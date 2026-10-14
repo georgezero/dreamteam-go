@@ -22,7 +22,8 @@ type OrderInfo struct {
 }
 
 var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
-	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderImaged: "imaged"}
+	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderImaged: "imaged",
+	orderReported: "reported"}
 
 // Orders lists every disclosed order (opening schedule included).
 func (w *World) Orders() []OrderInfo {
@@ -74,6 +75,7 @@ type VisitInfo struct {
 	ExamStart  simtime.Time
 	ExamEnd    simtime.Time
 	Reason     string
+	Supervisor string // radiologist supervising a contrast exam
 }
 
 var visitStateNames = [...]string{visitArrived: "arrived", visitRegistering: "registering", visitWaiting: "waiting",
@@ -87,7 +89,7 @@ func (w *World) Visits() []VisitInfo {
 		out = append(out, VisitInfo{ID: visitID(i), Order: orderID(v.order), Appt: v.appt, WalkIn: o.walkIn,
 			Exam: w.st.cfg.Catalog[o.exam].Code, Arrived: v.arrived, Late: v.late, AfterGrace: v.afterGrace,
 			State: visitStateNames[v.state], EndedAt: v.endedAt, ExamStart: v.examStart, ExamEnd: v.examEnd,
-			Reason: v.reason})
+			Reason: v.reason, Supervisor: w.supervisorName(v.supervisor)})
 	}
 	return out
 }
@@ -165,4 +167,40 @@ func (w *World) PushLiveNoise(at simtime.Time) {
 // PushStaleNoise queues an event that is stale on arrival.
 func (w *World) PushStaleNoise(at simtime.Time) {
 	w.eng.Push(Event{At: at, Class: ClassDeadline, Kind: kindWake, Gen: 1 << 31, A: 0})
+}
+
+// StudyInfo is one study.
+type StudyInfo struct {
+	ID, Visit, Exam, Priority         string
+	State                             string
+	Acquired, Entered, Claimed, Final simtime.Time
+	By                                string
+	ReadTime                          simtime.Duration // final − claimed, once final
+}
+
+var studyStateNames = [...]string{studyAcquired: "acquired", studyUnread: "unread", studyReading: "reading", studyFinal: "final"}
+
+// Studies lists every study.
+func (w *World) Studies() []StudyInfo {
+	var out []StudyInfo
+	for i, s := range w.st.dem.studies {
+		x := StudyInfo{ID: studyID(i), Visit: visitID(s.visit), Exam: w.st.cfg.Catalog[s.exam].Code,
+			Priority: s.priority.String(), State: studyStateNames[s.state], Acquired: s.acquiredAt,
+			Entered: s.enteredAt, Claimed: s.claimedAt, Final: s.finalAt}
+		if s.by >= 0 {
+			x.By = w.st.emps[s.by].cfg.Name
+		}
+		if s.state == studyFinal {
+			x.ReadTime = s.finalAt.Sub(s.claimedAt)
+		}
+		out = append(out, x)
+	}
+	return out
+}
+
+func (w *World) supervisorName(i int) string {
+	if i < 0 {
+		return ""
+	}
+	return w.st.emps[i].cfg.Name
 }

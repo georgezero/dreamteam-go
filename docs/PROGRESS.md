@@ -7,6 +7,83 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 9 — Worklist, reading and turnaround (v0.1.0-dev.9)
+
+**Behavior**
+
+* **Studies**: acquired at exam end (imaging complete, TAT start), on the
+  worklist once the technologist's documentation is done, then read, then
+  final. There is one study per imaged visit, never a report before imaging,
+  and never a second finalization.
+* **Radiologists read** during their site reading blocks while on regular
+  duty. Remote radiologists read too. Each claims the first study in worklist
+  order whose longest read (p100) ends by their scheduled shift end, so
+  reading never extends a shift or crosses midnight. One read at a time.
+  Reads that run past a block's end finish, and the overrun delays the next
+  block (§6.7, with a wake-up so the claim happens on time).
+* **Supervision** stays presence-based and compatible with reading, so a
+  radiologist can read while supervising. The supervisor of an exam in
+  progress stays until it ends (step 8 remediation). A remote radiologist
+  never supervises. A held-over radiologist claims no new reads.
+* **Read times** are per case (catalog `readSec`, keyed by the order's
+  origin), so worklist order and policy never change them.
+* **Worklist order** (default urgent then FIFO): urgent studies and studies
+  already past their TAT target first (no starvation), then time on the
+  worklist, with the study ID as the final tie-break. FIFO, oldest-first and
+  shortest-first (by the published expected time) are ready for the step-13
+  action.
+* **Turnaround**: TAT = imaging complete → report final. The figures shown
+  are median and p90 over studies acquired today with unfinished ones at
+  their age (censored), worklist wait, read time, backlog by modality and
+  priority, the oldest unfinished study, and breaches. Targets: urgent 60
+  min and routine 24 h (documented), soon 4 h (illustrative). Overdue
+  urgent and soon reports are logged once.
+* **After operational close** radiologists keep reading in their blocks.
+  Operations close without waiting for reports, and the backlog carries into
+  the next day (Saturday's afternoon studies are read on Monday).
+
+**On screen**: `w` worklist (reading and unread studies, turnaround,
+backlog, latest reports; `enter` opens the patient), a dashboard reporting
+line, radiologists shown as reading / ready to read / other duties /
+supervising, and journeys that continue to the final report and its TAT.
+
+**Tests** (`internal/sim/reading_test.go`, new micro fixtures):
+
+* A month of the mini practice:
+  * exactly one study per imaged visit;
+  * timestamps ordered, no duplicate finalization;
+  * every claim inside the claimer's site block;
+  * every read ends by shift end;
+  * no radiologist reads two studies at once;
+  * backlog crosses days.
+* Priority and ties: the urgent study is read first, and two studies
+  entering at the same instant go in ID order.
+* TAT definition (acquired 08:23, final 08:29 → 6m).
+* Overrun delays the next block to 09:51 (claim exactly then); a read ending
+  exactly at block end owes nothing (claim at 09:40, same-instant ordering).
+* Radiologist distinctions (ROADMAP): remote reads, never supervises; on-site
+  in other duties supervises, claims no reads.
+* Read time unchanged when the policy reorders the worklist. A deliberate
+  dependency on claim time makes this test fail.
+* Observation types carry no latent fields.
+* Outcomes unchanged by injected live or stale events (now including the
+  reading fixtures).
+* All step 8 remediation tests, chunking and speed tests pass.
+
+**Measured**: 180 days of the mini practice in 1.7–1.9 s on the loaded Pi:
+7,528 studies, 7,514 final, 14 outstanding at the end. Reading is not a hot
+path. See MEASUREMENTS.md.
+
+**Limitations**
+
+* Volumes are below calibration, so the reading backlog is small. Weekday
+  TAT medians run 20–40 min, and Tuesday mornings start nearly clear (the
+  design expects 10–15 unread from warm-up at full volume, steps 11 and 18).
+* No report interruptions, addenda or protocoling (V0.2).
+* Revenue at finalization is step 10.
+
+---
+
 ## Step 8 remediation — review findings 1–10 (v0.1.0-dev.8.1)
 
 The step 8 review (`docs/reviews/step-08-astra-review.md`, gpt-6-astra

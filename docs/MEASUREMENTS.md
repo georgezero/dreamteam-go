@@ -63,3 +63,18 @@ quiet-machine measurement goes with step 11.
 
 `go test ./internal/sim -run X -bench Mini180 -benchtime 3x -count 2`: 1.4–2.0 s/op. Roughly
 unchanged; the deadline wake adds a scan of on-site patients and staff per dispatch.
+
+## 2026-10-14 — V0.1 step 9 (same machine, load average ≈ 3.3)
+
+| Benchmark | Command | Result |
+|---|---|---|
+| Mini scenario, 180 days, now with studies, worklist, reading and TAT | `go test ./internal/sim -run X -bench Mini180 -benchtime 5x -count 2` | 1.67–1.88 s/op, 90 MB/op, 1.8M allocs/op |
+
+One 180-day run (seed 1): 58,830 events, 10,220 orders, 7,528 studies,
+7,514 reports finalized, 14 still on the worklist at the end.
+Profile: dispatch ≈ 27%, SHA-256 ≈ 22%, log text formatting ≈ 18%, FirstFit ≈ 7%.
+Worklist matching isn't a hot path. Three log lines per study (enters the
+worklist, final, and reading starts for urgent studies only) add to the
+logging share. There's no simple safe win here. The step-11 mitigations
+(lazy or structured warm-up log, per-day log hashing, cached start state)
+remain the plan.

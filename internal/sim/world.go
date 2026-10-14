@@ -122,6 +122,8 @@ const (
 	// person can no longer fit a registration, a patient stops being
 	// servable (§3.4 rule 4, §6.9).
 	kindDeadline
+	kindReadEnd   // a radiologist finishes a read: report final
+	kindTATBreach // an urgent or soon report reaches its TAT target unfinished
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -144,6 +146,8 @@ func (st *state) IsStale(ev Event) bool {
 		return ev.Gen != st.rooms[ev.A].wakeGen
 	case kindDeadline:
 		return ev.Gen != st.deadlineGen
+	case kindTATBreach:
+		return st.dem.studies[ev.A].state == studyFinal
 	case kindCancel, kindGrace:
 		return st.dem.appts[ev.A].state != apptBooked
 	case kindArrive:
@@ -192,7 +196,14 @@ func (st *state) Handle(e *Engine, ev Event) {
 	case kindExamEnd:
 		st.examEnd(e, int(ev.A))
 	case kindDocEnd:
+		if emp := &st.emps[ev.A]; emp.task == taskDoc {
+			st.enterWorklist(e, st.dem.visits[emp.taskVisit].study)
+		}
 		st.taskDone(e, int(ev.A))
+	case kindReadEnd:
+		st.readEnd(e, int(ev.A))
+	case kindTATBreach:
+		st.tatBreach(e, int(ev.A))
 	case kindWake, kindDeadline:
 	}
 }
@@ -239,6 +250,9 @@ func (st *state) CheckInvariants() error {
 	if err := st.checkStaffing(); err != nil {
 		return err
 	}
+	if err := st.checkReading(); err != nil {
+		return err
+	}
 	return st.checkDemand()
 }
 
@@ -266,5 +280,6 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observeDemand(&o, now)
 	st.observeFlow(&o, now)
 	st.observePractice(&o, now)
+	st.observeWorklist(&o, now)
 	return o
 }

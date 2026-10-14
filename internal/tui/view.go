@@ -40,6 +40,9 @@ func (m *Model) render() string {
 	case screenLog:
 		body = m.logBody(w, h-3)
 		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dash  p patients  q quit"
+	case screenWorklist:
+		body = m.worklistBody(w, h-3)
+		hints = " ↑↓ select  enter patient  d dash  p patients  s sched  l log  space run  q quit"
 	case screenPatients:
 		body = m.patientsBody(w, h-3)
 		hints = " ↑↓ select  enter open  tab filter  ←→ day  t today  esc back  q quit"
@@ -52,7 +55,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  p patients  s sched  l log  a auto:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  p pat  s sched  w worklist  l log  a auto:" + auto + "  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -121,6 +124,7 @@ func (m *Model) dashboardBody(w, n int) []string {
 		}
 	}
 	lines = append(lines, flowLines(o, w)...)
+	lines = append(lines, reportingSummary(o.Worklist, w)...)
 	demand := demandLines(o, w)
 	if n < 28 {
 		demand = demand[:len(demand)-1] // drop the since-day-1 line on short screens
@@ -149,8 +153,7 @@ func (m *Model) dashboardBody(w, n int) []string {
 // demandLines is the demand panel: today's orders and what became of them,
 // the day's schedule and the earliest open slot per modality.
 func demandLines(o api.Observation, w int) []string {
-	out := []string{titleStyle.Render(section("DEMAND today", w)),
-		dimStyle.Render("      orders booked recall  lost  cxl │ appts today  open │ next open slot")}
+	out := []string{titleStyle.Render(fit(" DEMAND  orders booked recall  lost  cxl │ appts today  open │ next open slot ", w))}
 	for _, d := range o.Demand.Modalities {
 		t := d.Today
 		next := warnStyle.Render("none within horizon")
@@ -169,7 +172,7 @@ func demandLines(o api.Observation, w int) []string {
 		if t.Lost > 0 {
 			lost = warnStyle.Render(lost)
 		}
-		out = append(out, fmt.Sprintf(" %-3s %8d %6d %6d %s %4d │ %11d %5d │ %s",
+		out = append(out, fmt.Sprintf(" %-3s %10d %6d %6d %s %4d │ %11d %5d │ %s",
 			d.Modality, t.Received, t.Booked, t.Recall, lost, t.Cancelled, d.ApptsToday, d.OpenToday, next))
 	}
 	var recv, lost int
@@ -345,7 +348,9 @@ func staffLines(o api.Observation) []string {
 		case api.StaffOnBreak:
 			st = warnStyle.Render("◐ break until " + e.EndsAt)
 		case api.StaffReading:
-			st = openStyle.Render("●") + " reading"
+			st = openStyle.Render("●") + " " + e.Task
+		case api.StaffReadingFree:
+			st = "○ ready to read"
 		case api.StaffOtherDuties:
 			st = "○ other duties"
 		default:
@@ -367,6 +372,9 @@ func staffLines(o api.Observation) []string {
 				note += " · until " + e.EndsAt
 			}
 			st += dimStyle.Render(note)
+		}
+		if e.Supervising != "" {
+			st += warnStyle.Render(" · supervising " + e.Supervising + " contrast")
 		}
 		if e.OvertimeMin > 0 && e.Status != api.StaffOff {
 			st += warnStyle.Render(" · OT +" + minutes(e.OvertimeMin))
@@ -437,7 +445,8 @@ func minutes(m int64) string {
 func staffSummary(o api.Observation) string {
 	var techs, techsOn, rads, radsOn int
 	for _, e := range o.Staff {
-		on := e.Status == api.StaffOnDuty || e.Status == api.StaffBusy || e.Status == api.StaffReading || e.Status == api.StaffOtherDuties
+		on := e.Status == api.StaffOnDuty || e.Status == api.StaffBusy || e.Status == api.StaffReading ||
+			e.Status == api.StaffOtherDuties || e.Status == api.StaffReadingFree
 		switch e.Role {
 		case "technologist":
 			techs++

@@ -175,7 +175,17 @@ func (st *state) fillVisit(r *api.PatientRow, vi int, now simtime.Time) {
 	case visitInExam:
 		r.Status, r.StatusText = api.PatientInExam, "in exam"
 	case visitDone:
-		r.Status, r.StatusText = api.PatientDone, "done"
+		r.Status, r.StatusText = api.PatientDone, "imaged"
+		if v.study >= 0 {
+			switch s := &st.dem.studies[v.study]; s.state {
+			case studyAcquired, studyUnread:
+				r.StatusText = "imaged · report pending"
+			case studyReading:
+				r.StatusText = "imaged · being read"
+			case studyFinal:
+				r.StatusText = "report final"
+			}
+		}
 	case visitLeft:
 		r.Status, r.StatusText = api.PatientLeft, "left without an exam"
 	case visitRescheduled:
@@ -311,7 +321,8 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 		}
 		switch v.state {
 		case visitDone:
-			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.examEnd), Label: "Departed", Detail: "imaged", Done: true})
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.examEnd), Label: "Imaging complete", Detail: "departed", Done: true})
+			j.Steps = append(j.Steps, st.studySteps(v.study, now)...)
 		case visitLeft:
 			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Left",
 				Detail: fmt.Sprintf("without an exam after waiting %s", v.endedAt.Sub(v.arrived)), Done: true})
@@ -333,4 +344,41 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 
 var orderStatusText = [...]string{orderBooked: "booked", orderRecall: "on the recall list", orderLost: "lost",
 	orderCancelled: "cancelled", orderVisit: "on site", orderNoShow: "no-show", orderLeft: "left without an exam",
-	orderImaged: "imaged"}
+	orderImaged: "imaged, report pending", orderReported: "report final"}
+
+// studySteps describes a study's reporting: documentation, the worklist,
+// the read and the final report. Read times appear only once the read
+// has ended.
+func (st *state) studySteps(si int, now simtime.Time) []api.JourneyStep {
+	if si < 0 {
+		return nil
+	}
+	s := &st.dem.studies[si]
+	iso := st.cal.ISO
+	target := st.cfg.Policies.TATTarget[s.priority]
+	var out []api.JourneyStep
+	if s.state == studyAcquired {
+		return append(out, api.JourneyStep{Label: "Study " + studyID(si), Detail: "technologist documenting", Done: true})
+	}
+	out = append(out, api.JourneyStep{Time: iso(s.enteredAt), Label: "On worklist", Done: true,
+		Detail: fmt.Sprintf("%s · %s priority · TAT target %s", studyID(si), s.priority, target)})
+	switch s.state {
+	case studyUnread:
+		out = append(out, api.JourneyStep{Label: "Awaiting read", Done: true,
+			Detail: fmt.Sprintf("%s since imaging", now.Sub(s.acquiredAt))})
+	case studyReading:
+		out = append(out, api.JourneyStep{Time: iso(s.claimedAt), Label: "Being read", Done: true,
+			Detail: fmt.Sprintf("%s · %s so far", st.emps[s.by].cfg.Name, now.Sub(s.claimedAt))})
+	case studyFinal:
+		out = append(out, api.JourneyStep{Time: iso(s.claimedAt), Label: "Read", Done: true,
+			Detail: fmt.Sprintf("%s · waited %s on the worklist · read %s", st.emps[s.by].cfg.Name,
+				s.claimedAt.Sub(s.enteredAt), s.finalAt.Sub(s.claimedAt))})
+		tat := s.finalAt.Sub(s.acquiredAt)
+		d := fmt.Sprintf("TAT %s (imaging complete → final)", tat)
+		if tat > target {
+			d += fmt.Sprintf(" · over the %s target", target)
+		}
+		out = append(out, api.JourneyStep{Time: iso(s.finalAt), Label: "Report final", Detail: d, Done: true})
+	}
+	return out
+}

@@ -23,6 +23,7 @@ func (st *state) Dispatch(e *Engine) {
 	st.holdNeeded(e)
 	st.matchRegistration(e)
 	st.matchImaging(e)
+	st.matchReading(e)
 	st.checkCoverage(e)
 	st.releaseHeld(e)
 	st.restaff(e.Now())
@@ -367,6 +368,7 @@ func (st *state) examEnd(e *Engine, vi int) {
 	st.rooms[v.room].visit = -1
 	st.removeWaiting(vi)
 	o.state, o.endedAt = orderImaged, e.Now()
+	st.acquireStudy(e, vi)
 	st.dem.flowToday.examsDone++
 	st.dem.flowTotal.examsDone++
 	draw := rng.Hash(st.seed, "attempt.exam", o.key.keys(v.attempt)...)
@@ -633,10 +635,12 @@ func (st *state) onSiteFor(m string) int {
 	return n
 }
 
-// anyBusy reports whether any employee is mid-task.
+// anyBusy reports whether anyone is mid-task on site work (registration,
+// exam, documentation). Radiologists reading don't hold operations open:
+// reports may still be outstanding at operational close (§3.4.2).
 func (st *state) anyBusy() bool {
 	for i := range st.emps {
-		if st.emps[i].status == busy {
+		if st.emps[i].status == busy && st.emps[i].task != taskRead {
 			return true
 		}
 	}
@@ -767,6 +771,9 @@ func (st *state) scheduleDeadline(e *Engine) {
 	}
 	for i := range st.emps {
 		emp := &st.emps[i]
+		if emp.reading && emp.readFrom > e.Now() && len(st.dem.worklist) > 0 {
+			consider(emp.readFrom) // a block delayed by overrun opens for claims
+		}
 		if emp.held {
 			for _, vi := range st.dem.waiting {
 				if last, ok := st.lastStart(i, vi); ok && st.outstanding(vi) {

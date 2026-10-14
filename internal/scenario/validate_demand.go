@@ -106,6 +106,18 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 	cfg.Policies.BreakDeferMax = simtime.Duration(pol.BreakDeferMaxMin) * simtime.Minute
 	cfg.Policies.WeeklyHours = simtime.Duration(pol.WeeklyOvertimeHours) * simtime.Hour
 	cfg.Policies.OvertimeBP = pol.OvertimeFactorBP
+	for i, name := range priorities {
+		v, ok := pol.TATTargetMin[name]
+		if !ok || v < 1 || v > 7*24*60 {
+			c.fail("policies.tatTargetMin."+name, "required, 1–10080 minutes")
+		}
+		cfg.Policies.TATTarget[i] = simtime.Duration(v) * simtime.Minute
+	}
+	for k := range pol.TATTargetMin {
+		if !slices.Contains(priorities, k) {
+			c.fail("policies.tatTargetMin."+k, "not a priority")
+		}
+	}
 
 	// Catalog and slot categories.
 	if len(f.Catalog) == 0 {
@@ -139,7 +151,8 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 		cfg.Catalog = append(cfg.Catalog, sim.ExamConfig{Code: x.Code, Name: x.Name, Modality: x.Modality,
 			Category: ci, Contrast: x.Contrast, WalkInEligible: x.WalkInEligible,
 			RoomTime:  c.quantile(xp+".roomTimeSec", x.RoomTimeSec, 60),
-			TechExtra: c.quantile(xp+".techExtraSec", x.TechExtraSec, 1)})
+			TechExtra: c.quantile(xp+".techExtraSec", x.TechExtraSec, 1),
+			ReadTime:  c.quantile(xp+".readSec", x.ReadSec, 30)})
 	}
 
 	// Templates.

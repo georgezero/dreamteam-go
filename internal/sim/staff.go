@@ -25,6 +25,7 @@ const (
 	taskReg           // registering a visit
 	taskExam          // running an exam
 	taskDoc           // documentation after an exam
+	taskRead          // a radiologist reading a study
 )
 
 type employee struct {
@@ -37,6 +38,12 @@ type employee struct {
 
 	task      taskKind
 	taskVisit int
+	taskStudy int // study being read (taskRead)
+
+	// Reading blocks (§6.7): claims start at readFrom (block start plus any
+	// overrun owed); readDebt is overrun still owed to later blocks.
+	readFrom, blockEndAt simtime.Time
+	readDebt             simtime.Duration
 
 	// Today's shift in absolute time, and its hard cap
 	// (start + MaxShiftHours, SIMULATION_DESIGN §6.4).
@@ -82,7 +89,8 @@ func (st *state) materialize(e *Engine, i int) {
 	emp.gen++
 	emp.shift = st.plan.ByEmp[i]
 	emp.status, emp.done, emp.reading = offDuty, false, false
-	emp.task, emp.taskVisit, emp.over, emp.held, emp.heldRooms = taskNone, -1, false, false, nil
+	emp.task, emp.taskVisit, emp.taskStudy, emp.over, emp.held, emp.heldRooms = taskNone, -1, -1, false, false, nil
+	emp.readFrom, emp.blockEndAt, emp.readDebt = 0, 0, 0
 	emp.breakDue, emp.breakTaken, emp.otToday = -1, 0, 0
 	if emp.shift < 0 {
 		return
@@ -143,9 +151,9 @@ func (st *state) staffEvent(e *Engine, ev Event) {
 		st.emit(e.Now(), api.Info, "staff", name+" back from break")
 		st.takeDueBreak(e, i)
 	case kindBlockStart:
-		emp.reading = true
+		st.blockStart(i, int(ev.B))
 	case kindBlockEnd:
-		emp.reading = false
+		st.blockEnd(i)
 	}
 }
 
@@ -519,13 +527,21 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 				x.Status, x.EndsAt = api.StaffOnBreak, st.cal.Clock(emp.breakUntil)
 			case busy:
 				x.Status, x.EndsAt, x.Task = api.StaffBusy, simtime.FormatClock(s.To), st.taskText(i)
+				if emp.task == taskRead {
+					x.Status = api.StaffReading
+				}
 			case available:
 				x.Status, x.EndsAt = api.StaffOnDuty, simtime.FormatClock(s.To)
 				if emp.cfg.Role == Radiologist {
 					x.Status = api.StaffOtherDuties
-					if emp.reading {
-						x.Status = api.StaffReading
+					if emp.reading && !emp.over {
+						x.Status = api.StaffReadingFree
 					}
+				}
+			}
+			for _, vi := range st.dem.waiting {
+				if v := &st.dem.visits[vi]; v.state == visitInExam && v.supervisor == i {
+					x.Supervising = patientID(st.dem.orders[v.order].patient)
 				}
 			}
 		}
@@ -553,6 +569,10 @@ func (st *state) taskText(i int) string {
 		return st.cfg.Rooms[v.room].Modality + " exam " + p
 	case taskDoc:
 		return "documenting " + p
+	case taskRead:
+		s := &st.dem.studies[emp.taskStudy]
+		x := &st.cfg.Catalog[s.exam]
+		return "reading " + studyID(emp.taskStudy) + " " + x.Modality + " " + x.Name
 	}
 	return ""
 }

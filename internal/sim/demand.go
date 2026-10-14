@@ -44,7 +44,8 @@ const (
 	orderVisit                       // the patient is on site (a visit is open)
 	orderNoShow                      // missed and never came; no new date (yet)
 	orderLeft                        // a walk-in left without an exam
-	orderImaged                      // imaged and departed
+	orderImaged                      // imaged and departed; report pending
+	orderReported                    // report finalized
 	numOrderStates
 )
 
@@ -124,6 +125,7 @@ type daySlots struct {
 	appts   []int // every appointment ever booked for the day, in booking order
 	visits  []int // every visit that day, in arrival order
 	walkIns []int // walk-in orders that day, in arrival order
+	studies []int // studies acquired that day
 }
 
 // modalityCounts are demand event counters for one modality: orders
@@ -147,6 +149,9 @@ type demandState struct {
 
 	visits           []visit
 	waiting          []int // open visits in arrival order
+	studies          []study
+	worklist         []int // unread and reading studies, in worklist-entry order
+	finals           []int // finalized studies, in finalization order
 	flowToday        flowCounts
 	flowTotal        flowCounts
 	noShowsLastClose int

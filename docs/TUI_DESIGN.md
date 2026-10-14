@@ -368,6 +368,20 @@ version (`DREAMTEAM v0.1.0-dev.N`).
 └────────────────────────────────────────────────────────────────────────────────┘
 ```
 
+As built in V0.1 step 9, `w` opens the worklist. The header gives unread,
+reading, urgent and the policy, then the turnaround line, then backlog by
+modality and priority with the oldest study. The rows list reading studies
+first, then unread in the order the policy offers them. Each row shows
+priority (‼ urgent, amber soon), study, patient, modality, exam, time since
+imaging complete (amber past target) and status (`reading · Dr. Avery 4m`).
+Below is **LATEST REPORTS** with TAT, marked when over target. `enter`
+opens the patient's journey, which now runs imaging complete → on worklist
+→ being read / read → report final (TAT, against target). The dashboard
+adds one reporting line: unread (‼ urgent), reading, oldest, final today,
+TAT median and p90 today, breaches. The staff panel shows radiologists as
+reading (with the study), ready to read, other duties, supervising P… contrast,
+or off.
+
 ### 4.7 Finance
 
 ```

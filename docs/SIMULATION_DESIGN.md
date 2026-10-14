@@ -1263,11 +1263,62 @@ so the player has a remedy.
 * TAT targets (policy, used for metrics/alerts): urgent ≤ 60 min, routine ≤ 24 h
   **[illustrative]**.
 
+### 6.7.1 As built (V0.1 step 9)
+
+* **Study lifecycle.** The study is *acquired* (ID allocated) when its exam
+  ends; that is imaging complete and the TAT start. It goes *unread* when
+  the technologist's documentation ends (it enters the worklist then), then
+  *reading* when claimed, then *final* when the read ends. TAT = final −
+  acquired. Worklist wait = claimed − entered. Read time = final − claimed.
+  One study per imaged visit.
+* **Claiming a read.** A radiologist may claim only while on regular duty
+  (not held over), inside a site reading block (from block start plus any
+  overrun owed), and not already reading. The read's p100 time must end by
+  the **scheduled shift end** (and cap). Reading therefore never extends a
+  shift or crosses midnight, and the worklist is never cleared by keeping
+  someone late. Radiologists claim in employee order, each taking the first
+  study in worklist order that fits.
+* **Overrun rule.** A read in progress at block end finishes. The overrun
+  delays the next block's first claim by the same amount (carried further
+  if longer than a block). A deadline wake fires at that moment, so the
+  claim doesn't wait for an unrelated event.
+* **Supervision vs reading.** Supervising contrast is presence (on duty, on
+  site, §6.5). It is compatible with reading, so a radiologist may read
+  while supervising. A remote radiologist reads but never supervises. A
+  radiologist held over to supervise past shift end claims no new reads.
+  One read at a time.
+* **Read time** is drawn from the catalog's `readSec` table by the order's
+  origin key (domain `read`, lane 0). Worklist order, staffing, policy and
+  speed don't change a case's read time.
+* **Operational close** no longer waits for reading. Reports outstanding at
+  close stay on the worklist and carry into the next day. The accounting
+  close checks nobody is mid-read (reads end by shift end).
+* **TAT targets** (`policies.tatTargetMin`): urgent 60 min and routine
+  24 h as documented. *Soon* has no documented target; **240 min is
+  illustrative** until calibration. An urgent or soon study not final by
+  its target is logged once as overdue. A routine study is counted as a
+  breach when finalized late, and appears overdue on the worklist.
+* **Metrics shown**: TAT median and p90 over the studies acquired today,
+  unfinished ones at their current age (censored, §11); medians of worklist
+  wait and read time over reports finalized today; backlog by modality and
+  priority; the oldest unfinished study; breaches today.
+* **Step 10 hook**: finalized reports are kept in finalization order. Revenue
+  recognition attaches there in step 10 (not done here).
+
 ### 6.8 Worklist policies
 
 `UrgentThenFIFO` (default), `FIFO`, `OldestFirst`, `ShortestFirst`
 (maximizes count, starves MR — a known exploit; benchmark metrics catch it via
 TAT p90 per modality). Exposed as action `set_worklist_policy` in V0.1.
+
+As built: `UrgentThenFIFO` ranks urgent studies **and studies already past
+their TAT target** first. The latter means a steady urgent stream can't
+starve routine work forever. Then it orders by time on the worklist.
+`FIFO` orders by time on the worklist, `OldestFirst` by acquisition, and
+`ShortestFirst` by the *published* expected read time (p50, never the case's
+own). Every ordering ends in the study ID, so ties are deterministic. The
+policy is read from `policies.worklist` on each claim, so the step-13 action
+only has to change it.
 
 ---
 

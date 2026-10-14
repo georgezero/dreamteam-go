@@ -102,8 +102,9 @@ const (
 	StaffBusy        = "busy"
 	StaffOnDuty      = "on_duty"
 	StaffOnBreak     = "on_break"
-	StaffReading     = "reading"      // radiologist in a site reading block
-	StaffOtherDuties = "other_duties" // radiologist on shift, outside site blocks
+	StaffReading     = "reading"      // radiologist reading a study now
+	StaffOtherDuties = "other_duties" // radiologist on shift, outside site reading blocks
+	StaffReadingFree = "read_ready"   // radiologist in a site block, not reading (worklist empty or nothing fits)
 )
 
 // Employee is one staff member's observable status.
@@ -124,6 +125,9 @@ type Employee struct {
 	// still need them; OvertimeMin is today's time past shift end so far.
 	Held        bool  `json:"held,omitempty"`
 	OvertimeMin int64 `json:"overtimeMin,omitempty"`
+	// Supervising names the patient whose contrast exam this radiologist
+	// is supervising now.
+	Supervising string `json:"supervising,omitempty"`
 }
 
 // Desk coverage levels.
@@ -155,6 +159,7 @@ type Observation struct {
 	Desk     Desk         `json:"desk"`
 	Demand   Demand       `json:"demand"`
 	Flow     Flow         `json:"flow"`
+	Worklist Worklist     `json:"worklist"`
 	// LogTotal is the number of log entries ever emitted.
 	LogTotal  uint64     `json:"logTotal"`
 	RecentLog []LogEntry `json:"recentLog"` // oldest first
@@ -369,4 +374,71 @@ type Journey struct {
 	WalkIn   bool          `json:"walkIn"`
 	Status   string        `json:"status"`
 	Steps    []JourneyStep `json:"steps"`
+}
+
+// Study states.
+const (
+	StudyAcquired = "acquired" // imaging complete, documentation in progress
+	StudyUnread   = "unread"   // awaiting interpretation
+	StudyReading  = "reading"
+	StudyFinal    = "final"
+)
+
+// WorklistItem is one study.
+type WorklistItem struct {
+	Study       string `json:"study"`
+	Patient     string `json:"patient"`
+	Modality    string `json:"modality"`
+	ExamName    string `json:"examName"`
+	Priority    string `json:"priority"`
+	State       string `json:"state"`
+	Acquired    string `json:"acquired"` // practice-local ISO time imaging completed
+	AgeMin      int64  `json:"ageMin"`   // since imaging completed (to final, once final)
+	Radiologist string `json:"radiologist,omitempty"`
+	ReadingMin  int64  `json:"readingMin,omitempty"` // elapsed, while reading
+	TATMin      int64  `json:"tatMin,omitempty"`     // once final
+	Overdue     bool   `json:"overdue"`              // past its TAT target
+}
+
+// Backlog counts unread and reading studies.
+type Backlog struct {
+	Key     string `json:"key"` // modality or priority
+	Unread  int    `json:"unread"`
+	Reading int    `json:"reading"`
+}
+
+// Worklist is the radiology worklist and report turnaround.
+type Worklist struct {
+	Policy  string         `json:"policy"`
+	Unread  int            `json:"unread"`
+	Reading int            `json:"reading"`
+	Urgent  int            `json:"urgent"` // unread or reading
+	Items   []WorklistItem `json:"items"`  // unread and reading, in the order the policy offers them (capped)
+	Recent  []WorklistItem `json:"recent"` // latest finalized reports, newest first (capped)
+	// OldestMin is the age of the oldest unfinished study since imaging.
+	OldestMin   int64     `json:"oldestMin"`
+	ByModality  []Backlog `json:"byModality"`
+	ByPriority  []Backlog `json:"byPriority"`
+	FinalToday  int       `json:"finalToday"`
+	FinalTotal  int       `json:"finalTotal"`
+	BreachToday int       `json:"breachToday"` // TAT targets missed today (urgent and soon when they pass; routine at finalization)
+	// TAT over the studies acquired today, imaging complete → report final,
+	// unfinished ones counted at their current age (censored, §11).
+	AcquiredToday int   `json:"acquiredToday"`
+	TATMedianMin  int64 `json:"tatMedianMin"`
+	TATP90Min     int64 `json:"tatP90Min"`
+	// Median worklist wait (entered → claimed) and read time (claimed →
+	// final) over reports finalized today.
+	WaitMedianMin int64 `json:"waitMedianMin"`
+	ReadMedianMin int64 `json:"readMedianMin"`
+	// TAT medians by priority over studies acquired today (censored).
+	TATByPriority []PriorityTAT `json:"tatByPriority"`
+	TargetMin     []PriorityTAT `json:"targetMin"` // the TAT targets
+}
+
+// PriorityTAT is a per-priority figure.
+type PriorityTAT struct {
+	Priority string `json:"priority"`
+	Count    int    `json:"count"`
+	Minutes  int64  `json:"minutes"`
 }

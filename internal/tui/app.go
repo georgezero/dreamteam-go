@@ -49,6 +49,7 @@ const (
 	screenSchedule
 	screenLog
 	screenPatients
+	screenWorklist
 )
 
 // Patient list filters, cycled with tab.
@@ -91,6 +92,8 @@ type Model struct {
 	patients  []api.PatientRow
 	journeyID string
 	journey   api.Journey
+	// Worklist screen: selected row and scroll.
+	wlSel, wlScroll int
 }
 
 // New returns a paused model on s.
@@ -219,8 +222,25 @@ func (m *Model) screenKey(k string) bool {
 	case "l":
 		m.screen, m.logScroll = screenLog, 0
 		return true
+	case "w":
+		m.screen = screenWorklist
+		return true
 	}
 	switch m.screen {
+	case screenWorklist:
+		switch k {
+		case "up", "k":
+			m.wlSel = max(0, m.wlSel-1)
+		case "down", "j":
+			m.wlSel++
+		case "enter":
+			if items := m.obs.Worklist.Items; m.wlSel < len(items) {
+				m.screen, m.journeyID = screenPatients, items[m.wlSel].Patient
+			}
+		default:
+			return false
+		}
+		return true
 	case screenSchedule:
 		switch k {
 		case "up":

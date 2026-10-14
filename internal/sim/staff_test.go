@@ -112,7 +112,7 @@ func TestRuntimeMatchesPlan(t *testing.T) {
 		}
 		reading := 0
 		for _, e := range o.Staff {
-			if e.Status == api.StaffReading {
+			if e.Status == api.StaffReading || e.Status == api.StaffReadingFree { // in a site block
 				reading++
 			}
 		}

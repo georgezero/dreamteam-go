@@ -55,6 +55,7 @@ type visit struct {
 	afterHours         bool   // exam started after scheduled close
 	reason             string // why it was rescheduled
 	supervisor         int    // radiologist supervising a contrast exam; -1 if none
+	study              int    // the study acquired, once imaged; -1 before
 }
 
 // flowCounts are patient-flow and operations counters.
@@ -70,6 +71,7 @@ type flowCounts struct {
 	heldOver, skippedBreaks          int
 	otSec                            simtime.Duration
 	otCost                           int64 // cents
+	acquired, reportsFinal, breaches int   // studies; reports; TAT targets missed
 }
 
 func visitID(i int) string { return fmt.Sprintf("V%05d", i+1) }
@@ -201,7 +203,7 @@ func punctuality(d simtime.Duration) string {
 func (st *state) openVisit(e *Engine, oi, ai int, late simtime.Duration, attempt int64) int {
 	vi := len(st.dem.visits)
 	st.dem.visits = append(st.dem.visits, visit{order: oi, appt: ai, arrived: e.Now(), late: late,
-		attempt: attempt, regBy: -1, examBy: -1, room: -1, supervisor: -1})
+		attempt: attempt, regBy: -1, examBy: -1, room: -1, supervisor: -1, study: -1})
 	st.dem.waiting = append(st.dem.waiting, vi)
 	ds := st.dem.days[st.day]
 	ds.visits = append(ds.visits, vi)
@@ -400,7 +402,7 @@ func (st *state) checkFlow() error {
 			return fmt.Errorf("%s timestamps out of order", visitID(vi))
 		case v.state == visitRescheduled && v.reason == "":
 			return fmt.Errorf("%s rescheduled without a reason", visitID(vi))
-		case v.state == visitDone && o.state != orderImaged:
+		case v.state == visitDone && o.state != orderImaged && o.state != orderReported:
 			return fmt.Errorf("%s done but order %s is %d", visitID(vi), orderID(v.order), o.state)
 		}
 		if v.appt >= 0 {

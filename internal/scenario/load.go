@@ -52,6 +52,7 @@ type Exam struct {
 	Contrast       bool     `json:"contrast"`
 	WalkInEligible bool     `json:"walkInEligible"`
 	RoomTimeSec    Quantile `json:"roomTimeSec"`
+	ReadSec        Quantile `json:"readSec"`
 	TechExtraSec   Quantile `json:"techExtraSec"`
 }
 
@@ -200,21 +201,22 @@ type Cover struct {
 
 // Policies are the operating rules.
 type Policies struct {
-	WalkIn               string `json:"walkIn"`
-	Worklist             string `json:"worklist"`
-	Late                 string `json:"late"`
-	GraceMin             int64  `json:"graceMin"`
-	OvertimeAllowanceMin int64  `json:"overtimeAllowanceMin"`
-	MaxShiftHours        int64  `json:"maxShiftHours"`
-	ContrastSupervision  string `json:"contrastSupervision"`
-	Booking              string `json:"booking"`
-	BookingHorizonDays   int64  `json:"bookingHorizonDays"`
-	BookingNoticeMin     int64  `json:"bookingNoticeMin"`
-	EarlyStartMin        int64  `json:"earlyStartMin"`
-	StartEarly           bool   `json:"startEarly"`
-	BreakDeferMaxMin     int64  `json:"breakDeferMaxMin"`
-	WeeklyOvertimeHours  int64  `json:"weeklyOvertimeHours"`
-	OvertimeFactorBP     int64  `json:"overtimeFactorBP"`
+	WalkIn               string           `json:"walkIn"`
+	Worklist             string           `json:"worklist"`
+	Late                 string           `json:"late"`
+	GraceMin             int64            `json:"graceMin"`
+	OvertimeAllowanceMin int64            `json:"overtimeAllowanceMin"`
+	MaxShiftHours        int64            `json:"maxShiftHours"`
+	ContrastSupervision  string           `json:"contrastSupervision"`
+	Booking              string           `json:"booking"`
+	BookingHorizonDays   int64            `json:"bookingHorizonDays"`
+	BookingNoticeMin     int64            `json:"bookingNoticeMin"`
+	EarlyStartMin        int64            `json:"earlyStartMin"`
+	StartEarly           bool             `json:"startEarly"`
+	BreakDeferMaxMin     int64            `json:"breakDeferMaxMin"`
+	WeeklyOvertimeHours  int64            `json:"weeklyOvertimeHours"`
+	OvertimeFactorBP     int64            `json:"overtimeFactorBP"`
+	TATTargetMin         map[string]int64 `json:"tatTargetMin"` // by priority
 }
 
 // maxExtendsDepth bounds extends chains.

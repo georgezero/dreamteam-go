@@ -126,7 +126,7 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
-	for _, scr := range []string{"d", "s", "l", "p"} {
+	for _, scr := range []string{"d", "s", "l", "p", "w"} {
 		m.key(scr)
 		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
 			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
@@ -146,7 +146,7 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(m.render())
 	for _, want := range []string{"DREAMTEAM v" + version.Number, "ROOMS", "XR ", "US ", "CT ", "MR ",
-		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "On site ", "in exam", "walk-ins", "DEMAND today", "next open slot", "EVENT LOG"} {
+		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "On site ", "in exam", "walk-ins", "Unread ", "final today", "DEMAND ", "next open slot", "EVENT LOG"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("80×24 dashboard lacks %q:\n%s", want, out)
 		}
@@ -230,7 +230,7 @@ func TestPatientsScreen(t *testing.T) {
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 40})
 	m.key("p")
 	out := ansi.Strip(m.render())
-	for _, want := range []string{"PATIENTS · Tue Oct 13 (today) · all", "P00001", "done", "08:00"} {
+	for _, want := range []string{"PATIENTS · Tue Oct 13 (today) · all", "P00001", "report final", "08:00"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("patient list lacks %q:\n%s", want, out)
 		}
@@ -280,5 +280,28 @@ func TestClosingStatusLine(t *testing.T) {
 	got = ansi.Strip(practiceStatus(o))
 	if want := "○ CLOSED · operations closed 20:47 (scheduled 20:00) · OT +42m ($38)"; got != want {
 		t.Errorf("closed:\n got %q\nwant %q", got, want)
+	}
+}
+
+func TestWorklistScreen(t *testing.T) {
+	m := New(openMini(t, 1))
+	m.sess.Advance(6*simtime.Day+3*simtime.Hour, session.Options{}) // Monday 09:00: weekend backlog
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 36})
+	m.key("w")
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"WORKLIST · ", "policy: urgent then FIFO", "SINCE IMAGING", "LATEST REPORTS", "TAT today median", "Backlog by modality"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("worklist lacks %q:\n%s", want, out)
+		}
+	}
+	if len(m.obs.Worklist.Items) == 0 {
+		t.Fatal("empty worklist on Monday morning")
+	}
+	m.key("enter")
+	if m.screen != screenPatients || m.journeyID != m.obs.Worklist.Items[0].Patient {
+		t.Fatalf("enter did not open the patient: screen %d journey %q", m.screen, m.journeyID)
+	}
+	if out := ansi.Strip(m.render()); !strings.Contains(out, "On worklist") {
+		t.Errorf("journey lacks the worklist step:\n%s", out)
 	}
 }

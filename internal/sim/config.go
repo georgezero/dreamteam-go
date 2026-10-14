@@ -46,8 +46,9 @@ type ExamConfig struct {
 	Contrast             bool
 	WalkInEligible       bool
 	// RoomTime is patient-in-room through room ready; TechExtra is the
-	// technologist's documentation after the room is released (seconds).
-	RoomTime, TechExtra rng.Quantile
+	// technologist's documentation after the room is released; ReadTime is
+	// the radiologist's interpretation (seconds).
+	RoomTime, TechExtra, ReadTime rng.Quantile
 }
 
 // Expected returns the published expected room time (p50).
@@ -265,6 +266,9 @@ type Policies struct {
 	BreakDeferMax simtime.Duration
 	WeeklyHours   simtime.Duration
 	OvertimeBP    int64
+	// TATTarget is the report turnaround target per priority (acquisition
+	// to final, §6.7); used for worklist aging, breach alerts and metrics.
+	TATTarget [numPriorities]simtime.Duration
 }
 
 // Assignment values other than room IDs.
