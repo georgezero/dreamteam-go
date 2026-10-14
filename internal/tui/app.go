@@ -36,7 +36,18 @@ const (
 	// maxEventsPerFrame bounds Max-speed work per frame; the budget is only
 	// checked between timestamp transactions.
 	maxEventsPerFrame = 20_000
-	recentLog         = 200
+	recentLog         = 200  // entries observed for the dashboard
+	fullLog           = 2000 // entries observed for the log screen (the retained log)
+	dashboardLog      = 8    // most entries the dashboard shows
+)
+
+// screen is the active view.
+type screen int
+
+const (
+	screenDashboard screen = iota
+	screenSchedule
+	screenLog
 )
 
 type tickMsg time.Time
@@ -58,6 +69,15 @@ type Model struct {
 	height    int
 	status    string
 	quitting  bool
+
+	screen screen
+	// Schedule screen: day offset from today, selected room, list scroll.
+	schedDay    int64
+	schedRoom   int
+	schedScroll int
+	sched       api.DaySchedule
+	// Log screen: entries scrolled back from the newest.
+	logScroll int
 }
 
 // New returns a paused model on s.
@@ -68,7 +88,16 @@ func New(s *session.Session) *Model {
 	return m
 }
 
-func (m *Model) refresh() { m.obs = m.sess.Observe(recentLog) }
+func (m *Model) refresh() {
+	n := recentLog
+	if m.screen == screenLog {
+		n = fullLog
+	}
+	m.obs = m.sess.Observe(n)
+	if m.screen == screenSchedule {
+		m.sched = m.sess.Schedule(m.schedDay)
+	}
+}
 
 // Init starts the frame clock.
 func (m *Model) Init() tea.Cmd { return tick() }
@@ -88,6 +117,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) key(k string) tea.Cmd {
+	if m.screenKey(k) {
+		m.refresh()
+		return nil
+	}
 	switch k {
 	case "q", "ctrl+c":
 		m.quitting = true
@@ -121,6 +154,67 @@ func (m *Model) key(k string) tea.Cmd {
 		}
 	}
 	return nil
+}
+
+// screenKey handles navigation keys; it reports whether k was one.
+func (m *Model) screenKey(k string) bool {
+	switch k {
+	case "d", "esc":
+		m.screen = screenDashboard
+		return true
+	case "s":
+		m.screen, m.schedDay, m.schedScroll = screenSchedule, 0, 0
+		return true
+	case "l":
+		m.screen, m.logScroll = screenLog, 0
+		return true
+	}
+	switch m.screen {
+	case screenSchedule:
+		switch k {
+		case "up":
+			m.schedRoom = max(0, m.schedRoom-1)
+			m.schedScroll = 0
+		case "down":
+			m.schedRoom = min(max(0, len(m.obs.Rooms)-1), m.schedRoom+1)
+			m.schedScroll = 0
+		case "left":
+			m.schedDay = max(m.obs.Practice.StartOffset, m.schedDay-1)
+			m.schedScroll = 0
+		case "right":
+			m.schedDay = min(m.obs.Practice.BookingHorizonDays, m.schedDay+1)
+			m.schedScroll = 0
+		case "t":
+			m.schedDay, m.schedScroll = 0, 0
+		case "j":
+			m.schedScroll++
+		case "k":
+			m.schedScroll = max(0, m.schedScroll-1)
+		default:
+			return false
+		}
+		return true
+	case screenLog:
+		page := max(1, m.height-4)
+		switch k {
+		case "up", "k":
+			m.logScroll++
+		case "down", "j":
+			m.logScroll = max(0, m.logScroll-1)
+		case "pgup":
+			m.logScroll += page
+		case "pgdown":
+			m.logScroll = max(0, m.logScroll-page)
+		case "g":
+			m.logScroll = len(m.obs.RecentLog)
+		case "G":
+			m.logScroll = 0
+		default:
+			return false
+		}
+		return true
+	}
+	return false
 }
 
 // frame advances the simulation for one tick of wall time.

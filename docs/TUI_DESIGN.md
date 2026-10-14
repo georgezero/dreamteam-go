@@ -238,6 +238,18 @@ room; the list below shows that room's appointments.
 
 `←/→` pages days (future days show bookings only; past days show outcomes).
 
+As built in V0.1 step 6 (before arrivals exist): `░` booked, `·` open,
+`˙` free but too late to book, `─` unstaffed, `◐` the room's tech on a
+planned break, `⊘` contrast slot with no radiologist on site. The list shows
+every slot of the selected room. Runs of slots that can't be booked collapse
+into one line that gives the reason. The header compares the modality's
+demand today (orders, booked, lost) with its next open slot. Paging runs
+from the start date to the end of the booking horizon. The dashboard gains a
+**DEMAND** panel per modality. It shows today's orders, bookings, recalls,
+losses and cancellations, today's appointments and open slots, and the next
+open slot, in amber when it is more than 14 days out. The dashboard log shows
+at most 8 entries. `l` opens the full retained log.
+
 ### 4.4 Patients — list and journey
 
 List: filter by state (`waiting`, `in exam`, `unread`, `all`), sort by wait.

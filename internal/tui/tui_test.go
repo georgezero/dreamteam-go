@@ -124,28 +124,100 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
-	for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
-		m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
-		out := m.render()
-		lines := strings.Split(out, "\n")
-		if len(lines) != size[1] {
-			t.Errorf("%v: %d lines", size, len(lines))
-		}
-		for i, l := range lines {
-			if w := ansi.StringWidth(l); w > size[0] {
-				t.Errorf("%v: line %d width %d", size, i, w)
+	for _, scr := range []string{"d", "s", "l"} {
+		m.key(scr)
+		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
+			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+			out := m.render()
+			lines := strings.Split(out, "\n")
+			if len(lines) != size[1] {
+				t.Errorf("%s %v: %d lines", scr, size, len(lines))
+			}
+			for i, l := range lines {
+				if w := ansi.StringWidth(l); w > size[0] {
+					t.Errorf("%s %v: line %d width %d", scr, size, i, w)
+				}
 			}
 		}
 	}
+	m.key("d")
 	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(m.render())
-	for _, want := range []string{"ROOMS", "STAFF", "XR ○ Idle       Riley", "US ○ Idle       Morgan", "Dr. Avery", "Desk ● Jordan"} {
+	for _, want := range []string{"ROOMS", "STAFF", "XR ○ Idle       Riley", "US ○ Idle       Morgan",
+		"Techs on duty 3/4", "Desk ● Jordan", "DEMAND today", "next open slot", "EVENT LOG"} {
 		if !strings.Contains(out, want) {
-			t.Errorf("80×24 render lacks %q:\n%s", want, out)
+			t.Errorf("80×24 dashboard lacks %q:\n%s", want, out)
 		}
+	}
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 36})
+	if out := ansi.Strip(m.render()); !strings.Contains(out, "Dr. Avery") {
+		t.Errorf("120×36 dashboard lacks the staff list:\n%s", out)
 	}
 	m.Update(tea.WindowSizeMsg{Width: 40, Height: 10})
 	if !strings.Contains(m.render(), "too small") {
 		t.Error("no size message at 40×10")
+	}
+}
+
+// The dashboard log stays compact; the log screen holds the full log.
+func TestDashboardLogCompact(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.sess.Advance(10*simtime.Hour, session.Options{})
+	m.Update(tea.WindowSizeMsg{Width: 160, Height: 60})
+	m.refresh()
+	entries := func(out string) int {
+		n := 0
+		for _, l := range strings.Split(ansi.Strip(out), "\n") {
+			if len(l) > 7 && l[0] == ' ' && l[3] == ':' && strings.Contains(l, "  ") && !strings.Contains(l, "on duty until") {
+				n++
+			}
+		}
+		return n
+	}
+	if n := entries(m.render()); n < 5 || n > dashboardLog {
+		t.Fatalf("dashboard shows %d log entries", n)
+	}
+	m.key("l")
+	if n := strings.Count(ansi.Strip(m.render()), "Oct 13 "); n < 40 {
+		t.Fatalf("log screen shows only %d entries", n)
+	}
+}
+
+func TestScheduleNavigation(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.Update(tea.WindowSizeMsg{Width: 100, Height: 40})
+	m.key("s")
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"SCHEDULE · Tue Oct 13 (today)", "XR ▶", "A00001", "Chest 2V", "booked"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("schedule lacks %q:\n%s", want, out)
+		}
+	}
+	m.key("down")
+	m.key("right")
+	m.key("right")
+	m.key("right")
+	m.key("right")
+	m.key("right")
+	m.key("right") // Monday Oct 19: rota week B, no US technologist
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "Mon Oct 19 (in 6 days)") || !strings.Contains(out, "US ▶") ||
+		!strings.Contains(out, "not bookable: no technologist rostered (12 slots)") {
+		t.Errorf("week B Monday US:\n%s", out)
+	}
+	m.key("left")
+	m.key("t")
+	if m.schedDay != 0 {
+		t.Fatal("t did not return to today")
+	}
+	for i := 0; i < 10; i++ {
+		m.key("left")
+	}
+	if m.schedDay != 0 {
+		t.Fatalf("paged before the start date: %d", m.schedDay)
+	}
+	m.key("esc")
+	if m.screen != screenDashboard {
+		t.Fatal("esc did not return to the dashboard")
 	}
 }

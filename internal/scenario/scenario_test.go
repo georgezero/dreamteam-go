@@ -117,6 +117,22 @@ func TestValidationErrors(t *testing.T) {
 		{`{"employees": [{"id": "E01", "skills": []}]}`, "employees[0].skills", "need \"registration\""},
 		{`{"policies": {"worklist": "random"}}`, "policies.worklist", "not one of"},
 		{`{"policies": {"contrastSupervision": "virtual"}}`, "policies.contrastSupervision", "not one of"},
+		{`{"policies": {"bookingHorizonDays": 0}}`, "policies.bookingHorizonDays", "outside"},
+		{`{"templates": {"R4": [{"days": ["Tue"], "slots": [{"start": "19:30", "lenMin": 45, "category": "MR_45"}]}]}}`, "templates.R4[0].slots", "outside open hours"},
+		{`{"templates": {"R4": [{"days": ["Tue"], "slots": [{"start": "08:00", "lenMin": 45, "category": "MR_45"}, {"start": "08:30", "lenMin": 45, "category": "MR_45"}]}]}}`, "templates.R4[0].slots", "overlap"},
+		{`{"templates": {"R4": [{"days": ["Tue"], "slots": [{"start": "08:00", "lenMin": 15, "category": "XR_15"}]}]}}`, "templates.R4[0].slots[0].category", "room R4 is MR"},
+		{`{"templates": {"R4": [{"days": ["Tue"], "slots": []}, {"days": ["Tue"], "slots": []}]}}`, "templates.R4[1].days[0]", "already has"},
+		{`{"templates": {"R9": []}}`, "templates.R9", "not a room"},
+		{`{"referralSources": [{"id": "SRC1", "examMix": {"XR_FOOT": 5}}]}`, "referralSources[0].examMix.XR_FOOT", "not an exam code"},
+		{`{"referralSources": [{"id": "SRC2", "priorityMixBP": {"routine": 5000}}]}`, "referralSources[1].priorityMixBP", "sums to 6000"},
+		{`{"demand": {"hourProfileBP": {"07": 0}}}`, "demand.hourProfileBP", "sums to 9600"},
+		{`{"demand": {"leadTimeDays": {"p100": null}}}`, "demand.leadTimeDays", "needs p0 and p100"},
+		{`{"demand": {"weekdayFactorBP": {"Sun": null}}}`, "demand.weekdayFactorBP", "all seven"},
+		{`{"behavior": {"waitToleranceDays": {"stat": {"p0": 0, "p100": 1}}}}`, "behavior.waitToleranceDays.stat", "not a priority"},
+		{`{"catalog": [{"code": "X", "name": "x", "modality": "XR", "category": "MR_45"}, {"code": "Y", "name": "y", "modality": "MR", "category": "MR_45"}]}`, "catalog[1].category", "mixes modalities"},
+		{`{"openingSchedule": [{"time": "18:00", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "no R2 template slot"},
+		{`{"openingSchedule": [{"day": 6, "time": "09:30", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "not bookable (unstaffed)"},
+		{`{"openingSchedule": [{"time": "09:30", "room": "R2", "exam": "US_THYROID", "source": "SRC3"}]}`, "openingSchedule[0]", "slot is US_45"},
 	}
 	for _, tc := range cases {
 		fsys := fstest.MapFS{

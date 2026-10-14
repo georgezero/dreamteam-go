@@ -43,7 +43,10 @@ func TestStepVisibleLandsOnNewEntry(t *testing.T) {
 		}
 	}
 	first := mini(t, 1)
-	if first.StepVisible() != Visible || !strings.HasPrefix(first.Observe(1).RecentLog[0].Text, "Dr. Avery on duty") || first.Observe(0).Clock != "07:30" {
+	// The 47 opening appointments hold O00001–O00047; the first order of
+	// the day arrives after 06:00 and is the first observable entry.
+	if first.StepVisible() != Visible || first.Observe(1).RecentLog[0].Category != "orders" ||
+		!strings.HasPrefix(first.Observe(1).RecentLog[0].Text, "O00048 ") {
 		t.Errorf("first visible entry = %+v", first.Observe(1).RecentLog)
 	}
 }

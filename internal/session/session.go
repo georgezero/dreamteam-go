@@ -100,6 +100,12 @@ func (s *Session) StepVisible() Reason {
 	return Horizon
 }
 
+// Schedule returns the schedule of the day offset days from today
+// (negative for past days).
+func (s *Session) Schedule(offset int64) api.DaySchedule {
+	return s.w.Schedule(s.w.DayIndex() + offset)
+}
+
 // Observe returns the current observation with up to recent log entries.
 func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recent) }
 

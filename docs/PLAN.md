@@ -320,6 +320,15 @@ unit-suffixed keys, so a reader never has to guess units.
 * **Fortnight rota**: a roster entry with `"weeks": "A"` or `"B"` applies only
   in that rota week. Weeks run Monday to Sunday, and `rotaWeekA` names a date
   in week A. Cover windows (`covers`) default to the whole shift.
+* **Templates** group weekdays: `"R4": [{"days": ["Mon", "Tue"], "slots":
+  [{"start": "08:00", "lenMin": 45, "count": 2, "category": "MR_45"}]}]`.
+  `count` repeats a slot back to back. Categories come from the catalog; all
+  exams in a category share modality and contrast.
+* **Quantile tables** use whole-percent keys `p0` … `p100`.
+* **`openingSchedule`** (scenarios without warm-up) lists today's
+  appointments: `{"day": 0, "time": "08:00", "room": "R4", "exam":
+  "MR_KNEE_WO", "source": "SRC2", "priority": "routine"}`. Each must sit on
+  a bookable template slot of the exam's category.
 * **Merge rules**: objects merge by key and `null` deletes a key. Arrays whose
   elements all carry an `id` merge by id (so an overlay can change one
   employee). Any other array is replaced.

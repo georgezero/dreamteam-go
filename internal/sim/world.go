@@ -32,6 +32,11 @@ type state struct {
 
 	rooms []room
 	emps  []employee
+	dem   demandState
+
+	// dropOrder, if set (tests only), suppresses exogenous orders that
+	// would arrive at or after a time: a change to future hidden demand.
+	dropOrder func(at simtime.Time) bool
 }
 
 // New builds a world from cfg. The calendar epoch is the start date minus
@@ -49,9 +54,11 @@ func New(cfg *Config, seed rng.Seed) *World {
 	for i := range cfg.Employees {
 		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], shift: -1})
 	}
+	st.initDemand()
 	w := &World{st: st}
 	w.eng = NewEngine(st, 0)
 	w.eng.Push(Event{At: 0, Class: ClassDayBoundary, Kind: kindDayStart, A: 0})
+	st.loadOpening(w.eng)
 	return w
 }
 
@@ -87,6 +94,8 @@ const (
 	kindBlockStart
 	kindBlockEnd
 	kindRosterEdge // a cover window starts or ends; only triggers re-staffing
+	kindOrder      // an order is received (disclosed)
+	kindCancel     // a patient cancels an appointment
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -102,6 +111,8 @@ func (st *state) IsStale(ev Event) bool {
 	switch ev.Kind {
 	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd, kindRosterEdge:
 		return ev.Gen != st.emps[ev.A].gen
+	case kindCancel:
+		return st.dem.appts[ev.A].state != apptBooked
 	}
 	return false
 }
@@ -120,6 +131,10 @@ func (st *state) Handle(e *Engine, ev Event) {
 	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd:
 		st.staffEvent(e, ev)
 	case kindRosterEdge:
+	case kindOrder:
+		st.receiveOrder(e, unpackOrigin(ev.A, ev.B))
+	case kindCancel:
+		st.cancel(e, int(ev.A))
 	}
 }
 
@@ -135,6 +150,16 @@ func (st *state) dayStart(e *Engine, day int64) {
 	for i := range st.emps {
 		st.materialize(e, i)
 	}
+
+	for _, m := range st.modalities() {
+		*st.dem.today[m] = modalityCounts{}
+		if day == st.startDay {
+			*st.dem.total[m] = modalityCounts{}
+		}
+	}
+	st.ensureDays(day + st.cfg.Policies.BookingHorizonDays)
+	st.releaseRecalls(e)
+	st.scheduleDemand(e, day)
 }
 
 func (st *state) Dispatch(e *Engine) {
@@ -143,7 +168,10 @@ func (st *state) Dispatch(e *Engine) {
 }
 
 func (st *state) CheckInvariants() error {
-	return st.checkStaffing()
+	if err := st.checkStaffing(); err != nil {
+		return err
+	}
+	return st.checkDemand()
 }
 
 // Observe projects the observable state. recent bounds the log entries
@@ -153,17 +181,20 @@ func (w *World) Observe(recent int) api.Observation {
 	now := w.eng.Now()
 	d := st.cal.Date(now)
 	o := api.Observation{
-		Schema:    api.ObservationSchema,
-		Now:       now,
-		Time:      st.cal.ISO(now),
-		Day:       st.cal.DayIndex(now) - st.startDay + 1,
-		Weekday:   d.Weekday().String(),
-		Date:      d.String(),
-		Clock:     st.cal.Clock(now),
-		Practice:  api.Practice{Name: st.cfg.Name, Open: st.open, Scenario: st.cfg.ID},
+		Schema:  api.ObservationSchema,
+		Now:     now,
+		Time:    st.cal.ISO(now),
+		Day:     st.cal.DayIndex(now) - st.startDay + 1,
+		Weekday: d.Weekday().String(),
+		Date:    d.String(),
+		Clock:   st.cal.Clock(now),
+		Practice: api.Practice{Name: st.cfg.Name, Open: st.open, Scenario: st.cfg.ID,
+			BookingHorizonDays: st.cfg.Policies.BookingHorizonDays,
+			StartOffset:        st.startDay - st.cal.DayIndex(now)},
 		LogTotal:  st.log.total,
 		RecentLog: st.log.recent(recent),
 	}
 	st.observeStaff(&o, now)
+	st.observeDemand(&o, now)
 	return o
 }

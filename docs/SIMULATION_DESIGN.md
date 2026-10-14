@@ -586,7 +586,7 @@ don't depend on public IDs or player actions:
 | `order.ext` | day, sourceIndex, hourBlock, k | preferred window | payer | — | — |
 | `patient` | originKey | punctuality class | wait tolerance | walk-in patience | — |
 | `attempt` | originKey, attempt | no-show | arrival offset | cancels? | cancellation lead |
-| `attempt.exam` | originKey, attempt | room time | tech extra time | rebooks after no-show? | — |
+| `attempt.exam` | originKey, attempt | room time | tech extra time | rebooks after no-show? | rebooks after cancellation? |
 | `read` | originKey | read time | — | — | — |
 | `claim` | originKey | outcome (paid / short / denied-recovered / denied-written-off) | adjudication delay | short-paid fraction | rework delay |
 | `walkin.count` | day, hourBlock | Poisson count | | | |
@@ -747,6 +747,29 @@ Booking policy `FirstFit` (default):
 5. Slots freed by cancellations are immediately bookable again by later orders
    (FirstFit naturally backfills them). Freed slots less than 24 h out rarely
    refill, which is realistic.
+
+Implementation details (V0.1 step 6):
+
+* Lanes are read by index (`Draws.Lane`), so an attribute keeps its lane
+  whether or not earlier lanes are used. `order.core` lane 0 (arrival second)
+  is read when the day's demand is scheduled; the other lanes are read when
+  the order is disclosed. `order.ext` lane 1 (payer) and `patient` lanes 0
+  and 2 are reserved for later steps.
+* Priority shapes the wanted date: urgent orders want today (lead 0), soon
+  orders at most 3 days ahead, routine orders draw the lead-time table.
+* Preferred windows: morning before 12:00, afternoon 12:00–16:00, evening
+  from 16:00, or any.
+* Same-day slots need `bookingNoticeMin` (default 60 min) of notice.
+* Slots become bookable or not when a day is laid out (it enters the booking
+  horizon), from the roster as known then.
+* A patient who cancels and asks for a new date (rebook draw) is offered
+  slots from the day after the cancelled appointment, never the freed slot.
+  If no acceptable slot exists, the order is lost.
+* Opening-schedule appointments (scenarios without warm-up) are confirmed:
+  they carry no cancellation draw.
+* Each order logs one line: booked, recall list, or lost (with the reason:
+  declined because the earliest slot was too far, or no slot within the
+  horizon).
 
 Lost demand is a first-class metric: it is the cost of insufficient capacity
 and the main signal that justifies hiring or extending hours.

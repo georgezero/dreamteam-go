@@ -228,3 +228,27 @@ func BenchmarkHashDraw(b *testing.B) {
 	}
 	_ = sink
 }
+
+func TestLaneMatchesSequence(t *testing.T) {
+	seed := SeedFromInt(3)
+	seq := Hash(seed, "lanes", 1, 2)
+	lanes := Hash(seed, "lanes", 1, 2)
+	for i := 3; i >= 0; i-- {
+		want := Hash(seed, "lanes", 1, 2)
+		for k := 0; k < i; k++ {
+			want.Uint64()
+		}
+		if got := lanes.Lane(i).Uint64(); got != want.Uint64() {
+			t.Fatalf("lane %d mismatch", i)
+		}
+	}
+	_ = seq.Uint64()
+	defer func() {
+		if recover() == nil {
+			t.Fatal("second draw from a lane did not panic")
+		}
+	}()
+	l := lanes.Lane(0)
+	l.Uint64()
+	l.Uint64()
+}

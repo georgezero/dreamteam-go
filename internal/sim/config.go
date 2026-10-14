@@ -3,6 +3,7 @@ package sim
 import (
 	"slices"
 
+	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
@@ -23,6 +24,105 @@ type Config struct {
 	Rooms     []RoomConfig
 	Employees []EmployeeConfig
 	Policies  Policies
+
+	Catalog    []ExamConfig
+	Categories []CategoryConfig
+	// Templates holds each room's slot template per weekday, in time order
+	// and non-overlapping.
+	Templates [][7][]SlotTemplate
+	Sources   []SourceConfig
+	Demand    DemandConfig
+	Behavior  BehaviorConfig
+	// Opening is the hand-built schedule a scenario without warm-up starts
+	// with (the mini scenario's "today").
+	Opening []OpeningAppt
+}
+
+// ExamConfig is one catalog entry.
+type ExamConfig struct {
+	Code, Name, Modality string
+	Category             int // index into Config.Categories
+	Contrast             bool
+	WalkInEligible       bool
+}
+
+// CategoryConfig is a slot category (e.g. MR_45). Every exam in a category
+// shares its modality and contrast flag, so a slot knows whether it needs
+// contrast supervision.
+type CategoryConfig struct {
+	Name, Modality string
+	Contrast       bool
+}
+
+// SlotTemplate is one bookable slot in a room's weekly template.
+type SlotTemplate struct {
+	Span
+	Category int
+}
+
+// Priority of an order.
+type Priority uint8
+
+const (
+	Routine Priority = iota
+	Soon
+	Urgent
+	numPriorities
+)
+
+var priorityNames = [...]string{Routine: "routine", Soon: "soon", Urgent: "urgent"}
+
+func (p Priority) String() string { return priorityNames[p] }
+
+// Window is a patient's preferred time of day.
+type Window uint8
+
+const (
+	AnyWindow Window = iota
+	Morning          // before 12:00
+	Afternoon        // 12:00–16:00
+	Evening          // from 16:00
+	numWindows
+)
+
+// SourceConfig is a referral source.
+type SourceConfig struct {
+	ID, Name, Kind string
+	// BaseDailyMilli is the expected orders per day before profile and
+	// factors, in thousandths.
+	BaseDailyMilli int64
+	PriorityBP     [numPriorities]uint64
+	Exams          []int    // catalog indices
+	ExamWeights    []uint64 // parallel to Exams
+}
+
+// DemandConfig shapes order arrival (SIMULATION_DESIGN §5.1).
+type DemandConfig struct {
+	HourBP    [24]int64 // share of a day's orders per hour block; sums to 10,000
+	WeekdayBP [7]int64  // factor by weekday (10,000 = 1.0)
+	SeasonBP  [12]int64 // factor by month (10,000 = 1.0)
+	LeadDays  rng.Quantile
+	WindowBP  [numWindows]uint64
+}
+
+// BehaviorConfig holds patient behavior used by booking.
+type BehaviorConfig struct {
+	// ToleranceDays is, per priority, how many days past the earliest
+	// wanted date a patient accepts.
+	ToleranceDays   [numPriorities]rng.Quantile
+	CancelPPM       rng.PPM
+	CancelLeadHours rng.Quantile // hours before the appointment
+	RebookPPM       rng.PPM      // a canceller asks for a new date
+}
+
+// OpeningAppt is one appointment on the hand-built opening schedule.
+type OpeningAppt struct {
+	Day      int64 // days after the start date
+	Room     int
+	Start    simtime.Duration
+	Exam     int
+	Priority Priority
+	Source   int
 }
 
 // Span is a half-open interval [From, To) of time of day.
@@ -103,6 +203,9 @@ type Policies struct {
 	OvertimeAllowance   simtime.Duration
 	MaxShift            simtime.Duration
 	ContrastSupervision string
+	Booking             string
+	BookingHorizonDays  int64
+	BookingNotice       simtime.Duration // earliest a same-day slot can be booked ahead
 }
 
 // Assignment values other than room IDs.
@@ -346,4 +449,49 @@ func (c *Coverage) StaffedSeconds() (rooms []simtime.Duration, open simtime.Dura
 		}
 	}
 	return rooms, open
+}
+
+// SlotBookable reports whether a slot is fully staffed by a qualified
+// technologist and, for contrast categories, has an on-site radiologist on
+// duty, according to the day's planned coverage (SIMULATION_DESIGN §5.3).
+// It returns a reason when not: "unstaffed" or "no_supervision".
+func (c *Coverage) SlotBookable(room int, s Span, contrast bool) (bool, string) {
+	for _, seg := range c.Segments {
+		if seg.To <= s.From || seg.From >= s.To {
+			continue
+		}
+		if !seg.Open || len(seg.Rooms[room]) == 0 {
+			return false, "unstaffed"
+		}
+		if contrast && !seg.Supervision {
+			return false, "no_supervision"
+		}
+	}
+	return true, ""
+}
+
+// OnBreak reports the open-hours intervals in which room r is unstaffed
+// only because a technologist rostered to it is on a planned break.
+func (c *Coverage) OnBreak(r int) []Span {
+	p := c.Plan
+	room := p.cfg.Rooms[r]
+	var out []Span
+	for _, seg := range c.Segments {
+		if !seg.Open || len(seg.Rooms[r]) > 0 {
+			continue
+		}
+		for si := range p.Shifts {
+			sh := &p.Shifts[si]
+			emp := &p.cfg.Employees[sh.Employee]
+			if sh.Contains(seg.From) && !sh.OnDutyAt(seg.From) && staffs(emp, sh, room, seg.From) {
+				if n := len(out); n > 0 && out[n-1].To == seg.From {
+					out[n-1].To = seg.To
+				} else {
+					out = append(out, seg.Span)
+				}
+				break
+			}
+		}
+	}
+	return out
 }

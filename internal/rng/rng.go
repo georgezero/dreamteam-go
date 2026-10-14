@@ -108,6 +108,24 @@ func (d *Draws) Uint64() uint64 {
 	return v
 }
 
+// Lane returns a one-draw source reading lane i (0–3) directly, so an
+// attribute keeps its fixed lane whether or not other lanes are used
+// (SIMULATION_DESIGN §4.3). It does not affect Uint64's sequence.
+func (d *Draws) Lane(i int) Source { return &lane{v: d.lanes[i]} }
+
+type lane struct {
+	v    uint64
+	used bool
+}
+
+func (l *lane) Uint64() uint64 {
+	if l.used {
+		panic("rng: a lane yields one draw")
+	}
+	l.used = true
+	return l.v
+}
+
 // Uniform returns a value in [0, n); see Uniform.
 func (d *Draws) Uniform(n uint64) uint64 { return Uniform(d, n) }
 

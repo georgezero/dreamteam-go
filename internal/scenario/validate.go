@@ -226,6 +226,11 @@ func Compile(f *File) (*sim.Config, error) {
 		cfg.Employees = append(cfg.Employees, ec)
 	}
 
+	c.demand(f, cfg)
+	if len(c.issues) == 0 {
+		c.openingSlots(cfg)
+	}
+
 	if len(c.issues) > 0 {
 		return nil, &ValidationError{c.issues}
 	}

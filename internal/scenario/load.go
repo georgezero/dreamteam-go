@@ -34,6 +34,82 @@ type File struct {
 	Rooms            []Room                `json:"rooms"`
 	Employees        []Employee            `json:"employees"`
 	Policies         Policies              `json:"policies"`
+	Catalog          []Exam                `json:"catalog"`
+	Templates        map[string][]Template `json:"templates"`
+	Sources          []Source              `json:"referralSources"`
+	Demand           Demand                `json:"demand"`
+	Behavior         Behavior              `json:"behavior"`
+	OpeningSchedule  []OpeningAppt         `json:"openingSchedule,omitempty"`
+}
+
+// Exam is a catalog entry. Internal codes, not CPT codes.
+type Exam struct {
+	Code           string `json:"code"`
+	Name           string `json:"name"`
+	Modality       string `json:"modality"`
+	Category       string `json:"category"` // slot category it books into, e.g. "MR_45"
+	Contrast       bool   `json:"contrast"`
+	WalkInEligible bool   `json:"walkInEligible"`
+}
+
+// Template is a group of weekdays sharing a room's slot list.
+type Template struct {
+	Days  []string   `json:"days"`
+	Slots []SlotSpec `json:"slots"`
+}
+
+// SlotSpec is one slot, or Count back-to-back slots of the same length.
+type SlotSpec struct {
+	Start    string `json:"start"`
+	LenMin   int64  `json:"lenMin"`
+	Count    int64  `json:"count,omitempty"` // default 1
+	Category string `json:"category"`
+}
+
+// Source is a referral source.
+type Source struct {
+	ID                   string           `json:"id"`
+	Name                 string           `json:"name"`
+	Kind                 string           `json:"kind"`
+	BaseDailyMilliOrders int64            `json:"baseDailyMilliOrders"`
+	PriorityMixBP        map[string]int64 `json:"priorityMixBP"`
+	ExamMix              map[string]int64 `json:"examMix"`
+}
+
+// Quantile is a piecewise-linear inverse CDF: keys "p0" … "p100" (whole
+// percents) mapped to values.
+type Quantile map[string]int64
+
+// Demand shapes order arrival.
+type Demand struct {
+	HourProfileBP   map[string]int64 `json:"hourProfileBP"` // "07" → share of the day's orders
+	WeekdayFactorBP map[string]int64 `json:"weekdayFactorBP"`
+	SeasonFactorBP  []int64          `json:"seasonFactorBP"` // Jan … Dec
+	LeadTimeDays    Quantile         `json:"leadTimeDays"`
+	WindowMixBP     map[string]int64 `json:"windowMixBP"`
+}
+
+// Behavior is patient behavior used by booking.
+type Behavior struct {
+	WaitToleranceDays map[string]Quantile `json:"waitToleranceDays"` // by priority
+	Cancellation      Cancellation        `json:"cancellation"`
+}
+
+// Cancellation describes appointment cancellations.
+type Cancellation struct {
+	PPM       int64    `json:"ppm"`
+	LeadHours Quantile `json:"leadHours"`
+	RebookPPM int64    `json:"rebookPPM"`
+}
+
+// OpeningAppt is one appointment on a hand-built opening schedule.
+type OpeningAppt struct {
+	Day      int64  `json:"day,omitempty"` // days after startDate
+	Time     string `json:"time"`
+	Room     string `json:"room"`
+	Exam     string `json:"exam"`
+	Priority string `json:"priority,omitempty"` // default routine
+	Source   string `json:"source"`
 }
 
 // Room is one room (one scanner in V0.1).
@@ -89,6 +165,9 @@ type Policies struct {
 	OvertimeAllowanceMin int64  `json:"overtimeAllowanceMin"`
 	MaxShiftHours        int64  `json:"maxShiftHours"`
 	ContrastSupervision  string `json:"contrastSupervision"`
+	Booking              string `json:"booking"`
+	BookingHorizonDays   int64  `json:"bookingHorizonDays"`
+	BookingNoticeMin     int64  `json:"bookingNoticeMin"`
 }
 
 // maxExtendsDepth bounds extends chains.

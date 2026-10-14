@@ -116,6 +116,31 @@ func Report(cfg *sim.Config) string {
 		if len(notes) > 0 {
 			b.WriteString("               unstaffed: " + strings.Join(notes, "; ") + "\n")
 		}
+		var slotNotes []string
+		for r := range cfg.Rooms {
+			var total, unstaffed, unsupervised int
+			for _, t := range cfg.Templates[r][d.Weekday()] {
+				total++
+				if ok, why := cov.SlotBookable(r, t.Span, cfg.Categories[t.Category].Contrast); !ok {
+					if why == "no_supervision" {
+						unsupervised++
+					} else {
+						unstaffed++
+					}
+				}
+			}
+			if unstaffed+unsupervised == 0 {
+				continue
+			}
+			n := fmt.Sprintf("%s %d of %d", cfg.Rooms[r].Modality, unstaffed+unsupervised, total)
+			if unsupervised > 0 {
+				n += fmt.Sprintf(" (%d contrast, no radiologist on site)", unsupervised)
+			}
+			slotNotes = append(slotNotes, n)
+		}
+		if len(slotNotes) > 0 {
+			b.WriteString("               template slots not bookable: " + strings.Join(slotNotes, "; ") + "\n")
+		}
 	}
 	if totOpen > 0 {
 		fmt.Fprintf(&b, "\nFortnight: %s of %s room-hours staffed (%d%%).\n",

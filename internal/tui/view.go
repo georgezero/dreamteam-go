@@ -29,10 +29,37 @@ func (m *Model) render() string {
 	if w < minWidth || h < minHeight {
 		return fmt.Sprintf("Terminal too small (need %d×%d, have %d×%d).", minWidth, minHeight, w, h)
 	}
-	o := m.obs
-	var lines []string
+	var body []string
+	hints := ""
+	switch m.screen {
+	case screenSchedule:
+		body = m.scheduleBody(w, h-3)
+		hints = " ↑↓ room  ←→ day  j/k scroll  t today  d dashboard  l log  space run  q quit"
+	case screenLog:
+		body = m.logBody(w, h-3)
+		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dashboard  s schedule  q quit"
+	default:
+		body = m.dashboardBody(w, h-3)
+		auto := "off"
+		if m.autoPause {
+			auto = "on"
+		}
+		hints = " space run  1-5 speed  n next  s schedule  l log  a auto-pause:" + auto + "  q quit"
+	}
+	lines := []string{m.topBar(w)}
+	for i := 0; i < h-3; i++ {
+		l := ""
+		if i < len(body) {
+			l = body[i]
+		}
+		lines = append(lines, fit(l, w))
+	}
+	lines = append(lines, fit(" "+m.status, w), barStyle.Render(fit(hints, w)))
+	return strings.Join(lines, "\n")
+}
 
-	// Top bar.
+func (m *Model) topBar(w int) string {
+	o := m.obs
 	run := "❚❚ PAUSED"
 	if m.running {
 		run = "▶ RUNNING " + speeds[m.speed].label
@@ -44,9 +71,13 @@ func (m *Model) render() string {
 	if ansi.StringWidth(left)+ansi.StringWidth(right) >= w {
 		left = " DREAMTEAM" // the clock and run state matter more than the name
 	}
-	lines = append(lines, barStyle.Render(spread(left, right, w)))
+	return barStyle.Render(spread(left, right, w))
+}
 
-	// Practice line.
+// dashboardBody lays out the dashboard in n lines. Sections are added in
+// priority order; the event log takes what is left, up to dashboardLog.
+func (m *Model) dashboardBody(w, n int) []string {
+	o := m.obs
 	state := dimStyle.Render("○ CLOSED")
 	if o.Practice.Open {
 		state = openStyle.Render("● OPEN")
@@ -58,15 +89,13 @@ func (m *Model) render() string {
 		info += " today"
 	}
 	info += "   " + deskText(o) + "   Scenario: " + o.Practice.Scenario
-	lines = append(lines, fit(info, w))
+	lines := []string{info}
 
-	// Rooms and staff: side by side when wide, stacked otherwise; the staff
-	// list collapses to one summary line when the terminal is short.
 	rooms := roomLines(o)
 	staff := staffLines(o)
 	if w >= 100 {
 		lw := 44
-		lines = append(lines, titleStyle.Render(fit(section("ROOMS", lw)+" "+section("STAFF", w-lw-1), w)))
+		lines = append(lines, titleStyle.Render(section("ROOMS", lw)+" "+section("STAFF", w-lw-1)))
 		for i := 0; i < max(len(rooms), len(staff)); i++ {
 			var l, r string
 			if i < len(rooms) {
@@ -75,48 +104,91 @@ func (m *Model) render() string {
 			if i < len(staff) {
 				r = staff[i]
 			}
-			lines = append(lines, fit(fit(l, lw)+" "+r, w))
+			lines = append(lines, fit(l, lw)+" "+r)
 		}
 	} else {
 		lines = append(lines, titleStyle.Render(section("ROOMS", w)))
-		for _, l := range rooms {
-			lines = append(lines, fit(l, w))
-		}
+		lines = append(lines, rooms...)
 		lines = append(lines, titleStyle.Render(section("STAFF", w)))
-		if h-len(lines)-len(staff)-4 >= 4 {
-			for _, l := range staff {
-				lines = append(lines, fit(l, w))
-			}
+		if n >= 34 {
+			lines = append(lines, staff...)
 		} else {
-			lines = append(lines, fit(staffSummary(o), w))
+			lines = append(lines, staffSummary(o))
 		}
 	}
+	lines = append(lines, demandLines(o, w)...)
 
-	// Event log, newest first, filling the space between header and footer.
-	lines = append(lines, titleStyle.Render(section("EVENT LOG", w)))
-	room := h - len(lines) - 2
-	n := 0
-	for i := len(o.RecentLog) - 1; i >= 0 && n < room; i-- {
-		lines = append(lines, fit(" "+logLine(o.RecentLog[i]), w))
-		n++
+	// Event log: newest first, compact; the full log is on its own screen.
+	room := min(dashboardLog, n-len(lines)-1)
+	if room > 0 {
+		lines = append(lines, titleStyle.Render(section("EVENT LOG (l: full log)", w)))
+		k := 0
+		for i := len(o.RecentLog) - 1; i >= 0 && k < room; i-- {
+			lines = append(lines, " "+logLine(o.RecentLog[i]))
+			k++
+		}
+		if k == 0 {
+			lines = append(lines, dimStyle.Render(" (nothing yet)"))
+		}
 	}
-	if n == 0 && room > 0 {
-		lines = append(lines, dimStyle.Render(fit(" (nothing yet)", w)))
-		n++
+	if len(lines) > n {
+		lines = lines[:n]
 	}
-	for ; n < room; n++ {
-		lines = append(lines, "")
-	}
+	return lines
+}
 
-	// Status and key hints.
-	lines = append(lines, fit(" "+m.status, w))
-	auto := "a auto-pause:off"
-	if m.autoPause {
-		auto = "a auto-pause:on"
+// demandLines is the demand panel: today's orders and what became of them,
+// the day's schedule and the earliest open slot per modality.
+func demandLines(o api.Observation, w int) []string {
+	out := []string{titleStyle.Render(section("DEMAND today", w)),
+		dimStyle.Render("      orders booked recall  lost  cxl │ appts today  open │ next open slot")}
+	for _, d := range o.Demand.Modalities {
+		t := d.Today
+		next := warnStyle.Render("none within horizon")
+		switch {
+		case d.NextOpenDays == 0:
+			next = "today"
+		case d.NextOpenDays == 1:
+			next = "tomorrow"
+		case d.NextOpenDays > 1:
+			next = fmt.Sprintf("%s (%d days)", shortDate(d.NextOpen), d.NextOpenDays)
+			if d.NextOpenDays > 14 {
+				next = warnStyle.Render(next)
+			}
+		}
+		lost := fmt.Sprintf("%5d", t.Lost)
+		if t.Lost > 0 {
+			lost = warnStyle.Render(lost)
+		}
+		out = append(out, fmt.Sprintf(" %-3s %8d %6d %6d %s %4d │ %11d %5d │ %s",
+			d.Modality, t.Received, t.Booked, t.Recall, lost, t.Cancelled, d.ApptsToday, d.OpenToday, next))
 	}
-	hints := " space run/pause  1-5 speed  n next event  " + auto + "  q quit"
-	lines = append(lines, barStyle.Render(fit(hints, w)))
-	return strings.Join(lines, "\n")
+	var recv, lost int
+	for _, d := range o.Demand.Modalities {
+		recv += d.SinceStart.Received
+		lost += d.SinceStart.Lost
+	}
+	out = append(out, dimStyle.Render(fmt.Sprintf(" Since day 1: %d orders, %d lost · recall list %d", recv, lost, o.Demand.RecallList)))
+	return out
+}
+
+// logBody is the full event log, newest at the bottom, scrollable.
+func (m *Model) logBody(w, n int) []string {
+	o := m.obs
+	lines := []string{titleStyle.Render(section(fmt.Sprintf("EVENT LOG · %d entries (last %d kept)", o.LogTotal, len(o.RecentLog)), w))}
+	rows := n - 1
+	m.logScroll = min(m.logScroll, max(0, len(o.RecentLog)-rows))
+	end := len(o.RecentLog) - m.logScroll
+	start := max(0, end-rows)
+	for i := start; i < end; i++ {
+		e := o.RecentLog[i]
+		day := ""
+		if len(e.Time) >= 10 {
+			day = shortDate(e.Time[:10]) + " "
+		}
+		lines = append(lines, " "+dimStyle.Render(day)+logLine(e))
+	}
+	return lines
 }
 
 // section renders a section rule: "─ ROOMS ─────".

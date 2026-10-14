@@ -96,7 +96,111 @@
        "Sat": {"start": "10:00", "end": "14:00", "weeks": "B", "assignment": "reading", "location": "remote"}
      }}
   ],
+  "catalog": [
+    {"code": "XR_CHEST_2V",     "name": "Chest 2V",               "modality": "XR", "category": "XR_15",  "contrast": false, "walkInEligible": true},
+    {"code": "XR_EXTREMITY",    "name": "Extremity",              "modality": "XR", "category": "XR_15",  "contrast": false, "walkInEligible": true},
+    {"code": "XR_SPINE",        "name": "Spine",                  "modality": "XR", "category": "XR_15",  "contrast": false, "walkInEligible": true},
+    {"code": "US_ABD_COMPLETE", "name": "Abdomen complete",       "modality": "US", "category": "US_45",  "contrast": false, "walkInEligible": false},
+    {"code": "US_PELVIS",       "name": "Pelvis",                 "modality": "US", "category": "US_45",  "contrast": false, "walkInEligible": false},
+    {"code": "US_VENOUS",       "name": "Venous duplex",          "modality": "US", "category": "US_45",  "contrast": false, "walkInEligible": true},
+    {"code": "US_THYROID",      "name": "Thyroid",                "modality": "US", "category": "US_30",  "contrast": false, "walkInEligible": false},
+    {"code": "US_RENAL",        "name": "Renal",                  "modality": "US", "category": "US_30",  "contrast": false, "walkInEligible": false},
+    {"code": "CT_HEAD_WO",      "name": "Head w/o",               "modality": "CT", "category": "CT_15",  "contrast": false, "walkInEligible": true},
+    {"code": "CT_CHEST_WO",     "name": "Chest w/o",              "modality": "CT", "category": "CT_15",  "contrast": false, "walkInEligible": false},
+    {"code": "CT_ABD_PEL_WC",   "name": "Abd/pelvis w/ contrast", "modality": "CT", "category": "CT_30C", "contrast": true,  "walkInEligible": false},
+    {"code": "CT_CHEST_WC",     "name": "Chest w/ contrast",      "modality": "CT", "category": "CT_30C", "contrast": true,  "walkInEligible": false},
+    {"code": "MR_BRAIN_WO",     "name": "Brain w/o",              "modality": "MR", "category": "MR_45",  "contrast": false, "walkInEligible": false},
+    {"code": "MR_LSPINE_WO",    "name": "L-spine w/o",            "modality": "MR", "category": "MR_45",  "contrast": false, "walkInEligible": false},
+    {"code": "MR_KNEE_WO",      "name": "Knee w/o",               "modality": "MR", "category": "MR_45",  "contrast": false, "walkInEligible": false},
+    {"code": "MR_BRAIN_WWO",    "name": "Brain w/wo contrast",    "modality": "MR", "category": "MR_60C", "contrast": true,  "walkInEligible": false}
+  ],
+  "templates": {
+    "R1": [
+      {"days": ["Mon", "Tue", "Wed", "Thu", "Fri"], "slots": [{"start": "08:00", "lenMin": 15, "count": 48, "category": "XR_15"}]},
+      {"days": ["Sat"], "slots": [{"start": "10:00", "lenMin": 15, "count": 32, "category": "XR_15"}]}
+    ],
+    "R2": [
+      {"days": ["Mon", "Tue", "Wed", "Thu", "Fri"], "slots": [
+        {"start": "09:30", "lenMin": 45, "count": 2, "category": "US_45"},
+        {"start": "11:00", "lenMin": 30, "category": "US_30"},
+        {"start": "11:30", "lenMin": 45, "category": "US_45"},
+        {"start": "12:15", "lenMin": 30, "category": "US_30"},
+        {"start": "12:45", "lenMin": 45, "category": "US_45"},
+        {"start": "14:00", "lenMin": 45, "category": "US_45"},
+        {"start": "14:45", "lenMin": 30, "category": "US_30"},
+        {"start": "15:15", "lenMin": 45, "category": "US_45"},
+        {"start": "16:00", "lenMin": 30, "category": "US_30"},
+        {"start": "16:30", "lenMin": 45, "category": "US_45"},
+        {"start": "17:15", "lenMin": 30, "category": "US_30"}]},
+      {"days": ["Sat"], "slots": [
+        {"start": "10:00", "lenMin": 45, "count": 2, "category": "US_45"},
+        {"start": "11:30", "lenMin": 30, "category": "US_30"},
+        {"start": "12:00", "lenMin": 45, "count": 2, "category": "US_45"},
+        {"start": "14:00", "lenMin": 45, "category": "US_45"},
+        {"start": "14:45", "lenMin": 30, "category": "US_30"},
+        {"start": "15:15", "lenMin": 45, "category": "US_45"}]}
+    ],
+    "R3": [
+      {"days": ["Mon", "Tue", "Wed", "Thu", "Fri"], "slots": [
+        {"start": "08:00", "lenMin": 15, "count": 16, "category": "CT_15"},
+        {"start": "12:00", "lenMin": 30, "count": 7, "category": "CT_30C"},
+        {"start": "16:00", "lenMin": 15, "count": 8, "category": "CT_15"},
+        {"start": "18:00", "lenMin": 30, "count": 4, "category": "CT_30C"}]},
+      {"days": ["Sat"], "slots": [
+        {"start": "10:00", "lenMin": 15, "count": 14, "category": "CT_15"},
+        {"start": "14:00", "lenMin": 15, "count": 16, "category": "CT_15"}]}
+    ],
+    "R4": [
+      {"days": ["Mon", "Tue", "Wed", "Thu", "Fri"], "slots": [
+        {"start": "08:00", "lenMin": 45, "count": 2, "category": "MR_45"},
+        {"start": "09:30", "lenMin": 60, "category": "MR_60C"},
+        {"start": "10:30", "lenMin": 45, "count": 2, "category": "MR_45"},
+        {"start": "13:00", "lenMin": 60, "category": "MR_60C"},
+        {"start": "14:00", "lenMin": 45, "count": 3, "category": "MR_45"}]}
+    ]
+  },
+  "referralSources": [
+    {"id": "SRC1", "name": "Northside Primary Care", "kind": "primary_care", "baseDailyMilliOrders": 24000,
+     "priorityMixBP": {"routine": 8500, "soon": 1200, "urgent": 300},
+     "examMix": {"XR_CHEST_2V": 30, "XR_SPINE": 8, "XR_EXTREMITY": 10, "US_ABD_COMPLETE": 10, "US_THYROID": 6,
+                 "US_RENAL": 4, "US_VENOUS": 4, "CT_HEAD_WO": 6, "CT_CHEST_WO": 8, "CT_ABD_PEL_WC": 6,
+                 "MR_BRAIN_WO": 4, "MR_LSPINE_WO": 4}},
+    {"id": "SRC2", "name": "Lakeview Orthopedics", "kind": "orthopedics", "baseDailyMilliOrders": 12000,
+     "priorityMixBP": {"routine": 9000, "soon": 900, "urgent": 100},
+     "examMix": {"XR_EXTREMITY": 45, "XR_SPINE": 15, "MR_KNEE_WO": 20, "MR_LSPINE_WO": 15}},
+    {"id": "SRC3", "name": "Riverside Women's Health", "kind": "ob_gyn", "baseDailyMilliOrders": 6000,
+     "priorityMixBP": {"routine": 9000, "soon": 1000, "urgent": 0},
+     "examMix": {"US_PELVIS": 70, "US_ABD_COMPLETE": 15, "US_THYROID": 15}},
+    {"id": "SRC4", "name": "Cedar Oncology", "kind": "oncology", "baseDailyMilliOrders": 5000,
+     "priorityMixBP": {"routine": 7000, "soon": 2500, "urgent": 500},
+     "examMix": {"CT_CHEST_WC": 40, "CT_ABD_PEL_WC": 40, "MR_BRAIN_WWO": 20}},
+    {"id": "SRC5", "name": "Eastgate Urgent Care", "kind": "urgent_care", "baseDailyMilliOrders": 7000,
+     "priorityMixBP": {"routine": 4000, "soon": 3500, "urgent": 2500},
+     "examMix": {"XR_CHEST_2V": 40, "XR_EXTREMITY": 35, "CT_HEAD_WO": 15, "US_VENOUS": 10}},
+    {"id": "SRC6", "name": "Other referrers", "kind": "other", "baseDailyMilliOrders": 9000,
+     "priorityMixBP": {"routine": 8000, "soon": 1500, "urgent": 500},
+     "examMix": {"CT_HEAD_WO": 25, "CT_CHEST_WO": 20, "CT_ABD_PEL_WC": 25, "MR_BRAIN_WO": 15,
+                 "MR_BRAIN_WWO": 10, "XR_CHEST_2V": 5}}
+  ],
+  "demand": {
+    "hourProfileBP": {"07": 400, "08": 900, "09": 1100, "10": 1100, "11": 1000, "12": 700,
+                      "13": 900, "14": 1000, "15": 1000, "16": 900, "17": 600, "18": 400},
+    "weekdayFactorBP": {"Mon": 11000, "Tue": 10000, "Wed": 10000, "Thu": 10000, "Fri": 10000,
+                        "Sat": 2500, "Sun": 0},
+    "seasonFactorBP": [10500, 10000, 10000, 10000, 9800, 9500, 9000, 9200, 10000, 10200, 10000, 9300],
+    "leadTimeDays": {"p0": 0, "p8": 1, "p30": 4, "p70": 15, "p92": 61, "p100": 181},
+    "windowMixBP": {"any": 4000, "morning": 2500, "afternoon": 2000, "evening": 1500}
+  },
+  "behavior": {
+    "waitToleranceDays": {
+      "routine": {"p0": 5, "p50": 21, "p100": 60},
+      "soon": {"p0": 1, "p50": 4, "p100": 10},
+      "urgent": {"p0": 0, "p50": 0, "p100": 2}
+    },
+    "cancellation": {"ppm": 90000, "leadHours": {"p0": 2, "p55": 72, "p100": 720}, "rebookPPM": 500000}
+  },
   "policies": {"walkIn": "accept_if_gap", "worklist": "urgent_then_fifo", "late": "fit_in",
                "graceMin": 15, "overtimeAllowanceMin": 15, "maxShiftHours": 12,
-               "contrastSupervision": "on_site"}
+               "contrastSupervision": "on_site", "booking": "first_fit",
+               "bookingHorizonDays": 120, "bookingNoticeMin": 60}
 }
