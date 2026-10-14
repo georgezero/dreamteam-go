@@ -755,6 +755,24 @@ else is persisted and no serialized world is trusted. File
   whatever observations, previews, rejected actions or unrelated events
   occurred (tested), and differs when hidden pending events differ (tested).
   Digests never appear in observations.
+* **Run results and golden references (step 15).** `dreamteam.result/v1`
+  (`internal/session/result.go`) is a run's canonical outcome built from
+  observations, the evaluation window and the digests: scenario ID and
+  fingerprint, engine, seed, epoch, takeover and end (seconds and ISO),
+  play days, the action history (counts, digest, each result in order),
+  the five digests, **calendar** days (completed, midnight to midnight,
+  headline flows plus end-of-day cash), the **evaluation window** (from
+  the exact takeover; baseline digest; period metrics; window money with
+  the cash bridge), **balances** and **obligations** at the end (point in
+  time), alert counts, and replay verification when requested. Integers
+  only (cents, seconds, counts; ratios as numerator and denominator), no
+  wall-clock time, paths or locale; encoded with fixed field order and
+  sorted maps, so repeated runs are byte-identical. Comparison decodes
+  both sides and walks them in key order: every field counts (missing and
+  unexpected ones too); compatibility (schema, engine, scenario, seed, run
+  length) is reported apart from the outcomes; the first differing path
+  is reported with both values. References live in `testdata/golden/`
+  (README there).
 * **Snapshots** (§3.6) are not built: replay is authoritative, and a
   snapshot cache may come later (V0.2) as an accelerator verified against
   the digests.

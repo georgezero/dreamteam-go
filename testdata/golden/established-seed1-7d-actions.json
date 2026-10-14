@@ -1,0 +1,901 @@
+{
+ "schema": "dreamteam.result/v1",
+ "engine": "0.1.0-dev.15",
+ "scenario": {
+  "id": "established",
+  "fingerprint": "b1cbc2a0108f22e34082a0d39f72499678a3eb2f8b2501d483f3525a39ad806a"
+ },
+ "seed": 1,
+ "epochDate": "2026-04-16",
+ "takeover": {
+  "sec": 15573600,
+  "time": "2026-10-13T06:00:00"
+ },
+ "end": {
+  "sec": 16178400,
+  "time": "2026-10-20T06:00:00"
+ },
+ "playDays": 7,
+ "actions": {
+  "attempted": 8,
+  "accepted": 5,
+  "rejected": 3,
+  "digest": "1852b8a05621b3245a4ff8db1ada6d89414fbd60c8897f638037ebc7a294b1de",
+  "results": [
+   {
+    "id": "X00001",
+    "batch": 1,
+    "time": "2026-10-13T07:00:00",
+    "action": {
+     "type": "extend_shift",
+     "employee": "E06",
+     "minutes": 120,
+     "date": "2026-10-15"
+    },
+    "ok": true,
+    "code": "accepted"
+   },
+   {
+    "id": "X00002",
+    "batch": 1,
+    "time": "2026-10-13T07:00:00",
+    "action": {
+     "type": "set_walkin_policy",
+     "policy": "accept_until",
+     "cutoff": "19:00"
+    },
+    "ok": true,
+    "code": "accepted"
+   },
+   {
+    "id": "X00003",
+    "batch": 1,
+    "time": "2026-10-13T07:00:00",
+    "action": {
+     "type": "extend_shift",
+     "employee": "E99",
+     "minutes": 30
+    },
+    "ok": false,
+    "code": "unknown_employee"
+   },
+   {
+    "id": "X00004",
+    "batch": 2,
+    "time": "2026-10-13T16:30:00",
+    "action": {
+     "type": "extend_shift",
+     "employee": "E05",
+     "minutes": 30
+    },
+    "ok": false,
+    "code": "shift_ended"
+   },
+   {
+    "id": "X00005",
+    "batch": 3,
+    "time": "2026-10-14T12:00:00",
+    "action": {
+     "type": "set_worklist_policy",
+     "policy": "fifo"
+    },
+    "ok": true,
+    "code": "accepted"
+   },
+   {
+    "id": "X00006",
+    "batch": 3,
+    "time": "2026-10-14T12:00:00",
+    "action": {
+     "type": "set_worklist_policy",
+     "policy": "fifo"
+    },
+    "ok": true,
+    "code": "unchanged"
+   },
+   {
+    "id": "X00007",
+    "batch": 4,
+    "time": "2026-10-16T08:00:00",
+    "action": {
+     "type": "set_walkin_policy",
+     "policy": "accept_if_gap"
+    },
+    "ok": true,
+    "code": "accepted"
+   },
+   {
+    "id": "X00008",
+    "batch": 4,
+    "time": "2026-10-16T08:00:00",
+    "action": {
+     "type": "extend_shift",
+     "employee": "E06",
+     "minutes": 300,
+     "date": "2026-10-19"
+    },
+    "ok": false,
+    "code": "invalid_minutes"
+   }
+  ]
+ },
+ "digests": {
+  "log": "6e34bd068f7f5be6d67035f6e52cd056f3eec8fa30483cb4c168d8013836fa24",
+  "ledger": "6c18847e1bad64b1053236efdb66d482a9ab7fd8876cf28bea424c76af3ccb71",
+  "actions": "1852b8a05621b3245a4ff8db1ada6d89414fbd60c8897f638037ebc7a294b1de",
+  "state": "08ab88ba9b214de146dd09169ee312699cd7e1b65da4fcf43711e98a910397df",
+  "run": "9005416cd60ad524a4888915185137ae8efb79bfca3de31629fe92a1123e559d"
+ },
+ "calendar": [
+  {
+   "date": "2026-10-13",
+   "weekday": "Tue",
+   "takeover": true,
+   "orders": 63,
+   "lost": 3,
+   "walkIns": 7,
+   "noShows": 2,
+   "exams": 70,
+   "reportsFinal": 62,
+   "unreadAtClose": 8,
+   "waitP50Sec": 1051,
+   "overtimeSec": 10895,
+   "netRevenueCents": 921038,
+   "expenseCents": 863519,
+   "operatingProfitCents": 57519,
+   "collectionsCents": 623917,
+   "disbursementsCents": 0,
+   "cashEndCents": 15623917,
+   "alertsRaised": 16
+  },
+  {
+   "date": "2026-10-14",
+   "weekday": "Wed",
+   "orders": 54,
+   "lost": 4,
+   "walkIns": 10,
+   "noShows": 5,
+   "exams": 60,
+   "reportsFinal": 62,
+   "unreadAtClose": 6,
+   "waitP50Sec": 725,
+   "overtimeSec": 7447,
+   "netRevenueCents": 1107668,
+   "expenseCents": 845713,
+   "operatingProfitCents": 261955,
+   "collectionsCents": 539116,
+   "disbursementsCents": 0,
+   "cashEndCents": 16163033,
+   "alertsRaised": 15
+  },
+  {
+   "date": "2026-10-15",
+   "weekday": "Thu",
+   "orders": 54,
+   "lost": 5,
+   "walkIns": 8,
+   "noShows": 3,
+   "exams": 56,
+   "reportsFinal": 58,
+   "unreadAtClose": 4,
+   "waitP50Sec": 685,
+   "overtimeSec": 12671,
+   "netRevenueCents": 899465,
+   "expenseCents": 851498,
+   "operatingProfitCents": 47967,
+   "collectionsCents": 595161,
+   "disbursementsCents": 0,
+   "cashEndCents": 16758194,
+   "alertsRaised": 18
+  },
+  {
+   "date": "2026-10-16",
+   "weekday": "Fri",
+   "orders": 71,
+   "lost": 8,
+   "walkIns": 11,
+   "noShows": 1,
+   "exams": 59,
+   "reportsFinal": 61,
+   "unreadAtClose": 2,
+   "waitP50Sec": 856,
+   "overtimeSec": 1254,
+   "netRevenueCents": 1009857,
+   "expenseCents": 834945,
+   "operatingProfitCents": 174912,
+   "collectionsCents": 765150,
+   "disbursementsCents": 4929272,
+   "cashEndCents": 12594072,
+   "alertsRaised": 20
+  },
+  {
+   "date": "2026-10-17",
+   "weekday": "Sat",
+   "orders": 12,
+   "lost": 6,
+   "walkIns": 3,
+   "noShows": 1,
+   "exams": 16,
+   "reportsFinal": 9,
+   "unreadAtClose": 9,
+   "waitP50Sec": 4462,
+   "overtimeSec": 0,
+   "netRevenueCents": 71065,
+   "expenseCents": 558328,
+   "operatingProfitCents": -487263,
+   "collectionsCents": 0,
+   "disbursementsCents": 0,
+   "cashEndCents": 12594072,
+   "alertsRaised": 7
+  },
+  {
+   "date": "2026-10-18",
+   "weekday": "Sun",
+   "orders": 0,
+   "lost": 0,
+   "walkIns": 0,
+   "noShows": 0,
+   "exams": 0,
+   "reportsFinal": 0,
+   "unreadAtClose": 9,
+   "waitP50Sec": 0,
+   "overtimeSec": 0,
+   "netRevenueCents": 0,
+   "expenseCents": 498841,
+   "operatingProfitCents": -498841,
+   "collectionsCents": 0,
+   "disbursementsCents": 0,
+   "cashEndCents": 12594072,
+   "alertsRaised": 1
+  },
+  {
+   "date": "2026-10-19",
+   "weekday": "Mon",
+   "orders": 75,
+   "lost": 6,
+   "walkIns": 5,
+   "noShows": 3,
+   "exams": 33,
+   "reportsFinal": 42,
+   "unreadAtClose": 0,
+   "waitP50Sec": 894,
+   "overtimeSec": 1149,
+   "netRevenueCents": 645127,
+   "expenseCents": 762968,
+   "operatingProfitCents": -117841,
+   "collectionsCents": 1876629,
+   "disbursementsCents": 0,
+   "cashEndCents": 14470701,
+   "alertsRaised": 4
+  }
+ ],
+ "window": {
+  "from": {
+   "sec": 15573600,
+   "time": "2026-10-13T06:00:00"
+  },
+  "to": {
+   "sec": 16178400,
+   "time": "2026-10-20T06:00:00"
+  },
+  "complete": false,
+  "baselineDigest": "557d1ccf159e230e5b8ae3b1dd1af2bf13f8f3ee13f0f5d18f23f2019441074b",
+  "ops": {
+   "from": "2026-10-13T06:00:00",
+   "to": "2026-10-20T06:00:00",
+   "complete": false,
+   "demand": {
+    "received": 329,
+    "booked": 330,
+    "recall": 13,
+    "lost": 32,
+    "cancelled": 32,
+    "lostRate": {
+     "num": 32,
+     "den": 329
+    },
+    "byModality": [
+     {
+      "modality": "XR",
+      "received": 136,
+      "lost": 6,
+      "exams": 132
+     },
+     {
+      "modality": "US",
+      "received": 58,
+      "lost": 14,
+      "exams": 33
+     },
+     {
+      "modality": "CT",
+      "received": 91,
+      "lost": 3,
+      "exams": 86
+     },
+     {
+      "modality": "MR",
+      "received": 44,
+      "lost": 9,
+      "exams": 43
+     }
+    ]
+   },
+   "appointments": {
+    "scheduled": 321,
+    "cancelled": 29,
+    "arrived": 277,
+    "noShows": 15,
+    "missed": 0,
+    "rescheduled": 0,
+    "noShowRate": {
+     "num": 15,
+     "den": 292
+    },
+    "cancelRate": {
+     "num": 29,
+     "den": 321
+    },
+    "bookableSec": 651600,
+    "bookedSec": 453600,
+    "fill": {
+     "num": 453600,
+     "den": 651600
+    }
+   },
+   "walkIns": {
+    "arrived": 44,
+    "sentToBook": 3,
+    "declined": 0,
+    "imaged": 20,
+    "left": 24,
+    "acceptance": {
+     "num": 20,
+     "den": 44
+    },
+    "abandonment": {
+     "num": 24,
+     "den": 44
+    }
+   },
+   "waits": {
+    "registration": {
+     "count": 294,
+     "p50Sec": 0,
+     "p90Sec": 284,
+     "maxSec": 2091
+    },
+    "toExam": {
+     "count": 294,
+     "p50Sec": 878,
+     "p90Sec": 2996,
+     "maxSec": 17300
+    },
+    "pastAppointment": {
+     "count": 265,
+     "p50Sec": 389,
+     "p90Sec": 1989,
+     "maxSec": 7268
+    },
+    "over30": 52
+   },
+   "exams": 294,
+   "afterHoursExams": 5,
+   "rooms": [
+    {
+     "room": "R1",
+     "modality": "XR",
+     "openSec": 244800,
+     "staffedSec": 220500,
+     "busySec": 81609,
+     "afterHoursBusySec": 492,
+     "exams": 132,
+     "utilOpen": {
+      "num": 81609,
+      "den": 244800
+     },
+     "utilStaffed": {
+      "num": 81609,
+      "den": 220500
+     },
+     "coverage": {
+      "num": 220500,
+      "den": 244800
+     }
+    },
+    {
+     "room": "R2",
+     "modality": "US",
+     "openSec": 244800,
+     "staffedSec": 122400,
+     "busySec": 72740,
+     "afterHoursBusySec": 0,
+     "exams": 33,
+     "utilOpen": {
+      "num": 72740,
+      "den": 244800
+     },
+     "utilStaffed": {
+      "num": 72740,
+      "den": 122400
+     },
+     "coverage": {
+      "num": 122400,
+      "den": 244800
+     }
+    },
+    {
+     "room": "R3",
+     "modality": "CT",
+     "openSec": 244800,
+     "staffedSec": 220500,
+     "busySec": 89982,
+     "afterHoursBusySec": 8450,
+     "exams": 86,
+     "utilOpen": {
+      "num": 89982,
+      "den": 244800
+     },
+     "utilStaffed": {
+      "num": 89982,
+      "den": 220500
+     },
+     "coverage": {
+      "num": 220500,
+      "den": 244800
+     }
+    },
+    {
+     "room": "R4",
+     "modality": "MR",
+     "openSec": 244800,
+     "staffedSec": 147811,
+     "busySec": 118441,
+     "afterHoursBusySec": 0,
+     "exams": 43,
+     "utilOpen": {
+      "num": 118441,
+      "den": 244800
+     },
+     "utilStaffed": {
+      "num": 118441,
+      "den": 147811
+     },
+     "coverage": {
+      "num": 147811,
+      "den": 244800
+     }
+    }
+   ],
+   "staff": [
+    {
+     "name": "Jordan",
+     "role": "front_desk",
+     "onDutySec": 144000,
+     "busySec": 55002,
+     "breakSec": 9000,
+     "overtimeSec": 0,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 55002,
+      "den": 144000
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Taylor",
+     "role": "ops_manager",
+     "onDutySec": 162093,
+     "busySec": 41192,
+     "breakSec": 0,
+     "overtimeSec": 93,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 41192,
+      "den": 162093
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Riley",
+     "role": "technologist",
+     "onDutySec": 145614,
+     "busySec": 110624,
+     "breakSec": 9000,
+     "overtimeSec": 1614,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 110624,
+      "den": 145614
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Sam",
+     "role": "technologist",
+     "onDutySec": 153203,
+     "busySec": 138002,
+     "breakSec": 9000,
+     "overtimeSec": 11003,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 138002,
+      "den": 153203
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Casey",
+     "role": "technologist",
+     "onDutySec": 147811,
+     "busySec": 132629,
+     "breakSec": 9000,
+     "overtimeSec": 3811,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 132629,
+      "den": 147811
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Morgan",
+     "role": "technologist",
+     "onDutySec": 122400,
+     "busySec": 85256,
+     "breakSec": 7200,
+     "overtimeSec": 7200,
+     "approvedOvertimeSec": 7200,
+     "util": {
+      "num": 85256,
+      "den": 122400
+     },
+     "readUtil": {
+      "num": 0,
+      "den": 0
+     }
+    },
+    {
+     "name": "Dr. Avery",
+     "role": "radiologist",
+     "onDutySec": 167400,
+     "busySec": 88533,
+     "breakSec": 0,
+     "overtimeSec": 0,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 88533,
+      "den": 167400
+     },
+     "blockSec": 102600,
+     "readInBlockSec": 79226,
+     "readOutsideSec": 9307,
+     "readUtil": {
+      "num": 79226,
+      "den": 102600
+     }
+    },
+    {
+     "name": "Dr. Blake",
+     "role": "radiologist",
+     "onDutySec": 162695,
+     "busySec": 56200,
+     "breakSec": 0,
+     "overtimeSec": 9695,
+     "approvedOvertimeSec": 0,
+     "util": {
+      "num": 56200,
+      "den": 162695
+     },
+     "blockSec": 78000,
+     "readInBlockSec": 51234,
+     "readOutsideSec": 4966,
+     "readUtil": {
+      "num": 51234,
+      "den": 78000
+     }
+    }
+   ],
+   "reporting": {
+    "acquired": 294,
+    "tat": {
+     "count": 294,
+     "p50Sec": 2381,
+     "p90Sec": 9281,
+     "maxSec": 148139
+    },
+    "unfinished": 0,
+    "overTarget": 13,
+    "final": 294,
+    "finalTAT": {
+     "count": 294,
+     "p50Sec": 2381,
+     "p90Sec": 9281,
+     "maxSec": 148139
+    },
+    "inherited": 0,
+    "breaches": 13,
+    "byPriority": [
+     {
+      "priority": "routine",
+      "acquired": 246,
+      "tat": {
+       "count": 246,
+       "p50Sec": 2503,
+       "p90Sec": 42687,
+       "maxSec": 148139
+      },
+      "overTarget": 9,
+      "targetSec": 86400
+     },
+     {
+      "priority": "soon",
+      "acquired": 34,
+      "tat": {
+       "count": 34,
+       "p50Sec": 1810,
+       "p90Sec": 4869,
+       "maxSec": 44007
+      },
+      "overTarget": 3,
+      "targetSec": 14400
+     },
+     {
+      "priority": "urgent",
+      "acquired": 14,
+      "tat": {
+       "count": 14,
+       "p50Sec": 1407,
+       "p90Sec": 3368,
+       "maxSec": 3628
+      },
+      "overTarget": 1,
+      "targetSec": 3600
+     }
+    ],
+    "backlogStart": 0,
+    "backlogEnd": 0
+   },
+   "workforce": {
+    "overtimeSec": 33416,
+    "overtimeCostCents": 28103,
+    "approvedOvertimeSec": 7200,
+    "approvedOvertimeCostCents": 8800,
+    "heldOver": 6,
+    "skippedBreaks": 0,
+    "noCoverage": 0,
+    "deskSelfPatientSec": 24001
+   },
+   "alerts": {
+    "warn": 66,
+    "alert": 15,
+    "top": null
+   },
+   "actions": {
+    "attempted": 8,
+    "accepted": 5,
+    "rejected": 3
+   }
+  },
+  "money": {
+   "ledger": {
+    "label": "Since takeover",
+    "from": "2026-10-13",
+    "to": "2026-10-20",
+    "days": 0,
+    "grossRevenueCents": 4745258,
+    "collectionVarianceCents": 91038,
+    "netRevenueCents": 4654220,
+    "wagesCents": 1941776,
+    "benefitsCents": 485447,
+    "facilityCents": 745161,
+    "equipmentCents": 1117744,
+    "suppliesCents": 482000,
+    "itCents": 223684,
+    "billingCents": 220003,
+    "laborCents": 2427223,
+    "fixedCents": 1998389,
+    "variableCents": 790203,
+    "operatingExpenseCents": 5215815,
+    "operatingProfitCents": -561595,
+    "marginBP": -1206,
+    "marginDefined": true,
+    "collectionsCents": 4399973,
+    "disbursementsCents": 4929272,
+    "netCashFlowCents": -529299,
+    "reportsFinal": 294,
+    "adjudicated": 277,
+    "denied": 24,
+    "denialRateBP": 866,
+    "byModality": [
+     {
+      "modality": "XR",
+      "reportsFinal": 132,
+      "netRevenueCents": 659139,
+      "directCostCents": 135792
+     },
+     {
+      "modality": "US",
+      "reportsFinal": 33,
+      "netRevenueCents": 609242,
+      "directCostCents": 108545
+     },
+     {
+      "modality": "CT",
+      "reportsFinal": 86,
+      "netRevenueCents": 1928622,
+      "directCostCents": 768031
+     },
+     {
+      "modality": "MR",
+      "reportsFinal": 43,
+      "netRevenueCents": 1457217,
+      "directCostCents": 895579
+     }
+    ],
+    "fixedByItem": [
+     {
+      "id": "rent",
+      "name": "Rent \u0026 facility",
+      "account": "facility",
+      "cents": 496774
+     },
+     {
+      "id": "utilities",
+      "name": "Utilities",
+      "account": "facility",
+      "cents": 158064
+     },
+     {
+      "id": "insurance",
+      "name": "Insurance (liability, property)",
+      "account": "facility",
+      "cents": 90323
+     },
+     {
+      "id": "lease_ct",
+      "name": "CT lease",
+      "account": "equipment",
+      "cents": 203226
+     },
+     {
+      "id": "lease_mr",
+      "name": "MR lease",
+      "account": "equipment",
+      "cents": 406452
+     },
+     {
+      "id": "service_mr",
+      "name": "MR service contract",
+      "account": "equipment",
+      "cents": 270968
+     },
+     {
+      "id": "service_ct",
+      "name": "CT service contract",
+      "account": "equipment",
+      "cents": 180646
+     },
+     {
+      "id": "service_us",
+      "name": "US service contract",
+      "account": "equipment",
+      "cents": 33871
+     },
+     {
+      "id": "service_xr",
+      "name": "XR service contract",
+      "account": "equipment",
+      "cents": 22581
+     },
+     {
+      "id": "it",
+      "name": "IT, RIS/PACS",
+      "account": "it",
+      "cents": 135484
+     }
+    ]
+   },
+   "inheritedVarianceCents": 91038,
+   "allocatedAccrualCents": 374122,
+   "revenueCents": 4745258,
+   "netRevenueCents": 4745258,
+   "operatingExpenseCents": 5589937,
+   "operatingProfitCents": -844679,
+   "margin": {
+    "num": -844679,
+    "den": 4745258
+   },
+   "collectionsCents": 4399973,
+   "inheritedCollectionsCents": 4399973,
+   "disbursementsCents": 4929272,
+   "inheritedPaidCents": 3913859,
+   "operatingCashFlowCents": -529299,
+   "capitalTransfersCents": 0,
+   "cashChangeCents": -529299,
+   "arChangeCents": 254247,
+   "apChangeCents": 2788592,
+   "payrollChangeCents": -2502049,
+   "cashEndCents": 14470701,
+   "minCashCents": 11828922,
+   "shortfallCents": 0,
+   "reconciled": true
+  }
+ },
+ "balances": {
+  "cashCents": 14470701,
+  "receivablesCents": 28069602,
+  "payablesCents": 7681876,
+  "accruedPayrollCents": 1411810,
+  "equityCents": 33446617,
+  "minCashCents": 11828922,
+  "daysBelowZero": 0
+ },
+ "obligations": {
+  "nextPayroll": {
+   "date": "2026-10-30",
+   "cents": 1411810
+  },
+  "nextPayables": {
+   "date": "2026-11-01",
+   "cents": 7681876
+  },
+  "openClaims": 1878,
+  "claimsAging": [
+   {
+    "label": "0–30 days",
+    "count": 1173,
+    "cents": 17955585
+   },
+   {
+    "label": "31–60 days",
+    "count": 539,
+    "cents": 8437462
+   },
+   {
+    "label": "61–90 days",
+    "count": 136,
+    "cents": 1451237
+   },
+   {
+    "label": "over 90 days",
+    "count": 30,
+    "cents": 225318
+   }
+  ],
+  "unread": 0,
+  "reading": 0,
+  "recallList": 45,
+  "bookedAhead": 802,
+  "policies": {
+   "walkIn": "accept_if_gap",
+   "worklist": "fifo"
+  },
+  "approvedExtensions": []
+ },
+ "alerts": {
+  "raisedWarn": 66,
+  "raisedAlert": 15,
+  "activeAtEnd": 0
+ },
+ "replay": {
+  "verified": true,
+  "batches": 4,
+  "runDigest": "9005416cd60ad524a4888915185137ae8efb79bfca3de31629fe92a1123e559d"
+ }
+}

@@ -513,6 +513,9 @@ func (s *Session) Verify() (*Report, error) {
 	return rep, err
 }
 
+// Engine is this build's version.
+func (s *Session) Engine() string { return version.Number }
+
 // Path is the file this session was last saved to or loaded from.
 func (s *Session) Path() string { return s.path }
 

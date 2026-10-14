@@ -7,6 +7,96 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 15 — Canonical results and golden references (v0.1.0-dev.15)
+
+**Owner decisions (2026-10-14).** Engine-version compatibility stays:
+replay and golden comparison against another engine only with
+`-allow-engine-mismatch`, and compatibility is always reported apart from
+verification. Golden outputs are canonical JSON for machines plus a concise
+text summary for people. Golden files hold observable and financial
+outcomes and digests, never individual records or hidden state.
+
+**Result schema** (`dreamteam.result/v1`, SIMULATION_DESIGN §4.5):
+
+| Section | Contents | Kind |
+|---|---|---|
+| identity | schema, engine, scenario ID and fingerprint, seed, epoch date | — |
+| `takeover`, `end`, `playDays` | simulation seconds and ISO time | times |
+| `actions` | attempted / accepted / rejected, history digest, every result in order (rejections and no-ops included) | history |
+| `digests` | log, ledger, actions, state, run | verification |
+| `calendar` | each completed day, midnight to midnight (the takeover day flagged): orders, lost, walk-ins, no-shows, exams, reports, unread at close, wait p50, overtime, net revenue, expenses, profit, collections, disbursements, end-of-day cash, alerts | calendar flows (+ end-of-day cash) |
+| `window` | from the exact takeover to the end: baseline digest, period metrics (demand, appointments, walk-ins, waits, rooms, staff, reporting, workforce, alert and action counts), window money (baseline-adjusted and as posted, cash bridge) | evaluation-window flows |
+| `balances` | cash, A/R, A/P, payroll owed, equity, lowest cash, days below zero | point in time |
+| `obligations` | next payroll and bills, open claims and aging, unread / reading, recall list, booked ahead, policies, approved extensions | point in time |
+| `alerts` | raised in the window by severity; active at the end | counts |
+| `replay` | verified, batches, replayed run digest (with `-verify-replay`) | verification |
+
+Integers only; ratios as numerator and denominator; fixed field order;
+arrays in defined order; no wall-clock time, paths or locale. Every field
+is compared.
+
+**CLI** (no new execution path: `run` and `replay` gained output flags):
+
+    dreamteam run -scenario established -seed 1 -days 7 -format json            # canonical JSON on stdout
+    dreamteam run -days 7 -actions FILE -verify-replay                           # text summary, replay checked
+    dreamteam run -days 90 -verify-replay -format json -golden testdata/golden/established-seed1-90d.json
+    dreamteam run -days 7 -format json -write-golden FILE [-overwrite]           # explicit, never silent
+    dreamteam replay SESSION -format json [-golden FILE]                         # the replayed run's result
+    dreamteam verify SESSION                                                     # "ok <run digest>"
+
+Diagnostics go to stderr; with `-format json` stdout holds only the JSON.
+Exit codes: 0 ok · 1 error (I/O, scenario) · 2 invalid input · 3 replay
+failure · 4 golden mismatch · 5 incompatible or unsupported format (another
+schema, engine, scenario, seed or run length; malformed golden; unknown
+`-format`). A mismatch report gives compatibility, the number of
+differences, the digests that differ and the first differing paths with
+both values, e.g. `first: .window.ops.exams: golden 1, run 184`.
+
+**Reference runs** (`testdata/golden/`, README there; each generated with
+`-verify-replay`, aggregate outcomes plus digests, 16–52 KB):
+
+| Reference | Exams | Orders / lost | Net revenue | Op. expense | Op. profit | Cash end | Run digest |
+|---|---|---|---|---|---|---|---|
+| established, seed 1, 7 days | 292 | 329 / 33 | $47,037 | $55,712 | −$8,675 | $144,817 | `af8fb442c246…` |
+| established, seed 1, 90 days | 3,887 | 4,171 / 370 | $593,096 | $675,797 | −$82,702 | $16,985 | `a25871c771cc…` |
+| mini, seed 1, 7 days | 184 | 360 / 4 | $27,893 | $50,784 | −$22,891 | $137,965 | `e3b39b7707d0…` |
+| established, seed 1, 7 days, actions (8: 5 accepted incl. a no-op, 3 rejected) | 294 | 329 / 32 | $47,452 | $55,899 | −$8,447 | $144,707 | `9005416cd60a…` |
+
+(Uncalibrated: the losses are the step 10–11 volume shortfall that step 18
+calibration addresses. The 90-day run ends with cash near zero.)
+
+**Tests** (`go test -count=1 ./...` passes):
+
+| Requirement | Test |
+|---|---|
+| References reproduce (byte-identical when the engine matches) | `TestGoldenReferences` (all four, `-verify-replay`) |
+| Repeated runs byte-identical; seeds and scenarios differ | `TestResultsRepeatableAndDistinct` |
+| Meaningful changes, missing / unexpected fields, digests, calendar length, engine, fingerprint, seed, run length, schema, malformed / truncated / trailing files, CLI exit codes, no silent overwrite, unsupported format | `TestGoldenComparisonReports` |
+| Action history changes detected; rejected actions represented | `TestActionHistoryInResult` |
+| Chunk sizes and playback speeds (one jump, 37-min chunks, Max-speed event budgets, alert stops) | `TestResultIndependentOfChunkingAndSpeed` |
+| No hidden data | `TestResultHasNoHiddenData` (no record IDs, no latent or queue fields) |
+| Financial reconciliation, window boundaries | `TestResultReconciles` (balance sheet, daily cash roll-forward, cash bridge, window = takeover → end, calendar days = play days) |
+
+**Cross-platform.** All four references reproduced byte-identically on a
+second Linux arm64 machine (Cortex-A76, via the built binary) as well as
+the Raspberry Pi 4 (Cortex-A72) that wrote them. Linux amd64 and macOS
+arm64 have **not** been run (no such machine or emulator here); the
+procedure is in `testdata/golden/README.md`.
+
+**Performance** (MEASUREMENTS.md): `run -days 7` 1.9 s, `-days 90` 3.1–4.7
+s (warm-up included); result build and encode after 90 days 0.54–0.62 s
+(mostly the state digest); comparison 18–25 ms. Not in any output.
+
+**Limitations.**
+* An engine version bump requires `-allow-engine-mismatch` for old
+  references (reported); regenerate to make them byte-identical again.
+* Per-day calendar rows make the 90-day file 52 KB; per-patient detail is
+  deliberately absent, so a digest-only change (e.g. the order of two
+  same-day events) is reported as differing digests without a metric path.
+* No amd64 or macOS verification yet.
+
+---
+
 ## Step 14 remediation — replay review findings (v0.1.0-dev.14.1)
 
 A focused review of replay correctness (`docs/reviews/step-14-astra-review.md`,

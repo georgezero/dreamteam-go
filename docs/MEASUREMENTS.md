@@ -194,3 +194,14 @@ template slots (unstaffed unless extended) add nothing measurable.
 | Save 30 days after takeover (`-bench Save30Days`) | 0.44–0.54 s (mostly the state digest), 1.3 MB |
 | Load = replay + verify, 30 days (`-bench Replay30Days`) | 2.1–2.3 s, 117 MB allocated |
 | State digest after 10 days of play | ≈0.3 s |
+
+## 2026-10-14 — V0.1 step 15 (Pi at ~80 °C)
+
+| Measurement | Result |
+|---|---|
+| `dreamteam run -days 7 -format json` (established, warm-up included) | 1.91–1.98 s, 40–42 MB peak RSS |
+| `dreamteam run -days 90 -format json` | 3.06–4.70 s, 60–61 MB peak RSS |
+| Golden generation with `-verify-replay` (run + replay) | 7 d 4.2 s · 90 d 8.0 s · mini 7 d 0.7 s · 7 d with actions 5.6 s |
+| Result build + encode after 90 days (`-bench Result90Days`) | 0.54–0.62 s (mostly the state digest), 5.4 MB |
+| Golden comparison, 90-day result (`-bench Compare90Days`) | 18–25 ms |
+| Reference sizes | 16–18 KB (7 days), 52 KB (90 days) |
