@@ -1413,6 +1413,18 @@ own). Every ordering ends in the study ID, so ties are deterministic. The
 policy is read from `policies.worklist` on each claim, so the step-13 action
 only has to change it.
 
+**Gameplay rule (owner decision, 0.1.0-dev.18.2): urgency always takes
+precedence.** Under every policy, urgent studies are offered before all
+others (the existing `urgent` priority; `soon` is not urgent); the policy
+orders within each class. So `FIFO` is urgent-first then FIFO,
+`OldestFirst` urgent-first then oldest, `ShortestFirst` urgent-first then
+shortest expected read; `UrgentThenFIFO` is unchanged (it also promotes
+overdue studies). Reads in progress are never interrupted. Without it,
+shortest-first could postpone a long urgent study indefinitely while short
+routine studies kept arriving (step 18.1 analysis). This is a deliberate
+rule change, not a calibration correction: reading blocks, staffing, read
+durations and reimbursement are unchanged.
+
 ---
 
 ## 7. Equipment
@@ -2021,7 +2033,8 @@ today, and from those who left. Walk-ins already waiting are never removed.
 **Worklist policy.** Read from the policies in force at each claim. A
 change reorders unread studies only; reads in progress run to the end, read
 times stay each case's own (keyed by origin), and `shortest_first` uses the
-published expected read time.
+published expected read time. Urgent studies come first under every policy
+(§6.8).
 
 ---
 

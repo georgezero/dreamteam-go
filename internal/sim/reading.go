@@ -96,10 +96,14 @@ func (st *state) tatBreach(e *Engine, si int) {
 }
 
 // worklistOrder returns the unread studies in the order the worklist
-// policy (§6.8) offers them. UrgentThenFIFO, the default, puts urgent
-// studies and studies already past their TAT target first (the latter so a
-// steady urgent stream can't starve routine work forever), then the rest by
-// time on the worklist. Every key ends in the study ID, so ties are
+// policy (§6.8) offers them. Urgent studies always come first, whatever the
+// policy (a gameplay rule since 0.1.0-dev.18.2: no ordering may postpone an
+// urgent study behind routine work); the policy orders within each class.
+// UrgentThenFIFO, the default, also promotes studies already past their
+// TAT target (so a steady urgent stream can't starve routine work
+// forever), then orders by time on the worklist; fifo by time on the
+// worklist, oldest_first by acquisition, shortest_first by the published
+// expected read time. Every key ends in the study ID, so ties are
 // deterministic.
 func (st *state) worklistOrder() []int {
 	pol := &st.cfg.Policies
@@ -111,7 +115,10 @@ func (st *state) worklistOrder() []int {
 	}
 	rank := func(si int) int {
 		s := &st.dem.studies[si]
-		if s.priority == Urgent || st.now >= s.acquiredAt.Add(pol.TATTarget[s.priority]) {
+		switch {
+		case s.priority == Urgent:
+			return 0
+		case st.pol.Worklist == "urgent_then_fifo" && st.now >= s.acquiredAt.Add(pol.TATTarget[s.priority]):
 			return 0
 		}
 		return 1
@@ -128,10 +135,8 @@ func (st *state) worklistOrder() []int {
 		return s.enteredAt
 	}
 	slices.SortStableFunc(out, func(a, b int) int {
-		if st.pol.Worklist == "urgent_then_fifo" {
-			if ra, rb := rank(a), rank(b); ra != rb {
-				return ra - rb
-			}
+		if ra, rb := rank(a), rank(b); ra != rb {
+			return ra - rb
 		}
 		if ka, kb := key(a), key(b); ka != kb {
 			return int(ka - kb)

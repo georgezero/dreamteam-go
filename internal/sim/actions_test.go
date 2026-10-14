@@ -332,16 +332,27 @@ func TestWorklistPolicyOrdering(t *testing.T) {
 		}
 	}
 	short.Apply([]api.Action{worklist(api.WorklistShortestFirst)})
-	// The offered order now follows the published expected read time.
+	// The offered order now follows the published expected read time,
+	// within each urgency class; urgent studies come first.
 	cfg := miniConfig(t)
 	p50 := map[string]int64{}
 	for _, x := range cfg.Catalog {
 		p50[x.Name] = x.ReadTime.At(500_000)
 	}
 	items := short.Observe(0).Worklist.Items
-	for i := 1; i < len(items); i++ {
-		a, b := items[i-1], items[i]
-		if a.State == api.StudyUnread && b.State == api.StudyUnread && p50[a.ExamName] > p50[b.ExamName] {
+	var unread []api.WorklistItem
+	for _, it := range items {
+		if it.State == api.StudyUnread {
+			unread = append(unread, it)
+		}
+	}
+	for i := 1; i < len(unread); i++ {
+		a, b := unread[i-1], unread[i]
+		ua, ub := a.Priority == "urgent", b.Priority == "urgent"
+		if !ua && ub {
+			t.Fatalf("shortest-first offers routine %s before urgent %s", a.Study, b.Study)
+		}
+		if ua == ub && p50[a.ExamName] > p50[b.ExamName] {
 			t.Fatalf("shortest-first offers %s (%ds) before %s (%ds)", a.Study, p50[a.ExamName], b.Study, p50[b.ExamName])
 		}
 	}

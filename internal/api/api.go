@@ -1169,12 +1169,15 @@ const (
 	WalkInScheduleLater = "schedule_later" // decline: offer an appointment instead
 )
 
-// Worklist policies.
+// Worklist policies: the order unread studies are offered in. Urgent
+// studies always come first under every policy; the policy orders within
+// each class (urgent, everything else). Reads in progress are never
+// interrupted; ties fall to the study ID.
 const (
-	WorklistUrgentThenFIFO = "urgent_then_fifo"
-	WorklistFIFO           = "fifo"
-	WorklistOldestFirst    = "oldest_first"
-	WorklistShortestFirst  = "shortest_first" // by the published expected read time
+	WorklistUrgentThenFIFO = "urgent_then_fifo" // default: urgent and overdue first, then time on the worklist
+	WorklistFIFO           = "fifo"             // time on the worklist
+	WorklistOldestFirst    = "oldest_first"     // acquisition time
+	WorklistShortestFirst  = "shortest_first"   // the published expected read time (never the case's own)
 )
 
 // Action is one decision. Fields by type: extend_shift — Employee (ID),

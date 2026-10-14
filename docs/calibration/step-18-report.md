@@ -404,6 +404,41 @@ shortest-first), urgent CT 25 / 54 / 35, urgent US 16 / 47 / 21; urgent MR
   hours. No policy semantics changed; whether shortest-first should keep
   urgent studies first is an owner decision.
 
+### Gameplay rule: urgency always takes precedence (0.1.0-dev.18.2)
+
+Owner decision after this analysis: urgent studies are offered first under
+every worklist policy, and the policy orders within each class (FIFO,
+oldest-first, shortest expected read; the default is unchanged). This is a
+deliberate gameplay rule change, not a correction to the calibration data:
+reading blocks, staffing, read durations, reimbursement and the default
+policy are unchanged, so the baseline and every default-policy figure in
+this report stand. Rerun of the paired comparison (`baseline`,
+`strategy-e`, `strategy-f`, `strategy-g`; nine seeds). Exams, lost
+bookings, walk-ins, net revenue, opex and margin are identical before and
+after in every run; only reading order changed.
+
+| policy | window | urgent p50 / p90 / max min, before → after | urgent breaches (overnight), before → after | routine p50 / p90 min, before → after |
+|---|---|---|---|---|
+| default | 30 / 90 d | unchanged: 15 / 500 / 1884; 16 / 282 / 2084 | unchanged: 6.0 (5.0); 15.1 (11.6) | unchanged: 35 / 126; 33 / 112 |
+| FIFO (G) | 30 d | 29 / 603 / 1893 → 15 / 496 / 1877 | 12.1 (6.1) → 6.0 (5.0) | 35 / 123 → 35 / 126 |
+| FIFO (G) | 90 d | 27 / 599 / 2101 → 16 / 282 / 2076 | 32.9 (14.2) → 15.1 (11.6) | 33 / 109 → 33 / 112 |
+| shortest-first (F) | 30 d | 16 / 575 / 1894 → 15 / 565 / 1877 | 7.1 (5.3) → 6.2 (5.1) | 22 / 125 → 22 / 126 |
+| shortest-first (F) | 90 d | 16 / 434 / 2083 → 15 / 420 / 2076 | 18.2 (12.4) → 16.3 (12.2) | 22 / 97 → 22 / 98 |
+| decline walk-ins + FIFO (E) | 30 d | 43 / 718 / 1410 → 19 / 419 / 1379 | 10.4 (5.6) → 4.9 (3.8) | 33 / 122 → 33 / 126 |
+
+* FIFO now matches the default for urgent work (90 days: 15.1 breaches,
+  p90 282 min); the cost is a few minutes on the routine p90.
+* Shortest-first keeps its routine gain (p50 22 vs 33–35 min) and loses
+  its urgent penalty in reading hours; the urgent MR median is back to
+  the default's (90 days: 99 → 52 min).
+* What remains is the coverage gap: ≈12 overnight urgent breaches per 90
+  days and a 31–41 h maximum under every policy. Evening or weekend
+  reading coverage could improve service quality without improving the
+  margin — a legitimate management trade-off for a later version; V0.1
+  has no action for it.
+
+With this rule, the calibration phase is closed.
+
 ## Targets
 
 | Target (V0.1 acceptance / design) | Default established practice | Status |

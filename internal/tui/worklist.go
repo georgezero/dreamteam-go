@@ -8,7 +8,8 @@ import (
 )
 
 var policyNames = map[string]string{
-	"urgent_then_fifo": "urgent then FIFO", "fifo": "FIFO", "oldest_first": "oldest first", "shortest_first": "shortest first",
+	"urgent_then_fifo": "urgent then FIFO", "fifo": "urgent, then FIFO", "oldest_first": "urgent, then oldest",
+	"shortest_first": "urgent, then shortest",
 }
 
 // worklistBody renders the radiology worklist: unread and reading studies

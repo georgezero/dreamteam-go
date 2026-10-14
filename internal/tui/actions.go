@@ -27,8 +27,8 @@ var worklistChoices = []string{api.WorklistUrgentThenFIFO, api.WorklistFIFO, api
 var policyLabels = map[string]string{
 	api.WalkInAcceptAlways: "accept always", api.WalkInAcceptIfGap: "accept if gap",
 	api.WalkInAcceptUntil: "accept until", api.WalkInScheduleLater: "decline (offer a later slot)",
-	api.WorklistUrgentThenFIFO: "urgent & overdue, then FIFO", api.WorklistFIFO: "FIFO",
-	api.WorklistOldestFirst: "oldest first", api.WorklistShortestFirst: "shortest first (expected read time)",
+	api.WorklistUrgentThenFIFO: "urgent & overdue first, then FIFO", api.WorklistFIFO: "urgent first, then FIFO",
+	api.WorklistOldestFirst: "urgent first, then oldest", api.WorklistShortestFirst: "urgent first, then shortest expected read",
 }
 
 // maxActionDay is how many days ahead the screen offers extensions.
@@ -210,6 +210,7 @@ func (m *Model) actionsBody(w, n int) []string {
 		policyLabels[walkInChoices[m.actWalk]], cutoff, dimStyle.Render("in force: "+inForce)))
 	lines = append(lines, fmt.Sprintf(" %s %s ‹ %s ›  %s", cursor(k+1), titleStyle.Render("Worklist policy"),
 		policyLabels[worklistChoices[m.actWork]], dimStyle.Render("in force: "+policyLabels[o.Policies.Worklist])))
+	lines = append(lines, dimStyle.Render("     Urgent studies are always read first; the policy orders the rest. Reads in progress continue."))
 	lines = append(lines, "")
 	if r := m.actResult; r != nil {
 		mark := openStyle.Render(" Done ✓ ")

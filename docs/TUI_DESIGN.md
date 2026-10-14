@@ -494,9 +494,11 @@ referenced patient / room / employee.
 │ 2  Walk-in policy:   ( ) accept always                   │
 │                      (•) accept if gap                   │
 │                      ( ) schedule later                  │
-│ 3  Worklist policy:  (•) urgent, then FIFO               │
-│                      ( ) FIFO   ( ) oldest first          │
-│                      ( ) shortest first                  │
+│ 3  Worklist policy:  (•) urgent & overdue, then FIFO     │
+│                      ( ) urgent, then FIFO               │
+│                      ( ) urgent, then oldest             │
+│                      ( ) urgent, then shortest           │
+│    Urgent studies are always read first.                 │
 ├──────────────────────────────────────────────────────────┤
 │ Result: ✓ Overtime approved: Morgan +60m today (≈$66)    │
 └──────────────────────────────────────────────────────────┘

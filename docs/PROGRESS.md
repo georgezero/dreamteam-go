@@ -7,6 +7,53 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 18.2 — Urgency always takes precedence on the worklist (v0.1.0-dev.18.2)
+
+**A deliberate gameplay rule change (owner decision), not a calibration
+correction.** Step 18.1 showed that shortest-first could postpone a long
+urgent study indefinitely while short routine studies kept arriving. Now
+urgent studies are offered before all others under every worklist policy,
+and the policy orders within each class: default unchanged (urgent and
+overdue first, then FIFO), FIFO → urgent first then FIFO, oldest-first →
+urgent first then oldest, shortest-first → urgent first then shortest
+published expected read. The existing `urgent` priority is the class (no
+new severity); reads in progress are never interrupted; hidden read
+durations are never used; ties still fall to the study ID. Reading blocks,
+staffing, read durations and reimbursement are unchanged.
+
+The TUI actions screen labels the choices "urgent first, then …" and says
+"Urgent studies are always read first; the policy orders the rest"; the
+worklist screen, API comments and SIMULATION_DESIGN §6.8 say the same.
+
+**Tests.** `TestRegress18UrgentLongStudyVsShortRoutine` (every policy reads
+the urgent MR next after the read in progress; before: FIFO and
+oldest-first after 5 min, shortest-first never in 7 h) and
+`TestRegress18WorklistUrgentFirst` (exact order per policy on a hand-built
+worklist, determinism, shortest-first unchanged with no urgent study
+waiting) fail on 049b304 and pass now. `TestWorklistPolicyOrdering` checks
+shortest-first within each class. Full uncached suite green.
+
+**Effect** (nine seeds, paired; details in the calibration report):
+exams, lost bookings, walk-ins, revenue, opex and margin identical in every
+run. 90 days: FIFO urgent breaches 32.9 → 15.1 and urgent p90 599 → 282
+min (now equal to the default); shortest-first urgent breaches 18.2 → 16.3,
+urgent MR median 99 → 52 min, routine p50 still 22 min. The default policy
+is unchanged. The remaining urgent tail is the evening/weekend reading
+coverage gap; with this rule the calibration phase is closed.
+
+**Goldens.** Only `established-seed1-7d-actions.json` (it sets FIFO) was
+regenerated; the three default-policy references are identical (compared
+with the engine mismatch allowed). Its changes: reading order (urgent TAT
+p50 1,407 → 803 s, max 3,628 → 2,256 s; breaches 13 → 12; one alert fewer;
+radiologist busy time shifted between the two), the log digest
+(6e34bd068f7f… → 625dfe83e5d8…), the ledger digest (6c18847e1bad… →
+4482cec1c8d3…: revenue posts at report final, so entries move in time;
+window money and balances are identical), state 72f117978ca0… →
+5a626a6308b7…, run 9a3d8861926c… → fb0ccb14a79c…. Patient flow, exams and
+money unchanged.
+
+---
+
 ## Step 18.1 — Calibration review remediation (v0.1.0-dev.18.1)
 
 The step 18 review (`docs/reviews/step-18-astra-review.md`, CONDITIONAL GO)
