@@ -623,8 +623,10 @@ products. No floating point.
   number of terms, specified in `rng` and golden-tested. The CDF follows by the
   recurrence P(k) = P(k−1)·λ/k in fixed point. The table is truncated at the
   first k where 1 − CDF < 2⁻⁴⁰, and the remaining mass goes to that last k.
-  Sampled by inverse transform with `uniform(2⁶²)`. Rates are capped at
-  λ ≤ 200 per block (validation error above that).
+  Sampled by inverse transform with `uniform(2⁶²)`. Rates above 16 are split
+  into n = ⌈λ/16⌉ equal parts and the sample is the sum of n part samples
+  (exactly Poisson; keeps e^(−λ) well inside fixed-point precision). Rates are
+  capped at λ ≤ 200 per block (validation error above that).
 * **Arrival times** within an hour block: `uniform(3600)` seconds per arrival,
   then sorted by `(second, k)`.
 
