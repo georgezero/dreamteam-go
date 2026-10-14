@@ -123,7 +123,9 @@
    "readSec": {
     "p0": 300,
     "p100": 300
-   }
+   },
+   "baseRateCents": 4500,
+   "supplyCostCents": 300
   },
   {
    "code": "CT_N",
@@ -143,7 +145,9 @@
    "readSec": {
     "p0": 300,
     "p100": 300
-   }
+   },
+   "baseRateCents": 16000,
+   "supplyCostCents": 1500
   },
   {
    "code": "CT_C",
@@ -163,7 +167,9 @@
    "readSec": {
     "p0": 300,
     "p100": 300
-   }
+   },
+   "baseRateCents": 26000,
+   "supplyCostCents": 5000
   }
  ],
  "templates": {
@@ -330,5 +336,69 @@
   "examMix": {
    "XR_A": 1
   }
+ },
+ "finance": {
+  "payers": [
+   {
+    "id": "commercial",
+    "name": "Commercial",
+    "mixBP": 5000,
+    "multiplierBP": 16000,
+    "delayDays": [
+     25,
+     60
+    ],
+    "deniedPPM": 70000,
+    "recoveredPPM": 500000,
+    "shortPaidPPM": 50000,
+    "shortMeanBP": 7000
+   },
+   {
+    "id": "self_pay",
+    "name": "Self-pay",
+    "selfPay": true,
+    "mixBP": 5000,
+    "multiplierBP": 9000,
+    "delayDays": [
+     30,
+     120
+    ],
+    "deniedPPM": 500000,
+    "recoveredPPM": 0,
+    "shortPaidPPM": 200000,
+    "shortMeanBP": 5000
+   }
+  ],
+  "chargeLagBusinessDays": [
+   1,
+   3
+  ],
+  "reworkDays": [
+   30,
+   60
+  ],
+  "shortSpreadBP": 1000,
+  "submitTime": "17:00",
+  "paymentTime": "10:00",
+  "benefitsBP": 2500,
+  "billingFeeBP": 500,
+  "perStudyITCents": 300,
+  "payrollAnchor": "2026-10-16",
+  "payrollEveryDays": 14,
+  "fixedMonthly": [
+   {
+    "id": "rent",
+    "name": "Rent",
+    "account": "facility",
+    "cents": 310000
+   },
+   {
+    "id": "lease_ct",
+    "name": "CT lease",
+    "account": "equipment",
+    "modality": "CT",
+    "cents": 93000
+   }
+  ]
  }
 }

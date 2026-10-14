@@ -34,6 +34,7 @@ type Config struct {
 	Demand    DemandConfig
 	Behavior  BehaviorConfig
 	WalkIns   WalkInConfig
+	Finance   FinanceConfig
 	// Opening is the hand-built schedule a scenario without warm-up starts
 	// with (the mini scenario's "today").
 	Opening []OpeningAppt
@@ -49,6 +50,10 @@ type ExamConfig struct {
 	// technologist's documentation after the room is released; ReadTime is
 	// the radiologist's interpretation (seconds).
 	RoomTime, TechExtra, ReadTime rng.Quantile
+	// BaseRateCents is the reference reimbursement before the payer
+	// multiplier; SupplyCostCents the supplies (contrast agent included)
+	// used by one exam (SIMULATION_DESIGN §8.2–8.3).
+	BaseRateCents, SupplyCostCents int64
 }
 
 // Expected returns the published expected room time (p50).

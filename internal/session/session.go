@@ -122,6 +122,7 @@ func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recen
 func (s *Session) Digest() string {
 	var b []byte
 	b = append(b, s.w.LogHash()...)
+	b = append(b, s.w.LedgerHash()...)
 	b = binary.BigEndian.AppendUint64(b, uint64(s.Now()))
 	sum := sha256.Sum256(b)
 	return hex.EncodeToString(sum[:])

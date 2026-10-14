@@ -41,19 +41,62 @@ type File struct {
 	Behavior         Behavior              `json:"behavior"`
 	WalkIns          WalkIns               `json:"walkIns"`
 	OpeningSchedule  []OpeningAppt         `json:"openingSchedule,omitempty"`
+	Finance          Finance               `json:"finance"`
+}
+
+// Finance holds the financial assumptions (SIMULATION_DESIGN §8). Money is
+// integer cents, probabilities ppm, shares basis points.
+type Finance struct {
+	Payers                []Payer     `json:"payers"`
+	ChargeLagBusinessDays [2]int64    `json:"chargeLagBusinessDays"` // inclusive range
+	ReworkDays            [2]int64    `json:"reworkDays"`            // denial to final outcome, inclusive range
+	ShortSpreadBP         int64       `json:"shortSpreadBP"`
+	SubmitTime            string      `json:"submitTime"`
+	PaymentTime           string      `json:"paymentTime"`
+	BenefitsBP            int64       `json:"benefitsBP"`
+	BillingFeeBP          int64       `json:"billingFeeBP"`
+	PerStudyITCents       int64       `json:"perStudyITCents"`
+	PayrollAnchor         string      `json:"payrollAnchor"` // a payday
+	PayrollEveryDays      int64       `json:"payrollEveryDays"`
+	FixedMonthly          []FixedCost `json:"fixedMonthly"`
+}
+
+// Payer is a payer class and its outcome model.
+type Payer struct {
+	ID           string   `json:"id"`
+	Name         string   `json:"name"`
+	SelfPay      bool     `json:"selfPay,omitempty"`
+	MixBP        int64    `json:"mixBP"`
+	MultiplierBP int64    `json:"multiplierBP"`
+	DelayDays    [2]int64 `json:"delayDays"` // inclusive range
+	DeniedPPM    int64    `json:"deniedPPM"`
+	RecoveredPPM int64    `json:"recoveredPPM"`
+	ShortPaidPPM int64    `json:"shortPaidPPM"`
+	ShortMeanBP  int64    `json:"shortMeanBP"`
+}
+
+// FixedCost is a monthly cost, accrued daily and paid on the 1st.
+type FixedCost struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Account  string `json:"account"`
+	Modality string `json:"modality,omitempty"`
+	Cents    int64  `json:"cents"`
 }
 
 // Exam is a catalog entry. Internal codes, not CPT codes.
 type Exam struct {
-	Code           string   `json:"code"`
-	Name           string   `json:"name"`
-	Modality       string   `json:"modality"`
-	Category       string   `json:"category"` // slot category it books into, e.g. "MR_45"
-	Contrast       bool     `json:"contrast"`
-	WalkInEligible bool     `json:"walkInEligible"`
-	RoomTimeSec    Quantile `json:"roomTimeSec"`
-	ReadSec        Quantile `json:"readSec"`
-	TechExtraSec   Quantile `json:"techExtraSec"`
+	Code            string   `json:"code"`
+	Name            string   `json:"name"`
+	Modality        string   `json:"modality"`
+	Category        string   `json:"category"` // slot category it books into, e.g. "MR_45"
+	Contrast        bool     `json:"contrast"`
+	WalkInEligible  bool     `json:"walkInEligible"`
+	RoomTimeSec     Quantile `json:"roomTimeSec"`
+	ReadSec         Quantile `json:"readSec"`
+	TechExtraSec    Quantile `json:"techExtraSec"`
+	BaseRateCents   int64    `json:"baseRateCents"`
+	SupplyCostCents int64    `json:"supplyCostCents"`
 }
 
 // Template is a group of weekdays sharing a room's slot list.

@@ -41,6 +41,8 @@ type state struct {
 	rooms []room
 	emps  []employee
 	dem   demandState
+	fin   finState
+	mods  []string // room modalities in room order: the ledger's modality dimension
 
 	// dropOrder, if set (tests only), suppresses exogenous orders that
 	// would arrive at or after a time: a change to future hidden demand.
@@ -66,6 +68,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], shift: -1})
 	}
 	st.initDemand()
+	st.initFinance()
 	w := &World{st: st}
 	w.eng = NewEngine(st, 0)
 	w.eng.Push(Event{At: 0, Class: ClassDayBoundary, Kind: kindDayStart, A: 0})
@@ -92,6 +95,9 @@ func (w *World) LastAlert() uint64 { return w.st.alertSeen }
 
 // LogHash returns the running hash of the observable log.
 func (w *World) LogHash() string { return hex.EncodeToString(w.st.log.hash[:]) }
+
+// LedgerHash digests the journal: every posted entry in order.
+func (w *World) LedgerHash() string { return w.st.fin.led.hash() }
 
 // Event kinds handled by the state.
 const (
@@ -124,6 +130,11 @@ const (
 	kindDeadline
 	kindReadEnd   // a radiologist finishes a read: report final
 	kindTATBreach // an urgent or soon report reaches its TAT target unfinished
+	// Finance (§8): the day's claim submission, a payer's remittance, and
+	// the outcome of a denied claim's rework.
+	kindSubmitClaims
+	kindAdjudicate
+	kindReworkOutcome
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -204,6 +215,12 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.readEnd(e, int(ev.A))
 	case kindTATBreach:
 		st.tatBreach(e, int(ev.A))
+	case kindSubmitClaims:
+		st.submitClaims(e)
+	case kindAdjudicate:
+		st.adjudicate(e, int(ev.A))
+	case kindReworkOutcome:
+		st.reworkOutcome(e, int(ev.A))
 	case kindWake, kindDeadline:
 	}
 }
@@ -217,6 +234,7 @@ func (st *state) dayStart(e *Engine, day int64) {
 			st.emps[i].weekPaid = 0
 		}
 	}
+	st.financeDayStart(e, day)
 	st.plan = st.cfg.Plan(st.cal.Date(e.Now()))
 	st.cov = st.plan.Coverage()
 	if h := st.plan.Hours; h != nil {
@@ -253,6 +271,9 @@ func (st *state) CheckInvariants() error {
 	if err := st.checkReading(); err != nil {
 		return err
 	}
+	if err := st.checkFinance(); err != nil {
+		return err
+	}
 	return st.checkDemand()
 }
 
@@ -281,5 +302,6 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observeFlow(&o, now)
 	st.observePractice(&o, now)
 	st.observeWorklist(&o, now)
+	st.observeFinance(&o, now)
 	return o
 }

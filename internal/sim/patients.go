@@ -230,7 +230,7 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 	o := &d.orders[oi]
 	x := &st.cfg.Catalog[o.exam]
 	j := api.Journey{Patient: id, Order: orderID(oi), Exam: x.Code, ExamName: x.Name, Modality: x.Modality,
-		Priority: o.priority.String(), Source: "—", WalkIn: o.walkIn}
+		Priority: o.priority.String(), Source: "—", WalkIn: o.walkIn, Payer: st.cfg.Finance.Payers[o.payer].Name}
 	if o.source >= 0 {
 		j.Source = st.cfg.Sources[o.source].Name
 	}
@@ -379,6 +379,7 @@ func (st *state) studySteps(si int, now simtime.Time) []api.JourneyStep {
 			d += fmt.Sprintf(" · over the %s target", target)
 		}
 		out = append(out, api.JourneyStep{Time: iso(s.finalAt), Label: "Report final", Detail: d, Done: true})
+		out = append(out, st.claimSteps(s.claim)...)
 	}
 	return out
 }

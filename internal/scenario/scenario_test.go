@@ -144,6 +144,16 @@ func TestValidationErrors(t *testing.T) {
 		{`{"openingSchedule": [{"time": "18:00", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "no R2 template slot"},
 		{`{"openingSchedule": [{"day": 6, "time": "09:30", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "not bookable (unstaffed)"},
 		{`{"openingSchedule": [{"time": "09:30", "room": "R2", "exam": "US_THYROID", "source": "SRC3"}]}`, "openingSchedule[0]", "slot is US_45"},
+		{`{"catalog": [{"code": "XR_X", "name": "x", "modality": "XR", "category": "XR_15", "roomTimeSec": {"p0": 60, "p100": 60}, "readSec": {"p0": 60, "p100": 60}, "techExtraSec": {"p0": 1, "p100": 1}}]}`, "catalog[0].baseRateCents", "outside"},
+		{`{"finance": {"payers": [{"id": "medicare", "mixBP": 3000}]}}`, "finance.payers", "mixBP sums to 9500"},
+		{`{"finance": {"payers": [{"id": "commercial", "deniedPPM": 990000}]}}`, "finance.payers[0]", "exceed 1000000"},
+		{`{"finance": {"payers": [{"id": "self_pay", "recoveredPPM": 1}]}}`, "finance.payers[3].recoveredPPM", "not reworked"},
+		{`{"finance": {"payers": [{"id": "medicaid", "delayDays": [40, 30]}]}}`, "finance.payers[2].delayDays", "increasing range"},
+		{`{"finance": {"reworkDays": [2, 60]}}`, "finance.reworkDays", "within 7–365"},
+		{`{"finance": {"payrollAnchor": "2026-13-01"}}`, "finance.payrollAnchor", "not a date"},
+		{`{"finance": {"fixedMonthly": [{"id": "rent", "account": "marketing"}]}}`, "finance.fixedMonthly[0].account", "not one of"},
+		{`{"finance": {"fixedMonthly": [{"id": "lease_ct", "modality": "PET"}]}}`, "finance.fixedMonthly[3].modality", "not a room modality"},
+		{`{"finance": {"submitTime": "25:00"}}`, "finance.submitTime", ""},
 	}
 	for _, tc := range cases {
 		fsys := fstest.MapFS{

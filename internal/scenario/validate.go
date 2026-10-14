@@ -230,6 +230,7 @@ func Compile(f *File) (*sim.Config, error) {
 	}
 
 	c.demand(f, cfg)
+	c.finance(f, cfg)
 	if len(c.issues) == 0 {
 		c.openingSlots(cfg)
 	}

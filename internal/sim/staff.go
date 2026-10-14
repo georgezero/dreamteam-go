@@ -230,6 +230,7 @@ func (st *state) goOff(e *Engine, i int) {
 	ot := max(0, now.Sub(emp.endAt))
 	paid := now.Sub(emp.startAt) - emp.breakTaken
 	cost := st.overtimeCost(emp, paid, ot)
+	st.payWages(i, paid)
 	emp.weekPaid += paid
 	emp.otToday += ot
 	emp.status, emp.done, emp.reading, emp.held, emp.over = offDuty, true, false, false, false

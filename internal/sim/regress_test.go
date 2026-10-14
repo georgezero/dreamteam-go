@@ -242,10 +242,10 @@ func TestRegressOutcomeIndependentOfUnrelatedEvents(t *testing.T) {
 				t.Errorf("%s: %v", f, err)
 			}
 		}
-		if plain.LogHash() != live.LogHash() {
+		if plain.LogHash() != live.LogHash() || plain.LedgerHash() != live.LedgerHash() {
 			t.Errorf("%s: unrelated live events changed the outcome", f)
 		}
-		if plain.LogHash() != stale.LogHash() {
+		if plain.LogHash() != stale.LogHash() || plain.LedgerHash() != stale.LedgerHash() {
 			t.Errorf("%s: stale events changed the outcome", f)
 		}
 	}
@@ -277,7 +277,7 @@ func TestRegressMiniUnaffectedByUnrelatedEvents(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if plain.LogHash() != noisy.LogHash() {
+		if plain.LogHash() != noisy.LogHash() || plain.LedgerHash() != noisy.LedgerHash() {
 			t.Fatalf("day %d: unrelated events changed the outcome", d)
 		}
 	}

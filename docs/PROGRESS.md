@@ -7,6 +7,203 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 10 — Ledger, claims, payroll and costs (v0.1.0-dev.10)
+
+**What was built.**
+* A double-entry ledger in integer cents (`internal/sim/ledger.go`).
+* Revenue at report final, the claim lifecycle, payroll, and fixed and
+  variable costs (`finance.go`).
+* Statements, claims and the journal in the API (`finance_view.go`,
+  `api.Finance`), and the TUI finance screen.
+* All the assumptions are scenario data: the new `finance` section and
+  catalog `baseRateCents` / `supplyCostCents`, taken from §8.2–8.3 of the
+  design. They are illustrative and not tuned. Design detail is in
+  SIMULATION_DESIGN §8.7.
+
+**Accounting conventions**
+* **Accrual for profit, cash for liquidity, one ledger.** Revenue is earned
+  when the radiologist finalizes the report: Dr A/R / Cr revenue at expected
+  net = base × payer multiplier × NCR. It is never earned at booking,
+  arrival, registration, imaging, worklist entry or reading start. Cash
+  moves only when a payment arrives or payroll or bills are paid. The
+  practice can be profitable and short of cash at the same time.
+* **Every entry** balances and is non-empty, and has a stable idempotency
+  key (study, claim and payment number, employee and day, or day). It is
+  never edited. Corrections are linked reversing entries, which can be
+  posted once and never reversed themselves. The incremental check re-sums
+  new entries independently, the day books must equal the balances, and
+  the accounts sum to zero.
+* **Claims.**
+  * Pending, then submitted 1–3 business days after final, at 17:00 in one
+    batch. Remittance comes after the payer's delay, on a business day at
+    10:00.
+  * Outcomes:
+    * paid in full;
+    * short paid at m ± 10 pp;
+    * denied, then resubmitted the next business day, then recovered or
+      written off 30–60 days after the denial;
+    * self-pay unpaid, written off and not counted as a denial.
+  * Settlement sends expected − paid to collection variance (contra
+    revenue), so a closed claim has zero A/R.
+  * Outcome, delay, short fraction, rework time and charge lag come from
+    the order's origin key (`claim`, `claim.lag`). The payer class is drawn
+    when the order is disclosed.
+* **Payroll.**
+  * Hourly staff accrue when they go home: worked time minus breaks taken,
+    with skipped breaks and held-over time paid. Pay is at the regular rate
+    until the week reaches 40 paid hours, then ×1.5 (the step 8 rule).
+  * Salaried staff accrue annual ÷ 365 per calendar day. Radiologists
+    accrue × their site allocation.
+  * Benefits are 25% on everything.
+  * Payroll is paid every other Friday from Oct 16 at 00:00 and covers
+    everything accrued through Thursday.
+* **Costs.**
+  * Fixed monthly items accrue daily with exact monthly totals.
+  * Supplies (contrast included) and $3 PACS post at acquisition.
+  * Billing is 5% of each payment.
+  * Accounts payable is paid on the 1st.
+* **Statements.**
+  * Today, month to date, trailing 30 days and since day 1.
+  * Net revenue = revenue − collection variance.
+  * Expenses are shown by account, and also as labor, fixed and variable.
+  * Operating profit and margin; the margin is undefined at zero revenue.
+  * Collections, disbursements and net cash flow.
+  * Denial rate, days in A/R and A/R aging.
+  * Revenue and direct cost by modality, plus a cash history.
+
+**On screen**
+* `f` finance has three views, switched with `tab`:
+  * **overview**: periods side by side, cash and the next payroll and
+    bills, A/R and denials, the modality table and a cash sparkline;
+  * **claims**: open claims, oldest first;
+  * **journal**: the latest entries as debit and credit lines.
+* The dashboard's second line shows cash ▲/▼ today, revenue, expenses and
+  operating profit today, and A/R.
+* The report-final log line now ends "· revenue $395".
+* The log adds lines for claim batches, payments, short payments, denials,
+  write-offs, payroll and bills.
+* Patient journeys continue through revenue, claim, denial and
+  resubmission, and payment or write-off.
+
+**Tests** (`internal/sim/finance_test.go`, `ledger_internal_test.go`, a TUI
+test, and scenario validation cases):
+
+| Requirement | Test |
+|---|---|
+| Revenue once, only at final; none for cancelled, no-show, left, lost, rescheduled-unperformed or unread exams | `TestRevenueOnlyAtReportFinal`: minute by minute on day 1, then 30 days; non-vacuity checks for each excluded state |
+| Correct modality and payer reimbursement | `TestFinanceArithmetic` (NCR 0.950/0.980/0.934/0.400; CT w/ contrast, commercial = $416 allowed, $395.20 expected), `TestClaimLifecycleAndTiming` (every claim's allowed and expected amounts) |
+| Claim lifecycle, payment timing, denials, receivables | `TestClaimLifecycleAndTiming`, 150 days. For every claim, the drawn charge lag, remittance date, rework date, state and paid amount match exactly. Non-vacuous for paid, short, denied → paid, denied → written off, self-pay unpaid, open and pending. A/R per claim and cash are rebuilt from the journal alone. |
+| Collection variance mean ≈ 0 (ROADMAP) | `TestCollectionVarianceMeanZero`: 30,000 draws per payer; the collected fraction is within 0.6 pp of NCR |
+| Balanced entries, idempotency, reversals | `TestLedgerPostingRules`: unbalanced, empty, duplicate, out-of-order and bad lines are rejected with no effect; reversal mirrors and links; no double reversal; tampering is detected. Every simulation test with invariants re-sums the journal. |
+| Cash and receivable reconciliation | `checkFinance` invariants (cash = opening + receipts − disbursements from independent totals; A/R = open claims; revenue = Σ expected; claims = final reports; accrued payroll and A/P), checked after every transaction in all invariant-checked tests and at each day boundary in the finance tests |
+| Payroll, regular and overtime; weekly threshold crossing | `TestPayrollWeeklyOvertime` (`micro-week.json`): Tue–Thu $630; Fri crosses 40 h after 8.5 h, $690; Sat all premium, $360; Monday resets, $630; unpaid lunch excluded; benefits 25% |
+| Required overtime after scheduled close | `TestPayrollRequiredOvertime`: wages = scheduled part + exactly the step 8 overtime cost (36 min held over: $126 = $90 + $36; premium fixture $189 = $135 + $54); one entry per employee and day |
+| Fixed and variable cost timing; day, week and month boundaries | `TestCostAndPaymentTiming`, Oct 13 to Dec 1: one fixed accrual per day at 00:00; November totals exactly the monthly sum; A/P paid Nov 1 and Dec 1 equals the balance before; supplies and PACS once per study at acquisition; billing fee = 5% of each payment; payroll only on the four anchored Fridays, equal to the accrual through Thursday; salaries once per employee and day; wages on the day worked |
+| Same-instant ordering | The same test checks that at 00:00 bills and payroll are paid before that day's accruals. Claim batches and remittances are class 6, after operations at the same instant. |
+| Sparse events, speed, replay | `TestFinanceDeterminism`: 75 days in one jump, daily, or in 13-minute chunks give identical ledger and log hashes. A replay is identical; a different seed differs. |
+| Independence from unrelated events | `TestFinanceUnaffectedByUnrelatedEvents` (live and stale events at 10:00, 17:00 and around them for 50 days); the step 8 wake-completeness tests now also compare the ledger hash |
+| Outcomes independent of operations | `TestClaimOutcomesIndependentOfOperations`: worklist FIFO vs shortest-first changes finalization times, but no payer, amount or outcome |
+| Hidden outcomes not leaked | `TestFinanceOutcomesNotLeaked`: forcing every claim to fail leaves the full observation identical for 15 days (and all journeys on day 15), then changes cash. The latent-field deny-list now covers `api.Finance`. |
+
+Mutation checks (each made the named test fail, then was reverted):
+* revenue at exam end;
+* claim draw keyed by processing order;
+* weekly threshold ignoring earlier days;
+* held-over time unpaid;
+* payables paid on the 2nd;
+* charge lag in calendar days (caught once the test checked the exact
+  drawn lag);
+* an observation revealing a forced outcome;
+* a wrong short-paid amount;
+* a cash identity off by a cent.
+
+All step 1–9 tests pass, including the step 8 remediation regressions. The
+fixtures gained rates and a `finance` section, but no expectation changed.
+
+**Measured: 180 days of the mini practice, seed 1** (2.1–2.5 s/op on the
+loaded Pi, MEASUREMENTS.md):
+
+| | Since day 1 (181 days) | Trailing 30 days |
+|---|---|---|
+| Revenue earned (expected net) | $1,125,060 | $195,429 |
+| Collection variance (favorable) | +$10,943 | +$2,429 |
+| Net revenue | $1,136,003 | $197,858 |
+| Operating expense | $1,336,861 | $222,177 |
+| — labor (wages $508,015 + benefits $127,005) | $635,020 | $103,677 |
+| — fixed | $529,192 | $86,692 |
+| — variable (supplies $108,567, PACS $58,461, billing $41,498) | $172,649 | $31,809 |
+| Operating profit | −$200,858 | −$24,319 |
+| Operating margin | −17.7% | −12.3% |
+| Cash collected | $829,949 | $179,528 |
+| Disbursements | $1,260,067 | $223,235 |
+
+* At the end: cash −$280,118 (opening $150,000); A/R $306,054 (46 days);
+  A/P $43,247; accrued payroll $33,547.
+* Denial rate: 5.9% (309 of 5,199 insurance adjudications).
+* Claims: 7,514. Paid 4,935, short paid 249, written off 270, open 2,060.
+* By modality (net revenue / direct cost):
+  * XR: 3,538 reports, $182,866 / $34,074;
+  * US: 1,216 reports, $213,322 / $30,321;
+  * CT: 1,833 reports, $436,681 / $180,790;
+  * MR: 927 reports, $303,134 / $223,453.
+* Hot spots: SHA-256 22%, dispatch 23%, log formatting 14%, finance about
+  10% (adjudication 4%, recognition 3%, posting 2%).
+
+**Why the margin is negative.** Volume, not the financial assumptions.
+Monthly-equivalent figures:
+* Labor ($106.7k vs the reference $105.1k) and fixed costs ($88.9k vs
+  $88.5k) match the §8.6 reference calculation.
+* Net revenue is $190.8k vs $261.5k. That is about 1,260 reports a month
+  instead of 1,650, the volume shortfall noted since step 7. Revenue per
+  report is $151 vs $158.5, from the exam mix.
+
+Nothing was tuned toward the 8.5% target, as instructed. That is step 18.
+The cumulative collection variance is favorable (−1.0% of revenue) because
+claims that settle early are mostly paid in full. Denials and self-pay
+write-offs settle 30–120 days later. Over all outcomes the mean is zero,
+as the draw test shows.
+
+**Known limitations**
+* The negative margin and cash are a volume artifact until calibration
+  (step 18).
+* Opening cash is posted at the epoch. The warm-up opening-equity
+  adjustment at the start time is step 11.
+* No credit line or interest: cash simply goes negative.
+* No copays or deductibles (not specified). Bad debt and denials share
+  collection variance (split in V0.3).
+* No holidays; business days are Mon–Fri.
+* No prepaid expenses (rent is paid in arrears on the 1st).
+* No payroll tax remittance schedule separate from payroll.
+* No reversal flow in V0.1 operations. The mechanism exists and is tested.
+* The end-of-day summary's finance line comes with the summary screen
+  (later step).
+* Performance: finance adds about 0.3–0.4 s per 180 days. The step 11
+  warm-up target now depends on the planned mitigations.
+
+**Decisions for owner approval** (each is scenario data or a small,
+documented rule; SIMULATION_DESIGN §8.7):
+1. **Rework timing.** "Resubmitted after ReworkDelay" is read as denial →
+   final outcome in 30–60 days, with the resubmission on the next business
+   day.
+2. **Remittance clock.** Business days only; submissions in a 17:00 batch,
+   payments, denials and write-offs at 10:00.
+3. **Self-pay.** A statement, not a claim. Non-payment is written off at
+   the due date, never reworked, and excluded from the denial rate.
+4. **Chart mapping.** Utilities and insurance go to *Rent & facility*; the
+   monthly IT/RIS charge to *IT / PACS*; leases and service to *Equipment
+   service & leases*, tagged by modality. No new accounts.
+5. **Payables.** All of them (rent included) are paid in arrears on the
+   1st, because the chart has no prepaid account. Payroll is paid at 00:00
+   on the anchored Friday (Oct 16, then every 14 days) and covers what was
+   accrued through Thursday, with benefits paid alongside.
+6. **Salaried accrual.** Per calendar day (annual ÷ 365), weekends
+   included. Radiologists × site allocation.
+7. **US base rates** within the documented $140–170: abdomen $170, pelvis
+   $155, venous $160, thyroid and renal $140.
+8. **Negative cash** is allowed and shown in red (no financing in V0.1).
+
+---
+
 ## Step 9 — Worklist, reading and turnaround (v0.1.0-dev.9)
 
 **Behavior**

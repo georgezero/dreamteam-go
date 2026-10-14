@@ -45,6 +45,7 @@ type study struct {
 	by                 int // radiologist; -1 until claimed
 	state              studyState
 	breached           bool // its TAT target passed before it was final
+	claim              int  // claim opened at final; -1 before
 }
 
 func studyID(i int) string { return fmt.Sprintf("S%05d", i+1) }
@@ -56,7 +57,7 @@ func (st *state) acquireStudy(e *Engine, vi int) {
 	o := &st.dem.orders[v.order]
 	si := len(st.dem.studies)
 	st.dem.studies = append(st.dem.studies, study{order: v.order, visit: vi, exam: o.exam, priority: o.priority,
-		acquiredAt: e.Now(), by: -1})
+		acquiredAt: e.Now(), by: -1, claim: -1})
 	v.study = si
 	ds := st.dem.days[st.day]
 	ds.studies = append(ds.studies, si)
@@ -220,8 +221,9 @@ func (st *state) readEnd(e *Engine, si int) {
 		s.breached = true
 	}
 	x := &st.cfg.Catalog[s.exam]
-	st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s %s %s report final (%s) · TAT %s",
-		studyID(si), x.Modality, x.Name, emp.cfg.Name, tat))
+	rev := st.recognize(si)
+	st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s %s %s report final (%s) · TAT %s · revenue %s",
+		studyID(si), x.Modality, x.Name, emp.cfg.Name, tat, money(rev)))
 }
 
 // blockStart opens a site reading block, after any overrun owed.

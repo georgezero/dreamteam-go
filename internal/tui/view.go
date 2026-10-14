@@ -40,6 +40,9 @@ func (m *Model) render() string {
 	case screenLog:
 		body = m.logBody(w, h-3)
 		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dash  p patients  q quit"
+	case screenFinance:
+		body = m.financeBody(w, h-3)
+		hints = " tab overview/claims/journal  ↑↓ scroll  d dash  w worklist  p patients  space run  q quit"
 	case screenWorklist:
 		body = m.worklistBody(w, h-3)
 		hints = " ↑↓ select  enter patient  d dash  p patients  s sched  l log  space run  q quit"
@@ -55,7 +58,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  p pat  s sched  w worklist  l log  a auto:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  p pat  s sched  w worklist  f finance  l log  a auto:" + auto + "  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -98,7 +101,7 @@ func (m *Model) dashboardBody(w, n int) []string {
 		info += "   " + staffSummary(o)
 	}
 	info += "   Scenario: " + o.Practice.Scenario
-	lines := []string{info}
+	lines := []string{info, financeLine(o, w)}
 
 	rooms := roomLines(o)
 	staff := staffLines(o)

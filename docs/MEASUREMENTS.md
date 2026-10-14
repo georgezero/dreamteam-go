@@ -78,3 +78,33 @@ worklist, final, and reading starts for urgent studies only) add to the
 logging share. There's no simple safe win here. The step-11 mitigations
 (lazy or structured warm-up log, per-day log hashing, cached start state)
 remain the plan.
+
+## 2026-10-14 — V0.1 step 10 (same machine, load average ≈ 4.8)
+
+| Benchmark | Command | Result |
+|---|---|---|
+| Mini scenario, 180 days, now with the ledger, claims, payroll and costs | `go test ./internal/sim -run X -bench Mini180 -benchtime 5x -count 3 -benchmem` | 2.11–2.48 s/op, 114 MB/op, 2.0M allocs/op |
+
+One 180-day run (seed 1) posts 27,070 journal entries, handles 7,514 claims
+and logs about one finance line per claim, plus one line for each day's
+submission batch.
+
+Profile:
+* SHA-256: ≈ 22% (keyed draws and the running log hash).
+* Log text formatting: ≈ 14%.
+* Dispatch: ≈ 23%.
+* Finance in total: about 10%.
+  * Adjudication: 4%, including the claim draw, which is hashed at
+    submission and again at remittance.
+  * Revenue recognition: 3%.
+  * Ledger posting: 2%.
+
+The step 9 figure (1.67–1.88 s) was taken at a lower load (≈ 3.3). On top
+of that, finance adds about 0.3–0.4 s. The step-11 mitigations are now
+required, since the warm-up target is < 1.5 s:
+* lazy or structured warm-up log text;
+* per-day log hashing;
+* a cached built start state.
+
+A smaller one is available too: cache the claim draw from submission until
+remittance.

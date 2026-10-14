@@ -618,6 +618,7 @@ don't depend on public IDs or player actions:
 | `attempt` | originKey, attempt | no-show | arrival offset | cancels? | cancellation lead |
 | `attempt.exam` | originKey, attempt | room time | tech extra time | rebooks after no-show? | rebooks after cancellation? |
 | `read` | originKey | read time | — | — | — |
+| `claim.lag` | originKey | charge lag (business days) | — | — | — |
 | `claim` | originKey | outcome (paid / short / denied-recovered / denied-written-off) | adjudication delay | short-paid fraction | rework delay |
 | `walkin.count` | day, hourBlock | Poisson count | | | |
 | `walkin` | day, hourBlock, k | second within block | exam | payer | priority |
@@ -1302,8 +1303,7 @@ so the player has a remedy.
   unfinished ones at their current age (censored, §11); medians of worklist
   wait and read time over reports finalized today; backlog by modality and
   priority; the oldest unfinished study; breaches today.
-* **Step 10 hook**: finalized reports are kept in finalization order. Revenue
-  recognition attaches there in step 10 (not done here).
+* **Revenue** is recognized at finalization (step 10, §8.7).
 
 ### 6.8 Worklist policies
 
@@ -1478,6 +1478,126 @@ here together.
 Two full-time
 radiologists charged 100% to this site would push the practice into losses —
 which is one reason radiologist site allocation is explicit (see PLAN.md §2).
+
+### 8.7 As built (V0.1 step 10)
+
+The model above, with these decisions where the design left room. All
+figures are scenario data (`finance` and catalog `baseRateCents`,
+`supplyCostCents`), not code.
+
+**Accrual and cash from one ledger.** Profit is on an accrual basis and
+liquidity on a cash basis, both read from the same double-entry journal.
+A practice can show an operating profit and still run short of cash, since
+payers pay weeks after the report. Cash may go negative. V0.1 has no
+credit line, and negative cash is shown in red.
+
+**Ledger.** Integer cents, debit-positive lines, an optional modality tag
+per line (for revenue and direct cost by modality). Every entry must
+balance, be non-empty and carry a unique idempotency key built from
+simulation identifiers: study for revenue and supplies, claim and payment
+number, employee and day, or day. A duplicate key is a bug (panic).
+Entries are never edited. A correction is a reversing entry that mirrors
+the original and is linked to it. An entry can be reversed once, and a
+reversal cannot itself be reversed. V0.1 has no correction flow yet, so
+the mechanism is exercised only by tests. Operational records and journal
+entries stay separate, linked by the key. Account balances, day books and
+an independent re-summation are reconciled by the invariants (§10).
+
+**Revenue and claims.**
+* At report final: Dr A/R / Cr revenue for the expected net, allowed ×
+  NCR, where allowed = base × payer multiplier, each rounded half up. The
+  claim opens *pending*.
+* Submission:
+  * The charge lag is 1–3 **business** days (Mon–Fri), drawn from
+    `claim.lag`.
+  * Claims due on a business day go out together at 17:00 (`submitTime`).
+    One log line covers the batch.
+  * The batch event is queued at 00:00 only when a claim is due that day,
+    so there is no polling.
+* Remittance:
+  * Comes `delay` calendar days after submission. On a weekend it rolls
+    to the next business day.
+  * Posts at 10:00 (`paymentTime`).
+  * The outcome comes from `claim` lane 0. Paid in full and short paid
+    (`m ± shortSpreadBP`) settle at once.
+* Denial and rework:
+  * A denied claim is *denied*, then *resubmitted* in the next business
+    day's batch.
+  * Its final outcome (recovered in full, or written off) posts
+    `reworkDays` (30–60) **after the denial**.
+  * The design's "resubmitted after ReworkDelay" is read as the time from
+    denial to final outcome, which keeps A/R ages realistic. Validation
+    requires at least 7 days, so the resubmission always comes first.
+* Self-pay: a statement instead of a claim, with the same draw (paid 30%,
+  half on average 20%, unpaid 50%). Non-payment is written off at the due
+  date. It is never reworked and is not counted as a denial. No other
+  patient responsibility (copays, deductibles) is specified, so none is
+  modelled.
+* Settlement posts the residual (expected − paid) to collection variance.
+  A closed claim's A/R is zero.
+* Payer behavior is keyed only by the order's origin key. Processing
+  order, speed, staffing and worklist order change only *when* the clock
+  starts (report final), never the outcome or amount. Tests check this.
+* The payer class is drawn when the order is disclosed (`order.ext` lane 1,
+  or `walkin` lane 2) and is observable: insurance is known at booking.
+
+**Costs.**
+* Supplies (contrast included) and the per-study PACS charge post at
+  acquisition (exam end), to A/P.
+* Fixed monthly items accrue at 00:00 each day, with cumulative rounding so
+  each month totals exactly the monthly amount.
+  * Utilities and insurance post to *Rent & facility*, since the chart has
+    no separate accounts.
+  * Leases and service contracts post to *Equipment service & leases*,
+    tagged by modality.
+  * The monthly IT/RIS charge posts to *IT / PACS*.
+* The billing fee (5% of cash collected) posts with each payment.
+* Accounts payable (all of the above) is paid on the 1st at 00:00. That
+  covers everything accrued before that day, so rent is paid in arrears;
+  the chart has no prepaid asset.
+
+**Payroll.**
+* Hourly staff accrue wages when they go home: paid time = shift start to
+  going home, minus breaks taken. Skipped breaks are paid, and held-over
+  time is included.
+* Wages are priced by `HourlyPay`: the regular rate until the week's paid
+  time reaches `weeklyOvertimeHours`, then ×`overtimeFactorBP`. This is the
+  same rule as the step 8 overtime cost, so overtime is neither
+  double-counted nor dropped.
+* Salaried staff accrue annual ÷ 365 per calendar day at 00:00, with
+  cumulative rounding. Radiologists accrue × their site allocation.
+* Benefits and payroll tax (25%) post with every accrual.
+* Payroll is paid every 14 days from `payrollAnchor` (a Friday) at 00:00.
+  It pays everything accrued through the day before.
+* Within an instant, payments are posted before the day's accruals, inside
+  the day-start transaction (class 0, not class 6 as §3.3 suggests). This
+  keeps "paid through yesterday" exact.
+
+**Opening cash.** Until step 11, `openingCashCents` is posted at the epoch
+(Dr Cash / Cr Opening equity). With warm-up 0 (the mini scenario) that is
+the start. Step 11 replaces it with the opening-equity adjustment at the
+start time (§8.4).
+
+**Statements.**
+* Periods: today, month to date and trailing 30 days are calendar windows,
+  and include history before day 1. *Since day 1* starts at the start date.
+* Net revenue = revenue − collection variance.
+* Operating expense is split two ways:
+  * by account: wages, benefits, facility, equipment, supplies, IT,
+    billing;
+  * by behavior: labor (wages + benefits), fixed (the daily fixed accrual),
+    variable (the rest: supplies, per-study PACS, billing fees).
+* Operating profit = net revenue − operating expense. Margin is in basis
+  points, and undefined when net revenue ≤ 0.
+* Cash flow shows collections and disbursements (payroll and bills paid).
+* Denial rate = first adjudications denied ÷ adjudicated, insurance only.
+* Days in A/R = A/R ÷ trailing-30-day average daily net revenue.
+* Direct cost by modality covers supplies, PACS, billing fees and the
+  modality's own leases and service. Labor and rent are not split.
+
+**Hidden.** A claim's outcome, remittance date and charge-lag draw never
+appear in observations or journeys before they happen. Forcing every claim
+to fail leaves every observation unchanged until the first remittance.
 
 ---
 

@@ -305,3 +305,40 @@ func TestWorklistScreen(t *testing.T) {
 		t.Errorf("journey lacks the worklist step:\n%s", out)
 	}
 }
+
+func TestFinanceScreen(t *testing.T) {
+	m := New(openMini(t, 1))
+	m.sess.Advance(45*simtime.Day+5*simtime.Hour, session.Options{}) // past the first payer remittances
+	m.Update(tea.WindowSizeMsg{Width: 140, Height: 44})
+	dash := ansi.Strip(m.render())
+	for _, want := range []string{"Cash $", "Revenue today", "Op. profit today", "A/R $"} {
+		if !strings.Contains(dash, want) {
+			t.Errorf("dashboard lacks %q:\n%s", want, dash)
+		}
+	}
+	m.key("f")
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"FINANCE · ", "[overview]", "TODAY", "MONTH TO DATE", "TRAILING 30D", "SINCE DAY 1",
+		"Revenue earned (expected)", "Net revenue", "Operating profit", "margin", "Cash collected", "CASH ", "days in A/R", "denial rate",
+		"A/R aging", "BY MODALITY", "Cash, last 30 days"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("finance overview lacks %q:\n%s", want, out)
+		}
+	}
+	if testing.Verbose() {
+		t.Log("\n" + out)
+	}
+	m.key("tab")
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "[claims]") || !strings.Contains(out, "Open claims") || len(m.obs.Finance.Claims.OpenClaims) == 0 {
+		t.Errorf("claims view:\n%s", out)
+	}
+	m.key("tab")
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "[journal]") || !strings.Contains(out, " Dr ") || !strings.Contains(out, " Cr ") {
+		t.Errorf("journal view:\n%s", out)
+	}
+	if testing.Verbose() {
+		t.Log("\n" + out)
+	}
+}

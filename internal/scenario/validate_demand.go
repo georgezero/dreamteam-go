@@ -150,9 +150,10 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 		}
 		cfg.Catalog = append(cfg.Catalog, sim.ExamConfig{Code: x.Code, Name: x.Name, Modality: x.Modality,
 			Category: ci, Contrast: x.Contrast, WalkInEligible: x.WalkInEligible,
-			RoomTime:  c.quantile(xp+".roomTimeSec", x.RoomTimeSec, 60),
-			TechExtra: c.quantile(xp+".techExtraSec", x.TechExtraSec, 1),
-			ReadTime:  c.quantile(xp+".readSec", x.ReadSec, 30)})
+			RoomTime:      c.quantile(xp+".roomTimeSec", x.RoomTimeSec, 60),
+			TechExtra:     c.quantile(xp+".techExtraSec", x.TechExtraSec, 1),
+			ReadTime:      c.quantile(xp+".readSec", x.ReadSec, 30),
+			BaseRateCents: x.BaseRateCents, SupplyCostCents: x.SupplyCostCents})
 	}
 
 	// Templates.

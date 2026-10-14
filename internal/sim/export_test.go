@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/georgezero/dreamteam-go/internal/simtime"
+import (
+	"github.com/georgezero/dreamteam-go/internal/rng"
+	"github.com/georgezero/dreamteam-go/internal/simtime"
+)
 
 // Test-only access to hidden state.
 
@@ -203,4 +206,106 @@ func (w *World) supervisorName(i int) string {
 		return ""
 	}
 	return w.st.emps[i].cfg.Name
+}
+
+// EntryInfo is one journal entry with its key spelled out.
+type EntryInfo struct {
+	Index    int
+	At       simtime.Time
+	Kind     string
+	A, B     int64
+	Lines    []LineInfo
+	Reversed bool
+}
+
+// LineInfo is one posting; Amt > 0 is a debit.
+type LineInfo struct {
+	Account  string
+	Modality string
+	Amt      int64
+}
+
+var entryKindNames = map[entryKind]string{entOpening: "opening", entRevenue: "revenue", entStudyCost: "study_cost",
+	entPayment: "payment", entSettle: "settle", entWages: "wages", entSalary: "salary", entFixed: "fixed",
+	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal"}
+
+// Journal lists every posted entry.
+func (w *World) Journal() []EntryInfo {
+	var out []EntryInfo
+	for i, e := range w.st.fin.led.entries {
+		ei := EntryInfo{Index: i, At: e.at, Kind: entryKindNames[e.key.kind], A: e.key.a, B: e.key.b, Reversed: e.reversed >= 0}
+		for _, ln := range e.lines {
+			li := LineInfo{Account: accountInfo[ln.acct].id, Amt: ln.amt}
+			if ln.mod >= 0 {
+				li.Modality = w.st.mods[ln.mod]
+			}
+			ei.Lines = append(ei.Lines, li)
+		}
+		out = append(out, ei)
+	}
+	return out
+}
+
+// Balance returns an account's debit-positive balance.
+func (w *World) Balance(id string) int64 {
+	for a := range numAccounts {
+		if accountInfo[a].id == id {
+			return w.st.fin.led.bal[a]
+		}
+	}
+	panic("no account " + id)
+}
+
+// ClaimInfo is a claim with its timestamps.
+type ClaimInfo struct {
+	ID, Study, Exam, Payer, State                 string
+	Origin                                        [4]int64
+	Allowed, Expected, Paid                       int64
+	Final, Submitted, Denied, Resubmitted, Closed simtime.Time
+	WasDenied                                     bool
+}
+
+// Claims lists every claim.
+func (w *World) Claims() []ClaimInfo {
+	st := w.st
+	var out []ClaimInfo
+	for ci, c := range st.fin.claims {
+		o := &st.dem.orders[c.order]
+		out = append(out, ClaimInfo{ID: claimID(ci), Study: studyID(c.study), Exam: st.cfg.Catalog[o.exam].Code,
+			Payer: st.cfg.Finance.Payers[c.payer].ID, State: claimStateNames[c.state],
+			Origin: [4]int64{o.key.day, o.key.src, o.key.block, o.key.k}, Allowed: c.allowed, Expected: c.expected,
+			Paid: c.paid, Final: c.finalAt, Submitted: c.submittedAt, Denied: c.deniedAt, Resubmitted: c.resubmittedAt,
+			Closed: c.closedAt, WasDenied: c.denied})
+	}
+	return out
+}
+
+// DrawClaim returns the latent payer draw for an origin key and payer.
+func (w *World) DrawClaim(origin [4]int64, payer int) (outcome int, delayDays, fracBP, reworkDays int64) {
+	d := w.st.claimDraw(originKey{origin[0], origin[1], origin[2], origin[3]}, payer)
+	return d.outcome, d.delayDays, d.fracBP, d.reworkDays
+}
+
+// Claim outcomes for DrawClaim.
+const (
+	OutPaid       = outPaid
+	OutShort      = outShort
+	OutRecovered  = outRecovered
+	OutWrittenOff = outWrittenOff
+)
+
+// ForceDeniedClaims makes every claim denied and written off: a change to
+// hidden latent payer outcomes.
+func (w *World) ForceDeniedClaims() { w.st.fin.forceDenied = func(int) bool { return true } }
+
+// OverheadForTest exposes the overtime cost recorded so far (all days).
+func (w *World) OvertimeCostTotal() int64 { return w.st.dem.flowTotal.otCost }
+
+// Check runs the state invariants now.
+func (w *World) Check() error { return w.st.CheckInvariants() }
+
+// DrawChargeLag returns the latent charge lag (business days) for an origin key.
+func (w *World) DrawChargeLag(origin [4]int64) int64 {
+	key := originKey{origin[0], origin[1], origin[2], origin[3]}
+	return uniformIn(rng.Hash(w.st.seed, "claim.lag", key.keys()...).Lane(0), w.st.cfg.Finance.ChargeLagDays)
 }

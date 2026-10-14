@@ -160,6 +160,7 @@ type Observation struct {
 	Demand   Demand       `json:"demand"`
 	Flow     Flow         `json:"flow"`
 	Worklist Worklist     `json:"worklist"`
+	Finance  Finance      `json:"finance"`
 	// LogTotal is the number of log entries ever emitted.
 	LogTotal  uint64     `json:"logTotal"`
 	RecentLog []LogEntry `json:"recentLog"` // oldest first
@@ -372,6 +373,7 @@ type Journey struct {
 	Priority string        `json:"priority"`
 	Source   string        `json:"source"`
 	WalkIn   bool          `json:"walkIn"`
+	Payer    string        `json:"payer"` // payer class, known at booking
 	Status   string        `json:"status"`
 	Steps    []JourneyStep `json:"steps"`
 }
@@ -441,4 +443,178 @@ type PriorityTAT struct {
 	Priority string `json:"priority"`
 	Count    int    `json:"count"`
 	Minutes  int64  `json:"minutes"`
+}
+
+// Claim states. Closed claims (paid, short_paid, written_off) carry no
+// balance.
+const (
+	ClaimPending     = "pending"     // report final, awaiting submission (charge lag)
+	ClaimSubmitted   = "submitted"   // with the payer (self-pay: statement sent)
+	ClaimDenied      = "denied"      // denied, awaiting resubmission
+	ClaimResubmitted = "resubmitted" // reworked and resubmitted
+	ClaimPaid        = "paid"
+	ClaimShortPaid   = "short_paid"
+	ClaimWrittenOff  = "written_off"
+)
+
+// Finance is the practice's money: balances, period statements, claims and
+// the latest journal entries. Amounts are integer cents. Revenue is earned
+// when a report is finalized (accrual); cash moves only on payments
+// received and bills or payroll paid, so profit and cash differ.
+type Finance struct {
+	CashCents            int64 `json:"cashCents"`
+	CashChangeTodayCents int64 `json:"cashChangeTodayCents"`
+	ARCents              int64 `json:"arCents"`             // accounts receivable: expected net still owed on open claims
+	APCents              int64 `json:"apCents"`             // accounts payable: accrued bills not yet paid
+	AccruedPayrollCents  int64 `json:"accruedPayrollCents"` // wages and benefits earned, not yet paid
+	// Periods: today, month to date and trailing 30 days are calendar
+	// windows (they include any history before day 1); since day 1 starts
+	// at the start date.
+	Today       FinancePeriod `json:"today"`
+	MonthToDate FinancePeriod `json:"monthToDate"`
+	Trailing30  FinancePeriod `json:"trailing30"`
+	SinceStart  FinancePeriod `json:"sinceStart"`
+	Claims      ClaimsSummary `json:"claims"`
+	// CashHistory is end-of-day cash for up to the last 30 days, oldest
+	// first; today's entry is the current balance.
+	CashHistory  []DayAmount    `json:"cashHistory"`
+	NextPayroll  Obligation     `json:"nextPayroll"`  // next payday and the payroll accrued so far
+	NextPayables Obligation     `json:"nextPayables"` // next 1st of the month and the payables accrued so far
+	Accounts     []Account      `json:"accounts"`     // trial balance
+	Journal      []JournalEntry `json:"journal"`      // newest first (capped)
+	JournalTotal int            `json:"journalTotal"`
+}
+
+// FinancePeriod is an income statement and cash flow for a date range.
+type FinancePeriod struct {
+	Label string `json:"label"`
+	From  string `json:"from"` // dates, inclusive
+	To    string `json:"to"`
+	Days  int64  `json:"days"`
+	// Revenue: recognized at expected net when reports are finalized;
+	// collection variance is the difference between expected and
+	// collected on settled claims (contra-revenue).
+	GrossRevenueCents       int64 `json:"grossRevenueCents"`
+	CollectionVarianceCents int64 `json:"collectionVarianceCents"`
+	NetRevenueCents         int64 `json:"netRevenueCents"`
+	// Operating expenses by account.
+	WagesCents     int64 `json:"wagesCents"`
+	BenefitsCents  int64 `json:"benefitsCents"`
+	FacilityCents  int64 `json:"facilityCents"`
+	EquipmentCents int64 `json:"equipmentCents"`
+	SuppliesCents  int64 `json:"suppliesCents"`
+	ITCents        int64 `json:"itCents"`
+	BillingCents   int64 `json:"billingCents"`
+	// The same expenses by behavior: labor (wages + benefits), fixed
+	// (monthly costs accrued daily) and variable (per-study supplies and IT,
+	// billing fees).
+	LaborCents            int64 `json:"laborCents"`
+	FixedCents            int64 `json:"fixedCents"`
+	VariableCents         int64 `json:"variableCents"`
+	OperatingExpenseCents int64 `json:"operatingExpenseCents"`
+	OperatingProfitCents  int64 `json:"operatingProfitCents"`
+	// MarginBP is operating profit / net revenue in basis points; it is
+	// undefined (MarginDefined false) when net revenue is not positive.
+	MarginBP      int64 `json:"marginBP"`
+	MarginDefined bool  `json:"marginDefined"`
+	// Cash flow: collections are payments received; disbursements are
+	// payroll and bills paid.
+	CollectionsCents   int64 `json:"collectionsCents"`
+	DisbursementsCents int64 `json:"disbursementsCents"`
+	NetCashFlowCents   int64 `json:"netCashFlowCents"`
+	ReportsFinal       int   `json:"reportsFinal"`
+	// Denials over insurance claims adjudicated in the period (first
+	// adjudication; self-pay excluded).
+	Adjudicated  int             `json:"adjudicated"`
+	Denied       int             `json:"denied"`
+	DenialRateBP int64           `json:"denialRateBP"`
+	ByModality   []ModalityMoney `json:"byModality"`
+}
+
+// ModalityMoney is revenue and direct cost for one modality. Direct cost
+// is supplies, per-study IT, billing fees and the modality's own leases
+// and service contracts; shared labor and facility costs are not split.
+type ModalityMoney struct {
+	Modality        string `json:"modality"`
+	ReportsFinal    int    `json:"reportsFinal"`
+	NetRevenueCents int64  `json:"netRevenueCents"`
+	DirectCostCents int64  `json:"directCostCents"`
+}
+
+// ClaimsSummary counts claims by state and ages the open ones.
+type ClaimsSummary struct {
+	Total      int           `json:"total"`
+	Open       int           `json:"open"`
+	Pending    int           `json:"pending"`
+	Submitted  int           `json:"submitted"`
+	Denied     int           `json:"denied"` // denied or resubmitted, still open
+	Paid       int           `json:"paid"`
+	ShortPaid  int           `json:"shortPaid"`
+	WrittenOff int           `json:"writtenOff"`
+	DaysInAR   int64         `json:"daysInAR"`   // A/R ÷ average daily net revenue over the trailing 30 days; -1 if undefined
+	Aging      []AgingBucket `json:"aging"`      // by days since report final
+	OpenClaims []ClaimItem   `json:"openClaims"` // oldest first (capped)
+}
+
+// AgingBucket is open A/R in an age range.
+type AgingBucket struct {
+	Label string `json:"label"`
+	Count int    `json:"count"`
+	Cents int64  `json:"cents"`
+}
+
+// ClaimItem is one claim as the practice sees it: never its future outcome.
+type ClaimItem struct {
+	Claim         string `json:"claim"`
+	Study         string `json:"study"`
+	Patient       string `json:"patient"`
+	Payer         string `json:"payer"`
+	Modality      string `json:"modality"`
+	ExamName      string `json:"examName"`
+	State         string `json:"state"`
+	Final         string `json:"final"`               // report final (revenue recognized)
+	Submitted     string `json:"submitted,omitempty"` // first submission
+	AgeDays       int64  `json:"ageDays"`             // since report final
+	ExpectedCents int64  `json:"expectedCents"`
+	PaidCents     int64  `json:"paidCents"`
+	BalanceCents  int64  `json:"balanceCents"`
+}
+
+// Obligation is a known upcoming payment.
+type Obligation struct {
+	Date  string `json:"date"`
+	Cents int64  `json:"cents"`
+}
+
+// DayAmount is one day's figure.
+type DayAmount struct {
+	Date  string `json:"date"`
+	Cents int64  `json:"cents"`
+}
+
+// Account is one trial-balance line, in its normal-balance sign (assets
+// and expenses debit-positive; liabilities, equity and revenue
+// credit-positive; collection variance debit-positive).
+type Account struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	Type         string `json:"type"`
+	BalanceCents int64  `json:"balanceCents"`
+}
+
+// JournalEntry is one posted double-entry transaction.
+type JournalEntry struct {
+	ID    string        `json:"id"`
+	Time  string        `json:"time"`
+	Memo  string        `json:"memo"`
+	Ref   string        `json:"ref,omitempty"` // the operational record (study, claim, employee)
+	Lines []JournalLine `json:"lines"`
+}
+
+// JournalLine is one debit or credit.
+type JournalLine struct {
+	Account     string `json:"account"`
+	Modality    string `json:"modality,omitempty"`
+	DebitCents  int64  `json:"debitCents,omitempty"`
+	CreditCents int64  `json:"creditCents,omitempty"`
 }

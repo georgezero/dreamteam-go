@@ -246,9 +246,11 @@ func TestReadTimeIndependentOfPolicy(t *testing.T) {
 }
 
 // Hidden state: no observable type carries a latent or future value
-// (read duration, remaining time, patience, no-show, arrival offset).
+// (read duration, remaining time, patience, no-show, arrival offset, a
+// claim's payer outcome, remittance date or charge lag).
 func TestObservationHasNoLatentFields(t *testing.T) {
-	deny := []string{"latent", "remaining", "willnoshow", "patience", "readsec", "readtime", "sampled", "cancelat", "arrivaloffset", "endsin"}
+	deny := []string{"latent", "remaining", "willnoshow", "patience", "readsec", "readtime", "sampled", "cancelat", "arrivaloffset", "endsin",
+		"outcome", "willpay", "willdeny", "submitdue", "adjudicationat", "remitat", "paydate", "fracbp", "reworkdays", "delaydays", "chargelag"}
 	seen := map[reflect.Type]bool{}
 	var walk func(reflect.Type, string)
 	walk = func(ty reflect.Type, path string) {
@@ -270,7 +272,7 @@ func TestObservationHasNoLatentFields(t *testing.T) {
 		}
 	}
 	for _, ty := range []reflect.Type{reflect.TypeOf(api.Observation{}), reflect.TypeOf(api.DaySchedule{}),
-		reflect.TypeOf(api.PatientRow{}), reflect.TypeOf(api.Journey{})} {
+		reflect.TypeOf(api.PatientRow{}), reflect.TypeOf(api.Journey{}), reflect.TypeOf(api.Finance{})} {
 		walk(ty, ty.Name())
 	}
 }

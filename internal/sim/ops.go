@@ -369,6 +369,7 @@ func (st *state) examEnd(e *Engine, vi int) {
 	st.removeWaiting(vi)
 	o.state, o.endedAt = orderImaged, e.Now()
 	st.acquireStudy(e, vi)
+	st.studyCost(v.study)
 	st.dem.flowToday.examsDone++
 	st.dem.flowTotal.examsDone++
 	draw := rng.Hash(st.seed, "attempt.exam", o.key.keys(v.attempt)...)

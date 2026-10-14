@@ -50,6 +50,7 @@ const (
 	screenLog
 	screenPatients
 	screenWorklist
+	screenFinance
 )
 
 // Patient list filters, cycled with tab.
@@ -94,6 +95,8 @@ type Model struct {
 	journey   api.Journey
 	// Worklist screen: selected row and scroll.
 	wlSel, wlScroll int
+	// Finance screen: view (overview, claims, journal) and scroll.
+	finView, finScroll int
 }
 
 // New returns a paused model on s.
@@ -225,8 +228,27 @@ func (m *Model) screenKey(k string) bool {
 	case "w":
 		m.screen = screenWorklist
 		return true
+	case "f":
+		m.screen, m.finScroll = screenFinance, 0
+		return true
 	}
 	switch m.screen {
+	case screenFinance:
+		switch k {
+		case "tab":
+			m.finView, m.finScroll = (m.finView+1)%numFinViews, 0
+		case "up", "k":
+			m.finScroll = max(0, m.finScroll-1)
+		case "down", "j":
+			m.finScroll++
+		case "pgup":
+			m.finScroll = max(0, m.finScroll-max(1, m.height-6))
+		case "pgdown":
+			m.finScroll += max(1, m.height-6)
+		default:
+			return false
+		}
+		return true
 	case screenWorklist:
 		switch k {
 		case "up", "k":

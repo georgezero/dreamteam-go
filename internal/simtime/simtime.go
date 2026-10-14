@@ -152,6 +152,9 @@ func (d Date) String() string {
 	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day)
 }
 
+// DaysInMonth returns the number of days in d's month.
+func (d Date) DaysInMonth() int { return daysInMonth(d.Year, d.Month) }
+
 // MonthName returns "Jan".."Dec".
 func (d Date) MonthName() string { return monthNames[d.Month-1] }
 

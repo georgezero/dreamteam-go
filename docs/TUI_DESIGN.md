@@ -409,6 +409,29 @@ Shows the deliberate distinction: profit is positive while cash may fall;
 upcoming known obligations (payroll date) are visible because a manager knows
 them.
 
+As built (V0.1 step 10):
+* `f` opens the screen. `tab` cycles three views, and `↑↓` scroll:
+  * **overview**: columns for today, month to date, trailing 30 days and
+    since day 1. Rows: revenue earned, collection variance, net revenue,
+    operating expense (labor, fixed, supplies/contrast/PACS, billing fees),
+    operating profit and margin, cash collected, cash paid out, net cash
+    flow and reports final. Below the table:
+    * cash with today's change, and the next payroll and bills with what
+      has accrued so far;
+    * A/R, days in A/R, the 30-day denial rate, open claims by state, A/R
+      aging and closed claims by outcome;
+    * revenue and direct cost by modality over 30 days;
+    * a 30-day cash sparkline.
+  * **claims**: open claims, oldest first.
+  * **journal**: the latest entries with their debit and credit lines.
+* Money is whole dollars, and negative amounts are red with a "−".
+  Undefined margins show "—".
+* The dashboard's second line is the compact money summary: cash and
+  today's change, revenue, expenses and operating profit today, and A/R.
+* Patient journeys continue past the report: revenue earned, claim
+  submitted, then denied or resubmitted, then paid, short paid or written
+  off.
+
 ### 4.8 Event log
 
 Full scrollable log with filters by category (`patients`, `rooms`, `staff`,

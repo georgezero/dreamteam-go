@@ -56,6 +56,7 @@ type order struct {
 	exam      int
 	priority  Priority
 	window    Window
+	payer     int // payer class (index into Finance.Payers)
 	received  simtime.Time
 	earliest  int64 // day index of the earliest wanted date
 	tolerance int64 // days past earliest the patient accepts
@@ -368,8 +369,7 @@ func (st *state) receiveOrder(e *Engine, key originKey) {
 		lead = min(lead, 3)
 	}
 	win := Window(rng.Weighted(ext.Lane(0), st.cfg.Demand.WindowBP[:]))
-	// ext lane 1 is reserved for the payer (step 10); patient lanes 0 and 2
-	// for punctuality and walk-in patience (step 7).
+	// patient lanes 0 and 2 are punctuality and walk-in patience (step 7).
 	tol := st.cfg.Behavior.ToleranceDays[pri].Sample(pat.Lane(1))
 
 	st.dem.patients++
@@ -377,6 +377,7 @@ func (st *state) receiveOrder(e *Engine, key originKey) {
 	st.dem.orders = append(st.dem.orders, order{
 		key: key, patient: st.dem.patients, source: int(key.src), exam: exam, priority: pri,
 		window: win, received: e.Now(), earliest: st.day + lead, tolerance: tol, appt: -1, visit: -1,
+		payer: st.payerOf(ext.Lane(1)),
 	})
 	st.count(exam, func(c *modalityCounts) { c.received++ })
 	o := &st.dem.orders[oi]
@@ -601,6 +602,7 @@ func (st *state) loadOpening(e *Engine) {
 		st.dem.orders = append(st.dem.orders, order{
 			key: key, patient: st.dem.patients, source: op.Source, tolerance: tol,
 			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1, visit: -1,
+			payer: st.payerOf(rng.Hash(st.seed, "order.ext", key.keys()...).Lane(1)),
 		})
 		if !sharedFree(st.dem.days[day], op.Room, &st.dem.days[day].rooms[op.Room][idx]) {
 			panic("sim: opening schedule breaks shared capacity (scenario validation should catch this)")

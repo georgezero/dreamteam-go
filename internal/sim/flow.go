@@ -322,14 +322,14 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	w := rng.Hash(st.seed, "walkin", day, blk, k)
 	wc := &st.cfg.WalkIns
 	exam := wc.Exams[rng.Weighted(w.Lane(1), wc.ExamWeights)]
-	// lane 2 is reserved for the payer (step 10).
 	pri := Priority(rng.Weighted(w.Lane(3), wc.PriorityBP[:]))
 	tol := st.cfg.Behavior.ToleranceDays[pri].Sample(rng.Hash(st.seed, "patient", key.keys()...).Lane(1))
 
 	st.dem.patients++
 	oi := len(st.dem.orders)
 	st.dem.orders = append(st.dem.orders, order{key: key, patient: st.dem.patients, source: -1, exam: exam,
-		priority: pri, received: e.Now(), earliest: st.day, tolerance: tol, appt: -1, visit: -1, walkIn: true})
+		priority: pri, received: e.Now(), earliest: st.day, tolerance: tol, appt: -1, visit: -1, walkIn: true,
+		payer: st.payerOf(w.Lane(2))})
 	o := &st.dem.orders[oi]
 	st.dem.days[st.day].walkIns = append(st.dem.days[st.day].walkIns, oi)
 	st.dem.flowToday.walkIns++
