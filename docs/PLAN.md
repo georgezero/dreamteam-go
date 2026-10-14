@@ -317,6 +317,12 @@ unit-suffixed keys, so a reader never has to guess units.
 }
 ```
 
+* **Fortnight rota**: a roster entry with `"weeks": "A"` or `"B"` applies only
+  in that rota week. Weeks run Monday to Sunday, and `rotaWeekA` names a date
+  in week A. Cover windows (`covers`) default to the whole shift.
+* **Merge rules**: objects merge by key and `null` deletes a key. Arrays whose
+  elements all carry an `id` merge by id (so an overlay can change one
+  employee). Any other array is replaced.
 * **`extends`**: a scenario can override a base file. Presets are small
   override files (`presets/struggling.json`, …) merged by key path.
 * **Synthetic names** come from bundled fictional lists. Display names are cosmetic.

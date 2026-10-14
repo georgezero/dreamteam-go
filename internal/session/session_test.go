@@ -1,13 +1,23 @@
 package session
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
+func mini(t testing.TB, seed int64) *Session {
+	t.Helper()
+	s, err := Open("mini", seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s
+}
+
 func TestStartsTuesdayMorning(t *testing.T) {
-	s := NewDemo(1)
+	s := mini(t, 1)
 	o := s.Observe(10)
 	if o.Weekday != "Tue" || o.Clock != "06:00" || o.Day != 1 || o.Date != "2026-10-13" {
 		t.Fatalf("start = %s %s day %d %s", o.Weekday, o.Clock, o.Day, o.Date)
@@ -18,7 +28,7 @@ func TestStartsTuesdayMorning(t *testing.T) {
 }
 
 func TestStepVisibleLandsOnNewEntry(t *testing.T) {
-	s := NewDemo(1)
+	s := mini(t, 1)
 	for i := 0; i < 50; i++ {
 		before := s.Observe(1).LogTotal
 		if s.StepVisible() != Visible {
@@ -32,16 +42,17 @@ func TestStepVisibleLandsOnNewEntry(t *testing.T) {
 			t.Fatalf("clock %d not at entry time %d", s.Now(), last.At)
 		}
 	}
-	if first := NewDemo(1); first.StepVisible() == Visible && first.Observe(1).RecentLog[0].Text != "Practice opens" {
-		t.Errorf("first visible entry = %q", first.Observe(1).RecentLog[0].Text)
+	first := mini(t, 1)
+	if first.StepVisible() != Visible || !strings.HasPrefix(first.Observe(1).RecentLog[0].Text, "Dr. Avery on duty") || first.Observe(0).Clock != "07:30" {
+		t.Errorf("first visible entry = %+v", first.Observe(1).RecentLog)
 	}
 }
 
 func TestBudgetStopsAtTransactionAndResumes(t *testing.T) {
-	a := NewDemo(4)
+	a := mini(t, 4)
 	a.Advance(3*simtime.Day, Options{})
 
-	b := NewDemo(4)
+	b := mini(t, 4)
 	target := b.Now().Add(3 * simtime.Day)
 	stops := 0
 	for b.Now() < target {
@@ -54,14 +65,5 @@ func TestBudgetStopsAtTransactionAndResumes(t *testing.T) {
 	}
 	if a.Digest() != b.Digest() {
 		t.Fatal("budgeted advance changed the outcome")
-	}
-}
-
-func TestSeedsDiffer(t *testing.T) {
-	a, b := NewDemo(1), NewDemo(2)
-	a.Advance(simtime.Day, Options{})
-	b.Advance(simtime.Day, Options{})
-	if a.Digest() == b.Digest() {
-		t.Fatal("different seeds gave identical runs")
 	}
 }

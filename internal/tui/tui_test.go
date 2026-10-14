@@ -41,6 +41,15 @@ func TestImportBoundary(t *testing.T) {
 	}
 }
 
+func openMini(t testing.TB, seed int64) *session.Session {
+	t.Helper()
+	s, err := session.Open("mini", seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s
+}
+
 func press(m *Model, k string) {
 	switch k {
 	case "space":
@@ -51,7 +60,7 @@ func press(m *Model, k string) {
 }
 
 func TestKeys(t *testing.T) {
-	m := New(session.NewDemo(1))
+	m := New(openMini(t, 1))
 	if m.running {
 		t.Fatal("starts running")
 	}
@@ -83,7 +92,7 @@ func TestKeys(t *testing.T) {
 func TestPacingDoesNotAffectOutcome(t *testing.T) {
 	const seed = 11
 	runTUI := func(fps int, speedPlan []int) *session.Session {
-		s := session.NewDemo(seed)
+		s := openMini(t, seed)
 		m := New(s)
 		press(m, "space")
 		wall := time.Unix(1_000_000, 0)
@@ -104,7 +113,7 @@ func TestPacingDoesNotAffectOutcome(t *testing.T) {
 	a.Advance(target.Sub(a.Now()), session.Options{})
 	b.Advance(target.Sub(b.Now()), session.Options{})
 
-	h := session.NewDemo(seed)
+	h := openMini(t, seed)
 	h.Advance(target.Sub(h.Now()), session.Options{})
 	if a.Digest() != h.Digest() || b.Digest() != h.Digest() {
 		t.Fatal("TUI pacing changed the simulation outcome")
@@ -112,7 +121,7 @@ func TestPacingDoesNotAffectOutcome(t *testing.T) {
 }
 
 func TestRenderFitsTerminal(t *testing.T) {
-	m := New(session.NewDemo(2))
+	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
 	for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
@@ -126,6 +135,13 @@ func TestRenderFitsTerminal(t *testing.T) {
 			if w := ansi.StringWidth(l); w > size[0] {
 				t.Errorf("%v: line %d width %d", size, i, w)
 			}
+		}
+	}
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"ROOMS", "STAFF", "XR ○ Idle       Riley", "US ○ Idle       Morgan", "Dr. Avery", "Desk ● Jordan"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("80×24 render lacks %q:\n%s", want, out)
 		}
 	}
 	m.Update(tea.WindowSizeMsg{Width: 40, Height: 10})

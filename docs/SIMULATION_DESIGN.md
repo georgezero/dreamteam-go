@@ -923,6 +923,13 @@ alternating weeks are handled without biweekly templates.
 
 Names are fictional placeholders.
 
+The bundled roster (`scenarios/base/established.json`) fills in what the
+tables leave open. On Mondays Riley covers CT for the whole shift, because Sam
+is off. On Saturdays Sam staffs XR and CT alone, with a 13:30–14:00 break.
+Breaks are not covered: a single-tech room is unstaffed during its tech's
+break. `dreamteam scenario coverage mini` prints staffed against open hours
+for every day of the fortnight; about 74% of open room-hours are staffed.
+
 ### 6.4 Shifts, breaks and overtime
 
 * Shifts and breaks are materialized each day from the roster (§2.6).

@@ -10,6 +10,8 @@ import (
 	"encoding/hex"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/rng"
+	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/sim"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -19,18 +21,20 @@ type Session struct {
 	w *sim.World
 }
 
-// DefaultStart is the default scenario start date (a Tuesday).
-var DefaultStart = simtime.Date{Year: 2026, Month: 10, Day: 13}
-
-// StartClock is when play begins on the start date.
-const StartClock = 6 * simtime.Hour
-
-// NewDemo returns a session on the step-4 demo world, advanced to 06:00 on
-// the start date.
-func NewDemo(seed int64) *Session {
-	s := &Session{w: sim.NewDemo(seed, DefaultStart)}
-	s.w.Engine().RunUntil(simtime.Time(StartClock), nil)
+// New returns a session on cfg, advanced to the scenario's start time.
+func New(cfg *sim.Config, seed int64) *Session {
+	s := &Session{w: sim.New(cfg, rng.SeedFromInt(seed))}
+	s.w.Engine().RunUntil(s.w.StartTime(), nil)
 	return s
+}
+
+// Open resolves a scenario (bundled ID or .json path) and starts a session.
+func Open(ref string, seed int64) (*Session, error) {
+	cfg, err := scenario.Resolve(ref)
+	if err != nil {
+		return nil, err
+	}
+	return New(cfg, seed), nil
 }
 
 // Now returns the simulated time.
