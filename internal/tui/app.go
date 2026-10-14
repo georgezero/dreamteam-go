@@ -1,0 +1,166 @@
+// Package tui is the Bubble Tea v2 terminal interface. It is a client of
+// session and api only: it never imports internal/sim (enforced by a test),
+// and nothing it does affects simulation outcomes, only when they are shown.
+package tui
+
+import (
+	"time"
+
+	tea "charm.land/bubbletea/v2"
+
+	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/session"
+	"github.com/georgezero/dreamteam-go/internal/simtime"
+)
+
+// speed is simulated time per real second; zero means Max.
+type speed struct {
+	label  string
+	perSec simtime.Duration
+}
+
+var speeds = []speed{
+	{"1 min/s", simtime.Minute},
+	{"5 min/s", 5 * simtime.Minute},
+	{"15 min/s", 15 * simtime.Minute},
+	{"1 h/s", simtime.Hour},
+	{"Max", 0},
+}
+
+const (
+	defaultSpeed = 2 // 15 min/s
+	frame        = 100 * time.Millisecond
+	// maxFrameGap caps one frame's wall time so a suspended terminal does
+	// not produce a huge jump on resume.
+	maxFrameGap = 500 * time.Millisecond
+	// maxEventsPerFrame bounds Max-speed work per frame; the budget is only
+	// checked between timestamp transactions.
+	maxEventsPerFrame = 20_000
+	recentLog         = 200
+)
+
+type tickMsg time.Time
+
+func tick() tea.Cmd {
+	return tea.Tick(frame, func(t time.Time) tea.Msg { return tickMsg(t) })
+}
+
+// Model is the root TUI model.
+type Model struct {
+	sess      *session.Session
+	obs       api.Observation
+	running   bool
+	speed     int
+	autoPause bool
+	lastTick  time.Time
+	carryMs   int64 // sub-second simulated remainder, in sim-ms
+	width     int
+	height    int
+	status    string
+	quitting  bool
+}
+
+// New returns a paused model on s.
+func New(s *session.Session) *Model {
+	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24}
+	m.status = "Paused. Press space to start the day."
+	m.refresh()
+	return m
+}
+
+func (m *Model) refresh() { m.obs = m.sess.Observe(recentLog) }
+
+// Init starts the frame clock.
+func (m *Model) Init() tea.Cmd { return tick() }
+
+// Update handles messages.
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.WindowSizeMsg:
+		m.width, m.height = msg.Width, msg.Height
+	case tickMsg:
+		m.frame(time.Time(msg))
+		return m, tick()
+	case tea.KeyPressMsg:
+		return m, m.key(msg.String())
+	}
+	return m, nil
+}
+
+func (m *Model) key(k string) tea.Cmd {
+	switch k {
+	case "q", "ctrl+c":
+		m.quitting = true
+		return tea.Quit
+	case "space":
+		m.running = !m.running
+		m.lastTick = time.Time{}
+		if m.running {
+			m.status = ""
+		} else {
+			m.status = "Paused."
+		}
+	case "1", "2", "3", "4", "5":
+		m.speed = int(k[0] - '1')
+		m.carryMs = 0
+		m.status = "Speed " + speeds[m.speed].label
+	case "n":
+		m.running = false
+		if m.sess.StepVisible() == session.Horizon {
+			m.status = "Nothing observable in the next 7 days."
+		} else {
+			m.status = "Stepped to the next event."
+		}
+		m.refresh()
+	case "a":
+		m.autoPause = !m.autoPause
+		if m.autoPause {
+			m.status = "Auto-pause on alerts: on"
+		} else {
+			m.status = "Auto-pause on alerts: off"
+		}
+	}
+	return nil
+}
+
+// frame advances the simulation for one tick of wall time.
+func (m *Model) frame(now time.Time) {
+	if !m.running {
+		m.lastTick = now
+		return
+	}
+	elapsed := frame
+	if !m.lastTick.IsZero() {
+		elapsed = min(now.Sub(m.lastTick), maxFrameGap)
+	}
+	m.lastTick = now
+	opts := session.Options{StopOnAlert: m.autoPause}
+	sp := speeds[m.speed]
+
+	var why session.Reason
+	switch {
+	case !m.obs.Practice.Open && sp.perSec != 0:
+		// Nobody watches an empty building: jump to the next observable
+		// entry (normally "Practice opens").
+		why = m.sess.StepVisible()
+	case sp.perSec == 0:
+		opts.EventBudget = maxEventsPerFrame
+		why = m.sess.Advance(simtime.Day, opts)
+	default:
+		simMs := int64(sp.perSec)*elapsed.Milliseconds() + m.carryMs
+		m.carryMs = simMs % 1000
+		why = m.sess.Advance(simtime.Duration(simMs/1000), opts)
+	}
+	if why == session.Alert {
+		m.running = false
+		m.status = "Auto-paused on an alert."
+	}
+	m.refresh()
+}
+
+// View renders the screen.
+func (m *Model) View() tea.View {
+	v := tea.NewView(m.render())
+	v.AltScreen = true
+	return v
+}
