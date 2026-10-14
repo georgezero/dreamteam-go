@@ -497,8 +497,8 @@ dreamteam-go/
 │   └── records/                sample run records
 └── docs/
     ├── PLAN.md  ROADMAP.md  SIMULATION_DESIGN.md  TUI_DESIGN.md
-    ├── ASSUMPTIONS.md          (V0.1 step 19: every tunable value, source, label)
-    ├── calibration/pnl-model.xlsx  (V0.1 step 19: P&L calibration workbook, ROADMAP §10)
+    ├── ASSUMPTIONS.md          (V0.1 step 18: every tunable value, source, label)
+    ├── calibration/pnl-model.xlsx  (V0.1 step 18: P&L calibration workbook, ROADMAP §10)
     └── turns/                  short per-change notes (optional)
 ```
 
@@ -616,15 +616,16 @@ allocation, global billing (per-read teleradiology possible as a V0.4 option)
 1 h/s, Max, starting paused. See §12.1. The questions in §12.2 remain open
 until their listed version.
 
-### 13.5 Proposed implementation sequence
+### 13.5 Proposed implementation sequence (walking skeleton)
 
-1 simtime → 2 rng → 3 queue/timestamp transactions (+chunking invariance) →
-4 scenario → 5 rooms/staff/shifts → 6 demand/booking → 7 arrivals/walk-ins →
-8 registration/imaging → 9 reading → 10 ledger/claims → 11 warm-up →
-12 log/metrics →
-13 api/projection/actions → 14 session/replay → 15 CLI → **16 TUI dashboard
-(first playable)** → 17 TUI screens → 18 actions/summary → 19 calibration →
-20 docs. Details and closing tests: ROADMAP §2.
+1 simtime → 2 rng → 3 queue/timestamp transactions (+chunking invariance,
+synthetic-load benchmark) → **4 minimal api/session + TUI shell (first thing
+you can watch: clock, controls, event log)** → 5 mini scenario + rooms/staff/
+shifts → 6 demand/booking (schedule view) → 7 arrivals/walk-ins → 8
+registration/imaging → 9 reading → 10 ledger/claims → 11 warm-up (real
+established Tuesday) → 12 alerts/metrics/summary → 13 actions → 14 replay →
+15 CLI → 16 TUI polish + golden screens → 17 end-to-end replay → 18
+calibration → 19 performance → 20 docs. Details and closing tests: ROADMAP §2.
 
 ### 13.6 V0.1 acceptance criteria
 
