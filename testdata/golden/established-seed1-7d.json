@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.result/v1",
- "engine": "0.1.0-dev.15",
+ "engine": "0.1.0-dev.18.1",
  "scenario": {
   "id": "established",
   "fingerprint": "b1cbc2a0108f22e34082a0d39f72499678a3eb2f8b2501d483f3525a39ad806a"
@@ -27,8 +27,8 @@
   "log": "aebb2f625d74a79bf4258e45ea8e19f9a73107f2fb74e225fb376ccd1ea9e269",
   "ledger": "7d6a07681bab6ef3c166c8ecfea557729e48212652f71b83f7df41446532e569",
   "actions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-  "state": "8a2a0fd9228115e420e60c588bf8089630c3f67d533f379c747ad6164a1afefd",
-  "run": "af8fb442c2463c39e2e547a5f5d875f38ae3af99c31ec6aa177f538763068ce7"
+  "state": "c4d6b46c4d9446a194943c619be5442fa5d44479c1847374db6afbaa97438d50",
+  "run": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce"
  },
  "calendar": [
   {
@@ -36,7 +36,7 @@
    "weekday": "Tue",
    "takeover": true,
    "orders": 63,
-   "lost": 4,
+   "lost": 3,
    "walkIns": 7,
    "noShows": 2,
    "exams": 70,
@@ -156,7 +156,7 @@
    "date": "2026-10-19",
    "weekday": "Mon",
    "orders": 75,
-   "lost": 6,
+   "lost": 5,
    "walkIns": 5,
    "noShows": 3,
    "exams": 33,
@@ -190,12 +190,12 @@
    "complete": false,
    "demand": {
     "received": 329,
-    "booked": 329,
+    "booked": 328,
     "recall": 13,
-    "lost": 33,
+    "lost": 31,
     "cancelled": 32,
     "lostRate": {
-     "num": 33,
+     "num": 31,
      "den": 329
     },
     "byModality": [
@@ -208,7 +208,7 @@
      {
       "modality": "US",
       "received": 58,
-      "lost": 15,
+      "lost": 13,
       "exams": 31
      },
      {
@@ -223,7 +223,12 @@
       "lost": 9,
       "exams": 43
      }
-    ]
+    ],
+    "walkInOrigin": {
+     "booked": 1,
+     "lost": 2,
+     "cancelled": 0
+    }
    },
    "appointments": {
     "scheduled": 319,
@@ -249,12 +254,26 @@
    },
    "walkIns": {
     "arrived": 44,
-    "sentToBook": 3,
+    "admitted": 41,
+    "offered": 3,
     "declined": 0,
-    "imaged": 19,
+    "unservable": 3,
+    "offerBooked": 1,
+    "offerFailed": 2,
     "left": 24,
+    "sameVisitExams": 17,
+    "returnExams": 2,
+    "cohort": {
+     "arrived": 44,
+     "imagedSameVisit": 17,
+     "converted": 1,
+     "convertedImaged": 0,
+     "left": 24,
+     "lost": 2,
+     "onSite": 0
+    },
     "acceptance": {
-     "num": 19,
+     "num": 17,
      "den": 44
     },
     "abandonment": {
@@ -800,6 +819,6 @@
  "replay": {
   "verified": true,
   "batches": 0,
-  "runDigest": "af8fb442c2463c39e2e547a5f5d875f38ae3af99c31ec6aa177f538763068ce7"
+  "runDigest": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce"
  }
 }

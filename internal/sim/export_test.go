@@ -350,3 +350,21 @@ func (w *World) StateDigestParts() map[string]string {
 	}
 	return out
 }
+
+// StudyOrders lists the order of every study; ClaimOrders that of every
+// claim.
+func (w *World) StudyOrders() []string {
+	var out []string
+	for _, s := range w.st.dem.studies {
+		out = append(out, orderID(s.order))
+	}
+	return out
+}
+
+func (w *World) ClaimOrders() []string {
+	var out []string
+	for _, c := range w.st.fin.claims {
+		out = append(out, orderID(c.order))
+	}
+	return out
+}

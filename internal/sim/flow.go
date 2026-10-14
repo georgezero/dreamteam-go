@@ -61,8 +61,19 @@ type visit struct {
 // flowCounts are patient-flow and operations counters.
 type flowCounts struct {
 	arrived, early, late, afterGrace int // scheduled patients
-	walkIns, walkInsBooked           int // walk-ins; those sent away with an appointment
-	walkInsDeclined                  int // … of them, by the walk-in policy
+	// Walk-ins (step 18.1): arrivals; admitted on the visit they came in
+	// on; offered an appointment instead — declined by the policy, or
+	// unservable today — and whether that offer booked; exams on the
+	// walk-in visit itself, and later exams of walk-in orders on scheduled
+	// visits (returns).
+	walkIns, walkInsAdmitted                int
+	walkInsDeclined, walkInsUnservable      int
+	walkInsOfferBooked, walkInsOfferFailed  int
+	walkInSameVisitExams, walkInReturnExams int
+	// Booking events of walk-in-originated orders (any time: offers,
+	// rebookings, cancellations), kept apart from the
+	// referral demand counters.
+	wiBooked, wiLost, wiCancelled    int
 	missed, noShows, rescheduled     int
 	left                             int
 	registered, selfRegistered       int
@@ -349,15 +360,23 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 		ok, why, declined = false, "walk-in policy: no walk-ins after "+simtime.FormatClock(st.pol.WalkInCutoff), true
 	}
 	if !ok {
-		st.dem.flowToday.walkInsBooked++
-		st.dem.flowTotal.walkInsBooked++
-		if declined {
-			st.dem.flowToday.walkInsDeclined++
-			st.dem.flowTotal.walkInsDeclined++
+		booked := st.offer(e, oi, st.day+1, head+" ("+why+")", "")
+		for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
+			if declined {
+				f.walkInsDeclined++
+			} else {
+				f.walkInsUnservable++
+			}
+			if booked {
+				f.walkInsOfferBooked++
+			} else {
+				f.walkInsOfferFailed++
+			}
 		}
-		st.offer(e, oi, st.day+1, head+" ("+why+")", "")
 		return
 	}
+	st.dem.flowToday.walkInsAdmitted++
+	st.dem.flowTotal.walkInsAdmitted++
 	vi := st.openVisit(e, oi, -1, 0, 0)
 	patience := simtime.Duration(st.cfg.Behavior.WalkInPatienceMin.Sample(
 		st.hash("patient", key.keys()...).Lane(2))) * simtime.Minute

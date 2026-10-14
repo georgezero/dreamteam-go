@@ -1,8 +1,9 @@
 package sim
 
 import (
+	"encoding/binary"
 	"fmt"
-	"math/bits"
+	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/rng"
@@ -68,6 +69,10 @@ type order struct {
 	walkIn    bool
 	lostWhy   string // observable reason, when lost
 	endedAt   simtime.Time
+	// examAt is when the order's exam started (0 before); examSameVisit
+	// says it was on the walk-in visit itself, not a scheduled one.
+	examAt        simtime.Time
+	examSameVisit bool
 }
 
 type apptState uint8
@@ -184,6 +189,23 @@ func (st *state) modalities() []string {
 	return out
 }
 
+// countOrder counts a booking event of order o: referral orders in the
+// modality's demand counters, walk-in-originated orders apart (step 18.1),
+// so referral demand and its loss rate stay one population.
+func (st *state) countOrder(o *order, f func(*modalityCounts)) {
+	if !o.walkIn {
+		st.count(o.exam, f)
+		return
+	}
+	var c modalityCounts
+	f(&c)
+	for _, fl := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
+		fl.wiBooked += c.booked
+		fl.wiLost += c.lost
+		fl.wiCancelled += c.cancelled
+	}
+}
+
 func (st *state) count(exam int, f func(*modalityCounts)) {
 	m := st.cfg.Catalog[exam].Modality
 	f(st.dem.today[m])
@@ -248,44 +270,148 @@ func (st *state) coverSlot(cov *Coverage, r int, s *slot) {
 	}
 }
 
-// sharedFree applies the shared-capacity rule (§5.3): within every
-// stretch of the slot with constant coverage, the appointments already
-// booked in other rooms that need one of this room's technologists then
-// must leave at least one of them free. One technologist covering XR and
-// CT can't be booked in both rooms at once.
+// sharedFree applies the shared-capacity rule (§5.3): slot s of room r is
+// free for booking if every appointment already booked that day, plus one
+// in s, can each be given a distinct technologist rostered to its room
+// throughout — one technologist, one exam at a time. Appointments are cut
+// at coverage boundaries, where a handover may happen; within a coverage
+// segment a piece keeps one technologist. The answer depends only on the
+// set of appointments, never on the order they were booked in.
 func sharedFree(ds *daySlots, r int, s *slot) bool {
 	if !s.shared {
-		return true
+		return true // nobody staffing s staffs another room meanwhile
 	}
-	for _, seg := range ds.segs {
-		if seg.To <= s.From || seg.From >= s.To {
-			continue
-		}
-		var here uint64
-		for _, e := range seg.Rooms[r] {
-			here |= 1 << uint(e)
-		}
-		lo, hi := max(seg.From, s.From), min(seg.To, s.To)
-		load := 0
-		for r2 := range ds.rooms {
-			if r2 == r {
+	type piece struct {
+		from, to simtime.Duration
+		staff    uint64
+	}
+	cut := func(room int, sp Span, proposed bool) ([]piece, bool) {
+		var out []piece
+		for _, seg := range ds.segs {
+			if seg.To <= sp.From || seg.From >= sp.To {
 				continue
 			}
-			for k := range ds.rooms[r2] {
-				o := &ds.rooms[r2][k]
+			var m uint64
+			for _, e := range seg.Rooms[room] {
+				m |= 1 << uint(e)
+			}
+			if m == 0 {
+				if proposed {
+					return nil, false
+				}
+				continue // an unstaffed stretch of a booked slot: nobody to assign
+			}
+			out = append(out, piece{max(seg.From, sp.From), min(seg.To, sp.To), m})
+		}
+		return out, true
+	}
+	pieces, ok := cut(r, s.Span, true)
+	if !ok {
+		return false
+	}
+	var comp uint64
+	for _, p := range pieces {
+		comp |= p.staff
+	}
+	// The cluster linked to the new appointment by shared staff and
+	// overlapping time: assignments in disjoint clusters do not constrain
+	// one another. Booked slots are screened by their rostered staff and
+	// the cluster's time window before being cut into pieces.
+	type ref struct{ room, k int }
+	taken := map[ref]bool{}
+	overlaps := func(p piece) bool {
+		for _, q := range pieces {
+			if p.from < q.to && q.from < p.to {
+				return true
+			}
+		}
+		return false
+	}
+	lo, hi := s.From, s.To
+	for grew := true; grew; {
+		grew = false
+		for room := range ds.rooms {
+			for k := range ds.rooms[room] {
+				o := &ds.rooms[room][k]
 				if o.From >= hi {
 					break
 				}
-				if o.appt >= 0 && o.To > lo && o.staff&here != 0 {
-					load++
+				if o.appt < 0 || o.To <= lo || o.staff&comp == 0 || taken[ref{room, k}] {
+					continue
 				}
+				ps, _ := cut(room, o.Span, false)
+				linked := false
+				for _, p := range ps {
+					if p.staff&comp != 0 && overlaps(p) {
+						linked = true
+					}
+				}
+				if !linked {
+					continue
+				}
+				taken[ref{room, k}] = true
+				for _, p := range ps {
+					comp |= p.staff
+					lo, hi = min(lo, p.from), max(hi, p.to)
+				}
+				pieces = append(pieces, ps...)
+				grew = true
 			}
 		}
-		if load >= bits.OnesCount64(here) {
-			return false
-		}
 	}
-	return true
+	slices.SortFunc(pieces, func(a, b piece) int {
+		if a.from != b.from {
+			return int(a.from - b.from)
+		}
+		if a.to != b.to {
+			return int(a.to - b.to)
+		}
+		return int(a.staff) - int(b.staff)
+	})
+	// Assign technologists in start order; busy holds the technologists
+	// still in an earlier piece and when they come free.
+	type held struct {
+		tech  int
+		until simtime.Duration
+	}
+	memo := map[string]bool{}
+	var assign func(i int, busy []held) bool
+	assign = func(i int, busy []held) bool {
+		if i == len(pieces) {
+			return true
+		}
+		p := pieces[i]
+		var free uint64 = p.staff
+		live := busy[:0:0]
+		for _, h := range busy {
+			if h.until > p.from {
+				live = append(live, h)
+				free &^= 1 << uint(h.tech)
+			}
+		}
+		key := make([]byte, 0, 8+12*len(live))
+		key = binary.AppendUvarint(key, uint64(i))
+		for _, h := range live {
+			key = binary.AppendUvarint(key, uint64(h.tech))
+			key = binary.AppendUvarint(key, uint64(h.until))
+		}
+		if v, ok := memo[string(key)]; ok {
+			return v
+		}
+		res := false
+		for t := 0; free != 0 && !res; t++ {
+			if free&(1<<uint(t)) == 0 {
+				continue
+			}
+			free &^= 1 << uint(t)
+			next := append(slices.Clone(live), held{t, p.to})
+			slices.SortFunc(next, func(a, b held) int { return a.tech - b.tech })
+			res = assign(i+1, next)
+		}
+		memo[string(key)] = res
+		return res
+	}
+	return assign(0, nil)
 }
 
 // CheckOpening books a scenario's opening schedule in order under the same
@@ -417,7 +543,7 @@ func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) boo
 		pick = any
 	default:
 		o.state, o.endedAt = orderLost, e.Now()
-		st.count(o.exam, func(c *modalityCounts) { c.lost++ })
+		st.countOrder(o, func(c *modalityCounts) { c.lost++ })
 		why := fmt.Sprintf("no %s slot within %d days", st.cfg.Catalog[o.exam].Modality, st.cfg.Policies.BookingHorizonDays)
 		if hasAny {
 			why = "declined, earliest slot " + st.dayLabel(any.day)
@@ -430,7 +556,7 @@ func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) boo
 		return false
 	}
 	ai := st.book(e, oi, pick, false)
-	st.count(o.exam, func(c *modalityCounts) { c.booked++ })
+	st.countOrder(o, func(c *modalityCounts) { c.booked++ })
 	st.emit(e.Now(), api.Info, "orders", fmt.Sprintf("%s → booked %s %s (%s)%s",
 		head, st.dayLabel(pick.day), simtime.FormatClock(st.slotAt(pick).From), apptID(ai), tail))
 	return true
@@ -551,7 +677,7 @@ func (st *state) cancel(e *Engine, ai int) {
 	a.state, a.endedAt = apptCancelled, e.Now()
 	s.appt = -1
 	st.dem.days[a.day].booked--
-	st.count(o.exam, func(c *modalityCounts) { c.cancelled++ })
+	st.countOrder(o, func(c *modalityCounts) { c.cancelled++ })
 	head := fmt.Sprintf("%s cancelled (%s %s, %s %s)", apptID(ai), orderID(a.order),
 		st.examLabel(o.exam), st.dayLabel(a.day), simtime.FormatClock(s.From))
 

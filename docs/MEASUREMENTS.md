@@ -215,3 +215,12 @@ template slots (unstaffed unless extended) add nothing measurable.
 | `TestEstablishedCharacterization` (3 seeds × 30 days, untagged) | ≈5.4 s |
 
 No engine change; warm-up and run times as in step 15.
+
+## 2026-10-14 — V0.1 step 18.1 (Pi at ~80 °C, timings bimodal)
+
+| Measurement | Result |
+|---|---|
+| Established warm-up, old `sharedFree` (`b1a9ffb`) vs the feasibility check, interleaved best-of | 1.43–1.60 s vs 1.47–1.54 s: no measurable change |
+| First feasibility version (cut every booked slot on each call) | 2.4–3.0 s; profiling showed the cutting dominated, so booked slots are now screened by shared staff and time window before cutting |
+| `-tags calibration -run 'CalibrationExperiments$'`: 10 manifests, 9 seeds each (6 × 90 days, 4 × 30 days) | ≈270 s |
+| `TestRegress18WalkInCohorts` (established, 21 days, per-day cohort checks) | ≈3 s |

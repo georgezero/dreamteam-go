@@ -248,7 +248,7 @@ func TestWalkInPolicies(t *testing.T) {
 		t.Fatalf("walk-in arrivals changed with the policy (%d, %d, %d)", len(pa), len(da), len(ua))
 	}
 	fp, fd, fu := plain.Observe(0).Flow.Today, decline.Observe(0).Flow.Today, until.Observe(0).Flow.Today
-	if fp.WalkInsDeclined != 0 || fd.WalkInsDeclined != len(da) || fd.WalkInsBooked < fd.WalkInsDeclined ||
+	if fp.WalkInsDeclined != 0 || fd.WalkInsDeclined != len(da) || fd.WalkInsOffered < fd.WalkInsDeclined ||
 		fu.WalkInsDeclined != len(late) || fd.WalkIns != fp.WalkIns {
 		t.Fatalf("declined: plain %+v, decline %+v, until %+v (late arrivals %d)", fp, fd, fu, len(late))
 	}
@@ -258,15 +258,14 @@ func TestWalkInPolicies(t *testing.T) {
 		}
 	}
 	// Declined walk-ins remain demand: each became an order offered
-	// appointments and is counted once as booked, put on recall or lost.
-	offers := func(w *sim.World) (n int) {
-		for _, m := range w.Observe(0).Demand.Modalities {
-			n += m.Today.Booked + m.Today.Recall + m.Today.Lost
+	// appointments, and the offer either booked or failed — exactly once.
+	for _, f := range []api.FlowCounts{fp, fd, fu} {
+		if f.WalkInsOfferBooked+f.WalkInsOfferFailed != f.WalkInsOffered || f.WalkInsAdmitted+f.WalkInsOffered != f.WalkIns {
+			t.Fatalf("walk-in offers do not add up: %+v", f)
 		}
-		return n
 	}
-	if offers(decline)-offers(plain) < len(da) || offers(until)-offers(plain) < len(late) {
-		t.Fatalf("offers %d (plain), %d (decline all %d), %d (until, %d late)", offers(plain), offers(decline), len(da), offers(until), len(late))
+	if fd.WalkInsOffered != len(da) || fu.WalkInsOffered < len(late) {
+		t.Fatalf("offers %d (decline all %d), %d (until, %d late)", fd.WalkInsOffered, len(da), fu.WalkInsOffered, len(late))
 	}
 	booked := map[string]bool{}
 	for _, ap := range decline.Appointments() {
@@ -277,7 +276,8 @@ func TestWalkInPolicies(t *testing.T) {
 			t.Fatalf("declined walk-in %s neither booked, on recall nor lost: %q", o.ID, o.State)
 		}
 	}
-	if m := day(t, decline, 0).Ops.WalkIns; m.Declined != len(da) || m.Arrived != len(da) || m.Acceptance.Num != 0 {
+	if m := day(t, decline, 0).Ops.WalkIns; m.Declined != len(da) || m.Arrived != len(da) || m.Acceptance.Num != 0 ||
+		m.Admitted != 0 || m.Offered != len(da) || m.Cohort.Arrived != len(da) || m.Cohort.ImagedSameVisit != 0 {
 		t.Fatalf("walk-in metrics %+v", m)
 	}
 }
@@ -668,8 +668,8 @@ func TestInterventionsChangeOutcomesNotDemand(t *testing.T) {
 	row("walk-ins arrived", ep.Ops.WalkIns.Arrived, ea.Ops.WalkIns.Arrived)
 	row("exams", ep.Ops.Exams, ea.Ops.Exams)
 	row("orders lost", ep.Ops.Demand.Lost, ea.Ops.Demand.Lost)
-	row("walk-ins imaged / left / declined", ints(ep.Ops.WalkIns.Imaged, ep.Ops.WalkIns.Left, ep.Ops.WalkIns.Declined),
-		ints(ea.Ops.WalkIns.Imaged, ea.Ops.WalkIns.Left, ea.Ops.WalkIns.Declined))
+	row("walk-ins imaged same visit / left / declined", ints(ep.Ops.WalkIns.SameVisitExams, ep.Ops.WalkIns.Left, ep.Ops.WalkIns.Declined),
+		ints(ea.Ops.WalkIns.SameVisitExams, ea.Ops.WalkIns.Left, ea.Ops.WalkIns.Declined))
 	row("US staffed/open, busy/open", us(ep, "US"), us(ea, "US"))
 	row("MR staffed/open, busy/open", us(ep, "MR"), us(ea, "MR"))
 	row("wait p90 (min)", ep.Ops.Waits.ToExam.P90Sec/60, ea.Ops.Waits.ToExam.P90Sec/60)

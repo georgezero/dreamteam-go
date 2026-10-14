@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.result/v1",
- "engine": "0.1.0-dev.15",
+ "engine": "0.1.0-dev.18.1",
  "scenario": {
   "id": "established",
   "fingerprint": "b1cbc2a0108f22e34082a0d39f72499678a3eb2f8b2501d483f3525a39ad806a"
@@ -27,8 +27,8 @@
   "log": "6b9c94fed7f7062684ec91126c6b42bde54e63f4e57859c0afc20d402671f7fe",
   "ledger": "82d511608b6d29abdd7b132dd4fafb15b860f5055a4c89cc5aca20fb96256a39",
   "actions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
-  "state": "8f7de97d1fc07300cd4fb1c84e2b36fb9b8800282fb67d40f80ebb90afe993c3",
-  "run": "a25871c771ccf9559ba80a7a2c03cc5558550f89ad98d6c6110810012b973f09"
+  "state": "8c6575d355650c59eee855f4c1facc94c150a7df71b76ed125cb09c27c39af6f",
+  "run": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d"
  },
  "calendar": [
   {
@@ -36,7 +36,7 @@
    "weekday": "Tue",
    "takeover": true,
    "orders": 63,
-   "lost": 4,
+   "lost": 3,
    "walkIns": 7,
    "noShows": 2,
    "exams": 70,
@@ -156,7 +156,7 @@
    "date": "2026-10-19",
    "weekday": "Mon",
    "orders": 75,
-   "lost": 6,
+   "lost": 5,
    "walkIns": 5,
    "noShows": 3,
    "exams": 33,
@@ -956,7 +956,7 @@
    "date": "2026-11-28",
    "weekday": "Sat",
    "orders": 18,
-   "lost": 1,
+   "lost": 0,
    "walkIns": 4,
    "noShows": 0,
    "exams": 17,
@@ -996,7 +996,7 @@
    "date": "2026-11-30",
    "weekday": "Mon",
    "orders": 68,
-   "lost": 9,
+   "lost": 8,
    "walkIns": 6,
    "noShows": 3,
    "exams": 32,
@@ -1516,7 +1516,7 @@
    "date": "2026-12-26",
    "weekday": "Sat",
    "orders": 11,
-   "lost": 5,
+   "lost": 4,
    "walkIns": 7,
    "noShows": 2,
    "exams": 17,
@@ -1850,12 +1850,12 @@
    "complete": false,
    "demand": {
     "received": 4171,
-    "booked": 4110,
+    "booked": 4081,
     "recall": 131,
-    "lost": 370,
-    "cancelled": 354,
+    "lost": 365,
+    "cancelled": 352,
     "lostRate": {
-     "num": 370,
+     "num": 365,
      "den": 4171
     },
     "byModality": [
@@ -1868,7 +1868,7 @@
      {
       "modality": "US",
       "received": 847,
-      "lost": 192,
+      "lost": 187,
       "exams": 618
      },
      {
@@ -1883,7 +1883,12 @@
       "lost": 83,
       "exams": 510
      }
-    ]
+    ],
+    "walkInOrigin": {
+     "booked": 29,
+     "lost": 5,
+     "cancelled": 2
+    }
    },
    "appointments": {
     "scheduled": 4141,
@@ -1909,12 +1914,26 @@
    },
    "walkIns": {
     "arrived": 657,
-    "sentToBook": 33,
+    "admitted": 624,
+    "offered": 33,
     "declined": 0,
-    "imaged": 336,
+    "unservable": 33,
+    "offerBooked": 28,
+    "offerFailed": 5,
     "left": 318,
+    "sameVisitExams": 306,
+    "returnExams": 30,
+    "cohort": {
+     "arrived": 657,
+     "imagedSameVisit": 306,
+     "converted": 28,
+     "convertedImaged": 26,
+     "left": 318,
+     "lost": 5,
+     "onSite": 0
+    },
     "acceptance": {
-     "num": 336,
+     "num": 306,
      "den": 657
     },
     "abandonment": {
@@ -2460,6 +2479,6 @@
  "replay": {
   "verified": true,
   "batches": 0,
-  "runDigest": "a25871c771ccf9559ba80a7a2c03cc5558550f89ad98d6c6110810012b973f09"
+  "runDigest": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d"
  }
 }

@@ -35,16 +35,16 @@ type empTally struct {
 // snapshot); the list lengths bound the samples, studies, reports and
 // alerts that existed then.
 type tally struct {
-	at          simtime.Time
-	rooms       []roomTally
-	emps        []empTally
-	deskSelf    simtime.Duration // patient-time waiting to register, no desk staff on duty
-	walkInExams int
-	flow        flowCounts
-	dem         [maxMods]modalityCounts
+	at       simtime.Time
+	rooms    []roomTally
+	emps     []empTally
+	deskSelf simtime.Duration // patient-time waiting to register, no desk staff on duty
+	flow     flowCounts
+	dem      [maxMods]modalityCounts
 
 	waits, studies, finals, raised int
 	actions                        int // action records
+	orders                         int // orders received
 	backlog                        int // unread + reading
 }
 
@@ -157,7 +157,7 @@ func (st *state) snapshot(now simtime.Time) tally {
 	}
 	t.waits, t.studies, t.finals = len(st.met.waits), len(st.dem.studies), len(st.dem.finals)
 	t.raised, t.backlog = len(st.alerts.raised), len(st.dem.worklist)
-	t.actions = len(st.actions.log)
+	t.actions, t.orders = len(st.actions.log), len(st.dem.orders)
 	return t
 }
 
@@ -192,8 +192,16 @@ func (f *flowCounts) add(g *flowCounts) {
 	f.late += g.late
 	f.afterGrace += g.afterGrace
 	f.walkIns += g.walkIns
-	f.walkInsBooked += g.walkInsBooked
+	f.walkInsAdmitted += g.walkInsAdmitted
 	f.walkInsDeclined += g.walkInsDeclined
+	f.walkInsUnservable += g.walkInsUnservable
+	f.walkInsOfferBooked += g.walkInsOfferBooked
+	f.walkInsOfferFailed += g.walkInsOfferFailed
+	f.walkInSameVisitExams += g.walkInSameVisitExams
+	f.walkInReturnExams += g.walkInReturnExams
+	f.wiBooked += g.wiBooked
+	f.wiLost += g.wiLost
+	f.wiCancelled += g.wiCancelled
 	f.otApprovedSec += g.otApprovedSec
 	f.otApprovedCost += g.otApprovedCost
 	f.missed += g.missed
@@ -215,6 +223,38 @@ func (f *flowCounts) add(g *flowCounts) {
 	f.breaches += g.breaches
 }
 
+// walkInCohort follows the walk-ins who arrived with orders [from, to)
+// to their outcome as of time at, from timestamps only (later events do
+// not leak in): each originating walk-in is counted once, in exactly one
+// outcome, unresolved ones included.
+func (st *state) walkInCohort(from, to int, at simtime.Time) api.WalkInCohort {
+	var c api.WalkInCohort
+	for oi := from; oi < to; oi++ {
+		o := &st.dem.orders[oi]
+		if !o.walkIn {
+			continue
+		}
+		c.Arrived++
+		examined := o.examAt != 0 && o.examAt <= at
+		switch {
+		case examined && o.examSameVisit:
+			c.ImagedSameVisit++
+		case len(o.appts) > 0 && st.dem.appts[o.appts[0]].bookedAt <= at:
+			c.Converted++
+			if examined {
+				c.ConvertedImaged++
+			}
+		case o.state == orderLeft && o.endedAt <= at:
+			c.Left++
+		case o.state == orderLost && o.endedAt <= at:
+			c.Lost++
+		default:
+			c.OnSite++
+		}
+	}
+	return c
+}
+
 // noteExamStart records the wait sample for visit vi.
 func (st *state) noteExamStart(vi int) {
 	v := &st.dem.visits[vi]
@@ -224,8 +264,17 @@ func (st *state) noteExamStart(vi int) {
 	if v.appt >= 0 && !v.afterGrace {
 		s.pastAppt = int32(max(0, v.examStart.Sub(max(v.arrived, st.apptStart(v.appt)))))
 	}
-	if o.walkIn {
-		st.met.cum.walkInExams++
+	if o.examAt == 0 {
+		o.examAt, o.examSameVisit = v.examStart, v.appt < 0
+		if o.walkIn {
+			for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
+				if o.examSameVisit {
+					f.walkInSameVisitExams++
+				} else {
+					f.walkInReturnExams++
+				}
+			}
+		}
 	}
 	st.met.waits = append(st.met.waits, s)
 }
@@ -270,16 +319,21 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 		dm.ByModality = append(dm.ByModality, api.ModalityDemandMetrics{Modality: m, Received: c.received, Lost: c.lost})
 	}
 	dm.LostRate = ratio(int64(dm.Lost), int64(dm.Received))
+	dm.WalkInOrigin = api.WalkInOriginDemand{Booked: f.wiBooked, Lost: f.wiLost, Cancelled: f.wiCancelled}
 
 	// Appointments whose slot starts in [a.at, b.at).
 	p.Appointments = st.apptMetrics(a.at, b.at)
 
 	// Walk-ins.
 	wi := &p.WalkIns
-	wi.Arrived, wi.SentToBook, wi.Declined, wi.Left = f.walkIns, f.walkInsBooked, f.walkInsDeclined, f.left
-	wi.Imaged = b.walkInExams - a.walkInExams
-	wi.Acceptance = ratio(int64(wi.Imaged), int64(wi.Arrived))
-	wi.Abandonment = ratio(int64(wi.Left), int64(wi.Arrived))
+	wi.Arrived, wi.Admitted, wi.Left = f.walkIns, f.walkInsAdmitted, f.left
+	wi.Declined, wi.Unservable = f.walkInsDeclined, f.walkInsUnservable
+	wi.Offered = f.walkInsDeclined + f.walkInsUnservable
+	wi.OfferBooked, wi.OfferFailed = f.walkInsOfferBooked, f.walkInsOfferFailed
+	wi.SameVisitExams, wi.ReturnExams = f.walkInSameVisitExams, f.walkInReturnExams
+	wi.Cohort = st.walkInCohort(a.orders, b.orders, b.at)
+	wi.Acceptance = ratio(int64(wi.Cohort.ImagedSameVisit), int64(wi.Cohort.Arrived))
+	wi.Abandonment = ratio(int64(wi.Cohort.Left), int64(wi.Cohort.Arrived))
 
 	// Waits over exams started in the period.
 	var reg, toExam, past []int64
@@ -449,8 +503,16 @@ func (f *flowCounts) scale(k int) {
 	f.late *= k
 	f.afterGrace *= k
 	f.walkIns *= k
-	f.walkInsBooked *= k
+	f.walkInsAdmitted *= k
 	f.walkInsDeclined *= k
+	f.walkInsUnservable *= k
+	f.walkInsOfferBooked *= k
+	f.walkInsOfferFailed *= k
+	f.walkInSameVisitExams *= k
+	f.walkInReturnExams *= k
+	f.wiBooked *= k
+	f.wiLost *= k
+	f.wiCancelled *= k
 	f.otApprovedSec *= simtime.Duration(k)
 	f.otApprovedCost *= int64(k)
 	f.missed *= k

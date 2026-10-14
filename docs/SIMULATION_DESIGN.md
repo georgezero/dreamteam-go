@@ -2153,7 +2153,7 @@ median and p90 use the same definition.
 | No-show rate | no-shows (incl. missed, provisional until accounting close) / (scheduled − cancelled), appointments starting in the period | |
 | Cancellation rate | cancelled / scheduled | |
 | Lost demand rate | orders lost / orders received | |
-| Walk-in acceptance / abandonment | imaged / arrived; left / arrived | |
+| Walk-in acceptance / abandonment | over the cohort of walk-ins who arrived in the period, as of its end: imaged on the walk-in visit / arrived; left / arrived (step 18.1: a later exam on a scheduled visit is a conversion, counted apart, never same-visit acceptance) | |
 | Waits | arrival → registration start; arrival → exam start; exam start past the appointment time (scheduled patients not fitted in after grace) — over exams started in the period | |
 | TAT (cohort) | studies acquired in the period; unfinished ones at their age at the period end (censored) | |
 | TAT (finalized) | reports finalized in the period; those of studies acquired before it are counted as inherited | |

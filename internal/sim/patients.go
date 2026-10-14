@@ -14,7 +14,9 @@ import (
 
 func flowView(c flowCounts) api.FlowCounts {
 	return api.FlowCounts{Arrived: c.arrived, Early: c.early, Late: c.late, AfterGrace: c.afterGrace,
-		WalkIns: c.walkIns, WalkInsBooked: c.walkInsBooked, Missed: c.missed, NoShows: c.noShows,
+		WalkIns: c.walkIns, WalkInsAdmitted: c.walkInsAdmitted,
+		WalkInsOffered: c.walkInsDeclined + c.walkInsUnservable, WalkInsOfferBooked: c.walkInsOfferBooked,
+		WalkInsOfferFailed: c.walkInsOfferFailed, Missed: c.missed, NoShows: c.noShows,
 		Rescheduled: c.rescheduled, Left: c.left, Registered: c.registered, SelfRegistered: c.selfRegistered,
 		ExamsStarted: c.examsStarted, ExamsDone: c.examsDone, AfterHours: c.afterHours, NoCoverage: c.noCoverage,
 		HeldOver: c.heldOver, SkippedBreaks: c.skippedBreaks, OvertimeMin: int64(c.otSec / simtime.Minute),

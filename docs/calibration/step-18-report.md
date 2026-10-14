@@ -14,6 +14,37 @@ before any change was considered; no scenario input changed afterwards
 (owner decision 2026-10-14, below), so it also describes the calibrated
 default.
 
+## Step 18.1 corrections (0.1.0-dev.18.1)
+
+The step 18 review (`docs/reviews/step-18-astra-review.md`) found
+arithmetic, labeling and provenance problems in this report and three
+engine defects. All are fixed; every experiment was rerun on the fixed
+engine and is now reproducible from a saved manifest:
+
+    go test -tags calibration ./internal/sim -run 'CalibrationExperiments$' -v -timeout 120m
+
+The manifests are `docs/calibration/experiments/*.json` (scenario, overlay,
+strategy, seeds, horizon). Each run writes `docs/calibration/results/<name>.json`
+(engine version, base and overlaid scenario fingerprints, overlay SHA-256,
+per-seed windows, aggregates) and regenerates
+`docs/calibration/results/summary.md`. Corrections below are marked
+**[18.1]**; the baseline tables above the diagnosis are unchanged (the
+fixes changed no outcome of the default practice: log and ledger digests
+are identical, and the referral counters never included walk-ins in those
+tables).
+
+* **Booking feasibility fixed.** Shared-staff booking now checks for an
+  actual assignment of distinct qualified technologists. Default outcomes
+  are identical; only strategies that extend Riley past 16:15 (C, D)
+  change, by at most 1 exam and 0.1 margin points (table below). The
+  struggling-practice characterization stands.
+* **Walk-in accounting separated** (arrival, same-visit admission,
+  conversion to an appointment, exam). Walk-in losses are no longer in
+  referral `lost`: referral lost bookings over 30 days are 129, not 141
+  (the 12 were walk-ins whose offered appointment did not suit them).
+* **Report figures corrected:** the loss decomposition, lead time, TAT
+  labels and the shortest-first effect.
+
 ## Owner decision (2026-10-14)
 
 The default established practice is a **struggling, capacity-constrained
@@ -24,6 +55,10 @@ belongs to a separate better-staffed established practice (next scenario
 milestone, below). The mini scenario is unchanged.
 
 ## Baseline (all nine seeds; per month = ×30.4/days)
+
+**[18.1]** "Lead" is receipt → first appointment day, including the
+referral's own requested lead (split below); TAT rows are all priorities;
+"lost" rows are referral orders only.
 
 ### 30 days
 
@@ -112,9 +147,9 @@ milestone, below). The mini scenario is unchanged.
 | backlog 07:30 Tue–Fri, max               |       11.3 |       10.0 |        9.0 |       18.0 |
 | share of Tue–Fri 07:30 in 5–20 %         |       47.7 |       52.9 |       29.4 |       64.7 |
 | unread at close, mean                    |        5.0 |        4.9 |        4.6 |        5.6 |
-| TAT p50 min (cohort, censored)           |       33.8 |       33.0 |       32.0 |       36.0 |
-| TAT p90 min                              |      305.7 |      141.0 |      119.0 |      665.0 |
-| TAT over target %                        |        5.2 |        5.0 |        4.9 |        5.8 |
+| TAT p50 min, all priorities (censored)   |       33.8 |       33.0 |       32.0 |       36.0 |
+| TAT p90 min, all priorities              |      305.7 |      141.0 |      119.0 |      665.0 |
+| TAT over target %, all priorities        |        5.2 |        5.0 |        4.9 |        5.8 |
 | net revenue $k / month                   |      208.1 |      209.6 |      198.1 |      211.3 |
 | labor $k / month                         |      108.1 |      108.1 |      107.4 |      108.5 |
 | fixed $k / month                         |       87.9 |       87.9 |       87.9 |       87.9 |
@@ -215,9 +250,9 @@ milestone, below). The mini scenario is unchanged.
 | backlog 07:30 Tue–Fri, max               |       12.0 |       12.0 |        9.0 |       18.0 |
 | share of Tue–Fri 07:30 in 5–20 %         |       33.6 |       33.3 |       29.4 |       41.2 |
 | unread at close, mean                    |        4.5 |        4.4 |        4.2 |        4.9 |
-| TAT p50 min (cohort, censored)           |       31.9 |       32.0 |       30.0 |       33.0 |
-| TAT p90 min                              |      122.1 |      119.0 |      115.0 |      132.0 |
-| TAT over target %                        |        5.2 |        5.1 |        5.0 |        5.7 |
+| TAT p50 min, all priorities (censored)   |       31.9 |       32.0 |       30.0 |       33.0 |
+| TAT p90 min, all priorities              |      122.1 |      119.0 |      115.0 |      132.0 |
+| TAT over target %, all priorities        |        5.2 |        5.1 |        5.0 |        5.7 |
 | net revenue $k / month                   |      200.4 |      200.3 |      197.4 |      202.7 |
 | labor $k / month                         |      106.8 |      106.8 |      106.4 |      107.0 |
 | fixed $k / month                         |       87.8 |       87.8 |       87.8 |       87.8 |
@@ -237,22 +272,34 @@ milestone, below). The mini scenario is unchanged.
 1,647 a month (90-day mean), the design's ~1,650. Exams are 1,314 a month
 over 90 days (1,381 over the first 30, before the December season dip).
 
-**Where the 330 a month go** (90-day means): lost bookings 127 (US 64: the
-earliest US slot is beyond the patient's tolerance — US lead time p50 19
-days; MR 29; CT 17; XR 17; "no slot within the horizon" is rare, 7);
-walk-ins leaving before their exam ≈100 (45% of walk-ins, almost all XR);
-no-shows ≈85 (6.5%) and cancellations not rebooked ≈60 (8.9% cancel, half
-rebook) — both as documented in §5.2.
+**Where demand goes [18.1].** The earlier "330 a month" mixed flows (a
+month's exams include orders received before the month; its losses
+include orders received after it) and its parts summed to ≈372. The
+reconciliation is an order cohort: every order received in the window is,
+at its end, completed, ended without an exam, or still outstanding — each
+counted once (`orderCohort` in the results; a hand-checkable one-week
+version is `TestRegress18OrderCohortReconciles`). Nine seeds, 90 days:
+
+| | Received | Completed | Ended without exam | Outstanding at the end |
+|---|---|---|---|---|
+| Referral orders | 4,212 | 2,785 | 632: lost 376 (earliest slot beyond tolerance, or none in the horizon), cancelled 146, no-show 109 | 795: booked 757, on recall 38 |
+| Walk-ins | 662 | 357 | 304: left 295, offered appointment lost 7, later cancelled or no-show 2 | 2 |
+
+Over 30 days the referral cohort is 1,479 received: 704 completed, 197
+ended (lost 129, cancelled 41, no-show 27), 577 outstanding — most
+referrals are booked days to weeks ahead, so a 30-day cohort is mostly
+still waiting at its end. Lost referral bookings per 90 days by modality:
+US the most (≈190), then MR, CT and XR.
 
 **Why: technologist time and slot templates, not rooms.**
 
 | Constraint | Evidence (9-seed means) |
 |---|---|
 | XR/CT on one shared technologist most of the day | Sam 82–86% busy, Riley 76–77%; the XR room is busy only 35–38% of staffed time. Walk-ins who leave registered quickly and then waited 30–112 min for an exam (seed 1 trace). Shorter XR room times (×0.75) add only ~27 exams a month; the walk-in policy (`accept_always`) changes nothing. |
-| US: one technologist, 45-min slots for ~37-min exams | 10.0 exams per Tue–Fri day, 69% busy of staffed time (~72% is the ceiling with these slots and 7% no-shows; the 80–90% target needs shorter slots or overbooking); US loses the most demand. |
+| US: one technologist, 45-min slots for ~37-min exams | 10.0 exams per Tue–Fri day, 69% busy of staffed time (~72% is the ceiling with these slots and 7% no-shows; the 80–90% target needs shorter slots or overbooking); US loses the most demand. **[18.1]** The "lead p50 19 days" in the tables is receipt → first appointment and includes the referral's own requested lead: split, US requested lead p50 ≈9.6 days and capacity delay (earliest wanted day → appointment) p50 ≈3 days; MR 8.3 and ≈1.7; XR and CT ≈5.2 and 0. |
 | MR: one technologist, 9 template slots | 7.7 exams per weekday; 42% busy of open hours (cap 66.7%, dark after 16:30). |
 | Monday thinner by design | XR 19, CT 8.7, US 5.3 per Monday (Sam off; Morgan alternate weeks). |
-| Radiologists over-provisioned for this volume | 63–76% of site-reading block time used; TAT p50 32–34 min; 07:30 backlog mean 3.3 (90 d), takeover worklist ≈0. A cut to 45%/38% site allocation made the queue unstable (TAT p50 20 h); 55%/45% was stable and saved ≈$5k/month — not applied (documented staffing preserved). |
+| Radiologists over-provisioned for this volume | 63–76% of site-reading block time used; TAT p50 32–34 min (all priorities); 07:30 backlog mean 3.3 (90 d), takeover worklist ≈0. A cut to 45%/38% site allocation made the queue unstable (all-priority TAT p50 22 h; rerun `staffing-reduced-reading`); 55%/45% was stable and saved ≈$5k/month — not applied (documented staffing preserved). |
 
 **Economics follow volume.** Net revenue per exam $153 (reference $158.5,
 more XR in the mix); labor $106.8k, fixed $87.8k, variable $32.7k a month —
@@ -264,42 +311,98 @@ all as documented. Operating margin −12.5% over 30 days (seeds −16.9% to
 cancellations, declines or abandonment, and technologists ~94% busy. A
 better-staffed variant shows the limit: three more technologists (an XR/CT
 day technologist and US and MR technologists to the 20:00 close) cut lost
-bookings by 70% (US 62 → 14, MR 28 → 7) but raise exams only 7% (1,407 a
-month over 90 days), because demand, no-shows and cancellations bind; the
-margin falls to −18.7%. A moderately profitable established practice
+referral bookings by 65% (376 → 130 per 90 days) but raise exams only 7%
+(1,390 per 30 days over 90 days, against 1,296), because demand, no-shows
+and cancellations bind; the margin falls to −18.6% (−20.0 to −17.4).
+**[18.1]** Rerun on the fixed booking check (`staffing-three-techs`):
+the same conclusion; the step 18 figures were −18.7% and ≈1,407 a month
+(×30.4/30). XR room times ×0.75 (`staffing-faster-xr`): +25 exams per 30
+days, margin −13.1%. A moderately profitable established practice
 therefore needs more demand (referral growth, V0.4) as well as staff — it
 cannot be configured cleanly from staffing alone, so it is documented as
 the next scenario milestone rather than added now.
 
-## What the player's three actions can do (30 days, nine seeds)
+## What the player's three actions can do (30 days, nine seeds) [18.1]
 
-Strategies decided at the takeover (extensions approved ahead for every
-weekday inside the booking horizon). Demand is identical across strategies
-(asserted for every seed).
+Rerun on the fixed engine (`strategy-b` … `strategy-g`; A is `baseline`).
+Strategies are decided at the takeover; extensions are approved for every
+day the employee works inside the next 30 days, never past the day's
+scheduled close (the step 18 helper also asked for Saturday extensions,
+which were rejected; the harness now asserts every action is accepted).
+Demand is identical across strategies (asserted for every seed in
+`TestCalibrationActions`). Means (range); TAT all priorities; lost =
+referral bookings lost.
 
-| strategy | exams | lost orders | walk-ins left / declined | TAT p50 / p90 min | over target % | overtime h (approved) | net revenue $k | opex $k | profit $k | margin % |
+| strategy | exams | lost | walk-ins left / declined | TAT p50 / p90 min | urgent p90 min / breaches | overtime h (approved) | net revenue $k | opex $k | profit $k | margin % |
 |---|---|---|---|---|---|---|---|---|---|---|
-| A no actions | 1363 (1332–1383) | 141 (118–153) | 108 / 0 | 34 / 306 | 5.2 | 38 (0) | 205.4 (195.5–208.5) | 231.0 (228.6–231.9) | -25.6 (-33.1–-23.1) | -12.5 (-16.9–-11.1) |
-| B US+MR to close, walk-ins until 19:00 | 1431 (1412–1446) | 94 (76–107) | 108 / 5 | 44 / 762 | 5.7 | 151 (117) | 220.6 (214.5–223.6) | 241.2 (239.4–241.9) | -20.6 (-24.9–-17.7) | -9.4 (-11.6–-7.9) |
-| C 2nd XR/CT tech evenings, accept all walk-ins | 1394 (1364–1418) | 127 (105–142) | 89 / 0 | 36 / 326 | 5.2 | 99 (77) | 207.5 (198.0–211.3) | 235.4 (233.2–236.7) | -28.0 (-35.2–-24.8) | -13.5 (-17.8–-11.8) |
-| D all three extensions + accept all | 1460 (1432–1482) | 79 (62–91) | 92 / 0 | 48 / 808 | 6.0 | 214 (194) | 222.4 (216.4–225.2) | 245.7 (244.2–246.7) | -23.3 (-27.8–-20.4) | -10.5 (-12.8–-9.0) |
-| E decline walk-ins, FIFO worklist | 1394 (1360–1429) | 178 (159–192) | 0 / 230 | 33 / 362 | 5.0 | 34 (0) | 205.0 (195.4–209.3) | 230.8 (228.4–231.8) | -25.8 (-32.9–-22.4) | -12.6 (-16.9–-10.7) |
-| F shortest-first worklist | 1363 (1332–1383) | 141 (118–153) | 108 / 0 | 22 / 157 | 5.1 | 38 (0) | 205.4 (195.5–208.6) | 231.0 (228.6–231.9) | -25.6 (-33.1–-23.0) | -12.5 (-16.9–-11.0) |
+| A no actions | 1363 (1332–1383) | 129 (113–144) | 108 / 0 | 34 / 306 | 500 / 6.0 | 38 (0) | 205.4 (195.5–208.5) | 231.0 (228.6–231.9) | -25.6 (-33.1–-23.1) | -12.5 (-16.9–-11.1) |
+| B US+MR to 20:00, walk-ins until 19:00 | 1431 (1412–1446) | 85 (72–93) | 108 / 5 | 44 / 762 | 668 / 7.4 | 151 (117) | 220.6 (214.5–223.6) | 241.2 (239.4–241.9) | -20.6 (-24.9–-17.7) | -9.4 (-11.6–-7.9) |
+| C 2nd XR/CT tech evenings, accept all | 1394 (1368–1420) | 114 (100–131) | 91 / 0 | 36 / 399 | 205 / 6.3 | 100 (77) | 207.6 (198.5–211.3) | 235.5 (233.4–236.9) | -27.8 (-34.9–-25.0) | -13.4 (-17.6–-11.8) |
+| D all three extensions, accept all | 1461 (1433–1484) | 69 (58–74) | 93 / 0 | 49 / 817 | 449 / 9.3 | 214 (194) | 222.5 (217.0–224.8) | 245.7 (244.3–246.9) | -23.2 (-27.3–-20.7) | -10.4 (-12.6–-9.2) |
+| E decline walk-ins, FIFO worklist | 1394 (1360–1429) | 152 (140–166) | 0 / 230 | 33 / 362 | 718 / 10.4 | 34 (0) | 205.0 (195.4–209.3) | 230.8 (228.4–231.8) | -25.8 (-32.9–-22.4) | -12.6 (-16.9–-10.7) |
+| F shortest-first worklist | 1363 (1332–1383) | 129 (113–144) | 108 / 0 | 22 / 157 | 575 / 7.1 | 38 (0) | 205.4 (195.5–208.6) | 231.0 (228.6–231.9) | -25.6 (-33.1–-23.0) | -12.5 (-16.9–-11.0) |
+| G FIFO worklist only | 1363 (1332–1383) | 129 (113–144) | 108 / 0 | 34 / 252 | 603 / 12.1 | 38 (0) | 205.4 (195.5–208.5) | 231.0 (228.6–231.9) | -25.6 (-33.1–-23.1) | -12.5 (-16.9–-11.1) |
 
-* **Capacity costs labor.** Extending US and MR to the close (B) adds 68
-  exams and recovers 47 lost orders for 117 h of approved overtime: profit
-  +$5k a month, margin −9.4%. Adding the XR/CT evening extension (D)
-  raises volume most (+97) but its labor eats the gain. Extending Riley
-  alone (C) loses money: the evening XR/CT work does not cover it.
-* **Declining walk-ins (E) raises exams** (+31): they are offered
-  appointments and mostly come back, instead of leaving after an hour; lost
-  orders rise by those who decline the date. Walk-in demand stays measured
-  (230 declined, counted).
-* **Shortest-first reading (F) halves TAT** (p50 34 → 22 min, p90 306 → 157)
-  at no cost — published expected read times only; MR waits longer.
-* **No strategy reaches break-even.** With the default roster the best is
-  about −9%. Profitability needs hiring and demand growth (V0.4), as
-  expected for a struggling practice.
+Against step 18: B, E and F are identical; C and D moved by at most one
+exam and 0.1 margin points (the booking fix: Riley extended past 16:15
+shares staff with CT); lost is lower in every row because walk-in losses
+are no longer counted as referral losses.
+
+* **Capacity costs labor.** Extending US and MR (B) adds 68 exams and
+  recovers 44 lost bookings for 117 h of approved overtime: profit +$5k a
+  month, margin −9.4%. Adding the XR/CT evening extension (D) raises volume
+  most (+98) but its labor eats the gain. Extending Riley alone (C) loses
+  money.
+* **Declining walk-ins (E) raises exams** (+31): offered appointments
+  mostly come back instead of leaving after an hour; referral losses rise
+  because declined walk-ins take slots. Walk-in demand stays measured (230
+  declined, counted).
+* **Shortest-first reading (F) cuts the all-priority TAT median by about
+  35%** (34 → 22 min; p90 306 → 157) at no cost — published expected read
+  times only. It is not free for urgent studies: see below.
+* **No strategy reaches break-even.** The best is about −9%.
+
+## Urgent turnaround under the worklist policies [18.1]
+
+Paired runs (same seeds and demand), 30 and 90 days: the default
+(`urgent_then_fifo`), FIFO only (G) and shortest-first (F). Studies acquired
+in the window, as of its end; nine-seed means, ranges for max and
+breaches. Breaches are completed over target plus unfinished past it;
+"overnight" are those first claimed on a later day than acquired.
+
+| policy | window | urgent studies | unfinished | urgent p50 / p90 min | urgent max min | urgent breaches (overnight) | routine p50 / p90 min | routine oldest unfinished min |
+|---|---|---|---|---|---|---|---|---|
+| default | 30 d | 39.2 | 0 | 15 / 500 | 1884 (731–2457) | 6 (3–11) (5.0) | 35 / 126 | 361 |
+| FIFO (G) | 30 d | 39.2 | 0 | 29 / 603 | 1893 (757–2457) | 12 (8–22) (6.1) | 35 / 123 | 361 |
+| shortest-first (F) | 30 d | 39.2 | 0 | 16 / 575 | 1894 (742–2465) | 7 (4–13) (5.3) | 22 / 125 | 460 |
+| default | 90 d | 114.8 | 0 | 16 / 282 | 2084 (845–2457) | 15 (8–19) (11.6) | 33 / 112 | 2366 |
+| FIFO (G) | 90 d | 114.8 | 0 | 27 / 599 | 2101 (891–2457) | 33 (29–37) (14.2) | 33 / 109 | 2366 |
+| shortest-first (F) | 90 d | 114.8 | 0 | 16 / 434 | 2083 (839–2465) | 18 (12–23) (12.4) | 22 / 97 | 2366 |
+
+By modality (90 days): urgent XR p50 10 / 19 / 11 min (default / FIFO /
+shortest-first), urgent CT 25 / 54 / 35, urgent US 16 / 47 / 21; urgent MR
+(about one a month) 52 / 52 / 99. Full tables: `results/summary.md`.
+
+* **The default's urgent tail is a coverage gap, not ordering.** About
+  three quarters of its urgent breaches (11.6 of 15 over 90 days) wait
+  overnight: studies acquired after the last reading block (weekday
+  evenings to 20:00, Saturday afternoons) are read the next morning or on
+  Monday. That is the 5–8 h urgent p90 (≈12 h in the seed-1 90-day golden) and the 31–41 h maximum, and it is the
+  same under every policy. Reducing it needs evening or weekend reading
+  coverage, which is a staffing question, not a worklist one.
+* **Within reading hours, the default protects urgent work**; FIFO adds
+  about 15 urgent breaches per 90 days in reading hours (18.8 vs 3.4) and
+  doubles the urgent median.
+* **Shortest-first costs little for urgent work here** (+3 breaches per 90
+  days, 2 of them in reading hours), because the worklist empties often;
+  but a long urgent study is offered after every shorter routine one: the
+  rare urgent MR waits about twice as long (p50 99 vs 52 min), and the
+  controlled micro case (`TestRegress18UrgentLongStudyVsShortRoutine`: one
+  radiologist, a routine XR every 140 s, one urgent MR) shows unbounded
+  starvation when short routine studies never run out — the default reads
+  the urgent study next, FIFO after 5 min, shortest-first not at all in 7
+  hours. No policy semantics changed; whether shortest-first should keep
+  urgent studies first is an owner decision.
 
 ## Targets
 
@@ -315,6 +418,6 @@ weekday inside the booking horizon). Demand is identical across strategies
 | MR open-hours utilization ≤ 65% | 42.5% | met |
 | Radiologist capacity 105–115% of reading demand | ≈145% at this volume | over-provisioned (documented allocation kept) |
 | Unread backlog at 07:30 Tue–Fri 5–20 | mean 3.3, max 9–18; 34% of mornings in 5–20; takeover ≈0 | below, consistent with over-provisioned reading |
-| Routine TAT median 1–4 h | 32 min | faster than target (same cause) |
+| Routine TAT median 1–4 h | 33 min routine (90 d; all priorities 32) [18.1] | faster than target (same cause) |
 | T30 operating margin 6–12% | −12.5% (−16.9 to −11.1) | moved to the better-staffed preset |
 | Cash and profit diverge on payroll days | yes | met |

@@ -42,56 +42,90 @@ type takeoverSnap struct {
 type window struct {
 	Days int `json:"days"`
 	// Demand and flow, by modality (room order).
-	Mods       []string       `json:"mods"`
-	Orders     []int          `json:"orders"`       // referral orders received
-	WalkIns    []int          `json:"walkIns"`      // walk-ins arrived
-	Booked     []int          `json:"booked"`       // orders received in the window that got an appointment
-	LostDecl   []int          `json:"lostDeclined"` // lost: earliest slot beyond the patient's tolerance
-	LostNoSlot []int          `json:"lostNoSlot"`   // lost: no slot within the horizon
-	LeadP50    []int64        `json:"leadP50Days"`  // received → appointment day, booked orders
-	LeadP90    []int64        `json:"leadP90Days"`
-	Exams      []int          `json:"exams"`
-	TueFriDay  []float64      `json:"tueFriPerDay"` // exams per Tue–Fri day
-	MonDay     []float64      `json:"monPerDay"`
-	SatDay     []float64      `json:"satPerDay"`
-	UtilOpen   []int64        `json:"utilOpenBP"`
-	UtilStaff  []int64        `json:"utilStaffedBP"`
-	Coverage   []int64        `json:"coverageBP"`
-	Reports    int            `json:"reports"`
-	Scheduled  int            `json:"scheduled"`
-	Cancelled  int            `json:"cancelled"`
-	NoShows    int            `json:"noShows"`
-	WalkInLeft int            `json:"walkInsLeft"`
-	TechUtil   int64          `json:"techUtilBP"`
-	ReadUtil   int64          `json:"readUtilBP"`
-	TATP50     int64          `json:"tatP50Min"`
-	TATP90     int64          `json:"tatP90Min"`
-	OverTarget int            `json:"overTarget"`
-	Acquired   int            `json:"acquired"`
-	Backlog730 []int          `json:"backlog0730TueFri"` // unread+reading at 07:30, each Tue–Fri
-	UnreadEOD  []int          `json:"unreadAtClose"`
-	RevPerRpt  []int64        `json:"revenuePerReportCents"` // by modality
-	NetRev     int64          `json:"netRevenueCents"`
-	Labor      int64          `json:"laborCents"`
-	Fixed      int64          `json:"fixedCents"`
-	Variable   int64          `json:"variableCents"`
-	Opex       int64          `json:"opexCents"`
-	Profit     int64          `json:"profitCents"`
-	MarginBP   int64          `json:"marginBP"`
-	Collect    int64          `json:"collectionsCents"`
-	Disburse   int64          `json:"disbursementsCents"`
-	ARChange   int64          `json:"arChangeCents"`
-	CashEnd    int64          `json:"cashEndCents"`
-	OTMin      int64          `json:"overtimeMin"`
-	Extra      map[string]int `json:"extra"`
+	Mods       []string `json:"mods"`
+	Orders     []int    `json:"orders"`       // referral orders received
+	WalkIns    []int    `json:"walkIns"`      // walk-ins arrived
+	Booked     []int    `json:"booked"`       // orders received in the window that got an appointment
+	LostDecl   []int    `json:"lostDeclined"` // lost: earliest slot beyond the patient's tolerance
+	LostNoSlot []int    `json:"lostNoSlot"`   // lost: no slot within the horizon
+	LeadP50    []int64  `json:"leadP50Days"`  // received → appointment day, booked orders
+	LeadP90    []int64  `json:"leadP90Days"`
+	// The lead split (step 18.1): requested (received → earliest wanted
+	// day, the referral's own timing) and capacity delay (earliest wanted
+	// day → appointment day).
+	ReqLeadP50 []int64   `json:"requestedLeadP50Days"`
+	ReqLeadP90 []int64   `json:"requestedLeadP90Days"`
+	DelayP50   []int64   `json:"capacityDelayP50Days"`
+	DelayP90   []int64   `json:"capacityDelayP90Days"`
+	Exams      []int     `json:"exams"`
+	TueFriDay  []float64 `json:"tueFriPerDay"` // exams per Tue–Fri day
+	MonDay     []float64 `json:"monPerDay"`
+	SatDay     []float64 `json:"satPerDay"`
+	UtilOpen   []int64   `json:"utilOpenBP"`
+	UtilStaff  []int64   `json:"utilStaffedBP"`
+	Coverage   []int64   `json:"coverageBP"`
+	Reports    int       `json:"reports"`
+	Scheduled  int       `json:"scheduled"`
+	Cancelled  int       `json:"cancelled"`
+	NoShows    int       `json:"noShows"`
+	WalkInLeft int       `json:"walkInsLeft"`
+	TechUtil   int64     `json:"techUtilBP"`
+	ReadUtil   int64     `json:"readUtilBP"`
+	TATP50     int64     `json:"tatP50Min"` // all priorities
+	TATP90     int64     `json:"tatP90Min"`
+	// By priority, and by priority and modality ("urgent/CT"), over the
+	// studies acquired in the window, finished or not.
+	TATByPri   map[string]*tatStat `json:"tatByPriority"`
+	OverTarget int                 `json:"overTarget"`
+	Acquired   int                 `json:"acquired"`
+	Backlog730 []int               `json:"backlog0730TueFri"` // unread+reading at 07:30, each Tue–Fri
+	UnreadEOD  []int               `json:"unreadAtClose"`
+	RevPerRpt  []int64             `json:"revenuePerReportCents"` // by modality
+	NetRev     int64               `json:"netRevenueCents"`
+	Labor      int64               `json:"laborCents"`
+	Fixed      int64               `json:"fixedCents"`
+	Variable   int64               `json:"variableCents"`
+	Opex       int64               `json:"opexCents"`
+	Profit     int64               `json:"profitCents"`
+	MarginBP   int64               `json:"marginBP"`
+	Collect    int64               `json:"collectionsCents"`
+	Disburse   int64               `json:"disbursementsCents"`
+	ARChange   int64               `json:"arChangeCents"`
+	CashEnd    int64               `json:"cashEndCents"`
+	OTMin      int64               `json:"overtimeMin"`
+	ApprOTMin  int64               `json:"approvedOvertimeMin"` // of OTMin, approved ahead (extend_shift)
+	// Cohort: the orders received in the window by origin ("referral",
+	// "walk-in") and their state at its end — each order once.
+	Cohort map[string]map[string]int `json:"orderCohort"`
+	Extra  map[string]int            `json:"extra"`
 	// Per person: busy share of duty (technologists, desk), read share of
 	// site blocks (radiologists), basis points; overtime minutes.
 	StaffUtil map[string]int64 `json:"staffUtilBP"`
 	StaffOT   map[string]int64 `json:"staffOvertimeMin"`
 }
 
-func seedsFromEnv() []int64 {
-	spec := os.Getenv("DT_SEEDS")
+// tatStat: studies acquired in a window, as of its end. Percentiles and
+// max are over the completed ones; Breaches counts completed over target
+// plus unfinished already past it, Overnight the completed breaches first
+// claimed on a later day than acquired (they waited for the next reading
+// block: a coverage gap, not worklist order); OldestMin is the age of the
+// oldest unfinished study.
+type tatStat struct {
+	Acquired   int   `json:"acquired"`
+	Completed  int   `json:"completed"`
+	Unfinished int   `json:"unfinished"`
+	P50Min     int64 `json:"p50Min"`
+	P90Min     int64 `json:"p90Min"`
+	MaxMin     int64 `json:"maxMin"`
+	Breaches   int   `json:"breaches"`
+	Overnight  int   `json:"overnightBreaches"`
+	OldestMin  int64 `json:"oldestUnfinishedMin"`
+	tats       []int64
+}
+
+func seedsFromEnv() []int64 { return parseSeeds(os.Getenv("DT_SEEDS")) }
+
+func parseSeeds(spec string) []int64 {
 	if spec == "" {
 		spec = "1-9"
 	}
@@ -146,7 +180,7 @@ func TestCalibrationReport(t *testing.T) {
 	}
 	var runs []seedRun
 	for _, seed := range seedsFromEnv() {
-		runs = append(runs, calibrate(t, cfg, seed, days))
+		runs = append(runs, calibrate(t, cfg, seed, days, nil))
 	}
 	if out := os.Getenv("DT_CALIB_OUT"); out != "" {
 		raw, _ := json.MarshalIndent(runs, "", " ")
@@ -159,10 +193,21 @@ func TestCalibrationReport(t *testing.T) {
 	}
 }
 
-func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int) seedRun {
+// calibrate runs one seed for days from the takeover, applying plan's
+// actions (if any) at the takeover; every one must be accepted.
+func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*sim.World, int) []api.Action) seedRun {
 	w := sim.New(cfg, rng.SeedFromInt(seed))
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
+	if plan != nil {
+		if as := plan(w, days); len(as) > 0 {
+			for i, r := range w.Apply(as) {
+				if !r.OK {
+					t.Fatalf("seed %d: %+v rejected: %s %s", seed, as[i], r.Code, r.Message)
+				}
+			}
+		}
+	}
 	o := w.Observe(0)
 	r := seedRun{Seed: seed, Windows: map[string]*window{},
 		Takeover: takeoverSnap{Unread: o.Worklist.Unread, Reading: o.Worklist.Reading, OpenClaims: o.Finance.Claims.Open,
@@ -192,7 +237,7 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 	ops, m := ev.Ops, ev.Money
 	end := start.Add(simtime.Duration(days) * simtime.Day)
 	cal := w.Calendar()
-	win := &window{Days: days, Extra: map[string]int{}}
+	win := &window{Days: days, Extra: map[string]int{}, Cohort: map[string]map[string]int{}}
 	modIdx := map[string]int{}
 	for _, r := range cfg.Rooms {
 		if _, ok := modIdx[r.Modality]; !ok {
@@ -206,6 +251,7 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 	win.LeadP50, win.LeadP90, win.UtilOpen, win.UtilStaff, win.Coverage, win.RevPerRpt =
 		make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n)
 	win.TueFriDay, win.MonDay, win.SatDay = make([]float64, n), make([]float64, n), make([]float64, n)
+	win.ReqLeadP50, win.ReqLeadP90, win.DelayP50, win.DelayP90 = make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n)
 	exam := map[string]string{}
 	for _, x := range cfg.Catalog {
 		exam[x.Code] = x.Modality
@@ -216,12 +262,20 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 			apptDay[a.Order] = a.Day // first appointment booked for the order
 		}
 	}
-	leads := make([][]int64, n)
+	leads, reqs, delays := make([][]int64, n), make([][]int64, n), make([][]int64, n)
 	for _, o := range w.Orders() {
 		if o.Received <= start || o.Received > end {
 			continue
 		}
 		k := modIdx[exam[o.Exam]]
+		origin := "referral"
+		if o.WalkIn {
+			origin = "walk-in"
+		}
+		if win.Cohort[origin] == nil {
+			win.Cohort[origin] = map[string]int{}
+		}
+		win.Cohort[origin][o.State]++
 		if o.WalkIn {
 			win.WalkIns[k]++
 			continue
@@ -236,15 +290,16 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 		if d, ok := apptDay[o.ID]; ok {
 			win.Booked[k]++
 			leads[k] = append(leads[k], d-cal.DayIndex(o.Received))
+			reqs[k] = append(reqs[k], o.Earliest-cal.DayIndex(o.Received))
+			delays[k] = append(delays[k], d-o.Earliest)
 		}
 	}
 	for k := range leads {
-		slices.Sort(leads[k])
-		if len(leads[k]) > 0 {
-			win.LeadP50[k] = leads[k][(len(leads[k])*50+99)/100-1]
-			win.LeadP90[k] = leads[k][(len(leads[k])*90+99)/100-1]
-		}
+		win.LeadP50[k], win.LeadP90[k] = pctl(leads[k], 50), pctl(leads[k], 90)
+		win.ReqLeadP50[k], win.ReqLeadP90[k] = pctl(reqs[k], 50), pctl(reqs[k], 90)
+		win.DelayP50[k], win.DelayP90[k] = pctl(delays[k], 50), pctl(delays[k], 90)
 	}
+	win.TATByPri = tatByPriority(w, cfg, start, end)
 	for _, r := range ops.Rooms {
 		k := modIdx[r.Modality]
 		win.Exams[k] += r.Exams
@@ -314,12 +369,74 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 	win.Labor, win.Fixed, win.Variable = m.Ledger.LaborCents, m.Ledger.FixedCents, m.Ledger.VariableCents
 	win.MarginBP = m.Margin.BP()
 	win.Collect, win.Disburse, win.ARChange, win.CashEnd = m.CollectionsCents, m.DisbursementsCents, m.ARChangeCents, m.CashEndCents
-	win.OTMin = ops.Workforce.OvertimeSec / 60
+	win.OTMin, win.ApprOTMin = ops.Workforce.OvertimeSec/60, ops.Workforce.ApprovedOvertimeSec/60
 	win.Extra["walkInsDeclined"] = ops.WalkIns.Declined
-	win.Extra["walkInsImaged"] = ops.WalkIns.Imaged
+	win.Extra["walkInsImaged"] = ops.WalkIns.SameVisitExams
 	win.Extra["heldOver"] = ops.Workforce.HeldOver
 	win.Extra["noCoverage"] = ops.Workforce.NoCoverage
 	return win
+}
+
+// pctl is the nearest-rank p-th percentile of xs (0 when empty); it sorts xs.
+func pctl(xs []int64, p int) int64 {
+	if len(xs) == 0 {
+		return 0
+	}
+	slices.Sort(xs)
+	return xs[(len(xs)*p+99)/100-1]
+}
+
+// tatByPriority measures report turnaround of the studies acquired in
+// (start, end], by priority and by priority and modality, as of end.
+func tatByPriority(w *sim.World, cfg *sim.Config, start, end simtime.Time) map[string]*tatStat {
+	mod := map[string]string{}
+	for _, x := range cfg.Catalog {
+		mod[x.Code] = x.Modality
+	}
+	target := map[string]simtime.Duration{}
+	for p := sim.Routine; p <= sim.Urgent; p++ {
+		target[p.String()] = cfg.Policies.TATTarget[p]
+	}
+	cal := w.Calendar()
+	out := map[string]*tatStat{}
+	for _, s := range w.Studies() {
+		if s.Acquired <= start || s.Acquired > end {
+			continue
+		}
+		for _, key := range []string{s.Priority, s.Priority + "/" + mod[s.Exam]} {
+			ts := out[key]
+			if ts == nil {
+				ts = &tatStat{}
+				out[key] = ts
+			}
+			ts.Acquired++
+			if s.State == "final" && s.Final <= end {
+				tat := int64(s.Final.Sub(s.Acquired))
+				ts.Completed++
+				ts.tats = append(ts.tats, tat)
+				if tat > int64(target[s.Priority]) {
+					ts.Breaches++
+					if cal.DayIndex(s.Claimed) != cal.DayIndex(s.Acquired) {
+						ts.Overnight++
+					}
+				}
+				continue
+			}
+			ts.Unfinished++
+			age := end.Sub(s.Acquired)
+			if age > target[s.Priority] {
+				ts.Breaches++
+			}
+			ts.OldestMin = max(ts.OldestMin, int64(age/simtime.Minute))
+		}
+	}
+	for _, ts := range out {
+		ts.P50Min, ts.P90Min = pctl(ts.tats, 50)/60, pctl(ts.tats, 90)/60
+		if len(ts.tats) > 0 {
+			ts.MaxMin = ts.tats[len(ts.tats)-1] / 60
+		}
+	}
+	return out
 }
 
 // --- aggregation -----------------------------------------------------------
@@ -385,7 +502,9 @@ func summarize(runs []seedRun, key string) string {
 		row(m+" walk-ins / month", func(w *window) float64 { return per30(w, float64(w.WalkIns[k])) })
 		row(m+" lost declined / month", func(w *window) float64 { return per30(w, float64(w.LostDecl[k])) })
 		row(m+" lost no slot / month", func(w *window) float64 { return per30(w, float64(w.LostNoSlot[k])) })
-		row(m+" lead p50 days", func(w *window) float64 { return float64(w.LeadP50[k]) })
+		row(m+" lead p50 days (incl. requested)", func(w *window) float64 { return float64(w.LeadP50[k]) })
+		row(m+" requested lead p50 days", func(w *window) float64 { return float64(w.ReqLeadP50[k]) })
+		row(m+" capacity delay p50 days", func(w *window) float64 { return float64(w.DelayP50[k]) })
 		row(m+" lead p90 days", func(w *window) float64 { return float64(w.LeadP90[k]) })
 		row(m+" exams / Tue–Fri day", func(w *window) float64 { return w.TueFriDay[k] })
 		row(m+" exams / Monday", func(w *window) float64 { return w.MonDay[k] })
@@ -410,9 +529,9 @@ func summarize(runs []seedRun, key string) string {
 	row("backlog 07:30 Tue–Fri, max", func(w *window) float64 { return float64(slices.Max(append(w.Backlog730, 0))) })
 	row("share of Tue–Fri 07:30 in 5–20 %", func(w *window) float64 { return share(w.Backlog730, 5, 20) })
 	row("unread at close, mean", func(w *window) float64 { return mean(w.UnreadEOD) })
-	row("TAT p50 min (cohort, censored)", func(w *window) float64 { return float64(w.TATP50) })
-	row("TAT p90 min", func(w *window) float64 { return float64(w.TATP90) })
-	row("TAT over target %", func(w *window) float64 { return pct(w.OverTarget, w.Acquired) })
+	row("TAT p50 min, all priorities (censored)", func(w *window) float64 { return float64(w.TATP50) })
+	row("TAT p90 min, all priorities", func(w *window) float64 { return float64(w.TATP90) })
+	row("TAT over target %, all priorities", func(w *window) float64 { return pct(w.OverTarget, w.Acquired) })
 	row("net revenue $k / month", func(w *window) float64 { return per30(w, float64(w.NetRev)) / 100_000 })
 	row("labor $k / month", func(w *window) float64 { return per30(w, float64(w.Labor)) / 100_000 })
 	row("fixed $k / month", func(w *window) float64 { return per30(w, float64(w.Fixed)) / 100_000 })

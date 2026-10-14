@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.result/v1",
- "engine": "0.1.0-dev.15",
+ "engine": "0.1.0-dev.18.1",
  "scenario": {
   "id": "established",
   "fingerprint": "b1cbc2a0108f22e34082a0d39f72499678a3eb2f8b2501d483f3525a39ad806a"
@@ -123,8 +123,8 @@
   "log": "6e34bd068f7f5be6d67035f6e52cd056f3eec8fa30483cb4c168d8013836fa24",
   "ledger": "6c18847e1bad64b1053236efdb66d482a9ab7fd8876cf28bea424c76af3ccb71",
   "actions": "1852b8a05621b3245a4ff8db1ada6d89414fbd60c8897f638037ebc7a294b1de",
-  "state": "08ab88ba9b214de146dd09169ee312699cd7e1b65da4fcf43711e98a910397df",
-  "run": "9005416cd60ad524a4888915185137ae8efb79bfca3de31629fe92a1123e559d"
+  "state": "72f117978ca033a1377f039997f7d5dc46729d1486c82467954608733842ec9f",
+  "run": "9a3d8861926c985ef2b8c807beafa9b58426f371937c60ff2559e19a36e624f0"
  },
  "calendar": [
   {
@@ -252,7 +252,7 @@
    "date": "2026-10-19",
    "weekday": "Mon",
    "orders": 75,
-   "lost": 6,
+   "lost": 5,
    "walkIns": 5,
    "noShows": 3,
    "exams": 33,
@@ -286,12 +286,12 @@
    "complete": false,
    "demand": {
     "received": 329,
-    "booked": 330,
+    "booked": 328,
     "recall": 13,
-    "lost": 32,
+    "lost": 31,
     "cancelled": 32,
     "lostRate": {
-     "num": 32,
+     "num": 31,
      "den": 329
     },
     "byModality": [
@@ -304,7 +304,7 @@
      {
       "modality": "US",
       "received": 58,
-      "lost": 14,
+      "lost": 13,
       "exams": 33
      },
      {
@@ -319,7 +319,12 @@
       "lost": 9,
       "exams": 43
      }
-    ]
+    ],
+    "walkInOrigin": {
+     "booked": 2,
+     "lost": 1,
+     "cancelled": 0
+    }
    },
    "appointments": {
     "scheduled": 321,
@@ -345,12 +350,26 @@
    },
    "walkIns": {
     "arrived": 44,
-    "sentToBook": 3,
+    "admitted": 41,
+    "offered": 3,
     "declined": 0,
-    "imaged": 20,
+    "unservable": 3,
+    "offerBooked": 2,
+    "offerFailed": 1,
     "left": 24,
+    "sameVisitExams": 17,
+    "returnExams": 3,
+    "cohort": {
+     "arrived": 44,
+     "imagedSameVisit": 17,
+     "converted": 2,
+     "convertedImaged": 1,
+     "left": 24,
+     "lost": 1,
+     "onSite": 0
+    },
     "acceptance": {
-     "num": 20,
+     "num": 17,
      "den": 44
     },
     "abandonment": {
@@ -896,6 +915,6 @@
  "replay": {
   "verified": true,
   "batches": 4,
-  "runDigest": "9005416cd60ad524a4888915185137ae8efb79bfca3de31629fe92a1123e559d"
+  "runDigest": "9a3d8861926c985ef2b8c807beafa9b58426f371937c60ff2559e19a36e624f0"
  }
 }

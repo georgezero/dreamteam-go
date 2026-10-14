@@ -109,8 +109,8 @@ func (m *Model) summaryBody(w, n int) []string {
 	}
 	wi := ops.WalkIns
 	add("Patients", pick(
-		fmt.Sprintf("%d exams (%s) · walk-ins %d: imaged %d, booked later %d, left %d",
-			ops.Exams, strings.Join(byMod, " · "), wi.Arrived, wi.Imaged, wi.SentToBook, wi.Left),
+		fmt.Sprintf("%d exams (%s) · walk-ins %d: admitted %d, offered later %d (booked %d), left %d",
+			ops.Exams, strings.Join(byMod, " · "), wi.Arrived, wi.Admitted, wi.Offered, wi.OfferBooked, wi.Left),
 		fmt.Sprintf("%d exams (%s) · walk-ins %d, left %d", ops.Exams, strings.Join(byMod, " "), wi.Arrived, wi.Left)))
 	dm := ops.Demand
 	lost := fmt.Sprintf("lost %d (%s)", dm.Lost, pctR(dm.LostRate))

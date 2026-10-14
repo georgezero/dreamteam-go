@@ -7,6 +7,80 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 18.1 — Calibration review remediation (v0.1.0-dev.18.1)
+
+The step 18 review (`docs/reviews/step-18-astra-review.md`, CONDITIONAL GO)
+found five defects. Each got a regression test that fails on `b1a9ffb`,
+then the smallest fix; every experiment was rerun on the fixed engine.
+
+**Fixes.**
+* `extend_shift` validates the raw minutes before converting them; huge
+  values no longer wrap into a negative extension.
+* Shared-staff booking is a real feasibility check: distinct qualified
+  technologists for every overlapping appointment, handovers only at
+  coverage boundaries, whatever the booking order. Default outcomes are
+  identical; dispatch is unchanged; warm-up time is unchanged.
+* Walk-ins: arrival, same-visit admission, the offer (declined by policy
+  or unservable) and whether it booked, the same-visit exam and a later
+  return exam are separate counters. Walk-in-origin booking events are
+  out of referral demand (`demand.walkInOrigin`). Acceptance and
+  abandonment are over the cohort of walk-ins who arrived in the period,
+  each classified once (imaged same visit, converted, left, lost, on
+  site). The TUI summary reads "walk-ins N: admitted, offered later
+  (booked), left".
+* The strategy helper no longer requests extensions past the scheduled
+  close; the harness fails on any rejected action.
+
+**Reproducible experiments.** `docs/calibration/experiments/*.json`
+(scenario, overlay, strategy, seeds, horizon) run with
+`go test -tags calibration ./internal/sim -run 'CalibrationExperiments$'`
+and write `docs/calibration/results/<name>.json` (engine, fingerprints,
+overlay hash, per-seed windows, aggregates) and `results/summary.md`. The
+harness adds an order cohort, requested lead vs capacity delay, approved
+overtime and turnaround by priority and modality.
+
+**Results** (nine seeds; full tables in the report):
+
+| | 30 days | 90 days |
+|---|---|---|
+| Baseline exams / margin | 1,363, −12.5% | 1,296 per 30 d, −14.0% |
+| Three more technologists | 1,458, −16.7% | 1,390 per 30 d, −18.6% (step 18: −18.7%) |
+| Faster XR (×0.75) | 1,390, −11.6% | 1,321 per 30 d, −13.1% |
+| Reading allocation 45%/38% | TAT p50 20 h — unstable | TAT p50 22 h |
+
+Strategies (30 days): B 1,431 exams, −9.4%; C 1,394, −13.4%; D 1,461,
+−10.4%; E 1,394, −12.6%; F TAT p50 34 → 22 min (≈35%, not half). C and D
+moved by at most one exam and 0.1 points with the booking fix; the
+struggling-practice characterization stands.
+
+**Urgent turnaround.** The default's urgent tail is a reading-coverage
+gap: ≈¾ of urgent breaches are studies acquired after the last reading
+block and read the next morning or Monday (max 31–41 h under every
+policy). FIFO adds ≈15 in-hours urgent breaches per 90 days;
+shortest-first ≈2, but it delays long urgent studies (urgent MR p50 99 vs
+52 min) and, in a controlled micro case, starves them while short routine
+work keeps arriving. No worklist semantics changed; the trade-off is
+documented for an owner decision.
+
+**Goldens.** All four regenerated: outcomes unchanged (log, ledger and
+action digests identical), the state digest changed (new order and counter
+fields in the state walk), and the result JSON changed in walk-in fields
+and referral `lost`/`booked`.
+
+| Golden | state digest | run digest |
+|---|---|---|
+| established-seed1-7d | 8a2a0fd92281… → c4d6b46c4d94… | af8fb442c246… → 7b99a6f7ffc1… |
+| established-seed1-90d | 8f7de97d1fc0… → 8c6575d35565… | a25871c771cc… → 12157065771c… |
+| mini-seed1-7d | 0db92e2b5226… → f2dff6e4d307… | e3b39b7707d0… → 26adad607323… |
+| established-seed1-7d-actions | 08ab88ba9b21… → 72f117978ca0… | 9005416cd60a… → 9a3d8861926c… |
+
+**Tests.** Regressions: `TestRegress18ExtensionMinutesRange`,
+`TestRegress18SharedStaffFeasibility`, `TestRegress18WalkInCohorts`,
+`TestRegress18FlowCountsFieldsFolded`, `TestRegress18OrderCohortReconciles`,
+`TestRegress18UrgentLongStudyVsShortRoutine`. Full uncached suite green.
+
+---
+
 ## Step 18 — Calibration: a struggling, capacity-constrained practice (v0.1.0-dev.18)
 
 **Owner decisions (2026-10-14).** Calibrate in order — volume and flow,

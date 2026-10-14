@@ -81,7 +81,7 @@ func (w *World) Validate(a api.Action) api.ActionResult {
 	st.now = w.eng.Now()
 	ok, code, msg := st.apply(w.eng, a, false)
 	st.now = prev
-	return api.ActionResult{Time: st.cal.ISO(st.now), Action: a, OK: ok, Code: code, Message: msg}
+	return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: ok, Code: code, Message: msg}
 }
 
 func (st *state) actionResult(i int) api.ActionResult {
@@ -138,10 +138,11 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	}
 	ec := &st.cfg.Employees[i]
 	name := ec.Name
-	d := simtime.Duration(a.Minutes) * simtime.Minute
-	if a.Minutes < 1 || d > MaxExtension {
+	// The raw value first: converting before the check could overflow.
+	if a.Minutes < 1 || a.Minutes > int64(MaxExtension/simtime.Minute) {
 		return false, "invalid_minutes", fmt.Sprintf("Minutes must be 1–%d.", MaxExtension/simtime.Minute)
 	}
+	d := simtime.Duration(a.Minutes) * simtime.Minute
 	day := st.day
 	if a.Date != "" {
 		date, err := simtime.ParseDate(a.Date)

@@ -27,20 +27,25 @@ type strategy struct {
 	plan func(w *sim.World, days int) []api.Action
 }
 
-// extendTo extends the named employees to the given close on every
-// weekday they work in the next days.
+// extendTo extends the named employees to the given time (never past the
+// day's scheduled close, where an extension adds no capacity and is
+// rejected) on every day they work in the next days.
 func extendTo(w *sim.World, days int, names []string, until simtime.Duration) []api.Action {
 	cal := w.Calendar()
 	start := cal.DayIndex(w.StartTime())
 	var as []api.Action
 	for d := int64(0); d < int64(days); d++ {
+		h := w.Schedule(start + d).Hours
+		if h == nil {
+			continue
+		}
 		for _, e := range w.Roster(start + d) {
 			if !contains(names, e.Name) {
 				continue
 			}
 			end, _ := simtime.ParseClock(e.RosterEnd)
 			cap, _ := simtime.ParseClock(e.CapAt)
-			if gap := (min(until, cap) - end) / simtime.Minute; gap > 0 && gap <= 240 {
+			if gap := (min(until, cap, h.To) - end) / simtime.Minute; gap > 0 && gap <= 240 {
 				as = append(as, api.Action{Type: api.ActExtendShift, Employee: e.ID, Minutes: int64(gap),
 					Date: cal.Date(cal.StartOfDay(start + d)).String()})
 			}
@@ -79,6 +84,20 @@ var strategies = []strategy{
 	{"F shortest-first worklist", func(*sim.World, int) []api.Action {
 		return []api.Action{{Type: api.ActSetWorklistPolicy, Policy: api.WorklistShortestFirst}}
 	}},
+	// G isolates E's worklist half, for the urgent turnaround comparison.
+	{"G FIFO worklist", func(*sim.World, int) []api.Action {
+		return []api.Action{{Type: api.ActSetWorklistPolicy, Policy: api.WorklistFIFO}}
+	}},
+}
+
+// strategyByKey finds a strategy by its letter.
+func strategyByKey(key string) (strategy, bool) {
+	for _, s := range strategies {
+		if strings.HasPrefix(s.name, key+" ") {
+			return s, true
+		}
+	}
+	return strategy{}, false
 }
 
 func TestCalibrationActions(t *testing.T) {
@@ -97,7 +116,11 @@ func TestCalibrationActions(t *testing.T) {
 			w := sim.New(cfg, rng.SeedFromInt(seed))
 			w.Engine().RunUntil(w.StartTime(), nil)
 			if as := s.plan(w, days); len(as) > 0 {
-				w.Apply(as)
+				for i, r := range w.Apply(as) {
+					if !r.OK {
+						t.Errorf("seed %d, %s: %+v rejected: %s %s", seed, s.name, as[i], r.Code, r.Message)
+					}
+				}
 			}
 			w.Engine().RunUntil(w.StartTime().Add(days*simtime.Day), nil)
 			if k == 0 {

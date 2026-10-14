@@ -272,19 +272,24 @@ type DaySchedule struct {
 
 // FlowCounts count patient-flow events.
 type FlowCounts struct {
-	Arrived       int `json:"arrived"`       // scheduled patients who arrived
-	Early         int `json:"early"`         // … more than 5 min early
-	Late          int `json:"late"`          // … more than 5 min late
-	AfterGrace    int `json:"afterGrace"`    // … after being marked missed (fitted in)
-	WalkIns       int `json:"walkIns"`       // walk-ins who came in
-	WalkInsBooked int `json:"walkInsBooked"` // … sent away with an appointment instead
-	// WalkInsDeclined counts, of WalkInsBooked, those turned away by the
-	// walk-in policy (the rest could not be served today).
-	WalkInsDeclined int `json:"walkInsDeclined"`
-	Missed          int `json:"missed"`      // appointments marked missed at start + grace
-	NoShows         int `json:"noShows"`     // missed appointments finalized at accounting close
-	Rescheduled     int `json:"rescheduled"` // too late for the late policy, or after closing
-	Left            int `json:"left"`        // walk-ins who left without an exam
+	Arrived         int `json:"arrived"`         // scheduled patients who arrived
+	Early           int `json:"early"`           // … more than 5 min early
+	Late            int `json:"late"`            // … more than 5 min late
+	AfterGrace      int `json:"afterGrace"`      // … after being marked missed (fitted in)
+	WalkIns         int `json:"walkIns"`         // walk-ins who came in
+	WalkInsAdmitted int `json:"walkInsAdmitted"` // … taken in on that visit
+	// WalkInsOffered counts walk-ins offered an appointment instead;
+	// WalkInsDeclined, of them, those turned away by the walk-in policy
+	// (the rest could not be served today). An offer either booked or
+	// found no acceptable slot (the order is lost).
+	WalkInsOffered     int `json:"walkInsOffered"`
+	WalkInsDeclined    int `json:"walkInsDeclined"`
+	WalkInsOfferBooked int `json:"walkInsOfferBooked"`
+	WalkInsOfferFailed int `json:"walkInsOfferFailed"`
+	Missed             int `json:"missed"`      // appointments marked missed at start + grace
+	NoShows            int `json:"noShows"`     // missed appointments finalized at accounting close
+	Rescheduled        int `json:"rescheduled"` // too late for the late policy, or after closing
+	Left               int `json:"left"`        // walk-ins who left without an exam
 
 	Registered     int `json:"registered"`
 	SelfRegistered int `json:"selfRegistered"` // by a technologist (no desk staff on duty)
@@ -849,6 +854,16 @@ type DemandMetrics struct {
 	Cancelled  int                     `json:"cancelled"` // appointments cancelled by patients
 	LostRate   Ratio                   `json:"lostRate"`
 	ByModality []ModalityDemandMetrics `json:"byModality"`
+	// Booking events of walk-in-originated orders (offers, rebookings,
+	// cancellations), kept out of the referral counters above (step 18.1).
+	WalkInOrigin WalkInOriginDemand `json:"walkInOrigin"`
+}
+
+// WalkInOriginDemand counts booking events of walk-in-originated orders.
+type WalkInOriginDemand struct {
+	Booked    int `json:"booked"`
+	Lost      int `json:"lost"`
+	Cancelled int `json:"cancelled"`
 }
 
 // ModalityDemandMetrics is one modality's demand and output.
@@ -879,17 +894,46 @@ type ApptMetrics struct {
 	Fill        Ratio `json:"fill"`
 }
 
-// WalkInMetrics: walk-ins who came, were sent away with an appointment,
-// were imaged, or left. Acceptance = imaged / arrived; abandonment = left /
+// WalkInMetrics keeps four concepts apart (step 18.1): arrival, admission
+// on the visit the walk-in came on, conversion to a scheduled appointment,
+// and the exam. The activity counts are events in the period (an exam may
+// belong to a walk-in who arrived earlier); Cohort follows the walk-ins who
+// arrived in the period to their outcome as of its end. Acceptance =
+// cohort imaged on the same visit / arrived; abandonment = cohort left /
 // arrived.
 type WalkInMetrics struct {
-	Arrived     int   `json:"arrived"`
-	SentToBook  int   `json:"sentToBook"`
-	Declined    int   `json:"declined"` // of SentToBook, by the walk-in policy
-	Imaged      int   `json:"imaged"`
-	Left        int   `json:"left"`
-	Acceptance  Ratio `json:"acceptance"`
-	Abandonment Ratio `json:"abandonment"`
+	Arrived  int `json:"arrived"`
+	Admitted int `json:"admitted"` // taken in on the visit they came on
+	// Offered an appointment instead: Declined by the walk-in policy, or
+	// Unservable today; the offer booked or failed (order lost).
+	Offered     int `json:"offered"`
+	Declined    int `json:"declined"`
+	Unservable  int `json:"unservable"`
+	OfferBooked int `json:"offerBooked"`
+	OfferFailed int `json:"offerFailed"`
+	Left        int `json:"left"` // left without an exam
+	// Exams of walk-in orders started in the period: on the walk-in visit
+	// itself, and on a later scheduled visit.
+	SameVisitExams int          `json:"sameVisitExams"`
+	ReturnExams    int          `json:"returnExams"`
+	Cohort         WalkInCohort `json:"cohort"`
+	Acceptance     Ratio        `json:"acceptance"`
+	Abandonment    Ratio        `json:"abandonment"`
+}
+
+// WalkInCohort classifies each walk-in who arrived in the period once, as
+// of the period end: Arrived = ImagedSameVisit + Converted + Left + Lost +
+// OnSite.
+type WalkInCohort struct {
+	Arrived         int `json:"arrived"`
+	ImagedSameVisit int `json:"imagedSameVisit"`
+	// Converted to a scheduled appointment (on arrival, or rescheduled
+	// after admission); ConvertedImaged, of them, examined by the end.
+	Converted       int `json:"converted"`
+	ConvertedImaged int `json:"convertedImaged"`
+	Left            int `json:"left"`   // left without an exam
+	Lost            int `json:"lost"`   // no appointment acceptable: order lost
+	OnSite          int `json:"onSite"` // still on site, unresolved
 }
 
 // WaitMetrics are over exams started in the period: arrival to
