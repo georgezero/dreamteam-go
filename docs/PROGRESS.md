@@ -7,6 +7,48 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Steps 16–17 — Acceptance pass, part 1: TUI polish and end-to-end replay (v0.1.0-dev.18.3)
+
+The V0.1 acceptance pass (ROADMAP §2), with the owner's list. The
+checklist with every criterion's evidence is `docs/ACCEPTANCE.md`.
+
+**Built.**
+* **Help screen**: `?` from any screen shows the keys and the worklist
+  rule; `?` or `esc` returns where it came from.
+* **Event-log filters**: on the log screen `tab` cycles the category,
+  `!` the severity (all · warnings & alerts · alerts only); the title shows
+  the filter and how many entries match.
+* **`run -log events.jsonl`**: the observable log from the takeover, one
+  JSON object per line (seq, time, severity, category, text), through an
+  output-only sink (never part of the state; the result is byte-identical
+  with and without it). `-summary text|json` is an alias of `-format`.
+* **NO_COLOR**: colors follow the profile Bubble Tea detects from the
+  environment; with `NO_COLOR` no color sequence remains and severity stays
+  marked (⚠ ‼). Documented in `dreamteam help`.
+* **CI** (`.github/workflows/ci.yml`): vet (all tags), gofmt, the full
+  suite and the golden references on linux/amd64, linux/arm64 and
+  darwin/arm64, then a byte-for-byte comparison of the three platforms'
+  results.
+* **Acceptance suite** (`-tags acceptance`): criterion 9 on the real
+  simulation (1,000 random chunkings of warm-up, takeover and a day of
+  operations) and criterion 10 (invariants after every transaction, 50
+  seeds × 90 days).
+
+**Tests.** `TestTUIRunReplaysHeadless` (criterion 8: three randomized TUI
+sessions — speeds, frame gaps 10–610 ms, pauses, steps, alert auto-pauses,
+actions submitted from the actions screen — each reproduced by a headless
+session from its action record and by replay; all five digests),
+`TestHelpAndLogFilters`, `TestNoColor` (fails without NO_COLOR),
+`TestRunLogJSONL`, `TestScreenSnapshots` (ten screens at 80×24, 120×36,
+160×48; `-update-screens` to regenerate), and `TestRenderFitsTerminal` now
+also covers 140×40, briefing, actions, help and the end-of-day summary.
+
+**Deviation recorded.** Criterion 1 asks for an unread backlog at the
+takeover; the struggling practice usually has none (reading is
+over-provisioned for its volume, as characterized in step 18).
+
+---
+
 ## Step 18.2 — Urgency always takes precedence on the worklist (v0.1.0-dev.18.2)
 
 **A deliberate gameplay rule change (owner decision), not a calibration

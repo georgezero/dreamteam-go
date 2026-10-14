@@ -1,16 +1,21 @@
 package tui
 
 import (
+	"flag"
+	"fmt"
 	"go/parser"
 	"go/token"
+	"math/rand/v2"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/colorprofile"
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
@@ -126,9 +131,30 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
-	for _, scr := range []string{"d", "s", "l", "p", "w", "f", "h"} {
+	fits := func(scr string) {
+		for _, size := range [][2]int{{80, 24}, {140, 40}, {60, 16}} {
+			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+			lines := strings.Split(m.render(), "\n")
+			if len(lines) != size[1] {
+				t.Errorf("%s %v: %d lines", scr, size, len(lines))
+			}
+			for i, l := range lines {
+				if w := ansi.StringWidth(l); w > size[0] {
+					t.Errorf("%s %v: line %d width %d", scr, size, i, w)
+				}
+			}
+		}
+	}
+	defer func() {
+		m.key("e") // the end-of-day summary (finishes the day, so last)
+		fits("e")
+	}()
+	for _, scr := range []string{"d", "s", "l", "p", "w", "f", "h", "b", "a", "?"} {
+		if m.screen == screenHelp {
+			m.key("?")
+		}
 		m.key(scr)
-		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
+		for _, size := range [][2]int{{80, 24}, {140, 40}, {120, 36}, {160, 48}, {60, 16}} {
 			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
 			out := m.render()
 			lines := strings.Split(out, "\n")
@@ -595,4 +621,210 @@ func TestSessionKeys(t *testing.T) {
 	if !strings.HasPrefix(m.status, "✓ Replay verified: 1 batches") {
 		t.Fatalf("verify: %q", m.status)
 	}
+}
+
+// Acceptance: ? shows the keys from any screen and returns to it; the log
+// screen filters by category (tab) and severity (!).
+func TestHelpAndLogFilters(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.sess.Advance(10*simtime.Hour, session.Options{})
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m.key("w")
+	m.key("?")
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"HELP · keys", "space", "1 2 3 4 5", "ctrl+v", "Urgent studies are always read first"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("help lacks %q:\n%s", want, out)
+		}
+	}
+	m.key("esc")
+	if m.screen != screenWorklist {
+		t.Fatalf("esc from help went to screen %d, not the worklist", m.screen)
+	}
+
+	m.key("l")
+	all := len(m.obs.RecentLog)
+	for m.logCat = 0; logCategories[m.logCat] != "patients"; {
+		m.key("tab")
+	}
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "EVENT LOG · patients · all") {
+		t.Fatalf("no category title:\n%s", out)
+	}
+	n := len(filterLog(m.obs.RecentLog, m.logCat, 0))
+	if n == 0 || n >= all {
+		t.Fatalf("patients filter keeps %d of %d", n, all)
+	}
+	for _, e := range filterLog(m.obs.RecentLog, m.logCat, 0) {
+		if e.Category != "patients" {
+			t.Fatalf("filtered entry %+v", e)
+		}
+	}
+	m.key("tab")
+	m.logCat = 0
+	m.key("!")
+	for _, e := range filterLog(m.obs.RecentLog, 0, m.logSev) {
+		if e.Severity == api.Info {
+			t.Fatalf("severity filter kept %+v", e)
+		}
+	}
+	m.key("!")
+	m.key("!")
+	if m.logSev != 0 || len(filterLog(m.obs.RecentLog, 0, 0)) != all {
+		t.Fatal("severity filter does not cycle back to all")
+	}
+}
+
+// Acceptance: NO_COLOR. The program's renderer downsamples through the
+// color profile detected from the environment (as Bubble Tea does); with
+// NO_COLOR set no color sequence survives, and severity stays readable
+// from its marks (⚠, ‼), not only from color.
+func TestNoColor(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.sess.Advance(10*simtime.Hour, session.Options{})
+	m.Update(tea.WindowSizeMsg{Width: 140, Height: 40})
+	m.key("l")
+	m.key("!") // warnings and alerts only: every line carries a mark
+	raw := m.render()
+	if !strings.Contains(raw, "\x1b[") {
+		t.Fatal("the raw render has no styling at all: the test is vacuous")
+	}
+	env := []string{"TERM=xterm-256color", "COLORTERM=truecolor", "NO_COLOR=1"}
+	if p := colorprofile.Env(env); p > colorprofile.Ascii {
+		t.Fatalf("NO_COLOR detected as profile %v", p)
+	}
+	var buf strings.Builder
+	w := &colorprofile.Writer{Forward: &buf, Profile: colorprofile.Env(env)}
+	if _, err := w.Write([]byte(raw)); err != nil {
+		t.Fatal(err)
+	}
+	out := buf.String()
+	if regexp.MustCompile(`\x1b\[[0-9;]*(3[0-9]|4[0-9]|9[0-7]|10[0-7])(;[0-9;]*)?m`).MatchString(out) {
+		t.Errorf("a color sequence survived NO_COLOR: %q", out)
+	}
+	if !strings.Contains(out, "⚠") && !strings.Contains(out, "‼") {
+		t.Errorf("no severity marks in the filtered log:\n%s", ansi.Strip(out))
+	}
+}
+
+// Acceptance criterion 8: a run played in the TUI — random speeds, frame
+// gaps, pauses, steps, alerts and actions submitted from the actions
+// screen — is reproduced exactly by a headless session given only its
+// action record, and by replaying its saved record. All five digests.
+func TestTUIRunReplaysHeadless(t *testing.T) {
+	for trial := uint64(1); trial <= 3; trial++ {
+		r := rand.New(rand.NewPCG(trial, 18))
+		m := New(openMini(t, 4))
+		m.Update(tea.WindowSizeMsg{Width: 100, Height: 30})
+		m.key("space")
+		start := m.sess.Now()
+		wall := time.Unix(0, 0)
+		submitted := 0
+		for frames := 0; frames < 4000 && m.sess.Now() < start.Add(2*simtime.Day); frames++ {
+			switch x := r.IntN(100); {
+			case x < 8:
+				m.key(strconv.Itoa(1 + r.IntN(5)))
+			case x < 11:
+				m.key("space") // pause …
+				m.key("space") // … and resume
+			case x < 13:
+				m.key("n")
+				m.key("space")
+			case x < 15 && submitted < 6:
+				// From the actions screen: a worklist policy change, or a
+				// shift extension on today's first row.
+				m.key("a")
+				if r.IntN(2) == 0 {
+					for range 20 {
+						m.key("down")
+					}
+					m.key("right")
+				}
+				m.key("enter")
+				m.key("d")
+				submitted++
+			}
+			if !m.running {
+				m.key("space") // auto-paused on an alert, or by a step
+			}
+			wall = wall.Add(time.Duration(10+r.IntN(600)) * time.Millisecond)
+			m.frame(wall)
+		}
+		rec, err := m.sess.Record()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(rec.Batches) == 0 {
+			t.Fatalf("trial %d: no actions were submitted", trial)
+		}
+		head := openMini(t, 4)
+		for _, b := range rec.Batches {
+			head.AdvanceTo(simtime.Time(b.AtSec))
+			head.Apply(b.Actions...)
+		}
+		head.AdvanceTo(m.sess.Now())
+		if got, want := head.Digests(), m.sess.Digests(); got != want {
+			t.Fatalf("trial %d: headless %+v, TUI %+v", trial, got, want)
+		}
+		re, rep, err := session.Replay(rec, session.ReplayOptions{})
+		if err != nil {
+			t.Fatalf("trial %d: replay: %v %+v", trial, err, rep)
+		}
+		if re.Digests() != m.sess.Digests() {
+			t.Fatalf("trial %d: replayed digests differ", trial)
+		}
+		t.Logf("trial %d: %d batches, ended %s, run digest %.12s…", trial, len(rec.Batches), m.sess.Calendar().ISO(m.sess.Now()), m.sess.Digests().Run)
+	}
+}
+
+var updateScreens = flag.Bool("update-screens", false, "rewrite the golden screen snapshots in testdata/screens")
+
+// Golden screen snapshots (ROADMAP step 16): every screen at 80×24,
+// 120×36 and 160×48, text only, at a fixed point of a fixed run. A layout
+// change shows up as a diff; regenerate deliberately with
+//
+//	go test ./internal/tui -run ScreenSnapshots -update-screens
+func TestScreenSnapshots(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.sess.Advance(5*simtime.Hour+17*simtime.Minute, session.Options{})
+	m.refresh()
+	dir := filepath.Join("..", "..", "testdata", "screens")
+	for _, scr := range []struct{ key, name string }{
+		{"d", "dashboard"}, {"s", "schedule"}, {"l", "log"}, {"p", "patients"}, {"w", "worklist"},
+		{"f", "finance"}, {"h", "history"}, {"b", "briefing"}, {"a", "actions"}, {"?", "help"},
+	} {
+		if m.screen == screenHelp {
+			m.key("?")
+		}
+		m.key(scr.key)
+		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}} {
+			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+			got := snapshotText(m.render())
+			path := filepath.Join(dir, fmt.Sprintf("%s-%dx%d.txt", scr.name, size[0], size[1]))
+			if *updateScreens {
+				os.MkdirAll(dir, 0o755)
+				if err := os.WriteFile(path, []byte(got), 0o644); err != nil {
+					t.Fatal(err)
+				}
+				continue
+			}
+			want, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("%v (generate with -update-screens)", err)
+			}
+			if string(want) != got {
+				t.Errorf("%s differs from its snapshot:\n%s", path, got)
+			}
+		}
+	}
+}
+
+// snapshotText is the rendered screen as text, with the version in the top
+// bar replaced (and that line's padding collapsed) so a version bump alone
+// does not change a snapshot.
+func snapshotText(r string) string {
+	lines := strings.Split(ansi.Strip(r), "\n")
+	top := strings.ReplaceAll(lines[0], "v"+version.Number, "vVERSION")
+	lines[0] = strings.Join(strings.Fields(top), " ")
+	return strings.Join(lines, "\n") + "\n"
 }

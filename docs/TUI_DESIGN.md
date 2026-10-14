@@ -486,6 +486,12 @@ Full scrollable log with filters by category (`patients`, `rooms`, `staff`,
 `reading`, `finance`, `alerts`) and severity. `enter` on an entry jumps to the
 referenced patient / room / employee.
 
+*As built (V0.1):* `tab` / `shift+tab` cycle the category (all, patients,
+orders, demand, imaging, reading, staff, rooms, finance, practice,
+actions; alerts carry their rule's category), `!` cycles the severity (all
+· warnings & alerts · alerts only); the title shows the filter and the
+match count. Jumping from an entry is deferred.
+
 ### 4.9 Actions menu (V0.1)
 
 ```
@@ -586,6 +592,10 @@ table shrinks to one line so the alerts fit.
 each metric means, how utilization is defined, why cash and profit diverge, and
 that numbers are illustrative.
 
+*As built (V0.1):* `?` from any screen shows the keys (time, screens,
+in-screen keys, session) and the worklist rule; `?` or `esc` returns to
+the screen it came from. The field guide is deferred.
+
 ---
 
 ## 5. Model structure (code organization)
@@ -621,7 +631,12 @@ the cached observation down. No screen mutates the observation.
 * **Golden views**: construct a session from a fixed scenario+seed, advance to
   fixed times, render each screen at 80×24, 120×36, 160×48 with colors
   disabled; compare to files under `internal/tui/testdata/`. Regenerate with
-  `-update`.
+  `-update`. *As built:* `TestScreenSnapshots`, files in
+  `testdata/screens/` (the version in the top bar is normalized), regenerate
+  with `go test ./internal/tui -run ScreenSnapshots -update-screens`.
+* **NO_COLOR**: colors follow the terminal profile Bubble Tea detects;
+  `NO_COLOR` removes every color and severity stays marked (⚠ ‼) —
+  `TestNoColor`.
 * **Update tests**: key sequences produce expected UI state and session calls
   (e.g., `space` toggles running; `n` lands on the next observable entry).
 * **Pacing test**: drive `tickMsg`s with a fake wall clock at different frame

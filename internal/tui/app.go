@@ -56,6 +56,13 @@ const (
 	screenHistory
 	screenSummary
 	screenActions
+	screenHelp
+)
+
+// Event log filters on the log screen: category (tab) and severity (!).
+var (
+	logCategories = []string{"all", "patients", "orders", "demand", "imaging", "reading", "staff", "rooms", "finance", "practice", "actions"}
+	logSeverities = []string{"all", "warnings & alerts", "alerts only"}
 )
 
 // Patient list filters, cycled with tab.
@@ -87,8 +94,12 @@ type Model struct {
 	schedRoom   int
 	schedScroll int
 	sched       api.DaySchedule
-	// Log screen: entries scrolled back from the newest.
-	logScroll int
+	// Log screen: entries scrolled back from the newest, and the
+	// category and severity filters.
+	logScroll      int
+	logCat, logSev int
+	// Help screen: the screen to return to.
+	helpFrom screen
 	// Patients screen: day offset, filter, selected row and the patient
 	// whose journey is open ("" for the list).
 	patDay    int64
@@ -265,6 +276,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) key(k string) tea.Cmd {
+	if m.screen == screenHelp {
+		switch k {
+		case "?", "esc", "enter", "backspace":
+			m.screen = m.helpFrom
+			m.refresh()
+			return nil
+		}
+	} else if k == "?" {
+		m.helpFrom, m.screen = m.screen, screenHelp
+		return nil
+	}
 	if m.sessionKey(k) {
 		m.refresh()
 		return nil
@@ -461,6 +483,12 @@ func (m *Model) screenKey(k string) bool {
 			m.logScroll = len(m.obs.RecentLog)
 		case "G":
 			m.logScroll = 0
+		case "tab":
+			m.logCat, m.logScroll = (m.logCat+1)%len(logCategories), 0
+		case "shift+tab":
+			m.logCat, m.logScroll = (m.logCat+len(logCategories)-1)%len(logCategories), 0
+		case "!":
+			m.logSev, m.logScroll = (m.logSev+1)%len(logSeverities), 0
 		default:
 			return false
 		}

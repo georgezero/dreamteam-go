@@ -113,6 +113,13 @@ func (w *World) StartTime() simtime.Time {
 // LogTotal returns the number of observable log entries emitted so far.
 func (w *World) LogTotal() uint64 { return w.st.log.total }
 
+// SetLogSink calls f with every observable log entry emitted from now on
+// (nil stops). It is an output only: outcomes and digests never depend on
+// it.
+func (w *World) SetLogSink(f func(api.LogEntry)) {
+	w.st.log.sink, w.st.log.sinkCal = f, w.st.cal
+}
+
 // LastAlert returns the log sequence number of the most recent alert.
 func (w *World) LastAlert() uint64 { return w.st.alertSeen }
 

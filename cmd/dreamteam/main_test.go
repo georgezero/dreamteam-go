@@ -2,10 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/georgezero/dreamteam-go/internal/api"
 )
 
 // run → save → replay/verify, and a damaged file is refused.
@@ -66,5 +69,58 @@ func TestRegress14ActionsFileTrailing(t *testing.T) {
 	var out, errs bytes.Buffer
 	if code := runCmd([]string{"-scenario", "mini", "-days", "1", "-actions", p}, &out, &errs); code != exitInvalid {
 		t.Fatalf("exit %d:\n%s", code, errs.String())
+	}
+}
+
+// Acceptance criterion 6: run -summary text prints the summaries and -log
+// writes the observable log from the takeover as JSON lines, without
+// changing any outcome.
+func TestRunLogJSONL(t *testing.T) {
+	dir := t.TempDir()
+	logPath := filepath.Join(dir, "events.jsonl")
+	var plain, logged, errs bytes.Buffer
+	if code := runCmd([]string{"-scenario", "mini", "-seed", "7", "-days", "2", "-summary", "json"}, &plain, &errs); code != 0 {
+		t.Fatalf("exit %d: %s", code, errs.String())
+	}
+	if code := runCmd([]string{"-scenario", "mini", "-seed", "7", "-days", "2", "-summary", "json", "-log", logPath}, &logged, &errs); code != 0 {
+		t.Fatalf("exit %d: %s", code, errs.String())
+	}
+	if plain.String() != logged.String() {
+		t.Fatal("-log changed the result")
+	}
+	var r struct {
+		Digests struct{ Log string } `json:"digests"`
+	}
+	if err := json.Unmarshal(plain.Bytes(), &r); err != nil || r.Digests.Log == "" {
+		t.Fatalf("result: %v", err)
+	}
+	raw, err := os.ReadFile(logPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lines := strings.Split(strings.TrimSpace(string(raw)), "\n")
+	if len(lines) < 100 {
+		t.Fatalf("only %d log lines", len(lines))
+	}
+	var prev uint64
+	for i, l := range lines {
+		var e api.LogEntry
+		dec := json.NewDecoder(strings.NewReader(l))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&e); err != nil || e.Time == "" || e.Category == "" || e.Text == "" || e.Severity == "" {
+			t.Fatalf("line %d %q: %v", i+1, l, err)
+		}
+		if i > 0 && e.Seq != prev+1 {
+			t.Fatalf("line %d: seq %d after %d", i+1, e.Seq, prev)
+		}
+		prev = e.Seq
+	}
+	if !strings.HasPrefix(lines[0], `{"seq":`) || strings.Contains(lines[0], "2026-10-12") {
+		t.Errorf("the log should start at the takeover: %s", lines[0])
+	}
+	var text bytes.Buffer
+	if code := runCmd([]string{"-scenario", "mini", "-seed", "7", "-days", "2", "-summary", "text"}, &text, &errs); code != 0 ||
+		!strings.Contains(text.String(), "digest: run ") {
+		t.Fatalf("text summary exit %d:\n%s", code, text.String())
 	}
 }

@@ -49,15 +49,19 @@ func usage() {
                                                    play in the terminal (default); -load resumes
                                                    a saved session; ctrl+s saves (to -save, the
                                                    loaded file, or SCENARIO-seedN.session.json)
-  dreamteam run [-scenario ID|FILE] [-seed N] -days D [-actions FILE] [-save FILE] [OUTPUT]
+  dreamteam run [-scenario ID|FILE] [-seed N] -days D [-actions FILE] [-save FILE] [-log FILE] [OUTPUT]
                                                    run headless from the takeover for D days,
-                                                   applying timestamped action batches
+                                                   applying timestamped action batches; -log
+                                                   writes the observable event log from the
+                                                   takeover as JSON lines (seq, time, severity,
+                                                   category, text)
   dreamteam replay FILE [-allow-engine-mismatch] [OUTPUT]
                                                    rebuild a saved session from its scenario,
                                                    seed and actions; report every mismatch
   dreamteam verify FILE [-allow-engine-mismatch]   the same, quietly: "ok <run digest>"
   OUTPUT (run, replay):
     -format text|json       text summary (default) or the canonical result JSON on stdout
+                            (-summary is an alias)
     -verify-replay          (run) also replay the run's own record and include the outcome
     -golden FILE            compare the result with a golden reference
     -write-golden FILE      write the result as a golden reference (refuses to replace one
@@ -65,6 +69,8 @@ func usage() {
   Exit codes: 0 ok · 1 error (I/O, scenario) · 2 invalid input · 3 replay failure
               · 4 golden mismatch · 5 incompatible or unsupported format
   dreamteam version                                print the version
+
+In the terminal UI press ? for the keys. Colors follow the terminal; NO_COLOR=1 turns them off.
 `)
 }
 

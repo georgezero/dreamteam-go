@@ -207,6 +207,10 @@ func (s *Session) History(n int) []api.DaySummary { return s.w.History(n) }
 // Observe returns the current observation with up to recent log entries.
 func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recent) }
 
+// SetLogSink calls f with every observable log entry emitted from now on
+// (nil stops); an output only, like the terminal.
+func (s *Session) SetLogSink(f func(api.LogEntry)) { s.w.SetLogSink(f) }
+
 // Digest identifies the run: its log, books, actions and full state at
 // the current time (Digests().Run).
 func (s *Session) Digest() string { return s.Digests().Run }

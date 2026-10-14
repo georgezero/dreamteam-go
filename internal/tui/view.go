@@ -39,7 +39,10 @@ func (m *Model) render() string {
 		hints = " ↑↓ room  ←→ day  j/k scroll  t today  d dash  p patients  l log  q quit"
 	case screenLog:
 		body = m.logBody(w, h-3)
-		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dash  p patients  q quit"
+		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  tab category  ! severity  d dash  ? help  q quit"
+	case screenHelp:
+		body = m.helpBody(w, h-3)
+		hints = " ? or esc back  q quit"
 	case screenBriefing:
 		body = m.briefingBody(w, h-3)
 		hints = " enter dashboard  space start  h history  f finance  w worklist  s sched  q quit"
@@ -70,7 +73,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  e end of day  a actions  p s w f l  A auto:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  e end of day  a actions  p s w f l  A auto:" + auto + "  ? help  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -252,16 +255,25 @@ func demandLines(o api.Observation, w int) []string {
 	return out
 }
 
-// logBody is the full event log, newest at the bottom, scrollable.
+// logBody is the full event log, newest at the bottom, scrollable and
+// filtered by category and severity.
 func (m *Model) logBody(w, n int) []string {
 	o := m.obs
-	lines := []string{titleStyle.Render(section(fmt.Sprintf("EVENT LOG · %d entries (last %d kept)", o.LogTotal, len(o.RecentLog)), w))}
+	entries := filterLog(o.RecentLog, m.logCat, m.logSev)
+	title := fmt.Sprintf("EVENT LOG · %d entries (last %d kept)", o.LogTotal, len(o.RecentLog))
+	if m.logCat != 0 || m.logSev != 0 {
+		title = fmt.Sprintf("EVENT LOG · %s · %s · %d of the last %d", logCategories[m.logCat], logSeverities[m.logSev], len(entries), len(o.RecentLog))
+	}
+	lines := []string{titleStyle.Render(section(title, w))}
 	rows := n - 1
-	m.logScroll = min(m.logScroll, max(0, len(o.RecentLog)-rows))
-	end := len(o.RecentLog) - m.logScroll
+	m.logScroll = min(m.logScroll, max(0, len(entries)-rows))
+	end := len(entries) - m.logScroll
 	start := max(0, end-rows)
+	if len(entries) == 0 {
+		lines = append(lines, dimStyle.Render(" No entries match the filter (tab: category, !: severity)."))
+	}
 	for i := start; i < end; i++ {
-		e := o.RecentLog[i]
+		e := entries[i]
 		day := ""
 		if len(e.Time) >= 10 {
 			day = shortDate(e.Time[:10]) + " "
@@ -269,6 +281,60 @@ func (m *Model) logBody(w, n int) []string {
 		lines = append(lines, " "+dimStyle.Render(day)+logLine(e))
 	}
 	return lines
+}
+
+// filterLog keeps the entries of category logCategories[cat] (0: all) and
+// at least the severity logSeverities[sev] asks for.
+func filterLog(es []api.LogEntry, cat, sev int) []api.LogEntry {
+	if cat == 0 && sev == 0 {
+		return es
+	}
+	var out []api.LogEntry
+	for _, e := range es {
+		if cat != 0 && e.Category != logCategories[cat] {
+			continue
+		}
+		if sev == 1 && e.Severity == api.Info || sev == 2 && e.Severity != api.Alert {
+			continue
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+// helpBody lists the keys: global ones, then the current screen's.
+func (m *Model) helpBody(w, n int) []string {
+	rows := [][2]string{
+		{"TIME", ""},
+		{"space", "run / pause (the practice opens paused)"},
+		{"1 2 3 4 5", "speed: 1 min/s · 5 min/s · 15 min/s · 1 h/s · Max"},
+		{"n", "step to the next log entry"},
+		{"e", "finish today's operations and show the end-of-day summary"},
+		{"A", "auto-pause on alerts on/off"},
+		{"SCREENS", ""},
+		{"d / esc", "dashboard          b  briefing        h  history"},
+		{"s", "schedule           p  patients        w  worklist"},
+		{"l", "event log          f  finance         a  actions"},
+		{"IN SCREENS", ""},
+		{"↑↓ j k ←→ t", "move, scroll, page days (t: today)"},
+		{"tab", "next filter or view (patients, log, finance, summary)"},
+		{"!", "log: severity filter (all · warnings & alerts · alerts only)"},
+		{"enter", "open (patient, journey) or submit (actions)"},
+		{"SESSION", ""},
+		{"ctrl+s ctrl+o", "save · reload the saved file (replays it)"},
+		{"ctrl+v", "verify: replay this run from scenario, seed and actions"},
+		{"q", "quit (unsaved changes are lost)"},
+	}
+	lines := []string{titleStyle.Render(section("HELP · keys", w))}
+	for _, r := range rows {
+		if r[1] == "" {
+			lines = append(lines, dimStyle.Render(" "+r[0]))
+			continue
+		}
+		lines = append(lines, fmt.Sprintf("   %-14s %s", r[0], r[1]))
+	}
+	lines = append(lines, dimStyle.Render(" Urgent studies are always read first; the worklist policy orders the rest."))
+	return lines[:min(len(lines), n)]
 }
 
 // section renders a section rule: "─ ROOMS ─────".

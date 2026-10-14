@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -162,7 +163,7 @@ func parseFlags(fs *flag.FlagSet, args []string) (pos []string, err error) {
 }
 
 // runCmd runs a scenario headless from its takeover.
-func runCmd(args []string, stdout, stderr io.Writer) int {
+func runCmd(args []string, stdout, stderr io.Writer) (code int) {
 	fs := flag.NewFlagSet("run", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	seed := fs.Int64("seed", 1, "simulation seed")
@@ -171,8 +172,10 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 	actions := fs.String("actions", "", "JSON file of action batches: [{\"time\": \"2026-10-13T07:00:00\", \"actions\": [...]}]")
 	save := fs.String("save", "", "save the session to this file")
 	verify := fs.Bool("verify-replay", false, "replay the run's own record and include the outcome")
+	logFile := fs.String("log", "", "write the observable event log from the takeover to this file, one JSON object per line")
 	var o output
 	o.flags(fs)
+	fs.StringVar(&o.format, "summary", "text", "alias of -format: text or json")
 	if pos, err := parseFlags(fs, args); err != nil || len(pos) > 0 {
 		return exitInvalid
 	}
@@ -206,6 +209,34 @@ func runCmd(args []string, stdout, stderr io.Writer) int {
 	if err != nil {
 		fmt.Fprintln(stderr, "dreamteam:", err)
 		return exitError
+	}
+	if *logFile != "" {
+		f, err := os.Create(*logFile)
+		if err != nil {
+			fmt.Fprintln(stderr, "dreamteam:", err)
+			return exitError
+		}
+		bw := bufio.NewWriter(f)
+		enc := json.NewEncoder(bw)
+		var werr error
+		s.SetLogSink(func(e api.LogEntry) {
+			if werr == nil {
+				werr = enc.Encode(e)
+			}
+		})
+		defer func() {
+			s.SetLogSink(nil)
+			if err := bw.Flush(); werr == nil {
+				werr = err
+			}
+			if err := f.Close(); werr == nil {
+				werr = err
+			}
+			if werr != nil {
+				fmt.Fprintln(stderr, "dreamteam: -log:", werr)
+				code = exitError
+			}
+		}()
 	}
 	cal := s.Calendar()
 	end := s.Now().Add(simtime.Duration(*days) * simtime.Day)

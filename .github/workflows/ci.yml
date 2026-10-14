@@ -1,0 +1,79 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # Linux amd64, Linux arm64 and macOS arm64: the golden references
+        # pin every digest, so passing them on each platform means the same
+        # outcomes everywhere (acceptance criterion 8).
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Platform
+        run: go version && go env GOOS GOARCH
+      - name: Vet
+        run: |
+          go vet ./...
+          go vet -tags calibration ./...
+          go vet -tags acceptance ./...
+      - name: Format
+        run: test -z "$(gofmt -l .)"
+      - name: Test
+        run: go test ./... -count=1 -timeout 30m
+      - name: Golden references
+        # Outcomes and digests against the pinned references (the engine
+        # name may lag a version bump; the comparison reports it).
+        shell: bash
+        run: |
+          set -euo pipefail
+          go build -o dt ./cmd/dreamteam
+          mkdir -p out
+          cd testdata/golden
+          check() {
+            f=$1; shift
+            ../../dt run "$@" -verify-replay -format json -allow-engine-mismatch -golden "$f" > "../../out/$f"
+            echo "$f: outcomes identical"
+          }
+          check established-seed1-7d.json -scenario established -seed 1 -days 7
+          check established-seed1-90d.json -scenario established -seed 1 -days 90
+          check mini-seed1-7d.json -scenario mini -seed 1 -days 7
+          check established-seed1-7d-actions.json -scenario established -seed 1 -days 7 -actions established-7d.actions.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: results-${{ matrix.os }}
+          path: out/
+
+  cross-platform:
+    # The same commit's results, byte for byte, on every platform.
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: results
+      - name: Compare
+        run: |
+          set -eu
+          ls results
+          for f in results/results-ubuntu-latest/*.json; do
+            n=$(basename "$f")
+            for os in ubuntu-24.04-arm macos-latest; do
+              cmp "$f" "results/results-$os/$n"
+            done
+            echo "$n: byte-identical on linux/amd64, linux/arm64, darwin/arm64"
+          done

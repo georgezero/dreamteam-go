@@ -23,6 +23,10 @@ type eventLog struct {
 	total uint64
 	h     hash.Hash
 	buf   []byte
+	// sink, when set, receives every entry as it is emitted (an output,
+	// like a terminal: never read back, never part of the state).
+	sink    func(api.LogEntry)
+	sinkCal simtime.Calendar
 }
 
 type logEntry struct {
@@ -51,6 +55,9 @@ func (l *eventLog) emit(at simtime.Time, sev api.Severity, cat, text string) {
 	l.buf = b
 
 	e := logEntry{seq: l.total, at: at, sev: sev, cat: cat, text: text}
+	if l.sink != nil {
+		l.sink(api.LogEntry{Seq: e.seq, At: at, Time: l.sinkCal.ISO(at), Severity: sev, Category: cat, Text: text})
+	}
 	if len(l.ring) < logRetention {
 		l.ring = append(l.ring, e)
 		return
