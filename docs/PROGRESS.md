@@ -7,6 +7,141 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 14 — Sessions, replay and digests (v0.1.0-dev.14)
+
+### Part A — playtest (before step 14)
+
+Driven through the real TUI model (scripted keys, every screen read at
+80×24) on the established practice, seed 1:
+
+1. **Two days, no actions.** Alerts, queues, worklist and money agree:
+   day 1 70 exams, 16 alerts (mostly XR waits behind the shared XR/CT
+   technologist), 3h 01m overtime, profit $575; day 2 60 exams, an insight
+   flags MR busy 86% of staffed time but staffed 70% of open hours. The
+   17:00 dashboard shows self-registration after the desk staff leave;
+   "MR room unstaffed — why: Casey on break until 13:00" matches the roster.
+2. **US extension a week ahead** (Morgan, Wed Oct 21, +2h): the schedule
+   for that day went from 2 to 5 open US slots (18:00, 18:45, 19:30), at
+   once. Demand untouched (tests).
+3. **Walk-ins: decline, then accept-if-gap.** The 3 walk-ins arriving
+   while declining were offered appointments and counted as declined;
+   nobody already waiting was removed; switching back took effect for the
+   next arrival.
+4. **Worklist: priority → FIFO** with an urgent and two routine studies
+   unread: the urgent XR dropped from first to last at once; MR and US were
+   read first, the urgent one at 38 min; the read in progress continued.
+
+**Defects found and fixed (all in action feedback):**
+* An extension's preview did not say what the extra time covers, and an
+  extension that would cover nothing was accepted. Now each says
+  "staffs US 18:00–20:00", "covers the desk …" or "on site for contrast
+  supervision (reading blocks unchanged)", and one covering no room, desk
+  or supervision is refused (`no_coverage`). Coverage is evaluated on the
+  extended plan, the same plan dispatch and booking use, so the preview,
+  the schedule and the effect agree (`TestExtensionWithoutCoverageRefused`).
+* It did not say the benefit: it now names the slots it opens ("opens 3
+  US slots for booking") or says none would be ("already staffed, or no
+  template slots then" — e.g. Riley's XR evening, which Sam covers).
+* At 80 columns the preview and result were cut off (the cost and effect
+  lost) and dates were ISO. They now wrap over up to three lines ("Done ✓
+  …", "If submitted: ✓/✗ …"), dates read "Wed Oct 21", and the next preview
+  restarts at +60m instead of showing a confusing rejection.
+* Declined walk-ins were cut off the 80-column dashboard: now "walk-ins 3
+  (3 declined)".
+
+Owner note: the five-day comparison's +$181 does not make the policy
+optimal — 22 h of approved overtime for 8 exams may reverse once step 18
+calibrates rates and staffing. That trade-off is for players and agents to
+discover.
+
+### Part B — sessions, replay, digests
+
+**Principle.** A saved run is reproduced from its scenario, seed and
+timestamped actions; no serialized world is trusted. The session file
+(`dreamteam.session/v1`) is a run record: the fully resolved scenario with
+its fingerprint, the seed, epoch and takeover, every action batch with its
+results (rejections and no-ops too), the saved time, five digests, a
+readable summary and a checksum. Format and rules: SIMULATION_DESIGN §4.5
+(as built).
+
+| Digest | Covers |
+|---|---|
+| log | every observable log entry, in order |
+| ledger | every journal entry, in order |
+| actions | the action record with results |
+| state | the whole authoritative state, hidden fields included, and the live pending events; not caches, hooks, processing counters or event sequence numbers |
+| run | all of the above and the clock |
+
+**Load = replay.** Strict parse → checksum → schema → scenario fingerprint
+→ batch structure → compile, warm up, apply every batch at its time
+through `Apply`, compare each result → run to the saved time → compare the
+digests. Mismatches name the first differing action (batch, time, action,
+recorded vs replayed) or the differing digests, with both summaries.
+
+**Compatibility.** Another schema: refused. Another engine version:
+refused unless `-allow-engine-mismatch`, which replays and lets the digests
+say whether outcomes agree. Changing the rules (any future gameplay step)
+therefore changes which old saves verify: that is the point.
+
+**Changes to existing behavior (no outcome changes).**
+* Alerts keep the text they were raised (or escalated) with; before, the
+  stored text was refreshed at each evaluation, so a *resolved* alert's
+  displayed text depended on when unrelated events happened. Observations
+  of active alerts still show the live text.
+* A batch of only rejected or no-op actions no longer moves the metrics'
+  accrual point or the clock cache; an empty batch is not a batch.
+* `Session.Digest()` is now the run digest (log, ledger, actions, state,
+  clock).
+* Saved and loaded sessions without actions are identical to `08ccc5d`
+  (ledger and every visit, study and appointment, established 21 days and
+  mini 30 days, seeds 1–3).
+
+**Controls.**
+* TUI: `ctrl+s` save, `ctrl+o` reload (replay the saved file and resume),
+  `ctrl+v` verify by replay; the top bar shows the seed and "● unsaved".
+* CLI:
+  * `dreamteam play [-load FILE] [-save FILE]`
+  * `dreamteam run [-scenario ID] [-seed N] -days D [-actions FILE] [-save FILE]`
+    — headless, prints each action result, the since-takeover figures and
+    the digests. Actions file: `[{"time": "2026-10-13T07:00:00", "actions": [...]}]`.
+  * `dreamteam replay FILE [-allow-engine-mismatch]` — full report.
+  * `dreamteam verify FILE` — `ok <run digest>` or the mismatch, exit 1.
+
+**Tests** (`go test -count=1 ./...` passes; `internal/sim` 158 s,
+`internal/session` 21 s):
+
+| Requirement | Test |
+|---|---|
+| Save/load round trip, resume | `TestSaveLoadRoundTrip` (accepted, rejected, no-op, two multi-action batches, a future-day extension; both sessions continue identically) |
+| Replay after restart | `TestRunSaveReplayVerify` (CLI: separate run, file, replay, verify) |
+| Midday takeover, cross-day and cross-week, payroll and claims across resume | `TestReplayMiddayTakeoverAcrossPayrollAndWeek` (13:00 takeover, saved Thursday 23:00, continued past Friday payroll and remittances to the next Tuesday) |
+| Corrupt, truncated, edited, fingerprint, schema, engine, tampered results and digests, order | `TestCorruptAndIncompatibleFiles` (11 cases) |
+| Atomic save failure | `TestAtomicSaveFailure` |
+| Chunking | `TestReplayChunkingInvariance` (17 min, 3 h, single step) |
+| Independence from unrelated events, reads, previews, rejections | `TestStateDigestIndependentOfNoiseAndReads` |
+| Hidden state covered, nothing leaked | `TestStateDigestCoversHiddenState`, `TestSavingHasNoSideEffects` (no latent fields in the file; saving and verifying change nothing) |
+| Determinism | `TestStateDigestDeterministic`, `TestCanonicalRoundTrip`, `TestParseISORoundTrip` |
+| TUI | `TestSessionKeys` |
+
+**Performance** (MEASUREMENTS.md): warm-up unchanged (1415 ms vs 1359 ms
+best, within thermal noise; identical memory); save after 30 days
+0.44–0.54 s; load = replay + verify of 30 days 2.1–2.3 s; `run -days 30`
+plus save 4.0 s and 48 MB peak; file 35 KB.
+
+**Limitations.**
+* No snapshots: loading always replays from the epoch (warm-up included),
+  about 1.4 s plus the played days. A snapshot cache verified against the
+  digests can come with V0.2 save/load UI.
+* The state digest is a reflection walk over the state's fields: a field
+  added later is covered automatically, but a new cache must be added to
+  its skip list (or the noise test fails, which is how this one was found).
+* Records include the seed: fine for game saves; benchmark records will
+  escrow it (V0.5).
+* Golden 7- and 90-day digests (ROADMAP testing strategy) are not pinned
+  yet; the start-state goldens are.
+
+---
+
 ## Step 13 — Player actions (v0.1.0-dev.13)
 
 **Owner decisions recorded (2026-10-14).** The four step 12 conventions are

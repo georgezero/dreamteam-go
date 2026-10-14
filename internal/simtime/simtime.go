@@ -312,3 +312,20 @@ func floorDiv(a, b int64) int64 {
 }
 
 func floorMod(a, b int64) int64 { return a - floorDiv(a, b)*b }
+
+// ParseISO parses a practice-local time as ISO formats it,
+// "YYYY-MM-DDTHH:MM:SS" (seconds optional).
+func (c Calendar) ParseISO(s string) (Time, error) {
+	if len(s) < 16 || s[10] != 'T' {
+		return 0, fmt.Errorf("simtime: %q is not YYYY-MM-DDTHH:MM[:SS]", s)
+	}
+	d, err := ParseDate(s[:10])
+	if err != nil {
+		return 0, err
+	}
+	cl, err := ParseClock(s[11:])
+	if err != nil {
+		return 0, err
+	}
+	return c.StartOfDate(d).Add(cl), nil
+}

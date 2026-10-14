@@ -4,6 +4,7 @@
 package tui
 
 import (
+	"fmt"
 	"time"
 
 	tea "charm.land/bubbletea/v2"
@@ -118,6 +119,65 @@ type Model struct {
 	actResult        *api.ActionResult
 	actDay           int64             // extension day, offset from today
 	roster           []api.RosterEntry // that day's shifts
+	// savePath is where ctrl+s saves when the session has no file yet.
+	savePath string
+}
+
+// SetSavePath names the file ctrl+s saves to ("" keeps the default: the
+// file the session was loaded from, else SCENARIO-seedN.session.json).
+func (m *Model) SetSavePath(p string) { m.savePath = p }
+
+// saveTarget is where the session saves.
+func (m *Model) saveTarget() string {
+	switch {
+	case m.savePath != "":
+		return m.savePath
+	case m.sess.Path() != "":
+		return m.sess.Path()
+	}
+	return m.sess.DefaultPath()
+}
+
+// sessionKey handles save (ctrl+s), reload (ctrl+o: load the saved file
+// and resume from it) and replay verification (ctrl+v).
+func (m *Model) sessionKey(k string) bool {
+	switch k {
+	case "ctrl+s":
+		m.running = false
+		p := m.saveTarget()
+		if err := m.sess.Save(p); err != nil {
+			m.status = "✗ Save failed: " + err.Error()
+		} else {
+			m.status = "✓ Saved " + p + " (scenario, seed and actions; reload with ctrl+o)"
+		}
+	case "ctrl+o":
+		m.running = false
+		p := m.saveTarget()
+		s, rep, err := session.Load(p, session.ReplayOptions{})
+		switch {
+		case err != nil && rep != nil && len(rep.Mismatches) > 0:
+			m.status = "✗ " + p + " did not replay: " + rep.Mismatches[0]
+		case err != nil:
+			m.status = "✗ Load failed: " + err.Error()
+		default:
+			m.sess = s
+			m.status = fmt.Sprintf("✓ Loaded %s: %d batches replayed, digests match; resumed at %s", p, rep.Batches, m.sess.Calendar().ISO(m.sess.Now()))
+		}
+	case "ctrl+v":
+		m.running = false
+		rep, err := m.sess.Verify()
+		switch {
+		case err == nil:
+			m.status = fmt.Sprintf("✓ Replay verified: %d batches from scenario, seed and actions reproduce this run (%.12s…)", rep.Batches, rep.Replayed.Run)
+		case rep != nil && len(rep.Mismatches) > 0:
+			m.status = "✗ Replay mismatch: " + rep.Mismatches[0]
+		default:
+			m.status = "✗ Cannot verify: " + err.Error()
+		}
+	default:
+		return false
+	}
+	return true
 }
 
 // New returns a paused model on s.
@@ -205,6 +265,10 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) key(k string) tea.Cmd {
+	if m.sessionKey(k) {
+		m.refresh()
+		return nil
+	}
 	if m.screenKey(k) {
 		m.refresh()
 		return nil

@@ -1,6 +1,10 @@
 package sim
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"reflect"
+
 	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -329,3 +333,17 @@ func (w *World) ForceDeniedClaimsFrom(t simtime.Time) {
 
 // Config returns the world's configuration.
 func (w *World) Config() *Config { return w.st.cfg }
+
+// StateDigestParts digests each top-level state field on its own (to find
+// what differs).
+func (w *World) StateDigestParts() map[string]string {
+	out := map[string]string{}
+	v := reflect.ValueOf(w.st).Elem()
+	for _, i := range fieldsOf(v.Type()) {
+		d := &stateHasher{h: sha256.New()}
+		d.value(v.Field(i))
+		d.flush()
+		out[v.Type().Field(i).Name] = hex.EncodeToString(d.h.Sum(nil))[:12]
+	}
+	return out
+}

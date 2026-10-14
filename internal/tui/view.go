@@ -93,10 +93,19 @@ func (m *Model) topBar(w int) string {
 		run += " · " + speeds[m.speed].label
 	}
 	brand := " DREAMTEAM v" + version.Number
-	left := brand + " · " + o.Practice.Name
+	sess := fmt.Sprintf(" · seed %d", m.sess.Seed())
+	if m.sess.Unsaved() {
+		sess += " ● unsaved"
+	}
+	left := brand + sess + " · " + o.Practice.Name
 	right := fmt.Sprintf("%s %s · Day %d · %s ── %s ", o.Weekday, shortDate(o.Date), o.Day, o.Clock, run)
 	if ansi.StringWidth(left)+ansi.StringWidth(right) >= w {
-		left = brand // the clock and run state matter more than the name
+		left = brand + sess // the clock and run state matter more than the name
+	}
+	if ansi.StringWidth(left)+ansi.StringWidth(right) >= w && m.sess.Unsaved() {
+		left = brand + " ●" // …and than the seed (● = unsaved changes)
+	} else if ansi.StringWidth(left)+ansi.StringWidth(right) >= w {
+		left = brand
 	}
 	return barStyle.Render(spread(left, right, w))
 }
@@ -484,8 +493,12 @@ func flowLines(o api.Observation, w int) []string {
 	if t.Left > 0 {
 		left = warnStyle.Render(left)
 	}
-	l2 := fmt.Sprintf(" Done %d · arrived %d (late %d) · walk-ins %d · %s · %s · no-shows %d",
-		t.ExamsDone, t.Arrived, t.Late, t.WalkIns, left, missed, f.NoShowsLastClose)
+	walkIns := fmt.Sprintf("walk-ins %d", t.WalkIns)
+	if t.WalkInsDeclined > 0 {
+		walkIns += fmt.Sprintf(" (%d declined)", t.WalkInsDeclined)
+	}
+	l2 := fmt.Sprintf(" Done %d · arrived %d (late %d) · %s · %s · %s · no-shows %d",
+		t.ExamsDone, t.Arrived, t.Late, walkIns, left, missed, f.NoShowsLastClose)
 	if t.NoCoverage > 0 {
 		l2 += warnStyle.Render(fmt.Sprintf(" · rescheduled %d", t.NoCoverage))
 	}
@@ -497,9 +510,7 @@ func flowLines(o api.Observation, w int) []string {
 		wi += " " + o.Policies.WalkInCutoff
 	}
 	head := fmt.Sprintf("PATIENT FLOW today · walk-ins: %s · worklist: %s", wi, o.Policies.Worklist)
-	if t.WalkInsDeclined > 0 {
-		l2 += fmt.Sprintf(" · declined %d", t.WalkInsDeclined)
-	}
+
 	return []string{titleStyle.Render(section(head, w)), l1, l2}
 }
 

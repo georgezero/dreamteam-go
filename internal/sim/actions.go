@@ -3,6 +3,7 @@ package sim
 import (
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
@@ -41,10 +42,13 @@ func actionID(i int) string { return pubID('X', int64(i+1), 5) }
 
 // Apply applies one batch of actions now and returns their results.
 func (w *World) Apply(actions []api.Action) []api.ActionResult {
+	if len(actions) == 0 {
+		return nil // no decision, no batch
+	}
 	st := w.st
 	now := w.eng.Now()
+	prev := st.now
 	st.now = now
-	st.accrue(now) // the state up to now, before the batch changes it
 	st.actions.batches++
 	changed := false
 	var out []api.ActionResult
@@ -58,16 +62,25 @@ func (w *World) Apply(actions []api.Action) []api.ActionResult {
 	})
 	if changed {
 		w.eng.Settle()
+	} else {
+		st.now = prev // nothing happened: not even the clock cache moves
 	}
 	return out
 }
+
+// beforeChange runs once an action is valid and about to change the
+// state: the interval metrics are accrued to now first. (Rejections and
+// no-ops leave even the accrual point untouched.)
+func (st *state) beforeChange() { st.accrue(st.now) }
 
 // Validate checks an action against the state now without applying or
 // recording it (a preview for frontends).
 func (w *World) Validate(a api.Action) api.ActionResult {
 	st := w.st
+	prev := st.now
 	st.now = w.eng.Now()
 	ok, code, msg := st.apply(w.eng, a, false)
+	st.now = prev
 	return api.ActionResult{Time: st.cal.ISO(st.now), Action: a, OK: ok, Code: code, Message: msg}
 }
 
@@ -150,7 +163,8 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	k := plan.ByEmp[i]
 	dateText := "today"
 	if day != st.day {
-		dateText = st.cal.Date(st.cal.StartOfDay(day)).String()
+		dd := st.cal.Date(st.cal.StartOfDay(day))
+		dateText = fmt.Sprintf("%s %s %d", dd.Weekday(), dd.MonthName(), dd.Day)
 	}
 	if k < 0 {
 		return false, "not_on_shift", fmt.Sprintf("%s is not rostered %s.", name, dateText)
@@ -176,6 +190,10 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	if plan.Hours == nil || sh.To >= plan.Hours.To {
 		return false, "after_close", fmt.Sprintf("%s's shift %s already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).", name, dateText)
 	}
+	covers, opens := st.extensionEffect(day, plan, k, d)
+	if covers == "" {
+		return false, "no_coverage", fmt.Sprintf("%s would cover no room, desk or contrast supervision in the extra time %s (a remote radiologist's reading blocks are not extended): nothing to gain.", name, dateText)
+	}
 	cost := ""
 	if ec.Pay == Hourly {
 		if day == st.day {
@@ -193,10 +211,12 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 				st.cfg.Policies.OvertimeBP/10_000, st.cfg.Policies.OvertimeBP%10_000/1000, st.cfg.Policies.WeeklyHours/simtime.Hour)
 		}
 	}
-	msg := fmt.Sprintf("Shift extended: %s %s until %s (+%s approved overtime%s).", name, dateText, st.cal.Clock(end), d, cost)
+	msg := fmt.Sprintf("Shift extended: %s %s until %s (+%s approved overtime%s) · %s %s–%s%s.", name, dateText,
+		st.cal.Clock(end), d, cost, covers, simtime.FormatClock(sh.To), simtime.FormatClock(sh.To+d), opens)
 	if !do {
 		return true, api.ActionAccepted, msg
 	}
+	st.beforeChange()
 	if st.ext == nil {
 		st.ext = map[int64]map[int]simtime.Duration{}
 	}
@@ -300,6 +320,7 @@ func (st *state) setWalkIn(e *Engine, a api.Action, do bool) (bool, string, stri
 	}
 	msg := fmt.Sprintf("Walk-in policy: %s → %s (walk-ins already waiting stay).", st.walkInText(), text)
 	if do {
+		st.beforeChange()
 		st.pol.WalkIn, st.pol.WalkInCutoff = a.Policy, cutoff
 		st.emit(st.now, api.Info, "actions", msg)
 	}
@@ -327,6 +348,7 @@ func (st *state) setWorklist(e *Engine, a api.Action, do bool) (bool, string, st
 	}
 	msg := fmt.Sprintf("Worklist policy: %s → %s (reads in progress continue).", st.pol.Worklist, a.Policy)
 	if do {
+		st.beforeChange()
 		st.pol.Worklist = a.Policy
 		st.emit(st.now, api.Info, "actions", msg)
 	}
@@ -375,4 +397,69 @@ func (w *World) ActionLog() []api.ActionResult {
 		out = append(out, w.st.actionResult(i))
 	}
 	return out
+}
+
+// extensionEffect says what extending shift k of plan by d on day would
+// add: what the person covers in the extra time ("" if nothing) and the
+// template slots that would become bookable.
+func (st *state) extensionEffect(day int64, plan DayPlan, k int, d simtime.Duration) (covers, opens string) {
+	sh := plan.Shifts[k]
+	ec := &st.cfg.Employees[sh.Employee]
+	last := sh.To + d - 1 // a moment inside the extra time
+	ext := sh
+	ext.To += d
+	var rooms []string
+	for _, room := range st.cfg.Rooms {
+		if staffs(ec, &ext, room, last) {
+			rooms = append(rooms, room.Modality)
+		}
+	}
+	switch {
+	case len(rooms) > 0:
+		covers = "staffs " + strings.Join(rooms, "+")
+	case deskLevel(ec) != DeskClosed:
+		covers = "covers the desk"
+	case ec.Role == Radiologist && !sh.Remote:
+		covers = "on site for contrast supervision (reading blocks unchanged)"
+	}
+	if covers == "" {
+		return "", ""
+	}
+	ds := st.dem.days[day]
+	if ds == nil {
+		return covers, ""
+	}
+	p := plan
+	p.Shifts = slices.Clone(plan.Shifts)
+	p.Shifts[k] = ext
+	cov := p.Coverage()
+	n := map[string]int{}
+	var mods []string
+	for r := range ds.rooms {
+		for _, s := range ds.rooms[r] {
+			if s.why == slotOK {
+				continue
+			}
+			x := s
+			st.coverSlot(&cov, r, &x)
+			if x.why == slotOK {
+				m := st.cfg.Rooms[r].Modality
+				if n[m] == 0 {
+					mods = append(mods, m)
+				}
+				n[m]++
+			}
+		}
+	}
+	var parts []string
+	for _, m := range mods {
+		parts = append(parts, fmt.Sprintf("%d %s", n[m], m))
+	}
+	switch {
+	case len(parts) > 0:
+		opens = " · opens " + strings.Join(parts, ", ") + " slots for booking"
+	case len(rooms) > 0:
+		opens = " · no slot newly bookable (already staffed, or no template slots then)"
+	}
+	return covers, opens
 }

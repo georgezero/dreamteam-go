@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/x/ansi"
+
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -132,6 +134,9 @@ func (m *Model) actionKey(k string) bool {
 			r := m.sess.Apply(a)[0]
 			m.actResult = &r
 			m.status = resultText(r)
+			if r.OK && a.Type == api.ActExtendShift {
+				delete(m.actMinutes, a.Employee) // the next preview is a fresh +60m
+			}
 		}
 	default:
 		return false
@@ -206,16 +211,20 @@ func (m *Model) actionsBody(w, n int) []string {
 	lines = append(lines, fmt.Sprintf(" %s %s ‹ %s ›  %s", cursor(k+1), titleStyle.Render("Worklist policy"),
 		policyLabels[worklistChoices[m.actWork]], dimStyle.Render("in force: "+policyLabels[o.Policies.Worklist])))
 	lines = append(lines, "")
+	if r := m.actResult; r != nil {
+		mark := openStyle.Render(" Done ✓ ")
+		if !r.OK {
+			mark = alertStyle.Render(" Refused ✗ ")
+		}
+		lines = append(lines, wrapAfter(mark, r.Message, w, 3)...)
+	}
 	if a, ok := m.selectedAction(); ok {
 		p := m.sess.Validate(a)
-		mark := openStyle.Render(" Preview ✓ ")
+		mark := dimStyle.Render(" If submitted: ") + openStyle.Render("✓ ")
 		if !p.OK {
-			mark = alertStyle.Render(" Preview ✗ ")
+			mark = dimStyle.Render(" If submitted: ") + alertStyle.Render("✗ ")
 		}
-		lines = append(lines, mark+trim(p.Message, w-12))
-	}
-	if r := m.actResult; r != nil {
-		lines = append(lines, " Result  "+trim(resultText(*r), w-9))
+		lines = append(lines, wrapAfter(mark, p.Message, w, 3)...)
 	}
 	al := o.Actions
 	lines = append(lines, dimStyle.Render(fmt.Sprintf(" Actions so far: %d attempted · %d accepted · %d rejected", al.Attempted, al.Accepted, al.Rejected)))
@@ -262,4 +271,29 @@ func statusLabel(e api.Employee) string {
 func (m *Model) selected() api.Action {
 	a, _ := m.selectedAction()
 	return a
+}
+
+// wrapAfter lays out text after a prefix, wrapped at word boundaries to
+// width w in at most n lines (continuation lines indented).
+func wrapAfter(prefix, text string, w, n int) []string {
+	first := w - ansi.StringWidth(prefix) - 1
+	var out []string
+	line := prefix
+	room := first
+	for _, word := range strings.Fields(text) {
+		cur := ansi.StringWidth(line) - (w - 1 - room)
+		if cur > 0 && cur+1+ansi.StringWidth(word) > room {
+			out = append(out, line)
+			if len(out) == n {
+				return out
+			}
+			line, room = "   ", w-4
+		}
+		if line == "   " || line == prefix {
+			line += word
+		} else {
+			line += " " + word
+		}
+	}
+	return append(out, line)
 }

@@ -163,9 +163,11 @@ func (st *state) evaluateAlerts(e *Engine) {
 			a := al.active[i]
 			i++
 			a.falseSince = -1
-			a.text, a.why = c.text, c.why
+			// The stored text is the text as raised (or escalated): texts
+			// drift with time ("longest 42m") and what is kept must not
+			// depend on when evaluations happen. Observations recompute it.
 			if c.level > a.fired {
-				a.level = c.level
+				a.level, a.text, a.why = c.level, c.text, c.why
 				st.raise(now, &a.cond, c.level)
 				a.fired, a.raisedText = c.level, c.text
 			}

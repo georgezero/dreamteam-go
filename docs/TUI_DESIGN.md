@@ -470,6 +470,16 @@ The finance overview adds:
 
 The dashboard money line flags "⚠ shortfall".
 
+### 4.7b Sessions (V0.1 step 14)
+
+`ctrl+s` saves the session (to `play -save FILE`, else the file it was
+loaded from, else `SCENARIO-seedN.session.json`); `ctrl+o` reloads that
+file — it replays the run from the scenario, seed and actions, checks the
+digests and resumes there; `ctrl+v` verifies the current run by replaying
+it from scratch. The top bar shows the seed and "● unsaved" when the clock
+or the actions moved since the last save or load (at 80 columns, just
+"●"). `dreamteam play -load FILE` resumes a saved session.
+
 ### 4.8 Event log
 
 Full scrollable log with filters by category (`patients`, `rooms`, `staff`,

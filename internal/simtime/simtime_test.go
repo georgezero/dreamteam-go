@@ -123,3 +123,16 @@ func TestWeekdayParse(t *testing.T) {
 		t.Error("accepted Funday")
 	}
 }
+
+func TestParseISORoundTrip(t *testing.T) {
+	c := NewCalendar(Date{2026, 4, 1})
+	for _, x := range []Time{0, 59, 3600*24*200 + 13*3600 + 7*60 + 5} {
+		got, err := c.ParseISO(c.ISO(x))
+		if err != nil || got != x {
+			t.Fatalf("%d: %v %v", x, got, err)
+		}
+	}
+	if _, err := c.ParseISO("2026-04-01 10:00"); err == nil {
+		t.Fatal("accepted a space separator")
+	}
+}

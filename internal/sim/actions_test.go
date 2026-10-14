@@ -3,6 +3,7 @@ package sim_test
 import (
 	"math/rand/v2"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -776,6 +777,10 @@ func TestExtensionAheadOpensBookings(t *testing.T) {
 			t.Errorf("%+v: %+v", c.a, rs[i])
 		}
 	}
+	if m := rs[len(rs)-1].Message; !strings.Contains(m, "Morgan Thu Oct 22 until 20:00") ||
+		!strings.Contains(m, "staffs US 18:00–20:00") || !strings.Contains(m, "opens 3 US slots for booking") {
+		t.Fatalf("feedback %q", m)
+	}
 	thuIdx := cal.DayIndex(d0) + 9
 	openAfter18 := func(w *sim.World) (n int) {
 		for _, rs := range w.Schedule(thuIdx).Rooms {
@@ -814,5 +819,25 @@ func TestExtensionAheadOpensBookings(t *testing.T) {
 	}
 	if !reflect.DeepEqual(exogenous(plain.Orders()), exogenous(ahead.Orders())) {
 		t.Fatal("demand changed")
+	}
+}
+
+// An extension that would cover nothing — here an operations manager who
+// does not register patients (no room, no desk, no supervision) — is
+// refused, not paid for.
+func TestExtensionWithoutCoverageRefused(t *testing.T) {
+	cfg := *miniConfig(t)
+	emps := slices.Clone(cfg.Employees)
+	for k := range emps {
+		if emps[k].ID == "E02" {
+			emps[k].Skills = nil
+		}
+	}
+	cfg.Employees = emps
+	w := sim.New(&cfg, rng.SeedFromInt(1))
+	d0 := w.Calendar().StartOfDate(cfg.Start)
+	r := applyAt(t, w, at(d0, "07:00"), extend("E02", 60), extend("E01", 30))
+	if r[0].OK || r[0].Code != "no_coverage" || !r[1].OK || !strings.Contains(r[1].Message, "covers the desk 16:15–16:45") {
+		t.Fatalf("%+v", r)
 	}
 }

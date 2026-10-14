@@ -5,10 +5,6 @@
 package session
 
 import (
-	"crypto/sha256"
-	"encoding/binary"
-	"encoding/hex"
-
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
@@ -19,22 +15,52 @@ import (
 // Session is one running simulation.
 type Session struct {
 	w *sim.World
+	// The scenario as resolved (nil for sessions built from a bare
+	// configuration, which cannot be saved), its fingerprint, the seed,
+	// and the file this session was saved to or loaded from.
+	src   *scenario.File
+	fp    string
+	seed  int64
+	path  string
+	saved savePoint
+}
+
+// savePoint is what the last save or load covered.
+type savePoint struct {
+	at      simtime.Time
+	actions int
+	valid   bool
 }
 
 // New returns a session on cfg, advanced to the scenario's start time.
 func New(cfg *sim.Config, seed int64) *Session {
-	s := &Session{w: sim.New(cfg, rng.SeedFromInt(seed))}
+	s := &Session{w: sim.New(cfg, rng.SeedFromInt(seed)), seed: seed}
 	s.w.Engine().RunUntil(s.w.StartTime(), nil)
 	return s
 }
 
 // Open resolves a scenario (bundled ID or .json path) and starts a session.
 func Open(ref string, seed int64) (*Session, error) {
-	cfg, err := scenario.Resolve(ref)
+	f, err := scenario.ResolveFile(ref)
 	if err != nil {
 		return nil, err
 	}
-	return New(cfg, seed), nil
+	return FromFile(f, seed)
+}
+
+// FromFile starts a session on a resolved scenario; it can be saved.
+func FromFile(f *scenario.File, seed int64) (*Session, error) {
+	fp, err := scenario.Fingerprint(f)
+	if err != nil {
+		return nil, err
+	}
+	cfg, err := scenario.Compile(f)
+	if err != nil {
+		return nil, err
+	}
+	s := New(cfg, seed)
+	s.src, s.fp = f, fp
+	return s, nil
 }
 
 // AtStart reports whether the session is still at the scenario's start
@@ -88,6 +114,13 @@ func (s *Session) Advance(d simtime.Duration, opts Options) Reason {
 		return why
 	}
 	return Reached
+}
+
+// AdvanceTo runs to time t (no stops); earlier times do nothing.
+func (s *Session) AdvanceTo(t simtime.Time) {
+	if t > s.Now() {
+		s.w.Engine().RunUntil(t, nil)
+	}
 }
 
 // StepHorizon bounds how far StepVisible searches.
@@ -166,13 +199,6 @@ func (s *Session) History(n int) []api.DaySummary { return s.w.History(n) }
 // Observe returns the current observation with up to recent log entries.
 func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recent) }
 
-// Digest identifies the run's observable history and clock. It grows to
-// cover the full state digest in step 14.
-func (s *Session) Digest() string {
-	var b []byte
-	b = append(b, s.w.LogHash()...)
-	b = append(b, s.w.LedgerHash()...)
-	b = binary.BigEndian.AppendUint64(b, uint64(s.Now()))
-	sum := sha256.Sum256(b)
-	return hex.EncodeToString(sum[:])
-}
+// Digest identifies the run: its log, books, actions and full state at
+// the current time (Digests().Run).
+func (s *Session) Digest() string { return s.Digests().Run }

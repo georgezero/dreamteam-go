@@ -712,6 +712,57 @@ products. No floating point.
   batches) tuples. Any intentional gameplay change updates them in the same
   commit, with the reason stated in the commit message.
 
+**As built (V0.1 step 14).** A saved session *is* a run record; nothing
+else is persisted and no serialized world is trusted. File
+`dreamteam.session/v1` (JSON):
+
+```
+{schema, engine,                         // build that recorded it
+ scenario: {id, name, fingerprint, resolved},   // resolved file, SHA-256 of its canonical JSON
+ seed, epochDate, startSec/start,        // takeover
+ untilSec/until,                         // saved time
+ batches: [{batch, atSec, time, actions[], results[]}],
+ digests: {log, ledger, actions, state, run},
+ summary: {logEntries, ledgerEntries, actions, day, time, cashCents, examsSinceDay1},
+ checksum}                               // SHA-256 of the canonical JSON with checksum ""
+```
+
+* **Load = replay**: strict parse (unknown fields, trailing data refused);
+  checksum; schema; embedded scenario decoded and fingerprinted; batches
+  structurally checked (time and number order, a result per action, within
+  the run); then the scenario is compiled, the warm-up built, each batch
+  applied at its time through `Apply` — rejections and no-ops included —
+  and each result compared with the recorded one; the clock runs to
+  `until` and all five digests are compared. Any difference is
+  `ErrMismatch` with the first differing action or the digests that differ
+  and both summaries. Clock chunking during replay cannot matter (tested).
+* **Compatibility**: another schema is refused; another engine version is
+  refused unless explicitly allowed (`-allow-engine-mismatch`), in which
+  case the digests say whether outcomes still agree. Gameplay changes keep
+  old records loadable only in that comparison mode.
+* **Digests**: log (§4.5), ledger, actions (canonical JSON of the action
+  record), **state** — a canonical walk of the whole authoritative state,
+  hidden fields included (orders and latent attributes, appointments,
+  visits, studies, claims with their latent payer draws, employees, rooms,
+  ledger balances and day books, policies, extensions, alert and
+  evaluation state, the metric tally as of now) plus live pending events
+  (time, class, kind, generation, arguments; no sequence numbers; passive
+  events and stale ones left out) — and **run** over all of them and the
+  clock. Integers are 64-bit big-endian, strings length-prefixed, map
+  entries sorted: the same on every platform. Caches that depend on what
+  was read, test hooks, scratch buffers, the configuration (fingerprinted)
+  and processing statistics are excluded, so the state digest is the same
+  whatever observations, previews, rejected actions or unrelated events
+  occurred (tested), and differs when hidden pending events differ (tested).
+  Digests never appear in observations.
+* **Snapshots** (§3.6) are not built: replay is authoritative, and a
+  snapshot cache may come later (V0.2) as an accelerator verified against
+  the digests.
+* **Atomic saves**: temporary file in the same directory, synced, renamed
+  over the target, directory synced; a failure leaves the previous file
+  untouched and no temporary behind (tested by failing just before the
+  rename).
+
 ---
 
 ## 5. Patients, demand and appointments

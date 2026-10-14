@@ -182,3 +182,15 @@ or a ~2.4–2.9 s mode depending on throttling, so the best runs compare:
 
 Action processing has no cost when no action is taken; the evening
 template slots (unstaffed unless extended) add nothing measurable.
+
+## 2026-10-14 — V0.1 step 14 (Pi at 80–82 °C)
+
+| Measurement | Result |
+|---|---|
+| Established warm-up, `08ccc5d` vs step 14 alternated (best of 4) | 1359 ms vs 1415 ms; 90.78 MB, 1.266M allocs both (noise) |
+| `dreamteam run -days 30` (established, 4 actions) + save | 3.98 s wall, 48 MB peak RSS; session file 35 KB |
+| `dreamteam replay` of that file | 3.95 s, 53 MB peak RSS |
+| `dreamteam verify` | 2.96 s, 49 MB peak RSS |
+| Save 30 days after takeover (`-bench Save30Days`) | 0.44–0.54 s (mostly the state digest), 1.3 MB |
+| Load = replay + verify, 30 days (`-bench Replay30Days`) | 2.1–2.3 s, 117 MB allocated |
+| State digest after 10 days of play | ≈0.3 s |

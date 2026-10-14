@@ -269,3 +269,35 @@ func TestCoverageReportGolden(t *testing.T) {
 		t.Errorf("coverage report changed (run with -update to accept):\n%s", got)
 	}
 }
+
+// A resolved scenario survives its canonical JSON: decoding it compiles to
+// the same configuration, and the fingerprint is stable.
+func TestCanonicalRoundTrip(t *testing.T) {
+	for _, id := range []string{"established", "mini"} {
+		f, err := ResolveFile(id)
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, err := Canonical(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		g, err := Decode(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		a, err := Compile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		b, err := Compile(g)
+		if err != nil {
+			t.Fatal(err)
+		}
+		fa, _ := Fingerprint(f)
+		fb, _ := Fingerprint(g)
+		if !reflect.DeepEqual(a, b) || fa != fb || len(fa) != 64 {
+			t.Fatalf("%s: canonical round trip changed the scenario", id)
+		}
+	}
+}

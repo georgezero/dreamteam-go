@@ -510,7 +510,7 @@ func TestActionsScreen(t *testing.T) {
 	m.actSel = idx("Morgan")
 	m.key("right") // +75m
 	out := ansi.Strip(m.render())
-	if !strings.Contains(out, "Preview ✓ Shift extended: Morgan today until 19:15") {
+	if !strings.Contains(out, "If submitted: ✓ Shift extended: Morgan today until 19:15") {
 		t.Fatalf("no preview:\n%s", out)
 	}
 	m.key("enter")
@@ -556,5 +556,43 @@ func TestActionsScreen(t *testing.T) {
 	}
 	if len(m.sess.ActionLog()) != 4 {
 		t.Fatalf("action log %+v", m.sess.ActionLog())
+	}
+}
+
+// ctrl+s saves the session (scenario, seed, actions), the top bar shows
+// unsaved changes, ctrl+o reloads the saved file by replaying it, and
+// ctrl+v verifies the run by replaying it from scratch.
+func TestSessionKeys(t *testing.T) {
+	m := New(openMini(t, 2))
+	p := filepath.Join(t.TempDir(), "s.json")
+	m.SetSavePath(p)
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m.sess.Advance(4*simtime.Hour, session.Options{})
+	m.key("a")
+	m.key("enter") // extend the first rostered employee by 60m
+	m.refresh()
+	if top := ansi.Strip(strings.Split(m.render(), "\n")[0]); !strings.Contains(top, "●") || !strings.Contains(top, "PAUSED · 15 min/s") {
+		t.Fatalf("top bar %q", top)
+	}
+	m.key("ctrl+s")
+	if !strings.HasPrefix(m.status, "✓ Saved "+p) || m.sess.Unsaved() {
+		t.Fatalf("save: %q", m.status)
+	}
+	saved := m.sess.Now()
+	digest := m.sess.Digest()
+	m.sess.Advance(2*simtime.Hour, session.Options{})
+	m.refresh()
+	m.Update(tea.WindowSizeMsg{Width: 140, Height: 40})
+	if !strings.Contains(ansi.Strip(m.render()), "seed 2 ● unsaved") {
+		t.Fatal("no unsaved mark after playing on")
+	}
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m.key("ctrl+o")
+	if !strings.HasPrefix(m.status, "✓ Loaded") || m.sess.Now() != saved || m.sess.Digest() != digest {
+		t.Fatalf("reload: %q", m.status)
+	}
+	m.key("ctrl+v")
+	if !strings.HasPrefix(m.status, "✓ Replay verified: 1 batches") {
+		t.Fatalf("verify: %q", m.status)
 	}
 }
