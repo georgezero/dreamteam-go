@@ -144,9 +144,12 @@ type claim struct {
 	closedAt            simtime.Time
 	denied              bool // denied at first adjudication (observable once it happens)
 	payments            int64
+	// draw is the latent payer behavior, drawn at submission and kept to
+	// remittance (never observed; claimDraw recomputes the same value).
+	draw claimDraw
 }
 
-func claimID(i int) string { return fmt.Sprintf("C%05d", i+1) }
+func claimID(i int) string { return pubID('C', int64(i+1), 5) }
 
 // Claim outcomes (latent until adjudication).
 const (
@@ -233,6 +236,16 @@ type finState struct {
 	// forceDenied, if set (tests only), makes matching claims denied and
 	// written off: a change to a hidden latent outcome.
 	forceDenied func(ci int) bool
+
+	// The opening adjustment at the start time (opening.go): the amount
+	// posted to cash against opening equity, and the state it was made in.
+	opened  bool
+	opening openingSnap
+	// Financing shortfall since the start: the lowest cash balance and when,
+	// and whether cash is below zero now (for the one-time alert per dip).
+	minCash   int64
+	minCashAt simtime.Time
+	belowZero bool
 }
 
 func (st *state) finDay(day int64) *finDay {
@@ -242,17 +255,14 @@ func (st *state) finDay(day int64) *finDay {
 	return &st.fin.days[day]
 }
 
-// initFinance posts opening cash at the epoch. (Step 11 replaces this with
-// the opening-equity adjustment at the start time, after warm-up.)
+// initFinance sets up the ledger. Cash starts at zero at the epoch; the
+// opening adjustment at the start time (opening.go) sets it to the
+// scenario's opening cash (§8.4).
 func (st *state) initFinance() {
 	st.fin.led = newLedger(st.cal)
 	st.mods = st.modalities()
 	if len(st.mods) > maxMods {
 		panic("sim: more modalities than the ledger dimension")
-	}
-	if c := st.cfg.OpeningCashCents; c != 0 {
-		st.fin.led.mustPost(0, entryKey{kind: entOpening},
-			line{acctCash, -1, c}, line{acctEquity, -1, -c})
 	}
 }
 
@@ -272,16 +282,18 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 	st.finDay(day)
 	if st.isPayday(date) {
 		if amt := led.bal[acctAccruedPayroll]; amt < 0 {
-			led.mustPost(now, entryKey{kind: entPayroll, a: day}, line{acctAccruedPayroll, -1, -amt}, line{acctCash, -1, amt})
+			led.mustPost(now, entryKey{kind: entPayroll, a: day}, line{acctAccruedPayroll, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.payrollPaid += -amt
+			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Payroll paid %s (wages and benefits accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
 		}
 	}
 	if date.Day == 1 {
 		if amt := led.bal[acctAP]; amt < 0 {
-			led.mustPost(now, entryKey{kind: entPayAP, a: day}, line{acctAP, -1, -amt}, line{acctCash, -1, amt})
+			led.mustPost(now, entryKey{kind: entPayAP, a: day}, line{acctAP, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.apPaid += -amt
+			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Bills paid %s (rent, leases, service, supplies, fees accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
 		}
@@ -301,16 +313,16 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 	}
 	var lines []line
 	var total int64
-	for _, fc := range f.Fixed {
+	for k, fc := range f.Fixed {
 		amt := DailyAccrual(fc.Monthly, date.Day, date.DaysInMonth())
 		if amt == 0 {
 			continue
 		}
-		lines = append(lines, line{fixedAccount(fc.Account), st.modIndex(fc.Modality), amt})
+		lines = append(lines, line{acct: fixedAccount(fc.Account), mod: st.modIndex(fc.Modality), amt: amt, item: int16(k)})
 		total += amt
 	}
 	if total > 0 {
-		lines = append(lines, line{acctAP, -1, -total})
+		lines = append(lines, line{acctAP, -1, -total, -1})
 		led.mustPost(now, entryKey{kind: entFixed, a: day}, lines...)
 		st.fin.apAccrued += total
 	}
@@ -342,7 +354,7 @@ func (st *state) nextPayday(day int64) int64 {
 // accruePay posts wages w and benefits on them to accrued payroll.
 func (st *state) accruePay(at simtime.Time, key entryKey, w int64) {
 	b := roundDiv(w*st.cfg.Finance.BenefitsBP, 10_000)
-	st.fin.led.mustPost(at, key, line{acctWages, -1, w}, line{acctBenefits, -1, b}, line{acctAccruedPayroll, -1, -(w + b)})
+	st.fin.led.mustPost(at, key, line{acctWages, -1, w, -1}, line{acctBenefits, -1, b, -1}, line{acctAccruedPayroll, -1, -(w + b), -1})
 	st.fin.payrollAccrued += w + b
 }
 
@@ -381,7 +393,7 @@ func (st *state) studyCost(si int) {
 		return
 	}
 	st.fin.led.mustPost(st.now, entryKey{kind: entStudyCost, a: int64(si)},
-		line{acctSupplies, m, x.SupplyCostCents}, line{acctIT, m, it}, line{acctAP, -1, -(x.SupplyCostCents + it)})
+		line{acctSupplies, m, x.SupplyCostCents, -1}, line{acctIT, m, it, -1}, line{acctAP, -1, -(x.SupplyCostCents + it), -1})
 	st.fin.apAccrued += x.SupplyCostCents + it
 }
 
@@ -395,13 +407,13 @@ func (st *state) recognize(si int) int64 {
 	ci := len(st.fin.claims)
 	c := claim{study: si, order: s.order, payer: o.payer, mod: st.modIndex(x.Modality),
 		allowed: f.AllowedCents(x, o.payer), expected: f.ExpectedNetCents(x, o.payer), finalAt: st.now}
-	lag := uniformIn(rng.Hash(st.seed, "claim.lag", o.key.keys()...).Lane(0), f.ChargeLagDays)
+	lag := uniformIn(st.hash("claim.lag", o.key.keys()...).Lane(0), f.ChargeLagDays)
 	c.submitDue = st.addBusinessDays(st.day, lag)
 	st.fin.claims = append(st.fin.claims, c)
 	st.fin.pending = append(st.fin.pending, ci)
 	s.claim = ci
 	st.fin.led.mustPost(st.now, entryKey{kind: entRevenue, a: int64(si)},
-		line{acctAR, c.mod, c.expected}, line{acctRevenue, c.mod, -c.expected})
+		line{acctAR, c.mod, c.expected, -1}, line{acctRevenue, c.mod, -c.expected, -1})
 	if c.mod >= 0 {
 		st.finDay(st.day).finals[c.mod]++
 	}
@@ -429,8 +441,8 @@ func (st *state) submitClaims(e *Engine) {
 			continue // its outcome event was queued at the denial
 		}
 		c.state, c.submittedAt = claimSubmitted, now
-		dr := st.claimDraw(st.dem.orders[c.order].key, c.payer)
-		day := st.onOrAfterBusiness(st.day + dr.delayDays)
+		c.draw = st.claimDraw(st.dem.orders[c.order].key, c.payer)
+		day := st.onOrAfterBusiness(st.day + c.draw.delayDays)
 		e.Push(Event{At: st.cal.At(day, f.PaymentClock), Class: ClassFinancial, Kind: kindAdjudicate, A: int64(ci)})
 	}
 	st.fin.pending = keep
@@ -448,7 +460,7 @@ func (st *state) adjudicate(e *Engine, ci int) {
 	f := &st.cfg.Finance
 	c := &st.fin.claims[ci]
 	p := &f.Payers[c.payer]
-	dr := st.claimDraw(st.dem.orders[c.order].key, c.payer)
+	dr := c.draw
 	if st.fin.forceDenied != nil && st.fin.forceDenied(ci) {
 		dr.outcome = outWrittenOff
 	}
@@ -490,7 +502,7 @@ func (st *state) adjudicate(e *Engine, ci int) {
 func (st *state) reworkOutcome(e *Engine, ci int) {
 	c := &st.fin.claims[ci]
 	p := &st.cfg.Finance.Payers[c.payer]
-	dr := st.claimDraw(st.dem.orders[c.order].key, c.payer)
+	dr := c.draw
 	if (st.fin.forceDenied == nil || !st.fin.forceDenied(ci)) && dr.outcome == outRecovered {
 		st.pay(ci, c.allowed)
 		st.settle(ci, claimPaid)
@@ -511,12 +523,13 @@ func (st *state) pay(ci int, amt int64) {
 	c.paid += amt
 	st.fin.receipts += amt
 	fee := roundDiv(amt*st.cfg.Finance.BillingFeeBP, 10_000)
-	lines := []line{{acctCash, -1, amt}, {acctAR, c.mod, -amt}}
+	lines := []line{{acctCash, -1, amt, -1}, {acctAR, c.mod, -amt, -1}}
 	if fee > 0 {
-		lines = append(lines, line{acctBilling, c.mod, fee}, line{acctAP, -1, -fee})
+		lines = append(lines, line{acctBilling, c.mod, fee, -1}, line{acctAP, -1, -fee, -1})
 		st.fin.apAccrued += fee
 	}
 	st.fin.led.mustPost(st.now, entryKey{kind: entPayment, a: int64(ci), b: c.payments}, lines...)
+	st.noteCash(st.now)
 }
 
 // settle closes claim ci: the residual between expected net and cash
@@ -525,7 +538,7 @@ func (st *state) settle(ci int, final claimState) {
 	c := &st.fin.claims[ci]
 	c.state, c.closedAt = final, st.now
 	if r := c.expected - c.paid; r != 0 {
-		st.fin.led.mustPost(st.now, entryKey{kind: entSettle, a: int64(ci)}, line{acctVariance, c.mod, r}, line{acctAR, c.mod, -r})
+		st.fin.led.mustPost(st.now, entryKey{kind: entSettle, a: int64(ci)}, line{acctVariance, c.mod, r, -1}, line{acctAR, c.mod, -r, -1})
 	}
 }
 
@@ -554,9 +567,11 @@ func (st *state) checkFinance() error {
 		return fmt.Errorf("A/R %d, open claims owe %d", led.bal[acctAR], ar)
 	case -led.bal[acctRevenue] != revenue:
 		return fmt.Errorf("revenue %d, claims expected %d", -led.bal[acctRevenue], revenue)
-	case led.bal[acctCash] != st.cfg.OpeningCashCents+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid:
-		return fmt.Errorf("cash %d, opening + receipts − disbursements %d", led.bal[acctCash],
-			st.cfg.OpeningCashCents+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid)
+	case led.bal[acctCash] != st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid:
+		return fmt.Errorf("cash %d, opening adjustment + receipts − disbursements %d", led.bal[acctCash],
+			st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid)
+	case -led.bal[acctEquity] != st.fin.opening.adjustment:
+		return fmt.Errorf("opening equity %d, adjustment %d", -led.bal[acctEquity], st.fin.opening.adjustment)
 	case -led.bal[acctAccruedPayroll] != st.fin.payrollAccrued-st.fin.payrollPaid:
 		return fmt.Errorf("accrued payroll %d, accrued − paid %d", -led.bal[acctAccruedPayroll], st.fin.payrollAccrued-st.fin.payrollPaid)
 	case -led.bal[acctAP] != st.fin.apAccrued-st.fin.apPaid:

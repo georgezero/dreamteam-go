@@ -54,11 +54,15 @@ func play(args []string) int {
 	if err := fs.Parse(args); err != nil {
 		return 2
 	}
-	s, err := session.Open(*scen, *seed)
+	cfg, err := scenario.Resolve(*scen)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "dreamteam:", err)
 		return 1
 	}
+	if cfg.WarmupDays > 0 {
+		fmt.Fprintf(os.Stderr, "Building %d days of practice history…\n", cfg.WarmupDays)
+	}
+	s := session.New(cfg, *seed)
 	m := tui.New(s)
 	if _, err := tea.NewProgram(m).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "dreamteam:", err)

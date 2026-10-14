@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
-	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
@@ -123,7 +122,7 @@ func (st *state) matchRegistration(e *Engine) {
 		if pick < 0 {
 			continue
 		}
-		draw := rng.Hash(st.seed, "registration", o.key.keys(v.attempt)...)
+		draw := st.hash("registration", o.key.keys(v.attempt)...)
 		dur := simtime.Duration(q.Sample(draw.Lane(0)) * factor / 10_000)
 		emp := &st.emps[pick]
 		emp.status, emp.task, emp.taskVisit = busy, taskReg, vi
@@ -341,7 +340,7 @@ func (st *state) startExam(e *Engine, r, vi, t int) {
 		v.supervisor = st.supervisor(x)
 	}
 	st.rooms[r].visit = vi
-	draw := rng.Hash(st.seed, "attempt.exam", o.key.keys(v.attempt)...)
+	draw := st.hash("attempt.exam", o.key.keys(v.attempt)...)
 	dur := simtime.Duration(x.RoomTime.Sample(draw.Lane(0)))
 	for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
 		f.examsStarted++
@@ -372,7 +371,7 @@ func (st *state) examEnd(e *Engine, vi int) {
 	st.studyCost(v.study)
 	st.dem.flowToday.examsDone++
 	st.dem.flowTotal.examsDone++
-	draw := rng.Hash(st.seed, "attempt.exam", o.key.keys(v.attempt)...)
+	draw := st.hash("attempt.exam", o.key.keys(v.attempt)...)
 	doc := simtime.Duration(x.TechExtra.Sample(draw.Lane(1)))
 	emp := &st.emps[v.examBy]
 	emp.task = taskDoc

@@ -309,3 +309,19 @@ func (w *World) DrawChargeLag(origin [4]int64) int64 {
 	key := originKey{origin[0], origin[1], origin[2], origin[3]}
 	return uniformIn(rng.Hash(w.st.seed, "claim.lag", key.keys()...).Lane(0), w.st.cfg.Finance.ChargeLagDays)
 }
+
+// WeekPaid returns an employee's paid time so far this week.
+func (w *World) WeekPaid(name string) simtime.Duration {
+	for i := range w.st.emps {
+		if w.st.emps[i].cfg.Name == name {
+			return w.st.emps[i].weekPaid
+		}
+	}
+	panic("no employee " + name)
+}
+
+// ForceDeniedClaimsFrom makes every claim adjudicated at or after t fail:
+// a change to hidden payer outcomes from t on.
+func (w *World) ForceDeniedClaimsFrom(t simtime.Time) {
+	w.st.fin.forceDenied = func(int) bool { return w.st.now >= t }
+}

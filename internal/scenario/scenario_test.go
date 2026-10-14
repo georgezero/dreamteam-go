@@ -6,6 +6,7 @@ import (
 	"flag"
 	"os"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"testing/fstest"
@@ -18,8 +19,8 @@ var update = flag.Bool("update", false, "rewrite golden files")
 
 func TestBundledScenariosCompile(t *testing.T) {
 	ids := List()
-	if len(ids) == 0 || ids[0] != "mini" {
-		t.Fatalf("List() = %v", ids)
+	if !slices.Equal(ids, []string{"established", "mini"}) || !slices.Contains(ids, Default) {
+		t.Fatalf("List() = %v, default %q", ids, Default)
 	}
 	for _, id := range ids {
 		if _, err := Resolve(id); err != nil {

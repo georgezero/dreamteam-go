@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -12,7 +13,7 @@ func TestLedgerPostingRules(t *testing.T) {
 	l := newLedger(cal)
 	k := func(a int64) entryKey { return entryKey{kind: entRevenue, a: a} }
 
-	if _, err := l.post(10, k(1), []line{{acctAR, 0, 500}, {acctRevenue, 0, -500}}); err != nil {
+	if _, err := l.post(10, k(1), []line{{acctAR, 0, 500, -1}, {acctRevenue, 0, -500, -1}}); err != nil {
 		t.Fatal(err)
 	}
 	for name, c := range map[string]struct {
@@ -21,11 +22,11 @@ func TestLedgerPostingRules(t *testing.T) {
 		lines []line
 		want  string
 	}{
-		"unbalanced": {20, k(2), []line{{acctAR, 0, 500}, {acctRevenue, 0, -499}}, "does not balance"},
-		"empty":      {20, k(3), []line{{acctAR, 0, 0}, {acctRevenue, 0, 0}}, "empty"},
-		"duplicate":  {20, k(1), []line{{acctAR, 0, 1}, {acctRevenue, 0, -1}}, "duplicate"},
-		"backwards":  {5, k(4), []line{{acctAR, 0, 1}, {acctRevenue, 0, -1}}, "before the previous"},
-		"bad mod":    {20, k(5), []line{{acctAR, maxMods, 1}, {acctRevenue, 0, -1}}, "bad line"},
+		"unbalanced": {20, k(2), []line{{acctAR, 0, 500, -1}, {acctRevenue, 0, -499, -1}}, "does not balance"},
+		"empty":      {20, k(3), []line{{acctAR, 0, 0, -1}, {acctRevenue, 0, 0, -1}}, "empty"},
+		"duplicate":  {20, k(1), []line{{acctAR, 0, 1, -1}, {acctRevenue, 0, -1, -1}}, "duplicate"},
+		"backwards":  {5, k(4), []line{{acctAR, 0, 1, -1}, {acctRevenue, 0, -1, -1}}, "before the previous"},
+		"bad mod":    {20, k(5), []line{{acctAR, maxMods, 1, -1}, {acctRevenue, 0, -1, -1}}, "bad line"},
 	} {
 		n := len(l.entries)
 		_, err := l.post(c.at, c.key, c.lines)
@@ -62,7 +63,7 @@ func TestLedgerPostingRules(t *testing.T) {
 		t.Fatal(err)
 	}
 	h := l.hash()
-	l.mustPost(40, k(9), line{acctCash, -1, 100}, line{acctAR, 0, -100})
+	l.mustPost(40, k(9), line{acctCash, -1, 100, -1}, line{acctAR, 0, -100, -1})
 	if l.hash() == h {
 		t.Error("hash ignores a new entry")
 	}
@@ -73,5 +74,15 @@ func TestLedgerPostingRules(t *testing.T) {
 	l.bal[acctCash]++
 	if err := l.check(); err == nil {
 		t.Error("check missed a balance that disagrees with the journal")
+	}
+}
+
+func TestPubIDMatchesFmt(t *testing.T) {
+	for _, n := range []int64{0, 1, 9, 10, 99999, 100000, 1234567, 9_999_999_999} {
+		for _, w := range []int{5, 6} {
+			if got, want := pubID('S', n, w), fmt.Sprintf("S%0*d", w, n); got != want {
+				t.Fatalf("pubID(%d, %d) = %q, want %q", n, w, got, want)
+			}
+		}
 	}
 }

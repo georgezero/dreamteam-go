@@ -42,7 +42,14 @@ type state struct {
 	emps  []employee
 	dem   demandState
 	fin   finState
-	mods  []string // room modalities in room order: the ledger's modality dimension
+	// history holds one summary per completed day (history.go); histFinals
+	// is how many finals the last summary covered.
+	history    []dayRecord
+	histFinals int
+	staffBuf   []int // scratch for restaff
+	// drawMemo memoizes today's keyed draws (draws.go).
+	drawMemo map[drawKey][4]uint64
+	mods     []string // room modalities in room order: the ledger's modality dimension
 
 	// dropOrder, if set (tests only), suppresses exogenous orders that
 	// would arrive at or after a time: a change to future hidden demand.
@@ -72,6 +79,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 	w := &World{st: st}
 	w.eng = NewEngine(st, 0)
 	w.eng.Push(Event{At: 0, Class: ClassDayBoundary, Kind: kindDayStart, A: 0})
+	st.pushOpening(w.eng, w.StartTime())
 	st.loadOpening(w.eng)
 	return w
 }
@@ -94,7 +102,7 @@ func (w *World) LogTotal() uint64 { return w.st.log.total }
 func (w *World) LastAlert() uint64 { return w.st.alertSeen }
 
 // LogHash returns the running hash of the observable log.
-func (w *World) LogHash() string { return hex.EncodeToString(w.st.log.hash[:]) }
+func (w *World) LogHash() string { return hex.EncodeToString(w.st.log.digest()) }
 
 // LedgerHash digests the journal: every posted entry in order.
 func (w *World) LedgerHash() string { return w.st.fin.led.hash() }
@@ -135,10 +143,11 @@ const (
 	kindSubmitClaims
 	kindAdjudicate
 	kindReworkOutcome
+	kindOpening // the opening equity adjustment at the start time (§8.4)
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
-	st.log.emit(st.cal, at, sev, cat, text)
+	st.log.emit(at, sev, cat, text)
 	if sev == api.Alert {
 		st.alertSeen = st.log.total
 	}
@@ -221,6 +230,8 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.adjudicate(e, int(ev.A))
 	case kindReworkOutcome:
 		st.reworkOutcome(e, int(ev.A))
+	case kindOpening:
+		st.openingAdjust(e)
 	case kindWake, kindDeadline:
 	}
 }
@@ -228,6 +239,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 func (st *state) dayStart(e *Engine, day int64) {
 	e.Push(Event{At: st.cal.StartOfDay(day + 1), Class: ClassDayBoundary, Kind: kindDayStart, A: day + 1})
 	st.day = day
+	clear(st.drawMemo)
 	st.opened, st.closing, st.opClosedAt = false, false, 0
 	if st.cal.Weekday(e.Now()) == simtime.Monday {
 		for i := range st.emps {
@@ -295,7 +307,7 @@ func (w *World) Observe(recent int) api.Observation {
 			BookingHorizonDays: st.cfg.Policies.BookingHorizonDays,
 			StartOffset:        st.startDay - st.cal.DayIndex(now)},
 		LogTotal:  st.log.total,
-		RecentLog: st.log.recent(recent),
+		RecentLog: st.log.recent(st.cal, recent),
 	}
 	st.observeStaff(&o, now)
 	st.observeDemand(&o, now)

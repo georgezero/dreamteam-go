@@ -97,6 +97,13 @@ func Hash(seed Seed, domain string, keys ...int64) *Draws {
 	return d
 }
 
+// Lanes returns the four lanes.
+func (d *Draws) Lanes() [4]uint64 { return d.lanes }
+
+// FromLanes rebuilds draws from lanes returned by Lanes (for callers that
+// memoize a digest instead of recomputing it).
+func FromLanes(l [4]uint64) *Draws { return &Draws{lanes: l} }
+
 // Uint64 returns the next lane. It panics after four: an attribute that
 // needs more draws must use a Stream.
 func (d *Draws) Uint64() uint64 {

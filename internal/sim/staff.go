@@ -343,11 +343,21 @@ func (st *state) restaff(now simtime.Time) {
 	clock := simtime.ClockOf(now)
 	for r := range st.rooms {
 		rm := &st.rooms[r]
-		var staff []int
+		buf := st.staffBuf[:0]
 		for i := range st.emps {
 			if st.techStaffs(i, r, clock) {
-				staff = append(staff, i)
+				buf = append(buf, i)
 			}
+		}
+		st.staffBuf = buf
+		// Keep the room's list when unchanged (no allocation per dispatch);
+		// a changed list is a fresh copy, never the scratch buffer.
+		staff := rm.staff
+		switch {
+		case len(buf) == 0:
+			staff = nil
+		case !slices.Equal(buf, staff):
+			staff = slices.Clone(buf)
 		}
 		next := roomClosed
 		switch {

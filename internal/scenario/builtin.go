@@ -11,9 +11,9 @@ import (
 	"github.com/georgezero/dreamteam-go/scenarios"
 )
 
-// Default is the scenario played when none is named. It becomes the
-// established practice once the warm-up exists (ROADMAP §2, step 11).
-const Default = "mini"
+// Default is the scenario played when none is named: the established
+// practice, built by its 180-day warm-up (ROADMAP §2, step 11).
+const Default = "established"
 
 // List returns the IDs of the bundled playable scenarios.
 func List() []string {

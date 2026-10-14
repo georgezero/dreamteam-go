@@ -7,6 +7,164 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 11 — Warm-up, opening state and performance (v0.1.0-dev.11)
+
+**What was built.**
+* `dreamteam` now opens the **established practice** by default (bundled
+  scenario `established`; `mini` remains).
+* It runs the documented 180-day warm-up with the ordinary engine before
+  the TUI starts ("Building 180 days of practice history…") and opens on a
+  takeover briefing at Tue Oct 13 06:00, day 1.
+* New code:
+  * `internal/sim/opening.go`: the opening adjustment and snapshot, and
+    financing-shortfall tracking;
+  * `history.go`: daily records;
+  * `draws.go`: the draw memo;
+  * `internal/tui/briefing.go`: the briefing and history screens.
+* Design: SIMULATION_DESIGN §8.8; TUI_DESIGN §4.7a.
+
+**Warm-up semantics.** Warm-up and play are one continuous run of the same
+engine. Nothing is approximated, skipped or reset. These carry over as the
+history left them:
+* appointments (868 booked from day 1 for seed 1) and the recall list
+  (48);
+* pending orders and patients on site;
+* studies on the worklist and reads in progress;
+* claims at every stage, receivables, payables and accrued payroll;
+* staff weekly hours, for overtime;
+* ID counters.
+
+**Warm-up accounting conventions**
+* Cash is 0 at the epoch, and the history's collections, payroll and bills
+  accumulate.
+* At the start time one journal entry, the **opening equity adjustment**
+  (Dr/Cr Cash ↔ Opening equity), sets cash to the scenario's $150,000.
+  This is the documented convention (§8.4): owner capital in, or a
+  distribution out. It is not revenue or a cash flow.
+* Nothing else changes. A/R, A/P, accrued payroll and every open claim
+  continue, and future payment events stay queued. The history's operating
+  result stays in equity, so losses are not erased.
+* Seed 1 at takeover:
+
+| | |
+|---|---|
+| Cash left by the history | −$418,829 |
+| Owner capital added | $568,829 |
+| Opening cash | $150,000 |
+| Receivables (1,870 open claims) | $278,154 |
+| Payables | $48,933 |
+| Payroll owed | $39,139 |
+| History result (180 days) | −$223,758 |
+| Last 30 days: net revenue / expenses / profit (margin) | $192,344 / $222,591 / −$30,247 (−15.7%) |
+| Balance sheet at takeover | assets $428,154 = liabilities $88,071 + equity $340,082 |
+
+* The capital is large because the uncalibrated history loses money.
+  Alternatives are listed under the decisions below.
+* **Revenue recognized vs net revenue.** Revenue recognized is the expected
+  net booked when each report is finalized. Net revenue adds the collection
+  variance on claims that settled in the period. In step 10's 180-day run
+  net revenue ($1,136,003) exceeded revenue recognized ($1,125,060) because
+  the claims settled so far paid $10,943 more than expected: fast payments
+  in full settle first, while denials and self-pay write-offs settle 30–120
+  days later. The TUI rows are now "Revenue recognized", "+ collected vs
+  expected" and "Net revenue", with a note.
+* **Financing shortfall.** Negative cash stays allowed, as approved, but
+  it is now tracked from the start:
+  * the lowest balance and when it happened, and days ended below zero;
+  * one alert per dip below zero, and a red **FINANCING SHORTFALL** on the
+    finance screen and the dashboard.
+
+  No credit line or bankruptcy is modelled.
+* **Underlying categories.** Fixed-cost ledger lines carry their item, so
+  every period reports fixed cost by item (rent, utilities, insurance, each
+  lease and service contract, IT) whatever account it posts to.
+* **History boundary.**
+  * Days before the start date are history: daily records, ledger and log.
+  * Today's counters, demand and statements since day 1, cash change today
+    and the financing figures start at day 1. Day 1's 00:00 accruals are
+    day 1's.
+  * The opening adjustment never appears as today's cash change.
+  * The cash history and day records restate the days before takeover by
+    the adjustment, so the series is continuous. This is labelled.
+
+**On screen**
+* **Briefing** (`b`):
+  * money: opening cash, owner capital, last-30-day P&L and cash flow,
+    carried-over receivables, payables and payroll, next payroll and bills,
+    and the financing note;
+  * patients: last 7 days of demand and exams, waits, utilization of open
+    and staffed hours, bookings ahead;
+  * worklist and TAT;
+  * today's roster.
+* **Daily history** (`h`): 30 days, with history rows marked "·".
+* **Finance:** a balance sheet line with the equity split, a financing
+  line, and the clarified revenue rows.
+
+**Determinism and correctness tests** (`internal/sim/warmup_test.go`):
+
+| Requirement | Test |
+|---|---|
+| Opening balance sheet reconciles | `TestOpeningBalanceSheet`: one opening entry, at the start, after every warm-up entry; adjustment = target − cash before; cash = $150,000; assets = liabilities + equity; equity components match the journal; A/R, A/P and payroll carried over and non-zero; day-1 "today" figures empty; history ends the day before the start, restated to the opening cash |
+| Claims, payments, reports, worklist, appointments, weekly overtime survive | `TestStateSurvivesTheBoundary` (13:00 start, so patients on site and the worklist cross the boundary). Every study pending at the start is finalized once. All of the 1,000+ claims open at the start settle within 145 days (the longest path). Warm-up bookings resolve. Riley's weekly paid time at the start equals Monday's pay exactly. |
+| Warm-up vs uninterrupted run; chunking; unrelated events | `TestWarmupDeterminism`: a daily-chunked warm-up, a warm-up with live and stale noise events, and a rebuild give identical log and ledger hashes and identical observations; build then 3 days of play = one uninterrupted run; seed 2 differs |
+| Golden start state | `TestStartStateGolden` (ledger and log digests, seed 1) |
+| No hidden future in the opening state | `TestOpeningStateHidesTheFuture`: forcing every patient from day 2 to no-show and every claim adjudicated after the start to fail leaves the observation, the 180-day history and tomorrow's schedule unchanged; afterwards the books differ |
+| Convergence (ROADMAP) | `TestWarmupConvergence`: nine-seed means, 180 vs 365 days. Forward fill to 90 days, A/R and A/R ≤ 60 days within ±5% (largest: 7–30-day fill −4.6%); tails within ±25%. A 90-day warm-up fails (−12.6% fill, no A/R over 90 days). |
+| Financing shortfall | `TestFinancingShortfallTracked`: $10k opening cash; an alert per dip; lowest cash and days below zero agree with the daily history |
+| Optimizations change nothing | Formatter equivalence tests against `fmt`. Before the step-11 behavior was added, a full warm-up plus 3 days produced byte-identical log text (61,226 entries) and ledger (`a37b36…`) to `32313ac`. |
+
+All step 1–10 tests pass, including the step 8 remediation regressions and
+the step 10 finance tests. The full suite takes about 2 minutes on the Pi;
+the convergence test is 30 s of that and is skipped with `-short`.
+
+**Performance (before / after).** Warm-up build, alternating old and new
+with cool-downs:
+* step 10: 1.80–2.38 s/op, 111.6 MB, 1.97M allocations;
+* step 11: 1.35–1.97 s/op, 89.7 MB, 1.26M allocations.
+
+That is about 22–25% faster at the median. The spread is thermal: the Pi
+ran at 75–79 °C with throttling, and unthrottled builds take 1.34–1.35 s.
+Details and the remaining profile are in MEASUREMENTS.md:
+* What changed: lazy log time text, a streamed log hash, Sprintf-free
+  ID and time formatting, a per-day memo of keyed draws (30% were
+  repeats), the claim draw kept on the claim, and reused room staffing
+  lists.
+* What didn't: no randomness semantics, no event suppression and no
+  concurrency.
+
+**Remaining limitations**
+* **Target ≤ 1.5 s only when unthrottled.** Throttled builds take
+  1.7–1.9 s. The next steps are a lazy structured log, or the start-state
+  cache once snapshots exist (step 14).
+* **The worklist is empty at 06:00 on day 1.** Monday's studies are all
+  read by Monday evening at the current (below-design) volume; the design's
+  10–15 unread is a calibration matter (step 18).
+* **Large owner capital.** The history loses money, so takeover needs
+  $569k of owner capital. This is expected to shrink to a working-capital
+  figure after calibration.
+* **Utilization is minimal.** The daily records keep only exam time over
+  open and staffed hours; the full metric set is step 12.
+* **No financing model.** No credit line, interest or insolvency (V0.2).
+
+**Decisions for owner approval**
+1. **Opening capital convention** (implemented as documented): one
+   adjustment at takeover, with the history's balances and losses kept.
+   Alternatives:
+   * (a) opening cash at the epoch and no adjustment, so the start cash is
+     what the history leaves (−$268,829 for seed 1);
+   * (b) no opening capital (−$418,829);
+   * (c) keep the adjustment and calibrate so the history is about
+     break-even (step 18).
+
+   Recommendation: keep the adjustment, aim for (c).
+2. **Restated cash history.** Before day 1 it is shown as if the opening
+   capital had always been there (continuous series, labelled). The
+   alternative is the raw series with a jump at takeover.
+3. **The log digest format changed** (streamed SHA-256). Digests differ
+   from step 10 by construction; outcomes do not.
+
+---
+
 ## Step 10 — Ledger, claims, payroll and costs (v0.1.0-dev.10)
 
 **What was built.**

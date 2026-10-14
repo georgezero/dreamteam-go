@@ -79,8 +79,12 @@ func pct(bp int64) string {
 func financeLine(o api.Observation, w int) string {
 	f := o.Finance
 	t := f.Today
-	l := fmt.Sprintf(" Cash %s %s today · Revenue today %s · Expenses today %s · Op. profit today %s · A/R %s",
-		signed(f.CashCents), change(f.CashChangeTodayCents), usd(t.NetRevenueCents), usd(t.OperatingExpenseCents),
+	warn := ""
+	if f.Financing.ShortfallCents > 0 {
+		warn = alertStyle.Render(" ⚠ shortfall")
+	}
+	l := fmt.Sprintf(" Cash %s%s %s today · Revenue today %s · Expenses today %s · Op. profit today %s · A/R %s",
+		signed(f.CashCents), warn, change(f.CashChangeTodayCents), usd(t.NetRevenueCents), usd(t.OperatingExpenseCents),
 		signed(t.OperatingProfitCents), usd(f.ARCents))
 	if w >= 140 {
 		l += " · margin 30d " + margin(f.Trailing30)
@@ -131,8 +135,8 @@ func overviewLines(f api.Finance, w int) []string {
 	out := []string{dimStyle.Render(fmt.Sprintf(" %-28s%s%s%s%s", "", padLeft("TODAY", col), padLeft("MONTH TO DATE", col),
 		padLeft("TRAILING 30D", col), padLeft("SINCE DAY 1", col)))}
 	out = append(out,
-		row("Revenue earned (expected)", money(func(p api.FinancePeriod) int64 { return p.GrossRevenueCents })),
-		row("  collection variance", money(func(p api.FinancePeriod) int64 { return -p.CollectionVarianceCents })),
+		row("Revenue recognized", money(func(p api.FinancePeriod) int64 { return p.GrossRevenueCents })),
+		row("  + collected vs expected", money(func(p api.FinancePeriod) int64 { return -p.CollectionVarianceCents })),
 		titleStyle.Render(row("Net revenue", money(func(p api.FinancePeriod) int64 { return p.NetRevenueCents }))),
 		row("Operating expense", money(func(p api.FinancePeriod) int64 { return p.OperatingExpenseCents })),
 		row("  Labor (pay + benefits)", money(func(p api.FinancePeriod) int64 { return p.LaborCents })),
@@ -147,9 +151,24 @@ func overviewLines(f api.Finance, w int) []string {
 		row("Reports final", func(p api.FinancePeriod) string { return fmt.Sprint(p.ReportsFinal) }),
 		"",
 	)
+	out = append(out, dimStyle.Render(" Revenue recognized = expected net booked at report final. Net revenue adds what settled claims"),
+		dimStyle.Render(" paid above (or below) that expectation (collection variance)."), "")
 	out = append(out, fmt.Sprintf(" CASH %s  %s today   payroll %s %s · bills %s %s",
 		signed(f.CashCents), change(f.CashChangeTodayCents), shortDate(f.NextPayroll.Date), usd(-f.NextPayroll.Cents),
 		shortDate(f.NextPayables.Date), usd(-f.NextPayables.Cents)))
+	if fi := f.Financing; f.Opening.Done {
+		l := fmt.Sprintf(" Financing: lowest cash since day 1 %s · days ended below zero %d", signed(fi.MinCashCents), fi.DaysBelowZero)
+		if fi.ShortfallCents > 0 {
+			l = alertStyle.Render(fmt.Sprintf(" ⚠ FINANCING SHORTFALL %s (no credit line modelled)", usd(fi.ShortfallCents))) + l
+		}
+		out = append(out, l)
+	}
+	b := f.BalanceSheet
+	out = append(out, fmt.Sprintf(" BALANCE  assets %s (cash %s, A/R %s) = liabilities %s (payables %s, payroll %s) + equity %s",
+		signed(b.AssetsCents), signed(b.CashCents), usd(b.ReceivablesCents), usd(b.LiabilitiesCents), usd(b.PayablesCents),
+		usd(b.AccruedPayrollCents), signed(b.EquityCents)))
+	out = append(out, dimStyle.Render(fmt.Sprintf("          equity = opening capital %s + result before day 1 %s + result since day 1 %s",
+		usd(b.OpeningCapitalCents), usd(b.HistoryEarningsCents), usd(b.EarningsSinceStartCents))))
 	c := f.Claims
 	dar := "—"
 	if c.DaysInAR >= 0 {

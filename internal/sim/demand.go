@@ -327,7 +327,7 @@ func (st *state) scheduleDemand(e *Engine, day int64) {
 			n := st.poissonFor(uint32(rate)).Sample(rng.Hash(st.seed, "demand.count", day, int64(si), h))
 			for k := 0; k < n; k++ {
 				key := originKey{day, int64(si), h, int64(k)}
-				sec := rng.Uniform(rng.Hash(st.seed, "order.core", key.keys()...).Lane(0), 3600)
+				sec := rng.Uniform(st.hash("order.core", key.keys()...).Lane(0), 3600)
 				at := st.cal.At(day, simtime.Duration(h)*simtime.Hour+simtime.Duration(sec))
 				if st.dropOrder != nil && st.dropOrder(at) {
 					continue
@@ -354,9 +354,9 @@ func (st *state) poissonFor(milli uint32) *rng.Poisson {
 // receiveOrder discloses an order: public IDs are allocated here and only
 // here, then attributes are drawn by origin key and booking runs.
 func (st *state) receiveOrder(e *Engine, key originKey) {
-	core := rng.Hash(st.seed, "order.core", key.keys()...)
-	ext := rng.Hash(st.seed, "order.ext", key.keys()...)
-	pat := rng.Hash(st.seed, "patient", key.keys()...)
+	core := st.hash("order.core", key.keys()...)
+	ext := st.hash("order.ext", key.keys()...)
+	pat := st.hash("patient", key.keys()...)
 	src := &st.cfg.Sources[key.src]
 
 	exam := src.Exams[rng.Weighted(core.Lane(1), src.ExamWeights)]
@@ -517,7 +517,7 @@ func (st *state) book(e *Engine, oi int, r slotRef, confirmed bool) int {
 	if confirmed {
 		return ai
 	}
-	att := rng.Hash(st.seed, "attempt", o.key.keys(o.attempt)...)
+	att := st.hash("attempt", o.key.keys(o.attempt)...)
 	if !rng.Bernoulli(att.Lane(2), st.cfg.Behavior.CancelPPM) {
 		return ai
 	}
@@ -547,7 +547,7 @@ func (st *state) cancel(e *Engine, ai int) {
 	head := fmt.Sprintf("%s cancelled (%s %s, %s %s)", apptID(ai), orderID(a.order),
 		st.examLabel(o.exam), st.dayLabel(a.day), simtime.FormatClock(s.From))
 
-	ex := rng.Hash(st.seed, "attempt.exam", o.key.keys(a.attempt)...)
+	ex := st.hash("attempt.exam", o.key.keys(a.attempt)...)
 	if !rng.Bernoulli(ex.Lane(3), st.cfg.Behavior.RebookPPM) {
 		o.state, o.endedAt = orderCancelled, e.Now()
 		st.emit(e.Now(), api.Info, "orders", head)
@@ -598,11 +598,11 @@ func (st *state) loadOpening(e *Engine) {
 		st.dem.patients++
 		oi := len(st.dem.orders)
 		key := originKey{-1, -1, -1, int64(i)}
-		tol := st.cfg.Behavior.ToleranceDays[op.Priority].Sample(rng.Hash(st.seed, "patient", key.keys()...).Lane(1))
+		tol := st.cfg.Behavior.ToleranceDays[op.Priority].Sample(st.hash("patient", key.keys()...).Lane(1))
 		st.dem.orders = append(st.dem.orders, order{
 			key: key, patient: st.dem.patients, source: op.Source, tolerance: tol,
 			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1, visit: -1,
-			payer: st.payerOf(rng.Hash(st.seed, "order.ext", key.keys()...).Lane(1)),
+			payer: st.payerOf(st.hash("order.ext", key.keys()...).Lane(1)),
 		})
 		if !sharedFree(st.dem.days[day], op.Room, &st.dem.days[day].rooms[op.Room][idx]) {
 			panic("sim: opening schedule breaks shared capacity (scenario validation should catch this)")
@@ -611,9 +611,29 @@ func (st *state) loadOpening(e *Engine) {
 	}
 }
 
-func orderID(i int) string     { return fmt.Sprintf("O%05d", i+1) }
-func apptID(i int) string      { return fmt.Sprintf("A%05d", i+1) }
-func patientID(n int64) string { return fmt.Sprintf("P%05d", n) }
+func orderID(i int) string     { return pubID('O', int64(i+1), 5) }
+func apptID(i int) string      { return pubID('A', int64(i+1), 5) }
+func patientID(n int64) string { return pubID('P', n, 5) }
+
+// pubID formats a public ID: prefix and a zero-padded number (at least
+// width digits), the same text as fmt.Sprintf("%c%0*d").
+func pubID(prefix byte, n int64, width int) string {
+	var digits [20]byte
+	i := len(digits)
+	for n >= 10 {
+		i--
+		digits[i] = byte('0' + n%10)
+		n /= 10
+	}
+	i--
+	digits[i] = byte('0' + n)
+	b := make([]byte, 0, 1+max(width, len(digits)-i))
+	b = append(b, prefix)
+	for k := len(digits) - i; k < width; k++ {
+		b = append(b, '0')
+	}
+	return string(append(b, digits[i:]...))
+}
 
 func (st *state) examLabel(exam int) string {
 	x := &st.cfg.Catalog[exam]

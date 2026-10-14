@@ -72,11 +72,15 @@ var accountInfo = [numAccounts]struct {
 const maxMods = 4
 
 // line is one posting: amt > 0 debits the account, amt < 0 credits it.
-// mod tags the line with a modality (index into state.mods), or -1.
+// mod tags the line with a modality (index into state.mods), or -1; item
+// with the fixed cost it accrues (index into FinanceConfig.Fixed), or -1,
+// so costs that share an account (rent, utilities and insurance under
+// Rent & facility) stay separable.
 type line struct {
 	acct account
 	mod  int8
 	amt  int64
+	item int16
 }
 
 // entryKind names the business transaction an entry records.
@@ -109,16 +113,17 @@ type entry struct {
 	reversed int // index of the entry reversing this one, -1 if none
 }
 
-func journalID(i int) string { return fmt.Sprintf("J%06d", i+1) }
+func journalID(i int) string { return pubID('J', int64(i+1), 6) }
 
 // dayBook holds one day's postings by account and modality, and the day's
 // gross cash movements, so period statements need no journal scan.
 type dayBook struct {
 	net      [numAccounts]int64
 	byMod    [numAccounts][maxMods]int64
-	receipts int64 // cash in from payments
-	paidOut  int64 // cash out: payroll and payables
-	fixed    int64 // expense posted by fixed-cost accruals (and their reversals)
+	receipts int64   // cash in from payments
+	paidOut  int64   // cash out: payroll and payables
+	fixed    int64   // expense posted by fixed-cost accruals (and their reversals)
+	items    []int64 // fixed-cost expense by item
 }
 
 type ledger struct {
@@ -174,6 +179,12 @@ func (l *ledger) post(at simtime.Time, key entryKey, lines []line) (int, error) 
 		if kind == entFixed && accountInfo[ln.acct].kind == kindExpense {
 			b.fixed += ln.amt
 		}
+		if ln.item >= 0 {
+			for len(b.items) <= int(ln.item) {
+				b.items = append(b.items, 0)
+			}
+			b.items[ln.item] += ln.amt
+		}
 		l.bal[ln.acct] += ln.amt
 		b.net[ln.acct] += ln.amt
 		if ln.mod >= 0 {
@@ -216,7 +227,7 @@ func (l *ledger) reverse(at simtime.Time, i int) (int, error) {
 	}
 	mirror := make([]line, len(orig.lines))
 	for k, ln := range orig.lines {
-		mirror[k] = line{acct: ln.acct, mod: ln.mod, amt: -ln.amt}
+		mirror[k] = line{acct: ln.acct, mod: ln.mod, amt: -ln.amt, item: ln.item}
 	}
 	r, err := l.post(at, entryKey{kind: entReversal, a: int64(i)}, mirror)
 	if err == nil {
@@ -316,6 +327,12 @@ func (l *ledger) sumDays(from, to int64) dayBook {
 		out.receipts += b.receipts
 		out.paidOut += b.paidOut
 		out.fixed += b.fixed
+		for len(out.items) < len(b.items) {
+			out.items = append(out.items, 0)
+		}
+		for k, v := range b.items {
+			out.items[k] += v
+		}
 	}
 	return out
 }

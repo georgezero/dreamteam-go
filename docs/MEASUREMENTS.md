@@ -108,3 +108,43 @@ required, since the warm-up target is < 1.5 s:
 
 A smaller one is available too: cache the claim draw from submission until
 remittance.
+
+## 2026-10-14 — V0.1 step 11: the 180-day warm-up (same machine)
+
+`BenchmarkEstablishedWarmup` builds the established practice: `sim.New`,
+then run to the start time, the same work as `session.Open`. Previous
+(`32313ac`) and new binaries were run alternately three times each. There
+was a 45 s cool-down before each run, and `-benchtime 5x -count 2`:
+
+| Build | ns/op (6 samples) | Memory | Allocations |
+|---|---|---|---|
+| step 10 (`32313ac`) | 1.80, 2.19, 2.38, 1.80, 2.32, 2.35 s | 111.6 MB/op | 1.97M/op |
+| step 11 | 1.54, 1.71, 1.73, 1.88, 1.97, 1.35 s | 89.7 MB/op | 1.26M/op |
+
+**Conditions.** The SoC was at 75–79 °C, at the soft throttling limit.
+`vcgencmd get_throttled` reported throttling earlier in the session, and
+load averages were 2–4 from other work. The spread is mostly throttling:
+unthrottled runs give 1.34–1.35 s, throttled runs 1.7–1.9 s.
+
+**Result.** About 22–25% faster at the median, with 20% less memory and 36%
+fewer allocations. The ≤ 1.5 s target is met unthrottled and missed by up
+to 0.45 s when throttled. A cooler or idle Pi, or the step 14 start-state
+cache, closes the rest.
+
+Profile after the changes:
+* Dispatch: 28%.
+* Keyed SHA-256 draws: 19%. A key encodes to 86–102 bytes, so every draw
+  is at least two compressions, and the encoding is randomness semantics,
+  so it was not changed. 125,067 draws per warm-up, of which 87,297 are
+  distinct; same-day repeats are now memoized.
+* FirstFit booking: 9%.
+* fmt at call sites: 8%.
+* Log: 7% (was 21%: ISO time text 8% and per-entry hash-chain finalization
+  are gone).
+* GC: about 4%.
+
+Not done:
+* Lazy, structured log text. It would remove most of the remaining fmt and
+  log cost, but it changes every emit call site.
+* A cached start state. Snapshots are step 14; the roadmap fallback stays
+  available.

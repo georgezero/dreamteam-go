@@ -51,6 +51,8 @@ const (
 	screenPatients
 	screenWorklist
 	screenFinance
+	screenBriefing
+	screenHistory
 )
 
 // Patient list filters, cycled with tab.
@@ -97,6 +99,9 @@ type Model struct {
 	wlSel, wlScroll int
 	// Finance screen: view (overview, claims, journal) and scroll.
 	finView, finScroll int
+	// Briefing and history screens: recent daily summaries, history scroll.
+	hist       []api.DaySummary
+	histScroll int
 }
 
 // New returns a paused model on s.
@@ -104,6 +109,10 @@ func New(s *session.Session) *Model {
 	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24}
 	m.status = "Paused. Press space to start the day."
 	m.refresh()
+	if s.AtStart() && m.obs.Finance.Opening.HistoryDays > 0 {
+		m.screen = screenBriefing
+		m.refresh()
+	}
 	return m
 }
 
@@ -114,6 +123,8 @@ func (m *Model) refresh() {
 	}
 	m.obs = m.sess.Observe(n)
 	switch m.screen {
+	case screenBriefing, screenHistory:
+		m.hist = m.sess.History(historyDays)
 	case screenSchedule:
 		m.sched = m.sess.Schedule(m.schedDay)
 	case screenPatients:
@@ -177,6 +188,9 @@ func (m *Model) key(k string) tea.Cmd {
 		m.quitting = true
 		return tea.Quit
 	case "space":
+		if m.screen == screenBriefing {
+			m.screen = screenDashboard
+		}
 		m.running = !m.running
 		m.lastTick = time.Time{}
 		if m.running {
@@ -231,8 +245,29 @@ func (m *Model) screenKey(k string) bool {
 	case "f":
 		m.screen, m.finScroll = screenFinance, 0
 		return true
+	case "h":
+		m.screen, m.histScroll = screenHistory, 0
+		return true
+	case "b":
+		m.screen = screenBriefing
+		return true
 	}
 	switch m.screen {
+	case screenBriefing:
+		if k == "enter" {
+			m.screen = screenDashboard
+			return true
+		}
+	case screenHistory:
+		switch k {
+		case "up", "k":
+			m.histScroll++
+		case "down", "j":
+			m.histScroll = max(0, m.histScroll-1)
+		default:
+			return false
+		}
+		return true
 	case screenFinance:
 		switch k {
 		case "tab":

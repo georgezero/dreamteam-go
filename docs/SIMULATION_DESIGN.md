@@ -675,9 +675,15 @@ products. No floating point.
 
 ### 4.5 Digests and replay
 
-* **Log hash**: a running hash `h ← SHA-256(h ‖ canonical(entry))` updated each
-  time an observable `LogEntry` is emitted. It's stored in state and snapshots,
-  so it doesn't depend on log retention or streaming.
+* **Log hash**: one SHA-256 stream over the canonical encoding of every
+  observable `LogEntry`, in order: sequence, time, severity, category and
+  text. It is finalized only when read. It doesn't depend on log retention or
+  streaming. The hash state can be marshaled for snapshots (Go's SHA-256
+  digest implements `MarshalBinary`).
+  * *As built, step 11:* this replaced a per-entry chain
+    `h ← SHA-256(h ‖ canonical(entry))`. The chain hashed 32 extra bytes and
+    paid a finalization for every entry. Digest values changed with it;
+    outcomes did not.
 * **State digest**: SHA-256 of the canonical snapshot serialization (§3.6).
 * `Digest = SHA-256(logHash ‖ stateDigest)`.
 * A **run record** is
@@ -1434,6 +1440,103 @@ same time — a real phenomenon the player must learn.
   `Cash(t) = Cash(start) + receipts(start..t] − disbursements(start..t]`.
   During warm-up the same invariant is checked with baseline 0 at the epoch.
 
+### 8.8 As built: warm-up and the opening state (V0.1 step 11)
+
+**One engine, one run.** The established practice is built by running the
+ordinary engine from the epoch (start date − 180 days) to the start time
+under default policies. Nothing is approximated, skipped or reset. All of
+these carry on into play exactly as the history left them:
+* appointments, the recall list and pending orders;
+* patients on site, studies on the worklist and reads in progress;
+* claims at every stage, receivables, payables and accrued payroll;
+* each employee's paid hours this week, for weekly overtime;
+* ID counters.
+
+The warm-up and play are one run, so building and then playing equals one
+uninterrupted run, and a test checks this.
+
+**Opening balance sheet.**
+* Cash is 0 at the epoch. The history's cash flows (collections, payroll,
+  bills) accumulate, so cash at the start is what the history left.
+  Seed 1 leaves −$418,829, because the uncalibrated history runs at a loss.
+* At the start time, one journal entry, the *opening equity adjustment*
+  (Dr/Cr Cash against Opening equity), sets cash to `openingCashCents`. That
+  is owner capital in, or a distribution out. It is not revenue, not a cash
+  flow, and not counted in receipts.
+* Nothing else is touched:
+  * receivables, payables and accrued payroll stay at their history values,
+    and open claims settle on their own schedule;
+  * the history's operating result stays in the books as earnings before
+    day 1, so losses are not erased.
+* Assets (cash + A/R) = liabilities (A/P + accrued payroll) + equity
+  (opening capital + history result + result since day 1) holds at every
+  instant. The observation's balance sheet and the opening state show
+  these figures.
+
+**Alternatives** (owner decision; the adjustment above is the documented
+convention):
+* (a) Post `openingCashCents` at the epoch and no adjustment, so the start
+  cash is whatever the history leaves: −$268k with the current loss-making
+  calibration.
+* (b) No opening capital at all: −$419k at the start.
+* (c) Keep the adjustment and calibrate (step 18) so the history is
+  roughly break-even. The adjustment then becomes small and mostly reflects
+  working capital (A/R − liabilities).
+
+(c) is the expected end state. The adjustment's size is reported on screen
+and in the log ("owner capital $568,829 added at takeover").
+
+**History boundary.**
+* Everything before the start date is history:
+  * day records (one per day at accounting close: demand, exams,
+    no-shows, waits, TAT, unread at close, utilization of open and staffed
+    hours, net revenue, expense, profit, collections, disbursements, cash);
+  * the ledger;
+  * the log.
+* "Today", flow counters, demand since day 1 and the since-day-1 statement
+  start at the start date. Day 1's 00:00 accruals are day 1's, not
+  history.
+* The cash history and day records restate days before the adjustment by
+  its amount, so the series is continuous at day 1. They are labelled as
+  restated.
+
+**Financing shortfall.**
+* From the start time, every disbursement and receipt updates:
+  * the lowest cash balance and when it happened;
+  * whether cash is below zero.
+* A fall below zero raises one alert ("Cash below zero: financing
+  shortfall …"); a recovery logs one line.
+* The observation reports the current shortfall, the lowest cash and the
+  days since day 1 that ended below zero.
+* No credit line, interest or insolvency is modelled (V0.2). The shortfall
+  exists so a negative balance is visible and measurable, never free
+  borrowing.
+
+**Convergence.** The test compares nine-seed means of a 180-day warm-up
+with a 365-day warm-up:
+* Fill to 90 days, total A/R and A/R up to 60 days must be within ±5%.
+* The thin tails (fill 90–120 days, A/R over 60 days) must be within ±25%.
+
+180 days passes; the largest bulk difference is the 7–30-day fill, at
+−4.6%. With nine seeds, the 180-day result also matches a 540-day warm-up
+within 1%. A 90-day warm-up fails (fill 7–30 days −12.6%, no A/R over 90
+days), which shows the test can detect an unconverged start.
+
+**Performance without changing outcomes.**
+* Log entries keep their time as a number; ISO text is made when the log
+  is read.
+* The log hash is streamed (§4.5).
+* Public IDs, durations, clock times and dates are formatted without `fmt`
+  (identical text, checked against the `fmt` versions).
+* Keyed draws are memoized for the day. A draw is a pure function of its
+  key, and about 30% of hashes were repeats (an order's core draws at
+  scheduling and disclosure, an exam's at start and end).
+* A claim's payer draw is kept from submission to remittance.
+* Room staffing lists are reused when unchanged.
+* The log text and ledger of a full warm-up plus three days were checked
+  byte-identical to the previous version before the step-11 behavior was
+  added. The start-state digests are now golden.
+
 ### 8.5 KPIs
 
 Daily / month-to-date / trailing 30 days:
@@ -1573,10 +1676,21 @@ an independent re-summation are reconciled by the invariants (§10).
   the day-start transaction (class 0, not class 6 as §3.3 suggests). This
   keeps "paid through yesterday" exact.
 
-**Opening cash.** Until step 11, `openingCashCents` is posted at the epoch
-(Dr Cash / Cr Opening equity). With warm-up 0 (the mini scenario) that is
-the start. Step 11 replaces it with the opening-equity adjustment at the
-start time (§8.4).
+**Opening cash.** Cash starts at 0 at the epoch, and the opening equity
+adjustment at the start time sets it to `openingCashCents` (§8.4, §8.8).
+
+**Status.** The owner approved these conventions for V0.1 (2026-10-14):
+* rework outcome 30–60 days after the denial (configurable);
+* business-day claim and payment times;
+* self-pay statements, with write-offs kept separate from denials;
+* utilities and insurance under facility, with the item kept on every
+  ledger line;
+* rent in arrears for now; prepaid expenses come with a later accounting
+  revision;
+* salaries per calendar day;
+* configurable US rates;
+* negative cash allowed, but tracked as a financing shortfall (§8.8),
+  never treated as free borrowing.
 
 **Statements.**
 * Periods: today, month to date and trailing 30 days are calendar windows,

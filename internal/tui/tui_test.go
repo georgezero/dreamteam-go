@@ -319,7 +319,7 @@ func TestFinanceScreen(t *testing.T) {
 	m.key("f")
 	out := ansi.Strip(m.render())
 	for _, want := range []string{"FINANCE · ", "[overview]", "TODAY", "MONTH TO DATE", "TRAILING 30D", "SINCE DAY 1",
-		"Revenue earned (expected)", "Net revenue", "Operating profit", "margin", "Cash collected", "CASH ", "days in A/R", "denial rate",
+		"Revenue recognized", "collected vs expected", "Net revenue", "BALANCE", "equity = opening capital", "Operating profit", "margin", "Cash collected", "CASH ", "days in A/R", "denial rate",
 		"A/R aging", "BY MODALITY", "Cash, last 30 days"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("finance overview lacks %q:\n%s", want, out)
@@ -340,5 +340,46 @@ func TestFinanceScreen(t *testing.T) {
 	}
 	if testing.Verbose() {
 		t.Log("\n" + out)
+	}
+}
+
+// The established practice opens on the takeover briefing, built from the
+// warm-up history; enter goes to the dashboard and h shows the history.
+func TestOpeningBriefing(t *testing.T) {
+	s, err := session.Open("established", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 140, Height: 40})
+	if m.screen != screenBriefing {
+		t.Fatalf("opened on screen %d", m.screen)
+	}
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"TAKING OVER", "operated for 180 days", "Opening cash $150,000", "owner capital",
+		"Last 30 days", "receivables", "Room utilization", "Booked ahead", "Worklist now", "financing shortfall"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("briefing lacks %q:\n%s", want, out)
+		}
+	}
+	if testing.Verbose() {
+		t.Log("\n" + out)
+	}
+	m.key("h")
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "DAILY HISTORY") || len(m.hist) != historyDays || !m.hist[0].BeforeStart {
+		t.Errorf("history: %d days\n%s", len(m.hist), out)
+	}
+	if testing.Verbose() {
+		t.Log("\n" + out)
+	}
+	m.key("b")
+	m.key("enter")
+	if m.screen != screenDashboard {
+		t.Fatalf("enter left screen %d", m.screen)
+	}
+	// The mini scenario has no history and opens on the dashboard.
+	if m := New(openMini(t, 1)); m.screen != screenDashboard {
+		t.Fatalf("mini opened on screen %d", m.screen)
 	}
 }

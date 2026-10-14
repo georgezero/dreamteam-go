@@ -462,7 +462,9 @@ const (
 // when a report is finalized (accrual); cash moves only on payments
 // received and bills or payroll paid, so profit and cash differ.
 type Finance struct {
-	CashCents            int64 `json:"cashCents"`
+	CashCents int64 `json:"cashCents"`
+	// CashChangeTodayCents is today's operating cash flow: collections
+	// minus disbursements (the opening adjustment is not a cash flow).
 	CashChangeTodayCents int64 `json:"cashChangeTodayCents"`
 	ARCents              int64 `json:"arCents"`             // accounts receivable: expected net still owed on open claims
 	APCents              int64 `json:"apCents"`             // accounts payable: accrued bills not yet paid
@@ -476,12 +478,17 @@ type Finance struct {
 	SinceStart  FinancePeriod `json:"sinceStart"`
 	Claims      ClaimsSummary `json:"claims"`
 	// CashHistory is end-of-day cash for up to the last 30 days, oldest
-	// first; today's entry is the current balance.
+	// first; today's entry is the current balance. Days before the start
+	// date are restated as if the opening adjustment had always been in
+	// place, so the series is continuous at day 1.
 	CashHistory  []DayAmount    `json:"cashHistory"`
 	NextPayroll  Obligation     `json:"nextPayroll"`  // next payday and the payroll accrued so far
 	NextPayables Obligation     `json:"nextPayables"` // next 1st of the month and the payables accrued so far
 	Accounts     []Account      `json:"accounts"`     // trial balance
-	Journal      []JournalEntry `json:"journal"`      // newest first (capped)
+	BalanceSheet BalanceSheet   `json:"balanceSheet"`
+	Opening      OpeningState   `json:"opening"`
+	Financing    Financing      `json:"financing"`
+	Journal      []JournalEntry `json:"journal"` // newest first (capped)
 	JournalTotal int            `json:"journalTotal"`
 }
 
@@ -491,9 +498,12 @@ type FinancePeriod struct {
 	From  string `json:"from"` // dates, inclusive
 	To    string `json:"to"`
 	Days  int64  `json:"days"`
-	// Revenue: recognized at expected net when reports are finalized;
-	// collection variance is the difference between expected and
-	// collected on settled claims (contra-revenue).
+	// Revenue recognized: the expected net amount booked when each report
+	// is finalized (allowed × expected collection rate). Collection
+	// variance: on claims settled in the period, expected minus actually
+	// collected (positive when less was collected). Net revenue = revenue
+	// recognized − collection variance; it exceeds revenue recognized when
+	// settled claims paid more than expected.
 	GrossRevenueCents       int64 `json:"grossRevenueCents"`
 	CollectionVarianceCents int64 `json:"collectionVarianceCents"`
 	NetRevenueCents         int64 `json:"netRevenueCents"`
@@ -529,6 +539,72 @@ type FinancePeriod struct {
 	Denied       int             `json:"denied"`
 	DenialRateBP int64           `json:"denialRateBP"`
 	ByModality   []ModalityMoney `json:"byModality"`
+	// FixedByItem splits fixed costs by underlying item (rent, utilities,
+	// insurance, each lease and service contract, IT), whatever account
+	// they post to.
+	FixedByItem []ItemMoney `json:"fixedByItem"`
+}
+
+// ItemMoney is one fixed-cost item's expense in a period.
+type ItemMoney struct {
+	ID      string `json:"id"`
+	Name    string `json:"name"`
+	Account string `json:"account"`
+	Cents   int64  `json:"cents"`
+}
+
+// BalanceSheet: assets = liabilities + equity. Equity is the opening
+// capital (the adjustment at the start), the operating result of the
+// history before day 1 (retained earnings) and the result since day 1.
+type BalanceSheet struct {
+	CashCents               int64 `json:"cashCents"`
+	ReceivablesCents        int64 `json:"receivablesCents"`
+	AssetsCents             int64 `json:"assetsCents"`
+	PayablesCents           int64 `json:"payablesCents"`
+	AccruedPayrollCents     int64 `json:"accruedPayrollCents"`
+	LiabilitiesCents        int64 `json:"liabilitiesCents"`
+	OpeningCapitalCents     int64 `json:"openingCapitalCents"`
+	HistoryEarningsCents    int64 `json:"historyEarningsCents"`
+	EarningsSinceStartCents int64 `json:"earningsSinceStartCents"`
+	EquityCents             int64 `json:"equityCents"`
+}
+
+// OpeningState describes the practice when play began: the opening cash
+// adjustment and what the history left behind.
+type OpeningState struct {
+	Done        bool   `json:"done"`
+	Time        string `json:"time"`
+	HistoryDays int64  `json:"historyDays"`
+	// Cash before the adjustment (what the history left), the scenario's
+	// opening cash, and the adjustment between them: owner capital added
+	// (> 0) or distributed (< 0).
+	CashBeforeCents  int64 `json:"cashBeforeCents"`
+	OpeningCashCents int64 `json:"openingCashCents"`
+	AdjustmentCents  int64 `json:"adjustmentCents"`
+	// Carried over from the history.
+	ReceivablesCents    int64 `json:"receivablesCents"`
+	PayablesCents       int64 `json:"payablesCents"`
+	AccruedPayrollCents int64 `json:"accruedPayrollCents"`
+	OpenClaims          int   `json:"openClaims"`
+	Unread              int   `json:"unread"`
+	Reading             int   `json:"reading"`
+	BookedAppointments  int   `json:"bookedAppointments"` // from the start date on
+	RecallList          int   `json:"recallList"`
+	// The history's results (before day 1).
+	HistoryNetRevenueCents int64 `json:"historyNetRevenueCents"`
+	HistoryExpenseCents    int64 `json:"historyExpenseCents"`
+	HistoryResultCents     int64 `json:"historyResultCents"`
+}
+
+// Financing tracks negative cash since the start. V0.1 has no credit line:
+// a negative balance is an unfunded financing shortfall, shown and
+// tracked, not free borrowing.
+type Financing struct {
+	ShortfallCents    int64  `json:"shortfallCents"` // max(0, −cash) now
+	MinCashCents      int64  `json:"minCashCents"`   // lowest balance since the start
+	MinCashTime       string `json:"minCashTime,omitempty"`
+	DaysBelowZero     int64  `json:"daysBelowZero"` // days since day 1 that ended with cash < 0
+	CreditLineModeled bool   `json:"creditLineModeled"`
 }
 
 // ModalityMoney is revenue and direct cost for one modality. Direct cost
@@ -615,6 +691,51 @@ type JournalEntry struct {
 type JournalLine struct {
 	Account     string `json:"account"`
 	Modality    string `json:"modality,omitempty"`
+	Item        string `json:"item,omitempty"` // fixed-cost item, e.g. "Utilities"
 	DebitCents  int64  `json:"debitCents,omitempty"`
 	CreditCents int64  `json:"creditCents,omitempty"`
+}
+
+// DaySummary is one completed day's record. BeforeStart marks history from
+// before day 1 (the practice's past, never scored). Waits are arrival to
+// exam start for patients imaged that day; TAT is over reports finalized
+// that day. Cash is end of day; before day 1 it is restated to the
+// opening balance, as in Finance.CashHistory.
+type DaySummary struct {
+	Date                 string        `json:"date"`
+	Weekday              string        `json:"weekday"`
+	BeforeStart          bool          `json:"beforeStart"`
+	Orders               int           `json:"orders"`
+	Booked               int           `json:"booked"`
+	Lost                 int           `json:"lost"`
+	Cancelled            int           `json:"cancelled"`
+	WalkIns              int           `json:"walkIns"`
+	Arrived              int           `json:"arrived"`
+	NoShows              int           `json:"noShows"`
+	Exams                int           `json:"exams"`
+	ByModality           []ModalityDay `json:"byModality"`
+	WaitMedianMin        int64         `json:"waitMedianMin"`
+	ReportsFinal         int           `json:"reportsFinal"`
+	TATMedianMin         int64         `json:"tatMedianMin"`
+	UnreadAtClose        int           `json:"unreadAtClose"`
+	OvertimeMin          int64         `json:"overtimeMin"`
+	NetRevenueCents      int64         `json:"netRevenueCents"`
+	ExpenseCents         int64         `json:"expenseCents"`
+	OperatingProfitCents int64         `json:"operatingProfitCents"`
+	CollectionsCents     int64         `json:"collectionsCents"`
+	DisbursementsCents   int64         `json:"disbursementsCents"`
+	CashEndCents         int64         `json:"cashEndCents"`
+}
+
+// ModalityDay is one modality's exams and room time for a day. Utilization
+// is busy (patient in the room) over open hours and over staffed hours,
+// in basis points.
+type ModalityDay struct {
+	Modality      string `json:"modality"`
+	Exams         int    `json:"exams"`
+	BusyMin       int64  `json:"busyMin"`
+	OpenMin       int64  `json:"openMin"`
+	StaffedMin    int64  `json:"staffedMin"`
+	UtilOpenBP    int64  `json:"utilOpenBP"`
+	UtilStaffedBP int64  `json:"utilStaffedBP"`
 }

@@ -5,7 +5,6 @@ import (
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
-	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
@@ -48,7 +47,7 @@ type study struct {
 	claim              int  // claim opened at final; -1 before
 }
 
-func studyID(i int) string { return fmt.Sprintf("S%05d", i+1) }
+func studyID(i int) string { return pubID('S', int64(i+1), 5) }
 
 // acquireStudy records imaging completion for visit vi (exam end). Study
 // IDs are allocated here, at acquisition.
@@ -187,7 +186,7 @@ func (st *state) claim(e *Engine, i, si int) {
 	x := &st.cfg.Catalog[s.exam]
 	s.state, s.claimedAt, s.by = studyReading, e.Now(), i
 	emp.status, emp.task, emp.taskVisit, emp.taskStudy = busy, taskRead, s.visit, si
-	dur := simtime.Duration(x.ReadTime.Sample(rng.Hash(st.seed, "read", o.key.keys()...).Lane(0)))
+	dur := simtime.Duration(x.ReadTime.Sample(st.hash("read", o.key.keys()...).Lane(0)))
 	if s.priority == Urgent {
 		st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s reading urgent %s %s %s", emp.cfg.Name, studyID(si), x.Modality, x.Name))
 	}

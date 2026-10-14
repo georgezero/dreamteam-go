@@ -74,7 +74,7 @@ type flowCounts struct {
 	acquired, reportsFinal, breaches int   // studies; reports; TAT targets missed
 }
 
-func visitID(i int) string { return fmt.Sprintf("V%05d", i+1) }
+func visitID(i int) string { return pubID('V', int64(i+1), 5) }
 
 // startAppointments queues arrival and grace events for today's
 // appointments, in room and slot order (day start, after booking).
@@ -105,7 +105,7 @@ func (st *state) scheduleArrival(e *Engine, ai int) {
 
 	e.Push(Event{At: start.Add(st.cfg.Policies.Grace), Class: ClassDeadline, Kind: kindGrace, A: int64(ai)})
 
-	att := rng.Hash(st.seed, "attempt", o.key.keys(a.attempt)...)
+	att := st.hash("attempt", o.key.keys(a.attempt)...)
 	lead := a.day - st.cal.DayIndex(a.bookedAt)
 	ppm := b.NoShowPPM[st.cfg.Catalog[o.exam].Modality] +
 		min(b.NoShowMaxLeadPPM, rng.PPM(lead/10)*b.NoShowPerTenDaysPPM)
@@ -116,7 +116,7 @@ func (st *state) scheduleArrival(e *Engine, ai int) {
 	for i, c := range b.Arrival {
 		weights[i] = c.WeightBP
 	}
-	cls := b.Arrival[rng.Weighted(rng.Hash(st.seed, "patient", o.key.keys()...).Lane(0), weights)]
+	cls := b.Arrival[rng.Weighted(st.hash("patient", o.key.keys()...).Lane(0), weights)]
 	off := cls.From + simtime.Duration(rng.Uniform(att.Lane(1), uint64(cls.To-cls.From)+1))
 	at := start.Add(off)
 	if at <= e.Now() {
@@ -266,12 +266,13 @@ func (st *state) accountingClose(e *Engine) {
 		st.dem.flowToday.noShows++
 		st.dem.flowTotal.noShows++
 		st.emit(e.Now(), api.Info, "patients", fmt.Sprintf("%s %s %s: no-show", apptID(ai), patientID(o.patient), st.examLabel(o.exam)))
-		ex := rng.Hash(st.seed, "attempt.exam", o.key.keys(a.attempt)...)
+		ex := st.hash("attempt.exam", o.key.keys(a.attempt)...)
 		if rng.Bernoulli(ex.Lane(2), st.cfg.Behavior.NoShowRebookPPM) {
 			e.Push(Event{At: st.cal.At(st.day+1, 9*simtime.Hour), Class: ClassArrival, Kind: kindNoShowRebook, A: int64(a.order)})
 		}
 	}
 	st.dem.noShowsLastClose = n
+	st.recordDay()
 }
 
 // noShowRebook: a no-show patient calls for a new date.
@@ -299,7 +300,7 @@ func (st *state) scheduleWalkIns(e *Engine, day int64) {
 		}
 		n := st.poissonFor(uint32(rate)).Sample(rng.Hash(st.seed, "walkin.count", day, blk))
 		for k := 0; k < n; k++ {
-			sec := rng.Uniform(rng.Hash(st.seed, "walkin", day, blk, int64(k)).Lane(0), 3600)
+			sec := rng.Uniform(st.hash("walkin", day, blk, int64(k)).Lane(0), 3600)
 			clock := simtime.Duration(blk)*simtime.Hour + simtime.Duration(sec)
 			if !h.Contains(clock) {
 				continue
@@ -319,11 +320,11 @@ func (st *state) scheduleWalkIns(e *Engine, day int64) {
 // an appointment for later.
 func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	key := originKey{day: day, src: -1, block: blk, k: k}
-	w := rng.Hash(st.seed, "walkin", day, blk, k)
+	w := st.hash("walkin", day, blk, k)
 	wc := &st.cfg.WalkIns
 	exam := wc.Exams[rng.Weighted(w.Lane(1), wc.ExamWeights)]
 	pri := Priority(rng.Weighted(w.Lane(3), wc.PriorityBP[:]))
-	tol := st.cfg.Behavior.ToleranceDays[pri].Sample(rng.Hash(st.seed, "patient", key.keys()...).Lane(1))
+	tol := st.cfg.Behavior.ToleranceDays[pri].Sample(st.hash("patient", key.keys()...).Lane(1))
 
 	st.dem.patients++
 	oi := len(st.dem.orders)
@@ -348,7 +349,7 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	}
 	vi := st.openVisit(e, oi, -1, 0, 0)
 	patience := simtime.Duration(st.cfg.Behavior.WalkInPatienceMin.Sample(
-		rng.Hash(st.seed, "patient", key.keys()...).Lane(2))) * simtime.Minute
+		st.hash("patient", key.keys()...).Lane(2))) * simtime.Minute
 	e.Push(Event{At: e.Now().Add(patience), Class: ClassDeadline, Kind: kindPatience, A: int64(vi)})
 	st.emit(e.Now(), api.Info, "patients", fmt.Sprintf("%s %s · waiting (%s)", visitID(vi), head, orderID(oi)))
 }

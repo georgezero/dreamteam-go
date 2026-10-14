@@ -432,6 +432,41 @@ As built (V0.1 step 10):
   submitted, then denied or resubmitted, then paid, short paid or written
   off.
 
+### 4.7a Opening briefing and daily history (V0.1 step 11)
+
+The established practice opens on a **takeover briefing**, built from the
+180-day warm-up, which runs before the TUI starts and is never shown
+advancing. It covers:
+* **Money:** opening cash and the owner capital added at takeover, with
+  what the history left; the last 30 days' net revenue, expenses,
+  operating profit and margin; cash collected and paid out.
+* **Carried over:** the history's result, receivables and open claims,
+  payables and payroll owed; the next payroll and bills.
+* **Financing:** a note that no credit line is modelled and that negative
+  cash is tracked as a shortfall.
+* **Patients:** the last 7 days' orders, exams, lost orders and no-shows;
+  median wait; room utilization of open and of staffed hours; appointments
+  booked ahead and the recall list.
+* **Reporting:** the worklist now and the recent TAT.
+* **Today:** opening hours, appointments, and the rostered staff with
+  their shifts.
+
+`enter` goes to the dashboard, `space` starts the day, and `b` reopens the
+briefing. `h` shows the **daily history**: one row per completed day, with
+history days marked "·" and dimmed. Columns: orders, exams, no-shows,
+lost, median wait, TAT, unread at close, utilization by modality, net
+revenue, expenses, profit and end-of-day cash (restated before day 1).
+
+The finance overview adds:
+* the balance sheet (assets = liabilities + equity, with equity split into
+  opening capital, result before day 1 and result since day 1);
+* the financing line (lowest cash since day 1, days that ended below zero,
+  and a red **FINANCING SHORTFALL** while cash is negative);
+* the revenue rows, now "Revenue recognized", "+ collected vs expected" and
+  "Net revenue", with a note on the difference.
+
+The dashboard money line flags "⚠ shortfall".
+
 ### 4.8 Event log
 
 Full scrollable log with filters by category (`patients`, `rooms`, `staff`,

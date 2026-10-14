@@ -40,6 +40,12 @@ func (m *Model) render() string {
 	case screenLog:
 		body = m.logBody(w, h-3)
 		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dash  p patients  q quit"
+	case screenBriefing:
+		body = m.briefingBody(w, h-3)
+		hints = " enter dashboard  space start  h history  f finance  w worklist  s sched  q quit"
+	case screenHistory:
+		body = m.historyBody(w, h-3)
+		hints = " ↑↓ scroll  b briefing  d dash  f finance  space run  q quit"
 	case screenFinance:
 		body = m.financeBody(w, h-3)
 		hints = " tab overview/claims/journal  ↑↓ scroll  d dash  w worklist  p patients  space run  q quit"

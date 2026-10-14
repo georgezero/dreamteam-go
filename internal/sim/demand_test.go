@@ -7,6 +7,7 @@ import (
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/rng"
+	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/sim"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -248,5 +249,19 @@ func BenchmarkMini180(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		w := sim.New(cfg, rng.SeedFromInt(1))
 		w.Engine().RunUntil(w.Calendar().StartOfDate(cfg.Start.AddDays(180)), nil)
+	}
+}
+
+// BenchmarkEstablishedWarmup builds the established practice: the 180-day
+// warm-up from the epoch to the start time (ROADMAP step 11, target
+// < 1.5 s on the reference Pi).
+func BenchmarkEstablishedWarmup(b *testing.B) {
+	cfg, err := scenario.Resolve("established")
+	if err != nil {
+		b.Fatal(err)
+	}
+	for i := 0; i < b.N; i++ {
+		w := sim.New(cfg, rng.SeedFromInt(1))
+		w.Engine().RunUntil(w.StartTime(), nil)
 	}
 }

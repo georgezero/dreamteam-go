@@ -37,6 +37,10 @@ func Open(ref string, seed int64) (*Session, error) {
 	return New(cfg, seed), nil
 }
 
+// AtStart reports whether the session is still at the scenario's start
+// time (nothing played yet).
+func (s *Session) AtStart() bool { return s.Now() == s.w.StartTime() }
+
 // Now returns the simulated time.
 func (s *Session) Now() simtime.Time { return s.w.Engine().Now() }
 
@@ -113,6 +117,10 @@ func (s *Session) Patients(offset int64) []api.PatientRow {
 
 // Journey returns a patient's observable history.
 func (s *Session) Journey(patient string) (api.Journey, bool) { return s.w.Journey(patient) }
+
+// History returns the summaries of up to n completed days, oldest first
+// (days before day 1 are the practice's history).
+func (s *Session) History(n int) []api.DaySummary { return s.w.History(n) }
 
 // Observe returns the current observation with up to recent log entries.
 func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recent) }

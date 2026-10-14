@@ -39,32 +39,33 @@ func (d Duration) String() string {
 	if neg {
 		d = -d
 	}
-	var s string
+	b := make([]byte, 0, 12)
+	if neg {
+		b = append(b, '-')
+	}
 	switch {
 	case d < Minute:
-		s = fmt.Sprintf("%ds", int64(d))
+		b = append(strconv.AppendInt(b, int64(d), 10), 's')
 	case d < Hour:
-		s = fmt.Sprintf("%dm", int64(d/Minute))
+		b = append(strconv.AppendInt(b, int64(d/Minute), 10), 'm')
 	case d < Day:
 		h, m := int64(d/Hour), int64(d%Hour/Minute)
-		if m == 0 {
-			s = fmt.Sprintf("%dh", h)
-		} else {
-			s = fmt.Sprintf("%dh %02dm", h, m)
+		b = append(strconv.AppendInt(b, h, 10), 'h')
+		if m != 0 {
+			b = append(append(b, ' '), byte('0'+m/10), byte('0'+m%10), 'm')
 		}
 	default:
 		days, h := int64(d/Day), int64(d%Day/Hour)
-		if h == 0 {
-			s = fmt.Sprintf("%dd", days)
-		} else {
-			s = fmt.Sprintf("%dd %dh", days, h)
+		b = append(strconv.AppendInt(b, days, 10), 'd')
+		if h != 0 {
+			b = append(strconv.AppendInt(append(b, ' '), h, 10), 'h')
 		}
 	}
-	if neg {
-		return "-" + s
-	}
-	return s
+	return string(b)
 }
+
+// two appends n (0–99) as two digits.
+func two(b []byte, n int64) []byte { return append(b, byte('0'+n/10), byte('0'+n%10)) }
 
 // Weekday follows time.Weekday numbering: Sunday = 0.
 type Weekday int
@@ -148,8 +149,14 @@ func daysInMonth(y, m int) int {
 	return 31
 }
 
-func (d Date) String() string {
-	return fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day)
+func (d Date) String() string { return string(d.append(make([]byte, 0, 10))) }
+
+// append appends "YYYY-MM-DD" (years 0–9999).
+func (d Date) append(b []byte) []byte {
+	y := int64(d.Year)
+	b = append(two(two(b, y/100%100), y%100), '-')
+	b = append(two(b, int64(d.Month)), '-')
+	return two(b, int64(d.Day))
 }
 
 // DaysInMonth returns the number of days in d's month.
@@ -268,7 +275,9 @@ func ParseClock(s string) (Duration, error) {
 // FormatClock formats a time of day as "HH:MM".
 func FormatClock(d Duration) string {
 	d = Duration(floorMod(int64(d), int64(Day)))
-	return fmt.Sprintf("%02d:%02d", int64(d/Hour), int64(d%Hour/Minute))
+	b := make([]byte, 0, 5)
+	b = append(two(b, int64(d/Hour)), ':')
+	return string(two(b, int64(d%Hour/Minute)))
 }
 
 // Clock formats t as "HH:MM".
@@ -283,8 +292,11 @@ func (c Calendar) Short(t Time) string {
 // ISO formats t as "2026-10-13T10:42:05" (practice local, no zone).
 func (c Calendar) ISO(t Time) string {
 	cl := ClockOf(t)
-	return fmt.Sprintf("%sT%02d:%02d:%02d", c.Date(t),
-		int64(cl/Hour), int64(cl%Hour/Minute), int64(cl%Minute))
+	b := make([]byte, 0, 19)
+	b = append(c.Date(t).append(b), 'T')
+	b = append(two(b, int64(cl/Hour)), ':')
+	b = append(two(b, int64(cl%Hour/Minute)), ':')
+	return string(two(b, int64(cl%Minute)))
 }
 
 func floorDiv(a, b int64) int64 {

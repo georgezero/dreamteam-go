@@ -33,7 +33,7 @@ func (st *state) observeFinance(o *api.Observation, now simtime.Time) {
 		JournalTotal:        len(led.entries),
 	}
 	if day < int64(len(led.days)) {
-		f.CashChangeTodayCents = led.days[day].net[acctCash]
+		f.CashChangeTodayCents = led.days[day].receipts - led.days[day].paidOut
 	}
 	f.Today = st.period("Today", day, day)
 	f.MonthToDate = st.period("Month to date", day-int64(date.Day-1), day)
@@ -56,8 +56,13 @@ func (st *state) observeFinance(o *api.Observation, now simtime.Time) {
 		if d < int64(len(led.days)) {
 			cash += led.days[d].net[acctCash]
 		}
-		f.CashHistory = append(f.CashHistory, api.DayAmount{Date: st.cal.Date(st.cal.StartOfDay(d)).String(), Cents: cash})
+		shown := cash
+		if st.fin.opened && st.cal.StartOfDay(d+1) <= st.fin.opening.at {
+			shown += st.fin.opening.adjustment // restated: before the adjustment
+		}
+		f.CashHistory = append(f.CashHistory, api.DayAmount{Date: st.cal.Date(st.cal.StartOfDay(d)).String(), Cents: shown})
 	}
+	st.observeBalance(&f, day)
 	f.NextPayroll = api.Obligation{Date: st.cal.Date(st.cal.StartOfDay(st.nextPayday(day))).String(), Cents: f.AccruedPayrollCents}
 	f.NextPayables = api.Obligation{Date: date.AddDays(int64(date.DaysInMonth() - date.Day + 1)).String(), Cents: f.APCents}
 
@@ -127,6 +132,13 @@ func (st *state) period(label string, from, to int64) api.FinancePeriod {
 		}
 		p.ReportsFinal += finals[k]
 		p.ByModality = append(p.ByModality, mm)
+	}
+	for k, fc := range st.cfg.Finance.Fixed {
+		var c int64
+		if k < len(b.items) {
+			c = b.items[k]
+		}
+		p.FixedByItem = append(p.FixedByItem, api.ItemMoney{ID: fc.ID, Name: fc.Name, Account: fc.Account, Cents: c})
 	}
 	return p
 }
@@ -246,6 +258,9 @@ func (st *state) journalEntry(i int) api.JournalEntry {
 				continue
 			}
 			jl := api.JournalLine{Account: accountInfo[ln.acct].name}
+			if ln.item >= 0 {
+				jl.Item = st.cfg.Finance.Fixed[ln.item].Name
+			}
 			if ln.mod >= 0 {
 				jl.Modality = st.mods[ln.mod]
 			}
@@ -291,4 +306,42 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 		return "Reversal of " + journalID(int(k.a)), journalID(int(k.a))
 	}
 	return "", ""
+}
+
+// observeBalance fills the balance sheet, the opening state and the
+// financing shortfall.
+func (st *state) observeBalance(f *api.Finance, day int64) {
+	led := &st.fin.led
+	b := &f.BalanceSheet
+	b.CashCents, b.ReceivablesCents = led.bal[acctCash], led.bal[acctAR]
+	b.AssetsCents = b.CashCents + b.ReceivablesCents
+	b.PayablesCents, b.AccruedPayrollCents = -led.bal[acctAP], -led.bal[acctAccruedPayroll]
+	b.LiabilitiesCents = b.PayablesCents + b.AccruedPayrollCents
+	b.OpeningCapitalCents = -led.bal[acctEquity]
+	hist := led.sumDays(0, min(day, st.startDay-1))
+	b.HistoryEarningsCents = netRevenue(&hist) - opex(&hist)
+	if day >= st.startDay {
+		cur := led.sumDays(st.startDay, day)
+		b.EarningsSinceStartCents = netRevenue(&cur) - opex(&cur)
+	}
+	b.EquityCents = b.OpeningCapitalCents + b.HistoryEarningsCents + b.EarningsSinceStartCents
+
+	if s := &st.fin.opening; st.fin.opened {
+		f.Opening = api.OpeningState{Done: true, Time: st.cal.ISO(s.at), HistoryDays: st.cfg.WarmupDays,
+			CashBeforeCents: s.before, OpeningCashCents: s.target, AdjustmentCents: s.adjustment,
+			ReceivablesCents: s.ar, PayablesCents: s.ap, AccruedPayrollCents: s.accruedPay, OpenClaims: s.openClaims,
+			Unread: s.unread, Reading: s.reading, BookedAppointments: s.booked, RecallList: s.recall,
+			HistoryNetRevenueCents: s.historyRevenue, HistoryExpenseCents: s.historyExpense,
+			HistoryResultCents: s.historyNetIncome}
+		fi := &f.Financing
+		fi.ShortfallCents = max(0, -led.bal[acctCash])
+		fi.MinCashCents, fi.MinCashTime = st.fin.minCash, st.cal.ISO(st.fin.minCashAt)
+		cash := led.cashAtEnd(st.startDay - 1)
+		for d := st.startDay; d < day && d < int64(len(led.days)); d++ { // completed days
+			cash += led.days[d].net[acctCash]
+			if cash < 0 {
+				fi.DaysBelowZero++
+			}
+		}
+	}
 }
