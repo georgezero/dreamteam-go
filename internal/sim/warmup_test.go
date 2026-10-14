@@ -3,6 +3,7 @@ package sim_test
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"strings"
 	"testing"
 
@@ -100,7 +101,10 @@ func TestOpeningBalanceSheet(t *testing.T) {
 		t.Fatalf("day-1 figures carry history: %+v %+v", o.Finance.Today, o.Finance.Financing)
 	}
 	h := w.History(30)
-	if len(h) != 30 || !h[29].BeforeStart || h[29].Date != cfg.Start.AddDays(-1).String() || h[29].CashEndCents != cfg.OpeningCashCents {
+	// History cash is actual (what the history left); pro forma adds the
+	// takeover capital.
+	if len(h) != 30 || !h[29].BeforeStart || h[29].Date != cfg.Start.AddDays(-1).String() ||
+		h[29].CashEndCents != op.CashBeforeCents || h[29].ProFormaCashEndCents != cfg.OpeningCashCents {
 		t.Fatalf("history ends %+v", h[len(h)-1])
 	}
 }
@@ -254,7 +258,7 @@ func mustJSON(t testing.TB, v any) string {
 func TestStartStateGolden(t *testing.T) {
 	w := built(t, established(t), 1)
 	const (
-		wantLedger = "b3c0faccbb45a69b5b70aaf9ae206f6d0ab6b2a7a5b2548103181fad050db6a6"
+		wantLedger = "eff39e05918a05336a287beb4e7603427daa7500da059bc55a5871f4e9ad9784"
 		wantLog    = "6b164b8984d88d7b51eb976004adb0ca6ed78bf9f16260922d82f1b09c00a180"
 	)
 	if w.LedgerHash() != wantLedger || w.LogHash() != wantLog {
@@ -367,7 +371,7 @@ func meanProfile(t *testing.T, warmup int64, n int) startProfile {
 func converged(p, ref startProfile) []string {
 	var bad []string
 	check := func(name string, got, want, tol float64) {
-		if d := got/want - 1; d < -tol || d > tol {
+		if d := got/want - 1; math.IsNaN(d) || math.IsInf(d, 0) || d < -tol || d > tol {
 			bad = append(bad, fmt.Sprintf("%s %.4g vs %.4g (%+.1f%%)", name, got, want, 100*d))
 		}
 	}

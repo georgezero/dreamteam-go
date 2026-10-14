@@ -231,7 +231,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 	case kindReworkOutcome:
 		st.reworkOutcome(e, int(ev.A))
 	case kindOpening:
-		st.openingAdjust(e)
+		st.fin.openingDue = true // posted at the end of this transaction's dispatch
 	case kindWake, kindDeadline:
 	}
 }

@@ -58,3 +58,17 @@ func TestFormattersMatchFmt(t *testing.T) {
 		}
 	}
 }
+
+// Step 11 review finding 6: dates outside years 0–9999 format as fmt did.
+func TestRegress11DateFormattingAllYears(t *testing.T) {
+	for _, d := range []Date{{0, 1, 1}, {9999, 12, 31}, {10000, 1, 1}, {12345, 6, 7}, {-1, 12, 31}} {
+		want := fmt.Sprintf("%04d-%02d-%02d", d.Year, d.Month, d.Day)
+		if got := d.String(); got != want {
+			t.Errorf("%v: %q, want %q", d, got, want)
+		}
+		cal := NewCalendar(d)
+		if got := cal.ISO(0); got != want+"T00:00:00" {
+			t.Errorf("ISO %v: %q", d, got)
+		}
+	}
+}

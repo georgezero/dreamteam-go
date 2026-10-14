@@ -29,6 +29,10 @@ func (st *state) Dispatch(e *Engine) {
 	st.operationalClose(e)
 	st.scheduleWakes(e)
 	st.scheduleDeadline(e)
+	if st.fin.openingDue {
+		st.fin.openingDue = false
+		st.openingAdjust(e)
+	}
 }
 
 // --- registration ---------------------------------------------------------

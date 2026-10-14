@@ -455,7 +455,10 @@ advancing. It covers:
 briefing. `h` shows the **daily history**: one row per completed day, with
 history days marked "·" and dimmed. Columns: orders, exams, no-shows,
 lost, median wait, TAT, unread at close, utilization by modality, net
-revenue, expenses, profit and end-of-day cash (restated before day 1).
+revenue, expenses, profit and **actual** end-of-day cash. A takeover line
+names the owner capital and the cash before and after it; the finance
+chart is "Cash (actual)" with the capital noted at takeover. The balance
+line shows exact cents, so its equation holds as printed.
 
 The finance overview adds:
 * the balance sheet (assets = liabilities + equity, with equity split into

@@ -320,7 +320,7 @@ func TestFinanceScreen(t *testing.T) {
 	out := ansi.Strip(m.render())
 	for _, want := range []string{"FINANCE · ", "[overview]", "TODAY", "MONTH TO DATE", "TRAILING 30D", "SINCE DAY 1",
 		"Revenue recognized", "collected vs expected", "Net revenue", "BALANCE", "equity = opening capital", "Operating profit", "margin", "Cash collected", "CASH ", "days in A/R", "denial rate",
-		"A/R aging", "BY MODALITY", "Cash, last 30 days"} {
+		"A/R aging", "BY MODALITY", "Cash (actual), last 30 days"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("finance overview lacks %q:\n%s", want, out)
 		}
@@ -381,5 +381,42 @@ func TestOpeningBriefing(t *testing.T) {
 	// The mini scenario has no history and opens on the dashboard.
 	if m := New(openMini(t, 1)); m.screen != screenDashboard {
 		t.Fatalf("mini opened on screen %d", m.screen)
+	}
+}
+
+// Step 11 review finding 5: the balance-sheet equation is shown in exact
+// cents, so it holds as printed (whole-dollar rounding of each term made
+// $428,154 = $88,071 + $340,082).
+func TestRegress11BalanceEquationExact(t *testing.T) {
+	f := api.Finance{BalanceSheet: api.BalanceSheet{CashCents: 15_000_000, ReceivablesCents: 27_815_355, AssetsCents: 42_815_355,
+		PayablesCents: 4_893_284, AccruedPayrollCents: 3_913_859, LiabilitiesCents: 8_807_143, OpeningCapitalCents: 56_882_864,
+		HistoryEarningsCents: -22_375_815, EarningsSinceStartCents: -498_837, EquityCents: 34_008_212}}
+	out := ansi.Strip(strings.Join(overviewLines(f, 140), "\n"))
+	for _, want := range []string{"$428,153.55", "$88,071.43", "$340,082.12"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("balance line lacks %s:\n%s", want, out)
+		}
+	}
+}
+
+// Step 11 review finding 2: history and the cash chart show actual cash
+// and name the takeover capital; nothing presents pro forma cash as
+// actual.
+func TestRegress11CashHistoryLabelled(t *testing.T) {
+	s, err := session.Open("established", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 140, Height: 44})
+	m.key("h")
+	out := ansi.Strip(m.render())
+	if !strings.Contains(out, "ACTUAL CASH") || !strings.Contains(out, "takeover: owner capital +$568,829") {
+		t.Errorf("history screen:\n%s", out)
+	}
+	m.key("f")
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "Cash (actual), last") || !strings.Contains(out, "owner capital +$568,829 at takeover") {
+		t.Errorf("finance screen:\n%s", out)
 	}
 }

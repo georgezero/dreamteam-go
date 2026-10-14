@@ -56,11 +56,7 @@ func (st *state) observeFinance(o *api.Observation, now simtime.Time) {
 		if d < int64(len(led.days)) {
 			cash += led.days[d].net[acctCash]
 		}
-		shown := cash
-		if st.fin.opened && st.cal.StartOfDay(d+1) <= st.fin.opening.at {
-			shown += st.fin.opening.adjustment // restated: before the adjustment
-		}
-		f.CashHistory = append(f.CashHistory, api.DayAmount{Date: st.cal.Date(st.cal.StartOfDay(d)).String(), Cents: shown})
+		f.CashHistory = append(f.CashHistory, api.DayAmount{Date: st.cal.Date(st.cal.StartOfDay(d)).String(), Cents: cash})
 	}
 	st.observeBalance(&f, day)
 	f.NextPayroll = api.Obligation{Date: st.cal.Date(st.cal.StartOfDay(st.nextPayday(day))).String(), Cents: f.AccruedPayrollCents}

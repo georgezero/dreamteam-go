@@ -131,7 +131,7 @@ func pctOf(a, b int64) string {
 // historyBody is the daily history: one row per completed day, newest at
 // the bottom; days before day 1 are marked as history.
 func (m *Model) historyBody(w, n int) []string {
-	lines := []string{titleStyle.Render(section(fmt.Sprintf("DAILY HISTORY · last %d days (· = before day 1)", len(m.hist)), w)),
+	lines := []string{titleStyle.Render(section(fmt.Sprintf("DAILY HISTORY · last %d days (· = before day 1) · ACTUAL CASH", len(m.hist)), w)),
 		dimStyle.Render(fmt.Sprintf("   DATE         ORD EXAMS  NS LOST    WAIT     TAT UNREAD  %-19s    NET REV  EXPENSES    PROFIT   CASH END",
 			strings.Join(m.obsMods(), " ")+" %")),
 		dimStyle.Render("                                                         utilization, open hrs")}
@@ -163,6 +163,10 @@ func (m *Model) historyBody(w, n int) []string {
 	}
 	if len(h) == 0 {
 		lines = append(lines, dimStyle.Render("  (no completed days yet)"))
+	}
+	if op := m.obs.Finance.Opening; op.Done && op.AdjustmentCents != 0 {
+		lines = append(lines, dimStyle.Render(fmt.Sprintf(" takeover: owner capital %s on %s brought cash from %s to %s (cash before day 1 is as it was)",
+			plusUSD(op.AdjustmentCents), strings.Replace(op.Time[5:16], "T", " ", 1), usd(op.CashBeforeCents), usd(op.OpeningCashCents))))
 	}
 	return lines
 }

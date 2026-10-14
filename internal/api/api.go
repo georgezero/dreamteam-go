@@ -477,10 +477,9 @@ type Finance struct {
 	Trailing30  FinancePeriod `json:"trailing30"`
 	SinceStart  FinancePeriod `json:"sinceStart"`
 	Claims      ClaimsSummary `json:"claims"`
-	// CashHistory is end-of-day cash for up to the last 30 days, oldest
-	// first; today's entry is the current balance. Days before the start
-	// date are restated as if the opening adjustment had always been in
-	// place, so the series is continuous at day 1.
+	// CashHistory is actual end-of-day cash for up to the last 30 days,
+	// oldest first; today's entry is the current balance. The takeover
+	// capital (Opening.AdjustmentCents) appears once, on the takeover day.
 	CashHistory  []DayAmount    `json:"cashHistory"`
 	NextPayroll  Obligation     `json:"nextPayroll"`  // next payday and the payroll accrued so far
 	NextPayables Obligation     `json:"nextPayables"` // next 1st of the month and the payables accrued so far
@@ -699,8 +698,8 @@ type JournalLine struct {
 // DaySummary is one completed day's record. BeforeStart marks history from
 // before day 1 (the practice's past, never scored). Waits are arrival to
 // exam start for patients imaged that day; TAT is over reports finalized
-// that day. Cash is end of day; before day 1 it is restated to the
-// opening balance, as in Finance.CashHistory.
+// that day. CashEndCents is actual end-of-day cash; ProFormaCashEndCents
+// adds the takeover capital to days before it (labelled pro forma).
 type DaySummary struct {
 	Date                 string        `json:"date"`
 	Weekday              string        `json:"weekday"`
@@ -725,6 +724,9 @@ type DaySummary struct {
 	CollectionsCents     int64         `json:"collectionsCents"`
 	DisbursementsCents   int64         `json:"disbursementsCents"`
 	CashEndCents         int64         `json:"cashEndCents"`
+	// ProFormaCashEndCents is cash end adjusted as if the takeover capital
+	// had been in place throughout (pro forma, not actual).
+	ProFormaCashEndCents int64 `json:"proFormaCashEndCents"`
 }
 
 // ModalityDay is one modality's exams and room time for a day. Utilization

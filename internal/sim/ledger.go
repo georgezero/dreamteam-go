@@ -306,6 +306,7 @@ func (l *ledger) hash() string {
 			put(int64(ln.acct))
 			put(int64(ln.mod))
 			put(ln.amt)
+			put(int64(ln.item))
 		}
 	}
 	return hex.EncodeToString(h.Sum(nil))

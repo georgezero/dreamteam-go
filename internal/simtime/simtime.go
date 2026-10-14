@@ -151,8 +151,12 @@ func daysInMonth(y, m int) int {
 
 func (d Date) String() string { return string(d.append(make([]byte, 0, 10))) }
 
-// append appends "YYYY-MM-DD" (years 0–9999).
+// append appends "YYYY-MM-DD", the text of fmt's "%04d-%02d-%02d"; the
+// fast path covers years 0–9999.
 func (d Date) append(b []byte) []byte {
+	if d.Year < 0 || d.Year > 9999 {
+		return fmt.Appendf(b, "%04d-%02d-%02d", d.Year, d.Month, d.Day)
+	}
 	y := int64(d.Year)
 	b = append(two(two(b, y/100%100), y%100), '-')
 	b = append(two(b, int64(d.Month)), '-')

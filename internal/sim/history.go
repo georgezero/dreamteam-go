@@ -110,8 +110,9 @@ func (w *World) History(n int) []api.DaySummary {
 			s.CollectionsCents, s.DisbursementsCents = b.receipts, b.paidOut
 		}
 		s.CashEndCents = led.cashAtEnd(r.day)
+		s.ProFormaCashEndCents = s.CashEndCents
 		if st.fin.opened && st.cal.StartOfDay(r.day+1) <= st.fin.opening.at {
-			s.CashEndCents += st.fin.opening.adjustment // restated, as in the cash history
+			s.ProFormaCashEndCents += st.fin.opening.adjustment // as if the takeover capital had been there
 		}
 		out = append(out, s)
 	}

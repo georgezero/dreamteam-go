@@ -1460,7 +1460,11 @@ uninterrupted run, and a test checks this.
   bills) accumulate, so cash at the start is what the history left.
   Seed 1 leaves −$418,829, because the uncalibrated history runs at a loss.
 * At the start time, one journal entry, the *opening equity adjustment*
-  (Dr/Cr Cash against Opening equity), sets cash to `openingCashCents`. That
+  (Dr/Cr Cash against Opening equity), sets cash to `openingCashCents`.
+  It is posted at the end of that instant's transaction, after every
+  same-instant event (a day start with payroll or bills, remittances) and
+  after dispatch. Cash is then exactly the target, and the opening snapshot
+  is the state play begins from (step 11 review, finding 1). That
   is owner capital in, or a distribution out. It is not revenue, not a cash
   flow, and not counted in receipts.
 * Nothing else is touched:
@@ -1496,9 +1500,16 @@ and in the log ("owner capital $568,829 added at takeover").
 * "Today", flow counters, demand since day 1 and the since-day-1 statement
   start at the start date. Day 1's 00:00 accruals are day 1's, not
   history.
-* The cash history and day records restate days before the adjustment by
-  its amount, so the series is continuous at day 1. They are labelled as
-  restated.
+* Historical cash is shown as it actually was (owner decision, step 11
+  review). The takeover capital appears once, at takeover, and is named on
+  the history screen and next to the cash chart.
+  `DaySummary.ProFormaCashEndCents` (history plus the capital) is a
+  separate, explicitly pro forma field. The ledger is never rewritten.
+* The capital injection stays explicit and visible. It is never a hidden
+  balancing item, and calibration is not assumed to shrink it.
+* Scoring windows: display periods are calendar days. Benchmark scoring
+  should start at the exact takeover instant, with capital transfers
+  excluded from operating performance (owner decision pending, step 12).
 
 **Financing shortfall.**
 * From the start time, every disbursement and receipt updates:
@@ -1620,7 +1631,8 @@ an independent re-summation are reconciled by the invariants (§10).
 * Remittance:
   * Comes `delay` calendar days after submission. On a weekend it rolls
     to the next business day.
-  * Posts at 10:00 (`paymentTime`).
+  * Posts at 10:00 (`paymentTime`). Submission and payment times must be
+    before 24:00, so they fall on the business day itself.
   * The outcome comes from `claim` lane 0. Paid in full and short paid
     (`m ± shortSpreadBP`) settle at once.
 * Denial and rework:

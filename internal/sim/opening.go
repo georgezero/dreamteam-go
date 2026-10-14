@@ -34,9 +34,11 @@ type openingSnap struct {
 	historyNetIncome   int64
 }
 
-// pushOpening queues the adjustment at the start time, in the first class
-// of that instant (after the day-start transaction when the start is
-// 00:00, whose event was queued first).
+// pushOpening queues the takeover event at the start time. Its handler only
+// marks the adjustment due; the adjustment is posted at the very end of
+// that instant's transaction, after every other event (day start with
+// payroll or bills, remittances, completions) and after dispatch, so cash
+// is exactly the target and the snapshot is the state play begins from.
 func (st *state) pushOpening(e *Engine, at simtime.Time) {
 	e.Push(Event{At: at, Class: ClassDayBoundary, Kind: kindOpening})
 }

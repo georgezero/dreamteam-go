@@ -5,6 +5,7 @@ import (
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/sim"
+	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
 // finance validates and compiles the financial assumptions and the
@@ -80,8 +81,9 @@ func (c *checker) finance(f *File, cfg *sim.Config) {
 		c.fail("finance.shortSpreadBP", "%d is outside 0–5000", fin.ShortSpreadBP)
 	}
 	out.ShortSpreadBP = fin.ShortSpreadBP
-	out.SubmitClock = c.clock("finance.submitTime", fin.SubmitTime)
-	out.PaymentClock = c.clock("finance.paymentTime", fin.PaymentTime)
+	// Points in time on a business day: 24:00 would be the next day.
+	out.SubmitClock = c.clockOfDay("finance.submitTime", fin.SubmitTime)
+	out.PaymentClock = c.clockOfDay("finance.paymentTime", fin.PaymentTime)
 	for _, x := range []struct {
 		p string
 		v int64
@@ -132,4 +134,13 @@ func (c *checker) dayRange(p string, r [2]int64, lo, hi int64) {
 	if r[0] < lo || r[1] > hi || r[0] > r[1] {
 		c.fail(p, "[%d, %d] must be an increasing range within %d–%d", r[0], r[1], lo, hi)
 	}
+}
+
+// clockOfDay parses a point in time within a day (00:00 to before 24:00).
+func (c *checker) clockOfDay(p, s string) simtime.Duration {
+	d := c.clock(p, s)
+	if d >= simtime.Day {
+		c.fail(p, "%q must be before 24:00 (a time within the day)", s)
+	}
+	return d
 }

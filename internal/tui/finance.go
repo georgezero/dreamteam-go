@@ -35,6 +35,20 @@ func usd(c int64) string {
 	return "$" + s
 }
 
+// usdc formats cents exactly: $12,345.67 or −$12,345.67. Used where an
+// equation must hold as printed.
+func usdc(c int64) string {
+	neg := c < 0
+	if neg {
+		c = -c
+	}
+	s := usd(c/100*100) + fmt.Sprintf(".%02d", c%100)
+	if neg {
+		return "−" + s
+	}
+	return s
+}
+
 // signed renders money red when negative.
 func signed(c int64) string {
 	if c < 0 {
@@ -165,10 +179,10 @@ func overviewLines(f api.Finance, w int) []string {
 	}
 	b := f.BalanceSheet
 	out = append(out, fmt.Sprintf(" BALANCE  assets %s (cash %s, A/R %s) = liabilities %s (payables %s, payroll %s) + equity %s",
-		signed(b.AssetsCents), signed(b.CashCents), usd(b.ReceivablesCents), usd(b.LiabilitiesCents), usd(b.PayablesCents),
-		usd(b.AccruedPayrollCents), signed(b.EquityCents)))
+		usdc(b.AssetsCents), usdc(b.CashCents), usdc(b.ReceivablesCents), usdc(b.LiabilitiesCents), usdc(b.PayablesCents),
+		usdc(b.AccruedPayrollCents), usdc(b.EquityCents)))
 	out = append(out, dimStyle.Render(fmt.Sprintf("          equity = opening capital %s + result before day 1 %s + result since day 1 %s",
-		usd(b.OpeningCapitalCents), usd(b.HistoryEarningsCents), usd(b.EarningsSinceStartCents))))
+		usdc(b.OpeningCapitalCents), usdc(b.HistoryEarningsCents), usdc(b.EarningsSinceStartCents))))
 	c := f.Claims
 	dar := "—"
 	if c.DaysInAR >= 0 {
@@ -193,7 +207,11 @@ func overviewLines(f api.Finance, w int) []string {
 	}
 	out = append(out, dimStyle.Render(" Direct cost: supplies, PACS, billing fees and the modality's lease and service; labor and rent are shared."))
 	if len(f.CashHistory) > 1 {
-		out = append(out, " Cash, last "+fmt.Sprint(len(f.CashHistory))+" days  "+sparkline(f.CashHistory))
+		l := " Cash (actual), last " + fmt.Sprint(len(f.CashHistory)) + " days  " + sparkline(f.CashHistory)
+		if op := f.Opening; op.Done && op.AdjustmentCents != 0 && op.Time[:10] >= f.CashHistory[0].Date {
+			l += dimStyle.Render(fmt.Sprintf(" · owner capital %s at takeover %s", plusUSD(op.AdjustmentCents), shortDate(op.Time[:10])))
+		}
+		out = append(out, l)
 	}
 	return out
 }
@@ -274,4 +292,12 @@ func (m *Model) journalLines(f api.Finance, w, n int) []string {
 	m.finScroll = max(0, min(m.finScroll, len(all)-rows))
 	end := min(len(all), m.finScroll+rows)
 	return append(out, all[m.finScroll:end]...)
+}
+
+// plusUSD formats a signed amount with an explicit sign: +$1,234 / −$1,234.
+func plusUSD(c int64) string {
+	if c >= 0 {
+		return "+" + usd(c)
+	}
+	return usd(c)
 }

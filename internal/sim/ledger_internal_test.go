@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
@@ -84,5 +85,61 @@ func TestPubIDMatchesFmt(t *testing.T) {
 				t.Fatalf("pubID(%d, %d) = %q, want %q", n, w, got, want)
 			}
 		}
+	}
+}
+
+// Step 11 review finding 4: every line field, including the fixed-cost
+// item, is part of the ledger hash.
+func TestRegress11LedgerHashCoversItem(t *testing.T) {
+	cal := simtime.NewCalendar(simtime.Date{Year: 2026, Month: 10, Day: 13})
+	a, b := newLedger(cal), newLedger(cal)
+	a.mustPost(0, entryKey{kind: entFixed}, line{acctFacility, -1, 100, 0}, line{acctAP, -1, -100, -1})
+	b.mustPost(0, entryKey{kind: entFixed}, line{acctFacility, -1, 100, 1}, line{acctAP, -1, -100, -1})
+	if a.hash() == b.hash() {
+		t.Fatal("entries differing only in the fixed-cost item hash the same")
+	}
+}
+
+// Review test gap: memoized draws equal fresh hashes, each call gets its
+// own lane cursors, and the memo resets.
+func TestDrawMemoEqualsFreshHash(t *testing.T) {
+	st := &state{seed: rng.SeedFromInt(9)}
+	for k := int64(0); k < 50; k++ {
+		fresh := rng.Hash(st.seed, "attempt", 1, 2, 3, k, 0).Lanes()
+		first := st.hash("attempt", 1, 2, 3, k, 0)
+		_ = first.Uint64() // consume a cursor on the first copy
+		second := st.hash("attempt", 1, 2, 3, k, 0)
+		if first.Lanes() != fresh || second.Lanes() != fresh || second.Uint64() != fresh[0] {
+			t.Fatalf("key %d: memoized draw differs from a fresh hash", k)
+		}
+	}
+	if len(st.drawMemo) != 50 {
+		t.Fatalf("memo holds %d", len(st.drawMemo))
+	}
+	clear(st.drawMemo)
+	if st.hash("attempt", 1).Lanes() != rng.Hash(st.seed, "attempt", 1).Lanes() {
+		t.Fatal("after reset")
+	}
+}
+
+// Review test gap: the streamed log hash covers every entry, regardless of
+// ring eviction or digests read in between.
+func TestLogDigestIndependentOfReadsAndEviction(t *testing.T) {
+	var a, b eventLog
+	for i := 0; i < logRetention+500; i++ {
+		text := fmt.Sprintf("entry %d", i)
+		a.emit(simtime.Time(i), "info", "test", text)
+		b.emit(simtime.Time(i), "info", "test", text)
+		if i%97 == 0 {
+			_ = b.digest()
+		}
+	}
+	if string(a.digest()) != string(b.digest()) || len(a.ring) != logRetention {
+		t.Fatal("reading the digest or evicting entries changed the hash")
+	}
+	cal := simtime.NewCalendar(simtime.Date{Year: 2026, Month: 10, Day: 13})
+	r := a.recent(cal, 3)
+	if r[0].Text != fmt.Sprintf("entry %d", logRetention+497) || r[2].Seq != uint64(logRetention+500) {
+		t.Fatalf("retained order: %+v", r)
 	}
 }

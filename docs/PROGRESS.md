@@ -7,6 +7,70 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 11 remediation — review findings (v0.1.0-dev.11.1)
+
+The step 11 review (`docs/reviews/step-11-astra-review.md`, gpt-6-astra at
+high reasoning, read-only snapshot of `e5863b4`) returned a CONDITIONAL GO
+with six confirmed defects and two test gaps. For each defect a regression
+test was written first and run on the unfixed code (`e5863b4`); then the
+smallest fix was made and the test rerun.
+
+| # | Defect | Regression test | Before (on `e5863b4`) | After | Fix |
+|---|---|---|---|---|---|
+| 1 (high) | The takeover adjustment ran before same-instant events: a later-queued day start (payroll or bills) at a midnight takeover, 10:00 remittances, and dispatch. Opening cash came out wrong and the snapshot was taken too early. | `TestRegress11TakeoverCollisions` | FAIL: 5 operating entries after the opening at midnight on payday Fri Oct 16 and on Nov 1; 87 at a 10:00 takeover. Opening cash $100,801 (payroll paid after the injection), $27,142 (bills) and $156,239 (collections) instead of $150,000. | PASS: exactly $150,000; snapshot = books when play begins; the opening is the last entry of the instant | The takeover event only marks the adjustment due. It is posted at the end of that instant's dispatch, after every event and dispatch decision. |
+| 2 (medium) | The cash chart and daily records showed pro forma (shifted) history as plain cash | `TestRegress11ActualHistoricalCash`, `TestRegress11CashHistoryLabelled` | FAIL: cash history Sep 14 $195,837, actual −$372,992; screens unlabelled | PASS | Actual cash everywhere by default. `DaySummary.ProFormaCashEndCents` is a separate, named field. The history screen says ACTUAL CASH and shows a takeover line ("owner capital +$568,829 … brought cash from −$418,829 to $150,000"). The chart says "Cash (actual)" and notes the capital at takeover. The ledger is untouched. |
+| 3 (medium) | `submitTime`/`paymentTime` of 24:00 accepted, scheduling onto the next (weekend) day | `TestValidationErrors` (2 new cases) | FAIL: no validation error | PASS | Point-in-time financial clocks must be before 24:00. |
+| 4 (low) | Ledger hash ignored the fixed-cost item | `TestRegress11LedgerHashCoversItem` | FAIL: same hash | PASS | The item is part of each hashed line. The golden ledger digest changed for this reason only; the log digest is unchanged. |
+| 5 (low) | The balance line printed "=" between independently rounded dollars (the reported $1) | `TestRegress11BalanceEquationExact` | FAIL: whole dollars | PASS | The balance and equity lines show exact cents: $428,153.55 = $88,071.43 + $340,082.12. |
+| 6 (low) | Dates outside years 0–9999 wrapped (10000 → 0000) | `TestRegress11DateFormattingAllYears` | FAIL: "0000-01-01" for 10000, "000/-12-31" for −1 | PASS | The fast path covers 0–9999; others use the previous `fmt` format. |
+
+**The $1 discrepancy.** It was display rounding. The exact balances at
+takeover (seed 1) were assets 42,815,355¢, liabilities 8,807,143¢ and
+equity 34,008,212¢: an exact match in cents. The ledger also enforces
+Σ = 0 on every posting and in the invariants.
+
+**Test gaps closed**
+* `TestRegress11SplitEqualsWholePendingState`: building then playing 2 days
+  7 h equals one uninterrupted run. It compares the full pending event queue
+  and every claim, appointment, study, visit and order, not only digests.
+  This passed before as well.
+* `TestRegress11ConvergenceRejectsNaN`: the convergence comparator now
+  rejects non-finite ratios (0/0 used to pass). It failed before.
+* `TestDrawMemoEqualsFreshHash`: memoized draws equal fresh hashes, with
+  independent cursors.
+* `TestLogDigestIndependentOfReadsAndEviction`: the hash covers every entry
+  regardless of reads and ring eviction, and retained order is kept.
+* The last two passed before; they confirm the review's finding that the
+  optimizations are sound.
+
+**Not changed (recorded):**
+* The convergence test remains a nine-seed smoke test. It has no variance
+  estimate, the seeds are unpaired across warm-up lengths, and liabilities
+  and backlog are not compared. Step 18 measures variance.
+* The review's other suggested fixtures remain future work: takeover during
+  required overtime; a recall, no-show rebook and stale arrival at
+  takeover; one claim in every state; an overnight TAT in history.
+
+**Owner decisions**
+1. **Capital stays explicit** (owner, 2026-10-14). The takeover injection
+   is shown wherever opening cash is (briefing, log, finance screen,
+   history line) and is never treated as a balancing mechanism. Calibration
+   is not assumed to shrink it.
+2. **Historical cash** (owner, 2026-10-14): actual by default with the
+   injection visible. Pro forma only as an explicitly named value. Done.
+3. **Scoring windows (open).** "Today" and "since day 1" are calendar-day
+   windows from 00:00. A 06:00 takeover includes the 00:00 accruals; a
+   13:00 takeover includes the morning. That is fine for display. For
+   benchmark scoring (step 12 onward) the recommendation is to score
+   post-takeover performance from the exact takeover instant against the
+   opening balance sheet, and to keep capital transfers out of operating
+   performance.
+
+Verification: the full suite passes, and all step 8 and step 10
+regressions pass.
+
+---
+
 ## Step 11 — Warm-up, opening state and performance (v0.1.0-dev.11)
 
 **What was built.**

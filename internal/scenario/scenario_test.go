@@ -155,6 +155,9 @@ func TestValidationErrors(t *testing.T) {
 		{`{"finance": {"fixedMonthly": [{"id": "rent", "account": "marketing"}]}}`, "finance.fixedMonthly[0].account", "not one of"},
 		{`{"finance": {"fixedMonthly": [{"id": "lease_ct", "modality": "PET"}]}}`, "finance.fixedMonthly[3].modality", "not a room modality"},
 		{`{"finance": {"submitTime": "25:00"}}`, "finance.submitTime", ""},
+		// Step 11 review finding 3: point-in-time financial clocks are before 24:00.
+		{`{"finance": {"submitTime": "24:00"}}`, "finance.submitTime", "before 24:00"},
+		{`{"finance": {"paymentTime": "24:00"}}`, "finance.paymentTime", "before 24:00"},
 	}
 	for _, tc := range cases {
 		fsys := fstest.MapFS{

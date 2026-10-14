@@ -239,8 +239,8 @@ type finState struct {
 
 	// The opening adjustment at the start time (opening.go): the amount
 	// posted to cash against opening equity, and the state it was made in.
-	opened  bool
-	opening openingSnap
+	opened, openingDue bool
+	opening            openingSnap
 	// Financing shortfall since the start: the lowest cash balance and when,
 	// and whether cash is below zero now (for the one-time alert per dip).
 	minCash   int64
