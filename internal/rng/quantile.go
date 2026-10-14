@@ -56,7 +56,7 @@ func (q Quantile) At(u PPM) int64 {
 	return a.V + (b.V-a.V)*int64(u-a.P)/int64(b.P-a.P)
 }
 
-// Sample draws one value (one Uniform draw).
-func (q Quantile) Sample(s *Stream) int64 {
-	return q.At(PPM(s.Uniform(uint64(OneMillion))))
+// Sample draws one value (one draw).
+func (q Quantile) Sample(src Source) int64 {
+	return q.At(PPM(Uniform(src, uint64(OneMillion))))
 }

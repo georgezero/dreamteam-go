@@ -68,11 +68,14 @@ func NewPoisson(lambdaMilli uint32) (*Poisson, error) {
 // LambdaMilli returns the rate in thousandths.
 func (p *Poisson) LambdaMilli() uint32 { return p.milli }
 
-// Sample draws one count (parts Uniform draws).
-func (p *Poisson) Sample(s *Stream) int {
+// Parts returns how many draws one Sample consumes.
+func (p *Poisson) Parts() int { return p.parts }
+
+// Sample draws one count (Parts draws).
+func (p *Poisson) Sample(src Source) int {
 	n := 0
 	for i := 0; i < p.parts; i++ {
-		u := s.Uniform(fpOne)
+		u := Uniform(src, fpOne)
 		lo, hi := 0, len(p.cdf)-1
 		for lo < hi {
 			mid := (lo + hi) / 2

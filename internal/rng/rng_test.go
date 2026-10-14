@@ -189,3 +189,42 @@ func TestPoissonMoments(t *testing.T) {
 		}
 	}
 }
+
+// BenchmarkKeyedDraw measures one keyed draw (SHA-256 key derivation,
+// ChaCha8 setup, one sample) — the per-attribute cost in the simulation.
+func BenchmarkKeyedDraw(b *testing.B) {
+	seed := SeedFromInt(1)
+	var sink uint64
+	for i := 0; i < b.N; i++ {
+		sink += New(seed, "exam.roomTime", int64(i), 3, 0).Uniform(1_000_000)
+	}
+	_ = sink
+}
+
+func TestHashDraws(t *testing.T) {
+	seed := SeedFromInt(1)
+	d := Hash(seed, "golden", 1, 2)
+	sum := sha256.Sum256(KeyBytes(seed, "golden", 1, 2))
+	if got := d.Uint64(); hex.EncodeToString(sum[:8]) != goldenKeyPrefix || got != 0x86573f9320847a07 {
+		t.Fatalf("first lane %#x", got)
+	}
+	d.Uint64()
+	d.Uint64()
+	d.Uint64()
+	defer func() {
+		if recover() == nil {
+			t.Fatal("fifth draw did not panic")
+		}
+	}()
+	d.Uint64()
+}
+
+// BenchmarkHashDraw measures a single-key draw without a stream.
+func BenchmarkHashDraw(b *testing.B) {
+	seed := SeedFromInt(1)
+	var sink uint64
+	for i := 0; i < b.N; i++ {
+		sink += Hash(seed, "exam.roomTime", int64(i), 3, 0).Uniform(1_000_000)
+	}
+	_ = sink
+}

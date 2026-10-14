@@ -555,7 +555,7 @@ an engine.
 | Unstable sorting | `slices.SortStableFunc` with total-order keys (ending in ID) |
 | JSON float round-trip in scenarios | Scenario numbers are integers (cents, seconds, ppm, bp) |
 | Library RNG algorithm change | `math/rand/v2` **ChaCha8**, whose output is specified and stable, plus golden tests |
-| Seed recovery by a benchmark agent (matching observed history against candidate seeds) | Test-pack seeds are 256-bit secrets. Stream keys are derived with SHA-256 and the generator is ChaCha8 (a cryptographic generator), so observing outputs doesn't reveal the seed or other streams (§4.3) |
+| Seed recovery by a benchmark agent (matching observed history against candidate seeds) | Test-pack seeds are 256-bit secrets. Draws are SHA-256 outputs over keys containing the secret (and ChaCha8 streams seeded from them), so observing outputs doesn't reveal the seed or other draws (§4.3) |
 
 ### 4.3 Keyed random streams
 
@@ -571,33 +571,45 @@ The game and dev seeds are small integers expanded to 32 bytes as
 `SHA-256("dreamteam-seed" ‖ 8-byte big-endian n)`. Benchmark test seeds are
 random 32-byte secrets.
 
-**One stream per attribute.** Every random attribute has its own named domain,
-so adding or reordering draws for one attribute never shifts another. Each
-domain makes a fixed number of draws (usually one `Uint64`) in a documented
-order. Origin keys (§2.2) don't depend on public IDs or player actions:
+**One fixed lane per attribute.** A SHA-256 digest yields four 64-bit
+*lanes*. `rng.Hash(seed, domain, keys…)` returns them, and each lane is
+permanently assigned to one attribute. Adding or changing an attribute never
+shifts another. A fifth attribute in a group gets a new domain. Attributes
+needing an unbounded number of draws (Poisson splits beyond four parts, lists)
+use `rng.New`, a ChaCha8 stream seeded with the same digest. Origin keys (§2.2)
+don't depend on public IDs or player actions:
 
-| Domain | Keys | Draws |
-|---|---|---|
-| `demand.count` | day, sourceIndex, hourBlock | Poisson count |
-| `demand.time` | day, sourceIndex, hourBlock, k | second within block |
-| `order.exam`, `order.priority`, `order.lead`, `order.window`, `order.payer` | day, sourceIndex, hourBlock, k | one weighted choice each |
-| `patient.punctuality`, `patient.waitTolerance`, `patient.patience` | originKey | one each |
-| `appt.noshow`, `appt.arrivalOffset`, `appt.cancel`, `appt.cancelLead`, `appt.rebook` | originKey, attempt | one each; *attempt* increments per rebooking |
-| `exam.roomTime`, `exam.techExtra` | originKey, attempt | one each |
-| `read.time` | originKey | one |
-| `claim.outcome`, `claim.delay`, `claim.partialFraction`, `claim.recovery` | originKey | one each |
-| `walkin.count`, `walkin.time`, `walkin.exam` | day, hourBlock (, k) | as demand |
-| `failure.*` **[V0.2]** | roomIndex, day | |
-| `absence.*` **[V0.2]** | employeeIndex, day | |
+| Domain | Keys | Lane 0 | Lane 1 | Lane 2 | Lane 3 |
+|---|---|---|---|---|---|
+| `demand.count` | day, sourceIndex, hourBlock | Poisson count (one lane per part; stream if > 4 parts) | | | |
+| `order.core` | day, sourceIndex, hourBlock, k | second within block | exam | priority | lead time |
+| `order.ext` | day, sourceIndex, hourBlock, k | preferred window | payer | — | — |
+| `patient` | originKey | punctuality class | wait tolerance | walk-in patience | — |
+| `attempt` | originKey, attempt | no-show | arrival offset | cancels? | cancellation lead |
+| `attempt.exam` | originKey, attempt | room time | tech extra time | rebooks after no-show? | — |
+| `read` | originKey | read time | — | — | — |
+| `claim` | originKey | outcome (paid / short / denied-recovered / denied-written-off) | adjudication delay | short-paid fraction | rework delay |
+| `walkin.count` | day, hourBlock | Poisson count | | | |
+| `walkin` | day, hourBlock, k | second within block | exam | payer | — |
+| `failure` **[V0.2]** | roomIndex, day | | | | |
+| `absence` **[V0.2]** | employeeIndex, day | | | | |
+
+*attempt* increments per rebooking. `originKey` is the order's key tuple
+`(day, sourceIndex, hourBlock, k)`, or the walk-in's `(day, hourBlock, k)`
+with sourceIndex = −1.
 
 Consequence: if an agent reschedules patient X, patient Y's exam still takes
 exactly as long as it did under the baseline policy. Comparisons between
 policies measure the policy, not the dice.
 
 Each draw is a pure function of its key, so it doesn't matter *when* it's
-computed, and latents can be computed on demand rather than stored. Cost: one
-SHA-256 plus ChaCha8 setup per draw, about 1 µs. At a few thousand draws per
-simulated day that's negligible.
+computed, and latents can be computed on demand rather than stored.
+
+Cost, measured on the dev Raspberry Pi 4: one `Hash` ≈ 2.7 µs (SHA-256 without
+hardware acceleration), and a `New` stream ≈ 3.5 µs. About 7 hashes per order
+plus demand counts is ≈ 600 hashes per simulated day, or ≈ 0.3 s for a 180-day
+warm-up. One hash per attribute (~20 per order) would have cost ≈ 0.8 s; that
+is why attributes are grouped into lanes.
 
 ### 4.4 Integer samplers
 

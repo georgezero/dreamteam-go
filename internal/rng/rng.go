@@ -1,11 +1,14 @@
-// Package rng provides keyed deterministic random streams and integer-only
+// Package rng provides keyed deterministic randomness and integer-only
 // samplers.
 //
-// Every random attribute in the simulation draws from its own stream, keyed
-// by a domain name and origin keys that do not depend on player actions.
-// Streams are ChaCha8 generators seeded with SHA-256 over a byte-exact key
-// encoding, so independent implementations agree and observed outputs do not
-// reveal the seed. No floating point is used.
+// Every random attribute in the simulation has its own key: a domain name
+// and origin keys that do not depend on player actions. The key is hashed
+// with SHA-256 over a byte-exact encoding, so independent implementations
+// agree and observed outputs do not reveal the seed.
+//
+// Most attributes need one to four values: Hash returns them straight from
+// the digest (four 64-bit lanes). Attributes needing more draws use New, a
+// ChaCha8 stream seeded with the same digest. No floating point is used.
 package rng
 
 import (
@@ -49,7 +52,12 @@ func KeyBytes(seed Seed, domain string, keys ...int64) []byte {
 	return b
 }
 
-// Stream is one keyed random stream.
+// Source supplies raw 64-bit values. *Stream and *Draws implement it.
+type Source interface {
+	Uint64() uint64
+}
+
+// Stream is one keyed random stream with unlimited draws.
 type Stream struct {
 	c *rand.ChaCha8
 }
@@ -62,15 +70,62 @@ func New(seed Seed, domain string, keys ...int64) *Stream {
 // Uint64 returns the next raw 64-bit value.
 func (s *Stream) Uint64() uint64 { return s.c.Uint64() }
 
+// Uniform returns a value in [0, n); see Uniform.
+func (s *Stream) Uniform(n uint64) uint64 { return Uniform(s, n) }
+
+// Bernoulli returns true with probability p; see Bernoulli.
+func (s *Stream) Bernoulli(p PPM) bool { return Bernoulli(s, p) }
+
+// Weighted picks an index; see Weighted.
+func (s *Stream) Weighted(weights []uint64) int { return Weighted(s, weights) }
+
+// Draws holds the four 64-bit lanes of one key's SHA-256 digest: up to
+// four values for about the cost of one hash.
+type Draws struct {
+	lanes [4]uint64
+	next  int
+}
+
+// Hash returns the draws for (seed, domain, keys). The lanes are the digest
+// read as big-endian uint64s; it is the same digest that seeds New.
+func Hash(seed Seed, domain string, keys ...int64) *Draws {
+	sum := sha256.Sum256(KeyBytes(seed, domain, keys...))
+	d := &Draws{}
+	for i := range d.lanes {
+		d.lanes[i] = binary.BigEndian.Uint64(sum[8*i:])
+	}
+	return d
+}
+
+// Uint64 returns the next lane. It panics after four: an attribute that
+// needs more draws must use a Stream.
+func (d *Draws) Uint64() uint64 {
+	if d.next == len(d.lanes) {
+		panic("rng: more than four draws from one Hash; use a Stream")
+	}
+	v := d.lanes[d.next]
+	d.next++
+	return v
+}
+
+// Uniform returns a value in [0, n); see Uniform.
+func (d *Draws) Uniform(n uint64) uint64 { return Uniform(d, n) }
+
+// Bernoulli returns true with probability p; see Bernoulli.
+func (d *Draws) Bernoulli(p PPM) bool { return Bernoulli(d, p) }
+
+// Weighted picks an index; see Weighted.
+func (d *Draws) Weighted(weights []uint64) int { return Weighted(d, weights) }
+
 // Uniform returns a value in [0, n) using the high word of a 64×64-bit
 // product (one draw, no rejection). The bias is at most n/2^64, which is
 // negligible for the ranges used here; powers of two are exact.
 // Uniform panics if n == 0.
-func (s *Stream) Uniform(n uint64) uint64 {
+func Uniform(src Source, n uint64) uint64 {
 	if n == 0 {
 		panic("rng: Uniform(0)")
 	}
-	hi, _ := bits.Mul64(s.c.Uint64(), n)
+	hi, _ := bits.Mul64(src.Uint64(), n)
 	return hi
 }
 
@@ -80,19 +135,19 @@ type PPM uint32
 // OneMillion is probability 1 in PPM.
 const OneMillion PPM = 1_000_000
 
-// Bernoulli returns true with probability p.
-func (s *Stream) Bernoulli(p PPM) bool {
-	return s.Uniform(uint64(OneMillion)) < uint64(p)
+// Bernoulli returns true with probability p (one draw).
+func Bernoulli(src Source, p PPM) bool {
+	return Uniform(src, uint64(OneMillion)) < uint64(p)
 }
 
-// Weighted picks an index with probability proportional to weights.
-// It panics if all weights are zero.
-func (s *Stream) Weighted(weights []uint64) int {
+// Weighted picks an index with probability proportional to weights (one
+// draw). It panics if all weights are zero.
+func Weighted(src Source, weights []uint64) int {
 	var total uint64
 	for _, w := range weights {
 		total += w
 	}
-	u := s.Uniform(total)
+	u := Uniform(src, total)
 	for i, w := range weights {
 		if u < w {
 			return i
