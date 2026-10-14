@@ -438,6 +438,16 @@ Rules:
    The TUI's Max-speed budget is checked only **between** transactions.
 6. **Stop conditions never change state.** Auto-pause only truncates how far
    `RunUntil` goes, and only at transaction boundaries.
+7. **Observers (V0.1 step 12).** Metrics and alerts watch without changing
+   the simulation. *Passive* events (the alert wake and the evaluation
+   endpoint) are handled like others but do not count as activity: a
+   transaction with only passive events runs no dispatch, so pushing one
+   cannot change an outcome. After every transaction that handled any
+   non-stale event, after dispatch, an *after-transaction* hook records
+   the evaluation endpoint and evaluates the alert rules; like dispatch it
+   may push events only after *t*. Interval metrics are accrued at the
+   start of each transaction (before its first event changes anything),
+   since state only changes inside transactions.
 
 ### 3.4.1 Actions and decision batches
 
@@ -1946,3 +1956,109 @@ service metrics include the tail. Orders still unserved, studies unread and
 patients pushed past the horizon count against the agent at their age. Cohort
 metrics (share of studies or orders breaching target, unfinished included)
 complement percentiles, so sacrificing a 10% tail can't hide inside a p90.
+
+### 11.1 As built (V0.1 step 12)
+
+**Measurement.** One cumulative tally runs from the epoch. Its interval
+part integrates the state between transactions (§3.4 rule 7):
+
+| Interval | Definition |
+|---|---|
+| Room open | the practice is between scheduled open and scheduled close |
+| Room staffed | open, and the room is `Idle` or `Occupied` (a qualified technologist on duty staffs it; a shared technologist counts fully for each room they cover, even while busy in the other) |
+| Room busy | open and `Occupied` (a patient in the room) |
+| Room after-hours busy | `Occupied` outside open hours (the closing phase) |
+| Employee on duty | `available` or `busy`: paid working time; breaks excluded, overtime included |
+| Employee busy | registration, exam, documentation, or reading |
+| Employee break / overtime | on break / on duty past the scheduled shift end |
+| Radiologist block | on duty inside a site-reading block |
+| Read in block / outside | reading inside a block / after a block ended (overrun) |
+| Desk-self patient time | patients waiting to register × time, while no desk staff is on duty |
+
+Counters (orders, bookings, flow, overtime) and sample lists (one wait
+sample per exam start; studies; reports; raised alerts) only grow. A
+**period** is the difference of two snapshots of the tally plus the samples
+between them. Snapshots are taken at every midnight, at the takeover (end
+of its transaction) and at the evaluation endpoint; "now" is a snapshot
+taken without changing anything.
+
+**Ratios** keep numerator and denominator; an empty denominator is
+undefined ("—"), never 0%. **Percentiles** are nearest-rank (the smallest
+value with at least p% of the sample at or below it) — the worklist's
+median and p90 use the same definition.
+
+| Metric | Definition | Bound |
+|---|---|---|
+| Room utilization of open hours | busy / open | ≤ 100% |
+| Room utilization of staffed hours | busy / staffed | ≤ 100% (busy ⊆ staffed) |
+| Coverage | staffed / open | ≤ 100% |
+| Technologist utilization | busy / on duty, per person (a shared technologist's time counts once) | ≤ 100% |
+| Radiologist reading utilization | read in block / block time | ≤ 100% |
+| Appointment fill | booked slot time / bookable slot time, slots starting in the period | ≤ 100% |
+| No-show rate | no-shows (incl. missed, provisional until accounting close) / (scheduled − cancelled), appointments starting in the period | |
+| Cancellation rate | cancelled / scheduled | |
+| Lost demand rate | orders lost / orders received | |
+| Walk-in acceptance / abandonment | imaged / arrived; left / arrived | |
+| Waits | arrival → registration start; arrival → exam start; exam start past the appointment time (scheduled patients not fitted in after grace) — over exams started in the period | |
+| TAT (cohort) | studies acquired in the period; unfinished ones at their age at the period end (censored) | |
+| TAT (finalized) | reports finalized in the period; those of studies acquired before it are counted as inherited | |
+| Overtime, held-over, skipped breaks, coverage reschedules | counters; overtime cost from the payroll | |
+
+**Reporting windows (owner decision, 2026-10-14).** Calendar reporting
+(daily history, statements, the TUI) runs midnight to midnight and includes
+the takeover day's activity before the takeover. The **evaluation window**
+runs from the exact takeover instant to the configured endpoint
+(`evaluationDays`; 0 = open-ended). The baseline is taken at the end of the
+takeover transaction, after the opening adjustment: everything at that
+instant belongs to the inherited state, and the window is (takeover, end].
+The baseline is immutable and digested (SHA-256 of its canonical JSON): the
+balances and trial balance, open claims by state, unreported studies, booked
+appointments, the recall list, patients on site, staff on duty, staffed
+rooms, the ledger position and the log position.
+
+The window's money comes from the journal entries posted after the
+baseline (a second day book, filled as entries post). Operating
+performance then:
+
+* removes the **collection variance on inherited claims** (recognized
+  before takeover; a true-up of the history's revenue, reported apart);
+  their payments are window cash flow, never window revenue;
+* adds the **takeover day's midnight accruals** (salaries, fixed costs),
+  posted before the takeover but covering the whole day: the window bears
+  the share after the takeover, per line, rounded down;
+* never includes capital transfers.
+
+The cash bridge holds to the cent: operating profit − inherited variance +
+allocated accruals − ΔA/R + ΔA/P + Δpayroll owed = collections −
+disbursements; + capital transfers = change in cash. A study imaged before
+takeover and finalized after earns its revenue in the window (revenue is
+recognized at report final) but is not in the window's TAT cohort.
+Billing fees on collections of inherited claims are window expenses (the
+fee is a cost of collecting in the window). No weights, thresholds or
+scores are computed: these are measurements.
+
+**Alerts.** Rules over observable state only, evaluated after every
+transaction from the takeover:
+
+| Rule | Condition | Level | Ends |
+|---|---|---|---|
+| Wait (per modality) | a patient on site not yet in an exam waiting ≥ 30 min (past the appointment time, or since arrival for walk-ins and patients fitted in after grace) | warn; alert at 60 min | 10 min after clear |
+| Unstaffed room | open, room unstaffed, patients for it on site | warn | 10 min after clear |
+| Report TAT (per priority) | unfinished studies past target | urgent: alert; routine: warn; soon: tracked, not re-logged (each breach already is) | when none overdue |
+| Overtime (per employee) | held past shift end | tracked (the hold is logged already) | off duty |
+| Shift cap (per employee) | held and within 30 min of the 12-hour cap | alert | off duty |
+| Closing late | closing phase ≥ 30 min after scheduled close | warn; alert at 60 min | operational close |
+| Reporting backlog | unread + reading ≥ 40 (clears below 32) | warn | 10 min after clear |
+| Lost demand (per modality) | ≥ 3 orders lost today | warn | expires at midnight |
+| Cash low / negative | cash < $25,000 (clears at 110%) / cash < 0 | warn / alert | when cleared |
+
+An alert is raised once per episode, escalates at most once and logs its
+resolution ("Resolved: <text as raised> (raised hh:mm)"; "Cash back above
+zero" for negative cash). Conditions that change with time alone get one
+exact passive wake at the earliest such time — no polling. Thresholds are
+configurable (`alerts` in the scenario).
+
+**Daily summary.** `DaySummary.Ops` (the period metrics) and `.Money` (the
+day's statement), with end-of-day balances; complete from the next
+midnight, partial (`Complete: false`, `AsOf`) for today; the takeover day
+names the takeover time.

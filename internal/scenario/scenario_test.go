@@ -103,6 +103,10 @@ func TestValidationErrors(t *testing.T) {
 	base, _ := scenarios.FS.ReadFile("base/established.json")
 	cases := []struct{ overlay, path, msg string }{
 		{`{"schema": "v0"}`, "schema", "is not"},
+		{`{"evaluationDays": -1}`, "evaluationDays", "outside"},
+		{`{"alerts": {"waitWarnMin": 30, "waitAlertMin": 20, "capWarnMin": 30, "closingWarnMin": 30, "closingAlertMin": 60, "clearAfterMin": 10}}`, "alerts.waitAlertMin", "below waitWarnMin"},
+		{`{"alerts": {"waitWarnMin": 0, "waitAlertMin": 60, "capWarnMin": 30, "closingWarnMin": 30, "closingAlertMin": 60, "clearAfterMin": 10}}`, "alerts.waitWarnMin", "outside"},
+		{`{"alerts": {"waitWarnMin": 30, "waitAlertMin": 60, "capWarnMin": 30, "closingWarnMin": 30, "closingAlertMin": 60, "clearAfterMin": 10, "lowCashCents": -1}}`, "alerts.lowCashCents", "negative"},
 		{`{"startDate": "2026-02-30"}`, "startDate", "not a date"},
 		{`{"hours": {"Mon": ["20:00", "08:00"]}}`, "hours.Mon", "not before"},
 		{`{"hours": {"Monday": ["08:00", "20:00"]}}`, "hours.Monday", "not a weekday"},

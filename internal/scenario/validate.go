@@ -131,6 +131,40 @@ func Compile(f *File) (*sim.Config, error) {
 	if f.RotaWeekA != "" {
 		cfg.RotaWeekA = c.date("rotaWeekA", f.RotaWeekA)
 	}
+	if f.EvaluationDays < 0 || f.EvaluationDays > 3650 {
+		c.fail("evaluationDays", "%d is outside 0–3650", f.EvaluationDays)
+	}
+	cfg.EvaluationDays = f.EvaluationDays
+	cfg.Alerts = sim.DefaultAlerts()
+	if a := f.Alerts; a != nil {
+		minutes := func(field string, v, lo, hi int64) simtime.Duration {
+			if v < lo || v > hi {
+				c.fail("alerts."+field, "%d is outside %d–%d", v, lo, hi)
+			}
+			return simtime.Duration(v) * simtime.Minute
+		}
+		cfg.Alerts = sim.AlertConfig{
+			WaitWarn: minutes("waitWarnMin", a.WaitWarnMin, 1, 480), WaitAlert: minutes("waitAlertMin", a.WaitAlertMin, 1, 480),
+			CapWarn:     minutes("capWarnMin", a.CapWarnMin, 1, 240),
+			ClosingWarn: minutes("closingWarnMin", a.ClosingWarnMin, 1, 480), ClosingAlert: minutes("closingAlertMin", a.ClosingAlertMin, 1, 480),
+			ClearAfter:  minutes("clearAfterMin", a.ClearAfterMin, 0, 240),
+			BacklogWarn: a.BacklogWarn, LostWarn: a.LostWarn, LowCashCents: a.LowCashCents}
+		if a.WaitAlertMin < a.WaitWarnMin {
+			c.fail("alerts.waitAlertMin", "below waitWarnMin")
+		}
+		if a.ClosingAlertMin < a.ClosingWarnMin {
+			c.fail("alerts.closingAlertMin", "below closingWarnMin")
+		}
+		if a.BacklogWarn < 0 || a.BacklogWarn > 10_000 {
+			c.fail("alerts.backlogWarn", "%d is outside 0–10000", a.BacklogWarn)
+		}
+		if a.LostWarn < 0 || a.LostWarn > 10_000 {
+			c.fail("alerts.lostWarn", "%d is outside 0–10000", a.LostWarn)
+		}
+		if a.LowCashCents < 0 {
+			c.fail("alerts.lowCashCents", "negative")
+		}
+	}
 
 	// Policies come first: shift checks need MaxShiftHours.
 	p := f.Policies

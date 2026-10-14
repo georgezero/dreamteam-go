@@ -136,6 +136,16 @@ type ledger struct {
 	// (check) has re-summed; shadow is its independent running balance.
 	verified int
 	shadow   [numAccounts]int64
+	// win, once opened at the takeover, books every entry posted after it
+	// up to winEnd (0: open-ended): the evaluation window (evaluation.go).
+	win    *dayBook
+	winEnd simtime.Time
+}
+
+// openWindow starts the evaluation window's book: entries posted from now
+// on (the takeover's own are already in) up to end (0: no end).
+func (l *ledger) openWindow(end simtime.Time) {
+	l.win, l.winEnd = &dayBook{}, end
 }
 
 func newLedger(cal simtime.Calendar) ledger {
@@ -170,11 +180,25 @@ func (l *ledger) post(at simtime.Time, key entryKey, lines []line) (int, error) 
 	for int64(len(l.days)) <= day {
 		l.days = append(l.days, dayBook{})
 	}
-	b := &l.days[day]
 	kind := key.kind
 	if kind == entReversal {
 		kind = l.entries[key.a].key.kind
 	}
+	l.book(&l.days[day], key, kind, lines)
+	if l.win != nil && (l.winEnd == 0 || at <= l.winEnd) {
+		l.book(l.win, key, kind, lines)
+	}
+	for _, ln := range lines {
+		l.bal[ln.acct] += ln.amt
+	}
+	i := len(l.entries)
+	l.entries = append(l.entries, entry{at: at, key: key, lines: lines, reversed: -1})
+	l.keys[key] = i
+	return i, nil
+}
+
+// book adds an entry's lines to a day book.
+func (l *ledger) book(b *dayBook, key entryKey, kind entryKind, lines []line) {
 	for _, ln := range lines {
 		if kind == entFixed && accountInfo[ln.acct].kind == kindExpense {
 			b.fixed += ln.amt
@@ -185,7 +209,6 @@ func (l *ledger) post(at simtime.Time, key entryKey, lines []line) (int, error) 
 			}
 			b.items[ln.item] += ln.amt
 		}
-		l.bal[ln.acct] += ln.amt
 		b.net[ln.acct] += ln.amt
 		if ln.mod >= 0 {
 			b.byMod[ln.acct][ln.mod] += ln.amt
@@ -198,10 +221,6 @@ func (l *ledger) post(at simtime.Time, key entryKey, lines []line) (int, error) 
 			}
 		}
 	}
-	i := len(l.entries)
-	l.entries = append(l.entries, entry{at: at, key: key, lines: lines, reversed: -1})
-	l.keys[key] = i
-	return i, nil
 }
 
 // mustPost posts and panics on error: the simulation never builds a bad

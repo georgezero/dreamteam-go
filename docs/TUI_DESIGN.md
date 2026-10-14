@@ -520,6 +520,41 @@ Shown when `e` completes or the day ends with auto-pause on:
 "Insight" lines are rule-based observations from observed metrics only — they
 teach the player where the levers are. They never reveal hidden state.
 
+**As built (V0.1 step 12).** `e` (from any screen) runs today's operations
+to operational close and opens the summary. Below 110 columns every line has
+a short form, so the day fits 80×24 untruncated:
+
+```
+─ END OF DAY · Tue Oct 13 · so far, to 21:28 · closed 21:28 ──────────────
+ Takeover day: from midnight, incl. before 06:00 · tab: since takeover
+ Patients  70 exams (XR 29 US 9 CT 24 MR 8) · walk-ins 7, left 4
+ Demand    63 orders · lost 4 (6%) · no-shows 3% · slot fill 77%
+ Waits     arrival→exam p50 17m · p90 44m · over 30m 11
+ Rooms     busy/open    XR 41% US 48% CT 53% MR 49%
+           busy/staffed XR 42% US 72% CT 56% MR 73%
+           staffed/open XR 96% US 67% CT 96% MR 67%
+ Staff     techs busy 87% · reading 76% of blocks · overtime 3h 01m ($65)
+ Reporting final 62 · TAT p50 29m · p90 1h 15m · unread at close 8
+ Money     revenue $9,210 · expenses $8,635 · profit $575 (6.2%)
+ Cash      in $6,239 · out $0 · cash $156,239 · A/R $281,125
+ Alerts    16 raised (4 urgent)
+```
+
+`←→` page through earlier days (completed days are final; today says "so
+far"), `t` returns to today, `tab` switches to **since takeover**: the
+inherited baseline, operating results (excluding inherited-claim variance,
+including the takeover day's accruals after the takeover), cash flow (with
+the inherited part), the change in A/R, A/P and payroll owed, a ✓ when the
+cash bridge reconciles, and the window's operations. `enter` returns to the
+dashboard.
+
+The dashboard adds two things and gives up one: a **Today** line
+(utilization of staffed hours by room, time-weighted, and the arrival→exam
+wait so far) and an **ALERTS** panel (active alerts, most severe first, with
+the time raised, the screen key that shows more, and a "why:" line for the
+first one, built from observed facts). On screens under 28 rows the demand
+table shrinks to one line so the alerts fit.
+
 ### 4.11 Help / field guide
 
 `?` shows key bindings for the current screen plus a short field guide: what

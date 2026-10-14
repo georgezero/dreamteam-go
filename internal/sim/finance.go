@@ -245,7 +245,6 @@ type finState struct {
 	// and whether cash is below zero now (for the one-time alert per dip).
 	minCash   int64
 	minCashAt simtime.Time
-	belowZero bool
 }
 
 func (st *state) finDay(day int64) *finDay {
@@ -284,6 +283,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 		if amt := led.bal[acctAccruedPayroll]; amt < 0 {
 			led.mustPost(now, entryKey{kind: entPayroll, a: day}, line{acctAccruedPayroll, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.payrollPaid += -amt
+			st.evalPaid(&st.eval.basePayroll, -amt)
 			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Payroll paid %s (wages and benefits accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
@@ -293,6 +293,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 		if amt := led.bal[acctAP]; amt < 0 {
 			led.mustPost(now, entryKey{kind: entPayAP, a: day}, line{acctAP, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.apPaid += -amt
+			st.evalPaid(&st.eval.baseAP, -amt)
 			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Bills paid %s (rent, leases, service, supplies, fees accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
@@ -416,6 +417,9 @@ func (st *state) recognize(si int) int64 {
 		line{acctAR, c.mod, c.expected, -1}, line{acctRevenue, c.mod, -c.expected, -1})
 	if c.mod >= 0 {
 		st.finDay(st.day).finals[c.mod]++
+		if st.inWindow(st.now) {
+			st.eval.finals[c.mod]++
+		}
 	}
 	return c.expected
 }
@@ -467,8 +471,15 @@ func (st *state) adjudicate(e *Engine, ci int) {
 	if !p.SelfPay {
 		fd := st.finDay(st.day)
 		fd.adjudicated++
-		if dr.outcome == outRecovered || dr.outcome == outWrittenOff {
+		denied := dr.outcome == outRecovered || dr.outcome == outWrittenOff
+		if denied {
 			fd.denied++
+		}
+		if st.inWindow(st.now) {
+			st.eval.adjudicated++
+			if denied {
+				st.eval.denied++
+			}
 		}
 	}
 	switch dr.outcome {
@@ -522,6 +533,9 @@ func (st *state) pay(ci int, amt int64) {
 	c.payments++
 	c.paid += amt
 	st.fin.receipts += amt
+	if st.inWindow(st.now) && ci < st.eval.claims {
+		st.eval.inhCollections += amt
+	}
 	fee := roundDiv(amt*st.cfg.Finance.BillingFeeBP, 10_000)
 	lines := []line{{acctCash, -1, amt, -1}, {acctAR, c.mod, -amt, -1}}
 	if fee > 0 {
@@ -538,6 +552,9 @@ func (st *state) settle(ci int, final claimState) {
 	c := &st.fin.claims[ci]
 	c.state, c.closedAt = final, st.now
 	if r := c.expected - c.paid; r != 0 {
+		if st.inWindow(st.now) && ci < st.eval.claims {
+			st.eval.inhVariance += r
+		}
 		st.fin.led.mustPost(st.now, entryKey{kind: entSettle, a: int64(ci)}, line{acctVariance, c.mod, r, -1}, line{acctAR, c.mod, -r, -1})
 	}
 }

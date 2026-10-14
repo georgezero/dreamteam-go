@@ -42,11 +42,12 @@ type state struct {
 	emps  []employee
 	dem   demandState
 	fin   finState
-	// history holds one summary per completed day (history.go); histFinals
-	// is how many finals the last summary covered.
-	history    []dayRecord
-	histFinals int
-	staffBuf   []int // scratch for restaff
+	// met measures the practice (metrics.go); alerts watch it from the
+	// takeover (alerts.go); eval is the evaluation window (evaluation.go).
+	met      metricsState
+	alerts   alertState
+	eval     evalState
+	staffBuf []int // scratch for restaff
 	// drawMemo memoizes today's keyed draws (draws.go).
 	drawMemo map[drawKey][4]uint64
 	mods     []string // room modalities in room order: the ledger's modality dimension
@@ -76,6 +77,11 @@ func New(cfg *Config, seed rng.Seed) *World {
 	}
 	st.initDemand()
 	st.initFinance()
+	st.initMetrics()
+	st.alerts.cfg = cfg.Alerts
+	if st.alerts.cfg == (AlertConfig{}) {
+		st.alerts.cfg = DefaultAlerts()
+	}
 	w := &World{st: st}
 	w.eng = NewEngine(st, 0)
 	w.eng.Push(Event{At: 0, Class: ClassDayBoundary, Kind: kindDayStart, A: 0})
@@ -144,7 +150,24 @@ const (
 	kindAdjudicate
 	kindReworkOutcome
 	kindOpening // the opening equity adjustment at the start time (§8.4)
+	// Passive kinds (Observer): they change no simulation state.
+	kindAlertWake // a time-based alert condition changes (alerts.go)
+	kindEvalEnd   // the evaluation window's endpoint (evaluation.go)
 )
+
+// Passive reports whether ev only observes (no dispatch follows it).
+func (st *state) Passive(ev Event) bool { return ev.Kind == kindAlertWake || ev.Kind == kindEvalEnd }
+
+// AfterTransaction runs after every transaction: the evaluation endpoint,
+// then the alert rules.
+func (st *state) AfterTransaction(e *Engine) {
+	if st.eval.endDue {
+		st.evalEnd(e.Now())
+	}
+	if st.alerts.on {
+		st.evaluateAlerts(e)
+	}
+}
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
 	st.log.emit(at, sev, cat, text)
@@ -166,6 +189,8 @@ func (st *state) IsStale(ev Event) bool {
 		return ev.Gen != st.rooms[ev.A].wakeGen
 	case kindDeadline:
 		return ev.Gen != st.deadlineGen
+	case kindAlertWake:
+		return ev.Gen != st.alerts.wakeGen
 	case kindTATBreach:
 		return st.dem.studies[ev.A].state == studyFinal
 	case kindCancel, kindGrace:
@@ -184,6 +209,7 @@ func (st *state) IsStale(ev Event) bool {
 
 func (st *state) Handle(e *Engine, ev Event) {
 	st.now = e.Now()
+	st.accrue(st.now) // the state since the last transaction, before anything changes
 	switch ev.Kind {
 	case kindDayStart:
 		st.dayStart(e, ev.A)
@@ -232,7 +258,9 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.reworkOutcome(e, int(ev.A))
 	case kindOpening:
 		st.fin.openingDue = true // posted at the end of this transaction's dispatch
-	case kindWake, kindDeadline:
+	case kindEvalEnd:
+		st.eval.endDue = true // recorded after this instant's transaction
+	case kindWake, kindDeadline, kindAlertWake:
 	}
 }
 
@@ -257,6 +285,7 @@ func (st *state) dayStart(e *Engine, day int64) {
 		st.materialize(e, i)
 	}
 
+	st.metricsCloseDay()
 	for _, m := range st.modalities() {
 		*st.dem.today[m] = modalityCounts{}
 		if day == st.startDay {
@@ -268,6 +297,7 @@ func (st *state) dayStart(e *Engine, day int64) {
 		st.dem.flowTotal = flowCounts{}
 	}
 	st.dem.dayStarted = false
+	st.metricsMark(day)
 	e.Push(Event{At: st.cal.At(day, simtime.Day-1), Class: ClassDayClose, Kind: kindDayClose})
 	st.ensureDays(day + st.cfg.Policies.BookingHorizonDays)
 	st.releaseRecalls(e)
@@ -315,5 +345,7 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observePractice(&o, now)
 	st.observeWorklist(&o, now)
 	st.observeFinance(&o, now)
+	o.Today = st.todayMetrics(now)
+	st.observeAlerts(&o, now)
 	return o
 }

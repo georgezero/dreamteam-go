@@ -104,6 +104,32 @@ func (s *Session) StepVisible() Reason {
 	return Horizon
 }
 
+// EndOfDay runs today's operations to their end: to operational close
+// (§3.4.2), when every admitted patient is done and no on-site task
+// remains. It does nothing if today's operations are already over or the
+// practice is closed today. It never stops on alerts.
+func (s *Session) EndOfDay() Reason {
+	if s.w.OperationsDone() {
+		return Reached
+	}
+	eng := s.w.Engine()
+	last := s.w.Calendar().StartOfDay(s.w.DayIndex()+1) - 2 // before accounting close
+	if eng.RunUntil(last, s.w.OperationsDone) == sim.Stopped {
+		return Visible
+	}
+	return Reached
+}
+
+// Day returns the summary of the day offset days from today (≤ 0); today's
+// is partial. ok is false before the first day.
+func (s *Session) Day(offset int64) (api.DaySummary, bool) {
+	return s.w.DaySummary(s.w.DayIndex() + offset)
+}
+
+// Evaluation returns the evaluation window: the takeover baseline and the
+// metrics since (to the endpoint, once reached).
+func (s *Session) Evaluation() api.Evaluation { return s.w.Evaluation() }
+
 // Schedule returns the schedule of the day offset days from today
 // (negative for past days).
 func (s *Session) Schedule(offset int64) api.DaySchedule {

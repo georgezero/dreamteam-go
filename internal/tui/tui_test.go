@@ -126,7 +126,7 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
-	for _, scr := range []string{"d", "s", "l", "p", "w"} {
+	for _, scr := range []string{"d", "s", "l", "p", "w", "f", "h"} {
 		m.key(scr)
 		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
 			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
@@ -146,7 +146,7 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(m.render())
 	for _, want := range []string{"DREAMTEAM v" + version.Number, "ROOMS", "XR ", "US ", "CT ", "MR ",
-		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "On site ", "in exam", "walk-ins", "Unread ", "final today", "DEMAND ", "next open slot", "EVENT LOG"} {
+		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "On site ", "in exam", "walk-ins", "Unread ", "final today", "Today: busy of staffed", "ALERTS", "Demand today", "next open slot", "EVENT LOG"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("80×24 dashboard lacks %q:\n%s", want, out)
 		}
@@ -418,5 +418,72 @@ func TestRegress11CashHistoryLabelled(t *testing.T) {
 	out = ansi.Strip(m.render())
 	if !strings.Contains(out, "Cash (actual), last") || !strings.Contains(out, "owner capital +$568,829 at takeover") {
 		t.Errorf("finance screen:\n%s", out)
+	}
+}
+
+// `e` completes today's operations and shows the end-of-day summary; tab
+// shows the window since takeover; both fit 80×24 and 120×36.
+func TestEndOfDaySummary(t *testing.T) {
+	m := New(openMini(t, 3))
+	m.key("e")
+	if m.screen != screenSummary || m.obs.Practice.OperationalClose == "" || m.running {
+		t.Fatalf("after e: screen %d, operational close %q", m.screen, m.obs.Practice.OperationalClose)
+	}
+	for _, size := range [][2]int{{80, 24}, {120, 36}} {
+		m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+		for _, view := range []int{sumDay, sumWindow} {
+			m.sumView = view
+			m.refresh()
+			out := m.render()
+			for i, l := range strings.Split(out, "\n") {
+				if w := ansi.StringWidth(l); w > size[0] {
+					t.Errorf("%v view %d: line %d width %d", size, view, i, w)
+				}
+			}
+			plain := ansi.Strip(out)
+			want := []string{"END OF DAY", "Patients", "Rooms", "busy", "Reporting", "Money", "Cash", "Alerts", "Takeover day"}
+			if view == sumWindow {
+				want = []string{"SINCE TAKEOVER", "Inherited", "Operating", "Cash flow", "cash bridge reconciles", "baseline"}
+			}
+			for _, s := range want {
+				if !strings.Contains(plain, s) {
+					t.Errorf("%v view %d lacks %q:\n%s", size, view, s, plain)
+				}
+			}
+		}
+	}
+	// Earlier days page with ←; today with t.
+	m.sumView = sumDay
+	m.key("left")
+	m.refresh()
+	if m.sumOffset != 0 {
+		t.Fatal("paged before the first day of a scenario without history")
+	}
+	m.key("enter")
+	if m.screen != screenDashboard {
+		t.Fatal("enter did not return to the dashboard")
+	}
+}
+
+// The dashboard's alert panel shows active alerts with severity and the
+// first one's explanation, and "nothing needs attention" otherwise.
+func TestDashboardAlerts(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 36})
+	out := ansi.Strip(m.render())
+	if !strings.Contains(out, "ALERTS · 0 active") || !strings.Contains(out, "nothing needs attention") {
+		t.Fatalf("no empty alert panel:\n%s", out)
+	}
+	for i := 0; i < 40 && len(m.obs.Alerts.Active) == 0; i++ {
+		m.sess.Advance(15*simtime.Minute, session.Options{})
+		m.refresh()
+	}
+	if len(m.obs.Alerts.Active) == 0 {
+		t.Fatal("no alert in 10 hours of the mini practice")
+	}
+	a := m.obs.Alerts.Active[0]
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, a.Text[:min(30, len(a.Text))]) || !strings.Contains(out, "why: ") {
+		t.Fatalf("alert %+v not shown with its explanation:\n%s", a, out)
 	}
 }

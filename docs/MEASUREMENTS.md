@@ -148,3 +148,21 @@ Not done:
   log cost, but it changes every emit call site.
 * A cached start state. Snapshots are step 14; the roadmap fallback stays
   available.
+
+## 2026-10-14 — V0.1 step 12 (Pi at 81 °C, throttling flagged)
+
+Old (`23b6ff8`) and new test binaries run alternately, four rounds, to cancel
+thermal drift; best of four:
+
+| Benchmark | Command | `23b6ff8` | step 12 |
+|---|---|---|---|
+| Established warm-up (180 days) | `go test ./internal/sim -run X -bench EstablishedWarmup` | 1366 ms (1366–2248) | 1402 ms (1402–1420) |
+| One observation at 11:00 (a TUI frame) | `-bench ObserveMidday` | 1.20 ms | 1.26 ms |
+| Evaluation window after 30 days (on request) | `-bench Evaluation30Days` | — | 1.27–2.01 ms, 108 allocs |
+
+Warm-up memory 90.6 MB/op, 1.26M allocs/op (step 11: 89.7 MB, 1.26M). The
+interval accrual runs once per transaction; alerts run only from the
+takeover, so the warm-up pays only the accrual and the daily snapshots
+(+2.6%). Completed days' summaries are cached; the evaluation window is
+computed only when a screen asks for it. At 10 frames a second the
+observation costs about 1.3% of one core.

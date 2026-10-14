@@ -38,6 +38,11 @@ type Config struct {
 	// Opening is the hand-built schedule a scenario without warm-up starts
 	// with (the mini scenario's "today").
 	Opening []OpeningAppt
+	// Alerts are the alert thresholds (zero: DefaultAlerts).
+	Alerts AlertConfig
+	// EvaluationDays is the evaluation window's length from the takeover
+	// (0: open-ended, measured to now).
+	EvaluationDays int64
 }
 
 // ExamConfig is one catalog entry.

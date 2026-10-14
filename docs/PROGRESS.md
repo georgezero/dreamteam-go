@@ -7,6 +7,152 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 12 — Metrics, alerts, daily summaries (v0.1.0-dev.12)
+
+**What the player sees.** The dashboard answers "what is going wrong, and
+why": an **ALERTS** panel (active alerts, most severe first, time raised,
+the screen that shows more, and a "why:" line built from observed facts —
+"shared technologist Riley busy (documenting P00031)", "no XR technologist
+rostered until 09:30") and a **Today** line (time-weighted utilization of
+staffed hours by room, arrival→exam wait p50/p90, lost orders). `e` runs
+today's operations to operational close and opens the **end-of-day
+summary** (TUI_DESIGN §4.10): patients, demand, schedule, waits, room time
+three ways (busy of open, busy of staffed, staffed of open), staff,
+reporting, money, cash, alerts and rule-based insights; `←→` pages earlier
+days, `tab` shows **since takeover**. It fits 80×24 untruncated (short
+forms below 110 columns). The history and briefing screens now draw on the
+same measurements (room busy time within open hours, so ≤ 100%).
+
+**Reporting windows (owner decision, 2026-10-14).** Two windows:
+
+| Window | Purpose | Definition |
+|---|---|---|
+| Calendar | TUI, daily history, statements | midnight to midnight, including the takeover day's activity before the takeover |
+| Evaluation | future player/agent evaluation | from the exact takeover instant to `evaluationDays` (scenario; 0 = open-ended) |
+
+The baseline is captured at the end of the takeover transaction, after the
+opening adjustment, so everything at that instant belongs to the inherited
+state and the window is (takeover, end]. It is immutable and digested:
+balances and trial balance, open claims by state, unreported studies,
+booked appointments, recall list, patients on site, staff on duty, staffed
+rooms, ledger and log positions. Window money is the journal after the
+baseline (a second day book), with operating performance separated from
+cash flow and working capital and a cash bridge that reconciles to the cent.
+No weighted score, weights or thresholds: measurements only.
+
+**Metric definitions** (full table: SIMULATION_DESIGN §11.1). One
+cumulative tally integrates the state between transactions; a period is the
+difference of two snapshots (midnight, takeover, endpoint, or now).
+
+* Rooms: open (scheduled hours); staffed (open with a qualified technologist
+  on duty; a shared technologist counts fully for each room); busy (patient
+  in the room, within open hours); after-hours busy apart. Utilization of
+  open hours = busy/open, of staffed hours = busy/staffed, coverage =
+  staffed/open: none can exceed 100%.
+* Staff: on duty (paid time, breaks out, overtime in), busy (registration,
+  exam, documentation, reading), break, overtime. Technologist utilization =
+  busy/on duty per person (shared time counted once). Radiologist reading
+  utilization = reads inside site-reading blocks / block time; overrun reads
+  apart.
+* Appointments (slots starting in the period): fill = booked/bookable slot
+  time; no-show rate = no-shows (missed included until accounting close) /
+  (scheduled − cancelled); cancellation rate = cancelled/scheduled.
+* Demand: received, booked, recall, lost, cancelled; lost rate =
+  lost/received. Walk-ins: acceptance = imaged/arrived, abandonment =
+  left/arrived.
+* Waits (exams started in the period): arrival→registration,
+  arrival→exam, exam start past the appointment time.
+* Reporting: TAT of studies imaged in the period, unfinished ones censored
+  at the period end; TAT of reports finalized (inherited ones counted);
+  breaches; backlog at both ends.
+* Workforce: overtime and its cost, held-over, skipped breaks, coverage
+  reschedules, patient-time waiting to register with no desk staff.
+* Ratios keep numerator and denominator (an empty denominator is "—", never
+  0%); percentiles are nearest-rank everywhere (the worklist's median and
+  p90 now use the same definition).
+
+**Alert behavior.** Ten rules over observable state, from the takeover on:
+waits (30 min warn, 60 min alert; measured past the appointment time, or
+since arrival for walk-ins and patients fitted in after grace), unstaffed
+rooms with patients on site, report TAT overdue (urgent alert, routine
+warn, soon tracked since each breach is already logged), held-over staff
+(tracked) and the 12-hour cap approaching (alert), closing running late (30
+min warn, 60 alert), reporting backlog (≥ 40, clears below 32), lost demand
+(≥ 3 per modality per day, expires at midnight), cash low (< $25,000) and
+negative (alert; replaces the step 11 shortfall entry, same text). One
+raise per episode, at most one escalation, a logged resolution after a
+10-minute clear for waits, rooms and backlog. Time-driven changes get one
+exact passive wake (no polling); passive events never trigger dispatch, so
+they cannot change outcomes. Seed 1 raised 16 alerts on day 1 and 11 on
+day 2 (escalations included), mostly waits behind the shared XR/CT
+technologist and short unstaffed spells during breaks, plus one late close. Thresholds are configurable (`alerts` in
+the scenario) and uncalibrated.
+
+**Conventions to confirm (owner).**
+1. Events at the exact takeover instant (midnight payroll or bills, 10:00
+   remittances, dispatch) belong to the inherited state, consistent with the
+   step 11 opening rule; the window is (takeover, end].
+2. The takeover day's midnight accruals (salaries, fixed costs) cover the
+   whole day; the window bears the share after the takeover (18/24 at
+   06:00), shown as "takeover-day accruals" and in the cash bridge.
+3. Collection variance on inherited claims is excluded from window
+   operating profit (reported apart); billing fees on collecting them stay
+   window expenses (the fee is a cost incurred in the window).
+4. Wait alerts measure from the appointment time (an early arrival waiting
+   for a punctual exam is not a problem); the wait metrics report both.
+
+**Outcome neutrality.** Metrics, alerts and summaries change nothing in
+the simulation. Checked against `23b6ff8`: ledger digest and every visit,
+study and appointment identical after 21 days (established) and 30 days
+(mini), seeds 1–3; the pinned start-state digests (ledger and log) are
+unchanged. The log gains the alert entries.
+
+**Tests** (`go test ./...`: all packages pass; `internal/sim` 157 s on the
+Pi). New, on hand-built micro practices with fixed durations where figures
+are worked out by hand, and on the mini and established practices:
+
+| Requirement | Test |
+|---|---|
+| Exact utilization denominators | `TestMetricsRoomAndStaffDenominators` (XR busy 46 min of 60 open, 34 min after hours; Tess 2h06m on duty, 36m overtime, 96m busy; an unused staffed room is 0%, not undefined) |
+| Shared technologist | `TestMetricsSharedTechnologist` |
+| Staffed vs open | `TestMetricsStaffedVersusOpen` (staffed = open − breaks) |
+| Reading blocks | `TestMetricsReadingBlocks` (and TAT percentiles, censored) |
+| Percentiles, empty denominators | `TestNearestRankPercentiles`, `TestMetricsEmptyDenominators`, wait percentiles in the denominators test |
+| Partial day, midnight boundary | `TestMetricsPartialDay`, `TestMetricsMidnightBoundary` (only the censored TAT ages, by one second, from 23:59:59 to midnight) |
+| Exact-timestamp boundary | `TestEvaluationExactTakeoverBoundary` (10:00 takeover with remittances at that instant; window books = journal after the baseline; orders before 10:00 in the calendar day only) |
+| Inherited claims paid after takeover | `TestEvaluationInheritedClaims` |
+| Imaged before, finalized after | `TestEvaluationPreTakeoverStudyFinalizedAfter` |
+| Capital excluded | `TestEvaluationExcludesCapitalTransfers` (+$350,000 opening cash: identical operations and operating results) |
+| Accrual allocation, whole-day window | `TestEvaluationAllocatesTakeoverDayAccruals`, `TestWindowEqualsDaysFromMidnightTakeover` |
+| Alerts: trigger, escalate, resolve, dedupe, expire | `TestAlertsTriggerEscalateResolve` (exact times 08:20, 08:50, 09:20, 09:40, 09:43), `TestAlertsExpireAndDeduplicate` |
+| Same-instant ordering | `TestAlertSameInstantOrdering` (an exam starting at the threshold instant raises nothing) |
+| Daily summary reconciliation | `TestDailySummaryReconciliation` (days sum to since-day-1; cash rolls forward) |
+| No future leakage | `TestMetricsAndAlertsRevealNoFuture` |
+| Chunking, speed, unrelated events | `TestMetricsChunkingInvariance`; the TUI pacing test; `TestRegressOutcomeIndependentOfUnrelatedEvents` now includes both alert fixtures |
+| Session, TUI | `TestEndOfDayStopsAtOperationalClose`, `TestEndOfDaySummary`, `TestDashboardAlerts`; render tests cover finance and history |
+| Scenario fields | `TestValidationErrors`: 4 new cases (`evaluationDays`, `alerts` ranges and ordering) |
+
+**Performance** (MEASUREMENTS.md): warm-up 1402 ms vs 1366 ms at `23b6ff8`
+(best of four alternating runs, Pi at 81 °C, +2.6%); one observation 1.26
+ms vs 1.20 ms; the evaluation window 1.3 ms, on request only. Completed
+days' summaries are cached.
+
+**Known limitations.**
+* All overtime is required hold-over until actions arrive (step 13); the
+  approved/required split is not yet reported.
+* Alerts start at the takeover: history days have none.
+* Thresholds, insight rules and the backlog limit are illustrative
+  (calibration, step 18). Insights are two simple rules.
+* A day appears in the history from midnight (before: from accounting
+  close); after accounting close today's summary is still "so far".
+* The baseline digest covers the baseline record, not the full state (the
+  full-state digest is step 14). Scenarios leave `evaluationDays` at 0.
+* No turnover state in V0.1, so busy = patient in the room.
+* The history screen did not gain alert or wait-percentile columns (the
+  summary screen pages through days instead).
+
+---
+
 ## Step 11 remediation — review findings (v0.1.0-dev.11.1)
 
 The step 11 review (`docs/reviews/step-11-astra-review.md`, gpt-6-astra at

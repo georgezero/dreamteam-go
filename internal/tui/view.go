@@ -43,6 +43,9 @@ func (m *Model) render() string {
 	case screenBriefing:
 		body = m.briefingBody(w, h-3)
 		hints = " enter dashboard  space start  h history  f finance  w worklist  s sched  q quit"
+	case screenSummary:
+		body = m.summaryBody(w, h-3)
+		hints = " ←→ day  t today  tab day/since takeover  enter dashboard  h history  f finance  space run  q quit"
 	case screenHistory:
 		body = m.historyBody(w, h-3)
 		hints = " ↑↓ scroll  b briefing  d dash  f finance  space run  q quit"
@@ -64,7 +67,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  p pat  s sched  w worklist  f finance  l log  a auto:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  e end of day  p pat  s sched  w work  f fin  l log  a auto:" + auto + "  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -133,11 +136,19 @@ func (m *Model) dashboardBody(w, n int) []string {
 		}
 	}
 	lines = append(lines, flowLines(o, w)...)
+	lines = append(lines, kpiLine(o))
 	lines = append(lines, reportingSummary(o.Worklist, w)...)
 	demand := demandLines(o, w)
 	if n < 28 {
-		demand = demand[:len(demand)-1] // drop the since-day-1 line on short screens
+		demand = []string{compactDemand(o)} // one line on short screens: the alerts matter more
 	}
+	// Alerts: what is going wrong and why, before the demand table.
+	alertRoom := 4
+	if n >= 30 {
+		alertRoom = 7
+	}
+	alertRoom = max(2, min(alertRoom, n-len(lines)-len(demand)-2))
+	lines = append(lines, alertLines(o, w, alertRoom)...)
 	lines = append(lines, demand...)
 
 	// Event log: newest first, compact; the full log is on its own screen.
@@ -157,6 +168,42 @@ func (m *Model) dashboardBody(w, n int) []string {
 		lines = lines[:n]
 	}
 	return lines
+}
+
+// kpiLine is today's headline operations so far: time-weighted room
+// utilization of staffed hours, waits and lost demand.
+func kpiLine(o api.Observation) string {
+	t := o.Today
+	l := " Today: busy of staffed " + modUtil(t.Rooms, func(r api.RoomMetrics) api.Ratio { return r.UtilStaffed })
+	l += " · wait " + distText(t.Waits.ToExam)
+	if t.Demand.Lost > 0 {
+		l += warnStyle.Render(fmt.Sprintf(" · lost %d", t.Demand.Lost))
+	}
+	return l
+}
+
+// compactDemand is the demand panel in one line: today's orders and the
+// next open slot by modality.
+func compactDemand(o api.Observation) string {
+	var recv, booked, lost int
+	var next []string
+	for _, d := range o.Demand.Modalities {
+		recv += d.Today.Received
+		booked += d.Today.Booked
+		lost += d.Today.Lost
+		n := "—"
+		switch {
+		case d.NextOpenDays == 0:
+			n = "today"
+		case d.NextOpenDays > 0:
+			n = fmt.Sprintf("%dd", d.NextOpenDays)
+		}
+		if d.NextOpenDays > 14 || d.NextOpenDays < 0 {
+			n = warnStyle.Render(n)
+		}
+		next = append(next, d.Modality+" "+n)
+	}
+	return fmt.Sprintf(" Demand today: orders %d · booked %d · lost %d · next open slot %s", recv, booked, lost, strings.Join(next, " "))
 }
 
 // demandLines is the demand panel: today's orders and what became of them,

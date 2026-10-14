@@ -143,3 +143,25 @@ func TestLogDigestIndependentOfReadsAndEviction(t *testing.T) {
 		t.Fatalf("retained order: %+v", r)
 	}
 }
+
+// Percentiles are nearest-rank: the smallest value with at least p% of the
+// sample at or below it.
+func TestNearestRankPercentiles(t *testing.T) {
+	for _, c := range []struct {
+		xs            []int64
+		p50, p90, max int64
+	}{
+		{[]int64{7}, 7, 7, 7},
+		{[]int64{2, 1}, 1, 2, 2},
+		{[]int64{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}, 5, 9, 10},
+		{[]int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, 6, 10, 11},
+	} {
+		d := dist(append([]int64(nil), c.xs...))
+		if d.Count != len(c.xs) || d.P50Sec != c.p50 || d.P90Sec != c.p90 || d.MaxSec != c.max {
+			t.Errorf("%v: %+v", c.xs, d)
+		}
+	}
+	if d := dist(nil); d.Count != 0 || d.P50Sec != 0 {
+		t.Errorf("empty: %+v", d)
+	}
+}

@@ -42,6 +42,24 @@ type File struct {
 	WalkIns          WalkIns               `json:"walkIns"`
 	OpeningSchedule  []OpeningAppt         `json:"openingSchedule,omitempty"`
 	Finance          Finance               `json:"finance"`
+	// Alerts overrides the default alert thresholds (all fields together).
+	Alerts *Alerts `json:"alerts,omitempty"`
+	// EvaluationDays is the evaluation window's length from the takeover
+	// (0 or absent: open-ended).
+	EvaluationDays int64 `json:"evaluationDays,omitempty"`
+}
+
+// Alerts are the alert thresholds (ROADMAP step 12).
+type Alerts struct {
+	WaitWarnMin     int64 `json:"waitWarnMin"`
+	WaitAlertMin    int64 `json:"waitAlertMin"`
+	CapWarnMin      int64 `json:"capWarnMin"`
+	ClosingWarnMin  int64 `json:"closingWarnMin"`
+	ClosingAlertMin int64 `json:"closingAlertMin"`
+	BacklogWarn     int   `json:"backlogWarn"` // 0 disables
+	LostWarn        int   `json:"lostWarn"`    // 0 disables
+	LowCashCents    int64 `json:"lowCashCents"`
+	ClearAfterMin   int64 `json:"clearAfterMin"`
 }
 
 // Finance holds the financial assumptions (SIMULATION_DESIGN §8). Money is

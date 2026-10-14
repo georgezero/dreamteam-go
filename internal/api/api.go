@@ -161,6 +161,10 @@ type Observation struct {
 	Flow     Flow         `json:"flow"`
 	Worklist Worklist     `json:"worklist"`
 	Finance  Finance      `json:"finance"`
+	// Today is today's operational metrics so far (partial: Complete is
+	// false until the day ends).
+	Today  PeriodMetrics `json:"today"`
+	Alerts Alerts        `json:"alerts"`
 	// LogTotal is the number of log entries ever emitted.
 	LogTotal  uint64     `json:"logTotal"`
 	RecentLog []LogEntry `json:"recentLog"` // oldest first
@@ -695,15 +699,22 @@ type JournalLine struct {
 	CreditCents int64  `json:"creditCents,omitempty"`
 }
 
-// DaySummary is one completed day's record. BeforeStart marks history from
-// before day 1 (the practice's past, never scored). Waits are arrival to
-// exam start for patients imaged that day; TAT is over reports finalized
-// that day. CashEndCents is actual end-of-day cash; ProFormaCashEndCents
-// adds the takeover capital to days before it (labelled pro forma).
+// DaySummary is one day's record. BeforeStart marks history from before
+// day 1 (the practice's past, never scored). Days are calendar days,
+// midnight to midnight; the takeover day includes its activity before the
+// takeover (Takeover gives the time). Complete is false for today (figures
+// so far, as of AsOf). Waits are arrival to exam start for patients imaged
+// that day; TAT is over reports finalized that day. CashEndCents is actual
+// end-of-day cash; ProFormaCashEndCents adds the takeover capital to days
+// before it (labelled pro forma). Ops and Money hold the full metrics; the
+// flat fields are the headline figures.
 type DaySummary struct {
 	Date                 string        `json:"date"`
 	Weekday              string        `json:"weekday"`
 	BeforeStart          bool          `json:"beforeStart"`
+	Complete             bool          `json:"complete"`
+	AsOf                 string        `json:"asOf"`               // practice-local ISO time the figures run to
+	Takeover             string        `json:"takeover,omitempty"` // takeover time, on the takeover day
 	Orders               int           `json:"orders"`
 	Booked               int           `json:"booked"`
 	Lost                 int           `json:"lost"`
@@ -727,6 +738,13 @@ type DaySummary struct {
 	// ProFormaCashEndCents is cash end adjusted as if the takeover capital
 	// had been in place throughout (pro forma, not actual).
 	ProFormaCashEndCents int64 `json:"proFormaCashEndCents"`
+	// End-of-day balances (or now, for today): what is still owed and
+	// outstanding.
+	ARCents             int64         `json:"arCents"`
+	APCents             int64         `json:"apCents"`
+	AccruedPayrollCents int64         `json:"accruedPayrollCents"`
+	Ops                 PeriodMetrics `json:"ops"`
+	Money               FinancePeriod `json:"money"`
 }
 
 // ModalityDay is one modality's exams and room time for a day. Utilization
@@ -740,4 +758,315 @@ type ModalityDay struct {
 	StaffedMin    int64  `json:"staffedMin"`
 	UtilOpenBP    int64  `json:"utilOpenBP"`
 	UtilStaffedBP int64  `json:"utilStaffedBP"`
+}
+
+// Ratio is a rate kept as numerator and denominator, so an empty
+// denominator reads as undefined ("—"), never as 0%.
+type Ratio struct {
+	Num int64 `json:"num"`
+	Den int64 `json:"den"`
+}
+
+// Defined reports whether the denominator is positive.
+func (r Ratio) Defined() bool { return r.Den > 0 }
+
+// BP is the ratio in basis points (0 when undefined).
+func (r Ratio) BP() int64 {
+	if r.Den <= 0 {
+		return 0
+	}
+	return r.Num * 10_000 / r.Den
+}
+
+// Dist summarizes durations in seconds. Percentiles are nearest-rank
+// (the smallest value with at least p% of the sample at or below it); all
+// zero when Count is 0.
+type Dist struct {
+	Count  int   `json:"count"`
+	P50Sec int64 `json:"p50Sec"`
+	P90Sec int64 `json:"p90Sec"`
+	MaxSec int64 `json:"maxSec"`
+}
+
+// PeriodMetrics are the operational metrics of a period [From, To]
+// (practice-local ISO times): a calendar day, today so far, or the
+// evaluation window. Time-based figures are interval measurements in
+// seconds (SIMULATION_DESIGN §11).
+type PeriodMetrics struct {
+	From     string `json:"from"`
+	To       string `json:"to"`
+	Complete bool   `json:"complete"` // the period has ended; false: so far
+
+	Demand          DemandMetrics    `json:"demand"`
+	Appointments    ApptMetrics      `json:"appointments"`
+	WalkIns         WalkInMetrics    `json:"walkIns"`
+	Waits           WaitMetrics      `json:"waits"`
+	Exams           int              `json:"exams"`           // exams completed
+	AfterHoursExams int              `json:"afterHoursExams"` // started after scheduled close
+	Rooms           []RoomMetrics    `json:"rooms"`
+	Staff           []StaffMetrics   `json:"staff"`
+	Reporting       ReportingMetrics `json:"reporting"`
+	Workforce       WorkforceMetrics `json:"workforce"`
+	Alerts          AlertCounts      `json:"alerts"`
+}
+
+// DemandMetrics: orders received and what booking did with them. LostRate
+// is lost / received.
+type DemandMetrics struct {
+	Received   int                     `json:"received"`
+	Booked     int                     `json:"booked"` // incl. recall releases and rebookings
+	Recall     int                     `json:"recall"`
+	Lost       int                     `json:"lost"`
+	Cancelled  int                     `json:"cancelled"` // appointments cancelled by patients
+	LostRate   Ratio                   `json:"lostRate"`
+	ByModality []ModalityDemandMetrics `json:"byModality"`
+}
+
+// ModalityDemandMetrics is one modality's demand and output.
+type ModalityDemandMetrics struct {
+	Modality string `json:"modality"`
+	Received int    `json:"received"`
+	Lost     int    `json:"lost"`
+	Exams    int    `json:"exams"`
+}
+
+// ApptMetrics covers the appointments whose slot starts in the period.
+// Scheduled counts every appointment ever booked into those slots;
+// NoShows includes Missed (provisional until accounting close). Rates:
+// no-shows / (scheduled − cancelled); cancelled / scheduled. Fill is
+// booked slot time over bookable slot time (slots a technologist, and for
+// contrast an on-site radiologist, was rostered for).
+type ApptMetrics struct {
+	Scheduled   int   `json:"scheduled"`
+	Cancelled   int   `json:"cancelled"`
+	Arrived     int   `json:"arrived"`
+	NoShows     int   `json:"noShows"`
+	Missed      int   `json:"missed"` // of NoShows, not yet final
+	Rescheduled int   `json:"rescheduled"`
+	NoShowRate  Ratio `json:"noShowRate"`
+	CancelRate  Ratio `json:"cancelRate"`
+	BookableSec int64 `json:"bookableSec"`
+	BookedSec   int64 `json:"bookedSec"`
+	Fill        Ratio `json:"fill"`
+}
+
+// WalkInMetrics: walk-ins who came, were sent away with an appointment,
+// were imaged, or left. Acceptance = imaged / arrived; abandonment = left /
+// arrived.
+type WalkInMetrics struct {
+	Arrived     int   `json:"arrived"`
+	SentToBook  int   `json:"sentToBook"`
+	Imaged      int   `json:"imaged"`
+	Left        int   `json:"left"`
+	Acceptance  Ratio `json:"acceptance"`
+	Abandonment Ratio `json:"abandonment"`
+}
+
+// WaitMetrics are over exams started in the period: arrival to
+// registration start, arrival to exam start, and (scheduled patients)
+// exam start past the appointment time (0 when on time or early).
+type WaitMetrics struct {
+	Registration    Dist `json:"registration"`
+	ToExam          Dist `json:"toExam"`
+	PastAppointment Dist `json:"pastAppointment"`
+	Over30          int  `json:"over30"` // arrival to exam start over 30 minutes
+}
+
+// RoomMetrics is one room's time. Open: the practice's scheduled hours.
+// Staffed: open time with a qualified technologist on duty (a shared
+// technologist counts fully for each room they cover). Busy: a patient in
+// the room during open hours; after-hours busy is reported separately.
+// UtilOpen = busy / open, UtilStaffed = busy / staffed, Coverage = staffed
+// / open; none can exceed 100%.
+type RoomMetrics struct {
+	Room              string `json:"room"`
+	Modality          string `json:"modality"`
+	OpenSec           int64  `json:"openSec"`
+	StaffedSec        int64  `json:"staffedSec"`
+	BusySec           int64  `json:"busySec"`
+	AfterHoursBusySec int64  `json:"afterHoursBusySec"`
+	Exams             int    `json:"exams"`
+	UtilOpen          Ratio  `json:"utilOpen"`
+	UtilStaffed       Ratio  `json:"utilStaffed"`
+	Coverage          Ratio  `json:"coverage"`
+}
+
+// StaffMetrics is one employee's working time. On duty is paid working
+// time (breaks excluded, overtime included); busy is registration, exam
+// and documentation (technologists, desk) or reading (radiologists); Util
+// = busy / on duty. Radiologists: site-reading block time, reads inside and
+// outside blocks, and ReadUtil = read inside blocks / block time.
+type StaffMetrics struct {
+	Name           string `json:"name"`
+	Role           string `json:"role"`
+	OnDutySec      int64  `json:"onDutySec"`
+	BusySec        int64  `json:"busySec"`
+	BreakSec       int64  `json:"breakSec"`
+	OvertimeSec    int64  `json:"overtimeSec"` // on duty past the scheduled shift end
+	Util           Ratio  `json:"util"`
+	BlockSec       int64  `json:"blockSec,omitempty"`
+	ReadInBlockSec int64  `json:"readInBlockSec,omitempty"`
+	ReadOutsideSec int64  `json:"readOutsideSec,omitempty"`
+	ReadUtil       Ratio  `json:"readUtil"`
+}
+
+// ReportingMetrics: TAT over the studies acquired in the period, with
+// unfinished ones counted at their age at the period end (censored, §11);
+// TAT of the reports finalized in the period (Inherited: of studies
+// acquired before the period); target breaches; worklist at both ends.
+type ReportingMetrics struct {
+	Acquired     int               `json:"acquired"`
+	TAT          Dist              `json:"tat"`
+	Unfinished   int               `json:"unfinished"`
+	OverTarget   int               `json:"overTarget"` // of Acquired, TAT (censored) past target
+	Final        int               `json:"final"`
+	FinalTAT     Dist              `json:"finalTAT"`
+	Inherited    int               `json:"inherited"`
+	Breaches     int               `json:"breaches"` // targets missed (urgent/soon when passed, routine at final)
+	ByPriority   []PriorityMetrics `json:"byPriority"`
+	BacklogStart int               `json:"backlogStart"` // unread + reading
+	BacklogEnd   int               `json:"backlogEnd"`
+}
+
+// PriorityMetrics is the censored TAT of one priority's studies.
+type PriorityMetrics struct {
+	Priority   string `json:"priority"`
+	Acquired   int    `json:"acquired"`
+	TAT        Dist   `json:"tat"`
+	OverTarget int    `json:"overTarget"`
+	TargetSec  int64  `json:"targetSec"`
+}
+
+// WorkforceMetrics: overtime (all of it required hold-over in V0.1),
+// staff held over, breaks skipped, patients rescheduled for lack of safe
+// coverage, and patient-seconds spent waiting to register while no desk
+// staff was on duty.
+type WorkforceMetrics struct {
+	OvertimeSec        int64 `json:"overtimeSec"`
+	OvertimeCostCents  int64 `json:"overtimeCostCents"`
+	HeldOver           int   `json:"heldOver"`
+	SkippedBreaks      int   `json:"skippedBreaks"`
+	NoCoverage         int   `json:"noCoverage"`
+	DeskSelfPatientSec int64 `json:"deskSelfPatientSec"`
+}
+
+// AlertCounts are the alerts raised in a period, by severity, with the
+// first few texts.
+type AlertCounts struct {
+	Warn  int      `json:"warn"`
+	Alert int      `json:"alert"`
+	Top   []string `json:"top"`
+}
+
+// AlertItem is one alert: a condition the practice can see, raised once
+// per episode (escalating at most once), resolved when the condition has
+// cleared. Why explains it from observed facts; Screen is the TUI key
+// that shows more.
+type AlertItem struct {
+	Key      string   `json:"key"`
+	Severity Severity `json:"severity"`
+	Since    string   `json:"since"`              // practice-local ISO time raised
+	Resolved string   `json:"resolved,omitempty"` // when it cleared (or expired)
+	Expired  bool     `json:"expired,omitempty"`  // ended with its day, not cleared
+	Text     string   `json:"text"`
+	Why      string   `json:"why"`
+	Screen   string   `json:"screen"`
+}
+
+// Alerts are the active alerts (most severe first, then oldest) and the
+// latest resolved ones (newest first, capped).
+type Alerts struct {
+	Active      []AlertItem `json:"active"`
+	Resolved    []AlertItem `json:"resolved"`
+	RaisedToday int         `json:"raisedToday"`
+}
+
+// Evaluation is the evaluation window: from the exact takeover time to the
+// configured endpoint (or now, while it runs), measured against an
+// immutable baseline captured at takeover. It is a measurement, not a
+// score: weights and thresholds come later.
+type Evaluation struct {
+	Started  bool          `json:"started"`
+	Baseline Baseline      `json:"baseline"`
+	End      string        `json:"end,omitempty"` // configured endpoint; empty: open-ended
+	Ended    bool          `json:"ended"`
+	AsOf     string        `json:"asOf"`
+	Ops      PeriodMetrics `json:"ops"`
+	Money    WindowMoney   `json:"money"`
+}
+
+// Baseline is the state at the takeover instant, after everything at that
+// instant (the opening adjustment included). Digest identifies it.
+type Baseline struct {
+	Time   string `json:"time"`
+	Digest string `json:"digest"`
+
+	CashCents           int64       `json:"cashCents"`
+	ReceivablesCents    int64       `json:"receivablesCents"`
+	PayablesCents       int64       `json:"payablesCents"`
+	AccruedPayrollCents int64       `json:"accruedPayrollCents"`
+	EquityCents         int64       `json:"equityCents"` // all equity: opening capital and retained results
+	Accounts            []Account   `json:"accounts"`
+	Claims              []ClaimLoad `json:"claims"` // open claims by state
+	OpenClaims          int         `json:"openClaims"`
+	// Time-based accruals posted at the takeover day's midnight that cover
+	// the rest of that day: the window bears the share after takeover.
+	AllocatedAccrualCents int64 `json:"allocatedAccrualCents"`
+
+	Unreported         int      `json:"unreported"` // studies acquired, not final
+	Unread             int      `json:"unread"`
+	Reading            int      `json:"reading"`
+	OldestUnreportedS  int64    `json:"oldestUnreportedSec"`
+	BookedAppointments int      `json:"bookedAppointments"` // from the takeover on
+	RecallList         int      `json:"recallList"`
+	OnSite             int      `json:"onSite"`
+	StaffOnDuty        []string `json:"staffOnDuty"`
+	RoomsStaffed       int      `json:"roomsStaffed"`
+	LedgerEntries      int      `json:"ledgerEntries"`
+	LogSeq             uint64   `json:"logSeq"`
+}
+
+// ClaimLoad is the open claims in one state.
+type ClaimLoad struct {
+	State string `json:"state"`
+	Count int    `json:"count"`
+	Cents int64  `json:"cents"`
+}
+
+// WindowMoney is the evaluation window's money. Ledger is every journal
+// entry posted after the baseline, as posted. Operating performance then
+// removes what is not the window's: collection variance on claims whose
+// revenue was recognized before takeover (a true-up of the history's
+// revenue) and adds the share of the takeover day's midnight accruals that
+// covers time after takeover. Capital transfers are never operating
+// performance. The cash bridge: operating profit − inherited variance +
+// allocated accruals (already in the baseline's liabilities) − ΔA/R +
+// ΔA/P + Δpayroll owed = operating cash flow (collections −
+// disbursements); + capital transfers = change in cash.
+type WindowMoney struct {
+	Ledger FinancePeriod `json:"ledger"`
+
+	InheritedVarianceCents int64 `json:"inheritedVarianceCents"`
+	AllocatedAccrualCents  int64 `json:"allocatedAccrualCents"`
+	RevenueCents           int64 `json:"revenueCents"` // recognized in the window
+	NetRevenueCents        int64 `json:"netRevenueCents"`
+	OperatingExpenseCents  int64 `json:"operatingExpenseCents"`
+	OperatingProfitCents   int64 `json:"operatingProfitCents"`
+	Margin                 Ratio `json:"margin"` // operating profit / net revenue (undefined unless revenue > 0)
+
+	CollectionsCents          int64 `json:"collectionsCents"`
+	InheritedCollectionsCents int64 `json:"inheritedCollectionsCents"` // on claims recognized before takeover
+	DisbursementsCents        int64 `json:"disbursementsCents"`
+	InheritedPaidCents        int64 `json:"inheritedPaidCents"` // of disbursements, settling baseline payables and payroll
+	OperatingCashFlowCents    int64 `json:"operatingCashFlowCents"`
+	CapitalTransfersCents     int64 `json:"capitalTransfersCents"`
+	CashChangeCents           int64 `json:"cashChangeCents"`
+	ARChangeCents             int64 `json:"arChangeCents"`
+	APChangeCents             int64 `json:"apChangeCents"`
+	PayrollChangeCents        int64 `json:"payrollChangeCents"`
+
+	CashEndCents   int64 `json:"cashEndCents"`
+	MinCashCents   int64 `json:"minCashCents"`
+	ShortfallCents int64 `json:"shortfallCents"` // max(0, −lowest cash in the window)
+	Reconciled     bool  `json:"reconciled"`     // the cash bridge holds to the cent
 }

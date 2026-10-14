@@ -318,21 +318,10 @@ func (st *state) studyItem(si int, now simtime.Time) api.WorklistItem {
 	return it
 }
 
-func median(xs []int64) int64 {
-	if len(xs) == 0 {
-		return 0
-	}
-	slices.Sort(xs)
-	return xs[len(xs)/2]
-}
+// median and pct90 are nearest-rank percentiles, as in the metrics (dist).
+func median(xs []int64) int64 { return dist(xs).P50Sec }
 
-func pct90(xs []int64) int64 {
-	if len(xs) == 0 {
-		return 0
-	}
-	slices.Sort(xs)
-	return xs[len(xs)*9/10]
-}
+func pct90(xs []int64) int64 { return dist(xs).P90Sec }
 
 // observeWorklist fills the worklist: unread and reading studies in policy
 // order, recent reports, backlog by modality and priority, and turnaround.

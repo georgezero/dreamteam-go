@@ -79,7 +79,6 @@ func (st *state) openingAdjust(e *Engine) {
 	s.historyNetIncome = s.historyRevenue - s.historyExpense
 	st.fin.opening, st.fin.opened = s, true
 	st.fin.minCash, st.fin.minCashAt = led.bal[acctCash], now
-	st.fin.belowZero = led.bal[acctCash] < 0
 	text := fmt.Sprintf("Opening balance: cash %s", money(s.target))
 	switch {
 	case s.adjustment > 0:
@@ -92,12 +91,16 @@ func (st *state) openingAdjust(e *Engine) {
 			st.cfg.WarmupDays, money(s.historyRevenue), money(s.historyNetIncome), money(s.ar), s.openClaims)
 	}
 	st.emit(now, api.Info, "finance", text)
+	// Play begins: alerts watch from here, and the evaluation window's
+	// baseline is this state.
+	st.alerts.on = true
+	st.captureBaseline(e)
 }
 
-// noteCash tracks the financing shortfall after a disbursement, from the
-// start time on: the lowest balance, and one alert each time cash falls
-// below zero. V0.1 has no credit line; negative cash is an unfunded
-// shortfall, tracked and shown, never free borrowing.
+// noteCash tracks the financing shortfall after a cash movement, from the
+// start time on: the lowest balance (the cash alerts in alerts.go say when
+// it goes below zero). V0.1 has no credit line; negative cash is an
+// unfunded shortfall, tracked and shown, never free borrowing.
 func (st *state) noteCash(now simtime.Time) {
 	if !st.fin.opened {
 		return
@@ -106,14 +109,7 @@ func (st *state) noteCash(now simtime.Time) {
 	if c < st.fin.minCash {
 		st.fin.minCash, st.fin.minCashAt = c, now
 	}
-	switch {
-	case c < 0 && !st.fin.belowZero:
-		st.fin.belowZero = true
-		st.emit(now, api.Alert, "finance", fmt.Sprintf("Cash below zero: financing shortfall %s (no credit line is modelled; the shortfall is tracked)", money(-c)))
-	case c >= 0 && st.fin.belowZero:
-		st.fin.belowZero = false
-		st.emit(now, api.Info, "finance", "Cash back above zero")
-	}
+	st.noteWindowCash()
 }
 
 // netRevenue and opex read a day-book sum.

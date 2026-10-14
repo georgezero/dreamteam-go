@@ -344,6 +344,7 @@ func (st *state) startExam(e *Engine, r, vi, t int) {
 		v.supervisor = st.supervisor(x)
 	}
 	st.rooms[r].visit = vi
+	st.noteExamStart(vi)
 	draw := st.hash("attempt.exam", o.key.keys(v.attempt)...)
 	dur := simtime.Duration(x.RoomTime.Sample(draw.Lane(0)))
 	for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
@@ -369,6 +370,7 @@ func (st *state) examEnd(e *Engine, vi int) {
 	x := &st.cfg.Catalog[o.exam]
 	v.state, v.examEnd, v.endedAt = visitDone, e.Now(), e.Now()
 	st.rooms[v.room].visit = -1
+	st.met.cum.rooms[v.room].exams++
 	st.removeWaiting(vi)
 	o.state, o.endedAt = orderImaged, e.Now()
 	st.acquireStudy(e, vi)

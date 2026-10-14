@@ -22,6 +22,19 @@ type Processor interface {
 	CheckInvariants() error
 }
 
+// Observer is optionally implemented by a Processor whose bookkeeping
+// watches the simulation without changing it (metrics, alerts).
+//
+// Passive events are handled like any other but do not count as activity:
+// a transaction whose only non-stale events are passive runs no dispatch,
+// so pushing or handling one cannot change an outcome. AfterTransaction
+// runs once after every transaction that handled a non-stale event, after
+// dispatch; like dispatch it may push events only strictly after now.
+type Observer interface {
+	Passive(ev Event) bool
+	AfterTransaction(e *Engine)
+}
+
 // StopReason says why RunUntil returned.
 type StopReason int
 
@@ -59,6 +72,7 @@ type Engine struct {
 	seq   uint64
 	q     queue
 	proc  Processor
+	obs   Observer // proc as an Observer, or nil
 	phase phase
 	class Class // class being processed during phaseHandling
 
@@ -74,7 +88,9 @@ type Engine struct {
 
 // NewEngine returns an engine whose clock starts at start.
 func NewEngine(p Processor, start simtime.Time) *Engine {
-	return &Engine{now: start, proc: p, MaxEventsPerTimestamp: DefaultMaxEventsPerTimestamp}
+	e := &Engine{now: start, proc: p, MaxEventsPerTimestamp: DefaultMaxEventsPerTimestamp}
+	e.obs, _ = p.(Observer)
+	return e
 }
 
 // Now returns the simulated clock.
@@ -147,13 +163,13 @@ func (e *Engine) RunUntil(target simtime.Time, stop func() bool) StopReason {
 }
 
 // transaction processes all events at the earliest pending time, class by
-// class, then dispatches once if anything non-stale happened. It reports
-// whether any non-stale event was handled.
+// class, then dispatches once if anything non-stale and not passive
+// happened. It reports whether any non-stale event was handled.
 func (e *Engine) transaction() bool {
 	t := e.q.peek().At
 	e.now = t
 	n := 0
-	handledAny := false
+	handledAny, active := false, false
 	e.phase = phaseHandling
 	for e.q.Len() > 0 && e.q.peek().At == t {
 		ev := e.q.pop()
@@ -169,10 +185,15 @@ func (e *Engine) transaction() bool {
 		e.proc.Handle(e, ev)
 		e.handled++
 		handledAny = true
+		active = active || e.obs == nil || !e.obs.Passive(ev)
 	}
-	if handledAny {
+	if active {
 		e.phase = phaseDispatch
 		e.proc.Dispatch(e)
+	}
+	if handledAny && e.obs != nil {
+		e.phase = phaseDispatch
+		e.obs.AfterTransaction(e)
 	}
 	e.phase = phaseIdle
 	e.transactions++

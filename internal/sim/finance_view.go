@@ -82,8 +82,32 @@ func (st *state) period(label string, from, to int64) api.FinancePeriod {
 	from = max(from, 0)
 	led := &st.fin.led
 	b := led.sumDays(from, to)
-	p := api.FinancePeriod{Label: label, From: st.cal.Date(st.cal.StartOfDay(from)).String(),
-		To: st.cal.Date(st.cal.StartOfDay(to)).String(), Days: to - from + 1}
+	p := st.bookPeriod(label, &b)
+	p.From, p.To, p.Days = st.cal.Date(st.cal.StartOfDay(from)).String(), st.cal.Date(st.cal.StartOfDay(to)).String(), to-from+1
+
+	var finals [maxMods]int
+	for d := from; d <= to && d < int64(len(st.fin.days)); d++ {
+		fd := &st.fin.days[d]
+		for k := range maxMods {
+			finals[k] += fd.finals[k]
+		}
+		p.Adjudicated += fd.adjudicated
+		p.Denied += fd.denied
+	}
+	if p.Adjudicated > 0 {
+		p.DenialRateBP = int64(p.Denied) * 10_000 / int64(p.Adjudicated)
+	}
+	for k := range p.ByModality {
+		p.ByModality[k].ReportsFinal = finals[k]
+		p.ReportsFinal += finals[k]
+	}
+	return p
+}
+
+// bookPeriod builds the income statement and cash flow of a day book (the
+// money only: report and adjudication counts are the caller's).
+func (st *state) bookPeriod(label string, b *dayBook) api.FinancePeriod {
+	p := api.FinancePeriod{Label: label}
 	n := &b.net
 	p.GrossRevenueCents = -n[acctRevenue]
 	p.CollectionVarianceCents = n[acctVariance]
@@ -105,28 +129,13 @@ func (st *state) period(label string, from, to int64) api.FinancePeriod {
 	}
 	p.CollectionsCents, p.DisbursementsCents = b.receipts, b.paidOut
 	p.NetCashFlowCents = b.receipts - b.paidOut
-
-	var finals [maxMods]int
-	for d := from; d <= to && d < int64(len(st.fin.days)); d++ {
-		fd := &st.fin.days[d]
-		for k := range maxMods {
-			finals[k] += fd.finals[k]
-		}
-		p.Adjudicated += fd.adjudicated
-		p.Denied += fd.denied
-	}
-	if p.Adjudicated > 0 {
-		p.DenialRateBP = int64(p.Denied) * 10_000 / int64(p.Adjudicated)
-	}
 	for k, m := range st.mods {
-		mm := api.ModalityMoney{Modality: m, ReportsFinal: finals[k],
-			NetRevenueCents: -b.byMod[acctRevenue][k] - b.byMod[acctVariance][k]}
+		mm := api.ModalityMoney{Modality: m, NetRevenueCents: -b.byMod[acctRevenue][k] - b.byMod[acctVariance][k]}
 		for a := range numAccounts {
 			if accountInfo[a].kind == kindExpense {
 				mm.DirectCostCents += b.byMod[a][k]
 			}
 		}
-		p.ReportsFinal += finals[k]
 		p.ByModality = append(p.ByModality, mm)
 	}
 	for k, fc := range st.cfg.Finance.Fixed {

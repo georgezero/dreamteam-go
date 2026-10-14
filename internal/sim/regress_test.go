@@ -216,7 +216,7 @@ func TestRegressOutcomeIndependentOfUnrelatedEvents(t *testing.T) {
 	files := []string{"micro-overtime.json", "micro-cap.json", "micro-contrast.json", "micro-contrast-cap.json",
 		"micro-shared.json", "micro-rad-handover.json", "micro-cap-wake.json", "micro-desk-cap.json",
 		"micro-registering.json", "micro-breaks.json", "micro-reading.json", "micro-overrun.json",
-		"micro-overrun-exact.json", "micro-rads.json"}
+		"micro-overrun-exact.json", "micro-rads.json", "micro-alerts.json", "micro-alerts-tie.json"}
 	for _, f := range files {
 		plain, day := micro(t, f)
 		live, _ := micro(t, f)

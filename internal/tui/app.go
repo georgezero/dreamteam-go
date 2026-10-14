@@ -53,6 +53,7 @@ const (
 	screenFinance
 	screenBriefing
 	screenHistory
+	screenSummary
 )
 
 // Patient list filters, cycled with tab.
@@ -102,6 +103,12 @@ type Model struct {
 	// Briefing and history screens: recent daily summaries, history scroll.
 	hist       []api.DaySummary
 	histScroll int
+	// Summary screen: view (day or since takeover), day offset (≤ 0), the
+	// day shown and the evaluation window.
+	sumView   int
+	sumOffset int64
+	day       api.DaySummary
+	eval      api.Evaluation
 }
 
 // New returns a paused model on s.
@@ -125,6 +132,13 @@ func (m *Model) refresh() {
 	switch m.screen {
 	case screenBriefing, screenHistory:
 		m.hist = m.sess.History(historyDays)
+	case screenSummary:
+		if d, ok := m.sess.Day(m.sumOffset); ok {
+			m.day = d
+		}
+		if m.sumView == sumWindow {
+			m.eval = m.sess.Evaluation()
+		}
 	case screenSchedule:
 		m.sched = m.sess.Schedule(m.schedDay)
 	case screenPatients:
@@ -202,6 +216,15 @@ func (m *Model) key(k string) tea.Cmd {
 		m.speed = int(k[0] - '1')
 		m.carryMs = 0
 		m.status = "Speed " + speeds[m.speed].label
+	case "e":
+		m.running = false
+		if m.sess.EndOfDay() == session.Visible {
+			m.status = "Operations closed for today."
+		} else {
+			m.status = "Today's operations are over."
+		}
+		m.screen, m.sumView, m.sumOffset = screenSummary, sumDay, 0
+		m.refresh()
 	case "n":
 		m.running = false
 		if m.sess.StepVisible() == session.Horizon {
@@ -258,6 +281,24 @@ func (m *Model) screenKey(k string) bool {
 			m.screen = screenDashboard
 			return true
 		}
+	case screenSummary:
+		switch k {
+		case "left":
+			if _, ok := m.sess.Day(m.sumOffset - 1); ok {
+				m.sumOffset--
+			}
+		case "right":
+			m.sumOffset = min(0, m.sumOffset+1)
+		case "t":
+			m.sumOffset = 0
+		case "tab":
+			m.sumView = (m.sumView + 1) % numSumViews
+		case "enter":
+			m.screen = screenDashboard
+		default:
+			return false
+		}
+		return true
 	case screenHistory:
 		switch k {
 		case "up", "k":

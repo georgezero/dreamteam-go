@@ -99,3 +99,28 @@ func TestSpeedsIdentical(t *testing.T) {
 		t.Fatal("event budget changed the outcome")
 	}
 }
+
+// EndOfDay runs to operational close and no further; today's summary is
+// then partial (the day ends at midnight), and a second call does nothing.
+func TestEndOfDayStopsAtOperationalClose(t *testing.T) {
+	s := mini(t, 1)
+	if s.EndOfDay() != Visible {
+		t.Fatal("EndOfDay did not reach operational close")
+	}
+	o := s.Observe(1)
+	if o.Practice.OperationalClose == "" || o.Clock != o.Practice.OperationalClose || o.Practice.Phase != "closed" {
+		t.Fatalf("stopped at %s, operational close %q, phase %s", o.Clock, o.Practice.OperationalClose, o.Practice.Phase)
+	}
+	now := s.Now()
+	if s.EndOfDay() != Reached || s.Now() != now {
+		t.Fatal("a second EndOfDay moved the clock")
+	}
+	d, ok := s.Day(0)
+	if !ok || d.Complete || d.Ops.Exams != o.Flow.Today.ExamsDone || d.Takeover == "" {
+		t.Fatalf("today's summary %+v", d)
+	}
+	ev := s.Evaluation()
+	if !ev.Started || ev.Ops.Exams != o.Flow.Today.ExamsDone || !ev.Money.Reconciled {
+		t.Fatalf("window %+v", ev)
+	}
+}
