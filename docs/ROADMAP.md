@@ -81,7 +81,7 @@ criteria and determinism tests are the same as before; only the order changed.
 | 15 | CLI `run`, `replay`, `scenario` | — | CLI golden output |
 | 16 | TUI polish: responsive layouts (all breakpoints), help, filters, theme / `NO_COLOR` | all screens at every size | **golden screen snapshots at 80×24, 120×36, 160×48** (layout now stable) |
 | 17 | End-to-end: TUI action → run record → headless replay | — | identical digests TUI vs headless |
-| 18 | Calibration pass for `moderate` (per weekday type); preset bands; `docs/ASSUMPTIONS.md`; **P&L calibration workbook** (§10) | — | calibration suite (build tag); engine T30 margin within ±2 pp of the workbook for the same inputs |
+| 18 | Calibration pass for `moderate` (per weekday type); preset bands; `docs/ASSUMPTIONS.md`; **P&L calibration workbook** (§10) | — | calibration suite (build tag); engine T30 margin within ±2 pp of the workbook for the same inputs. **As done:** the default became a struggling, capacity-constrained practice (owner decision); nine-seed report and calibration suite (`-tags calibration`); the `moderate` better-staffed preset, the workbook and `ASSUMPTIONS.md` moved to the next scenario milestone |
 | 19 | Performance pass on the Pi (build, 90-day run, TUI CPU, Max-speed responsiveness) | — | acceptance criterion 16 |
 | 20 | README, docs sync, change notes | — | — |
 
@@ -152,6 +152,12 @@ Determinism and correctness
 
 Realism / calibration (default `moderate` preset, 20 seeds, **Tue–Fri** of days
 1–30 unless stated; targets per weekday type in SIMULATION_DESIGN §5.1)
+
+*Step 18:* criteria 12–15 describe the better-staffed `moderate` preset
+(next scenario milestone). The default established practice is the
+struggling one; its measured characterization (nine seeds) is in
+`docs/calibration/step-18-report.md` and guarded by
+`TestEstablishedCharacterization`.
 
 12. Tue–Fri visits 65–85; walk-ins 6–12; no-show 4–9%; same-day cancellations
     visible. Monday and Saturday volumes within their own bands.

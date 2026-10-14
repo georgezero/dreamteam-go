@@ -101,7 +101,7 @@ func (m *Model) briefingBody(w, n int) []string {
 		}
 	}
 	add("")
-	add(dimStyle.Render(" All figures are illustrative and uncalibrated (ROADMAP step 18)."))
+	add(dimStyle.Render(" A struggling, capacity-constrained practice: demand outruns the roster. Figures are illustrative."))
 	add(dimStyle.Render(" enter dashboard · h daily history · f finance · w worklist · s schedule · space start the day"))
 	if len(lines) > n {
 		lines = lines[:n]

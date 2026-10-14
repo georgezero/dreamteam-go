@@ -27,6 +27,7 @@ type OrderInfo struct {
 	Earliest int64
 	State    string
 	WalkIn   bool
+	LostWhy  string
 }
 
 var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
@@ -39,7 +40,7 @@ func (w *World) Orders() []OrderInfo {
 	for i, o := range w.st.dem.orders {
 		out = append(out, OrderInfo{ID: orderID(i), Origin: [4]int64{o.key.day, o.key.src, o.key.block, o.key.k},
 			Received: o.received, Exam: w.st.cfg.Catalog[o.exam].Code, Priority: o.priority.String(),
-			Earliest: o.earliest, State: orderStateNames[o.state], WalkIn: o.walkIn})
+			Earliest: o.earliest, State: orderStateNames[o.state], WalkIn: o.walkIn, LostWhy: o.lostWhy})
 	}
 	return out
 }
@@ -84,6 +85,8 @@ type VisitInfo struct {
 	ExamEnd    simtime.Time
 	Reason     string
 	Supervisor string // radiologist supervising a contrast exam
+	Registered bool
+	RegStart   simtime.Time
 }
 
 var visitStateNames = [...]string{visitArrived: "arrived", visitRegistering: "registering", visitWaiting: "waiting",
@@ -97,7 +100,7 @@ func (w *World) Visits() []VisitInfo {
 		out = append(out, VisitInfo{ID: visitID(i), Order: orderID(v.order), Appt: v.appt, WalkIn: o.walkIn,
 			Exam: w.st.cfg.Catalog[o.exam].Code, Arrived: v.arrived, Late: v.late, AfterGrace: v.afterGrace,
 			State: visitStateNames[v.state], EndedAt: v.endedAt, ExamStart: v.examStart, ExamEnd: v.examEnd,
-			Reason: v.reason, Supervisor: w.supervisorName(v.supervisor)})
+			Reason: v.reason, Supervisor: w.supervisorName(v.supervisor), Registered: v.regBy >= 0, RegStart: v.regStart})
 	}
 	return out
 }

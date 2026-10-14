@@ -205,3 +205,13 @@ template slots (unstaffed unless extended) add nothing measurable.
 | Result build + encode after 90 days (`-bench Result90Days`) | 0.54–0.62 s (mostly the state digest), 5.4 MB |
 | Golden comparison, 90-day result (`-bench Compare90Days`) | 18–25 ms |
 | Reference sizes | 16–18 KB (7 days), 52 KB (90 days) |
+
+## 2026-10-14 — V0.1 step 18 (calibration suite)
+
+| Run | Time |
+|---|---|
+| `-tags calibration -run CalibrationReport`, 9 seeds × 90 days | ≈29 s |
+| `-run CalibrationActions`, 9 seeds × 6 strategies × 30 days | ≈115 s |
+| `TestEstablishedCharacterization` (3 seeds × 30 days, untagged) | ≈5.4 s |
+
+No engine change; warm-up and run times as in step 15.

@@ -822,6 +822,11 @@ thins Mondays (§6.3):
 Weekday calibration criteria in ROADMAP apply to **Tue–Fri** only. Monthly
 figures aggregate all day types.
 
+*Step 18:* these targets describe a practice that can serve its demand.
+The calibrated default (struggling, §8.6) measures 60–61 visits per Tue–Fri
+day: XR 27.0, US 10.0, CT 15.1, MR 7.7 (nine seeds, 90 days) — XR and MR
+just below their bands for lack of technologist time and MR slots.
+
 ### 5.2 Patient latent behavior
 
 | Trait | Distribution **[illustrative]** | Revealed when |
@@ -1087,7 +1092,10 @@ Therefore **[structural]**:
 * Saturday coverage means some employees work Tue–Sat, leaving Monday thinner
   (per-weekday targets in §5.1).
 
-This is the intended first management problem.
+This is the intended first management problem. (Step 18 measured it: the XR/CT technologists are 76–86% busy, US and MR
+are bound by one technologist and their slot templates each, and the
+practice completes ≈1,314–1,381 of its ≈1,650 monthly orders and walk-ins;
+§8.6.)
 
 ### 6.3 Default roster — weekday **[illustrative]**
 
@@ -1641,12 +1649,30 @@ Daily / month-to-date / trailing 30 days:
 
 ### 8.6 Profitability presets **[calibration targets]**
 
+**Calibrated (V0.1 step 18, owner decision 2026-10-14).** The default
+established practice is a **struggling, capacity-constrained practice**:
+§8.2–8.3 rates and costs and the §6.3 roster as documented, demand ≈1,650
+orders and walk-ins a month, but only 1,314–1,381 exams, because the short
+roster and slot templates cannot serve it (§6.2) and no-shows,
+cancellations, declines and walk-in abandonment take their documented
+share. Measured over nine seeds: T30 operating margin −12.5% (seeds −16.9%
+to −11.1%), 90 days −14.0% (−15.6% to −13.0%). It is characterized, not
+forced into a band; the three V0.1 actions improve it to about −9% at best.
+Full report: `docs/calibration/step-18-report.md`.
+
+The +6% to +12% band below now describes a **better-staffed established
+practice** (next scenario milestone). Staff alone does not reach it: three
+more technologists cut lost bookings 70% but raise exams only 7% at
+documented demand (margin −18.7%), so that preset also needs more demand
+(referral growth) and is not yet built.
+
 | Preset | T30 operating margin | Levers |
 |---|---|---|
 | `struggling` | −8% to −2% | demand ×0.85, commercial share 35%, denial 10%, rent +20% |
 | `break-even` | −2% to +3% | demand ×0.92, denial 8% |
-| `moderate` (default) | +6% to +12% | as §8.2–8.3 |
+| `moderate` (better-staffed established practice; milestone) | +6% to +12% | as §8.2–8.3, more staff and more demand |
 | `high` | +18% to +25% | demand ×1.10, commercial 55%, rent −10% |
+| *established default (calibrated)* | *−12.5% measured* | *as §8.2–8.3, §6.3 roster* |
 
 A calibration test (§ ROADMAP testing) runs 20 seeds × 60 days per preset and
 asserts the band. Values in §8.2–8.3 are starting points to be tuned to hit
@@ -1667,6 +1693,12 @@ here together.
 | Supplies, contrast, PACS | ≈ $16.8 + $3 per exam × 1,650 | $32.7k |
 | Billing fee | 5% of collections (= net revenue in steady state) | $13.1k |
 | **Operating profit** | | **≈ $22k (margin ≈ 8.5%)** |
+
+*Step 18 finding:* this calculation counts ≈1,650 orders as ≈1,650 exams
+(no no-shows, cancellations, declines or walk-in abandonment) and needs the
+four technologists ~94% busy. With the default roster the practice
+completes ≈1,314–1,381; the calculation describes the better-staffed,
+higher-demand preset, not the default.
 
 Two full-time
 radiologists charged 100% to this site would push the practice into losses —

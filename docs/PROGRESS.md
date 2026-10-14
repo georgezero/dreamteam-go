@@ -7,6 +7,123 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 18 — Calibration: a struggling, capacity-constrained practice (v0.1.0-dev.18)
+
+**Owner decisions (2026-10-14).** Calibrate in order — volume and flow,
+reporting, economics, cross-seed — without forcing numbers. When the
+measurements showed the margin target conflicts with the documented roster,
+the owner chose: the default established practice is **struggling and
+capacity-constrained**; documented reimbursement, costs, staffing and
+operational assumptions stay; its margin is characterized, not forced; the
+6–12% band belongs to a separate better-staffed preset, added only if it
+can be configured cleanly (it cannot yet — next scenario milestone); the
+mini scenario is unchanged; no hiring, roster editing, new actions or
+artificial revenue.
+
+**Method.** A calibration suite behind the `calibration` build tag
+(`internal/sim/calib_test.go`, `calib_actions_test.go`): nine seeds, the
+180-day warm-up, 30- and 90-day windows from the takeover, daily 07:30
+worklist snapshots, per-person utilization, lost orders by reason, lead
+times by modality; and a scenario overlay (`DT_OVERLAY`, the scenario
+system's own merge) for trying candidate parameters without editing files.
+The pre-calibration nine-seed record is
+`docs/calibration/baseline-0.1.0-dev.15.json`; the full report with every
+table is `docs/calibration/step-18-report.md`.
+
+**Baseline diagnosis** (nine seeds, 90 days; 30-day in brackets):
+
+| | Mean (range) |
+|---|---|
+| Demand: orders + walk-ins a month | 1,423 + 224 = 1,647 |
+| Exams a month | 1,314 (1,293–1,335) [1,381] |
+| Tue–Fri visits a day | 59.9: XR 27.0, US 10.0, CT 15.1, MR 7.7 |
+| Lost bookings a month | 127: US 64, MR 29, CT 17, XR 17 (almost all "declined": earliest slot beyond tolerance) |
+| Walk-ins leaving | ≈100 a month, 45% of walk-ins |
+| No-shows / cancellations | 6.5% / 8.9% (as documented) |
+| Technologists busy (of duty) | Sam 82%, Morgan 82%, Casey 81%, Riley 76% |
+| Radiologists reading (of site blocks) | Avery 73%, Blake 63% |
+| Worklist at takeover / 07:30 Tue–Fri | ≈0 / mean 3.3, max 9–18 |
+| TAT p50 / p90 / over target | 32 min / 122 min / 5.2% |
+| Net revenue, labor, fixed, variable a month | $200.4k, $106.8k, $87.8k, $32.7k |
+| Operating margin | −14.0% (−15.6 to −13.0) [−12.5% (−16.9 to −11.1)] |
+
+**Bottlenecks.** Demand matches the design; capacity does not. XR and CT
+share technologist time most of the day (Sam and Riley saturated, rooms
+idle 60%+): walk-ins register, wait 30–112 min and leave. US is one
+technologist with 45-min slots for ~37-min exams (69% busy of staffed time,
+the most lost demand, lead p50 19 days). MR is one technologist with nine
+slots. Reading is over-provisioned for this volume (hence the empty
+evening worklist and fast TAT).
+
+**Experiments** (nine seeds; none applied): XR room times ×0.75 → +27
+exams a month; walk-in policy `accept_always` → no change; radiologist
+site allocation 45%/38% → unstable reading queue (TAT p50 20 h), 55%/45% →
+stable, ≈$5k a month cheaper (not applied: documented staffing kept); three
+more technologists → lost bookings −70% but exams +7% and margin −18.7%,
+because demand, no-shows and cancellations bind. The design's reference
+P&L counted ≈1,650 orders as ≈1,650 exams with technologists ~94% busy:
+internally inconsistent with its own roster (now noted in §8.6).
+
+**Parameters changed: none.** No change was defensible under the decision
+(each candidate either altered documented staffing or only marginally
+moved volume), so the established scenario's fingerprint is unchanged
+(`b1cbc2a0…`), and the golden references are unchanged: their inputs and
+outcomes did not change (rule: update only when they do). What changed is
+the characterization: design §5.1, §6.2, §8.6, ROADMAP step 18 and the
+V0.1 calibration criteria (now the better-staffed preset's), the briefing
+note, and the tests. The four references still name engine 0.1.0-dev.15; under
+0.1.0-dev.18 their outcomes reproduce exactly (`TestGoldenReferences`
+compares with the engine difference allowed and reported). The CLI without
+`-allow-engine-mismatch` reports them as not comparable (exit 5), as
+designed; regenerating them would only restamp the engine.
+
+**Actions** (30 days, nine seeds; demand identical across strategies,
+asserted):
+
+| Strategy | Exams | Lost | Margin |
+|---|---|---|---|
+| A no actions | 1,363 | 141 | −12.5% |
+| B US + MR extended to close (approved ahead), walk-ins until 19:00 | 1,431 | 94 | −9.4% |
+| C Riley extended (2nd XR/CT evenings), accept all walk-ins | 1,394 | 127 | −13.5% |
+| D all three extensions, accept all | 1,460 | 79 | −10.5% |
+| E decline walk-ins, FIFO | 1,394 | 178 | −12.6% |
+| F shortest-first worklist | 1,363 (TAT p50 22, p90 157 min) | 141 | −12.5% |
+
+Actions matter (B recovers a third of lost bookings; F halves TAT; E turns
+walk-ins who would leave into appointments) and every added hour is paid
+(117–194 h of approved overtime), but none reaches break-even: profitability
+needs hiring and demand growth (V0.4). No loophole found: demand is
+unchanged by any strategy, declined walk-ins stay counted, extensions are
+costed, worklist ordering uses published read times only.
+
+**Targets** (report table): demand, no-shows, MR utilization cap, US
+longest lead and most losses, cash/profit divergence — met. Tue–Fri
+visits (60 vs 65–85), XR and MR per day just below bands, US 80–90%
+utilization (unreachable with 45-min slots, no overbooking), radiologist
+capacity 105–115% (≈145%), 07:30 backlog 5–20 (mean 3.3), routine TAT 1–4 h
+(32 min), T30 margin 6–12% — missed by the default and assigned to the
+better-staffed preset.
+
+**Tests.** `TestEstablishedCharacterization` (three seeds, 30 days, broad
+bands: demand 1,450–1,850 a month, exams 1,250–1,500, margin −20% to −6%,
+25–65% of walk-ins leave, US loses most, TAT p50 < 2 h and morning backlog
+< 40, books reconcile). The calibration suite is tagged (≈30 s and ≈2 min).
+Determinism, replay (step 14), warm-up boundary (step 11), closing rules
+(step 8), demand independence and goldens are unchanged and pass:
+`go test -count=1 ./...`.
+
+**Limitations and next scenario milestone.**
+* The better-staffed `moderate` established practice (6–12%) needs more
+  staff and more demand; demand growth is V0.4 (referrals). Until then the
+  default is the only established practice.
+* The P&L workbook and `docs/ASSUMPTIONS.md` (ROADMAP step 18) move with it.
+* Reading capacity exceeds this practice's demand; a struggling owner might
+  reduce the site allocation — not a V0.1 action.
+* Forty-five percent walk-in abandonment is a consequence of the roster;
+  patience (30–120 min) is as documented.
+
+---
+
 ## Step 15 — Canonical results and golden references (v0.1.0-dev.15)
 
 **Owner decisions (2026-10-14).** Engine-version compatibility stays:

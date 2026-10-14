@@ -49,7 +49,7 @@ func TestDemandDeterministic(t *testing.T) {
 func exogenous(os []sim.OrderInfo) []sim.OrderInfo {
 	out := make([]sim.OrderInfo, len(os))
 	for i, o := range os {
-		o.State = ""
+		o.State, o.LostWhy = "", ""
 		out[i] = o
 	}
 	return out

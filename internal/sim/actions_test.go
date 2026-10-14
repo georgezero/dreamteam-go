@@ -232,7 +232,7 @@ func TestWalkInPolicies(t *testing.T) {
 	walkIns := func(w *sim.World) (all, late []sim.OrderInfo) {
 		for _, o := range w.Orders() {
 			if o.WalkIn && o.Received >= d0 {
-				o.State = ""
+				o.State, o.LostWhy = "", ""
 				all = append(all, o)
 				if o.Received >= at(d0, "14:00") {
 					late = append(late, o)

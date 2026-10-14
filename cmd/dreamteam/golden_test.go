@@ -117,6 +117,9 @@ func TestGoldenComparisonReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	// The reference may name an older engine (outcomes unchanged): stamp
+	// this one, so each case below changes exactly one thing.
+	golden = editGolden(t, golden, func(m map[string]any) { m["engine"] = version.Number })
 	out, _, code := runJSON(t, "-scenario", "mini", "-seed", "1", "-days", "7", "-verify-replay")
 	if code != 0 {
 		t.Fatal(code)
