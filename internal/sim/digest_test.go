@@ -84,3 +84,23 @@ func TestStateDigestDeterministic(t *testing.T) {
 		t.Fatal("state digest not a deterministic function of the run")
 	}
 }
+
+// Step 14 review finding 4: right after an unrelated event, before any
+// shared transaction, the state digests already agree (the cached time of
+// the last transaction is not state).
+func TestRegress14DigestRightAfterNoise(t *testing.T) {
+	cfg := miniConfig(t)
+	a := sim.New(cfg, rng.SeedFromInt(1))
+	b := sim.New(cfg, rng.SeedFromInt(1))
+	start := a.StartTime()
+	for _, w := range []*sim.World{a, b} {
+		w.Engine().RunUntil(start, nil)
+	}
+	b.PushLiveNoise(start + 1)
+	for _, w := range []*sim.World{a, b} {
+		w.Engine().RunUntil(start+1, nil)
+	}
+	if a.StateDigest() != b.StateDigest() {
+		t.Fatal("an unrelated event changed the state digest")
+	}
+}

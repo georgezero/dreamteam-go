@@ -5,6 +5,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -78,6 +80,9 @@ func Decode(raw []byte) (*File, error) {
 	var f File
 	if err := dec.Decode(&f); err != nil {
 		return nil, err
+	}
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, errors.New("scenario: data after the scenario")
 	}
 	return &f, nil
 }

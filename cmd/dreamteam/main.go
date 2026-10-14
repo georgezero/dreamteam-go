@@ -169,6 +169,9 @@ func runCmd(args []string, out io.Writer) int {
 			dec := json.NewDecoder(bytes.NewReader(raw))
 			dec.DisallowUnknownFields()
 			err = dec.Decode(&batches)
+			if err == nil && dec.Decode(&struct{}{}) != io.EOF {
+				err = fmt.Errorf("data after the list of batches")
+			}
 		}
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "dreamteam: actions:", err)

@@ -287,7 +287,7 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 	var hourSum int64
 	for k, v := range d.HourProfileBP {
 		h, err := strconv.Atoi(k)
-		if err != nil || len(k) != 2 || h < 0 || h > 23 || v < 0 {
+		if err != nil || k != fmt.Sprintf("%02d", h) || h < 0 || h > 23 || v < 0 {
 			c.fail("demand.hourProfileBP."+k, "keys are hours \"00\" … \"23\" with non-negative shares")
 			continue
 		}
@@ -499,7 +499,7 @@ func (c *checker) arrivals(f *File, cfg *sim.Config) {
 	var hsum int64
 	for k, v := range w.HourProfileBP {
 		h, err := strconv.Atoi(k)
-		if err != nil || len(k) != 2 || h < 0 || h > 23 || v < 0 {
+		if err != nil || k != fmt.Sprintf("%02d", h) || h < 0 || h > 23 || v < 0 {
 			c.fail("walkIns.hourProfileBP."+k, "keys are hours \"00\" … \"23\" with non-negative shares")
 			continue
 		}

@@ -50,6 +50,14 @@ func Open(ref string, seed int64) (*Session, error) {
 
 // FromFile starts a session on a resolved scenario; it can be saved.
 func FromFile(f *scenario.File, seed int64) (*Session, error) {
+	// A private copy: the caller may go on changing its file.
+	raw, err := scenario.Canonical(f)
+	if err != nil {
+		return nil, err
+	}
+	if f, err = scenario.Decode(raw); err != nil {
+		return nil, err
+	}
 	fp, err := scenario.Fingerprint(f)
 	if err != nil {
 		return nil, err

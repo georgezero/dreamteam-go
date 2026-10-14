@@ -8,10 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
@@ -108,10 +111,14 @@ var (
 // Digests computes the verification digests now.
 func (s *Session) Digests() Digests {
 	d := Digests{Log: s.w.LogHash(), Ledger: s.w.LedgerHash(), Actions: s.w.ActionDigest(), State: s.w.StateDigest()}
+	// Run binds the components to the scenario (its fingerprint: the rules
+	// still to come, which the state digest does not see) and the seed.
 	h := sha256.New()
-	for _, x := range []string{RecordSchema, d.Log, d.Ledger, d.Actions, d.State} {
+	for _, x := range []string{RecordSchema, s.fp, d.Log, d.Ledger, d.Actions, d.State} {
 		h.Write([]byte(x))
+		h.Write([]byte{0})
 	}
+	h.Write(binary.BigEndian.AppendUint64(nil, uint64(s.seed)))
 	h.Write(binary.BigEndian.AppendUint64(nil, uint64(s.Now())))
 	d.Run = hex.EncodeToString(h.Sum(nil))
 	return d
@@ -235,9 +242,31 @@ func writeAtomic(path string, data []byte) (err error) {
 	if err = os.Rename(tmp.Name(), path); err != nil {
 		return fmt.Errorf("save %s: %w", path, err)
 	}
-	if d, derr := os.Open(dir); derr == nil {
-		d.Sync() // make the rename durable where the platform allows
-		d.Close()
+	// Make the rename durable. The new file is in place either way; if the
+	// directory cannot be synced, say so rather than claim a durable save.
+	if err := syncDir(dir); err != nil {
+		return fmt.Errorf("save %s: written, but its durability is not confirmed (directory sync: %w)", path, err)
+	}
+	return nil
+}
+
+// failDirSync, if set (tests), fails the directory sync after the rename.
+var failDirSync func() error
+
+func syncDir(dir string) error {
+	if failDirSync != nil {
+		return failDirSync()
+	}
+	if runtime.GOOS == "windows" {
+		return nil // directories cannot be synced there; the rename is the guarantee
+	}
+	d, err := os.Open(dir)
+	if err != nil {
+		return err
+	}
+	defer d.Close()
+	if err := d.Sync(); err != nil && !errors.Is(err, syscall.EINVAL) && !errors.Is(err, syscall.ENOTSUP) {
+		return err // EINVAL/ENOTSUP: the file system does not sync directories
 	}
 	return nil
 }
@@ -262,7 +291,7 @@ func DecodeRecord(raw []byte) (*Record, error) {
 	if err := dec.Decode(&r); err != nil {
 		return nil, fmt.Errorf("%w: cannot parse (%v; truncated?)", ErrCorrupt, err)
 	}
-	if dec.More() {
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		return nil, fmt.Errorf("%w: data after the record", ErrCorrupt)
 	}
 	if r.Schema != RecordSchema {
@@ -336,8 +365,11 @@ func (rep *Report) String() string {
 // digests and returns the session at the saved time. err is ErrMismatch
 // (with the report) when anything differs.
 func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
+	// OK only once everything has been checked (fail sets it false; an
+	// early refusal leaves it false too).
 	rep := &Report{OK: true, Engine: r.Engine, Batches: len(r.Batches), Recorded: r.Digests, RecSummary: r.Summary}
 	if r.Engine != version.Number && !opts.AllowEngineMismatch {
+		rep.OK = false
 		return nil, rep, fmt.Errorf("%w: recorded by %s, this is %s (replay with the engine mismatch allowed to compare outcomes)",
 			ErrIncompatible, r.Engine, version.Number)
 	}
@@ -358,13 +390,38 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	}
 	f, err := scenario.Decode(r.Scenario.Resolved)
 	if err != nil {
+		rep.OK = false
 		return nil, rep, fmt.Errorf("%w: embedded scenario: %v", ErrCorrupt, err)
+	}
+	if r.Scenario.ID != f.ID || r.Scenario.Name != f.Name {
+		rep.fail("scenario identity %q (%s) does not match its content %q (%s)", r.Scenario.ID, r.Scenario.Name, f.ID, f.Name)
+		return nil, rep, ErrMismatch
 	}
 	s, err := FromFile(f, r.Seed)
 	if err != nil {
+		rep.OK = false
 		return nil, rep, err
 	}
 	cal := s.Calendar()
+	// Every readable copy of a time agrees with the seconds it describes,
+	// and every result belongs to its batch.
+	if cal.ISO(simtime.Time(r.StartSec)) != r.Start || cal.ISO(simtime.Time(r.UntilSec)) != r.Until {
+		rep.fail("times: start %q, until %q do not match %d, %d", r.Start, r.Until, r.StartSec, r.UntilSec)
+	}
+	for _, b := range r.Batches {
+		if cal.ISO(simtime.Time(b.AtSec)) != b.Time {
+			rep.fail("batch %d: time %q does not match %d", b.Batch, b.Time, b.AtSec)
+		}
+		for _, res := range b.Results {
+			if res.Batch != b.Batch || res.Time != b.Time {
+				rep.fail("batch %d at %s holds a result of batch %d at %s", b.Batch, b.Time, res.Batch, res.Time)
+				break
+			}
+		}
+	}
+	if !rep.OK {
+		return s, rep, ErrMismatch
+	}
 	if got := cal.Date(0).String(); got != r.EpochDate || int64(s.w.StartTime()) != r.StartSec {
 		rep.fail("calendar: epoch %s, takeover %s; recorded %s, %s", got, cal.ISO(s.w.StartTime()), r.EpochDate, r.Start)
 		return s, rep, ErrMismatch
@@ -402,6 +459,7 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 					break
 				}
 			}
+			rep.RepSummary = s.summary() // where the replay stood
 			return s, rep, ErrMismatch
 		}
 	}
@@ -411,6 +469,9 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	}
 	advance(simtime.Time(r.UntilSec))
 	rep.Replayed, rep.RepSummary = s.Digests(), s.summary()
+	if rep.RepSummary != r.Summary {
+		rep.fail("summary: recorded %+v, replayed %+v", r.Summary, rep.RepSummary)
+	}
 	for _, c := range []struct{ name, rec, got string }{
 		{"log", r.Digests.Log, rep.Replayed.Log}, {"ledger", r.Digests.Ledger, rep.Replayed.Ledger},
 		{"actions", r.Digests.Actions, rep.Replayed.Actions}, {"state", r.Digests.State, rep.Replayed.State},

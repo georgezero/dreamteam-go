@@ -52,3 +52,14 @@ func TestRunSaveReplayVerify(t *testing.T) {
 		t.Fatalf("out-of-range batch: exit %d", code)
 	}
 }
+
+// Step 14 review finding 5: an actions file with anything after the batch
+// list is refused, not partly applied.
+func TestRegress14ActionsFileTrailing(t *testing.T) {
+	p := filepath.Join(t.TempDir(), "a.json")
+	os.WriteFile(p, []byte(`[] [{"time": "2026-10-13T07:00:00", "actions": [{"type": "set_worklist_policy", "policy": "fifo"}]}]`), 0o644)
+	var out bytes.Buffer
+	if code := runCmd([]string{"-scenario", "mini", "-days", "1", "-actions", p}, &out); code != 1 {
+		t.Fatalf("exit %d:\n%s", code, out.String())
+	}
+}

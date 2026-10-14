@@ -7,6 +7,32 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 14 remediation — replay review findings (v0.1.0-dev.14.1)
+
+A focused review of replay correctness (`docs/reviews/step-14-astra-review.md`,
+gpt-6-astra at high reasoning, read-only snapshot of `16c53a2`) returned
+NO GO with eight findings; all were confirmed, each with a regression test
+that fails on `16c53a2` (finding 7 by inspection: no injection point
+existed) and passes after the smallest fix. No simulation outcome changed.
+The suspected pause-then-act mismatch was ruled out.
+
+| # | Finding | Fix |
+|---|---|---|
+| 1 (high) | Hour keys like `"+8"` were accepted beside `"08"`: compilation depended on map order | only canonical `"00"`–`"23"` |
+| 2 (high) | The run digest did not bind the scenario: future rules could differ under the same digest | run digest includes the scenario fingerprint and seed |
+| 3 (medium) | Sessions kept the caller's scenario object: later edits broke saves | private copy |
+| 4 (medium) | The state digest included the last-transaction time cache | excluded |
+| 5 (medium) | Trailing `]`/`}` after a record, data after a scenario, a second actions array accepted | EOF required |
+| 6 (medium) | Re-signed edits to batch numbers, times, scenario ID/name, start/until and summary verified | all checked against what they describe |
+| 7 (medium) | Directory-sync failure after rename reported as a durable save | reported; session stays unsaved |
+| 8 (low) | Refusals printed "OK … digests match"; mismatch summaries were zeros | OK only when fully checked; real replay position reported |
+
+Records saved by `16c53a2` no longer verify (the run digest changed); they
+replay with `-allow-engine-mismatch`. Remaining test gaps are listed in the
+review document.
+
+---
+
 ## Step 14 — Sessions, replay and digests (v0.1.0-dev.14)
 
 ### Part A — playtest (before step 14)
