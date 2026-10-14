@@ -43,3 +43,18 @@ hashing and the log together are about half the time. **Risk for step 11:**
 with imaging, reading and finance still to add, the < 1.5 s warm-up target
 needs the mitigations noted under step 6 (hash the warm-up log per day,
 build warm-up log text lazily, or cache the built start state).
+
+## 2026-10-14 — V0.1 step 8 (same machine, load average ≈ 5.5 from other work)
+
+| Benchmark | Command | Result |
+|---|---|---|
+| Mini scenario, 180 days, now with registration, imaging dispatch, exam timing, hold-over and closing rules | `go test ./internal/sim -run X -bench Mini180 -benchtime 5x -count 2` | 1.26–1.69 s/op, 78 MB/op, 1.5M allocs/op |
+
+Profile: SHA-256 ≈ 27% (keyed draws plus the running log hash), formatting
+log text ≈ 19%, dispatch ≈ 26% (imaging match 11%, room states 7%),
+FirstFit ≈ 8%. **The step-11 warm-up (< 1.5 s, with reading and finance
+still to come) now needs the mitigations**: build warm-up log text lazily
+or not at all (hash structured fields), hash the warm-up log per day, and
+cache the built start state per scenario and seed if it is still over.
+The load from other processes during these runs inflates the figures; a
+quiet-machine measurement goes with step 11.

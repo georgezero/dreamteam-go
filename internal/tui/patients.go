@@ -69,9 +69,13 @@ func shortPunct(p string) string {
 
 func statusStyle(s string) interface{ Render(...string) string } {
 	switch s {
-	case api.PatientWaiting:
+	case api.PatientWaiting, api.PatientArrived, api.PatientRegistering:
 		return openStyle
-	case api.PatientMissed, api.PatientLeft, api.PatientUnseen, api.PatientLost:
+	case api.PatientInExam:
+		return alertStyle
+	case api.PatientDone:
+		return dimStyle
+	case api.PatientMissed, api.PatientLeft, api.PatientLost:
 		return warnStyle
 	case api.PatientNoShow:
 		return alertStyle

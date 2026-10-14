@@ -1,7 +1,6 @@
 package sim
 
 import (
-	"errors"
 	"fmt"
 	"slices"
 	"strings"
@@ -16,15 +15,44 @@ const (
 	offDuty empStatus = iota
 	available
 	onBreak
+	busy
+)
+
+type taskKind uint8
+
+const (
+	taskNone taskKind = iota
+	taskReg           // registering a visit
+	taskExam          // running an exam
+	taskDoc           // documentation after an exam
 )
 
 type employee struct {
 	cfg     *EmployeeConfig
 	shift   int // index into state.plan.Shifts; -1 when off today
 	status  empStatus
-	done    bool // today's shift has ended
+	done    bool // today's shift has ended and they went home
 	reading bool // radiologist inside a site reading block
 	gen     uint32
+
+	task      taskKind
+	taskVisit int
+
+	// Today's shift in absolute time, and its hard cap
+	// (start + MaxShiftHours, SIMULATION_DESIGN §6.4).
+	startAt, endAt, capAt simtime.Time
+	over                  bool  // past the scheduled shift end, still on duty
+	held                  bool  // over and kept on because patients need them (§6.9)
+	heldRooms             []int // rooms a held technologist staffs
+
+	breakDue   int          // index of a break deferred because they were busy; -1 if none
+	breakDueAt simtime.Time // when the deferred break was due
+	breakFrom  simtime.Time
+	breakUntil simtime.Time
+	breakTaken simtime.Duration // unpaid break time taken today
+
+	otToday  simtime.Duration // overtime worked today (past scheduled end)
+	weekPaid simtime.Duration // paid time this week, for weekly overtime pay
 }
 
 type roomState uint8
@@ -33,12 +61,18 @@ const (
 	roomClosed roomState = iota
 	roomUnstaffed
 	roomIdle
+	roomOccupied
 )
 
 type room struct {
 	cfg   *RoomConfig
 	state roomState
 	staff []int // employees staffing the room, in employee order
+	visit int   // visit in the room, -1 when empty
+	// Eligibility wake (§3.4 rule 4): the latest pending wake's generation
+	// and time.
+	wakeGen uint32
+	wakeAt  simtime.Time
 }
 
 // materialize turns employee i's roster entry for today into events. The
@@ -48,10 +82,14 @@ func (st *state) materialize(e *Engine, i int) {
 	emp.gen++
 	emp.shift = st.plan.ByEmp[i]
 	emp.status, emp.done, emp.reading = offDuty, false, false
+	emp.task, emp.taskVisit, emp.over, emp.held, emp.heldRooms = taskNone, -1, false, false, nil
+	emp.breakDue, emp.breakTaken, emp.otToday = -1, 0, 0
 	if emp.shift < 0 {
 		return
 	}
 	s := &st.plan.Shifts[emp.shift]
+	emp.startAt, emp.endAt = st.cal.At(st.day, s.From), st.cal.At(st.day, s.To)
+	emp.capAt = emp.startAt.Add(st.cfg.Policies.MaxShift)
 	push := func(at simtime.Duration, c Class, k Kind, b int64) {
 		e.Push(Event{At: st.cal.At(st.day, at), Class: c, Kind: k, Gen: emp.gen, A: int64(i), B: b})
 	}
@@ -59,7 +97,6 @@ func (st *state) materialize(e *Engine, i int) {
 	push(s.To, ClassCapacityDown, kindShiftEnd, 0)
 	for k, b := range s.Breaks {
 		push(b.From, ClassCapacityDown, kindBreakStart, int64(k))
-		push(b.To, ClassCapacityUp, kindBreakEnd, int64(k))
 	}
 	for k, b := range st.plan.Reading[i] {
 		push(b.From, ClassCapacityUp, kindBlockStart, int64(k))
@@ -72,7 +109,8 @@ func (st *state) materialize(e *Engine, i int) {
 }
 
 func (st *state) staffEvent(e *Engine, ev Event) {
-	emp := &st.emps[ev.A]
+	i := int(ev.A)
+	emp := &st.emps[i]
 	s := &st.plan.Shifts[emp.shift]
 	name := emp.cfg.Name
 	switch ev.Kind {
@@ -80,19 +118,156 @@ func (st *state) staffEvent(e *Engine, ev Event) {
 		emp.status = available
 		st.emit(e.Now(), api.Info, "staff", name+" on duty · "+st.describe(emp, s))
 	case kindShiftEnd:
-		emp.status, emp.done, emp.reading = offDuty, true, false
-		st.emit(e.Now(), api.Info, "staff", name+" off duty")
+		emp.over = true
+		emp.heldRooms = st.roomsAtShiftEnd(i)
+		if emp.breakDue >= 0 {
+			st.skipBreak(e, i)
+		}
+		// Busy: finish-in-progress. Either way, dispatch decides after this
+		// instant's coverage checks whether they stay or go home.
 	case kindBreakStart:
-		emp.status = onBreak
-		st.emit(e.Now(), api.Info, "staff", fmt.Sprintf("%s on break until %s", name, simtime.FormatClock(s.Breaks[ev.B].To)))
+		b := s.Breaks[ev.B]
+		if emp.status == busy {
+			emp.breakDue, emp.breakDueAt = int(ev.B), e.Now()
+			return
+		}
+		st.startBreak(e, i, b.To-b.From)
 	case kindBreakEnd:
 		emp.status = available
+		emp.breakTaken += e.Now().Sub(emp.breakFrom)
 		st.emit(e.Now(), api.Info, "staff", name+" back from break")
 	case kindBlockStart:
 		emp.reading = true
 	case kindBlockEnd:
 		emp.reading = false
 	}
+}
+
+func (st *state) startBreak(e *Engine, i int, length simtime.Duration) {
+	emp := &st.emps[i]
+	emp.status, emp.breakFrom, emp.breakUntil = onBreak, e.Now(), e.Now().Add(length)
+	text := fmt.Sprintf("%s on break until %s", emp.cfg.Name, st.cal.Clock(emp.breakUntil))
+	if emp.breakDue >= 0 {
+		text += fmt.Sprintf(" (delayed %s)", e.Now().Sub(emp.breakDueAt))
+	}
+	emp.breakDue = -1
+	st.emit(e.Now(), api.Info, "staff", text)
+	e.Push(Event{At: emp.breakUntil, Class: ClassCapacityUp, Kind: kindBreakEnd, Gen: emp.gen, A: int64(i)})
+}
+
+func (st *state) skipBreak(e *Engine, i int) {
+	emp := &st.emps[i]
+	emp.breakDue = -1
+	st.dem.flowToday.skippedBreaks++
+	st.dem.flowTotal.skippedBreaks++
+	st.emit(e.Now(), api.Warn, "staff", emp.cfg.Name+" skipped a break (busy)")
+}
+
+// taskDone frees employee i after a task: a deferred break starts if it is
+// still within the deferral limit and ends before the shift does. Past the
+// shift end, dispatch decides whether they stay (§6.9).
+func (st *state) taskDone(e *Engine, i int) {
+	emp := &st.emps[i]
+	emp.status, emp.task, emp.taskVisit = available, taskNone, -1
+	if emp.breakDue >= 0 {
+		b := st.plan.Shifts[emp.shift].Breaks[emp.breakDue]
+		length := b.To - b.From
+		if e.Now() <= emp.breakDueAt.Add(st.cfg.Policies.BreakDeferMax) && e.Now().Add(length) <= emp.endAt {
+			st.startBreak(e, i, length)
+		} else {
+			st.skipBreak(e, i)
+		}
+	}
+}
+
+// endOrHold decides, for an idle employee past their scheduled shift end,
+// whether they stay (held over) or go home.
+func (st *state) endOrHold(e *Engine, i int) {
+	emp := &st.emps[i]
+	if why := st.neededFor(i); why != "" {
+		if !emp.held {
+			st.hold(e, i, why)
+		}
+		return
+	}
+	st.goOff(e, i)
+}
+
+func (st *state) hold(e *Engine, i int, why string) {
+	emp := &st.emps[i]
+	emp.held = true
+	st.dem.flowToday.heldOver++
+	st.dem.flowTotal.heldOver++
+	st.emit(e.Now(), api.Warn, "staff", fmt.Sprintf("%s stays past shift end: %s (overtime)", emp.cfg.Name, why))
+}
+
+// goOff sends employee i home and books their overtime and paid time.
+func (st *state) goOff(e *Engine, i int) {
+	emp := &st.emps[i]
+	now := e.Now()
+	ot := max(0, now.Sub(emp.endAt))
+	paid := now.Sub(emp.startAt) - emp.breakTaken
+	cost := st.overtimeCost(emp, paid, ot)
+	emp.weekPaid += paid
+	emp.otToday += ot
+	emp.status, emp.done, emp.reading, emp.held, emp.over = offDuty, true, false, false, false
+	text := emp.cfg.Name + " off duty"
+	if ot > 0 {
+		st.dem.flowToday.otSec += ot
+		st.dem.flowTotal.otSec += ot
+		st.dem.flowToday.otCost += cost
+		st.dem.flowTotal.otCost += cost
+		text += fmt.Sprintf(" after %s overtime", ot)
+		if cost > 0 {
+			text += fmt.Sprintf(" ($%d)", (cost+50)/100)
+		}
+	}
+	st.emit(now, api.Info, "staff", text)
+}
+
+// overtimeCost prices the overtime part of a day's paid time for hourly
+// staff: at the base rate while the week is under WeeklyHours, then at
+// ×OvertimeBP (§6.4). Salaried staff cost nothing extra.
+func (st *state) overtimeCost(emp *employee, paid, ot simtime.Duration) int64 {
+	if emp.cfg.Pay != Hourly || ot <= 0 {
+		return 0
+	}
+	before := emp.weekPaid + paid - ot // paid time this week before the overtime began
+	regular := min(ot, max(0, st.cfg.Policies.WeeklyHours-before))
+	premium := ot - regular
+	rate := emp.cfg.RateCents
+	return (rate*int64(regular) + rate*int64(premium)*st.cfg.Policies.OvertimeBP/10_000) / 3600
+}
+
+// roomsAtShiftEnd lists the rooms technologist i staffs at the last second
+// of the shift: the rooms they keep if held over.
+func (st *state) roomsAtShiftEnd(i int) []int {
+	emp := &st.emps[i]
+	if emp.cfg.Role != Technologist {
+		return nil
+	}
+	s := &st.plan.Shifts[emp.shift]
+	var out []int
+	for r := range st.cfg.Rooms {
+		if staffs(emp.cfg, s, st.cfg.Rooms[r], s.To-1) {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// techStaffs reports whether technologist i, on duty, staffs room r now:
+// by roster (assignment or cover window) during the shift, by the rooms
+// kept at shift end when held over.
+func (st *state) techStaffs(i, r int, clock simtime.Duration) bool {
+	emp := &st.emps[i]
+	if emp.cfg.Role != Technologist || (emp.status != available && emp.status != busy) {
+		return false
+	}
+	if emp.over {
+		return slices.Contains(emp.heldRooms, r)
+	}
+	return staffs(emp.cfg, &st.plan.Shifts[emp.shift], st.cfg.Rooms[r], clock)
 }
 
 // describe summarizes a shift for the log: "XR, covers CT until 11:30".
@@ -137,35 +312,46 @@ func (st *state) roomByID(id string) *RoomConfig {
 	panic("sim: unknown room " + id)
 }
 
-// restaff recomputes every room's Closed/Unstaffed/Idle state at the end of
-// a transaction (SIMULATION_DESIGN §2.5) and logs changes while open.
+// restaff recomputes every room's state at the end of a transaction
+// (SIMULATION_DESIGN §2.5, §6.9) and logs staffing changes while open.
+// After scheduled close a room stays in service only while it has an exam
+// or admitted patients waiting for its modality.
 func (st *state) restaff(now simtime.Time) {
 	clock := simtime.ClockOf(now)
 	for r := range st.rooms {
 		rm := &st.rooms[r]
 		var staff []int
-		next := roomClosed
-		if st.open {
-			for i := range st.emps {
-				emp := &st.emps[i]
-				if emp.status == available && staffs(emp.cfg, &st.plan.Shifts[emp.shift], *rm.cfg, clock) {
-					staff = append(staff, i)
-				}
+		for i := range st.emps {
+			if st.techStaffs(i, r, clock) {
+				staff = append(staff, i)
 			}
+		}
+		next := roomClosed
+		switch {
+		case rm.visit >= 0:
+			next = roomOccupied
+		case st.open || (st.closing && st.onSiteFor(rm.cfg.Modality) > 0):
 			next = roomUnstaffed
 			if len(staff) > 0 {
 				next = roomIdle
 			}
 		}
+		if next == roomClosed {
+			staff = nil
+		}
 		prev := rm.state
 		rm.state, rm.staff = next, staff
+		if !st.open {
+			continue
+		}
 		label := rm.cfg.Modality
+		staffed := func(s roomState) bool { return s == roomIdle || s == roomOccupied }
 		switch {
-		case prev == roomIdle && next == roomUnstaffed:
+		case staffed(prev) && next == roomUnstaffed:
 			st.emit(now, api.Info, "rooms", label+" unstaffed")
 		case prev == roomClosed && next == roomUnstaffed:
 			st.emit(now, api.Info, "rooms", label+" unstaffed at opening")
-		case prev == roomUnstaffed && next == roomIdle:
+		case prev == roomUnstaffed && staffed(next):
 			st.emit(now, api.Info, "rooms", label+" staffed · "+st.names(staff))
 		}
 	}
@@ -181,13 +367,13 @@ func (st *state) names(idx []int) string {
 
 // desk returns who registers patients now.
 func (st *state) desk() (level int, by int) {
-	if !st.open {
+	if !st.open && !st.closing {
 		return DeskClosed, -1
 	}
 	level, by = DeskSelf, -1
 	for i := range st.emps {
 		emp := &st.emps[i]
-		if emp.status != available {
+		if emp.status == offDuty || emp.status == onBreak {
 			continue
 		}
 		if l := deskLevel(emp.cfg); l > level {
@@ -198,45 +384,79 @@ func (st *state) desk() (level int, by int) {
 }
 
 func (st *state) checkStaffing() error {
-	clock := simtime.ClockOf(st.now)
 	for i := range st.emps {
 		emp := &st.emps[i]
-		if emp.status != offDuty && emp.shift < 0 {
+		if emp.status == offDuty {
+			if emp.task != taskNone || emp.held {
+				return fmt.Errorf("%s off duty with a task or held", emp.cfg.Name)
+			}
+			if emp.reading {
+				return fmt.Errorf("%s reading while off duty", emp.cfg.Name)
+			}
+			continue
+		}
+		if emp.shift < 0 {
 			return fmt.Errorf("%s on duty without a shift", emp.cfg.Name)
 		}
-		if emp.status == available && !st.plan.Shifts[emp.shift].OnDutyAt(clock) {
-			return fmt.Errorf("%s available outside planned duty at %s", emp.cfg.Name, simtime.FormatClock(clock))
-		}
-		if emp.reading && emp.status == offDuty {
-			return fmt.Errorf("%s reading while off duty", emp.cfg.Name)
+		switch {
+		case st.now < emp.startAt:
+			return fmt.Errorf("%s on duty before the shift starts", emp.cfg.Name)
+		case st.now > emp.capAt:
+			return fmt.Errorf("%s on duty past the %s shift cap", emp.cfg.Name, st.cfg.Policies.MaxShift)
+		case !emp.over && st.now >= emp.endAt:
+			return fmt.Errorf("%s past shift end but not marked over", emp.cfg.Name)
+		case (emp.status == busy) != (emp.task != taskNone):
+			return fmt.Errorf("%s status %d with task %d", emp.cfg.Name, emp.status, emp.task)
+		case emp.held && !emp.over:
+			return fmt.Errorf("%s held but not past shift end", emp.cfg.Name)
 		}
 	}
-	for _, rm := range st.rooms {
+	for r, rm := range st.rooms {
 		switch {
-		case rm.state == roomClosed && st.open, rm.state != roomClosed && !st.open:
-			return fmt.Errorf("room %s state %d with practice open=%v", rm.cfg.ID, rm.state, st.open)
+		case rm.state == roomOccupied:
+			if rm.visit < 0 {
+				return fmt.Errorf("room %s occupied with no visit", rm.cfg.ID)
+			}
+			v := &st.dem.visits[rm.visit]
+			if v.state != visitInExam || v.room != r || st.emps[v.examBy].task != taskExam || st.emps[v.examBy].taskVisit != rm.visit {
+				return fmt.Errorf("room %s occupancy inconsistent with %s", rm.cfg.ID, visitID(rm.visit))
+			}
+		case rm.visit >= 0:
+			return fmt.Errorf("room %s has a visit but is %d", rm.cfg.ID, rm.state)
 		case rm.state == roomIdle && len(rm.staff) == 0, rm.state == roomUnstaffed && len(rm.staff) > 0:
 			return fmt.Errorf("room %s state %d with %d staff", rm.cfg.ID, rm.state, len(rm.staff))
+		case rm.state != roomClosed && !st.open && !st.closing:
+			return fmt.Errorf("room %s in service while the practice is closed", rm.cfg.ID)
 		}
 		for _, i := range rm.staff {
 			emp := &st.emps[i]
-			if emp.status != available || emp.cfg.Role != Technologist || !emp.cfg.HasSkill(rm.cfg.Modality) {
-				return errors.New("room " + rm.cfg.ID + " staffed by an unavailable or unqualified employee")
+			if emp.cfg.Role != Technologist || !emp.cfg.HasSkill(rm.cfg.Modality) {
+				return fmt.Errorf("room %s staffed by an unqualified employee", rm.cfg.ID)
 			}
 		}
 	}
 	return nil
 }
 
-var roomStateNames = [...]string{roomClosed: api.RoomClosed, roomUnstaffed: api.RoomUnstaffed, roomIdle: api.RoomIdle}
+var roomStateNames = [...]string{roomClosed: api.RoomClosed, roomUnstaffed: api.RoomUnstaffed,
+	roomIdle: api.RoomIdle, roomOccupied: api.RoomOccupied}
 
 var deskNames = [...]string{DeskClosed: api.DeskClosed, DeskSelf: api.DeskSelf, DeskOps: api.DeskOps, DeskStaffed: api.DeskStaffed}
 
 func span(s Span) string { return simtime.FormatClock(s.From) + "–" + simtime.FormatClock(s.To) }
 
+// overtimeNow is employee i's overtime today including time still running.
+func (st *state) overtimeNow(i int, now simtime.Time) simtime.Duration {
+	emp := &st.emps[i]
+	ot := emp.otToday
+	if emp.status != offDuty && emp.over {
+		ot += max(0, now.Sub(emp.endAt))
+	}
+	return ot
+}
+
 // observeStaff fills the room, staff and desk parts of an observation.
 func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
-	clock := simtime.ClockOf(now)
 	if h := st.plan.Hours; h != nil {
 		o.Practice.Hours = span(*h)
 	}
@@ -246,6 +466,9 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 		for _, i := range rm.staff {
 			r.StaffBy = append(r.StaffBy, st.emps[i].cfg.ID)
 			staffing[i] = append(staffing[i], rm.cfg.ID)
+		}
+		if rm.visit >= 0 {
+			r.Current = st.examView(rm.visit, now)
 		}
 		o.Rooms = append(o.Rooms, r)
 	}
@@ -260,7 +483,7 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 		emp := &st.emps[i]
 		x := api.Employee{ID: emp.cfg.ID, Name: emp.cfg.Name, Role: string(emp.cfg.Role),
 			Skills: slices.Clone(emp.cfg.Skills), Status: api.StaffOff, SiteBP: emp.cfg.SiteAllocationBP,
-			Rooms: staffing[i]}
+			Rooms: staffing[i], Held: emp.held, OvertimeMin: int64(st.overtimeNow(i, now) / simtime.Minute)}
 		if emp.shift >= 0 {
 			s := &st.plan.Shifts[emp.shift]
 			x.Shift, x.Remote = span(s.Span), s.Remote
@@ -270,12 +493,9 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 					x.StartsAt = simtime.FormatClock(s.From)
 				}
 			case onBreak:
-				x.Status = api.StaffOnBreak
-				for _, b := range s.Breaks {
-					if b.Contains(clock) {
-						x.EndsAt = simtime.FormatClock(b.To)
-					}
-				}
+				x.Status, x.EndsAt = api.StaffOnBreak, st.cal.Clock(emp.breakUntil)
+			case busy:
+				x.Status, x.EndsAt, x.Task = api.StaffBusy, simtime.FormatClock(s.To), st.taskText(i)
 			case available:
 				x.Status, x.EndsAt = api.StaffOnDuty, simtime.FormatClock(s.To)
 				if emp.cfg.Role == Radiologist {
@@ -293,4 +513,23 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 	if by >= 0 {
 		o.Desk.By = st.emps[by].cfg.ID
 	}
+}
+
+func (st *state) taskText(i int) string {
+	emp := &st.emps[i]
+	if emp.taskVisit < 0 {
+		return ""
+	}
+	v := &st.dem.visits[emp.taskVisit]
+	o := &st.dem.orders[v.order]
+	p := patientID(o.patient)
+	switch emp.task {
+	case taskReg:
+		return "registering " + p
+	case taskExam:
+		return st.cfg.Rooms[v.room].Modality + " exam " + p
+	case taskDoc:
+		return "documenting " + p
+	}
+	return ""
 }

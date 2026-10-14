@@ -2,7 +2,6 @@ package sim
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/rng"
@@ -11,11 +10,10 @@ import (
 
 // Patient flow (SIMULATION_DESIGN §2.9–2.10, §5.6–5.8): scheduled patients
 // arrive early, on time or late, or not at all; walk-ins arrive with an
-// order but no appointment. An arrived patient opens a visit and waits.
-// Registration and imaging come in step 8, so in V0.1 step 7 every visit
-// waits until it ends: a walk-in may run out of patience, and patients
-// still waiting when the practice closes are sent home unseen (no exam
-// starts after closing, §6.5).
+// order but no appointment. An arrived patient is admitted (opens a visit)
+// unless nobody can serve them safely today, in which case they are
+// rescheduled on the spot. Admitted patients are registered and imaged,
+// after scheduled close if need be (§6.9; dispatch in ops.go).
 //
 // Hidden until they happen: whether a patient will come, when, and how
 // long a walk-in will wait. The arrival and grace events are queued at the
@@ -25,11 +23,18 @@ import (
 type visitState uint8
 
 const (
-	visitWaiting visitState = iota // arrived; not yet registered or imaged
-	visitLeft                      // walk-in ran out of patience
-	visitUnseen                    // still waiting when the practice closed
+	visitArrived     visitState = iota // admitted, waiting to register
+	visitRegistering                   // at the desk
+	visitWaiting                       // registered, waiting for the exam
+	visitInExam                        // in the room
+	visitDone                          // imaged and departed
+	visitLeft                          // walk-in ran out of patience
+	visitRescheduled                   // no safe coverage today; reason recorded
 	numVisitStates
 )
+
+// onSite reports whether a visit is still in the building.
+func (v *visit) onSite() bool { return v.state <= visitInExam }
 
 type visit struct {
 	order   int
@@ -41,14 +46,29 @@ type visit struct {
 	afterGrace bool // arrived after the appointment was marked missed
 	state      visitState
 	endedAt    simtime.Time
+	attempt    int64 // the order's attempt, for keyed exam and registration draws
+
+	regBy, examBy      int // employees; -1 until then
+	room               int // exam room; -1 until the exam starts
+	regStart, regEnd   simtime.Time
+	examStart, examEnd simtime.Time
+	afterHours         bool   // exam started after scheduled close
+	reason             string // why it was rescheduled
 }
 
-// flowCounts are patient-flow event counters.
+// flowCounts are patient-flow and operations counters.
 type flowCounts struct {
 	arrived, early, late, afterGrace int // scheduled patients
 	walkIns, walkInsBooked           int // walk-ins; those sent away with an appointment
 	missed, noShows, rescheduled     int
-	left, unseen                     int
+	left                             int
+	registered, selfRegistered       int
+	examsStarted, examsDone          int
+	afterHours                       int // exams started after scheduled close
+	noCoverage                       int // admitted patients rescheduled: no safe coverage
+	heldOver, skippedBreaks          int
+	otSec                            simtime.Duration
+	otCost                           int64 // cents
 }
 
 func visitID(i int) string { return fmt.Sprintf("V%05d", i+1) }
@@ -129,6 +149,10 @@ func (st *state) arrive(e *Engine, ai int) {
 		st.reschedule(e, ai, who+": arrived after closing")
 		return
 	}
+	if ok, why := st.servable(o.exam, e.Now()); !ok {
+		st.reschedule(e, ai, who+": "+why)
+		return
+	}
 	if a.state == apptMissed {
 		if st.cfg.Policies.Late == "reschedule" {
 			st.reschedule(e, ai, fmt.Sprintf("%s: arrived %s late, past the grace period", who, late))
@@ -139,7 +163,7 @@ func (st *state) arrive(e *Engine, ai int) {
 		st.dem.flowTotal.afterGrace++
 	}
 	missed := a.state == apptMissed
-	vi := st.openVisit(e, a.order, ai, late)
+	vi := st.openVisit(e, a.order, ai, late, a.attempt)
 	st.dem.visits[vi].afterGrace = missed
 	a.state, a.visit = apptArrived, vi
 	for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
@@ -173,9 +197,10 @@ func punctuality(d simtime.Duration) string {
 
 // openVisit creates a visit for an arriving patient. Visit IDs are
 // allocated here, at disclosure.
-func (st *state) openVisit(e *Engine, oi, ai int, late simtime.Duration) int {
+func (st *state) openVisit(e *Engine, oi, ai int, late simtime.Duration, attempt int64) int {
 	vi := len(st.dem.visits)
-	st.dem.visits = append(st.dem.visits, visit{order: oi, appt: ai, arrived: e.Now(), late: late})
+	st.dem.visits = append(st.dem.visits, visit{order: oi, appt: ai, arrived: e.Now(), late: late,
+		attempt: attempt, regBy: -1, examBy: -1, room: -1})
 	st.dem.waiting = append(st.dem.waiting, vi)
 	ds := st.dem.days[st.day]
 	ds.visits = append(ds.visits, vi)
@@ -197,27 +222,6 @@ func (st *state) reschedule(e *Engine, ai int, why string) {
 	st.offer(e, a.order, st.day+1, apptID(ai)+" "+why+"; rescheduled", "")
 }
 
-// closeVisits sends home everyone still waiting at closing time: no exam
-// starts after the practice closes.
-func (st *state) closeVisits(e *Engine) {
-	if len(st.dem.waiting) == 0 {
-		return
-	}
-	var ids []string
-	for _, vi := range st.dem.waiting {
-		v := &st.dem.visits[vi]
-		v.state, v.endedAt = visitUnseen, e.Now()
-		o := &st.dem.orders[v.order]
-		o.state, o.endedAt = orderUnseen, e.Now()
-		st.dem.flowToday.unseen++
-		st.dem.flowTotal.unseen++
-		ids = append(ids, patientID(o.patient))
-	}
-	st.dem.waiting = st.dem.waiting[:0]
-	st.emit(e.Now(), api.Warn, "patients", fmt.Sprintf("%d patient%s still waiting sent home unseen: %s",
-		len(ids), plural(len(ids)), strings.Join(ids, " ")))
-}
-
 func plural(n int) string {
 	if n == 1 {
 		return ""
@@ -229,6 +233,9 @@ func plural(n int) string {
 // (SIMULATION_DESIGN §3.4.2, §5.8). A no-show may ask for a new date; that
 // request is disclosed the next morning.
 func (st *state) accountingClose(e *Engine) {
+	if len(st.dem.waiting) > 0 {
+		fail("%d visits still on site at accounting close (first %s)", len(st.dem.waiting), visitID(st.dem.waiting[0]))
+	}
 	n := 0
 	for _, ai := range st.dem.days[st.day].appts {
 		a := &st.dem.appts[ai]
@@ -312,42 +319,26 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	st.dem.flowTotal.walkIns++
 	head := fmt.Sprintf("Walk-in %s %s", patientID(o.patient), st.examLabel(exam))
 
-	if st.cfg.Policies.WalkIn == "schedule_later" || !st.staffedLaterToday(st.cfg.Catalog[exam].Modality) {
+	ok, why := st.servable(exam, e.Now())
+	if st.cfg.Policies.WalkIn == "schedule_later" {
+		ok, why = false, "walk-in policy: schedule later"
+	}
+	if !ok {
 		st.dem.flowToday.walkInsBooked++
 		st.dem.flowTotal.walkInsBooked++
-		why := "no " + st.cfg.Catalog[exam].Modality + " technologist for the rest of today"
-		if st.cfg.Policies.WalkIn == "schedule_later" {
-			why = "walk-in policy: schedule later"
-		}
 		st.offer(e, oi, st.day+1, head+" ("+why+")", "")
 		return
 	}
-	vi := st.openVisit(e, oi, -1, 0)
+	vi := st.openVisit(e, oi, -1, 0, 0)
 	patience := simtime.Duration(st.cfg.Behavior.WalkInPatienceMin.Sample(
 		rng.Hash(st.seed, "patient", key.keys()...).Lane(2))) * simtime.Minute
 	e.Push(Event{At: e.Now().Add(patience), Class: ClassDeadline, Kind: kindPatience, A: int64(vi)})
 	st.emit(e.Now(), api.Info, "patients", fmt.Sprintf("%s %s · waiting (%s)", visitID(vi), head, orderID(oi)))
 }
 
-// staffedLaterToday reports whether some room of modality m has a
-// technologist rostered between now and closing.
-func (st *state) staffedLaterToday(m string) bool {
-	now := simtime.ClockOf(st.now)
-	for _, seg := range st.cov.Segments {
-		if !seg.Open || seg.To <= now {
-			continue
-		}
-		for r, room := range st.cfg.Rooms {
-			if room.Modality == m && len(seg.Rooms[r]) > 0 {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// patience: a walk-in still waiting gives up and leaves. The event is stale
-// once the visit has moved on (step 8: registration or imaging began).
+// patience: a walk-in waiting (to register or for the exam) gives up and
+// leaves. Patience is checked once, at its deadline: a walk-in who is being
+// registered or imaged at that moment stays (the event is stale).
 func (st *state) patience(e *Engine, vi int) {
 	v := &st.dem.visits[vi]
 	v.state, v.endedAt = visitLeft, e.Now()
@@ -371,19 +362,31 @@ func (st *state) removeWaiting(vi int) {
 }
 
 // checkFlow verifies visit invariants: one visit per arrived appointment,
-// waiting list = open visits, order and visit states agree, no appointment
-// both arrived and a no-show.
+// the on-site list = visits in the building, order and visit states agree,
+// timestamps ordered, rescheduled visits carry a reason, and nobody is on
+// site at accounting close.
 func (st *state) checkFlow() error {
 	d := &st.dem
 	open := 0
 	for vi := range d.visits {
 		v := &d.visits[vi]
 		o := &d.orders[v.order]
-		if v.state == visitWaiting {
+		if v.onSite() {
 			open++
 			if o.state != orderVisit || o.visit != vi {
-				return fmt.Errorf("%s waiting but order %s is %d", visitID(vi), orderID(v.order), o.state)
+				return fmt.Errorf("%s on site but order %s is %d", visitID(vi), orderID(v.order), o.state)
 			}
+		}
+		switch {
+		case v.state >= visitRegistering && v.state != visitLeft && v.state != visitRescheduled && v.regStart < v.arrived,
+			v.state >= visitWaiting && v.state <= visitDone && v.regEnd < v.regStart,
+			v.state >= visitInExam && v.state <= visitDone && v.examStart < v.regEnd,
+			v.state == visitDone && v.examEnd < v.examStart:
+			return fmt.Errorf("%s timestamps out of order", visitID(vi))
+		case v.state == visitRescheduled && v.reason == "":
+			return fmt.Errorf("%s rescheduled without a reason", visitID(vi))
+		case v.state == visitDone && o.state != orderImaged:
+			return fmt.Errorf("%s done but order %s is %d", visitID(vi), orderID(v.order), o.state)
 		}
 		if v.appt >= 0 {
 			a := &d.appts[v.appt]
@@ -395,11 +398,11 @@ func (st *state) checkFlow() error {
 		}
 	}
 	if open != len(d.waiting) {
-		return fmt.Errorf("%d open visits, waiting list %d", open, len(d.waiting))
+		return fmt.Errorf("%d visits on site, on-site list %d", open, len(d.waiting))
 	}
 	for _, vi := range d.waiting {
-		if d.visits[vi].state != visitWaiting {
-			return fmt.Errorf("%s on the waiting list but not waiting", visitID(vi))
+		if !d.visits[vi].onSite() {
+			return fmt.Errorf("%s on the on-site list but gone", visitID(vi))
 		}
 	}
 	return nil

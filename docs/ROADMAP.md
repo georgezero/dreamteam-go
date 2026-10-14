@@ -71,7 +71,7 @@ criteria and determinism tests are the same as before; only the order changed.
 | 5 | Scenario types (minimal subset first), embedded **mini scenario** (one Tuesday, no warm-up, hand-built opening state), `extends`/preset merge, validation, coverage report; rooms (incl. `Unstaffed`), employees, fortnight roster → daily shifts, breaks, cover windows, reading blocks, open/close | **staff panel and room states** (closed / unstaffed / idle) change through the day | valid/invalid fixtures; coverage timelines for Mon/Tue/Sat of both rota weeks |
 | 6 | Demand generation (origin-keyed, IDs at disclosure), orders, `FirstFit` booking against staffed templates, recall list, cancellations, lost demand | **schedule view** (timelines + appointment list) | booking feasibility, no double-booking, lost-demand accounting, ID noninterference |
 | 7 | Arrivals, missed → no-show lifecycle, late policy, walk-ins, patience | **patients arriving and waiting**, no-shows in the log | conservation invariants, late-arrival paths, arrival distribution |
-| 8 | Registration (desk / ops / self-reg), imaging dispatch, eligibility wakes, exam timing, start/admission rules, contrast supervision | **rooms scanning, queues, utilization**; patient journey view | resource invariants, shift-cap guarantee, wake-up independence |
+| 8 | Registration (desk / ops / self-reg), imaging dispatch, eligibility wakes, exam timing, start/admission rules, contrast supervision; **closing rules (SIMULATION_DESIGN §6.9)**: admitted patients served after scheduled close, required overtime (hold-over) within the shift cap, recorded overtime time and cost, explicit rescheduling when safe coverage runs out, operational close | **rooms scanning, queues**; patient journey; **`CLOSING — N patients remaining · OT +42m after 20:00`** status | resource invariants, shift-cap guarantee, wake-up independence; waiting patients kept after scheduled close; exams after close; required overtime and cost; shared XR/CT contention; coverage exhaustion → explicit reschedule; contrast after hours; operational close after scheduled close; determinism across speeds and chunking |
 | 9 | Worklist, reading blocks with overrun, worklist policies, TAT | **worklist and backlog** panel | backlog behavior, policy ordering; radiologist distinctions test (below) |
 | 10 | Ledger, revenue at expected net, claims outcome model and postings, payments, payroll, fixed/variable costs | **cash / revenue / profit** panel and finance view | ledger balance, cash identity, A/R identity, collection-variance mean ≈ 0 |
 | 11 | Warm-up build (full operations + finance), opening-cash adjustment, history boundary; default scenario switches from the mini scenario to the **established practice** | **the real populated Tuesday** | deterministic build; start-state digest golden; warm-up convergence test; **build-time benchmark against the < 1.5 s target** (if missed: profile, then cache the built start state per scenario+seed) |
@@ -131,6 +131,10 @@ Functional
    without overflow; < 60×16 shows the size message.
 5. The three actions work from the TUI with validation messages, and change
    outcomes (e.g., approving overtime for the US tech reduces US waits).
+5a. Patients admitted before scheduled close are served after it, with
+   overtime shown (`CLOSING — N patients remaining · OT +Xm`) and costed.
+   No one is sent home because of the clock. Coverage reschedules are
+   explicit and give a reason.
 6. `dreamteam run --days 90 --seed 7 --summary text` completes and prints
    operational and financial summaries; `--log events.jsonl` writes the
    observable log.
@@ -325,6 +329,7 @@ Acceptance
 
 | Risk | Impact | Mitigation |
 |---|---|---|
+| Overtime as an exploit (admit everything, run late, reschedule at the cap) | medium | overtime cost in the P&L, workforce and access metrics scored, coverage reschedules counted as access failures, evaluation tail (SIMULATION_DESIGN §6.9) |
 | Scope creep before anything is playable | high | walking skeleton: TUI at step 4, every step adds something visible; deferral list is binding |
 | Realism without data | high | every number labelled; quantile-table format ready for real RIS data; calibration targets rather than "truth"; workbook match is consistency only; independent calibration against anonymized operational data (and advisor review) before claiming realism |
 | Warm-up too slow on the Pi | medium | synthetic-load benchmark at step 3; build benchmark at step 11; fallback: cache built start states |

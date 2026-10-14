@@ -87,17 +87,10 @@ func (m *Model) topBar(w int) string {
 // priority order; the event log takes what is left, up to dashboardLog.
 func (m *Model) dashboardBody(w, n int) []string {
 	o := m.obs
-	state := dimStyle.Render("○ CLOSED")
-	if o.Practice.Open {
-		state = openStyle.Render("● OPEN")
+	info := " " + practiceStatus(o)
+	if o.Practice.Phase != api.PhaseClosing {
+		info += "   " + deskText(o)
 	}
-	info := " " + state
-	if o.Practice.Hours != "" {
-		info += " " + o.Practice.Hours
-	} else {
-		info += " today"
-	}
-	info += "   " + deskText(o)
 	if w < 100 {
 		info += "   " + staffSummary(o)
 	}
@@ -233,11 +226,47 @@ func staffName(o api.Observation, id string) string {
 	return id
 }
 
+// practiceStatus is the day's phase (TUI_DESIGN §4.1, SIMULATION_DESIGN
+// §6.9): open with hours, closing with patients remaining and overtime, or
+// closed with when operations actually ended.
+func practiceStatus(o api.Observation) string {
+	p := o.Practice
+	ot := ""
+	if p.OvertimeMin > 0 {
+		ot = " · OT +" + minutes(p.OvertimeMin)
+		if p.OvertimeCostCents > 0 {
+			ot += fmt.Sprintf(" ($%d)", (p.OvertimeCostCents+50)/100)
+		}
+	}
+	switch p.Phase {
+	case api.PhaseOpen:
+		return openStyle.Render("● OPEN") + " " + p.Hours
+	case api.PhaseClosing:
+		s := warnStyle.Render(fmt.Sprintf("◐ CLOSING — %d patient%s remaining", p.OnSite, plural(p.OnSite))) +
+			ot + " after " + p.ScheduledClose
+		if len(p.HeldOver) > 0 {
+			s += dimStyle.Render(" · held over: " + strings.Join(p.HeldOver, ", "))
+		}
+		return s
+	}
+	switch {
+	case p.Hours == "":
+		return dimStyle.Render("○ CLOSED today")
+	case p.OperationalClose != "" && p.OperationalClose != p.ScheduledClose:
+		return dimStyle.Render("○ CLOSED") + fmt.Sprintf(" · operations closed %s (scheduled %s)", p.OperationalClose, p.ScheduledClose) + ot
+	case p.OperationalClose != "":
+		return dimStyle.Render("○ CLOSED") + " · closed " + p.OperationalClose + ot
+	}
+	return dimStyle.Render("○ CLOSED") + " · opens " + strings.SplitN(p.Hours, "–", 2)[0]
+}
+
 func roomLines(o api.Observation) []string {
 	var out []string
 	for _, r := range o.Rooms {
 		var st string
 		switch r.State {
+		case api.RoomOccupied:
+			st = alertStyle.Render("●") + " Scanning "
 		case api.RoomIdle:
 			st = openStyle.Render("○") + " Idle     "
 		case api.RoomUnstaffed:
@@ -249,16 +278,36 @@ func roomLines(o api.Observation) []string {
 		for _, id := range r.StaffBy {
 			who = append(who, staffName(o, id))
 		}
-		line := fmt.Sprintf(" %-3s%s  %-14s", r.Modality, st, strings.Join(who, ", "))
+		staff := strings.Join(who, ", ")
 		if r.Shared {
-			line = fmt.Sprintf(" %-3s%s  %-14s", r.Modality, st, strings.Join(who, ", ")+" (sh)")
+			staff += " (sh)"
 		}
-		if n := waitingFor(o, r.Modality); n > 0 {
-			line += warnStyle.Render(fmt.Sprintf(" %d waiting", n))
+		line := fmt.Sprintf(" %-3s%s  %-14s", r.Modality, st, staff)
+		if c := r.Current; c != nil {
+			el := fmt.Sprintf("%d/%dm", c.ElapsedMin, c.ExpectedMin)
+			if c.ElapsedMin > c.ExpectedMin {
+				el = warnStyle.Render(el)
+			}
+			line = fmt.Sprintf(" %-3s%s  %s %s %s %s", r.Modality, st, c.Patient, trim(c.ExamName, 14),
+				el, dimStyle.Render(c.Technologist))
+		}
+		if n := queuedFor(o, r.Modality); n > 0 {
+			line += warnStyle.Render(fmt.Sprintf(" · %d waiting", n))
 		}
 		out = append(out, line)
 	}
 	return out
+}
+
+// queuedFor counts patients on site for a modality who are not in an exam.
+func queuedFor(o api.Observation, modality string) int {
+	n := 0
+	for _, w := range o.Flow.Waiting {
+		if w.Modality == modality && w.State != api.VisitInExam {
+			n++
+		}
+	}
+	return n
 }
 
 func roleLabel(e api.Employee) string {
@@ -291,6 +340,8 @@ func staffLines(o api.Observation) []string {
 				}
 				st += dimStyle.Render(" · " + strings.Join(mods, "+"))
 			}
+		case api.StaffBusy:
+			st = alertStyle.Render("●") + " " + e.Task
 		case api.StaffOnBreak:
 			st = warnStyle.Render("◐ break until " + e.EndsAt)
 		case api.StaffReading:
@@ -317,43 +368,44 @@ func staffLines(o api.Observation) []string {
 			}
 			st += dimStyle.Render(note)
 		}
+		if e.OvertimeMin > 0 && e.Status != api.StaffOff {
+			st += warnStyle.Render(" · OT +" + minutes(e.OvertimeMin))
+		}
 		out = append(out, fmt.Sprintf(" %-10s %-6s %s", e.Name, roleLabel(e), st))
 	}
 	return out
 }
 
-func waitingFor(o api.Observation, modality string) int {
-	n := 0
-	for _, w := range o.Flow.Waiting {
-		if w.Modality == modality {
-			n++
-		}
-	}
-	return n
-}
-
-// flowLines is the patient-flow panel: who is waiting now and what
-// happened to today's patients so far.
+// flowLines is the patient-flow panel: who is on site now and in which
+// stage, and what happened to today's patients so far.
 func flowLines(o api.Observation, w int) []string {
 	f := o.Flow
 	t := f.Today
+	var toReg, waiting, inExam int
 	longest := int64(0)
 	for _, p := range f.Waiting {
-		longest = max(longest, p.WaitedMin)
+		switch p.State {
+		case api.VisitArrived, api.VisitRegistering:
+			toReg++
+		case api.VisitWaiting:
+			waiting++
+		case api.VisitInExam:
+			inExam++
+		}
+		if p.State != api.VisitInExam {
+			longest = max(longest, p.WaitedMin)
+		}
 	}
-	wait := fmt.Sprintf(" Waiting %d", len(f.Waiting))
-	if len(f.Waiting) > 0 {
-		wait = warnStyle.Render(wait)
+	onSite := fmt.Sprintf(" On site %d", len(f.Waiting))
+	if waiting+toReg > 0 {
+		onSite = warnStyle.Render(onSite)
 	}
 	var by []string
 	for _, d := range o.Demand.Modalities {
-		by = append(by, fmt.Sprintf("%s %d", d.Modality, waitingFor(o, d.Modality)))
+		by = append(by, fmt.Sprintf("%s %d", d.Modality, queuedFor(o, d.Modality)))
 	}
-	l1 := wait + " · " + strings.Join(by, " ") + fmt.Sprintf(" · longest %s · no-shows at last close %d",
-		minutes(longest), f.NoShowsLastClose)
-	if w >= 100 {
-		l1 += dimStyle.Render(" · nobody is registered or imaged yet")
-	}
+	l1 := onSite + fmt.Sprintf(" · registering %d · waiting %d (%s) · in exam %d · longest wait %s",
+		toReg, waiting, strings.Join(by, " "), inExam, minutes(longest))
 	missed := fmt.Sprintf("missed %d", f.MissedNow)
 	if f.MissedNow > 0 {
 		missed = warnStyle.Render(missed)
@@ -362,8 +414,14 @@ func flowLines(o api.Observation, w int) []string {
 	if t.Left > 0 {
 		left = warnStyle.Render(left)
 	}
-	l2 := fmt.Sprintf(" Arrived %d (late %d, after grace %d) · walk-ins %d · %s · %s · unseen %d",
-		t.Arrived, t.Late, t.AfterGrace, t.WalkIns, left, missed, t.Unseen)
+	l2 := fmt.Sprintf(" Done %d · arrived %d (late %d) · walk-ins %d · %s · %s · no-shows %d",
+		t.ExamsDone, t.Arrived, t.Late, t.WalkIns, left, missed, f.NoShowsLastClose)
+	if t.NoCoverage > 0 {
+		l2 += warnStyle.Render(fmt.Sprintf(" · rescheduled %d", t.NoCoverage))
+	}
+	if t.AfterHours > 0 && w >= 100 {
+		l2 += fmt.Sprintf(" · after hours %d", t.AfterHours)
+	}
 	return []string{titleStyle.Render(section("PATIENT FLOW today", w)), l1, l2}
 }
 
@@ -379,7 +437,7 @@ func minutes(m int64) string {
 func staffSummary(o api.Observation) string {
 	var techs, techsOn, rads, radsOn int
 	for _, e := range o.Staff {
-		on := e.Status == api.StaffOnDuty || e.Status == api.StaffReading || e.Status == api.StaffOtherDuties
+		on := e.Status == api.StaffOnDuty || e.Status == api.StaffBusy || e.Status == api.StaffReading || e.Status == api.StaffOtherDuties
 		switch e.Role {
 		case "technologist":
 			techs++

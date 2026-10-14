@@ -28,8 +28,12 @@ type state struct {
 	day    int64        // current day index
 	plan   DayPlan      // today's materialized roster
 	cov    Coverage     // today's planned coverage
-	open   bool
-	opened bool // the practice opened today (rooms may report unstaffed)
+	open   bool         // between scheduled open and scheduled close
+	opened bool         // the practice opened today (rooms may report unstaffed)
+	// closing: after scheduled close while admitted patients or on-site
+	// tasks remain; opClosedAt: today's operational close (0 if not yet).
+	closing    bool
+	opClosedAt simtime.Time
 
 	rooms []room
 	emps  []employee
@@ -53,7 +57,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 		seed:     seed,
 	}
 	for i := range cfg.Rooms {
-		st.rooms = append(st.rooms, room{cfg: &cfg.Rooms[i]})
+		st.rooms = append(st.rooms, room{cfg: &cfg.Rooms[i], visit: -1})
 	}
 	for i := range cfg.Employees {
 		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], shift: -1})
@@ -106,6 +110,10 @@ const (
 	kindPatience   // a waiting walk-in gives up
 	kindDayClose   // 23:59:59 accounting close
 	kindNoShowRebook
+	kindRegEnd  // registration finished
+	kindExamEnd // exam finished; the patient departs
+	kindDocEnd  // technologist documentation finished
+	kindWake    // eligibility wake for a room (§3.4 rule 4)
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -119,15 +127,21 @@ func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
 // action rewrites today's shift).
 func (st *state) IsStale(ev Event) bool {
 	switch ev.Kind {
-	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd, kindRosterEdge:
+	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBlockStart, kindBlockEnd, kindRosterEdge, kindDocEnd:
 		return ev.Gen != st.emps[ev.A].gen
+	case kindBreakEnd:
+		emp := &st.emps[ev.A]
+		return ev.Gen != emp.gen || emp.status != onBreak || emp.breakUntil != ev.At
+	case kindWake:
+		return ev.Gen != st.rooms[ev.A].wakeGen
 	case kindCancel, kindGrace:
 		return st.dem.appts[ev.A].state != apptBooked
 	case kindArrive:
 		s := st.dem.appts[ev.A].state
 		return s != apptBooked && s != apptMissed
 	case kindPatience:
-		return st.dem.visits[ev.A].state != visitWaiting
+		s := st.dem.visits[ev.A].state
+		return s != visitArrived && s != visitWaiting
 	case kindNoShowRebook:
 		return st.dem.orders[ev.A].state != orderNoShow
 	}
@@ -143,9 +157,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.open, st.opened = true, true
 		st.emit(e.Now(), api.Info, "practice", "Practice opens")
 	case kindClose:
-		st.open = false
-		st.emit(e.Now(), api.Info, "practice", "Practice closes")
-		st.closeVisits(e)
+		st.scheduledClose(e)
 	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd:
 		st.staffEvent(e, ev)
 	case kindRosterEdge:
@@ -165,13 +177,25 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.accountingClose(e)
 	case kindNoShowRebook:
 		st.noShowRebook(e, int(ev.A))
+	case kindRegEnd:
+		st.regEnd(e, int(ev.A))
+	case kindExamEnd:
+		st.examEnd(e, int(ev.A))
+	case kindDocEnd:
+		st.taskDone(e, int(ev.A))
+	case kindWake:
 	}
 }
 
 func (st *state) dayStart(e *Engine, day int64) {
 	e.Push(Event{At: st.cal.StartOfDay(day + 1), Class: ClassDayBoundary, Kind: kindDayStart, A: day + 1})
 	st.day = day
-	st.opened = false
+	st.opened, st.closing, st.opClosedAt = false, false, 0
+	if st.cal.Weekday(e.Now()) == simtime.Monday {
+		for i := range st.emps {
+			st.emps[i].weekPaid = 0
+		}
+	}
 	st.plan = st.cfg.Plan(st.cal.Date(e.Now()))
 	st.cov = st.plan.Coverage()
 	if h := st.plan.Hours; h != nil {
@@ -199,11 +223,6 @@ func (st *state) dayStart(e *Engine, day int64) {
 	st.scheduleDemand(e, day)
 	st.startAppointments(e)
 	st.scheduleWalkIns(e, day)
-}
-
-func (st *state) Dispatch(e *Engine) {
-	st.now = e.Now()
-	st.restaff(e.Now())
 }
 
 func (st *state) CheckInvariants() error {
@@ -236,5 +255,6 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observeStaff(&o, now)
 	st.observeDemand(&o, now)
 	st.observeFlow(&o, now)
+	st.observePractice(&o, now)
 	return o
 }

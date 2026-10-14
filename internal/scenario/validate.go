@@ -188,6 +188,9 @@ func Compile(f *File) (*sim.Config, error) {
 		cfg.Rooms = append(cfg.Rooms, rc)
 	}
 
+	if len(f.Employees) > 64 {
+		c.fail("employees", "at most 64 employees")
+	}
 	ids := map[string]bool{}
 	for i, e := range f.Employees {
 		ep := fmt.Sprintf("employees[%d]", i)
@@ -266,6 +269,9 @@ func (c *checker) shift(sp string, s *Shift, e *sim.EmployeeConfig, rooms map[st
 	t := &sim.ShiftTemplate{Span: c.span(sp, [2]string{s.Start, s.End}), Assignment: s.Assignment}
 	if t.To-t.From > maxShift {
 		c.fail(sp, "shift %s–%s is longer than maxShiftHours", s.Start, s.End)
+	}
+	if t.From+maxShift > simtime.Day {
+		c.fail(sp, "shift start %s + maxShiftHours runs past midnight (hold-over must end the same day)", s.Start)
 	}
 	switch s.Weeks {
 	case "":

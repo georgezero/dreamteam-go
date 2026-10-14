@@ -6,10 +6,10 @@ package version
 import "runtime/debug"
 
 // Number is the release number.
-const Number = "0.1.0-dev.7"
+const Number = "0.1.0-dev.8"
 
 // String returns the version with the source commit when the binary was
-// built from a git checkout ("0.1.0-dev.7 (ff54f40)", "+dirty" when the
+// built from a git checkout ("0.1.0-dev.8 (72b9c91)", "+dirty" when the
 // tree had uncommitted changes). go run builds carry no commit.
 func String() string {
 	info, ok := debug.ReadBuildInfo()

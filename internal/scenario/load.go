@@ -45,12 +45,14 @@ type File struct {
 
 // Exam is a catalog entry. Internal codes, not CPT codes.
 type Exam struct {
-	Code           string `json:"code"`
-	Name           string `json:"name"`
-	Modality       string `json:"modality"`
-	Category       string `json:"category"` // slot category it books into, e.g. "MR_45"
-	Contrast       bool   `json:"contrast"`
-	WalkInEligible bool   `json:"walkInEligible"`
+	Code           string   `json:"code"`
+	Name           string   `json:"name"`
+	Modality       string   `json:"modality"`
+	Category       string   `json:"category"` // slot category it books into, e.g. "MR_45"
+	Contrast       bool     `json:"contrast"`
+	WalkInEligible bool     `json:"walkInEligible"`
+	RoomTimeSec    Quantile `json:"roomTimeSec"`
+	TechExtraSec   Quantile `json:"techExtraSec"`
 }
 
 // Template is a group of weekdays sharing a room's slot list.
@@ -97,6 +99,15 @@ type Behavior struct {
 	NoShow            NoShow              `json:"noShow"`
 	Arrival           []ArrivalClass      `json:"arrivalClasses"`
 	WalkInPatienceMin Quantile            `json:"walkInPatienceMin"`
+	Registration      Registration        `json:"registration"`
+}
+
+// Registration describes check-in time at the desk.
+type Registration struct {
+	ScheduledSec    Quantile `json:"scheduledSec"`
+	WalkInSec       Quantile `json:"walkInSec"`
+	OpsFactorBP     int64    `json:"opsFactorBP"`     // operations manager registering
+	SelfRegFactorBP int64    `json:"selfRegFactorBP"` // technologist registering
 }
 
 // NoShow describes missed appointments: a base rate per modality plus a
@@ -199,6 +210,11 @@ type Policies struct {
 	Booking              string `json:"booking"`
 	BookingHorizonDays   int64  `json:"bookingHorizonDays"`
 	BookingNoticeMin     int64  `json:"bookingNoticeMin"`
+	EarlyStartMin        int64  `json:"earlyStartMin"`
+	StartEarly           bool   `json:"startEarly"`
+	BreakDeferMaxMin     int64  `json:"breakDeferMaxMin"`
+	WeeklyOvertimeHours  int64  `json:"weeklyOvertimeHours"`
+	OvertimeFactorBP     int64  `json:"overtimeFactorBP"`
 }
 
 // maxExtendsDepth bounds extends chains.

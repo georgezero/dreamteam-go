@@ -145,8 +145,8 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m.key("d")
 	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(m.render())
-	for _, want := range []string{"DREAMTEAM v" + version.Number, "ROOMS", "XR ○ Idle       Riley", "US ○ Idle       Morgan",
-		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "Waiting ", "walk-ins", "DEMAND today", "next open slot", "EVENT LOG"} {
+	for _, want := range []string{"DREAMTEAM v" + version.Number, "ROOMS", "XR ", "US ", "CT ", "MR ",
+		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "On site ", "in exam", "walk-ins", "DEMAND today", "next open slot", "EVENT LOG"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("80×24 dashboard lacks %q:\n%s", want, out)
 		}
@@ -230,15 +230,20 @@ func TestPatientsScreen(t *testing.T) {
 	m.Update(tea.WindowSizeMsg{Width: 100, Height: 40})
 	m.key("p")
 	out := ansi.Strip(m.render())
-	for _, want := range []string{"PATIENTS · Tue Oct 13 (today) · all", "P00001", "waiting", "08:00"} {
+	for _, want := range []string{"PATIENTS · Tue Oct 13 (today) · all", "P00001", "done", "08:00"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("patient list lacks %q:\n%s", want, out)
 		}
 	}
-	m.key("tab") // waiting
+	m.key("tab") // on site
+	if len(m.patients) == 0 {
+		t.Fatal("nobody on site at 13:00")
+	}
 	for _, r := range m.patients {
-		if r.Status != api.PatientWaiting {
-			t.Fatalf("waiting filter shows %s", r.Status)
+		switch r.Status {
+		case api.PatientArrived, api.PatientRegistering, api.PatientWaiting, api.PatientInExam:
+		default:
+			t.Fatalf("on-site filter shows %s", r.Status)
 		}
 	}
 	m.key("enter")
@@ -246,7 +251,7 @@ func TestPatientsScreen(t *testing.T) {
 		t.Fatal("enter did not open a journey")
 	}
 	out = ansi.Strip(m.render())
-	for _, want := range []string{"PATIENT " + m.journeyID, "Booked", "Arrived", "Waiting", "so far"} {
+	for _, want := range []string{"PATIENT " + m.journeyID, "Booked", "Arrived", "so far"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("journey lacks %q:\n%s", want, out)
 		}
@@ -258,5 +263,22 @@ func TestPatientsScreen(t *testing.T) {
 	m.key("esc")
 	if m.screen != screenDashboard {
 		t.Fatal("esc did not return to the dashboard")
+	}
+}
+
+// The practice line shows the closing phase: patients remaining and
+// overtime after scheduled close, then when operations actually closed.
+func TestClosingStatusLine(t *testing.T) {
+	o := api.Observation{}
+	o.Practice = api.Practice{Phase: api.PhaseClosing, OnSite: 3, OvertimeMin: 42, OvertimeCostCents: 3800,
+		ScheduledClose: "20:00", Hours: "08:00–20:00", HeldOver: []string{"Sam", "Dr. Blake"}}
+	got := ansi.Strip(practiceStatus(o))
+	if want := "◐ CLOSING — 3 patients remaining · OT +42m ($38) after 20:00 · held over: Sam, Dr. Blake"; got != want {
+		t.Errorf("closing:\n got %q\nwant %q", got, want)
+	}
+	o.Practice.Phase, o.Practice.OperationalClose, o.Practice.HeldOver = api.PhaseClosed, "20:47", nil
+	got = ansi.Strip(practiceStatus(o))
+	if want := "○ CLOSED · operations closed 20:47 (scheduled 20:00) · OT +42m ($38)"; got != want {
+		t.Errorf("closed:\n got %q\nwant %q", got, want)
 	}
 }

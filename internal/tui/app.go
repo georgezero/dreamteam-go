@@ -52,7 +52,7 @@ const (
 )
 
 // Patient list filters, cycled with tab.
-var patientFilters = []string{"all", "waiting", "missed / no-show", "left / unseen", "walk-ins"}
+var patientFilters = []string{"all", "on site", "missed / no-show", "left / rescheduled", "walk-ins"}
 
 type tickMsg time.Time
 
@@ -127,12 +127,13 @@ func filterPatients(rows []api.PatientRow, f int) []api.PatientRow {
 	for _, r := range rows {
 		keep := false
 		switch patientFilters[f] {
-		case "waiting":
-			keep = r.Status == api.PatientWaiting
+		case "on site":
+			keep = r.Status == api.PatientArrived || r.Status == api.PatientRegistering ||
+				r.Status == api.PatientWaiting || r.Status == api.PatientInExam
 		case "missed / no-show":
 			keep = r.Status == api.PatientMissed || r.Status == api.PatientNoShow
-		case "left / unseen":
-			keep = r.Status == api.PatientLeft || r.Status == api.PatientUnseen
+		case "left / rescheduled":
+			keep = r.Status == api.PatientLeft || r.Status == api.PatientRescheduled
 		case "walk-ins":
 			keep = r.WalkIn
 		}

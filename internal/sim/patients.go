@@ -15,7 +15,50 @@ import (
 func flowView(c flowCounts) api.FlowCounts {
 	return api.FlowCounts{Arrived: c.arrived, Early: c.early, Late: c.late, AfterGrace: c.afterGrace,
 		WalkIns: c.walkIns, WalkInsBooked: c.walkInsBooked, Missed: c.missed, NoShows: c.noShows,
-		Rescheduled: c.rescheduled, Left: c.left, Unseen: c.unseen}
+		Rescheduled: c.rescheduled, Left: c.left, Registered: c.registered, SelfRegistered: c.selfRegistered,
+		ExamsStarted: c.examsStarted, ExamsDone: c.examsDone, AfterHours: c.afterHours, NoCoverage: c.noCoverage,
+		HeldOver: c.heldOver, SkippedBreaks: c.skippedBreaks, OvertimeMin: int64(c.otSec / simtime.Minute),
+		OvertimeCostCents: c.otCost}
+}
+
+var visitStateKeys = [...]string{visitArrived: api.VisitArrived, visitRegistering: api.VisitRegistering,
+	visitWaiting: api.VisitWaiting, visitInExam: api.VisitInExam}
+
+// examView describes the exam in progress for visit vi.
+func (st *state) examView(vi int, now simtime.Time) *api.RoomExam {
+	v := &st.dem.visits[vi]
+	o := &st.dem.orders[v.order]
+	x := &st.cfg.Catalog[o.exam]
+	return &api.RoomExam{Visit: visitID(vi), Patient: patientID(o.patient), ExamName: x.Name,
+		Technologist: st.emps[v.examBy].cfg.Name, StartedAt: st.cal.Clock(v.examStart),
+		ElapsedMin: int64(now.Sub(v.examStart) / simtime.Minute), ExpectedMin: int64(x.Expected() / simtime.Minute)}
+}
+
+// observePractice fills the closing phase and today's overtime.
+func (st *state) observePractice(o *api.Observation, now simtime.Time) {
+	p := &o.Practice
+	switch {
+	case st.open:
+		p.Phase = api.PhaseOpen
+	case st.closing:
+		p.Phase = api.PhaseClosing
+	default:
+		p.Phase = api.PhaseClosed
+	}
+	if h := st.plan.Hours; h != nil {
+		p.ScheduledClose = simtime.FormatClock(h.To)
+	}
+	if st.opClosedAt > 0 {
+		p.OperationalClose = st.cal.Clock(st.opClosedAt)
+	}
+	p.OnSite = len(st.dem.waiting)
+	p.OvertimeCostCents = st.dem.flowToday.otCost
+	for i := range st.emps {
+		p.OvertimeMin += int64(st.overtimeNow(i, now) / simtime.Minute)
+		if st.emps[i].held {
+			p.HeldOver = append(p.HeldOver, st.emps[i].cfg.Name)
+		}
+	}
 }
 
 func (st *state) observeFlow(o *api.Observation, now simtime.Time) {
@@ -34,7 +77,7 @@ func (st *state) observeFlow(o *api.Observation, now simtime.Time) {
 		v := &d.visits[vi]
 		ord := &d.orders[v.order]
 		x := &st.cfg.Catalog[ord.exam]
-		w := api.WaitingPatient{Visit: visitID(vi), Patient: patientID(ord.patient), Order: orderID(v.order),
+		w := api.WaitingPatient{State: visitStateKeys[v.state], Visit: visitID(vi), Patient: patientID(ord.patient), Order: orderID(v.order),
 			Modality: x.Modality, Exam: x.Code, ExamName: x.Name, Priority: ord.priority.String(),
 			WalkIn: ord.walkIn, Arrived: st.cal.Clock(v.arrived), WaitedMin: int64(now.Sub(v.arrived) / simtime.Minute),
 			LateMin: int64(v.late / simtime.Minute), AfterGrace: v.afterGrace}
@@ -113,16 +156,27 @@ func (st *state) fillVisit(r *api.PatientRow, vi int, now simtime.Time) {
 	if v.appt >= 0 {
 		r.Punctuality = punctuality(v.late)
 	}
+	if v.state >= visitInExam && v.state != visitLeft && v.state != visitRescheduled {
+		r.WaitedMin = int64(v.examStart.Sub(v.arrived) / simtime.Minute)
+	}
 	switch v.state {
+	case visitArrived:
+		r.Status, r.StatusText = api.PatientArrived, "waiting to register"
+	case visitRegistering:
+		r.Status, r.StatusText = api.PatientRegistering, "registering"
 	case visitWaiting:
-		r.Status, r.StatusText = api.PatientWaiting, "waiting"
+		r.Status, r.StatusText = api.PatientWaiting, "waiting for exam"
 		if v.afterGrace {
 			r.StatusText = "waiting (late, fitted in)"
 		}
+	case visitInExam:
+		r.Status, r.StatusText = api.PatientInExam, "in exam"
+	case visitDone:
+		r.Status, r.StatusText = api.PatientDone, "done"
 	case visitLeft:
 		r.Status, r.StatusText = api.PatientLeft, "left without an exam"
-	case visitUnseen:
-		r.Status, r.StatusText = api.PatientUnseen, "sent home unseen"
+	case visitRescheduled:
+		r.Status, r.StatusText = api.PatientRescheduled, "rescheduled: "+v.reason
 	}
 }
 
@@ -218,16 +272,49 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 			}
 		}
 		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.arrived), Label: "Arrived", Detail: detail, Done: true})
+		now := w.eng.Now()
+		if v.state == visitArrived {
+			j.Steps = append(j.Steps, api.JourneyStep{Label: "Waiting to register",
+				Detail: fmt.Sprintf("%s so far", now.Sub(v.arrived)), Done: true})
+		}
+		if v.regBy >= 0 {
+			step := api.JourneyStep{Time: iso(v.regStart), Label: "Registered", Done: true,
+				Detail: st.emps[v.regBy].cfg.Name}
+			if v.state == visitRegistering {
+				step.Label, step.Detail = "Registering", step.Detail+fmt.Sprintf(" · %s so far", now.Sub(v.regStart))
+			} else {
+				step.Detail += fmt.Sprintf(" · %s–%s", st.cal.Clock(v.regStart), st.cal.Clock(v.regEnd))
+			}
+			j.Steps = append(j.Steps, step)
+		}
+		if v.state == visitWaiting {
+			j.Steps = append(j.Steps, api.JourneyStep{Label: "Waiting for exam",
+				Detail: fmt.Sprintf("%s since registration", now.Sub(v.regEnd)), Done: true})
+		}
+		if v.examBy >= 0 {
+			x := &st.cfg.Catalog[o.exam]
+			step := api.JourneyStep{Time: iso(v.examStart), Label: "Exam", Done: true,
+				Detail: fmt.Sprintf("%s · %s · waited %s from arrival", st.emps[v.examBy].cfg.Name, st.cfg.Rooms[v.room].Name, v.examStart.Sub(v.arrived))}
+			if v.state == visitInExam {
+				step.Label = "In exam"
+				step.Detail += fmt.Sprintf(" · %s so far (expected %s)", now.Sub(v.examStart), x.Expected())
+			} else {
+				step.Detail += fmt.Sprintf(" · took %s (expected %s)", v.examEnd.Sub(v.examStart), x.Expected())
+			}
+			if v.afterHours {
+				step.Detail += " · after scheduled close"
+			}
+			j.Steps = append(j.Steps, step)
+		}
 		switch v.state {
-		case visitWaiting:
-			j.Steps = append(j.Steps, api.JourneyStep{Label: "Waiting",
-				Detail: fmt.Sprintf("%s so far; not yet registered", w.eng.Now().Sub(v.arrived)), Done: true})
+		case visitDone:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.examEnd), Label: "Departed", Detail: "imaged", Done: true})
 		case visitLeft:
 			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Left",
 				Detail: fmt.Sprintf("without an exam after waiting %s", v.endedAt.Sub(v.arrived)), Done: true})
-		case visitUnseen:
-			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Sent home",
-				Detail: fmt.Sprintf("still waiting at closing after %s", v.endedAt.Sub(v.arrived)), Done: true})
+		case visitRescheduled:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Rescheduled",
+				Detail: v.reason, Done: true})
 		}
 	}
 	switch o.state {
@@ -243,4 +330,4 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 
 var orderStatusText = [...]string{orderBooked: "booked", orderRecall: "on the recall list", orderLost: "lost",
 	orderCancelled: "cancelled", orderVisit: "on site", orderNoShow: "no-show", orderLeft: "left without an exam",
-	orderUnseen: "sent home unseen"}
+	orderImaged: "imaged"}

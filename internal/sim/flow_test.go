@@ -115,14 +115,16 @@ func TestAppointmentConservation(t *testing.T) {
 			visits[a.Visit] = true
 		}
 	}
-	orders := map[string]bool{}
+	// An order can have a second visit only after the first ended
+	// (rescheduled for lack of coverage, then back on a later day).
+	last := map[string]sim.VisitInfo{}
 	for _, v := range w.Visits() {
-		if orders[v.Order] {
-			t.Fatalf("order %s has two visits", v.Order)
+		if p, ok := last[v.Order]; ok && (p.State != "rescheduled" || p.EndedAt > v.Arrived) {
+			t.Fatalf("order %s has overlapping visits %s and %s", v.Order, p.ID, v.ID)
 		}
-		orders[v.Order] = true
-		if v.State == "waiting" && v.Arrived < w.Calendar().StartOfDay(end) {
-			t.Fatalf("%s from an earlier day still waiting", v.ID)
+		last[v.Order] = v
+		if v.State != "done" && v.State != "left" && v.State != "rescheduled" && v.Arrived < w.Calendar().StartOfDay(end) {
+			t.Fatalf("%s from an earlier day still %s", v.ID, v.State)
 		}
 	}
 }
@@ -174,8 +176,8 @@ func TestWalkIns(t *testing.T) {
 	}
 }
 
-// A walk-in who is still waiting leaves after a patience of 30–120 min;
-// one still waiting at closing is sent home instead, and nobody leaves twice.
+// A walk-in who is still waiting leaves after a patience of 30–120 min,
+// and the counter matches.
 func TestWalkInPatience(t *testing.T) {
 	w := longRun(t)
 	left := 0
@@ -186,10 +188,6 @@ func TestWalkInPatience(t *testing.T) {
 			waited := v.EndedAt.Sub(v.Arrived)
 			if !v.WalkIn || waited < 30*simtime.Minute || waited > 120*simtime.Minute {
 				t.Fatalf("%s left after %s (walk-in %v)", v.ID, waited, v.WalkIn)
-			}
-		case "unseen":
-			if c := simtime.ClockOf(v.EndedAt); c != 20*simtime.Hour && c != 18*simtime.Hour {
-				t.Fatalf("%s sent home at %s, not at closing", v.ID, w.Calendar().Short(v.EndedAt))
 			}
 		}
 	}
@@ -314,33 +312,48 @@ func TestSameInstantGraceThenCancel(t *testing.T) {
 	}
 }
 
-// Patience running out exactly at closing time: the patient leaves
-// (Deadline) before closing sends the rest home (CapacityDown).
-func TestPatienceAtClosingTime(t *testing.T) {
+// Patience running out at the instant a room frees up: the deadline
+// (class Deadline) is handled before dispatch, so the walk-in leaves
+// rather than starting the exam; a walk-in already registering stays.
+func TestPatienceBeatsDispatchAtSameInstant(t *testing.T) {
 	cfg := miniConfig(t)
 	w := sim.New(cfg, rng.SeedFromInt(2))
 	w.Engine().CheckInvariants = true
-	closing := w.Calendar().StartOfDate(cfg.Start).Add(20 * simtime.Hour)
-	w.Engine().RunUntil(closing-600, nil)
-	vi := int64(-1)
-	for i, v := range w.Visits() {
-		if v.State == "waiting" {
-			vi = int64(i)
+	day := w.Calendar().StartOfDate(cfg.Start)
+	var waiting, registering int64 = -1, -1
+	at := day.Add(8 * simtime.Hour)
+	for ; at < day.Add(19*simtime.Hour) && (waiting < 0 || registering < 0); at = at.Add(simtime.Minute) {
+		w.Engine().RunUntil(at, nil)
+		for i, v := range w.Visits() {
+			if waiting < 0 && v.State == "waiting" {
+				waiting = int64(i)
+			}
+			if registering < 0 && v.State == "registering" {
+				registering = int64(i)
+			}
+		}
+		if waiting >= 0 && registering >= 0 {
 			break
 		}
-	}
-	if vi < 0 {
-		t.Fatal("nobody waiting before closing")
-	}
-	w.PushForTest(closing, sim.ClassDeadline, "patience", vi)
-	w.Engine().RunUntil(closing, nil)
-	vs := w.Visits()
-	if vs[vi].State != "left" {
-		t.Fatalf("V%05d: %s, want left", vi+1, vs[vi].State)
-	}
-	for _, v := range vs {
-		if v.State == "waiting" {
-			t.Fatalf("%s still waiting after closing", v.ID)
+		if waiting >= 0 && registering < 0 {
+			waiting = -1 // need both at the same instant
 		}
+		if registering >= 0 && waiting < 0 {
+			registering = -1
+		}
+	}
+	if waiting < 0 || registering < 0 {
+		t.Fatal("no instant with both a waiting and a registering patient")
+	}
+	T := at.Add(1)
+	w.PushForTest(T, sim.ClassDeadline, "patience", waiting)
+	w.PushForTest(T, sim.ClassDeadline, "patience", registering)
+	w.Engine().RunUntil(T, nil)
+	vs := w.Visits()
+	if vs[waiting].State != "left" {
+		t.Fatalf("waiting patient: %s, want left", vs[waiting].State)
+	}
+	if vs[registering].State == "left" {
+		t.Fatal("a patient being registered left")
 	}
 }

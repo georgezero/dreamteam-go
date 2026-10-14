@@ -40,14 +40,48 @@ type Practice struct {
 	BookingHorizonDays int64 `json:"bookingHorizonDays"`
 	// StartOffset is the start date relative to today, in days (≤ 0).
 	StartOffset int64 `json:"startOffset"`
+
+	// Phase is "open" (scheduled hours), "closing" (after scheduled close
+	// while admitted patients are still being served) or "closed".
+	Phase          string `json:"phase"`
+	ScheduledClose string `json:"scheduledClose,omitempty"` // "20:00"
+	// OperationalClose is when today's operations actually ended, once
+	// they have ("20:47").
+	OperationalClose string `json:"operationalClose,omitempty"`
+	OnSite           int    `json:"onSite"` // admitted patients still in the building
+	// Overtime today: minutes past scheduled shift ends (running ones
+	// included) and the cost booked so far (cents, when staff go home).
+	OvertimeMin       int64    `json:"overtimeMin"`
+	OvertimeCostCents int64    `json:"overtimeCostCents"`
+	HeldOver          []string `json:"heldOver,omitempty"` // names of staff kept past shift end
 }
+
+// Practice phases.
+const (
+	PhaseOpen    = "open"
+	PhaseClosing = "closing"
+	PhaseClosed  = "closed"
+)
 
 // Room states (SIMULATION_DESIGN §2.5).
 const (
 	RoomClosed    = "closed"
 	RoomUnstaffed = "unstaffed"
 	RoomIdle      = "idle"
+	RoomOccupied  = "occupied"
 )
+
+// RoomExam is the exam in progress in a room. Expected is the catalog
+// median (published); the sampled duration is never shown.
+type RoomExam struct {
+	Visit        string `json:"visit"`
+	Patient      string `json:"patient"`
+	ExamName     string `json:"examName"`
+	Technologist string `json:"technologist"`
+	StartedAt    string `json:"startedAt"`
+	ElapsedMin   int64  `json:"elapsedMin"`
+	ExpectedMin  int64  `json:"expectedMin"`
+}
 
 // Room is one room's observable status.
 type Room struct {
@@ -58,12 +92,14 @@ type Room struct {
 	StaffBy  []string `json:"staffedBy"` // employee IDs
 	// Shared is true when a technologist staffing this room also staffs
 	// another one.
-	Shared bool `json:"shared"`
+	Shared  bool      `json:"shared"`
+	Current *RoomExam `json:"current,omitempty"`
 }
 
 // Employee statuses.
 const (
 	StaffOff         = "off"
+	StaffBusy        = "busy"
 	StaffOnDuty      = "on_duty"
 	StaffOnBreak     = "on_break"
 	StaffReading     = "reading"      // radiologist in a site reading block
@@ -83,6 +119,11 @@ type Employee struct {
 	Rooms    []string `json:"rooms,omitempty"`    // rooms this technologist staffs now
 	StartsAt string   `json:"startsAt,omitempty"` // shift start, while not yet on duty
 	EndsAt   string   `json:"endsAt,omitempty"`   // shift or break end, while on duty or break
+	Task     string   `json:"task,omitempty"`     // while busy: "registering P00042", "XR exam P00042"
+	// Held is true while kept past the scheduled shift end because patients
+	// still need them; OvertimeMin is today's time past shift end so far.
+	Held        bool  `json:"held,omitempty"`
+	OvertimeMin int64 `json:"overtimeMin,omitempty"`
 }
 
 // Desk coverage levels.
@@ -163,6 +204,7 @@ const (
 	SlotBooked        = "booked"         // holds an appointment
 	SlotUnstaffed     = "unstaffed"      // no technologist rostered for the whole slot
 	SlotNoSupervision = "no_supervision" // contrast slot without an on-site radiologist
+	SlotSharedBusy    = "shared_busy"    // its shared technologist is booked in another room then
 )
 
 // Appointment is one booked appointment.
@@ -216,12 +258,33 @@ type FlowCounts struct {
 	NoShows       int `json:"noShows"`       // missed appointments finalized at accounting close
 	Rescheduled   int `json:"rescheduled"`   // too late for the late policy, or after closing
 	Left          int `json:"left"`          // walk-ins who left without an exam
-	Unseen        int `json:"unseen"`        // still waiting at closing time, sent home
+
+	Registered     int `json:"registered"`
+	SelfRegistered int `json:"selfRegistered"` // by a technologist (no desk staff on duty)
+	ExamsStarted   int `json:"examsStarted"`
+	ExamsDone      int `json:"examsDone"`
+	AfterHours     int `json:"afterHours"` // exams started after scheduled close
+	// NoCoverage counts admitted patients rescheduled because nobody could
+	// serve them safely today (each with a recorded reason).
+	NoCoverage        int   `json:"noCoverage"`
+	HeldOver          int   `json:"heldOver"` // staff kept past shift end
+	SkippedBreaks     int   `json:"skippedBreaks"`
+	OvertimeMin       int64 `json:"overtimeMin"`       // booked when staff go home
+	OvertimeCostCents int64 `json:"overtimeCostCents"` // hourly staff only
 }
 
-// WaitingPatient is a patient on site who has not been imaged. In V0.1
-// step 7 nobody is registered yet: waiting means arrived.
+// Visit states for patients on site.
+const (
+	VisitArrived     = "arrived"     // waiting to register
+	VisitRegistering = "registering" // at the desk
+	VisitWaiting     = "waiting"     // registered, waiting for the exam
+	VisitInExam      = "in_exam"
+)
+
+// WaitingPatient is a patient on site: arrived, registering, waiting or in
+// an exam.
 type WaitingPatient struct {
+	State       string `json:"state"`
 	Visit       string `json:"visit"`
 	Patient     string `json:"patient"`
 	Order       string `json:"order"`
@@ -247,19 +310,22 @@ type Flow struct {
 	// they become no-shows at accounting close unless the patient comes.
 	MissedNow        int              `json:"missedNow"`
 	NoShowsLastClose int              `json:"noShowsLastClose"`
-	Waiting          []WaitingPatient `json:"waiting"` // in arrival order
+	Waiting          []WaitingPatient `json:"waiting"` // everyone on site, in arrival order
 }
 
 // Patient status keys for lists.
 const (
 	PatientBooked      = "booked"
 	PatientCancelled   = "cancelled"
+	PatientArrived     = "arrived" // waiting to register
+	PatientRegistering = "registering"
 	PatientWaiting     = "waiting"
+	PatientInExam      = "in_exam"
+	PatientDone        = "done"
 	PatientMissed      = "missed"
 	PatientNoShow      = "no_show"
 	PatientRescheduled = "rescheduled"
 	PatientLeft        = "left"
-	PatientUnseen      = "unseen"
 	PatientSentToBook  = "booked_later" // walk-in given an appointment instead
 	PatientLost        = "lost"
 )

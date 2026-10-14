@@ -293,6 +293,22 @@ Journey (one patient, booking to payment):
 Only observed facts appear (no "will be paid on…", no sampled durations before
 they happen).
 
+**Closing status** (step 8, SIMULATION_DESIGN §6.9). The practice line
+shows the day's phase, not just open/closed:
+
+```
+● OPEN 08:00–20:00
+◐ CLOSING — 3 patients remaining · OT +42m after 20:00 ($38) · Sam, Dr. Blake held over
+○ CLOSED · operations closed 20:47 (scheduled 20:00) · OT 1h 12m ($63)
+```
+
+After scheduled close the room panel shows only rooms with admitted
+patients or an exam in progress; the others read `Closed`. Log entries
+(amber): "Sam stays past shift end: 3 patients still need CT/XR", "P00123
+rescheduled: no MR technologist can finish within the 12-hour limit". Info
+entries: "Sam off duty after 42m overtime", "Operations closed 20:47". The
+staff list marks held-over staff `OT +42m`.
+
 As built in V0.1 step 7, `p` opens the list for a day: every appointment
 booked for it (time order, cancelled included) and every walk-in. Arrival
 shows the actual time and, when the patient was more than 5 minutes off, the

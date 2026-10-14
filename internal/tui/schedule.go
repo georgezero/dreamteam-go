@@ -72,7 +72,7 @@ func (m *Model) scheduleBody(w, n int) []string {
 			lines = append(lines, "")
 		}
 	}
-	lines = append(lines, dimStyle.Render(" ░ booked  · open  ˙ too late to book  ─ unstaffed  ◐ tech break  ⊘ contrast, no radiologist on site"))
+	lines = append(lines, dimStyle.Render(" ░ booked  · open  ¦ shared tech booked in the other room  ˙ too late  ─ unstaffed  ◐ tech break  ⊘ contrast, no radiologist"))
 
 	// Selected room: demand against capacity, then its slots.
 	rs := d.Rooms[m.schedRoom]
@@ -130,6 +130,8 @@ func timeline(d api.DaySchedule, rs api.RoomSchedule) string {
 			b.WriteString(dimStyle.Render("˙"))
 		case s.Status == api.SlotNoSupervision:
 			b.WriteString(warnStyle.Render("⊘"))
+		case s.Status == api.SlotSharedBusy:
+			b.WriteString(dimStyle.Render("¦"))
 		default:
 			b.WriteString(dimStyle.Render("─"))
 		}
@@ -165,6 +167,8 @@ func slotRows(rs api.RoomSchedule) []string {
 			out = append(out, fmt.Sprintf("  %s  %s", at, openStyle.Render("open")+dimStyle.Render(" · "+s.Category)))
 		case api.SlotPassed:
 			out = append(out, dimStyle.Render(fmt.Sprintf("  %s  open, too late to book · %s", at, s.Category)))
+		case api.SlotSharedBusy:
+			out = append(out, dimStyle.Render(fmt.Sprintf("  %s  free, but its shared technologist is booked in another room · %s", at, s.Category)))
 		default:
 			j := i
 			for j+1 < len(rs.Slots) && rs.Slots[j+1].Status == s.Status {

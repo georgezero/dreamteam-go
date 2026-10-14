@@ -1,0 +1,59 @@
+{
+ "extends": "micro-base.json",
+ "openingSchedule": [
+  {
+   "time": "08:00",
+   "room": "R2",
+   "exam": "CT_C",
+   "source": "S1"
+  },
+  {
+   "time": "08:15",
+   "room": "R2",
+   "exam": "CT_C",
+   "source": "S1"
+  },
+  {
+   "time": "08:30",
+   "room": "R2",
+   "exam": "CT_C",
+   "source": "S1"
+  },
+  {
+   "time": "08:45",
+   "room": "R2",
+   "exam": "CT_C",
+   "source": "S1"
+  }
+ ],
+ "templates": {
+  "R2": [
+   {
+    "days": [
+     "Tue"
+    ],
+    "slots": [
+     {
+      "start": "08:00",
+      "lenMin": 15,
+      "count": 4,
+      "category": "CT_15C"
+     }
+    ]
+   }
+  ]
+ },
+ "policies": {
+  "maxShiftHours": 2
+ },
+ "employees": [
+  {
+   "id": "T2",
+   "roster": {
+    "Tue": {
+     "start": "08:00"
+    }
+   }
+  }
+ ]
+}

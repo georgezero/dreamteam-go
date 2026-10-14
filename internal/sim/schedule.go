@@ -24,7 +24,7 @@ func (st *state) observeDemand(o *api.Observation, now simtime.Time) {
 					switch {
 					case s.appt >= 0:
 						md.ApptsToday++
-					case s.why == slotOK && st.cal.At(today, s.From) >= notBefore:
+					case s.why == slotOK && st.cal.At(today, s.From) >= notBefore && sharedFree(d.days[today], r, &s):
 						md.OpenToday++
 					}
 				}
@@ -51,7 +51,7 @@ func (st *state) nextOpen(m string, today int64, notBefore simtime.Time) (int64,
 				continue
 			}
 			for _, s := range st.dem.days[day].rooms[r] {
-				if s.appt < 0 && s.why == slotOK && st.cal.At(day, s.From) >= notBefore {
+				if s.appt < 0 && s.why == slotOK && st.cal.At(day, s.From) >= notBefore && sharedFree(st.dem.days[day], r, &s) {
 					return day, true
 				}
 			}
@@ -96,7 +96,7 @@ func (w *World) Schedule(day int64) api.DaySchedule {
 		for _, b := range cov.OnBreak(r) {
 			rs.Breaks = append(rs.Breaks, api.Span{From: b.From, To: b.To})
 		}
-		for _, s := range ds.rooms[r] {
+		for k, s := range ds.rooms[r] {
 			x := api.Slot{Span: api.Span{From: s.From, To: s.To}, Category: st.cfg.Categories[s.Category].Name}
 			switch {
 			case s.appt >= 0:
@@ -107,6 +107,8 @@ func (w *World) Schedule(day int64) api.DaySchedule {
 				x.Status = slotWhy[s.why]
 			case st.cal.At(day, s.From) < notBefore:
 				x.Status = api.SlotPassed
+			case !sharedFree(ds, r, &ds.rooms[r][k]):
+				x.Status = api.SlotSharedBusy
 			default:
 				x.Status = api.SlotOpen
 			}

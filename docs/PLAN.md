@@ -204,6 +204,7 @@ Each decision lists the recommendation, the alternatives and the tradeoff.
 | D18 | Exam codes | **Internal codes** | CPT | Avoids licensing. Can be mapped later |
 | D19 | Time zone | **Practice-local, no DST** | real tz | Removes calendar bugs that add no gameplay value |
 | D20 | V0.1 interaction | **3 real actions** + time controls + inspection | view-only V0.1 | Without some interaction V0.1 is a screensaver. Three actions prove the action path end-to-end |
+| D21 | Closing time | **Scheduled close stops admissions; admitted patients are still served.** Staff are held over as required overtime (recorded and costed) within the hard shift cap. Patients are rescheduled explicitly only when safe coverage runs out. Scheduled, operational and accounting close are distinct | hard cutoff at closing time | A hard cutoff silently discards patients and hides the real cost of a late-running day. Required overtime makes admission decisions (late walk-ins, evening templates) a real revenue vs overtime tradeoff |
 
 ---
 

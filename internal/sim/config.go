@@ -45,6 +45,20 @@ type ExamConfig struct {
 	Category             int // index into Config.Categories
 	Contrast             bool
 	WalkInEligible       bool
+	// RoomTime is patient-in-room through room ready; TechExtra is the
+	// technologist's documentation after the room is released (seconds).
+	RoomTime, TechExtra rng.Quantile
+}
+
+// Expected returns the published expected room time (p50).
+func (x *ExamConfig) Expected() simtime.Duration {
+	return simtime.Duration(x.RoomTime.At(500_000))
+}
+
+// MaxTask returns the longest the exam can occupy its technologist
+// (p100 room time + p100 documentation): the admission-rule bound.
+func (x *ExamConfig) MaxTask() simtime.Duration {
+	return simtime.Duration(x.RoomTime.Max() + x.TechExtra.Max())
 }
 
 // CategoryConfig is a slot category (e.g. MR_45). Every exam in a category
@@ -127,6 +141,10 @@ type BehaviorConfig struct {
 	Arrival []ArrivalClass
 	// WalkInPatienceMin is how long a walk-in waits before leaving.
 	WalkInPatienceMin rng.Quantile
+	// Registration times (seconds) and the slowdown when the operations
+	// manager or a technologist registers instead of the front desk.
+	RegScheduled, RegWalkIn rng.Quantile
+	RegOpsBP, RegSelfBP     int64
 }
 
 // ArrivalClass is one punctuality class.
@@ -237,6 +255,16 @@ type Policies struct {
 	Booking             string
 	BookingHorizonDays  int64
 	BookingNotice       simtime.Duration // earliest a same-day slot can be booked ahead
+	// Imaging queue (SIMULATION_DESIGN §5.9): a scheduled patient is due
+	// from EarlyStart before the appointment; StartEarly lets an idle room
+	// take an early patient who is not yet due.
+	EarlyStart simtime.Duration
+	StartEarly bool
+	// Breaks and overtime (§6.4): a break due while busy waits at most
+	// BreakDeferMax; hourly pay is ×OvertimeBP/10,000 beyond WeeklyHours.
+	BreakDeferMax simtime.Duration
+	WeeklyHours   simtime.Duration
+	OvertimeBP    int64
 }
 
 // Assignment values other than room IDs.

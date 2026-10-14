@@ -7,6 +7,100 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 8 — Registration, imaging, overtime and closing rules (v0.1.0-dev.8)
+
+**Planning changes first** (your decision): scheduled closing time no
+longer cuts off admitted patients. PLAN D21, SIMULATION_DESIGN §3.4.2 (three
+closes) and §6.9 (closing time and required overtime), the §6.4–6.5 rule
+changes, invariants 7–8a, closing metrics, ROADMAP step 8, acceptance
+criterion 5a, an exploit risk row, and the TUI closing status.
+
+**Behavior**
+
+* **Registration**: front desk, then the operations manager (×1.25), then,
+  only with nobody desk-capable on duty, the patient's technologist (×1.5).
+  The queue is urgent first, then scheduled patients by appointment time,
+  then walk-ins.
+* **Imaging**: patients across all free rooms are ranked by the queue policy
+  (urgent, due by appointment, late fitted in, walk-ins under the walk-in
+  policy, early arrivals) and started when a qualified technologist on the
+  room is free and can finish by their 12-hour cap. Contrast also needs an
+  on-site radiologist whose cap covers the exam. Room time and documentation
+  are drawn per exam. The technologist documents for 1–12 min after the
+  room is released.
+* **Shared technologists**: one person, one exam. Booking now respects it
+  too: a slot whose technologist also staffs another room isn't bookable
+  while that person is already booked there (schedule shows `¦`).
+* **Scheduled close** stops admissions only. Admitted patients are still
+  registered and imaged. Staff past their shift end are **held over** while
+  admitted patients need them (a technologist for the rooms they had, an
+  on-site radiologist for contrast). They are released at the first instant
+  they're not needed. Overtime minutes and cost (×1.5 past 40 paid hours a
+  week, hourly staff) are recorded per person and day.
+* **Coverage runs out** → the patient is rescheduled explicitly with the
+  reason (for example "no XR technologist can finish within the 12-hour shift
+  limit", "no radiologist on site to supervise contrast"), on arrival or
+  while waiting. Nobody is sent home for the clock.
+* **Operational close**: the first moment after scheduled close with nobody
+  on site and nobody mid-task. It is logged with after-hours exams and
+  overtime. Accounting close at 23:59:59 checks nobody is still on site.
+* Breaks due while busy are deferred up to 60 min, or skipped (counted).
+* **Template change [illustrative]**: Saturday XR/CT reduced to 12 + 7
+  staggered slots. Sam works both rooms alone and registers everyone.
+
+**On screen**
+
+* Practice line: `● OPEN 08:00–20:00`, then `◐ CLOSING — 3 patients
+  remaining · OT +42m ($38) after 20:00 · held over: Sam`, then
+  `○ CLOSED · operations closed 20:47 (scheduled 20:00) · OT +1h 12m ($63)`.
+* Rooms show scans in progress (`● Scanning P00614 Head w/o 14/12m Sam`,
+  amber when past the expected time) and how many are waiting. Staff show
+  their task (registering, exam, documenting) and overtime.
+* Patient flow: on site by stage (registering, waiting by modality, in
+  exam), longest wait, exams done, after-hours exams, coverage reschedules.
+* Journey: registered (by whom, when), exam (technologist, room, wait, time
+  taken against the expected time, after scheduled close), departed or
+  rescheduled with the reason.
+
+**Tests**
+
+* Micro practices (`internal/sim/testdata/micro-*.json`, fixed durations)
+  check exact timelines:
+  * waiting patients stay after scheduled close, and an exam starts after it;
+  * operations close at 09:36 against a scheduled 09:00;
+  * 36 min of required overtime costs $36, or $54 past 40 weekly hours;
+  * the shift cap forces an explicit reschedule with its reason;
+  * a shared XR/CT technologist never runs two exams at once;
+  * an on-site radiologist is held over for contrast after hours, and runs
+    out of cap with an explicit reason;
+  * patience expiry beats an exam start at the same instant, and a patient
+    being registered can't leave.
+* Across a month of the mini practice: every visit ends imaged, left, or
+  rescheduled with a reason, overtime is recorded, and some days close
+  late. Invariants are checked after every transaction: shift cap, one task
+  per person, room occupancy, timestamp order, nobody on site at accounting
+  close.
+* Determinism: minute-by-minute chunks and various speeds and budgets give
+  identical results.
+
+**Measured on the mini practice** (28 days, seed 1): wait from arrival to
+exam has median 14 min, p90 44 min, max ≈ 3 h (busy Saturdays and
+evenings). Overtime averages ≈ 30 min a day (≈ $15). There are a few
+after-hours exams a week.
+
+**Limitations**
+
+* No study or report yet. The worklist and radiologist reading are step 9.
+  Radiologists only supervise contrast here.
+* Held-over staff take no breaks. There is no minimum rest before the next
+  shift yet (V0.2), so a late night doesn't thin the next morning.
+* `extend_shift` (approved overtime) comes with the actions in step 13.
+  Until then all overtime is *required*.
+* Performance: 180 days of the mini practice take ≈ 1.3–1.7 s on the loaded
+  Pi. Step 11 must apply the warm-up mitigations (MEASUREMENTS.md).
+
+---
+
 ## Step 7 — Arrivals, missed appointments, walk-ins, patience (v0.1.0-dev.7)
 
 **Behavior**

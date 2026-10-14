@@ -20,6 +20,19 @@ func miniConfig(t testing.TB) *sim.Config {
 	return cfg
 }
 
+// rosterOnly is the mini scenario with no patients at all, so staffing
+// follows the roster exactly (no tasks, deferred breaks or hold-overs).
+func rosterOnly(t testing.TB) *sim.Config {
+	cfg := *miniConfig(t)
+	cfg.Opening = nil
+	cfg.Sources = append([]sim.SourceConfig(nil), cfg.Sources...)
+	for i := range cfg.Sources {
+		cfg.Sources[i].BaseDailyMilli = 0
+	}
+	cfg.WalkIns.DailyMilli = 0
+	return &cfg
+}
+
 func TestReadingBlocks(t *testing.T) {
 	h := simtime.Hour
 	m := simtime.Minute
@@ -47,7 +60,7 @@ var deskByLevel = map[int]string{
 // room, desk coverage and radiologist reading blocks. Covers a whole
 // fortnight, so Mon/Tue/Sat of both rota weeks are included.
 func TestRuntimeMatchesPlan(t *testing.T) {
-	cfg := miniConfig(t)
+	cfg := rosterOnly(t)
 	w := sim.New(cfg, rng.SeedFromInt(1))
 	eng := w.Engine()
 	eng.CheckInvariants = true
@@ -115,7 +128,7 @@ func TestRuntimeMatchesPlan(t *testing.T) {
 
 // Advancing minute by minute and in one jump give the same log.
 func TestStaffChunkingInvariance(t *testing.T) {
-	cfg := miniConfig(t)
+	cfg := rosterOnly(t)
 	a := sim.New(cfg, rng.SeedFromInt(1))
 	b := sim.New(cfg, rng.SeedFromInt(1))
 	end := a.Calendar().StartOfDate(cfg.Start.AddDays(7))

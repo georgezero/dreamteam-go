@@ -89,6 +89,23 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 	cfg.Policies.Booking = pol.Booking
 	cfg.Policies.BookingHorizonDays = pol.BookingHorizonDays
 	cfg.Policies.BookingNotice = simtime.Duration(pol.BookingNoticeMin) * simtime.Minute
+	if pol.EarlyStartMin < 0 || pol.EarlyStartMin > 120 {
+		c.fail("policies.earlyStartMin", "%d is outside 0–120", pol.EarlyStartMin)
+	}
+	if pol.BreakDeferMaxMin < 0 || pol.BreakDeferMaxMin > 240 {
+		c.fail("policies.breakDeferMaxMin", "%d is outside 0–240", pol.BreakDeferMaxMin)
+	}
+	if pol.WeeklyOvertimeHours < 0 || pol.WeeklyOvertimeHours > 80 {
+		c.fail("policies.weeklyOvertimeHours", "%d is outside 0–80", pol.WeeklyOvertimeHours)
+	}
+	if pol.OvertimeFactorBP < 10_000 || pol.OvertimeFactorBP > 30_000 {
+		c.fail("policies.overtimeFactorBP", "%d is outside 10000–30000", pol.OvertimeFactorBP)
+	}
+	cfg.Policies.EarlyStart = simtime.Duration(pol.EarlyStartMin) * simtime.Minute
+	cfg.Policies.StartEarly = pol.StartEarly
+	cfg.Policies.BreakDeferMax = simtime.Duration(pol.BreakDeferMaxMin) * simtime.Minute
+	cfg.Policies.WeeklyHours = simtime.Duration(pol.WeeklyOvertimeHours) * simtime.Hour
+	cfg.Policies.OvertimeBP = pol.OvertimeFactorBP
 
 	// Catalog and slot categories.
 	if len(f.Catalog) == 0 {
@@ -120,7 +137,9 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 			c.fail(xp+".category", "%q mixes modalities or contrast with an earlier exam", x.Category)
 		}
 		cfg.Catalog = append(cfg.Catalog, sim.ExamConfig{Code: x.Code, Name: x.Name, Modality: x.Modality,
-			Category: ci, Contrast: x.Contrast, WalkInEligible: x.WalkInEligible})
+			Category: ci, Contrast: x.Contrast, WalkInEligible: x.WalkInEligible,
+			RoomTime:  c.quantile(xp+".roomTimeSec", x.RoomTimeSec, 60),
+			TechExtra: c.quantile(xp+".techExtraSec", x.TechExtraSec, 1)})
 	}
 
 	// Templates.
@@ -438,6 +457,13 @@ func (c *checker) arrivals(f *File, cfg *sim.Config) {
 		c.fail("behavior.arrivalClasses", "weights sum to %d, not 10000", wsum)
 	}
 	b.WalkInPatienceMin = c.quantile("behavior.walkInPatienceMin", f.Behavior.WalkInPatienceMin, 1)
+	rg := f.Behavior.Registration
+	b.RegScheduled = c.quantile("behavior.registration.scheduledSec", rg.ScheduledSec, 30)
+	b.RegWalkIn = c.quantile("behavior.registration.walkInSec", rg.WalkInSec, 30)
+	if rg.OpsFactorBP < 10_000 || rg.OpsFactorBP > 30_000 || rg.SelfRegFactorBP < 10_000 || rg.SelfRegFactorBP > 30_000 {
+		c.fail("behavior.registration", "opsFactorBP and selfRegFactorBP must be 10000–30000")
+	}
+	b.RegOpsBP, b.RegSelfBP = rg.OpsFactorBP, rg.SelfRegFactorBP
 
 	w := f.WalkIns
 	wc := &cfg.WalkIns

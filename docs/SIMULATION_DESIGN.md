@@ -460,17 +460,30 @@ Rules:
   Replay calls `RunUntil(at)` then `ApplyBatch` with the same actions, and
   asserts identical results.
 
-### 3.4.2 Day boundaries: operational vs accounting
+### 3.4.2 Day boundaries: three closes
 
-* **Operational day end**: the first transaction after practice close at which
-  no visit is on site and no exam is in progress. It emits an observable
-  `OperationalDayEnd` entry. The TUI's `e` key runs to it, and the end-of-day
-  summary (operations metrics) is produced there.
-* **Accounting close** (`DayClose`, 23:59:59): payroll accrual for the day,
-  finalization of missed appointments as no-shows (§5.8), the daily KPI
-  snapshot, and the daily P&L. Financial figures in the end-of-day summary are
-  labelled "as of operational close". The daily P&L is final after accounting
-  close.
+A day has three distinct ends (§6.9 has the rules):
+
+1. **Scheduled close** (`hours.To`, e.g. 20:00): the practice stops
+   *admitting* patients: no walk-ins, and a scheduled patient arriving after
+   it is rescheduled. Patients already admitted keep their place, and
+   registration and imaging continue for them.
+2. **Operational close**: the first transaction after scheduled close at
+   which no admitted patient is on site and no technologist is busy (exam or
+   documentation), so every on-site task is done. It emits an observable
+   `Operations closed` entry with the day's after-hours figures. The TUI's
+   `e` key runs to it, and the end-of-day summary (operations metrics) is
+   produced there. Radiologist reading may continue remotely afterwards.
+3. **Accounting close** (`DayClose`, 23:59:59): payroll accrual for the day
+   (overtime included), finalization of missed appointments as no-shows
+   (§5.8), the daily KPI snapshot, and the daily P&L. Financial figures in
+   the end-of-day summary are labelled "as of operational close". The daily
+   P&L is final after accounting close.
+
+Operational close normally comes minutes after scheduled close. It can't
+come after the latest shift cap (shift start + `MaxShiftHours`), because
+nobody may work past their cap and patients who can't be finished safely are
+rescheduled (§6.9).
 
 ### 3.5 Dispatch (resource contention)
 
@@ -486,10 +499,27 @@ Rules:
    find an on-duty technologist with the skill whose assignment covers this
    room and who is `Available`; choose the next `Waiting` visit by the
    **imaging queue policy** (§5.9). Check constraints (§6.5). Start the exam:
-   room → Occupied, tech → Busy, visit → InExam, push `ExamEnd`.
+   room → Occupied, tech → Busy, visit → InExam, push `ExamEnd`. After
+   scheduled close this continues for admitted patients, with technologists
+   held over (§6.9).
+2a. **Hold-over and coverage** (§6.9): employees past their shift end are
+   released when no longer needed. Admitted patients who can't be served
+   safely today are rescheduled, and the reason is recorded.
 3. **Reading**: for each `Available` radiologist with site-reading time on the
    current block, claim the next `Unread` study by the **worklist policy**
    (§6.8). Push `ReadEnd`.
+
+**As built (V0.1 step 8).** Each transaction's dispatch runs, in order:
+(0) mark idle staff past shift end who are still needed as *held over*;
+(1) registration; (2) imaging; (2a) coverage checks (reschedule admitted
+patients nobody can serve safely today); release staff no longer needed;
+recompute room states; operational close; eligibility wakes. Imaging ranks
+the registered patients of **all free rooms together** by the queue policy
+(urgent, due scheduled by appointment time, late fitted in, walk-ins,
+early), then tries each in order. A technologist shared between rooms
+therefore serves the most overdue patient first, and room order only
+breaks ties. Room-by-room matching starved CT behind XR for hours on
+Saturdays.
 
 Greedy dispatch is intentional for V0.1. It is how real departments operate
 (people pick the next patient), it is cheap, and it is a sensible baseline that
@@ -744,6 +774,15 @@ Booking policy `FirstFit` (default):
    **Lost** (logged as "declined — earliest slot in 23 days").
 4. Urgent orders may use reserved add-on slots and, under policy
    `OverbookUrgent`, overbook today.
+5a. **Shared technologists** (as built in step 8). Each slot records the
+   technologists rostered to its room at its start. A slot whose
+   technologists also staff another room then is bookable only while fewer
+   overlapping appointments in those rooms hold them than there are
+   technologists. One technologist covering XR and CT can't be booked in
+   both rooms for the same quarter-hour. The schedule shows such slots as
+   `¦` (shared technologist booked in the other room). Without this rule the
+   templates promised two rooms' worth of work to one person, and waits
+   reached 4–6 hours.
 5. Slots freed by cancellations are immediately bookable again by later orders
    (FirstFit naturally backfills them). Freed slots less than 24 h out rarely
    refill, which is realistic.
@@ -874,11 +913,24 @@ time, they leave (`LeftWithoutExam`, demand lost).
   the rest of the day, the walk-in is booked an appointment and leaves.
   Otherwise they wait. `accept_if_gap` is a dispatch decision (§5.9), so it
   takes effect in step 8.
-* **Closing time.** No exam starts after the practice closes (§6.5), so
-  everyone still waiting at closing is sent home unseen (`Unseen`, counted).
-  Until imaging exists (step 8) this is every arrival that day.
+* **Closing time** (superseded in step 8 by §6.9). Step 7 had no imaging,
+  so patients still waiting at closing were sent home unseen. From step 8
+  admitted patients are served after scheduled close. Nobody is sent home
+  for the clock. A patient is rescheduled, with the reason recorded, only
+  when safe coverage runs out.
 * **Visits** get public IDs (`V…`) when the patient arrives. Each
   appointment has at most one visit, and so does each order.
+
+### 5.7.1 Registration as built (step 8)
+
+Registration needs a free registrar. Front desk staff come first, then the
+operations manager (×1.25). A technologist of the patient's modality
+registers (×1.5) only when no desk-capable person is on duty at all;
+someone on break or busy still counts as on duty, so the patient waits.
+Registration may start before opening when staff are in. The queue is
+urgent first, then scheduled patients by appointment time, then walk-ins by
+arrival. Durations are drawn from domain `registration` (originKey, attempt)
+lane 0. Exam room time and documentation use `attempt.exam` lanes 0 and 1.
 
 ### 5.9 Imaging queue policy
 
@@ -905,6 +957,8 @@ reschedule).
 ```
 Order Received → Booked → (Cancelled | NoShow | Arrived)
 Arrived → Registering → Waiting → InExam → Departed
+Arrived | Waiting → LeftWithoutExam (walk-in patience; never once registering or in exam)
+Arrived | Waiting → Rescheduled (no safe coverage today, reason recorded, §6.9)
 Study Unread → Reading → Final → Claim Pending → Submitted → Paid/Denied → Closed
 ```
 
@@ -984,7 +1038,9 @@ alternating weeks are handled without biweekly templates.
 Names are fictional placeholders.
 
 The bundled roster (`scenarios/base/established.json`) fills in what the
-tables leave open. On Mondays Riley covers CT for the whole shift, because Sam
+tables leave open. Saturday templates are sized for one technologist who
+also registers everyone (no desk): 12 XR and 7 CT slots, staggered so they
+never overlap **[illustrative; calibrated in step 18]**. On Mondays Riley covers CT for the whole shift, because Sam
 is off. On Saturdays Sam staffs XR and CT alone, with a 13:30–14:00 break.
 Breaks are not covered: a single-tech room is unstaffed during its tech's
 break. `dreamteam scenario coverage mini` prints staffed against open hours
@@ -999,10 +1055,13 @@ for every day of the fortnight; about 74% of open room-hours are staffed.
   The extra minutes are **run-over time**: paid, counted as overtime pay if
   weekly hours exceed the threshold, and reported as *unapproved overtime* (a
   soft metric). Run-over is not a violation.
-* **Start rule (soft, shift end)**: a technologist doesn't start an exam whose
-  *expected* duration (catalog p50, not the latent sample) would end more than
-  `OvertimeAllowance` (default 15 min) past shift end, unless overtime is
-  approved for that shift (action `extend_shift`).
+* **Handover rule (soft, shift end)**: a technologist doesn't start an exam
+  whose *expected* duration (catalog p50, not the latent sample) would end
+  more than `OvertimeAllowance` (default 15 min) past shift end **if another
+  qualified technologist covering that room is on regular duty past that
+  time** (or overtime is approved for the shift, action `extend_shift`). If
+  they're the last qualified one, the exam starts and becomes **required
+  overtime** (§6.9).
 * **Admission rule (hard, shift cap)**: a task may start only if
   `now + maxDuration ≤ shiftStart + MaxShiftHours`, where `maxDuration` is the
   quantile table's p100 (room time + tech extra). Sampled durations never
@@ -1011,7 +1070,14 @@ for every day of the fortnight; about 74% of open room-hours are staffed.
 * Overtime pay: ×1.5 for hourly staff beyond 40 paid hours in the week
   **[structural for US FLSA; configurable]**; daily-overtime rules (some states)
   configurable. Salaried staff: no overtime pay; extra hours count toward
-  workload only.
+  workload only. Time worked past the scheduled shift end is **overtime
+  time** whatever the weekly total. It is costed at the rate in force (×1.5
+  once the week passes 40 paid hours, which a full default week already
+  reaches) and recorded per employee and day (§6.9).
+* Breaks: a break due while the employee is busy is deferred until the task
+  ends, by at most 60 min, and only if it still ends before the shift does.
+  Otherwise it is skipped (counted, and paid as worked time). Held-over
+  staff take no breaks.
 
 ### 6.5 Coverage constraints (hard)
 
@@ -1030,11 +1096,99 @@ Enforced by dispatch and by action validation:
 3. One person, one task at a time; one patient per room.
 4. No employee's shift exceeds `MaxShiftHours` (default 12) from shift start,
    run-over included (guaranteed by the admission rule, §6.4).
-5. The practice does not start exams outside open hours (patients already in
-   the building may finish).
+5. No exam starts before opening. After **scheduled close** exams start only
+   for **admitted** patients (arrived before scheduled close), with staff
+   held over under §6.9. Nobody is admitted after scheduled close.
 
 Soft constraints, measured not enforced: skipped breaks, weekly hours above
-target, consecutive long days, desk-unstaffed minutes with patients present.
+target, consecutive long days, desk-unstaffed minutes with patients present,
+overtime minutes (required vs approved), short rest before the next shift.
+
+### 6.9 Closing time and required overtime **[structural]**
+
+Scheduled closing time is **not** a hard cutoff for patients already
+admitted. Distinguish scheduled close, operational close and accounting
+close (§3.4.2).
+
+**At scheduled close**
+* Stop admitting. No walk-ins are generated after it, and a scheduled
+  patient arriving after it is rescheduled ("arrived after closing"). No new
+  appointments can be booked after it, because templates lie inside open
+  hours.
+* Admitted patients (on site: arrived, registering, waiting, in exam) keep
+  their queue positions. Registration and imaging continue, and new exams
+  may start for them.
+* Nobody is sent home because of the clock.
+
+**Required overtime (hold-over)**
+* At shift end a **technologist** who is idle stays on duty (held over) if
+  an admitted patient still needs a room they were staffing at shift end
+  (to register or be imaged), and no technologist on regular duty covers
+  that room. A busy one finishes the task first (finish-in-progress), then
+  the same test applies. Held-over technologists staff the rooms they were
+  staffing at shift end, one exam at a time. A shared XR/CT technologist is
+  still one person.
+* An **on-site radiologist** whose shift ends stays (held over) while an
+  admitted contrast patient is waiting or in exam and no other on-site
+  radiologist is on regular duty. Their reading may also continue after
+  operational close: remotely, outside site blocks, and not modelled before
+  step 9.
+* Front desk and the operations manager are not held over. After they
+  leave, technologists self-register patients (§5.7).
+* Held-over staff are released at the first transaction where they are no
+  longer needed. Every second past the scheduled shift end is overtime,
+  recorded per employee and day with its cost (§6.4), and split into
+  *required* (held over, or finishing a task) and *approved* (`extend_shift`,
+  step 13).
+
+**Safety limits stay hard**
+* The shift cap (§6.4): no task starts unless it can finish by
+  `shiftStart + MaxShiftHours`, using p100 durations. Nobody works
+  indefinitely, and a hold-over ends at the cap.
+* Qualifications, one task per person, one patient per room, and contrast
+  supervision (an on-site radiologist on duty or held over, whose cap
+  covers the exam's p100 room time) all apply after hours exactly as before.
+
+**When safe coverage runs out**
+* A patient is **rescheduled explicitly**, with the reason logged and kept
+  on the visit, when no one can serve them today. That means no qualified
+  technologist (on duty, held over, or starting later today) whose cap
+  allows the exam, or, for contrast, no such on-site radiologist. A
+  patient arriving when this already holds is rescheduled on arrival. The
+  order is offered slots from the next day. It is lost only if the patient
+  accepts none.
+* Patients are never silently discarded. Every admitted visit ends
+  Departed, LeftWithoutExam (walk-in patience) or Rescheduled with a reason.
+
+**Walk-in patience** keeps running after scheduled close, so a walk-in can
+still leave. Patience is checked once, at its deadline. A walk-in waiting
+to register or waiting for the exam leaves then. One who is being
+registered or is in the exam at that moment stays.
+
+**Ordering.** Hold-over decisions and coverage checks run in dispatch,
+once per transaction, after all events at that instant (§3.4). Shift ends
+are class 5, so a task completing at the same instant (class 2) frees the
+person first. Employees are visited in employee order and visits in queue
+order, so the outcome doesn't depend on speed or chunking.
+
+**The tradeoff it creates.** Admitting more (late walk-ins, a fuller
+evening template, `accept_always`) earns revenue but runs the evening long.
+Overtime costs money at ×1.5, and long days show up in the workforce metrics.
+**[V0.2]** a minimum rest period before the next shift (late finishes delay
+or thin the next morning) and fatigue (V0.4) make the next day pay as well.
+
+**Benchmark exploits and their closures**
+* *Pile everything into the evening.* Overtime cost is in the P&L. Waits,
+  after-hours minutes and overtime are scored workforce metrics. The cap
+  bounds it.
+* *Admit everyone and reschedule at the cap.* Coverage reschedules count as
+  access failures (lost or delayed demand, with the age carried through the
+  evaluation tail, §11).
+* *Hold staff idle to keep rooms "staffed".* A hold-over ends at the first
+  transaction with no admitted need, and idle overtime is visible per
+  employee.
+* *Exploit the scheduled-close boundary* (book at 19:59, arrive late): no
+  slots exist after scheduled close, and arrivals after it are rescheduled.
 
 ### 6.6 Workload and fatigue
 
@@ -1384,8 +1538,12 @@ Checked after every timestamp transaction (§3.4) in tests and with `--check-inv
    shift end only happens to tasks already in progress (§6.4).
 6. Every contrast exam started with a radiologist on duty and on site (or
    virtual supervision enabled).
-7. No exam started outside open hours.
-8. No shift exceeds `MaxShiftHours` from shift start, run-over included.
+7. No exam started before opening. After scheduled close, exams started only
+   for patients admitted before it (§6.9).
+8. No shift exceeds `MaxShiftHours` from shift start, run-over and
+   hold-over included.
+8a. Every admitted visit ends Departed, LeftWithoutExam or Rescheduled with
+   a reason. None is still on site at accounting close.
 
 **Patients**
 9. Each visit is in exactly one state; transitions follow the allowed graph.
@@ -1421,7 +1579,8 @@ Checked after every timestamp transaction (§3.4) in tests and with `--check-inv
 | Access | lead time from **original order** to exam (across reschedules) by modality, **lost demand**, walk-in left-without-exam rate, same-day add-on acceptance, orders still unserved at window end with their age |
 | Patient experience | wait from **arrival** to exam start (median, p90), late starts, waits > 30 min |
 | Clinical service | report TAT median/p90 by priority and modality **over all studies acquired in the window, with unfinished ones counted at their age at window end (censored)**; urgent TAT breaches including still-unread overdue studies; unread backlog at close; overdue-outstanding count |
-| Workforce | overtime hours & cost, skipped breaks, desk-unstaffed patient-minutes, max weekly hours |
+| Workforce | overtime hours & cost (required vs approved), skipped breaks, desk-unstaffed patient-minutes, max weekly hours |
+| Closing | scheduled vs operational close, after-hours exams and minutes, patients rescheduled for lack of safe coverage |
 | Resilience **[V0.2]** | time to recover schedule after disruption, patients rescheduled due to disruption |
 
 Utilization is reported two ways because they tell different stories.

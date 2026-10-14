@@ -22,7 +22,7 @@ type OrderInfo struct {
 }
 
 var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
-	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderUnseen: "unseen"}
+	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderImaged: "imaged"}
 
 // Orders lists every disclosed order (opening schedule included).
 func (w *World) Orders() []OrderInfo {
@@ -71,9 +71,13 @@ type VisitInfo struct {
 	AfterGrace bool
 	State      string
 	EndedAt    simtime.Time
+	ExamStart  simtime.Time
+	ExamEnd    simtime.Time
+	Reason     string
 }
 
-var visitStateNames = [...]string{visitWaiting: "waiting", visitLeft: "left", visitUnseen: "unseen"}
+var visitStateNames = [...]string{visitArrived: "arrived", visitRegistering: "registering", visitWaiting: "waiting",
+	visitInExam: "in exam", visitDone: "done", visitLeft: "left", visitRescheduled: "rescheduled"}
 
 // Visits lists every visit.
 func (w *World) Visits() []VisitInfo {
@@ -82,7 +86,8 @@ func (w *World) Visits() []VisitInfo {
 		o := &w.st.dem.orders[v.order]
 		out = append(out, VisitInfo{ID: visitID(i), Order: orderID(v.order), Appt: v.appt, WalkIn: o.walkIn,
 			Exam: w.st.cfg.Catalog[o.exam].Code, Arrived: v.arrived, Late: v.late, AfterGrace: v.afterGrace,
-			State: visitStateNames[v.state], EndedAt: v.endedAt})
+			State: visitStateNames[v.state], EndedAt: v.endedAt, ExamStart: v.examStart, ExamEnd: v.examEnd,
+			Reason: v.reason})
 	}
 	return out
 }
