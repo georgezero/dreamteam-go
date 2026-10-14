@@ -22,6 +22,7 @@ type OrderInfo struct {
 	Priority string
 	Earliest int64
 	State    string
+	WalkIn   bool
 }
 
 var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
@@ -34,7 +35,7 @@ func (w *World) Orders() []OrderInfo {
 	for i, o := range w.st.dem.orders {
 		out = append(out, OrderInfo{ID: orderID(i), Origin: [4]int64{o.key.day, o.key.src, o.key.block, o.key.k},
 			Received: o.received, Exam: w.st.cfg.Catalog[o.exam].Code, Priority: o.priority.String(),
-			Earliest: o.earliest, State: orderStateNames[o.state]})
+			Earliest: o.earliest, State: orderStateNames[o.state], WalkIn: o.walkIn})
 	}
 	return out
 }
@@ -325,3 +326,6 @@ func (w *World) WeekPaid(name string) simtime.Duration {
 func (w *World) ForceDeniedClaimsFrom(t simtime.Time) {
 	w.st.fin.forceDenied = func(int) bool { return w.st.now >= t }
 }
+
+// Config returns the world's configuration.
+func (w *World) Config() *Config { return w.st.cfg }

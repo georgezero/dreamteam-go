@@ -1868,6 +1868,60 @@ but do not change state.
 Time controls (pause, speed, step) are **not** actions: they never change the
 simulated world.
 
+**As built (V0.1 step 13).** `World.Apply(batch)` / `Session.Apply` is the
+only entry point; `Validate` previews an action without applying or
+recording it. A batch applies at the current clock between transactions:
+state is accrued to now, actions are validated and applied in order (pushes
+at the current time are forbidden), every attempt is recorded
+(`{id X00001, batch, time, action, ok, code, message}`), and if any action
+changed something one dispatch and the alert observer run (`Engine.Settle`).
+Rejections and no-ops (`unchanged`: setting the policy in force) run
+nothing; rejected actions are kept in the action record (`Observation.Actions`,
+`ActionLog`) but not written to the event log. Replay = `RunUntil(time)`
+then `Apply(batch)` for each recorded batch (tested; run records are
+step 14).
+
+```json
+{"type": "extend_shift", "employee": "E06", "minutes": 120, "date": "2026-10-22"}
+{"type": "set_walkin_policy", "policy": "accept_until", "cutoff": "19:00"}
+{"type": "set_worklist_policy", "policy": "oldest_first"}
+```
+
+| Action | Rejection codes |
+|---|---|
+| `extend_shift` (1–240 min; `date` optional, today or a later day within the booking horizon) | `unknown_employee`, `invalid_minutes`, `invalid_date`, `past_date`, `beyond_horizon`, `not_on_shift`, `gone_home`, `shift_ended` (no retroactive approval), `exceeds_max_shift` (says how much is left), `after_close` (the shift already runs to scheduled close: an extension after close adds no capacity) |
+| `set_walkin_policy` (`accept_always`, `accept_if_gap`, `accept_until` + `cutoff`, `schedule_later`) | `unknown_policy`, `invalid_cutoff` |
+| `set_worklist_policy` (`urgent_then_fifo`, `fifo`, `oldest_first`, `shortest_first`) | `unknown_policy`, `invalid_parameters` |
+| any other type | `unknown_action` |
+
+**Extend shift.** The employee's scheduled end moves later on that day (the
+roster plus approved extensions is the day's plan). They stay on regular
+duty — staffing their assigned room, the desk or supervision — so the
+extension is *capacity*: today it serves waiting patients and walk-ins,
+and the day's template slots in the extra time become bookable at once
+(approved ahead, bookings fill them). Required hold-over is unchanged: it
+only finishes admitted patients, past the (extended) end, within the cap.
+Overtime is time on duty past the *rostered* end: approved up to the
+extended end, required beyond it; both are paid as worked time (one wage
+entry per person-day, no double count), and the approved part's cost is
+the overtime cost of paid time up to its end. Breaks and reading blocks are
+unchanged; cover windows keep their times. The default roster's US and MR
+templates now include evening slots (US 18:00–20:00, MR 16:30–19:30) that
+stay unstaffed, and unbookable, unless a shift is extended — outcomes
+without actions are unchanged.
+
+**Walk-in policy.** `accept_until` accepts as `accept_always` until the
+cutoff, then declines. A declined walk-in (policy `schedule_later`, or
+`accept_until` after the cutoff) is offered an appointment like any order,
+so it stays in the demand figures (booked, recall or lost); declines are
+counted apart (`walkInsDeclined`) from walk-ins who could not be served
+today, and from those who left. Walk-ins already waiting are never removed.
+
+**Worklist policy.** Read from the policies in force at each claim. A
+change reorders unread studies only; reads in progress run to the end, read
+times stay each case's own (keyed by origin), and `shortest_first` uses the
+published expected read time.
+
 ---
 
 ## 10. Invariants

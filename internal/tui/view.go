@@ -43,6 +43,9 @@ func (m *Model) render() string {
 	case screenBriefing:
 		body = m.briefingBody(w, h-3)
 		hints = " enter dashboard  space start  h history  f finance  w worklist  s sched  q quit"
+	case screenActions:
+		body = m.actionsBody(w, h-3)
+		hints = " ↑↓ choose  ←→ change  [ ] day  enter submit  d dash  s sched  space run  q quit"
 	case screenSummary:
 		body = m.summaryBody(w, h-3)
 		hints = " ←→ day  t today  tab day/since takeover  enter dashboard  h history  f finance  space run  q quit"
@@ -67,7 +70,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  e end of day  p pat  s sched  w work  f fin  l log  a auto:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  e end of day  a actions  p s w f l  A auto:" + auto + "  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -432,6 +435,9 @@ func staffLines(o api.Observation) []string {
 		if e.Supervising != "" {
 			st += warnStyle.Render(" · supervising " + e.Supervising + " contrast")
 		}
+		if e.ApprovedMin > 0 {
+			st += openStyle.Render(fmt.Sprintf(" · +%s approved", minutes(e.ApprovedMin)))
+		}
 		if e.OvertimeMin > 0 && e.Status != api.StaffOff {
 			st += warnStyle.Render(" · OT +" + minutes(e.OvertimeMin))
 		}
@@ -486,7 +492,15 @@ func flowLines(o api.Observation, w int) []string {
 	if t.AfterHours > 0 && w >= 100 {
 		l2 += fmt.Sprintf(" · after hours %d", t.AfterHours)
 	}
-	return []string{titleStyle.Render(section("PATIENT FLOW today", w)), l1, l2}
+	wi := o.Policies.WalkIn
+	if o.Policies.WalkInCutoff != "" {
+		wi += " " + o.Policies.WalkInCutoff
+	}
+	head := fmt.Sprintf("PATIENT FLOW today · walk-ins: %s · worklist: %s", wi, o.Policies.Worklist)
+	if t.WalkInsDeclined > 0 {
+		l2 += fmt.Sprintf(" · declined %d", t.WalkInsDeclined)
+	}
+	return []string{titleStyle.Render(section(head, w)), l1, l2}
 }
 
 // minutes formats a minute count: "34m", "2h 05m".
@@ -516,7 +530,13 @@ func staffSummary(o api.Observation) string {
 			}
 		}
 	}
-	return fmt.Sprintf("Techs %d/%d  Rads %d/%d", techsOn, techs, radsOn, rads)
+	ext := ""
+	for _, e := range o.Staff {
+		if e.ApprovedMin > 0 && e.Status != api.StaffOff {
+			ext = openStyle.Render(" +ext")
+		}
+	}
+	return fmt.Sprintf("Techs %d/%d  Rads %d/%d", techsOn, techs, radsOn, rads) + ext
 }
 
 func logLine(e api.LogEntry) string {

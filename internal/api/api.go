@@ -128,6 +128,16 @@ type Employee struct {
 	// Supervising names the patient whose contrast exam this radiologist
 	// is supervising now.
 	Supervising string `json:"supervising,omitempty"`
+	// Extensions (action extend_shift): the rostered end, the minutes
+	// approved today and the latest the shift could end (start + the
+	// shift cap). Pay: hourly rate (0 for salaried) and paid minutes this
+	// week before today, for overtime estimates.
+	RosterEnd     string `json:"rosterEnd,omitempty"`
+	ApprovedMin   int64  `json:"approvedMin,omitempty"`
+	CapAt         string `json:"capAt,omitempty"`
+	HourlyCents   int64  `json:"hourlyCents,omitempty"`
+	WeekPaidMin   int64  `json:"weekPaidMin"`
+	ApprovedOTMin int64  `json:"approvedOTMin,omitempty"` // of OvertimeMin, approved in advance
 }
 
 // Desk coverage levels.
@@ -163,8 +173,12 @@ type Observation struct {
 	Finance  Finance      `json:"finance"`
 	// Today is today's operational metrics so far (partial: Complete is
 	// false until the day ends).
-	Today  PeriodMetrics `json:"today"`
-	Alerts Alerts        `json:"alerts"`
+	Today    PeriodMetrics `json:"today"`
+	Alerts   Alerts        `json:"alerts"`
+	Policies Policies      `json:"policies"`
+	Actions  ActionLog     `json:"actions"`
+	// Extensions lists the shift extensions approved for today and later.
+	Extensions []Extension `json:"extensions"`
 	// LogTotal is the number of log entries ever emitted.
 	LogTotal  uint64     `json:"logTotal"`
 	RecentLog []LogEntry `json:"recentLog"` // oldest first
@@ -264,10 +278,13 @@ type FlowCounts struct {
 	AfterGrace    int `json:"afterGrace"`    // … after being marked missed (fitted in)
 	WalkIns       int `json:"walkIns"`       // walk-ins who came in
 	WalkInsBooked int `json:"walkInsBooked"` // … sent away with an appointment instead
-	Missed        int `json:"missed"`        // appointments marked missed at start + grace
-	NoShows       int `json:"noShows"`       // missed appointments finalized at accounting close
-	Rescheduled   int `json:"rescheduled"`   // too late for the late policy, or after closing
-	Left          int `json:"left"`          // walk-ins who left without an exam
+	// WalkInsDeclined counts, of WalkInsBooked, those turned away by the
+	// walk-in policy (the rest could not be served today).
+	WalkInsDeclined int `json:"walkInsDeclined"`
+	Missed          int `json:"missed"`      // appointments marked missed at start + grace
+	NoShows         int `json:"noShows"`     // missed appointments finalized at accounting close
+	Rescheduled     int `json:"rescheduled"` // too late for the late policy, or after closing
+	Left            int `json:"left"`        // walk-ins who left without an exam
 
 	Registered     int `json:"registered"`
 	SelfRegistered int `json:"selfRegistered"` // by a technologist (no desk staff on duty)
@@ -281,6 +298,10 @@ type FlowCounts struct {
 	SkippedBreaks     int   `json:"skippedBreaks"`
 	OvertimeMin       int64 `json:"overtimeMin"`       // booked when staff go home
 	OvertimeCostCents int64 `json:"overtimeCostCents"` // hourly staff only
+	// Of the overtime, the part approved in advance (extend_shift); the
+	// rest was required hold-over.
+	ApprovedOvertimeMin       int64 `json:"approvedOvertimeMin"`
+	ApprovedOvertimeCostCents int64 `json:"approvedOvertimeCostCents"`
 }
 
 // Visit states for patients on site.
@@ -808,6 +829,14 @@ type PeriodMetrics struct {
 	Reporting       ReportingMetrics `json:"reporting"`
 	Workforce       WorkforceMetrics `json:"workforce"`
 	Alerts          AlertCounts      `json:"alerts"`
+	Actions         ActionCounts     `json:"actions"`
+}
+
+// ActionCounts are the actions attempted in a period.
+type ActionCounts struct {
+	Attempted int `json:"attempted"`
+	Accepted  int `json:"accepted"` // incl. no-ops (setting the current policy)
+	Rejected  int `json:"rejected"`
 }
 
 // DemandMetrics: orders received and what booking did with them. LostRate
@@ -856,6 +885,7 @@ type ApptMetrics struct {
 type WalkInMetrics struct {
 	Arrived     int   `json:"arrived"`
 	SentToBook  int   `json:"sentToBook"`
+	Declined    int   `json:"declined"` // of SentToBook, by the walk-in policy
 	Imaged      int   `json:"imaged"`
 	Left        int   `json:"left"`
 	Acceptance  Ratio `json:"acceptance"`
@@ -897,17 +927,18 @@ type RoomMetrics struct {
 // = busy / on duty. Radiologists: site-reading block time, reads inside and
 // outside blocks, and ReadUtil = read inside blocks / block time.
 type StaffMetrics struct {
-	Name           string `json:"name"`
-	Role           string `json:"role"`
-	OnDutySec      int64  `json:"onDutySec"`
-	BusySec        int64  `json:"busySec"`
-	BreakSec       int64  `json:"breakSec"`
-	OvertimeSec    int64  `json:"overtimeSec"` // on duty past the scheduled shift end
-	Util           Ratio  `json:"util"`
-	BlockSec       int64  `json:"blockSec,omitempty"`
-	ReadInBlockSec int64  `json:"readInBlockSec,omitempty"`
-	ReadOutsideSec int64  `json:"readOutsideSec,omitempty"`
-	ReadUtil       Ratio  `json:"readUtil"`
+	Name                string `json:"name"`
+	Role                string `json:"role"`
+	OnDutySec           int64  `json:"onDutySec"`
+	BusySec             int64  `json:"busySec"`
+	BreakSec            int64  `json:"breakSec"`
+	OvertimeSec         int64  `json:"overtimeSec"`         // on duty past the rostered shift end
+	ApprovedOvertimeSec int64  `json:"approvedOvertimeSec"` // of it, approved in advance
+	Util                Ratio  `json:"util"`
+	BlockSec            int64  `json:"blockSec,omitempty"`
+	ReadInBlockSec      int64  `json:"readInBlockSec,omitempty"`
+	ReadOutsideSec      int64  `json:"readOutsideSec,omitempty"`
+	ReadUtil            Ratio  `json:"readUtil"`
 }
 
 // ReportingMetrics: TAT over the studies acquired in the period, with
@@ -942,12 +973,16 @@ type PriorityMetrics struct {
 // coverage, and patient-seconds spent waiting to register while no desk
 // staff was on duty.
 type WorkforceMetrics struct {
-	OvertimeSec        int64 `json:"overtimeSec"`
-	OvertimeCostCents  int64 `json:"overtimeCostCents"`
-	HeldOver           int   `json:"heldOver"`
-	SkippedBreaks      int   `json:"skippedBreaks"`
-	NoCoverage         int   `json:"noCoverage"`
-	DeskSelfPatientSec int64 `json:"deskSelfPatientSec"`
+	OvertimeSec       int64 `json:"overtimeSec"`
+	OvertimeCostCents int64 `json:"overtimeCostCents"`
+	// Of the overtime: approved in advance (extend_shift); the rest was
+	// required hold-over.
+	ApprovedOvertimeSec       int64 `json:"approvedOvertimeSec"`
+	ApprovedOvertimeCostCents int64 `json:"approvedOvertimeCostCents"`
+	HeldOver                  int   `json:"heldOver"`
+	SkippedBreaks             int   `json:"skippedBreaks"`
+	NoCoverage                int   `json:"noCoverage"`
+	DeskSelfPatientSec        int64 `json:"deskSelfPatientSec"`
 }
 
 // AlertCounts are the alerts raised in a period, by severity, with the
@@ -1048,11 +1083,14 @@ type WindowMoney struct {
 
 	InheritedVarianceCents int64 `json:"inheritedVarianceCents"`
 	AllocatedAccrualCents  int64 `json:"allocatedAccrualCents"`
-	RevenueCents           int64 `json:"revenueCents"` // recognized in the window
-	NetRevenueCents        int64 `json:"netRevenueCents"`
-	OperatingExpenseCents  int64 `json:"operatingExpenseCents"`
-	OperatingProfitCents   int64 `json:"operatingProfitCents"`
-	Margin                 Ratio `json:"margin"` // operating profit / net revenue (undefined unless revenue > 0)
+	// The fields below are baseline-adjusted (an evaluation convention);
+	// the ordinary accrual P&L, with the actual collection variance, is
+	// Ledger (and the calendar statements).
+	RevenueCents          int64 `json:"revenueCents"` // recognized in the window
+	NetRevenueCents       int64 `json:"netRevenueCents"`
+	OperatingExpenseCents int64 `json:"operatingExpenseCents"`
+	OperatingProfitCents  int64 `json:"operatingProfitCents"`
+	Margin                Ratio `json:"margin"` // operating profit / net revenue (undefined unless revenue > 0)
 
 	CollectionsCents          int64 `json:"collectionsCents"`
 	InheritedCollectionsCents int64 `json:"inheritedCollectionsCents"` // on claims recognized before takeover
@@ -1069,4 +1107,101 @@ type WindowMoney struct {
 	MinCashCents   int64 `json:"minCashCents"`
 	ShortfallCents int64 `json:"shortfallCents"` // max(0, −lowest cash in the window)
 	Reconciled     bool  `json:"reconciled"`     // the cash bridge holds to the cent
+}
+
+// Action types (SIMULATION_DESIGN §9.5). Every frontend and agent submits
+// these through the same Apply; validation lives in the simulation.
+const (
+	ActExtendShift       = "extend_shift"
+	ActSetWalkInPolicy   = "set_walkin_policy"
+	ActSetWorklistPolicy = "set_worklist_policy"
+)
+
+// Walk-in policies.
+const (
+	WalkInAcceptAlways  = "accept_always"  // wait for the next free technologist
+	WalkInAcceptIfGap   = "accept_if_gap"  // only into a gap before the next due scheduled patient
+	WalkInAcceptUntil   = "accept_until"   // accept always until the cutoff, then decline
+	WalkInScheduleLater = "schedule_later" // decline: offer an appointment instead
+)
+
+// Worklist policies.
+const (
+	WorklistUrgentThenFIFO = "urgent_then_fifo"
+	WorklistFIFO           = "fifo"
+	WorklistOldestFirst    = "oldest_first"
+	WorklistShortestFirst  = "shortest_first" // by the published expected read time
+)
+
+// Action is one decision. Fields by type: extend_shift — Employee (ID),
+// Minutes and optionally Date; set_walkin_policy — Policy and, for accept_until, Cutoff
+// ("HH:MM"); set_worklist_policy — Policy.
+type Action struct {
+	Type     string `json:"type"`
+	Employee string `json:"employee,omitempty"`
+	Minutes  int64  `json:"minutes,omitempty"`
+	// Date is the day an extension applies to ("YYYY-MM-DD"): today (the
+	// default) or a later day within the booking horizon. Approved ahead,
+	// its slots open for booking at once.
+	Date   string `json:"date,omitempty"`
+	Policy string `json:"policy,omitempty"`
+	Cutoff string `json:"cutoff,omitempty"`
+}
+
+// Result codes other than rejections.
+const (
+	ActionAccepted  = "accepted"
+	ActionUnchanged = "unchanged" // valid, but already in force: nothing changed
+)
+
+// ActionResult is the outcome of one action. ID numbers every attempted
+// action in order ("X00001"); Batch numbers decisions. Time is when it
+// took effect (or was refused): the clock at the batch. A rejected action
+// changed nothing; Code says why ("exceeds_max_shift", …).
+type ActionResult struct {
+	ID      string `json:"id"`
+	Batch   int64  `json:"batch"`
+	Time    string `json:"time"`
+	Action  Action `json:"action"`
+	OK      bool   `json:"ok"`
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+// ActionLog counts every action attempted and lists the latest.
+type ActionLog struct {
+	Attempted int            `json:"attempted"`
+	Accepted  int            `json:"accepted"`
+	Rejected  int            `json:"rejected"`
+	Recent    []ActionResult `json:"recent"` // newest first (capped)
+}
+
+// RosterEntry is one employee's shift on a day, with any approved
+// extension: Shift is the shift as now scheduled, RosterEnd the rostered
+// end, CapAt the latest end the shift cap allows.
+type RosterEntry struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Role        string `json:"role"`
+	Shift       string `json:"shift"`
+	RosterEnd   string `json:"rosterEnd"`
+	ApprovedMin int64  `json:"approvedMin"`
+	CapAt       string `json:"capAt"`
+	HourlyCents int64  `json:"hourlyCents,omitempty"`
+}
+
+// Extension is an approved shift extension, today or ahead.
+type Extension struct {
+	Date     string `json:"date"`
+	Employee string `json:"employee"`
+	Name     string `json:"name"`
+	Minutes  int64  `json:"minutes"`
+	Until    string `json:"until"` // the extended end
+}
+
+// Policies are the operating policies in force.
+type Policies struct {
+	WalkIn       string `json:"walkIn"`
+	WalkInCutoff string `json:"walkInCutoff,omitempty"` // accept_until: "HH:MM"
+	Worklist     string `json:"worklist"`
 }

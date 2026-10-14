@@ -118,7 +118,7 @@ func (st *state) worklistOrder() []int {
 	}
 	key := func(si int) simtime.Time {
 		s := &st.dem.studies[si]
-		switch pol.Worklist {
+		switch st.pol.Worklist {
 		case "oldest_first":
 			return s.acquiredAt
 		case "shortest_first":
@@ -128,7 +128,7 @@ func (st *state) worklistOrder() []int {
 		return s.enteredAt
 	}
 	slices.SortStableFunc(out, func(a, b int) int {
-		if pol.Worklist == "urgent_then_fifo" {
+		if st.pol.Worklist == "urgent_then_fifo" {
 			if ra, rb := rank(a), rank(b); ra != rb {
 				return ra - rb
 			}
@@ -328,7 +328,7 @@ func pct90(xs []int64) int64 { return dist(xs).P90Sec }
 func (st *state) observeWorklist(o *api.Observation, now simtime.Time) {
 	d := &st.dem
 	w := &o.Worklist
-	w.Policy = st.cfg.Policies.Worklist
+	w.Policy = st.pol.Worklist
 	for _, m := range st.modalities() {
 		w.ByModality = append(w.ByModality, api.Backlog{Key: m})
 	}

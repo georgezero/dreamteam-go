@@ -7,6 +7,120 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 13 — Player actions (v0.1.0-dev.13)
+
+**Owner decisions recorded (2026-10-14).** The four step 12 conventions are
+approved. For #3, the window's operating result excluding inherited-claim
+collection variance is a *baseline-adjusted* evaluation convention: the
+since-takeover screen labels it "baseline-adjusted" and shows the ledger
+basis ("as posted (the accrual P&L)") next to it; the calendar statements
+and `WindowMoney.Ledger` keep the actual collection variance. A write-down
+of an inherited receivable after takeover is visible there.
+
+**What the player can do.** `a` opens the actions screen (auto-pause moved
+to `A`): extend a shift today or on a day up to two weeks ahead (`[` `]`),
+set the walk-in policy, set the worklist policy. Each row is previewed
+live; `enter` submits; results and the latest actions are listed. The
+dashboard shows the policies in force and approved extensions.
+
+**One interface.** `World.Apply` / `Session.Apply(actions...)` is the only
+way to change the simulation; `Validate` previews without effect. The TUI
+calls the same functions an agent will. Batches apply at the current clock
+between transactions, in order, each action against the state the previous
+left; a rejected action changes nothing; one dispatch and the alert
+observer run after a batch that changed something, none after rejections or
+no-ops. Every attempt is recorded with a stable ID (`X00001`), batch
+number, time, action, result code and message (`ActionLog`,
+`Observation.Actions`, and per-period counts in the metrics and the
+evaluation window). Schema, codes and rules: SIMULATION_DESIGN §9.5 (as
+built).
+
+| Action | Parameters | Effect |
+|---|---|---|
+| `extend_shift` | `employee`, `minutes` 1–240, `date` (optional; today to the booking horizon) | the scheduled end moves later that day; they stay on regular duty; the day's slots in the extra time become bookable at once; time past the rostered end is approved overtime |
+| `set_walkin_policy` | `policy`: `accept_always`, `accept_if_gap`, `accept_until` (+ `cutoff` HH:MM), `schedule_later` | walk-ins arriving from now on; declined ones are offered appointments, counted apart |
+| `set_worklist_policy` | `policy`: `urgent_then_fifo`, `fifo`, `oldest_first`, `shortest_first` | the order unread studies are offered; reads in progress continue |
+
+**Extension vs hold-over** (the design issue you raised). Required hold-over
+finishes patients already admitted; it starts past the scheduled end and
+only while someone needs the person. An approved extension moves the
+scheduled end, so the person keeps staffing their room on regular duty: new
+capacity for waiting patients, walk-ins and bookings. Approved and required
+overtime are recorded apart (`ApprovedOvertimeSec`/`…CostCents` in the flow
+counters, staff metrics, workforce metrics and the window). Hard limits stay
+hard: the 12-hour cap (rejection says how much is left), no retroactive
+approval (`shift_ended`, `past_date`), no extension that would only add
+time after scheduled close (`after_close`: hold-over covers that), breaks
+and reading blocks unchanged, nobody else extended.
+
+To give extensions something to fill, the established roster's US and MR
+templates now continue to the evening (US 18:00–20:00, MR 16:30–19:30).
+Those slots are unstaffed — not bookable — unless a shift is extended; runs
+without actions are identical to step 12 (checked below).
+
+**Did the decisions matter?** Same seed (1), established practice, 5 days
+from takeover, no actions vs. a plan approved at takeover: US and MR
+extended to the 20:00 close on every weekday, walk-ins accepted until
+19:00 (`TestInterventionsChangeOutcomesNotDemand`):
+
+| 5 days from takeover | no actions | interventions |
+|---|---|---|
+| orders received / walk-ins arrived | 254 / 39 | 254 / 39 (identical, same attributes) |
+| exams | 259 | 267 |
+| orders lost | 27 | 22 |
+| US staffed / busy, of open hours | 57% / 34% | 71% / 40% |
+| MR staffed / busy, of open hours | 58% / 48% | 82% / 52% |
+| arrival→exam wait p90 | 52 min | 51 min |
+| overtime (of it approved) | 6 h (0) | 28 h (22) |
+| net revenue / expenses | $40,558 / $43,094 | $42,641 / $44,997 |
+| operating profit (baseline-adjusted) | −$2,536 | −$2,355 |
+
+The first version only extended shifts on the day itself: US and MR were
+staffed, but almost nothing was booked into the new time, because bookings
+are made days ahead (+4 exams for 22 h of overtime; profit fell to −$3,488).
+Hence the `date` parameter: approved ahead, the slots open for booking now.
+Uncalibrated figures; the point is that management decisions now change
+operations and money while demand stays exogenous.
+
+**Tests** (`go test ./...` passes; `internal/sim` 149 s):
+
+| Requirement | Test |
+|---|---|
+| Valid and invalid extensions, cap | `TestExtendShiftValidation` (16 cases), `TestExtensionAheadOpensBookings` (dates, horizon, Sunday, cap) |
+| Extension vs hold-over; payroll | `TestExtensionVersusHoldOver` (36 min required vs 60 approved; one wage entry = hourly pay of on-duty time; approved cost = overtime cost) |
+| Capacity, not demand | `TestExtensionAddsCapacityNotDemand`, `TestExtensionAheadOpensBookings` (evening US slots booked ahead), `TestInterventionsChangeOutcomesNotDemand` |
+| Walk-in policies, declines measurable, not retroactive | `TestWalkInPolicies`, `TestWalkInPolicyNotRetroactive` |
+| Worklist ordering, read times, no interruption, no double read | `TestWorklistPolicyOrdering` (shortest-first follows the published p50 only) |
+| Simultaneous actions | `TestSimultaneousActionsOrdered` (order-dependent results; intermediate policies inert) |
+| Invalid-action atomicity | `TestInvalidActionAtomicity` |
+| Replay | `TestActionReplayEquivalence` (re-applying the record reproduces log, books and results) |
+| No retroactive effects | `TestActionsNotRetroactive` |
+| Chunking, unrelated events | `TestActionsChunkingAndNoise` |
+| Evaluation window | `TestEvaluationAttributesActions` |
+| TUI | `TestActionsScreen` (submit, reject, policy, ahead; 80×24, 120×36) |
+
+Without actions, the ledger and every visit, study and appointment are
+identical to `4bbd03f` (established 21 days, mini 30 days, seeds 1–3), and
+the pinned start-state digests are unchanged.
+
+**Performance** (MEASUREMENTS.md): warm-up 1402 ms vs 1401–1434 ms (best
+runs; the Pi alternates between ~1.4 s and ~2.5 s with throttling); one
+preview 4 µs, one applied action with its dispatch 12–14 µs; 30 days after
+takeover 405 ms without actions, 380 ms with daily interventions.
+
+**Known limitations.**
+* Extensions are whole-shift-end only: no early starts, no extra breaks
+  for long shifts (the cap bounds them), cover windows keep their times,
+  radiologists' reading blocks are not extended (their supervision is).
+* A cost estimate ahead uses the base rate; the ×1.5 depends on the
+  week's hours when worked.
+* No undo: an approved extension stays (V0.2 `send_home`).
+* The evening slots exist only for US and MR in the default roster.
+* Rejected actions are in the action record, not the event log.
+* Run records and replay files are step 14.
+
+---
+
 ## Step 12 — Metrics, alerts, daily summaries (v0.1.0-dev.12)
 
 **What the player sees.** The dashboard answers "what is going wrong, and

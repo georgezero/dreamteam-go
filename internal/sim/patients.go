@@ -18,7 +18,8 @@ func flowView(c flowCounts) api.FlowCounts {
 		Rescheduled: c.rescheduled, Left: c.left, Registered: c.registered, SelfRegistered: c.selfRegistered,
 		ExamsStarted: c.examsStarted, ExamsDone: c.examsDone, AfterHours: c.afterHours, NoCoverage: c.noCoverage,
 		HeldOver: c.heldOver, SkippedBreaks: c.skippedBreaks, OvertimeMin: int64(c.otSec / simtime.Minute),
-		OvertimeCostCents: c.otCost}
+		OvertimeCostCents: c.otCost, WalkInsDeclined: c.walkInsDeclined,
+		ApprovedOvertimeMin: int64(c.otApprovedSec / simtime.Minute), ApprovedOvertimeCostCents: c.otApprovedCost}
 }
 
 var visitStateKeys = [...]string{visitArrived: api.VisitArrived, visitRegistering: api.VisitRegistering,

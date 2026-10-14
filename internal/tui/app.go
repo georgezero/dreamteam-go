@@ -54,6 +54,7 @@ const (
 	screenBriefing
 	screenHistory
 	screenSummary
+	screenActions
 )
 
 // Patient list filters, cycled with tab.
@@ -109,11 +110,19 @@ type Model struct {
 	sumOffset int64
 	day       api.DaySummary
 	eval      api.Evaluation
+	// Actions screen: cursor row, minutes per employee, the policy
+	// choices, and the last submission's result.
+	actSel           int
+	actMinutes       map[string]int64
+	actWalk, actWork int
+	actResult        *api.ActionResult
+	actDay           int64             // extension day, offset from today
+	roster           []api.RosterEntry // that day's shifts
 }
 
 // New returns a paused model on s.
 func New(s *session.Session) *Model {
-	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24}
+	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24, actMinutes: map[string]int64{}}
 	m.status = "Paused. Press space to start the day."
 	m.refresh()
 	if s.AtStart() && m.obs.Finance.Opening.HistoryDays > 0 {
@@ -132,6 +141,9 @@ func (m *Model) refresh() {
 	switch m.screen {
 	case screenBriefing, screenHistory:
 		m.hist = m.sess.History(historyDays)
+	case screenActions:
+		m.roster = m.sess.Roster(m.actDay)
+		m.actSel = min(m.actSel, len(m.roster)+1)
 	case screenSummary:
 		if d, ok := m.sess.Day(m.sumOffset); ok {
 			m.day = d
@@ -233,7 +245,7 @@ func (m *Model) key(k string) tea.Cmd {
 			m.status = "Stepped to the next event."
 		}
 		m.refresh()
-	case "a":
+	case "A":
 		m.autoPause = !m.autoPause
 		if m.autoPause {
 			m.status = "Auto-pause on alerts: on"
@@ -247,6 +259,9 @@ func (m *Model) key(k string) tea.Cmd {
 // screenKey handles navigation keys; it reports whether k was one.
 func (m *Model) screenKey(k string) bool {
 	if m.screen == screenPatients && m.patientKey(k) {
+		return true
+	}
+	if m.screen == screenActions && m.actionKey(k) {
 		return true
 	}
 	switch k {
@@ -273,6 +288,10 @@ func (m *Model) screenKey(k string) bool {
 		return true
 	case "b":
 		m.screen = screenBriefing
+		return true
+	case "a":
+		m.screen, m.actResult, m.actDay = screenActions, nil, 0
+		m.syncPolicyChoices()
 		return true
 	}
 	switch m.screen {

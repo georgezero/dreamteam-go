@@ -257,6 +257,7 @@ type Cover struct {
 // Policies are the operating rules (SIMULATION_DESIGN §5.5, §5.9, §6.4, §6.8).
 type Policies struct {
 	WalkIn              string
+	WalkInCutoff        simtime.Duration // accept_until: walk-ins arriving from this clock are declined
 	Worklist            string
 	Late                string
 	Grace               simtime.Duration

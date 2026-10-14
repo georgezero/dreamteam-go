@@ -44,6 +44,14 @@ type state struct {
 	fin   finState
 	// met measures the practice (metrics.go); alerts watch it from the
 	// takeover (alerts.go); eval is the evaluation window (evaluation.go).
+	// pol holds the operating policies in force: the scenario's, changed
+	// by actions (actions.go). Read the walk-in and worklist policies here,
+	// never from cfg.
+	pol     Policies
+	actions actionState
+	// ext holds the shift extensions approved, by day index and employee
+	// (actions.go); planFor applies them to the roster.
+	ext      map[int64]map[int]simtime.Duration
 	met      metricsState
 	alerts   alertState
 	eval     evalState
@@ -78,6 +86,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 	st.initDemand()
 	st.initFinance()
 	st.initMetrics()
+	st.pol = cfg.Policies
 	st.alerts.cfg = cfg.Alerts
 	if st.alerts.cfg == (AlertConfig{}) {
 		st.alerts.cfg = DefaultAlerts()
@@ -180,7 +189,10 @@ func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
 // action rewrites today's shift).
 func (st *state) IsStale(ev Event) bool {
 	switch ev.Kind {
-	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBlockStart, kindBlockEnd, kindRosterEdge, kindDocEnd:
+	case kindShiftEnd:
+		// An approved extension moves the end: the original event is stale.
+		return ev.Gen != st.emps[ev.A].gen || ev.At != st.emps[ev.A].endAt
+	case kindShiftStart, kindBreakStart, kindBlockStart, kindBlockEnd, kindRosterEdge, kindDocEnd:
 		return ev.Gen != st.emps[ev.A].gen
 	case kindBreakEnd:
 		emp := &st.emps[ev.A]
@@ -275,7 +287,7 @@ func (st *state) dayStart(e *Engine, day int64) {
 		}
 	}
 	st.financeDayStart(e, day)
-	st.plan = st.cfg.Plan(st.cal.Date(e.Now()))
+	st.plan = st.planFor(day)
 	st.cov = st.plan.Coverage()
 	if h := st.plan.Hours; h != nil {
 		e.Push(Event{At: st.cal.At(day, h.From), Class: ClassCapacityUp, Kind: kindOpen})
@@ -345,6 +357,7 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observePractice(&o, now)
 	st.observeWorklist(&o, now)
 	st.observeFinance(&o, now)
+	st.observeActions(&o)
 	o.Today = st.todayMetrics(now)
 	st.observeAlerts(&o, now)
 	return o

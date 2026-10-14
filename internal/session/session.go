@@ -130,6 +130,21 @@ func (s *Session) Day(offset int64) (api.DaySummary, bool) {
 // metrics since (to the endpoint, once reached).
 func (s *Session) Evaluation() api.Evaluation { return s.w.Evaluation() }
 
+// Apply submits one decision batch at the current time and returns each
+// action's result (SIMULATION_DESIGN §3.4.1). It is the only way to change
+// the simulation; every frontend and agent uses it.
+func (s *Session) Apply(actions ...api.Action) []api.ActionResult { return s.w.Apply(actions) }
+
+// Roster returns the shifts of the day offset days from today, with any
+// approved extensions.
+func (s *Session) Roster(offset int64) []api.RosterEntry { return s.w.Roster(s.w.DayIndex() + offset) }
+
+// ActionLog returns every action attempted, with its result, in order.
+func (s *Session) ActionLog() []api.ActionResult { return s.w.ActionLog() }
+
+// Validate previews an action now without applying or recording it.
+func (s *Session) Validate(a api.Action) api.ActionResult { return s.w.Validate(a) }
+
 // Schedule returns the schedule of the day offset days from today
 // (negative for past days).
 func (s *Session) Schedule(offset int64) api.DaySchedule {

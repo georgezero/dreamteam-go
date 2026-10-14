@@ -26,6 +26,7 @@ type roomTally struct {
 
 type empTally struct {
 	duty, busy, brk, over  simtime.Duration
+	approved               simtime.Duration // of over, approved in advance
 	block, readIn, readOut simtime.Duration
 }
 
@@ -43,6 +44,7 @@ type tally struct {
 	dem         [maxMods]modalityCounts
 
 	waits, studies, finals, raised int
+	actions                        int // action records
 	backlog                        int // unread + reading
 }
 
@@ -102,14 +104,16 @@ func (st *state) addIntervals(t *tally, dt simtime.Duration) {
 			x.afterHours += dt
 		}
 	}
+	from, to := t.at, t.at.Add(dt)
 	for i := range st.emps {
 		emp, x := &st.emps[i], &t.emps[i]
 		switch emp.status {
 		case available, busy:
 			x.duty += dt
-			if emp.over {
-				x.over += dt
-			}
+			// Overtime: on duty past the rostered end; approved up to the
+			// extended end, required beyond it.
+			x.over += max(0, to.Sub(max(from, emp.rosterEnd)))
+			x.approved += max(0, min(to, emp.endAt).Sub(max(from, emp.rosterEnd)))
 			if emp.reading {
 				x.block += dt
 			}
@@ -153,6 +157,7 @@ func (st *state) snapshot(now simtime.Time) tally {
 	}
 	t.waits, t.studies, t.finals = len(st.met.waits), len(st.dem.studies), len(st.dem.finals)
 	t.raised, t.backlog = len(st.alerts.raised), len(st.dem.worklist)
+	t.actions = len(st.actions.log)
 	return t
 }
 
@@ -188,6 +193,9 @@ func (f *flowCounts) add(g *flowCounts) {
 	f.afterGrace += g.afterGrace
 	f.walkIns += g.walkIns
 	f.walkInsBooked += g.walkInsBooked
+	f.walkInsDeclined += g.walkInsDeclined
+	f.otApprovedSec += g.otApprovedSec
+	f.otApprovedCost += g.otApprovedCost
 	f.missed += g.missed
 	f.noShows += g.noShows
 	f.rescheduled += g.rescheduled
@@ -268,7 +276,7 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 
 	// Walk-ins.
 	wi := &p.WalkIns
-	wi.Arrived, wi.SentToBook, wi.Left = f.walkIns, f.walkInsBooked, f.left
+	wi.Arrived, wi.SentToBook, wi.Declined, wi.Left = f.walkIns, f.walkInsBooked, f.walkInsDeclined, f.left
 	wi.Imaged = b.walkInExams - a.walkInExams
 	wi.Acceptance = ratio(int64(wi.Imaged), int64(wi.Arrived))
 	wi.Abandonment = ratio(int64(wi.Left), int64(wi.Arrived))
@@ -307,7 +315,8 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 	for i, ec := range st.cfg.Employees {
 		x, y := &a.emps[i], &b.emps[i]
 		sm := api.StaffMetrics{Name: ec.Name, Role: string(ec.Role), OnDutySec: secs(y.duty - x.duty), BusySec: secs(y.busy - x.busy),
-			BreakSec: secs(y.brk - x.brk), OvertimeSec: secs(y.over - x.over), BlockSec: secs(y.block - x.block),
+			BreakSec: secs(y.brk - x.brk), OvertimeSec: secs(y.over - x.over), ApprovedOvertimeSec: secs(y.approved - x.approved),
+			BlockSec:       secs(y.block - x.block),
 			ReadInBlockSec: secs(y.readIn - x.readIn), ReadOutsideSec: secs(y.readOut - x.readOut)}
 		sm.Util = ratio(sm.BusySec, sm.OnDutySec)
 		sm.ReadUtil = ratio(sm.ReadInBlockSec, sm.BlockSec)
@@ -319,10 +328,12 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 
 	w := &p.Workforce
 	w.OvertimeSec, w.OvertimeCostCents = secs(f.otSec), f.otCost
+	w.ApprovedOvertimeSec, w.ApprovedOvertimeCostCents = secs(f.otApprovedSec), f.otApprovedCost
 	w.HeldOver, w.SkippedBreaks, w.NoCoverage = f.heldOver, f.skippedBreaks, f.noCoverage
 	w.DeskSelfPatientSec = secs(b.deskSelf - a.deskSelf)
 
 	p.Alerts = st.alertCounts(a.raised, b.raised)
+	p.Actions = st.actionCounts(a.actions, b.actions)
 	return p
 }
 
@@ -439,6 +450,9 @@ func (f *flowCounts) scale(k int) {
 	f.afterGrace *= k
 	f.walkIns *= k
 	f.walkInsBooked *= k
+	f.walkInsDeclined *= k
+	f.otApprovedSec *= simtime.Duration(k)
+	f.otApprovedCost *= int64(k)
 	f.missed *= k
 	f.noShows *= k
 	f.rescheduled *= k

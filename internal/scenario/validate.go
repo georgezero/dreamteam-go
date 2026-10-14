@@ -42,7 +42,7 @@ func (e *ValidationError) Error() string {
 var (
 	modalities  = []string{"XR", "US", "CT", "MR"}
 	roles       = []string{string(sim.FrontDesk), string(sim.Technologist), string(sim.Radiologist), string(sim.OpsManager)}
-	walkIn      = []string{"accept_always", "accept_if_gap", "schedule_later"}
+	walkIn      = []string{"accept_always", "accept_if_gap", "accept_until", "schedule_later"}
 	worklist    = []string{"urgent_then_fifo", "fifo", "oldest_first", "shortest_first"}
 	late        = []string{"fit_in", "reschedule"}
 	supervision = []string{"on_site"} // "virtual" arrives in V0.2
@@ -187,6 +187,15 @@ func Compile(f *File) (*sim.Config, error) {
 		OvertimeAllowance:   simtime.Duration(p.OvertimeAllowanceMin) * simtime.Minute,
 		MaxShift:            simtime.Duration(p.MaxShiftHours) * simtime.Hour,
 		ContrastSupervision: p.ContrastSupervision,
+	}
+	switch {
+	case p.WalkIn == "accept_until":
+		cfg.Policies.WalkInCutoff = c.clock("policies.walkInCutoff", p.WalkInCutoff)
+		if cfg.Policies.WalkInCutoff <= 0 || cfg.Policies.WalkInCutoff >= simtime.Day {
+			c.fail("policies.walkInCutoff", "must be between 00:00 and 24:00")
+		}
+	case p.WalkInCutoff != "":
+		c.fail("policies.walkInCutoff", "only for walkIn accept_until")
 	}
 
 	if len(f.Hours) == 0 {

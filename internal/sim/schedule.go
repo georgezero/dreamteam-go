@@ -74,7 +74,7 @@ func (w *World) Schedule(day int64) api.DaySchedule {
 	} else {
 		ds = st.buildDay(day)
 	}
-	plan := st.cfg.Plan(date)
+	plan := st.planFor(day)
 	if plan.Hours == nil {
 		return out
 	}

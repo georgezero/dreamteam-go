@@ -495,6 +495,19 @@ referenced patient / room / employee.
 Every action shows its validation result and, where cheaply knowable, an
 estimated cost. Rejections show the reason.
 
+**As built (V0.1 step 13).** `a` opens the actions screen (auto-pause moved
+to `A`). One list: the employees rostered on the chosen day (`[` `]` pick
+today or a day up to two weeks ahead) with their shift, 12-hour cap, status
+today and any approved extension; then the walk-in and worklist policy
+rows. `↑↓` choose a row, `←→` change it (±15 minutes, or the next policy),
+`enter` submits through the same `Apply` an agent uses. The cursor row is
+previewed live ("Preview ✓ Shift extended: Morgan today until 19:15 (+1h
+15m approved overtime · ≈ cost)" or "Preview ✗ … past the 12-hour limit at
+21:30 (at most +2h 30m more)"); the result and the latest actions (ID, time,
+✓/✗) follow. The dashboard shows the policies in force in the patient-flow
+header, "+1h 15m approved" in the staff panel and "+ext" in the staff
+summary. Fits 80×24.
+
 ### 4.10 Daily summary (end of day)
 
 Shown when `e` completes or the day ends with auto-pause on:

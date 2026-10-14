@@ -79,9 +79,9 @@ func TestKeys(t *testing.T) {
 	if m.running || m.obs.LogTotal <= before {
 		t.Fatal("n should pause and step to a new entry")
 	}
-	press(m, "a")
+	press(m, "A")
 	if m.autoPause {
-		t.Fatal("a did not toggle auto-pause")
+		t.Fatal("A did not toggle auto-pause")
 	}
 	if _, cmd := m.Update(tea.KeyPressMsg{Code: 'q', Text: "q"}); cmd == nil {
 		t.Fatal("q did not quit")
@@ -204,7 +204,7 @@ func TestScheduleNavigation(t *testing.T) {
 	m.key("right") // Monday Oct 19: rota week B, no US technologist
 	out = ansi.Strip(m.render())
 	if !strings.Contains(out, "Mon Oct 19 (in 6 days)") || !strings.Contains(out, "US ▶") ||
-		!strings.Contains(out, "not bookable: no technologist rostered (12 slots)") {
+		!strings.Contains(out, "not bookable: no technologist rostered (15 slots)") {
 		t.Errorf("week B Monday US:\n%s", out)
 	}
 	m.key("left")
@@ -443,7 +443,7 @@ func TestEndOfDaySummary(t *testing.T) {
 			plain := ansi.Strip(out)
 			want := []string{"END OF DAY", "Patients", "Rooms", "busy", "Reporting", "Money", "Cash", "Alerts", "Takeover day"}
 			if view == sumWindow {
-				want = []string{"SINCE TAKEOVER", "Inherited", "Operating", "Cash flow", "cash bridge reconciles", "baseline"}
+				want = []string{"SINCE TAKEOVER", "Inherited", "Adjusted", "Ledger", "Cash flow", "cash bridge reconciles", "baseline"}
 			}
 			for _, s := range want {
 				if !strings.Contains(plain, s) {
@@ -485,5 +485,76 @@ func TestDashboardAlerts(t *testing.T) {
 	out = ansi.Strip(m.render())
 	if !strings.Contains(out, a.Text[:min(30, len(a.Text))]) || !strings.Contains(out, "why: ") {
 		t.Fatalf("alert %+v not shown with its explanation:\n%s", a, out)
+	}
+}
+
+// The actions screen submits through the session (the same Apply an agent
+// uses), previews the cursor row, shows accepted and rejected results, and
+// fits 80×24 and 120×36.
+func TestActionsScreen(t *testing.T) {
+	m := New(openMini(t, 2))
+	m.key("a")
+	if m.screen != screenActions {
+		t.Fatal("a did not open actions")
+	}
+	staff := m.actionStaff()
+	idx := func(name string) int {
+		for i, e := range staff {
+			if e.Name == name {
+				return i
+			}
+		}
+		t.Fatalf("no %s", name)
+		return 0
+	}
+	m.actSel = idx("Morgan")
+	m.key("right") // +75m
+	out := ansi.Strip(m.render())
+	if !strings.Contains(out, "Preview ✓ Shift extended: Morgan today until 19:15") {
+		t.Fatalf("no preview:\n%s", out)
+	}
+	m.key("enter")
+	if m.actResult == nil || !m.actResult.OK || m.obs.Actions.Accepted != 1 {
+		t.Fatalf("result %+v", m.actResult)
+	}
+	m.actSel = idx("Sam")
+	m.key("enter") // Sam already works to close
+	if m.actResult.OK || m.actResult.Code != "after_close" || !strings.Contains(m.status, "✗") {
+		t.Fatalf("result %+v status %q", m.actResult, m.status)
+	}
+	m.actSel = len(staff) // walk-in policy row
+	for m.selected().Policy != api.WalkInScheduleLater {
+		m.key("right")
+	}
+	m.key("enter")
+	if m.obs.Policies.WalkIn != api.WalkInScheduleLater {
+		t.Fatalf("policies %+v", m.obs.Policies)
+	}
+	for _, size := range [][2]int{{80, 24}, {120, 36}} {
+		m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
+		for i, l := range strings.Split(m.render(), "\n") {
+			if w := ansi.StringWidth(l); w > size[0] {
+				t.Errorf("%v: line %d width %d", size, i, w)
+			}
+		}
+	}
+	// Ahead: next Thursday (Oct 22), approved now.
+	m.actSel = 0
+	for i := 0; i < 9; i++ {
+		m.key("]")
+	}
+	m.actSel = idx("Morgan")
+	m.key("enter")
+	if !m.actResult.OK || len(m.obs.Extensions) != 2 || m.obs.Extensions[1].Date != "2026-10-22" {
+		t.Fatalf("ahead: %+v, extensions %+v", m.actResult, m.obs.Extensions)
+	}
+	m.key("d")
+	m.Update(tea.WindowSizeMsg{Width: 120, Height: 36})
+	out = ansi.Strip(m.render())
+	if !strings.Contains(out, "+1h 15m approved") || !strings.Contains(out, "walk-ins: schedule_later") {
+		t.Fatalf("dashboard lacks the extension or the policy:\n%s", out)
+	}
+	if len(m.sess.ActionLog()) != 4 {
+		t.Fatalf("action log %+v", m.sess.ActionLog())
 	}
 }

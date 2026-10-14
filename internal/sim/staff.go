@@ -46,8 +46,12 @@ type employee struct {
 	readDebt             simtime.Duration
 
 	// Today's shift in absolute time, and its hard cap
-	// (start + MaxShiftHours, SIMULATION_DESIGN §6.4).
+	// (start + MaxShiftHours, SIMULATION_DESIGN §6.4). rosterEnd is the
+	// rostered end; endAt is the scheduled end, later by any approved
+	// extension (actions.go). Time past rosterEnd is overtime: approved up
+	// to endAt, required (held over) after it.
 	startAt, endAt, capAt simtime.Time
+	rosterEnd             simtime.Time
 	over                  bool  // past the scheduled shift end, still on duty
 	held                  bool  // over and kept on because patients need them (§6.9)
 	heldRooms             []int // rooms a held technologist staffs
@@ -97,6 +101,7 @@ func (st *state) materialize(e *Engine, i int) {
 	}
 	s := &st.plan.Shifts[emp.shift]
 	emp.startAt, emp.endAt = st.cal.At(st.day, s.From), st.cal.At(st.day, s.To)
+	emp.rosterEnd = emp.endAt.Add(-st.ext[st.day][i])
 	emp.capAt = emp.startAt.Add(st.cfg.Policies.MaxShift)
 	push := func(at simtime.Duration, c Class, k Kind, b int64) {
 		e.Push(Event{At: st.cal.At(st.day, at), Class: c, Kind: k, Gen: emp.gen, A: int64(i), B: b})
@@ -227,9 +232,13 @@ func (st *state) hold(e *Engine, i int, why string) {
 func (st *state) goOff(e *Engine, i int) {
 	emp := &st.emps[i]
 	now := e.Now()
-	ot := max(0, now.Sub(emp.endAt))
+	ot := max(0, now.Sub(emp.rosterEnd))
 	paid := now.Sub(emp.startAt) - emp.breakTaken
 	cost := st.overtimeCost(emp, paid, ot)
+	// The approved part comes first (right after the rostered end); its
+	// cost is the overtime cost of paid time up to the end of it.
+	appr := min(ot, max(0, emp.endAt.Sub(emp.rosterEnd)))
+	apprCost := st.overtimeCost(emp, paid-(ot-appr), appr)
 	st.payWages(i, paid)
 	emp.weekPaid += paid
 	emp.otToday += ot
@@ -240,6 +249,10 @@ func (st *state) goOff(e *Engine, i int) {
 		st.dem.flowTotal.otSec += ot
 		st.dem.flowToday.otCost += cost
 		st.dem.flowTotal.otCost += cost
+		for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
+			f.otApprovedSec += appr
+			f.otApprovedCost += apprCost
+		}
 		text += fmt.Sprintf(" after %s overtime", ot)
 		if cost > 0 {
 			text += fmt.Sprintf(" ($%d)", (cost+50)/100)
@@ -491,8 +504,8 @@ func span(s Span) string { return simtime.FormatClock(s.From) + "–" + simtime.
 func (st *state) overtimeNow(i int, now simtime.Time) simtime.Duration {
 	emp := &st.emps[i]
 	ot := emp.otToday
-	if emp.status != offDuty && emp.over {
-		ot += max(0, now.Sub(emp.endAt))
+	if emp.status != offDuty {
+		ot += max(0, now.Sub(emp.rosterEnd))
 	}
 	return ot
 }
@@ -526,9 +539,18 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 		x := api.Employee{ID: emp.cfg.ID, Name: emp.cfg.Name, Role: string(emp.cfg.Role),
 			Skills: slices.Clone(emp.cfg.Skills), Status: api.StaffOff, SiteBP: emp.cfg.SiteAllocationBP,
 			Rooms: staffing[i], Held: emp.held, OvertimeMin: int64(st.overtimeNow(i, now) / simtime.Minute)}
+		x.WeekPaidMin = int64(emp.weekPaid / simtime.Minute)
+		if emp.cfg.Pay == Hourly {
+			x.HourlyCents = emp.cfg.RateCents
+		}
 		if emp.shift >= 0 {
 			s := &st.plan.Shifts[emp.shift]
 			x.Shift, x.Remote = span(s.Span), s.Remote
+			x.RosterEnd, x.CapAt = st.cal.Clock(emp.rosterEnd), st.cal.Clock(emp.capAt)
+			x.ApprovedMin = int64(emp.endAt.Sub(emp.rosterEnd) / simtime.Minute)
+			if emp.status != offDuty {
+				x.ApprovedOTMin = int64(max(0, min(now, emp.endAt).Sub(emp.rosterEnd)) / simtime.Minute)
+			}
 			switch emp.status {
 			case offDuty:
 				if !emp.done {

@@ -166,3 +166,19 @@ takeover, so the warm-up pays only the accrual and the daily snapshots
 (+2.6%). Completed days' summaries are cached; the evaluation window is
 computed only when a screen asks for it. At 10 frames a second the
 observation costs about 1.3% of one core.
+
+## 2026-10-14 — V0.1 step 13 (Pi at 79–81 °C; timings bimodal with throttling)
+
+Old (`4bbd03f`) and new binaries alternated; each lands in either a ~1.4 s
+or a ~2.4–2.9 s mode depending on throttling, so the best runs compare:
+
+| Benchmark | Command | `4bbd03f` | step 13 |
+|---|---|---|---|
+| Established warm-up (180 days) | `-bench EstablishedWarmup -benchmem` | 1401–1434 ms, 90.75 MB, 1.266M allocs | 1402–1411 ms, 90.78 MB, 1.266M allocs |
+| One observation at 11:00 | `-bench ObserveMidday` | 1.20–1.30 ms | 1.32–1.35 ms |
+| Validate one action (preview) | `-bench ValidateOnly` | — | 3.8–4.2 µs |
+| Apply one action (policy switch + dispatch) | `-bench ApplyValidate` | — | 12–14 µs |
+| 30 days after takeover, no actions / daily interventions | `-bench ThirtyDaysWithActions` | — | 405 ms / 380 ms (best of 3; same within noise) |
+
+Action processing has no cost when no action is taken; the evening
+template slots (unstaffed unless extended) add nothing measurable.

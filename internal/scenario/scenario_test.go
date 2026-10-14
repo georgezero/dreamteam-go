@@ -146,7 +146,7 @@ func TestValidationErrors(t *testing.T) {
 		{`{"demand": {"weekdayFactorBP": {"Sun": null}}}`, "demand.weekdayFactorBP", "all seven"},
 		{`{"behavior": {"waitToleranceDays": {"stat": {"p0": 0, "p100": 1}}}}`, "behavior.waitToleranceDays.stat", "not a priority"},
 		{`{"catalog": [{"code": "X", "name": "x", "modality": "XR", "category": "MR_45"}, {"code": "Y", "name": "y", "modality": "MR", "category": "MR_45"}]}`, "catalog[1].category", "mixes modalities"},
-		{`{"openingSchedule": [{"time": "18:00", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "no R2 template slot"},
+		{`{"openingSchedule": [{"time": "19:00", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "no R2 template slot"},
 		{`{"openingSchedule": [{"day": 6, "time": "09:30", "room": "R2", "exam": "US_PELVIS", "source": "SRC3"}]}`, "openingSchedule[0]", "not bookable (unstaffed)"},
 		{`{"openingSchedule": [{"time": "09:30", "room": "R2", "exam": "US_THYROID", "source": "SRC3"}]}`, "openingSchedule[0]", "slot is US_45"},
 		{`{"catalog": [{"code": "XR_X", "name": "x", "modality": "XR", "category": "XR_15", "roomTimeSec": {"p0": 60, "p100": 60}, "readSec": {"p0": 60, "p100": 60}, "techExtraSec": {"p0": 1, "p100": 1}}]}`, "catalog[0].baseRateCents", "outside"},

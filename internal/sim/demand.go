@@ -201,7 +201,7 @@ func (st *state) ensureDays(day int64) {
 // from the roster as known now.
 func (st *state) buildDay(day int64) *daySlots {
 	date := st.cal.Date(st.cal.StartOfDay(day))
-	plan := st.cfg.Plan(date)
+	plan := st.planFor(day)
 	ds := &daySlots{rooms: make([][]slot, len(st.cfg.Rooms))}
 	if plan.Hours == nil {
 		return ds
@@ -211,33 +211,41 @@ func (st *state) buildDay(day int64) *daySlots {
 	for r := range st.cfg.Rooms {
 		for _, t := range st.cfg.Templates[r][date.Weekday()] {
 			s := slot{SlotTemplate: t, appt: -1}
-			if ok, why := cov.SlotBookable(r, t.Span, st.cfg.Categories[t.Category].Contrast); !ok {
-				s.why = slotUnstaffed
-				if why == "no_supervision" {
-					s.why = slotNoSupervision
-				}
-			}
-			for _, seg := range cov.Segments {
-				if seg.To <= t.From || seg.From >= t.To {
-					continue
-				}
-				var here uint64
-				for _, e := range seg.Rooms[r] {
-					here |= 1 << uint(e)
-				}
-				s.staff |= here
-				for r2 := range seg.Rooms {
-					for _, e := range seg.Rooms[r2] {
-						if r2 != r && here&(1<<uint(e)) != 0 {
-							s.shared = true
-						}
-					}
-				}
-			}
+			st.coverSlot(&cov, r, &s)
 			ds.rooms[r] = append(ds.rooms[r], s)
 		}
 	}
 	return ds
+}
+
+// coverSlot sets slot s of room r from the day's planned coverage: whether
+// it is bookable, which technologists are rostered during it, and whether
+// it shares one with another room.
+func (st *state) coverSlot(cov *Coverage, r int, s *slot) {
+	s.why, s.staff, s.shared = slotOK, 0, false
+	if ok, why := cov.SlotBookable(r, s.Span, st.cfg.Categories[s.Category].Contrast); !ok {
+		s.why = slotUnstaffed
+		if why == "no_supervision" {
+			s.why = slotNoSupervision
+		}
+	}
+	for _, seg := range cov.Segments {
+		if seg.To <= s.From || seg.From >= s.To {
+			continue
+		}
+		var here uint64
+		for _, e := range seg.Rooms[r] {
+			here |= 1 << uint(e)
+		}
+		s.staff |= here
+		for r2 := range seg.Rooms {
+			for _, e := range seg.Rooms[r2] {
+				if r2 != r && here&(1<<uint(e)) != 0 {
+					s.shared = true
+				}
+			}
+		}
+	}
 }
 
 // sharedFree applies the shared-capacity rule (§5.3): within every

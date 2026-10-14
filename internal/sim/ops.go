@@ -237,7 +237,7 @@ func (st *state) imagingOrder() []imagingCand {
 		}
 		// accept_if_gap: a walk-in goes only if the room can image them
 		// before the next arrived scheduled patient is due.
-		if pol.WalkIn == "accept_if_gap" && nextDue >= 0 {
+		if st.pol.WalkIn == "accept_if_gap" && nextDue >= 0 {
 			room = slices.DeleteFunc(room, func(c imagingCand) bool {
 				if c.rank != 3 {
 					return false

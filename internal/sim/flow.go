@@ -62,6 +62,7 @@ type visit struct {
 type flowCounts struct {
 	arrived, early, late, afterGrace int // scheduled patients
 	walkIns, walkInsBooked           int // walk-ins; those sent away with an appointment
+	walkInsDeclined                  int // … of them, by the walk-in policy
 	missed, noShows, rescheduled     int
 	left                             int
 	registered, selfRegistered       int
@@ -70,8 +71,10 @@ type flowCounts struct {
 	noCoverage                       int // admitted patients rescheduled: no safe coverage
 	heldOver, skippedBreaks          int
 	otSec                            simtime.Duration
-	otCost                           int64 // cents
-	acquired, reportsFinal, breaches int   // studies; reports; TAT targets missed
+	otCost                           int64            // cents
+	otApprovedSec                    simtime.Duration // of otSec, approved in advance (extend_shift)
+	otApprovedCost                   int64
+	acquired, reportsFinal, breaches int // studies; reports; TAT targets missed
 }
 
 func visitID(i int) string { return pubID('V', int64(i+1), 5) }
@@ -338,12 +341,20 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	head := fmt.Sprintf("Walk-in %s %s", patientID(o.patient), st.examLabel(exam))
 
 	ok, why := st.servable(exam, e.Now(), st.newPatientTask(exam, true))
-	if st.cfg.Policies.WalkIn == "schedule_later" {
-		ok, why = false, "walk-in policy: schedule later"
+	declined := false
+	switch {
+	case st.pol.WalkIn == "schedule_later":
+		ok, why, declined = false, "walk-in policy: schedule later", true
+	case st.pol.WalkIn == "accept_until" && simtime.ClockOf(e.Now()) >= st.pol.WalkInCutoff:
+		ok, why, declined = false, "walk-in policy: no walk-ins after "+simtime.FormatClock(st.pol.WalkInCutoff), true
 	}
 	if !ok {
 		st.dem.flowToday.walkInsBooked++
 		st.dem.flowTotal.walkInsBooked++
+		if declined {
+			st.dem.flowToday.walkInsDeclined++
+			st.dem.flowTotal.walkInsDeclined++
+		}
 		st.offer(e, oi, st.day+1, head+" ("+why+")", "")
 		return
 	}

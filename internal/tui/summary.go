@@ -253,13 +253,16 @@ func (m *Model) windowBody(w, n int) []string {
 	if mo.Margin.Defined() {
 		mg = fmt.Sprintf("%.1f%%", float64(mo.Margin.BP())/100)
 	}
-	add("Operating", pick(fmt.Sprintf("net revenue %s · expenses %s · operating profit %s (%s)",
+	add("Adjusted", pick(fmt.Sprintf("baseline-adjusted: net revenue %s · expenses %s · operating profit %s (%s)",
 		usd(mo.NetRevenueCents), usd(mo.OperatingExpenseCents), signed(mo.OperatingProfitCents), mg),
 		fmt.Sprintf("revenue %s · expenses %s · profit %s (%s)",
 			usd(mo.NetRevenueCents), usd(mo.OperatingExpenseCents), signed(mo.OperatingProfitCents), mg)))
 	add("", dimStyle.Render(pick(fmt.Sprintf("excludes inherited-claim collection variance (%s to revenue) · includes %s of takeover-day accruals",
 		signed(-mo.InheritedVarianceCents), usd(mo.AllocatedAccrualCents)),
 		fmt.Sprintf("excl. inherited variance %s · incl. accruals %s", signed(-mo.InheritedVarianceCents), usd(mo.AllocatedAccrualCents)))))
+	add("Ledger", pick(fmt.Sprintf("as posted (the accrual P&L): net revenue %s · expenses %s · operating profit %s",
+		usd(mo.Ledger.NetRevenueCents), usd(mo.Ledger.OperatingExpenseCents), signed(mo.Ledger.OperatingProfitCents)),
+		fmt.Sprintf("as posted: revenue %s · profit %s", usd(mo.Ledger.NetRevenueCents), signed(mo.Ledger.OperatingProfitCents))))
 	add("Cash flow", pick(fmt.Sprintf("collected %s (%s on inherited claims) · paid %s (%s settling inherited bills/payroll) · net %s",
 		usd(mo.CollectionsCents), usd(mo.InheritedCollectionsCents), usd(mo.DisbursementsCents), usd(mo.InheritedPaidCents), signed(mo.OperatingCashFlowCents)),
 		fmt.Sprintf("in %s (inherited %s) · out %s · net %s", usd(mo.CollectionsCents), usd(mo.InheritedCollectionsCents),

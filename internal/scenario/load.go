@@ -263,6 +263,7 @@ type Cover struct {
 // Policies are the operating rules.
 type Policies struct {
 	WalkIn               string           `json:"walkIn"`
+	WalkInCutoff         string           `json:"walkInCutoff,omitempty"` // accept_until: "HH:MM"
 	Worklist             string           `json:"worklist"`
 	Late                 string           `json:"late"`
 	GraceMin             int64            `json:"graceMin"`

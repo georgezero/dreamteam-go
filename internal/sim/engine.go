@@ -205,6 +205,39 @@ func (e *Engine) transaction() bool {
 	return handledAny
 }
 
+// Settle runs the end of a decision batch applied at the current time
+// (SIMULATION_DESIGN §3.4.1): one dispatch, then the observer, then the
+// invariant check — as after a transaction. It must be called between
+// transactions.
+func (e *Engine) Settle() {
+	if e.phase != phaseIdle {
+		fail("Settle called inside a transaction")
+	}
+	e.phase = phaseDispatch
+	e.proc.Dispatch(e)
+	if e.obs != nil {
+		e.obs.AfterTransaction(e)
+	}
+	e.phase = phaseIdle
+	if e.CheckInvariants {
+		if err := e.proc.CheckInvariants(); err != nil {
+			fail("after batch at %d: %v", e.now, err)
+		}
+	}
+}
+
+// Batch runs f between transactions with pushes at the current time
+// forbidden (as in dispatch): a batch's effects start now or later, never
+// before.
+func (e *Engine) Batch(f func()) {
+	if e.phase != phaseIdle {
+		fail("Batch called inside a transaction")
+	}
+	e.phase = phaseDispatch
+	f()
+	e.phase = phaseIdle
+}
+
 // PendingEvents returns a copy of the queue in processing order, for
 // snapshots and debugging. It is never part of an observation.
 func (e *Engine) PendingEvents() []Event {
