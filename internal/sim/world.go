@@ -27,6 +27,7 @@ type state struct {
 	now    simtime.Time // time of the current or last transaction
 	day    int64        // current day index
 	plan   DayPlan      // today's materialized roster
+	cov    Coverage     // today's planned coverage
 	open   bool
 	opened bool // the practice opened today (rooms may report unstaffed)
 
@@ -37,6 +38,9 @@ type state struct {
 	// dropOrder, if set (tests only), suppresses exogenous orders that
 	// would arrive at or after a time: a change to future hidden demand.
 	dropOrder func(at simtime.Time) bool
+	// forceNoShow, if set (tests only), makes the patients of matching
+	// appointments never come: a change to hidden latent behavior.
+	forceNoShow func(start simtime.Time) bool
 }
 
 // New builds a world from cfg. The calendar epoch is the start date minus
@@ -96,6 +100,12 @@ const (
 	kindRosterEdge // a cover window starts or ends; only triggers re-staffing
 	kindOrder      // an order is received (disclosed)
 	kindCancel     // a patient cancels an appointment
+	kindArrive     // a scheduled patient arrives
+	kindGrace      // start + grace: not arrived means missed
+	kindWalkIn     // a walk-in arrives
+	kindPatience   // a waiting walk-in gives up
+	kindDayClose   // 23:59:59 accounting close
+	kindNoShowRebook
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -111,8 +121,15 @@ func (st *state) IsStale(ev Event) bool {
 	switch ev.Kind {
 	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd, kindRosterEdge:
 		return ev.Gen != st.emps[ev.A].gen
-	case kindCancel:
+	case kindCancel, kindGrace:
 		return st.dem.appts[ev.A].state != apptBooked
+	case kindArrive:
+		s := st.dem.appts[ev.A].state
+		return s != apptBooked && s != apptMissed
+	case kindPatience:
+		return st.dem.visits[ev.A].state != visitWaiting
+	case kindNoShowRebook:
+		return st.dem.orders[ev.A].state != orderNoShow
 	}
 	return false
 }
@@ -128,6 +145,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 	case kindClose:
 		st.open = false
 		st.emit(e.Now(), api.Info, "practice", "Practice closes")
+		st.closeVisits(e)
 	case kindShiftStart, kindShiftEnd, kindBreakStart, kindBreakEnd, kindBlockStart, kindBlockEnd:
 		st.staffEvent(e, ev)
 	case kindRosterEdge:
@@ -135,6 +153,18 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.receiveOrder(e, unpackOrigin(ev.A, ev.B))
 	case kindCancel:
 		st.cancel(e, int(ev.A))
+	case kindArrive:
+		st.arrive(e, int(ev.A))
+	case kindGrace:
+		st.grace(e, int(ev.A))
+	case kindWalkIn:
+		st.walkIn(e, ev.A, ev.B>>32, ev.B&0xffffffff)
+	case kindPatience:
+		st.patience(e, int(ev.A))
+	case kindDayClose:
+		st.accountingClose(e)
+	case kindNoShowRebook:
+		st.noShowRebook(e, int(ev.A))
 	}
 }
 
@@ -143,6 +173,7 @@ func (st *state) dayStart(e *Engine, day int64) {
 	st.day = day
 	st.opened = false
 	st.plan = st.cfg.Plan(st.cal.Date(e.Now()))
+	st.cov = st.plan.Coverage()
 	if h := st.plan.Hours; h != nil {
 		e.Push(Event{At: st.cal.At(day, h.From), Class: ClassCapacityUp, Kind: kindOpen})
 		e.Push(Event{At: st.cal.At(day, h.To), Class: ClassCapacityDown, Kind: kindClose})
@@ -157,9 +188,17 @@ func (st *state) dayStart(e *Engine, day int64) {
 			*st.dem.total[m] = modalityCounts{}
 		}
 	}
+	st.dem.flowToday = flowCounts{}
+	if day == st.startDay {
+		st.dem.flowTotal = flowCounts{}
+	}
+	st.dem.dayStarted = false
+	e.Push(Event{At: st.cal.At(day, simtime.Day-1), Class: ClassDayClose, Kind: kindDayClose})
 	st.ensureDays(day + st.cfg.Policies.BookingHorizonDays)
 	st.releaseRecalls(e)
 	st.scheduleDemand(e, day)
+	st.startAppointments(e)
+	st.scheduleWalkIns(e, day)
 }
 
 func (st *state) Dispatch(e *Engine) {
@@ -196,5 +235,6 @@ func (w *World) Observe(recent int) api.Observation {
 	}
 	st.observeStaff(&o, now)
 	st.observeDemand(&o, now)
+	st.observeFlow(&o, now)
 	return o
 }

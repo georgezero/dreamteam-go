@@ -590,7 +590,7 @@ don't depend on public IDs or player actions:
 | `read` | originKey | read time | — | — | — |
 | `claim` | originKey | outcome (paid / short / denied-recovered / denied-written-off) | adjudication delay | short-paid fraction | rework delay |
 | `walkin.count` | day, hourBlock | Poisson count | | | |
-| `walkin` | day, hourBlock, k | second within block | exam | payer | — |
+| `walkin` | day, hourBlock, k | second within block | exam | payer | priority |
 | `failure` **[V0.2]** | roomIndex, day | | | | |
 | `absence` **[V0.2]** | employeeIndex, day | | | | |
 
@@ -842,6 +842,43 @@ time, they leave (`LeftWithoutExam`, demand lost).
 * Absence is only revealed at `Start + grace`, and no-show only at close, so an
   agent can't "know" a slot will be free. It can only estimate from published
   base rates.
+
+### 5.8.1 As built in V0.1 step 7
+
+* **When latents are drawn.** At the start of an appointment's day (or when
+  it is booked for later the same day) the engine queues its grace check at
+  start + grace. It also draws whether the patient comes (`attempt` lane 0,
+  base rate per modality + lead-time effect) and, if they do, when
+  (punctuality class from `patient` lane 0, offset within the class from
+  `attempt` lane 1). Only the effects are observable: an arrival, or a miss
+  at start + grace.
+* **Order of events at one instant:** an arrival (class 3) is handled before
+  a grace check, a cancellation or a patience expiry (class 4), so a patient
+  who arrives exactly at start + grace counts as arrived. Practice close
+  (class 5) comes after those, and accounting close (class 7) comes last.
+  Stale events (an arrival for a cancelled appointment, patience for a
+  walk-in who already left) do nothing.
+* **Late arrivals:** a patient who arrives after being marked missed is
+  fitted in under `late: fit_in` (default; they wait with the lowest
+  scheduled priority) or rescheduled from the next day under
+  `late: reschedule`. A patient arriving after closing is rescheduled.
+* **No-shows:** at accounting close, appointments still missed become
+  no-shows. With `noShow.rebookPPM` (default 40%) the patient asks for a new
+  date the next morning at 09:00. This is disclosed as a log entry and
+  booked from that day.
+* **Walk-ins** draw their count per open hour block (`walkin.count`). Each
+  walk-in's time, exam and priority come from `walkin` lanes 0, 1 and 3, and
+  their patience from `patient` lane 2 (30–120 min). Each becomes a patient
+  and an order like any referral, but with no source. If the walk-in policy
+  is `schedule_later`, or no room of the modality has a technologist for
+  the rest of the day, the walk-in is booked an appointment and leaves.
+  Otherwise they wait. `accept_if_gap` is a dispatch decision (§5.9), so it
+  takes effect in step 8.
+* **Closing time.** No exam starts after the practice closes (§6.5), so
+  everyone still waiting at closing is sent home unseen (`Unseen`, counted).
+  Until imaging exists (step 8) this is every arrival that day.
+* **Visits** get public IDs (`V…`) when the patient arrives. Each
+  appointment has at most one visit, and so does each order.
 
 ### 5.9 Imaging queue policy
 

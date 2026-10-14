@@ -12,9 +12,8 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/session"
 	"github.com/georgezero/dreamteam-go/internal/tui"
+	"github.com/georgezero/dreamteam-go/internal/version"
 )
-
-const version = "0.1.0-dev"
 
 func main() {
 	args := os.Args[1:]
@@ -28,7 +27,7 @@ func main() {
 	case "scenario":
 		os.Exit(scenarioCmd(args))
 	case "version":
-		fmt.Println("dreamteam", version)
+		fmt.Println("dreamteam", version.String())
 	case "help", "-h", "--help":
 		usage()
 	default:

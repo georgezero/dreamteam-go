@@ -106,6 +106,14 @@ func (s *Session) Schedule(offset int64) api.DaySchedule {
 	return s.w.Schedule(s.w.DayIndex() + offset)
 }
 
+// Patients lists the patients of the day offset days from today.
+func (s *Session) Patients(offset int64) []api.PatientRow {
+	return s.w.Patients(s.w.DayIndex() + offset)
+}
+
+// Journey returns a patient's observable history.
+func (s *Session) Journey(patient string) (api.Journey, bool) { return s.w.Journey(patient) }
+
 // Observe returns the current observation with up to recent log entries.
 func (s *Session) Observe(recent int) api.Observation { return s.w.Observe(recent) }
 

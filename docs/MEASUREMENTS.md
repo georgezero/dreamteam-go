@@ -30,3 +30,16 @@ log text is ≈ 12%. Arrivals, imaging, reading and finance still have to fit
 in the remaining warm-up budget. Options if step 11 misses < 1.5 s: hash
 the warm-up log once per day instead of per entry, build warm-up log text
 lazily, or cache the built start state (ROADMAP §2, step 11).
+
+## 2026-10-14 — V0.1 step 7 (same machine, loaded: a separate Java process at ~170% CPU)
+
+| Benchmark | Command | Result |
+|---|---|---|
+| Mini scenario, 180 days, now with arrivals, missed and no-show lifecycle, walk-ins and patience | `go test ./internal/sim -run X -bench Mini180 -benchtime 5x` | 0.78–0.83 s/op (step 6 measured alternately in the same conditions: 0.45–0.75 s/op), 66 MB/op, 1.1M allocs/op |
+
+Each appointment now costs two more keyed hashes and about three more log
+entries, and each log entry is hashed into the running log hash. Keyed
+hashing and the log together are about half the time. **Risk for step 11:**
+with imaging, reading and finance still to add, the < 1.5 s warm-up target
+needs the mitigations noted under step 6 (hash the warm-up log per day,
+build warm-up log text lazily, or cache the built start state).

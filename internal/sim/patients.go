@@ -1,0 +1,246 @@
+package sim
+
+import (
+	"fmt"
+	"slices"
+
+	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/simtime"
+)
+
+// Observable projections of patients. Everything here comes from events
+// that already happened; latent arrival times, no-show draws and patience
+// are never read.
+
+func flowView(c flowCounts) api.FlowCounts {
+	return api.FlowCounts{Arrived: c.arrived, Early: c.early, Late: c.late, AfterGrace: c.afterGrace,
+		WalkIns: c.walkIns, WalkInsBooked: c.walkInsBooked, Missed: c.missed, NoShows: c.noShows,
+		Rescheduled: c.rescheduled, Left: c.left, Unseen: c.unseen}
+}
+
+func (st *state) observeFlow(o *api.Observation, now simtime.Time) {
+	d := &st.dem
+	f := &o.Flow
+	f.Today, f.SinceStart = flowView(d.flowToday), flowView(d.flowTotal)
+	f.NoShowsLastClose = d.noShowsLastClose
+	if today := st.cal.DayIndex(now); today < int64(len(d.days)) {
+		for _, ai := range d.days[today].appts {
+			if d.appts[ai].state == apptMissed {
+				f.MissedNow++
+			}
+		}
+	}
+	for _, vi := range d.waiting {
+		v := &d.visits[vi]
+		ord := &d.orders[v.order]
+		x := &st.cfg.Catalog[ord.exam]
+		w := api.WaitingPatient{Visit: visitID(vi), Patient: patientID(ord.patient), Order: orderID(v.order),
+			Modality: x.Modality, Exam: x.Code, ExamName: x.Name, Priority: ord.priority.String(),
+			WalkIn: ord.walkIn, Arrived: st.cal.Clock(v.arrived), WaitedMin: int64(now.Sub(v.arrived) / simtime.Minute),
+			LateMin: int64(v.late / simtime.Minute), AfterGrace: v.afterGrace}
+		if v.appt >= 0 {
+			a := &d.appts[v.appt]
+			w.Appointment = apptID(v.appt)
+			w.ApptTime = simtime.FormatClock(d.days[a.day].rooms[a.room][a.slot].From)
+		}
+		f.Waiting = append(f.Waiting, w)
+	}
+}
+
+// Patients lists the patients of day index day: every appointment booked
+// for that day (in time order, cancelled ones included) and every walk-in.
+func (w *World) Patients(day int64) []api.PatientRow {
+	st := w.st
+	d := &st.dem
+	if day < 0 || day >= int64(len(d.days)) {
+		return nil
+	}
+	ds := d.days[day]
+	now := w.eng.Now()
+	appts := slices.Clone(ds.appts)
+	slices.SortStableFunc(appts, func(x, y int) int {
+		a, b := &d.appts[x], &d.appts[y]
+		sa, sb := ds.rooms[a.room][a.slot].From, ds.rooms[b.room][b.slot].From
+		if sa != sb {
+			return int(sa - sb)
+		}
+		return a.room - b.room
+	})
+	var rows []api.PatientRow
+	for _, ai := range appts {
+		a := &d.appts[ai]
+		r := st.patientRow(a.order, now)
+		r.Appointment = apptID(ai)
+		r.ApptTime = simtime.FormatClock(ds.rooms[a.room][a.slot].From)
+		r.Status, r.StatusText = st.apptStatus(ai)
+		if a.visit >= 0 {
+			st.fillVisit(&r, a.visit, now)
+		}
+		rows = append(rows, r)
+	}
+	for _, oi := range ds.walkIns {
+		r := st.patientRow(oi, now)
+		o := &d.orders[oi]
+		switch {
+		case o.visit >= 0:
+			st.fillVisit(&r, o.visit, now)
+		case len(o.appts) > 0:
+			r.Status, r.StatusText = api.PatientSentToBook, "booked for later"
+		default:
+			r.Status, r.StatusText = api.PatientLost, "lost (no slot)"
+		}
+		rows = append(rows, r)
+	}
+	return rows
+}
+
+func (st *state) patientRow(oi int, now simtime.Time) api.PatientRow {
+	o := &st.dem.orders[oi]
+	x := &st.cfg.Catalog[o.exam]
+	return api.PatientRow{Patient: patientID(o.patient), Order: orderID(oi), Modality: x.Modality,
+		ExamName: x.Name, Priority: o.priority.String(), WalkIn: o.walkIn}
+}
+
+func (st *state) fillVisit(r *api.PatientRow, vi int, now simtime.Time) {
+	v := &st.dem.visits[vi]
+	r.Visit = visitID(vi)
+	r.Arrived = st.cal.Clock(v.arrived)
+	end := now
+	if v.state != visitWaiting {
+		end = v.endedAt
+	}
+	r.WaitedMin = int64(end.Sub(v.arrived) / simtime.Minute)
+	if v.appt >= 0 {
+		r.Punctuality = punctuality(v.late)
+	}
+	switch v.state {
+	case visitWaiting:
+		r.Status, r.StatusText = api.PatientWaiting, "waiting"
+		if v.afterGrace {
+			r.StatusText = "waiting (late, fitted in)"
+		}
+	case visitLeft:
+		r.Status, r.StatusText = api.PatientLeft, "left without an exam"
+	case visitUnseen:
+		r.Status, r.StatusText = api.PatientUnseen, "sent home unseen"
+	}
+}
+
+func (st *state) apptStatus(ai int) (string, string) {
+	switch st.dem.appts[ai].state {
+	case apptBooked:
+		return api.PatientBooked, "booked"
+	case apptCancelled:
+		return api.PatientCancelled, "cancelled"
+	case apptMissed:
+		return api.PatientMissed, "missed (provisional)"
+	case apptNoShow:
+		return api.PatientNoShow, "no-show"
+	case apptRescheduled:
+		return api.PatientRescheduled, "rescheduled"
+	}
+	return api.PatientWaiting, "arrived" // overwritten by fillVisit
+}
+
+// Journey returns the observable history of patient id ("P00042").
+func (w *World) Journey(id string) (api.Journey, bool) {
+	st := w.st
+	d := &st.dem
+	var n int64
+	if _, err := fmt.Sscanf(id, "P%d", &n); err != nil {
+		return api.Journey{}, false
+	}
+	oi := -1
+	for i := range d.orders {
+		if d.orders[i].patient == n {
+			oi = i
+			break
+		}
+	}
+	if oi < 0 {
+		return api.Journey{}, false
+	}
+	o := &d.orders[oi]
+	x := &st.cfg.Catalog[o.exam]
+	j := api.Journey{Patient: id, Order: orderID(oi), Exam: x.Code, ExamName: x.Name, Modality: x.Modality,
+		Priority: o.priority.String(), Source: "—", WalkIn: o.walkIn}
+	if o.source >= 0 {
+		j.Source = st.cfg.Sources[o.source].Name
+	}
+	iso := func(t simtime.Time) string { return st.cal.ISO(t) }
+	switch {
+	case o.walkIn:
+		j.Source = "walk-in"
+		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(o.received), Label: "Walked in", Detail: "order in hand, no appointment", Done: true})
+	case o.key.day < 0:
+		j.Steps = append(j.Steps, api.JourneyStep{Label: "Ordered", Detail: "before the simulation started", Done: true})
+	default:
+		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(o.received), Label: "Ordered", Detail: "referred by " + j.Source, Done: true})
+	}
+	for _, ai := range o.appts {
+		a := &d.appts[ai]
+		s := d.days[a.day].rooms[a.room][a.slot]
+		start := st.cal.At(a.day, s.From)
+		booked := api.JourneyStep{Time: iso(a.bookedAt), Label: "Booked",
+			Detail: fmt.Sprintf("%s for %s (%s)", apptID(ai), st.cal.Short(start), st.cfg.Rooms[a.room].Name), Done: true}
+		if o.key.day < 0 {
+			booked.Time = "" // on the opening schedule
+		}
+		j.Steps = append(j.Steps, booked)
+		switch a.state {
+		case apptBooked:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(start), Label: "Appointment", Detail: "upcoming"})
+		case apptCancelled:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.endedAt), Label: "Cancelled", Detail: "by the patient", Done: true})
+		case apptMissed, apptNoShow:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.missedAt), Label: "Missed",
+				Detail: "not arrived by the end of the grace period", Done: true})
+			if a.state == apptNoShow {
+				j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.endedAt), Label: "No-show", Detail: "finalized at accounting close", Done: true})
+			}
+		case apptArrived:
+			if a.missedAt != 0 {
+				j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.missedAt), Label: "Missed (provisional)",
+					Detail: "not arrived by the end of the grace period", Done: true})
+			}
+		case apptRescheduled:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.endedAt), Label: "Arrived, rescheduled",
+				Detail: punctuality(a.endedAt.Sub(start)) + "; too late to be seen", Done: true})
+		}
+	}
+	if o.visit >= 0 {
+		v := &d.visits[o.visit]
+		detail := visitID(o.visit)
+		if v.appt >= 0 {
+			detail += " · " + punctuality(v.late)
+			if v.afterGrace {
+				detail += ", after being marked missed (fitted in)"
+			}
+		}
+		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.arrived), Label: "Arrived", Detail: detail, Done: true})
+		switch v.state {
+		case visitWaiting:
+			j.Steps = append(j.Steps, api.JourneyStep{Label: "Waiting",
+				Detail: fmt.Sprintf("%s so far; not yet registered", w.eng.Now().Sub(v.arrived)), Done: true})
+		case visitLeft:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Left",
+				Detail: fmt.Sprintf("without an exam after waiting %s", v.endedAt.Sub(v.arrived)), Done: true})
+		case visitUnseen:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(v.endedAt), Label: "Sent home",
+				Detail: fmt.Sprintf("still waiting at closing after %s", v.endedAt.Sub(v.arrived)), Done: true})
+		}
+	}
+	switch o.state {
+	case orderLost:
+		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(o.endedAt), Label: "Lost", Detail: o.lostWhy, Done: true})
+	case orderRecall:
+		j.Steps = append(j.Steps, api.JourneyStep{Label: "Recall list",
+			Detail: "due " + st.cal.Date(st.cal.StartOfDay(o.earliest)).String() + "; booked when it enters the horizon"})
+	}
+	j.Status = orderStatusText[o.state]
+	return j, true
+}
+
+var orderStatusText = [...]string{orderBooked: "booked", orderRecall: "on the recall list", orderLost: "lost",
+	orderCancelled: "cancelled", orderVisit: "on site", orderNoShow: "no-show", orderLeft: "left without an exam",
+	orderUnseen: "sent home unseen"}

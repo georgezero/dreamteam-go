@@ -48,7 +48,11 @@ const (
 	screenDashboard screen = iota
 	screenSchedule
 	screenLog
+	screenPatients
 )
+
+// Patient list filters, cycled with tab.
+var patientFilters = []string{"all", "waiting", "missed / no-show", "left / unseen", "walk-ins"}
 
 type tickMsg time.Time
 
@@ -78,6 +82,15 @@ type Model struct {
 	sched       api.DaySchedule
 	// Log screen: entries scrolled back from the newest.
 	logScroll int
+	// Patients screen: day offset, filter, selected row and the patient
+	// whose journey is open ("" for the list).
+	patDay    int64
+	patFilter int
+	patSel    int
+	patScroll int
+	patients  []api.PatientRow
+	journeyID string
+	journey   api.Journey
 }
 
 // New returns a paused model on s.
@@ -94,9 +107,40 @@ func (m *Model) refresh() {
 		n = fullLog
 	}
 	m.obs = m.sess.Observe(n)
-	if m.screen == screenSchedule {
+	switch m.screen {
+	case screenSchedule:
 		m.sched = m.sess.Schedule(m.schedDay)
+	case screenPatients:
+		m.patients = filterPatients(m.sess.Patients(m.patDay), m.patFilter)
+		m.patSel = max(0, min(m.patSel, len(m.patients)-1))
+		if m.journeyID != "" {
+			m.journey, _ = m.sess.Journey(m.journeyID)
+		}
 	}
+}
+
+func filterPatients(rows []api.PatientRow, f int) []api.PatientRow {
+	if f == 0 {
+		return rows
+	}
+	var out []api.PatientRow
+	for _, r := range rows {
+		keep := false
+		switch patientFilters[f] {
+		case "waiting":
+			keep = r.Status == api.PatientWaiting
+		case "missed / no-show":
+			keep = r.Status == api.PatientMissed || r.Status == api.PatientNoShow
+		case "left / unseen":
+			keep = r.Status == api.PatientLeft || r.Status == api.PatientUnseen
+		case "walk-ins":
+			keep = r.WalkIn
+		}
+		if keep {
+			out = append(out, r)
+		}
+	}
+	return out
 }
 
 // Init starts the frame clock.
@@ -158,9 +202,15 @@ func (m *Model) key(k string) tea.Cmd {
 
 // screenKey handles navigation keys; it reports whether k was one.
 func (m *Model) screenKey(k string) bool {
+	if m.screen == screenPatients && m.patientKey(k) {
+		return true
+	}
 	switch k {
 	case "d", "esc":
 		m.screen = screenDashboard
+		return true
+	case "p":
+		m.screen, m.journeyID = screenPatients, ""
 		return true
 	case "s":
 		m.screen, m.schedDay, m.schedScroll = screenSchedule, 0, 0
@@ -215,6 +265,42 @@ func (m *Model) screenKey(k string) bool {
 		return true
 	}
 	return false
+}
+
+// patientKey handles the patients screen: list navigation, day paging,
+// filters, and opening or closing a journey.
+func (m *Model) patientKey(k string) bool {
+	if m.journeyID != "" {
+		if k == "esc" || k == "backspace" {
+			m.journeyID = ""
+			return true
+		}
+		return false
+	}
+	switch k {
+	case "up", "k":
+		m.patSel = max(0, m.patSel-1)
+	case "down", "j":
+		m.patSel = min(max(0, len(m.patients)-1), m.patSel+1)
+	case "left":
+		m.patDay = max(m.obs.Practice.StartOffset, m.patDay-1)
+		m.patSel, m.patScroll = 0, 0
+	case "right":
+		m.patDay = min(m.obs.Practice.BookingHorizonDays, m.patDay+1)
+		m.patSel, m.patScroll = 0, 0
+	case "t":
+		m.patDay, m.patSel, m.patScroll = 0, 0, 0
+	case "tab":
+		m.patFilter = (m.patFilter + 1) % len(patientFilters)
+		m.patSel, m.patScroll = 0, 0
+	case "enter":
+		if m.patSel < len(m.patients) {
+			m.journeyID = m.patients[m.patSel].Patient
+		}
+	default:
+		return false
+	}
+	return true
 }
 
 // frame advances the simulation for one tick of wall time.

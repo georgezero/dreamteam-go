@@ -323,6 +323,8 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 	cfg.Behavior.RebookPPM = rng.PPM(cn.RebookPPM)
 	cfg.Behavior.CancelLeadHours = c.quantile("behavior.cancellation.leadHours", cn.LeadHours, 0)
 
+	c.arrivals(f, cfg)
+
 	// Opening schedule: references only here; slot checks need the plan.
 	for i, op := range f.OpeningSchedule {
 		op_ := fmt.Sprintf("openingSchedule[%d]", i)
@@ -395,4 +397,115 @@ func (c *checker) openingSlots(cfg *sim.Config) {
 			c.fail(p, "slot is not bookable (%s)", why)
 		}
 	}
+}
+
+// arrivals validates no-shows, arrival classes, walk-in patience and the
+// walk-in stream (SIMULATION_DESIGN §5.2, §5.6, §5.8).
+func (c *checker) arrivals(f *File, cfg *sim.Config) {
+	b := &cfg.Behavior
+	ns := f.Behavior.NoShow
+	b.NoShowPPM = map[string]rng.PPM{}
+	for _, m := range modalities {
+		v, ok := ns.BasePPM[m]
+		if !ok {
+			c.fail("behavior.noShow.basePPM."+m, "required")
+		}
+		b.NoShowPPM[m] = c.ppm("behavior.noShow.basePPM."+m, v)
+	}
+	for k := range ns.BasePPM {
+		if !slices.Contains(modalities, k) {
+			c.fail("behavior.noShow.basePPM."+k, "not a modality")
+		}
+	}
+	b.NoShowPerTenDaysPPM = c.ppm("behavior.noShow.perTenDaysLeadPPM", ns.PerTenDaysLeadPPM)
+	b.NoShowMaxLeadPPM = c.ppm("behavior.noShow.maxLeadPPM", ns.MaxLeadPPM)
+	b.NoShowRebookPPM = c.ppm("behavior.noShow.rebookPPM", ns.RebookPPM)
+
+	var wsum int64
+	for i, a := range f.Behavior.Arrival {
+		ap := fmt.Sprintf("behavior.arrivalClasses[%d]", i)
+		if a.WeightBP < 0 {
+			c.fail(ap+".weightBP", "negative")
+		}
+		if a.FromMin > a.ToMin || a.FromMin < -120 || a.ToMin > 180 {
+			c.fail(ap, "need -120 ≤ fromMin ≤ toMin ≤ 180")
+		}
+		wsum += a.WeightBP
+		b.Arrival = append(b.Arrival, sim.ArrivalClass{WeightBP: uint64(max(0, a.WeightBP)),
+			From: simtime.Duration(a.FromMin) * simtime.Minute, To: simtime.Duration(a.ToMin) * simtime.Minute})
+	}
+	if wsum != 10_000 {
+		c.fail("behavior.arrivalClasses", "weights sum to %d, not 10000", wsum)
+	}
+	b.WalkInPatienceMin = c.quantile("behavior.walkInPatienceMin", f.Behavior.WalkInPatienceMin, 1)
+
+	w := f.WalkIns
+	wc := &cfg.WalkIns
+	if w.DailyMilli < 0 || w.DailyMilli > 200_000 {
+		c.fail("walkIns.dailyMilli", "%d is outside 0–200000", w.DailyMilli)
+	}
+	wc.DailyMilli = w.DailyMilli
+	var hsum int64
+	for k, v := range w.HourProfileBP {
+		h, err := strconv.Atoi(k)
+		if err != nil || len(k) != 2 || h < 0 || h > 23 || v < 0 {
+			c.fail("walkIns.hourProfileBP."+k, "keys are hours \"00\" … \"23\" with non-negative shares")
+			continue
+		}
+		wc.HourBP[h] = v
+		hsum += v
+	}
+	if hsum != 10_000 {
+		c.fail("walkIns.hourProfileBP", "sums to %d, not 10000", hsum)
+	}
+	if len(w.WeekdayFactorBP) != 7 {
+		c.fail("walkIns.weekdayFactorBP", "needs all seven weekdays")
+	}
+	for _, wd := range weekdays(c, "walkIns.weekdayFactorBP", w.WeekdayFactorBP) {
+		v := w.WeekdayFactorBP[wd.String()]
+		if v < 0 || v > 30_000 {
+			c.fail("walkIns.weekdayFactorBP."+wd.String(), "%d is outside 0–30000", v)
+		}
+		wc.WeekdayBP[wd] = v
+	}
+	copy(wc.PriorityBP[:], c.mixBP("walkIns.priorityMixBP", w.PriorityMixBP, priorities))
+	for code := range w.ExamMix {
+		found := false
+		for _, x := range cfg.Catalog {
+			if x.Code == code {
+				found = true
+				if !x.WalkInEligible {
+					c.fail("walkIns.examMix."+code, "exam is not walk-in eligible")
+				}
+			}
+		}
+		if !found {
+			c.fail("walkIns.examMix."+code, "not an exam code in the catalog")
+		}
+	}
+	for xi, x := range cfg.Catalog {
+		if v, ok := w.ExamMix[x.Code]; ok && v > 0 && x.WalkInEligible {
+			wc.Exams = append(wc.Exams, xi)
+			wc.ExamWeights = append(wc.ExamWeights, uint64(v))
+		}
+	}
+	if len(wc.Exams) == 0 && w.DailyMilli > 0 {
+		c.fail("walkIns.examMix", "must not be empty")
+	}
+	for h := range wc.HourBP {
+		for wd := range wc.WeekdayBP {
+			if wc.DailyMilli*wc.HourBP[h]/10_000*wc.WeekdayBP[wd]/10_000 > maxBlockMilli {
+				c.fail("walkIns", "hourly rate above %d milli-patients", maxBlockMilli)
+				return
+			}
+		}
+	}
+}
+
+func (c *checker) ppm(p string, v int64) rng.PPM {
+	if v < 0 || v > 1_000_000 {
+		c.fail(p, "%d is outside 0–1000000", v)
+		return 0
+	}
+	return rng.PPM(v)
 }

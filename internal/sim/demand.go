@@ -40,6 +40,10 @@ const (
 	orderRecall                      // wanted date beyond the booking horizon
 	orderLost                        // declined or no capacity: demand lost
 	orderCancelled                   // cancelled, no new date requested
+	orderVisit                       // the patient is on site (a visit is open)
+	orderNoShow                      // missed and never came; no new date (yet)
+	orderLeft                        // a walk-in left without an exam
+	orderUnseen                      // still waiting when the practice closed
 	numOrderStates
 )
 
@@ -55,15 +59,28 @@ type order struct {
 	tolerance int64 // days past earliest the patient accepts
 	attempt   int64
 	state     orderState
-	appt      int // current or last appointment, -1 if none
+	appt      int   // current or last appointment, -1 if none
+	appts     []int // every appointment booked for this order
+	visit     int   // current or last visit, -1 if none
+	walkIn    bool
+	lostWhy   string // observable reason, when lost
+	endedAt   simtime.Time
 }
 
 type apptState uint8
 
 const (
-	apptBooked apptState = iota
-	apptCancelled
+	apptBooked      apptState = iota // waiting for the patient
+	apptCancelled                    // cancelled; slot freed
+	apptArrived                      // the patient arrived (possibly late, fitted in)
+	apptMissed                       // provisional: not arrived by start + grace
+	apptNoShow                       // final, at accounting close
+	apptRescheduled                  // arrived too late (late policy) or after closing
+	numApptStates
 )
+
+var apptStateNames = [...]string{apptBooked: "booked", apptCancelled: "cancelled", apptArrived: "arrived",
+	apptMissed: "missed", apptNoShow: "no-show", apptRescheduled: "rescheduled"}
 
 type appt struct {
 	order    int
@@ -73,6 +90,11 @@ type appt struct {
 	attempt  int64
 	state    apptState
 	bookedAt simtime.Time
+	endedAt  simtime.Time // when it was cancelled, missed, finalized or rescheduled
+	missedAt simtime.Time // when it was marked missed (start + grace)
+	visit    int          // -1 until the patient arrives
+	// scheduled is set once today's arrival and grace events are queued.
+	scheduled bool
 }
 
 // Why a template slot cannot be booked.
@@ -89,8 +111,11 @@ type slot struct {
 }
 
 type daySlots struct {
-	rooms  [][]slot
-	booked int
+	rooms   [][]slot
+	booked  int   // appointments holding a slot (every state but cancelled)
+	appts   []int // every appointment ever booked for the day, in booking order
+	visits  []int // every visit that day, in arrival order
+	walkIns []int // walk-in orders that day, in arrival order
 }
 
 // modalityCounts are demand event counters for one modality: orders
@@ -111,6 +136,13 @@ type demandState struct {
 	patients int64
 	today    map[string]*modalityCounts // reset each day; read by modality key only
 	total    map[string]*modalityCounts // since the start date
+
+	visits           []visit
+	waiting          []int // open visits in arrival order
+	flowToday        flowCounts
+	flowTotal        flowCounts
+	noShowsLastClose int
+	dayStarted       bool // today's arrivals have been queued
 }
 
 func (st *state) initDemand() {
@@ -242,7 +274,7 @@ func (st *state) receiveOrder(e *Engine, key originKey) {
 	oi := len(st.dem.orders)
 	st.dem.orders = append(st.dem.orders, order{
 		key: key, patient: st.dem.patients, source: int(key.src), exam: exam, priority: pri,
-		window: win, received: e.Now(), earliest: st.day + lead, tolerance: tol, appt: -1,
+		window: win, received: e.Now(), earliest: st.day + lead, tolerance: tol, appt: -1, visit: -1,
 	})
 	st.count(exam, func(c *modalityCounts) { c.received++ })
 	o := &st.dem.orders[oi]
@@ -273,7 +305,7 @@ func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) boo
 	case hasAny && any.day-earliest <= o.tolerance:
 		pick = any
 	default:
-		o.state = orderLost
+		o.state, o.endedAt = orderLost, e.Now()
 		st.count(o.exam, func(c *modalityCounts) { c.lost++ })
 		why := fmt.Sprintf("no %s slot within %d days", st.cfg.Catalog[o.exam].Modality, st.cfg.Policies.BookingHorizonDays)
 		if hasAny {
@@ -282,6 +314,7 @@ func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) boo
 				why += fmt.Sprintf(" (%d days)", n)
 			}
 		}
+		o.lostWhy = why
 		st.emit(e.Now(), api.Warn, "orders", head+" → lost: "+why+tail)
 		return false
 	}
@@ -360,10 +393,16 @@ func (st *state) book(e *Engine, oi int, r slotRef, confirmed bool) int {
 	}
 	ai := len(st.dem.appts)
 	st.dem.appts = append(st.dem.appts, appt{order: oi, room: r.room, day: r.day, slot: r.idx,
-		attempt: o.attempt, bookedAt: e.Now()})
+		attempt: o.attempt, bookedAt: e.Now(), visit: -1})
 	s.appt = ai
-	st.dem.days[r.day].booked++
+	ds := st.dem.days[r.day]
+	ds.booked++
+	ds.appts = append(ds.appts, ai)
 	o.state, o.appt = orderBooked, ai
+	o.appts = append(o.appts, ai)
+	if r.day == st.day && st.dem.dayStarted {
+		st.scheduleArrival(e, ai) // booked for later today
+	}
 	if confirmed {
 		return ai
 	}
@@ -390,7 +429,7 @@ func (st *state) cancel(e *Engine, ai int) {
 	a := &st.dem.appts[ai]
 	o := &st.dem.orders[a.order]
 	s := &st.dem.days[a.day].rooms[a.room][a.slot]
-	a.state = apptCancelled
+	a.state, a.endedAt = apptCancelled, e.Now()
 	s.appt = -1
 	st.dem.days[a.day].booked--
 	st.count(o.exam, func(c *modalityCounts) { c.cancelled++ })
@@ -399,7 +438,7 @@ func (st *state) cancel(e *Engine, ai int) {
 
 	ex := rng.Hash(st.seed, "attempt.exam", o.key.keys(a.attempt)...)
 	if !rng.Bernoulli(ex.Lane(3), st.cfg.Behavior.RebookPPM) {
-		o.state = orderCancelled
+		o.state, o.endedAt = orderCancelled, e.Now()
 		st.emit(e.Now(), api.Info, "orders", head)
 		return
 	}
@@ -449,7 +488,7 @@ func (st *state) loadOpening(e *Engine) {
 		oi := len(st.dem.orders)
 		st.dem.orders = append(st.dem.orders, order{
 			key: originKey{-1, -1, -1, int64(i)}, patient: st.dem.patients, source: op.Source,
-			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1,
+			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1, visit: -1,
 		})
 		st.book(e, oi, slotRef{day, op.Room, idx}, true)
 	}
@@ -476,20 +515,25 @@ func (st *state) dayLabel(day int64) string {
 	return fmt.Sprintf("%s %s %d", d.Weekday(), d.MonthName(), d.Day)
 }
 
-// checkDemand verifies booking invariants: each active appointment holds
-// exactly one bookable slot of its exam's category and the slot points
-// back; per-day booked counters match; every order is in one state.
+// checkDemand verifies booking invariants: every appointment that holds a
+// slot (any state but cancelled) holds exactly one slot of its exam's
+// category and the slot points back; cancelled ones hold none; per-day
+// counters match; an order holds at most one pending appointment and is in
+// exactly one state.
 func (st *state) checkDemand() error {
 	d := &st.dem
-	active := 0
+	holding, pending := 0, 0
 	for ai := range d.appts {
 		a := &d.appts[ai]
-		if a.state != apptBooked {
-			continue
-		}
-		active++
 		s := &d.days[a.day].rooms[a.room][a.slot]
 		o := &d.orders[a.order]
+		if a.state == apptCancelled {
+			if s.appt == ai {
+				return fmt.Errorf("%s: cancelled but still holds its slot", apptID(ai))
+			}
+			continue
+		}
+		holding++
 		switch {
 		case s.appt != ai:
 			return fmt.Errorf("%s: slot does not point back", apptID(ai))
@@ -497,23 +541,29 @@ func (st *state) checkDemand() error {
 			return fmt.Errorf("%s: booked in an unbookable slot", apptID(ai))
 		case s.Category != st.cfg.Catalog[o.exam].Category:
 			return fmt.Errorf("%s: slot category does not admit %s", apptID(ai), st.cfg.Catalog[o.exam].Code)
-		case o.state != orderBooked || o.appt != ai:
-			return fmt.Errorf("%s: order %s not holding it", apptID(ai), orderID(a.order))
+		case (a.visit >= 0) != (a.state == apptArrived):
+			return fmt.Errorf("%s: state %s with visit %d", apptID(ai), apptStateNames[a.state], a.visit)
+		}
+		if a.state == apptBooked || a.state == apptMissed {
+			pending++
+			if o.state != orderBooked || o.appt != ai {
+				return fmt.Errorf("%s: pending but order %s is not holding it", apptID(ai), orderID(a.order))
+			}
 		}
 	}
 	booked := 0
 	for _, ds := range d.days {
 		booked += ds.booked
 	}
-	if booked != active {
-		return fmt.Errorf("day counters say %d booked, %d active appointments", booked, active)
+	if booked != holding {
+		return fmt.Errorf("day counters say %d holding slots, %d appointments do", booked, holding)
 	}
 	var states [numOrderStates]int
 	for _, o := range d.orders {
 		states[o.state]++
 	}
-	if states[orderBooked] != active || states[orderRecall] != len(d.recall) {
-		return fmt.Errorf("order states %v vs %d active, %d recall", states, active, len(d.recall))
+	if states[orderBooked] != pending || states[orderRecall] != len(d.recall) {
+		return fmt.Errorf("order states %v vs %d pending, %d recall", states, pending, len(d.recall))
 	}
-	return nil
+	return st.checkFlow()
 }

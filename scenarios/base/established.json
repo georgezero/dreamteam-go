@@ -197,7 +197,25 @@
       "soon": {"p0": 1, "p50": 4, "p100": 10},
       "urgent": {"p0": 0, "p50": 0, "p100": 2}
     },
-    "cancellation": {"ppm": 90000, "leadHours": {"p0": 2, "p55": 72, "p100": 720}, "rebookPPM": 500000}
+    "cancellation": {"ppm": 90000, "leadHours": {"p0": 2, "p55": 72, "p100": 720}, "rebookPPM": 500000},
+    "noShow": {"basePPM": {"XR": 40000, "US": 70000, "CT": 60000, "MR": 80000},
+               "perTenDaysLeadPPM": 5000, "maxLeadPPM": 60000, "rebookPPM": 400000},
+    "arrivalClasses": [
+      {"name": "early",     "weightBP": 6000, "fromMin": -25, "toMin": -5},
+      {"name": "on time",   "weightBP": 2800, "fromMin": -5,  "toMin": 5},
+      {"name": "late",      "weightBP": 900,  "fromMin": 5,   "toMin": 20},
+      {"name": "very late", "weightBP": 300,  "fromMin": 20,  "toMin": 45}
+    ],
+    "walkInPatienceMin": {"p0": 30, "p50": 60, "p100": 120}
+  },
+  "walkIns": {
+    "dailyMilli": 9500,
+    "hourProfileBP": {"08": 500, "09": 800, "10": 1300, "11": 1300, "12": 800, "13": 700,
+                      "14": 700, "15": 800, "16": 1100, "17": 1100, "18": 600, "19": 300},
+    "weekdayFactorBP": {"Mon": 10000, "Tue": 10000, "Wed": 10000, "Thu": 10000, "Fri": 10000,
+                        "Sat": 7000, "Sun": 0},
+    "priorityMixBP": {"routine": 8500, "soon": 1500, "urgent": 0},
+    "examMix": {"XR_CHEST_2V": 40, "XR_EXTREMITY": 30, "XR_SPINE": 10, "US_VENOUS": 12, "CT_HEAD_WO": 8}
   },
   "policies": {"walkIn": "accept_if_gap", "worklist": "urgent_then_fifo", "late": "fit_in",
                "graceMin": 15, "overtimeAllowanceMin": 15, "maxShiftHours": 12,

@@ -13,8 +13,10 @@ import (
 	tea "charm.land/bubbletea/v2"
 	"github.com/charmbracelet/x/ansi"
 
+	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/session"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
+	"github.com/georgezero/dreamteam-go/internal/version"
 )
 
 // The TUI may see the world only through session and api.
@@ -124,7 +126,7 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m := New(openMini(t, 2))
 	m.sess.Advance(5*simtime.Hour, session.Options{})
 	m.refresh()
-	for _, scr := range []string{"d", "s", "l"} {
+	for _, scr := range []string{"d", "s", "l", "p"} {
 		m.key(scr)
 		for _, size := range [][2]int{{80, 24}, {120, 36}, {160, 48}, {60, 16}} {
 			m.Update(tea.WindowSizeMsg{Width: size[0], Height: size[1]})
@@ -143,8 +145,8 @@ func TestRenderFitsTerminal(t *testing.T) {
 	m.key("d")
 	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
 	out := ansi.Strip(m.render())
-	for _, want := range []string{"ROOMS", "STAFF", "XR ○ Idle       Riley", "US ○ Idle       Morgan",
-		"Techs on duty 3/4", "Desk ● Jordan", "DEMAND today", "next open slot", "EVENT LOG"} {
+	for _, want := range []string{"DREAMTEAM v" + version.Number, "ROOMS", "XR ○ Idle       Riley", "US ○ Idle       Morgan",
+		"Techs 3/4", "Desk ● Jordan", "PATIENT FLOW today", "Waiting ", "walk-ins", "DEMAND today", "next open slot", "EVENT LOG"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("80×24 dashboard lacks %q:\n%s", want, out)
 		}
@@ -215,6 +217,43 @@ func TestScheduleNavigation(t *testing.T) {
 	}
 	if m.schedDay != 0 {
 		t.Fatalf("paged before the start date: %d", m.schedDay)
+	}
+	m.key("esc")
+	if m.screen != screenDashboard {
+		t.Fatal("esc did not return to the dashboard")
+	}
+}
+
+func TestPatientsScreen(t *testing.T) {
+	m := New(openMini(t, 1))
+	m.sess.Advance(7*simtime.Hour, session.Options{}) // 13:00
+	m.Update(tea.WindowSizeMsg{Width: 100, Height: 40})
+	m.key("p")
+	out := ansi.Strip(m.render())
+	for _, want := range []string{"PATIENTS · Tue Oct 13 (today) · all", "P00001", "waiting", "08:00"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("patient list lacks %q:\n%s", want, out)
+		}
+	}
+	m.key("tab") // waiting
+	for _, r := range m.patients {
+		if r.Status != api.PatientWaiting {
+			t.Fatalf("waiting filter shows %s", r.Status)
+		}
+	}
+	m.key("enter")
+	if m.journeyID == "" {
+		t.Fatal("enter did not open a journey")
+	}
+	out = ansi.Strip(m.render())
+	for _, want := range []string{"PATIENT " + m.journeyID, "Booked", "Arrived", "Waiting", "so far"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("journey lacks %q:\n%s", want, out)
+		}
+	}
+	m.key("esc")
+	if m.journeyID != "" || m.screen != screenPatients {
+		t.Fatal("esc did not return to the list")
 	}
 	m.key("esc")
 	if m.screen != screenDashboard {

@@ -21,7 +21,8 @@ type OrderInfo struct {
 	State    string
 }
 
-var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost", orderCancelled: "cancelled"}
+var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
+	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderUnseen: "unseen"}
 
 // Orders lists every disclosed order (opening schedule included).
 func (w *World) Orders() []OrderInfo {
@@ -41,6 +42,10 @@ type ApptInfo struct {
 	Day             int64
 	Span            Span
 	Cancelled       bool
+	State           string
+	BookedAt        simtime.Time
+	EndedAt         simtime.Time
+	Visit           int
 }
 
 // Appointments lists every appointment ever booked.
@@ -49,7 +54,47 @@ func (w *World) Appointments() []ApptInfo {
 	for i, a := range w.st.dem.appts {
 		s := w.st.dem.days[a.day].rooms[a.room][a.slot]
 		out = append(out, ApptInfo{ID: apptID(i), Order: orderID(a.order), Exam: w.st.cfg.Catalog[w.st.dem.orders[a.order].exam].Code,
-			Room: a.room, Day: a.day, Span: s.Span, Cancelled: a.state == apptCancelled})
+			Room: a.room, Day: a.day, Span: s.Span, Cancelled: a.state == apptCancelled,
+			State: apptStateNames[a.state], BookedAt: a.bookedAt, EndedAt: a.endedAt, Visit: a.visit})
 	}
 	return out
+}
+
+// VisitInfo is one visit.
+type VisitInfo struct {
+	ID, Order  string
+	Appt       int
+	WalkIn     bool
+	Exam       string
+	Arrived    simtime.Time
+	Late       simtime.Duration
+	AfterGrace bool
+	State      string
+	EndedAt    simtime.Time
+}
+
+var visitStateNames = [...]string{visitWaiting: "waiting", visitLeft: "left", visitUnseen: "unseen"}
+
+// Visits lists every visit.
+func (w *World) Visits() []VisitInfo {
+	var out []VisitInfo
+	for i, v := range w.st.dem.visits {
+		o := &w.st.dem.orders[v.order]
+		out = append(out, VisitInfo{ID: visitID(i), Order: orderID(v.order), Appt: v.appt, WalkIn: o.walkIn,
+			Exam: w.st.cfg.Catalog[o.exam].Code, Arrived: v.arrived, Late: v.late, AfterGrace: v.afterGrace,
+			State: visitStateNames[v.state], EndedAt: v.endedAt})
+	}
+	return out
+}
+
+// ForceNoShowsFrom makes every patient whose appointment starts at or after
+// t a no-show. Call before the day containing t starts.
+func (w *World) ForceNoShowsFrom(t simtime.Time) {
+	w.st.forceNoShow = func(start simtime.Time) bool { return start >= t }
+}
+
+// PushForTest queues a raw event (for same-timestamp ordering tests).
+func (w *World) PushForTest(at simtime.Time, class Class, kind string, a int64) {
+	k := map[string]Kind{"arrive": kindArrive, "grace": kindGrace, "cancel": kindCancel, "patience": kindPatience}[kind]
+	w.eng.Push(Event{At: at, Class: class, Kind: k, A: a})
 }

@@ -39,6 +39,7 @@ type File struct {
 	Sources          []Source              `json:"referralSources"`
 	Demand           Demand                `json:"demand"`
 	Behavior         Behavior              `json:"behavior"`
+	WalkIns          WalkIns               `json:"walkIns"`
 	OpeningSchedule  []OpeningAppt         `json:"openingSchedule,omitempty"`
 }
 
@@ -93,6 +94,36 @@ type Demand struct {
 type Behavior struct {
 	WaitToleranceDays map[string]Quantile `json:"waitToleranceDays"` // by priority
 	Cancellation      Cancellation        `json:"cancellation"`
+	NoShow            NoShow              `json:"noShow"`
+	Arrival           []ArrivalClass      `json:"arrivalClasses"`
+	WalkInPatienceMin Quantile            `json:"walkInPatienceMin"`
+}
+
+// NoShow describes missed appointments: a base rate per modality plus a
+// lead-time effect, and the chance a no-show asks for a new date.
+type NoShow struct {
+	BasePPM           map[string]int64 `json:"basePPM"`
+	PerTenDaysLeadPPM int64            `json:"perTenDaysLeadPPM"`
+	MaxLeadPPM        int64            `json:"maxLeadPPM"`
+	RebookPPM         int64            `json:"rebookPPM"`
+}
+
+// ArrivalClass is a punctuality class: offsets from the appointment start
+// in [fromMin, toMin] minutes (negative is early).
+type ArrivalClass struct {
+	Name     string `json:"name"`
+	WeightBP int64  `json:"weightBP"`
+	FromMin  int64  `json:"fromMin"`
+	ToMin    int64  `json:"toMin"`
+}
+
+// WalkIns describes patients who arrive with an order but no appointment.
+type WalkIns struct {
+	DailyMilli      int64            `json:"dailyMilli"`
+	HourProfileBP   map[string]int64 `json:"hourProfileBP"`
+	WeekdayFactorBP map[string]int64 `json:"weekdayFactorBP"`
+	PriorityMixBP   map[string]int64 `json:"priorityMixBP"`
+	ExamMix         map[string]int64 `json:"examMix"`
 }
 
 // Cancellation describes appointment cancellations.

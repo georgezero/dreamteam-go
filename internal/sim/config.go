@@ -33,6 +33,7 @@ type Config struct {
 	Sources   []SourceConfig
 	Demand    DemandConfig
 	Behavior  BehaviorConfig
+	WalkIns   WalkInConfig
 	// Opening is the hand-built schedule a scenario without warm-up starts
 	// with (the mini scenario's "today").
 	Opening []OpeningAppt
@@ -113,6 +114,36 @@ type BehaviorConfig struct {
 	CancelPPM       rng.PPM
 	CancelLeadHours rng.Quantile // hours before the appointment
 	RebookPPM       rng.PPM      // a canceller asks for a new date
+
+	// NoShowPPM is the base no-show probability per modality (keyed by
+	// modality name), plus NoShowPerTenDaysPPM for every 10 days of
+	// booking lead, capped at NoShowMaxLeadPPM.
+	NoShowPPM           map[string]rng.PPM
+	NoShowPerTenDaysPPM rng.PPM
+	NoShowMaxLeadPPM    rng.PPM
+	NoShowRebookPPM     rng.PPM // a no-show asks for a new date the next day
+	// Arrival classes (early, on time, late, very late): a weight and an
+	// offset range relative to the appointment start.
+	Arrival []ArrivalClass
+	// WalkInPatienceMin is how long a walk-in waits before leaving.
+	WalkInPatienceMin rng.Quantile
+}
+
+// ArrivalClass is one punctuality class.
+type ArrivalClass struct {
+	WeightBP uint64
+	From, To simtime.Duration // offset from the appointment start; negative is early
+}
+
+// WalkInConfig describes walk-in patients: people holding an order but no
+// appointment (SIMULATION_DESIGN §5.6). They arrive only in open hours.
+type WalkInConfig struct {
+	DailyMilli  int64
+	HourBP      [24]int64
+	WeekdayBP   [7]int64
+	PriorityBP  [numPriorities]uint64
+	Exams       []int // walk-in eligible catalog indices
+	ExamWeights []uint64
 }
 
 // OpeningAppt is one appointment on the hand-built opening schedule.

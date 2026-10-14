@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/x/ansi"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/version"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 
 var (
 	barStyle   = lipgloss.NewStyle().Reverse(true)
+	plainStyle = lipgloss.NewStyle()
 	titleStyle = lipgloss.NewStyle().Bold(true)
 	dimStyle   = lipgloss.NewStyle().Faint(true)
 	warnStyle  = lipgloss.NewStyle().Foreground(lipgloss.Yellow)
@@ -34,17 +36,23 @@ func (m *Model) render() string {
 	switch m.screen {
 	case screenSchedule:
 		body = m.scheduleBody(w, h-3)
-		hints = " ↑↓ room  ←→ day  j/k scroll  t today  d dashboard  l log  space run  q quit"
+		hints = " ↑↓ room  ←→ day  j/k scroll  t today  d dash  p patients  l log  q quit"
 	case screenLog:
 		body = m.logBody(w, h-3)
-		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dashboard  s schedule  q quit"
+		hints = " ↑↓ scroll  pgup/pgdn page  g/G oldest/newest  d dash  p patients  q quit"
+	case screenPatients:
+		body = m.patientsBody(w, h-3)
+		hints = " ↑↓ select  enter open  tab filter  ←→ day  t today  esc back  q quit"
+		if m.journeyID != "" {
+			hints = " esc back to list  d dashboard  space run  q quit"
+		}
 	default:
 		body = m.dashboardBody(w, h-3)
 		auto := "off"
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  s schedule  l log  a auto-pause:" + auto + "  q quit"
+		hints = " space run  1-5 speed  n next  p patients  s sched  l log  a auto:" + auto + "  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -66,10 +74,11 @@ func (m *Model) topBar(w int) string {
 	} else {
 		run += " · " + speeds[m.speed].label
 	}
-	left := " DREAMTEAM · " + o.Practice.Name
+	brand := " DREAMTEAM v" + version.Number
+	left := brand + " · " + o.Practice.Name
 	right := fmt.Sprintf("%s %s · Day %d · %s ── %s ", o.Weekday, shortDate(o.Date), o.Day, o.Clock, run)
 	if ansi.StringWidth(left)+ansi.StringWidth(right) >= w {
-		left = " DREAMTEAM" // the clock and run state matter more than the name
+		left = brand // the clock and run state matter more than the name
 	}
 	return barStyle.Render(spread(left, right, w))
 }
@@ -88,7 +97,11 @@ func (m *Model) dashboardBody(w, n int) []string {
 	} else {
 		info += " today"
 	}
-	info += "   " + deskText(o) + "   Scenario: " + o.Practice.Scenario
+	info += "   " + deskText(o)
+	if w < 100 {
+		info += "   " + staffSummary(o)
+	}
+	info += "   Scenario: " + o.Practice.Scenario
 	lines := []string{info}
 
 	rooms := roomLines(o)
@@ -109,14 +122,17 @@ func (m *Model) dashboardBody(w, n int) []string {
 	} else {
 		lines = append(lines, titleStyle.Render(section("ROOMS", w)))
 		lines = append(lines, rooms...)
-		lines = append(lines, titleStyle.Render(section("STAFF", w)))
 		if n >= 34 {
+			lines = append(lines, titleStyle.Render(section("STAFF", w)))
 			lines = append(lines, staff...)
-		} else {
-			lines = append(lines, staffSummary(o))
 		}
 	}
-	lines = append(lines, demandLines(o, w)...)
+	lines = append(lines, flowLines(o, w)...)
+	demand := demandLines(o, w)
+	if n < 28 {
+		demand = demand[:len(demand)-1] // drop the since-day-1 line on short screens
+	}
+	lines = append(lines, demand...)
 
 	// Event log: newest first, compact; the full log is on its own screen.
 	room := min(dashboardLog, n-len(lines)-1)
@@ -233,9 +249,12 @@ func roomLines(o api.Observation) []string {
 		for _, id := range r.StaffBy {
 			who = append(who, staffName(o, id))
 		}
-		line := fmt.Sprintf(" %-3s%s  %s", r.Modality, st, strings.Join(who, ", "))
+		line := fmt.Sprintf(" %-3s%s  %-14s", r.Modality, st, strings.Join(who, ", "))
 		if r.Shared {
-			line += dimStyle.Render(" (shared)")
+			line = fmt.Sprintf(" %-3s%s  %-14s", r.Modality, st, strings.Join(who, ", ")+" (sh)")
+		}
+		if n := waitingFor(o, r.Modality); n > 0 {
+			line += warnStyle.Render(fmt.Sprintf(" %d waiting", n))
 		}
 		out = append(out, line)
 	}
@@ -303,6 +322,59 @@ func staffLines(o api.Observation) []string {
 	return out
 }
 
+func waitingFor(o api.Observation, modality string) int {
+	n := 0
+	for _, w := range o.Flow.Waiting {
+		if w.Modality == modality {
+			n++
+		}
+	}
+	return n
+}
+
+// flowLines is the patient-flow panel: who is waiting now and what
+// happened to today's patients so far.
+func flowLines(o api.Observation, w int) []string {
+	f := o.Flow
+	t := f.Today
+	longest := int64(0)
+	for _, p := range f.Waiting {
+		longest = max(longest, p.WaitedMin)
+	}
+	wait := fmt.Sprintf(" Waiting %d", len(f.Waiting))
+	if len(f.Waiting) > 0 {
+		wait = warnStyle.Render(wait)
+	}
+	var by []string
+	for _, d := range o.Demand.Modalities {
+		by = append(by, fmt.Sprintf("%s %d", d.Modality, waitingFor(o, d.Modality)))
+	}
+	l1 := wait + " · " + strings.Join(by, " ") + fmt.Sprintf(" · longest %s · no-shows at last close %d",
+		minutes(longest), f.NoShowsLastClose)
+	if w >= 100 {
+		l1 += dimStyle.Render(" · nobody is registered or imaged yet")
+	}
+	missed := fmt.Sprintf("missed %d", f.MissedNow)
+	if f.MissedNow > 0 {
+		missed = warnStyle.Render(missed)
+	}
+	left := fmt.Sprintf("left %d", t.Left)
+	if t.Left > 0 {
+		left = warnStyle.Render(left)
+	}
+	l2 := fmt.Sprintf(" Arrived %d (late %d, after grace %d) · walk-ins %d · %s · %s · unseen %d",
+		t.Arrived, t.Late, t.AfterGrace, t.WalkIns, left, missed, t.Unseen)
+	return []string{titleStyle.Render(section("PATIENT FLOW today", w)), l1, l2}
+}
+
+// minutes formats a minute count: "34m", "2h 05m".
+func minutes(m int64) string {
+	if m < 60 {
+		return fmt.Sprintf("%dm", m)
+	}
+	return fmt.Sprintf("%dh %02dm", m/60, m%60)
+}
+
 // staffSummary is the one-line staff panel for short terminals.
 func staffSummary(o api.Observation) string {
 	var techs, techsOn, rads, radsOn int
@@ -321,7 +393,7 @@ func staffSummary(o api.Observation) string {
 			}
 		}
 	}
-	return fmt.Sprintf(" Techs on duty %d/%d   Rads %d/%d", techsOn, techs, radsOn, rads)
+	return fmt.Sprintf("Techs %d/%d  Rads %d/%d", techsOn, techs, radsOn, rads)
 }
 
 func logLine(e api.LogEntry) string {

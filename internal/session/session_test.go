@@ -1,6 +1,7 @@
 package session
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 
@@ -68,5 +69,33 @@ func TestBudgetStopsAtTransactionAndResumes(t *testing.T) {
 	}
 	if a.Digest() != b.Digest() {
 		t.Fatal("budgeted advance changed the outcome")
+	}
+}
+
+// Speed never changes outcomes: advancing in steps of 1 min, 7 min, 2 h or
+// with an event budget gives the same observations and patient lists as
+// one jump.
+func TestSpeedsIdentical(t *testing.T) {
+	target := 3 * simtime.Day
+	ref := mini(t, 12)
+	ref.Advance(target, Options{})
+	for _, step := range []simtime.Duration{simtime.Minute, 7 * simtime.Minute, 2 * simtime.Hour} {
+		s := mini(t, 12)
+		end := s.Now().Add(target)
+		for s.Now() < end {
+			s.Advance(min(step, end.Sub(s.Now())), Options{})
+		}
+		if s.Digest() != ref.Digest() || !reflect.DeepEqual(s.Observe(2000), ref.Observe(2000)) ||
+			!reflect.DeepEqual(s.Patients(-1), ref.Patients(-1)) || !reflect.DeepEqual(s.Patients(0), ref.Patients(0)) {
+			t.Fatalf("step %s changed the outcome", step)
+		}
+	}
+	s := mini(t, 12)
+	end := s.Now().Add(target)
+	for s.Now() < end {
+		s.Advance(end.Sub(s.Now()), Options{EventBudget: 3})
+	}
+	if !reflect.DeepEqual(s.Observe(2000), ref.Observe(2000)) {
+		t.Fatal("event budget changed the outcome")
 	}
 }

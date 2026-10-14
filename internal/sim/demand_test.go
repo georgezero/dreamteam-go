@@ -165,9 +165,10 @@ func TestUnfulfilledDemandAccounted(t *testing.T) {
 		}
 	}
 	switch {
-	case total.Received != len(orders):
-		t.Fatalf("received %d, orders %d", total.Received, len(orders))
-	case states["booked"]+states["recall"]+states["lost"]+states["cancelled"] != len(orders):
+	case total.Received+obs.Flow.SinceStart.WalkIns != len(orders):
+		t.Fatalf("received %d + walk-ins %d, orders %d", total.Received, obs.Flow.SinceStart.WalkIns, len(orders))
+	case states["booked"]+states["recall"]+states["lost"]+states["cancelled"]+states["visit"]+
+		states["no-show"]+states["left"]+states["unseen"] != len(orders):
 		t.Fatalf("states %v do not cover %d orders", states, len(orders))
 	case total.Lost != states["lost"]:
 		t.Fatalf("lost counter %d, lost orders %d", total.Lost, states["lost"])

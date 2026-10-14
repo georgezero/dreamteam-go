@@ -113,6 +113,7 @@ type Observation struct {
 	Staff    []Employee   `json:"staff"`
 	Desk     Desk         `json:"desk"`
 	Demand   Demand       `json:"demand"`
+	Flow     Flow         `json:"flow"`
 	// LogTotal is the number of log entries ever emitted.
 	LogTotal  uint64     `json:"logTotal"`
 	RecentLog []LogEntry `json:"recentLog"` // oldest first
@@ -201,4 +202,105 @@ type DaySchedule struct {
 	Offset  int64          `json:"offset"` // days from today
 	Hours   *Span          `json:"hours"`  // nil when closed
 	Rooms   []RoomSchedule `json:"rooms"`
+}
+
+// FlowCounts count patient-flow events.
+type FlowCounts struct {
+	Arrived       int `json:"arrived"`       // scheduled patients who arrived
+	Early         int `json:"early"`         // … more than 5 min early
+	Late          int `json:"late"`          // … more than 5 min late
+	AfterGrace    int `json:"afterGrace"`    // … after being marked missed (fitted in)
+	WalkIns       int `json:"walkIns"`       // walk-ins who came in
+	WalkInsBooked int `json:"walkInsBooked"` // … sent away with an appointment instead
+	Missed        int `json:"missed"`        // appointments marked missed at start + grace
+	NoShows       int `json:"noShows"`       // missed appointments finalized at accounting close
+	Rescheduled   int `json:"rescheduled"`   // too late for the late policy, or after closing
+	Left          int `json:"left"`          // walk-ins who left without an exam
+	Unseen        int `json:"unseen"`        // still waiting at closing time, sent home
+}
+
+// WaitingPatient is a patient on site who has not been imaged. In V0.1
+// step 7 nobody is registered yet: waiting means arrived.
+type WaitingPatient struct {
+	Visit       string `json:"visit"`
+	Patient     string `json:"patient"`
+	Order       string `json:"order"`
+	Appointment string `json:"appointment,omitempty"`
+	Modality    string `json:"modality"`
+	Exam        string `json:"exam"`
+	ExamName    string `json:"examName"`
+	Priority    string `json:"priority"`
+	WalkIn      bool   `json:"walkIn"`
+	ApptTime    string `json:"apptTime,omitempty"` // "10:15"
+	Arrived     string `json:"arrived"`            // "10:02"
+	WaitedMin   int64  `json:"waitedMin"`
+	// LateMin is minutes after the appointment start (negative: early).
+	LateMin    int64 `json:"lateMin"`
+	AfterGrace bool  `json:"afterGrace"`
+}
+
+// Flow is the patient flow today.
+type Flow struct {
+	Today      FlowCounts `json:"today"`
+	SinceStart FlowCounts `json:"sinceStart"`
+	// MissedNow counts today's appointments currently missed: provisional,
+	// they become no-shows at accounting close unless the patient comes.
+	MissedNow        int              `json:"missedNow"`
+	NoShowsLastClose int              `json:"noShowsLastClose"`
+	Waiting          []WaitingPatient `json:"waiting"` // in arrival order
+}
+
+// Patient status keys for lists.
+const (
+	PatientBooked      = "booked"
+	PatientCancelled   = "cancelled"
+	PatientWaiting     = "waiting"
+	PatientMissed      = "missed"
+	PatientNoShow      = "no_show"
+	PatientRescheduled = "rescheduled"
+	PatientLeft        = "left"
+	PatientUnseen      = "unseen"
+	PatientSentToBook  = "booked_later" // walk-in given an appointment instead
+	PatientLost        = "lost"
+)
+
+// PatientRow is one patient on a day's list: an appointment for that day or
+// a walk-in that day.
+type PatientRow struct {
+	Patient     string `json:"patient"`
+	Order       string `json:"order"`
+	Appointment string `json:"appointment,omitempty"`
+	Visit       string `json:"visit,omitempty"`
+	Modality    string `json:"modality"`
+	ExamName    string `json:"examName"`
+	Priority    string `json:"priority"`
+	WalkIn      bool   `json:"walkIn"`
+	ApptTime    string `json:"apptTime,omitempty"`
+	Arrived     string `json:"arrived,omitempty"`
+	Punctuality string `json:"punctuality,omitempty"` // "12m early", "on time", "9m late"
+	WaitedMin   int64  `json:"waitedMin"`             // so far, or until the visit ended
+	Status      string `json:"status"`                // a Patient* key
+	StatusText  string `json:"statusText"`
+}
+
+// JourneyStep is one observed step of a patient's journey.
+type JourneyStep struct {
+	Time   string `json:"time"` // practice-local ISO-8601; empty when unknown
+	Label  string `json:"label"`
+	Detail string `json:"detail"`
+	Done   bool   `json:"done"` // false for a step still ahead (a pending appointment)
+}
+
+// Journey is one patient's observable history.
+type Journey struct {
+	Patient  string        `json:"patient"`
+	Order    string        `json:"order"`
+	Exam     string        `json:"exam"`
+	ExamName string        `json:"examName"`
+	Modality string        `json:"modality"`
+	Priority string        `json:"priority"`
+	Source   string        `json:"source"`
+	WalkIn   bool          `json:"walkIn"`
+	Status   string        `json:"status"`
+	Steps    []JourneyStep `json:"steps"`
 }

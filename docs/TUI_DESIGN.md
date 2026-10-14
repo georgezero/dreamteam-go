@@ -293,6 +293,21 @@ Journey (one patient, booking to payment):
 Only observed facts appear (no "will be paid on…", no sampled durations before
 they happen).
 
+As built in V0.1 step 7, `p` opens the list for a day: every appointment
+booked for it (time order, cancelled included) and every walk-in. Arrival
+shows the actual time and, when the patient was more than 5 minutes off, the
+offset. Waited runs to now, or to when the visit ended. `tab` cycles the
+filters: all, waiting, missed / no-show, left / unseen, walk-ins. `←→` pages
+days and `enter` opens the journey: ordered (or walked in), booked, missed
+(provisional), arrived and how early or late, waiting, left, sent home,
+no-show, rescheduled, lost. Nothing is shown before it happens: no expected
+arrival, no-show odds or patience. The dashboard has a **PATIENT FLOW**
+panel. It shows who is waiting now by modality and the longest wait, the
+no-shows at the last close, and today's arrivals, late arrivals, walk-ins,
+walk-ins who left, provisional misses and patients sent home unseen. Each
+room line shows how many patients are waiting for it. The top bar shows the
+version (`DREAMTEAM v0.1.0-dev.N`).
+
 ### 4.5 Staff
 
 ```
