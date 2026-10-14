@@ -7,6 +7,54 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Step 8 remediation — review findings 1–10 (v0.1.0-dev.8.1)
+
+The step 8 review (`docs/reviews/step-08-astra-review.md`, gpt-6-astra
+at high reasoning) found 10 defects, all confirmed. For each, a regression
+test reproducing the reviewer's scenario was written first and run against
+the unfixed code (`ee26417`), then the fix was made and the same test
+rerun. Tests are in `internal/sim/regress_test.go`, with fixtures in
+`internal/sim/testdata/micro-*.json`.
+
+| # | Defect | Regression test | Before (on `ee26417`) | After | Resolution |
+|---|---|---|---|---|---|
+| 1 | Held radiologist released while supervising; colleague kept past her cap | `TestRegress01RadiologistHandoverCap` | FAIL: Dr. Bo overtime 0s (want 33m), Dr. Rae 3m (want 0, cap 09:30) | PASS | The supervising radiologist is recorded at exam start and stays until the exam ends. A waiting contrast patient keeps a radiologist only if she could supervise in time and no on-site colleague on regular duty could. New invariant: every contrast exam has its supervisor on duty, on site, within cap. |
+| 2 | Held employee kept past usefulness and cap (no wake) | `TestRegress02HeldPastUsefulnessAndCap` | FAIL: Tess overtime 45m, want 0 | PASS | "Needed" now uses the patient's earliest possible start and the full remaining task. A single deadline wake fires when a held employee stops being useful or a patient stops being servable. |
+| 3 | Desk staff who can't fit a registration block self-registration; patient stranded | `TestRegress03DeskCannotBlockSelfRegistration` | FAIL: panic, 1 visit still on site at accounting close | PASS | Desk and ops staff block self-registration only while on regular duty and able to fit a registration. They never start registrations after shift end. The deadline wake covers the moment they stop fitting. |
+| 4 | Last technologist released while their patient is registering | `TestRegress04HoldForRegisteringPatient` | FAIL: patient rescheduled "no XR technologist for the rest of today" | PASS | Registering patients count as outstanding for hold-over. |
+| 5 | Cap at midnight: documentation ends at 00:00, after day start; overtime lost | `TestRegress05MidnightBoundary` | FAIL: overtime 0m recorded, want 15m | PASS (scenario now rejected: cap must end by accounting close) | Day boundary: shift start + max hours must be ≤ 23:59:59. Accounting close sends home anyone past shift end (overtime booked to that day) and fails loudly if anyone is busy. The tradeoff against carrying work across midnight is documented in SIMULATION_DESIGN §6.9. |
+| 6 | FirstFit skipped an earlier preferred slot in a later room | `TestRegress06FirstFitPreferredAcrossRooms` | FAIL: booked room 0 at 15:00, want room 2 at 13:00 | PASS | The early exit compares any-window and preferred candidates separately. |
+| 7 | Shared capacity checked only at slot start | `TestRegress07SharedCapacityAcrossSlot` | FAIL: XR booked 09:00 on day 7 although its technologist is booked in CT 09:30–10:00 | PASS (XR goes to the next free day) | Slot technologist sets cover the whole slot. `sharedFree` checks every constant-coverage stretch of the slot. |
+| 8 | Opening schedules bypassed shared capacity | `TestRegress08OpeningRespectsSharedCapacity` | FAIL: no validation error | PASS | `sim.CheckOpening` books the opening schedule in order under the same rules, and scenario validation reports problems by JSON path. The mini opening Tuesday moved two CT appointments (08:00 → 09:15, 09:00 → 11:00), and `micro-shared.json` now alternates rooms. |
+| 9 | A second break overwrote a deferred first break | `TestRegress09DeferredBreaksDoNotOverwrite` | FAIL: break taken 15m, want 30m | PASS | A break falling due while busy or on break waits its turn after the current one. An older waiting break is skipped and counted, never silently dropped. |
+| 10 | Negative wait for patients not yet imaged | `TestRegress10WaitWhileRegistering` | FAIL: registering, waited -480 min | PASS | Waited runs to now while waiting, to exam start once imaged, and to departure otherwise. |
+
+**Missing-wake detection.** `TestRegressOutcomeIndependentOfUnrelatedEvents`
+reruns ten micro practices with no-op events (handled, so dispatch runs)
+every 7 minutes, and with stale events. On `ee26417` four of them changed
+outcome (`micro-cap`, `micro-contrast-cap`, `micro-cap-wake`,
+`micro-desk-cap`). After the fixes none do. A four-day version on the full
+mini practice with invariants on (`TestRegressMiniUnaffectedByUnrelatedEvents`)
+passes. It also passed on `ee26417`: the mini practice rarely reaches these
+edges, which is why the micro fixtures exist.
+
+**Expected changes to existing tests.** In `TestCoverageExhaustedReschedules`
+the patient is now rescheduled at 09:09:01, the second their last feasible
+start passes (cap 09:30 minus 21 min). Before, it happened at the next
+unrelated event (09:14). The contrast hold-over now logs "supervising a
+contrast exam". `TestSharedTechnologistContention` samples at 08:20 because
+its bookings now alternate rooms.
+
+**Verification.** The full suite passes. That covers the step 8 closing
+tests (acceptance criteria rechecked: patients served after scheduled
+close, required overtime costed, explicit coverage reschedules, contrast
+after hours, operational close after scheduled close), month-long
+invariants, minute-by-minute chunking, and identical results across speeds
+and event budgets. 180 days of the mini practice take 1.4–2.0 s on the
+loaded Pi (MEASUREMENTS.md, step 11 risk).
+
+---
+
 ## Step 8 — Registration, imaging, overtime and closing rules (v0.1.0-dev.8)
 
 **Planning changes first** (your decision): scheduled closing time no

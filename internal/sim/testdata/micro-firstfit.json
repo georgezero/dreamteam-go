@@ -1,0 +1,72 @@
+{
+ "extends": "micro-base.json",
+ "hours": {
+  "Tue": [
+   "08:00",
+   "16:00"
+  ]
+ },
+ "rooms": [
+  {
+   "id": "R3",
+   "modality": "XR",
+   "name": "X-ray 2"
+  }
+ ],
+ "employees": [
+  {
+   "id": "T1",
+   "roster": {
+    "Tue": {
+     "start": "08:00",
+     "end": "16:00",
+     "covers": [
+      {
+       "room": "R3"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "id": "T2",
+   "roster": null
+  }
+ ],
+ "templates": {
+  "R1": [
+   {
+    "days": [
+     "Tue"
+    ],
+    "slots": [
+     {
+      "start": "08:00",
+      "lenMin": 15,
+      "category": "XR_15"
+     },
+     {
+      "start": "15:00",
+      "lenMin": 15,
+      "category": "XR_15"
+     }
+    ]
+   }
+  ],
+  "R2": [],
+  "R3": [
+   {
+    "days": [
+     "Tue"
+    ],
+    "slots": [
+     {
+      "start": "13:00",
+      "lenMin": 15,
+      "category": "XR_15"
+     }
+    ]
+   }
+  ]
+ }
+}

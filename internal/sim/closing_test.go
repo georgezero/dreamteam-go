@@ -116,16 +116,17 @@ func TestRequiredOvertimeCost(t *testing.T) {
 	}
 }
 
-// With a 2-hour cap (07:30–09:30) P4 cannot be finished safely: from 09:14
-// (P3's exam over) an exam plus documentation would run past 09:30. P4 is
-// rescheduled then, with the reason, and Tess goes home after documenting
-// P3 at 09:15 instead of working toward her cap.
+// With a 2-hour cap (07:30–09:30) P4 cannot be finished safely: the last
+// start that fits an exam plus documentation (21 min) is 09:09. One second
+// later a deadline wake reschedules P4 with the reason (not at whatever
+// unrelated event comes next), and Tess goes home after documenting P3 at
+// 09:15 instead of working toward her cap.
 func TestCoverageExhaustedReschedules(t *testing.T) {
 	w, day := micro(t, "micro-cap.json")
 	w.Engine().RunUntil(at(day, "12:00"), nil)
 	vs := w.Visits()
 	last := vs[len(vs)-1]
-	if last.State != "rescheduled" || last.EndedAt != at(day, "09:14") {
+	if last.State != "rescheduled" || last.EndedAt != at(day, "09:09:01") {
 		t.Fatalf("P4: %+v", last)
 	}
 	j, _ := w.Journey("P00004")
@@ -138,11 +139,13 @@ func TestCoverageExhaustedReschedules(t *testing.T) {
 	}
 }
 
-// One technologist shared between XR and CT runs one exam at a time: while
-// she scans in one room the other is idle with its patient waiting.
+// One technologist shared between XR and CT runs one exam at a time. The
+// bookings alternate rooms (shared capacity), but exams run longer than the
+// 15-min slots, so at 08:20 she is scanning XR while the CT patient (here
+// since 08:15) waits in the idle CT room.
 func TestSharedTechnologistContention(t *testing.T) {
 	w, day := micro(t, "micro-shared.json")
-	w.Engine().RunUntil(at(day, "08:10"), nil)
+	w.Engine().RunUntil(at(day, "08:20"), nil)
 	o := w.Observe(0)
 	occupied, waitingRoom := 0, ""
 	for _, r := range o.Rooms {
@@ -153,7 +156,7 @@ func TestSharedTechnologistContention(t *testing.T) {
 		}
 	}
 	if occupied != 1 || waitingRoom == "" || !o.Rooms[0].Shared {
-		t.Fatalf("at 08:10: %d rooms scanning, idle %q, shared %v", occupied, waitingRoom, o.Rooms[0].Shared)
+		t.Fatalf("at 08:20: %d rooms scanning, idle %q, shared %v", occupied, waitingRoom, o.Rooms[0].Shared)
 	}
 	w.Engine().RunUntil(at(day, "12:00"), nil)
 	type iv struct{ from, to simtime.Time }
@@ -189,7 +192,7 @@ func TestContrastSupervisionAfterHours(t *testing.T) {
 			t.Fatalf("%s ended %s", v.ID, v.State)
 		}
 	}
-	if !logHas(w, "Dr. Rae stays past shift end: 2 contrast patients need an on-site radiologist") ||
+	if !logHas(w, "Dr. Rae stays past shift end: supervising a contrast exam") ||
 		!logHas(w, "Dr. Rae off duty after 35m overtime") {
 		for _, e := range w.Observe(2000).RecentLog {
 			t.Log(e.Time[11:16], e.Text)

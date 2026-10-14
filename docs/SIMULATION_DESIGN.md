@@ -779,7 +779,11 @@ Booking policy `FirstFit` (default):
    technologists also staff another room then is bookable only while fewer
    overlapping appointments in those rooms hold them than there are
    technologists. One technologist covering XR and CT can't be booked in
-   both rooms for the same quarter-hour. The schedule shows such slots as
+   both rooms for the same quarter-hour. The check runs over every stretch
+   of the slot with constant coverage, using the technologists rostered to
+   the room at any time during each slot, so a slot that crosses a cover
+   window's start is still checked. Opening schedules are validated by the
+   same rule, in order (`sim.CheckOpening`). The schedule shows such slots as
    `¦` (shared technologist booked in the other room). Without this rule the
    templates promised two rooms' worth of work to one person, and waits
    reached 4–6 hours.
@@ -1074,8 +1078,10 @@ for every day of the fortnight; about 74% of open room-hours are staffed.
   time** whatever the weekly total. It is costed at the rate in force (×1.5
   once the week passes 40 paid hours, which a full default week already
   reaches) and recorded per employee and day (§6.9).
-* Breaks: a break due while the employee is busy is deferred until the task
-  ends, by at most 60 min, and only if it still ends before the shift does.
+* Breaks: a break due while the employee is busy (or still on an earlier,
+  deferred break) waits its turn until they are free, by at most 60 min,
+  and only if it still ends before the shift does. If another break falls
+  due while one is still waiting, the older one is skipped and counted.
   Otherwise it is skipped (counted, and paid as worked time). Held-over
   staff take no breaks.
 
@@ -1159,6 +1165,42 @@ close (§3.4.2).
   accepts none.
 * Patients are never silently discarded. Every admitted visit ends
   Departed, LeftWithoutExam (walk-in patience) or Rescheduled with a reason.
+
+**Who counts as needed** (revised after the step-8 review):
+* A technologist past shift end is needed for an outstanding patient
+  (arrived, *registering* or waiting) only if they could still finish them
+  in time. That is the patient's earliest possible start (now, or when they
+  become due if early starts are off, not before opening) plus remaining
+  registration, exam and documentation at p100, within the technologist's
+  cap.
+* The radiologist who **supervises a contrast exam** is recorded at exam
+  start (the first on-site radiologist whose cap covers the exam's p100 room
+  time). She stays until it ends, even if a colleague is on regular duty: a
+  colleague can't take over mid-exam without her own cap being checked. For
+  waiting contrast patients a radiologist is needed only if she could
+  supervise them in time and no on-site colleague on regular duty could.
+* Desk staff and the operations manager start no new registrations after
+  their shift end. They block technologist self-registration only while
+  they are on regular duty and can still fit a registration before their
+  cap.
+
+**Deadline wake.** Some of these conditions change with time alone: a
+patient's last feasible start passes, a held employee stops being useful, a
+desk person can no longer fit a registration. Each dispatch therefore queues
+one `Deadline` event at the earliest such moment (generation-cancelled like
+room wakes). Outcomes never wait for an unrelated event, and there is no
+periodic polling. A test proves it: injecting no-op events that run dispatch
+every 7 minutes leaves every outcome unchanged.
+
+**Day boundary (tradeoff).** All of a day's work must end by accounting
+close: a shift's start + `MaxShiftHours` must be at or before 23:59:59
+(validated). Accounting close sends home anyone past shift end, so their
+overtime and paid time belong to that day, and it fails loudly if anyone is
+still busy or on regular duty. We chose this over carrying tasks across
+midnight because every piece of day state (shifts, closing phase, today's
+counters, accounting close, payroll) is day-scoped. Cross-midnight work
+would need a redesign for overnight operations, which V0.1 doesn't have.
+It bans no work before midnight.
 
 **Walk-in patience** keeps running after scheduled close, so a walk-in can
 still leave. Patience is checked once, at its deadline. A walk-in waiting

@@ -103,3 +103,66 @@ func (w *World) PushForTest(at simtime.Time, class Class, kind string, a int64) 
 	k := map[string]Kind{"arrive": kindArrive, "grace": kindGrace, "cancel": kindCancel, "patience": kindPatience}[kind]
 	w.eng.Push(Event{At: at, Class: class, Kind: k, A: a})
 }
+
+// TryBook books a test order (exam code, preferred window, earliest day
+// index) through FirstFit and returns the room and slot start it got.
+func (w *World) TryBook(exam string, window Window, earliest int64) (room int, from simtime.Duration, ok bool) {
+	_, room, from, ok = w.TryBookDay(exam, window, earliest)
+	return room, from, ok
+}
+
+// TryBookDay is TryBook, also returning the day index booked.
+func (w *World) TryBookDay(exam string, window Window, earliest int64) (day int64, room int, from simtime.Duration, ok bool) {
+	st := w.st
+	xi := -1
+	for i, x := range st.cfg.Catalog {
+		if x.Code == exam {
+			xi = i
+		}
+	}
+	st.dem.patients++
+	oi := len(st.dem.orders)
+	st.dem.orders = append(st.dem.orders, order{key: originKey{-2, -2, -2, int64(oi)}, patient: st.dem.patients,
+		source: -1, exam: xi, window: window, received: w.eng.Now(), earliest: earliest, tolerance: 1000, appt: -1, visit: -1})
+	pref, any, hasPref, hasAny := st.firstFit(&st.dem.orders[oi], earliest, w.eng.Now())
+	pick := any
+	switch {
+	case hasPref:
+		pick = pref
+	case !hasAny:
+		return 0, 0, 0, false
+	}
+	st.book(w.eng, oi, pick, true)
+	return pick.day, pick.room, st.slotAt(pick).From, true
+}
+
+// StaffInfo is an employee's day so far.
+type StaffInfo struct {
+	Name       string
+	OnDuty     bool
+	Held       bool
+	BreakTaken simtime.Duration
+	Overtime   simtime.Duration // booked when they went home
+}
+
+// Staff lists every employee.
+func (w *World) Staff() []StaffInfo {
+	var out []StaffInfo
+	for _, e := range w.st.emps {
+		out = append(out, StaffInfo{Name: e.cfg.Name, OnDuty: e.status != offDuty, Held: e.held,
+			BreakTaken: e.breakTaken, Overtime: e.otToday})
+	}
+	return out
+}
+
+// PushLiveNoise queues an event that is handled (so dispatch runs) but
+// changes nothing: a roster edge for employee 0 in their current
+// generation. Outcomes must not depend on such unrelated events.
+func (w *World) PushLiveNoise(at simtime.Time) {
+	w.eng.Push(Event{At: at, Class: ClassCapacityUp, Kind: kindRosterEdge, Gen: w.st.emps[0].gen, A: 0})
+}
+
+// PushStaleNoise queues an event that is stale on arrival.
+func (w *World) PushStaleNoise(at simtime.Time) {
+	w.eng.Push(Event{At: at, Class: ClassDeadline, Kind: kindWake, Gen: 1 << 31, A: 0})
+}

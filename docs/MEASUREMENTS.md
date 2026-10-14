@@ -58,3 +58,8 @@ or not at all (hash structured fields), hash the warm-up log per day, and
 cache the built start state per scenario and seed if it is still over.
 The load from other processes during these runs inflates the figures; a
 quiet-machine measurement goes with step 11.
+
+## 2026-10-14 — V0.1 step 8 remediation (same machine, load average ≈ 3.7)
+
+`go test ./internal/sim -run X -bench Mini180 -benchtime 3x -count 2`: 1.4–2.0 s/op. Roughly
+unchanged; the deadline wake adds a scan of on-site patients and staff per dispatch.

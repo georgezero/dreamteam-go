@@ -54,6 +54,7 @@ type visit struct {
 	examStart, examEnd simtime.Time
 	afterHours         bool   // exam started after scheduled close
 	reason             string // why it was rescheduled
+	supervisor         int    // radiologist supervising a contrast exam; -1 if none
 }
 
 // flowCounts are patient-flow and operations counters.
@@ -149,7 +150,7 @@ func (st *state) arrive(e *Engine, ai int) {
 		st.reschedule(e, ai, who+": arrived after closing")
 		return
 	}
-	if ok, why := st.servable(o.exam, e.Now()); !ok {
+	if ok, why := st.servable(o.exam, st.arrivalEarliest(ai), st.newPatientTask(o.exam, false)); !ok {
 		st.reschedule(e, ai, who+": "+why)
 		return
 	}
@@ -200,7 +201,7 @@ func punctuality(d simtime.Duration) string {
 func (st *state) openVisit(e *Engine, oi, ai int, late simtime.Duration, attempt int64) int {
 	vi := len(st.dem.visits)
 	st.dem.visits = append(st.dem.visits, visit{order: oi, appt: ai, arrived: e.Now(), late: late,
-		attempt: attempt, regBy: -1, examBy: -1, room: -1})
+		attempt: attempt, regBy: -1, examBy: -1, room: -1, supervisor: -1})
 	st.dem.waiting = append(st.dem.waiting, vi)
 	ds := st.dem.days[st.day]
 	ds.visits = append(ds.visits, vi)
@@ -235,6 +236,20 @@ func plural(n int) string {
 func (st *state) accountingClose(e *Engine) {
 	if len(st.dem.waiting) > 0 {
 		fail("%d visits still on site at accounting close (first %s)", len(st.dem.waiting), visitID(st.dem.waiting[0]))
+	}
+	// The day's work ends here: shift caps fall by 23:59:59 (validated), so
+	// nobody can still be busy. Anyone past shift end goes home now, so
+	// their overtime and paid time belong to this day.
+	for i := range st.emps {
+		emp := &st.emps[i]
+		switch {
+		case emp.status == busy:
+			fail("%s still busy at accounting close", emp.cfg.Name)
+		case emp.status != offDuty && emp.over:
+			st.goOff(e, i)
+		case emp.status != offDuty:
+			fail("%s still on regular duty at accounting close", emp.cfg.Name)
+		}
 	}
 	n := 0
 	for _, ai := range st.dem.days[st.day].appts {
@@ -319,7 +334,7 @@ func (st *state) walkIn(e *Engine, day, blk, k int64) {
 	st.dem.flowTotal.walkIns++
 	head := fmt.Sprintf("Walk-in %s %s", patientID(o.patient), st.examLabel(exam))
 
-	ok, why := st.servable(exam, e.Now())
+	ok, why := st.servable(exam, e.Now(), st.newPatientTask(exam, true))
 	if st.cfg.Policies.WalkIn == "schedule_later" {
 		ok, why = false, "walk-in policy: schedule later"
 	}
@@ -406,4 +421,28 @@ func (st *state) checkFlow() error {
 		}
 	}
 	return nil
+}
+
+// newPatientTask is the longest a newly arriving patient can occupy a
+// technologist (self-registration plus exam and documentation, p100).
+func (st *state) newPatientTask(xi int, walkIn bool) simtime.Duration {
+	b := &st.cfg.Behavior
+	q := b.RegScheduled
+	if walkIn {
+		q = b.RegWalkIn
+	}
+	return st.cfg.Catalog[xi].MaxTask() + simtime.Duration(q.Max()*b.RegSelfBP/10_000)
+}
+
+// arrivalEarliest is the earliest an arriving scheduled patient's exam
+// could start (due time when early starts are off, not before opening).
+func (st *state) arrivalEarliest(ai int) simtime.Time {
+	at := st.now
+	if !st.cfg.Policies.StartEarly {
+		at = max(at, st.apptStart(ai).Add(-st.cfg.Policies.EarlyStart))
+	}
+	if h := st.plan.Hours; h != nil && !st.open && !st.closing {
+		at = max(at, st.cal.At(st.day, h.From))
+	}
+	return at
 }

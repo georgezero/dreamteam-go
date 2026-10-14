@@ -119,7 +119,7 @@ func TestValidationErrors(t *testing.T) {
 		{`{"policies": {"contrastSupervision": "virtual"}}`, "policies.contrastSupervision", "not one of"},
 		{`{"policies": {"bookingHorizonDays": 0}}`, "policies.bookingHorizonDays", "outside"},
 		{`{"policies": {"overtimeFactorBP": 5000}}`, "policies.overtimeFactorBP", "outside"},
-		{`{"policies": {"maxShiftHours": 16}, "employees": [{"id": "E08", "roster": {"Tue": {"start": "13:00"}}}]}`, "employees[7].roster.Tue", "past midnight"},
+		{`{"policies": {"maxShiftHours": 16}, "employees": [{"id": "E08", "roster": {"Tue": {"start": "13:00"}}}]}`, "employees[7].roster.Tue", "accounting close"},
 		{`{"behavior": {"registration": {"selfRegFactorBP": 1}}}`, "behavior.registration", "must be 10000–30000"},
 		{`{"catalog": [{"code": "XR_X", "name": "x", "modality": "XR", "category": "XR_15", "techExtraSec": {"p0": 1, "p100": 2}}]}`, "catalog[0].roomTimeSec", "required"},
 		{`{"behavior": {"arrivalClasses": [{"weightBP": 5000, "fromMin": -10, "toMin": 0}]}}`, "behavior.arrivalClasses", "sum to 5000"},

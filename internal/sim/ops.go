@@ -28,6 +28,7 @@ func (st *state) Dispatch(e *Engine) {
 	st.restaff(e.Now())
 	st.operationalClose(e)
 	st.scheduleWakes(e)
+	st.scheduleDeadline(e)
 }
 
 // --- registration ---------------------------------------------------------
@@ -79,9 +80,12 @@ func (st *state) matchRegistration(e *Engine) {
 	if len(queue) == 0 {
 		return
 	}
+	// Desk-capable staff block self-registration only while they can still
+	// register someone: on regular duty (desk staff are never held over)
+	// and with room before their cap for a registration.
 	deskOnDuty := false
 	for i := range st.emps {
-		if st.emps[i].status != offDuty && deskLevel(st.emps[i].cfg) > DeskClosed {
+		if st.deskCanRegister(i) {
 			deskOnDuty = true
 		}
 	}
@@ -100,7 +104,7 @@ func (st *state) matchRegistration(e *Engine) {
 		}{{DeskStaffed, 10_000}, {DeskOps, b.RegOpsBP}} {
 			for i := range st.emps {
 				emp := &st.emps[i]
-				if pick < 0 && emp.status == available && deskLevel(emp.cfg) == lv.level &&
+				if pick < 0 && emp.status == available && !emp.over && deskLevel(emp.cfg) == lv.level &&
 					st.fits(i, simtime.Duration(q.Max()*lv.factor/10_000)) {
 					pick, factor = i, lv.factor
 				}
@@ -131,6 +135,22 @@ func (st *state) matchRegistration(e *Engine) {
 		}
 		e.Push(Event{At: e.Now().Add(max(1, dur)), Class: ClassCompletion, Kind: kindRegEnd, A: int64(vi)})
 	}
+}
+
+// deskCanRegister reports whether desk-capable employee i is on regular
+// duty and could still fit a registration before their cap (now or after
+// their current task or break).
+func (st *state) deskCanRegister(i int) bool {
+	emp := &st.emps[i]
+	b := &st.cfg.Behavior
+	if emp.status == offDuty || emp.over || deskLevel(emp.cfg) == DeskClosed {
+		return false
+	}
+	longest := max(b.RegScheduled.Max(), b.RegWalkIn.Max())
+	if emp.cfg.Role == OpsManager {
+		longest = longest * b.RegOpsBP / 10_000
+	}
+	return st.now.Add(simtime.Duration(longest)) <= emp.capAt
 }
 
 // fits applies the admission rule (§6.4): a task may start only if it can
@@ -316,6 +336,9 @@ func (st *state) startExam(e *Engine, r, vi, t int) {
 	emp.status, emp.task, emp.taskVisit = busy, taskExam, vi
 	v.state, v.examBy, v.room, v.examStart = visitInExam, t, r, e.Now()
 	v.afterHours = !st.open
+	if x.Contrast {
+		v.supervisor = st.supervisor(x)
+	}
 	st.rooms[r].visit = vi
 	draw := rng.Hash(st.seed, "attempt.exam", o.key.keys(v.attempt)...)
 	dur := simtime.Duration(x.RoomTime.Sample(draw.Lane(0)))
@@ -357,7 +380,60 @@ func (st *state) examEnd(e *Engine, vi int) {
 
 // --- hold-over and coverage (§6.9) ----------------------------------------
 
-// neededFor says why employee i, past shift end, must stay ("" if not).
+// patientTask is the longest an outstanding patient can still occupy a
+// technologist: registration (if not done yet, at the self-registration
+// rate) plus the exam and documentation at p100.
+func (st *state) patientTask(vi int) simtime.Duration {
+	v := &st.dem.visits[vi]
+	o := &st.dem.orders[v.order]
+	x := &st.cfg.Catalog[o.exam]
+	d := x.MaxTask()
+	if v.state == visitArrived || v.state == visitRegistering {
+		q := st.cfg.Behavior.RegScheduled
+		if o.walkIn {
+			q = st.cfg.Behavior.RegWalkIn
+		}
+		d += simtime.Duration(q.Max() * st.cfg.Behavior.RegSelfBP / 10_000)
+	}
+	return d
+}
+
+// earliestStart is the earliest an outstanding patient's exam could start:
+// now, or when they become due if early starts are off, and not before
+// opening (§5.9).
+func (st *state) earliestStart(vi int) simtime.Time {
+	v := &st.dem.visits[vi]
+	at := st.now
+	if v.appt >= 0 && !v.afterGrace && !st.cfg.Policies.StartEarly && st.dem.orders[v.order].priority != Urgent {
+		at = max(at, st.apptStart(v.appt).Add(-st.cfg.Policies.EarlyStart))
+	}
+	if h := st.plan.Hours; h != nil && !st.open && !st.closing {
+		at = max(at, st.cal.At(st.day, h.From))
+	}
+	return at
+}
+
+// lastStart is the latest an outstanding patient's work could start with
+// employee i and still end by i's cap; ok is false if it never fits.
+func (st *state) lastStart(i, vi int) (simtime.Time, bool) {
+	emp := &st.emps[i]
+	last := emp.capAt.Add(-st.patientTask(vi))
+	return last, max(st.earliestStart(vi), emp.startAt) <= last
+}
+
+// outstanding reports whether visit vi still needs a technologist:
+// arrived, registering or waiting (not yet in the room).
+func (st *state) outstanding(vi int) bool {
+	s := st.dem.visits[vi].state
+	return s == visitArrived || s == visitRegistering || s == visitWaiting
+}
+
+// neededFor says why employee i, past shift end, must stay ("" if not):
+// a technologist while an outstanding patient for a room they kept can
+// still be done by them in time and no technologist on regular duty covers
+// that room; a radiologist while supervising a contrast exam, or while a
+// waiting contrast patient needs them and no on-site colleague on regular
+// duty could supervise instead (§6.9).
 func (st *state) neededFor(i int) string {
 	emp := &st.emps[i]
 	clock := simtime.ClockOf(st.now)
@@ -367,9 +443,8 @@ func (st *state) neededFor(i int) string {
 			m := st.cfg.Rooms[r].Modality
 			n := 0
 			for _, vi := range st.dem.waiting {
-				v := &st.dem.visits[vi]
-				x := &st.cfg.Catalog[st.dem.orders[v.order].exam]
-				if (v.state == visitArrived || v.state == visitWaiting) && x.Modality == m && st.fits(i, x.MaxTask()) {
+				x := &st.cfg.Catalog[st.dem.orders[st.dem.visits[vi].order].exam]
+				if _, ok := st.lastStart(i, vi); ok && st.outstanding(vi) && x.Modality == m {
 					n++
 				}
 			}
@@ -390,22 +465,36 @@ func (st *state) neededFor(i int) string {
 		if st.plan.Shifts[emp.shift].Remote {
 			return ""
 		}
+		for _, vi := range st.dem.waiting {
+			if v := &st.dem.visits[vi]; v.state == visitInExam && v.supervisor == i {
+				return "supervising a contrast exam"
+			}
+		}
 		n := 0
 		for _, vi := range st.dem.waiting {
-			if st.cfg.Catalog[st.dem.orders[st.dem.visits[vi].order].exam].Contrast {
+			x := &st.cfg.Catalog[st.dem.orders[st.dem.visits[vi].order].exam]
+			if !x.Contrast || !st.outstanding(vi) {
+				continue
+			}
+			start := st.earliestStart(vi)
+			if start.Add(simtime.Duration(x.RoomTime.Max())) > emp.capAt {
+				continue // she couldn't supervise it anyway
+			}
+			relieved := false
+			for j := range st.emps {
+				o := &st.emps[j]
+				if j != i && o.cfg.Role == Radiologist && o.status != offDuty && !o.over &&
+					!st.plan.Shifts[o.shift].Remote && start.Add(simtime.Duration(x.RoomTime.Max())) <= o.capAt {
+					relieved = true
+				}
+			}
+			if !relieved {
 				n++
 			}
 		}
-		if n == 0 {
-			return ""
+		if n > 0 {
+			return fmt.Sprintf("%d contrast patient%s need an on-site radiologist", n, plural(n))
 		}
-		for j := range st.emps {
-			o := &st.emps[j]
-			if j != i && o.cfg.Role == Radiologist && o.status != offDuty && !o.over && !st.plan.Shifts[o.shift].Remote {
-				return ""
-			}
-		}
-		return fmt.Sprintf("%d contrast patient%s need an on-site radiologist", n, plural(n))
 	}
 	return ""
 }
@@ -433,21 +522,23 @@ func (st *state) releaseHeld(e *Engine) {
 	}
 }
 
-// servable reports whether exam xi can still be done safely today: a
-// qualified technologist (on duty, held over, or starting later today)
-// could finish it within their cap and, for contrast, an on-site
-// radiologist could supervise within theirs. It returns a reason if not.
-func (st *state) servable(xi int, now simtime.Time) (bool, string) {
+// servable reports whether exam xi can still be done safely today for a
+// patient whose exam could start at the earliest at `from` and who needs
+// `task` of a technologist's time: a qualified technologist (on duty, held
+// over, or starting later today) could finish within their cap and, for
+// contrast, an on-site radiologist could supervise within theirs. It
+// returns a reason if not.
+func (st *state) servable(xi int, from simtime.Time, task simtime.Duration) (bool, string) {
 	x := &st.cfg.Catalog[xi]
 	qualified, fits := false, false
 	for i := range st.emps {
 		emp := &st.emps[i]
 		if emp.cfg.Role != Technologist || !emp.cfg.HasSkill(x.Modality) || emp.shift < 0 || emp.done ||
-			!st.mayStaff(i, x.Modality, now) {
+			!st.mayStaff(i, x.Modality, st.now) {
 			continue
 		}
 		qualified = true
-		fits = fits || max(now, emp.startAt).Add(x.MaxTask()) <= emp.capAt
+		fits = fits || max(from, emp.startAt).Add(task) <= emp.capAt
 	}
 	switch {
 	case !qualified:
@@ -461,11 +552,16 @@ func (st *state) servable(xi int, now simtime.Time) (bool, string) {
 	for i := range st.emps {
 		emp := &st.emps[i]
 		if emp.cfg.Role == Radiologist && emp.shift >= 0 && !emp.done && !st.plan.Shifts[emp.shift].Remote &&
-			max(now, emp.startAt).Add(simtime.Duration(x.RoomTime.Max())) <= emp.capAt {
+			max(from, emp.startAt).Add(simtime.Duration(x.RoomTime.Max())) <= emp.capAt {
 			return true, ""
 		}
 	}
 	return false, "no radiologist on site to supervise contrast for the rest of today"
+}
+
+// visitServable applies servable to an admitted patient.
+func (st *state) visitServable(vi int) (bool, string) {
+	return st.servable(st.dem.orders[st.dem.visits[vi].order].exam, st.earliestStart(vi), st.patientTask(vi))
 }
 
 // mayStaff reports whether technologist i (not gone home) staffs, or will
@@ -506,8 +602,7 @@ func (st *state) checkCoverage(e *Engine) {
 		if v.state != visitArrived && v.state != visitWaiting {
 			continue
 		}
-		o := &st.dem.orders[v.order]
-		if ok, why := st.servable(o.exam, e.Now()); !ok {
+		if ok, why := st.visitServable(vi); !ok {
 			st.rescheduleVisit(e, vi, why)
 		}
 	}
@@ -610,5 +705,87 @@ func (st *state) scheduleWakes(e *Engine) {
 			rm.wakeAt = next
 			e.Push(Event{At: next, Class: ClassDeadline, Kind: kindWake, Gen: rm.wakeGen, A: int64(r)})
 		}
+	}
+}
+
+// --- deadline wake (§3.4 rule 4, §6.9) -------------------------------------
+
+// scheduleDeadline queues one wake at the earliest future moment a
+// time-based condition changes with no event of its own:
+//   - a held employee stops being useful (an outstanding patient's last
+//     possible start with them passes);
+//   - a desk-capable employee can no longer fit a registration while
+//     patients wait to register (self-registration may then begin);
+//   - an outstanding patient stops being servable by anyone today.
+//
+// Without it, those changes would wait for an unrelated event, so outcomes
+// would depend on what else happens to occur (review finding 2).
+func (st *state) scheduleDeadline(e *Engine) {
+	next := simtime.Time(-1)
+	consider := func(t simtime.Time) {
+		if t > e.Now() && (next < 0 || t < next) {
+			next = t
+		}
+	}
+	waitingToRegister := false
+	for _, vi := range st.dem.waiting {
+		if !st.outstanding(vi) {
+			continue
+		}
+		if st.dem.visits[vi].state == visitArrived {
+			waitingToRegister = true
+		}
+		// Latest start over every qualified technologist who may still
+		// staff the modality: one second later the patient is unservable.
+		o := &st.dem.orders[st.dem.visits[vi].order]
+		m := st.cfg.Catalog[o.exam].Modality
+		latest := simtime.Time(-1)
+		for i := range st.emps {
+			emp := &st.emps[i]
+			if emp.cfg.Role != Technologist || !emp.cfg.HasSkill(m) || emp.shift < 0 || emp.done || !st.mayStaff(i, m, st.now) {
+				continue
+			}
+			if last, ok := st.lastStart(i, vi); ok && last > latest {
+				latest = last
+			}
+		}
+		if x := &st.cfg.Catalog[o.exam]; x.Contrast && latest >= 0 {
+			// …and for contrast, the latest start an on-site radiologist
+			// could still supervise.
+			radLatest := simtime.Time(-1)
+			for i := range st.emps {
+				emp := &st.emps[i]
+				if emp.cfg.Role == Radiologist && emp.shift >= 0 && !emp.done && !st.plan.Shifts[emp.shift].Remote {
+					radLatest = max(radLatest, emp.capAt.Add(-simtime.Duration(x.RoomTime.Max())))
+				}
+			}
+			latest = min(latest, radLatest)
+		}
+		if latest >= 0 {
+			consider(latest.Add(1))
+		}
+	}
+	for i := range st.emps {
+		emp := &st.emps[i]
+		if emp.held {
+			for _, vi := range st.dem.waiting {
+				if last, ok := st.lastStart(i, vi); ok && st.outstanding(vi) {
+					consider(last.Add(1))
+				}
+			}
+		}
+		if waitingToRegister && st.deskCanRegister(i) {
+			b := &st.cfg.Behavior
+			longest := max(b.RegScheduled.Max(), b.RegWalkIn.Max())
+			if emp.cfg.Role == OpsManager {
+				longest = longest * b.RegOpsBP / 10_000
+			}
+			consider(emp.capAt.Add(-simtime.Duration(longest)).Add(1))
+		}
+	}
+	if next >= 0 && next != st.deadlineAt {
+		st.deadlineGen++
+		st.deadlineAt = next
+		e.Push(Event{At: next, Class: ClassDeadline, Kind: kindDeadline, Gen: st.deadlineGen})
 	}
 }

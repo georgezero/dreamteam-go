@@ -1,0 +1,59 @@
+{
+ "extends": "micro-base.json",
+ "hours": {
+  "Tue": [
+   "12:00",
+   "23:45"
+  ]
+ },
+ "behavior": {
+  "arrivalClasses": [
+   {
+    "name": "fixed",
+    "weightBP": 10000,
+    "fromMin": 6,
+    "toMin": 6
+   }
+  ]
+ },
+ "employees": [
+  {
+   "id": "T1",
+   "roster": {
+    "Tue": {
+     "start": "12:00",
+     "end": "23:45"
+    }
+   }
+  },
+  {
+   "id": "T2",
+   "roster": null
+  }
+ ],
+ "templates": {
+  "R1": [
+   {
+    "days": [
+     "Tue"
+    ],
+    "slots": [
+     {
+      "start": "23:30",
+      "lenMin": 15,
+      "category": "XR_15"
+     }
+    ]
+   }
+  ],
+  "R2": []
+ },
+ "openingSchedule": [
+  {
+   "time": "23:30",
+   "room": "R1",
+   "exam": "XR_A",
+   "source": "S1"
+  }
+ ]
+}

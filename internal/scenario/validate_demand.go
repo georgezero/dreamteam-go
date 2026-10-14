@@ -416,6 +416,17 @@ func (c *checker) openingSlots(cfg *sim.Config) {
 			c.fail(p, "slot is not bookable (%s)", why)
 		}
 	}
+	if len(c.issues) > 0 {
+		return
+	}
+	// The same booking rules as any appointment, in order: shared
+	// technologists can't be double-booked.
+	problems := sim.CheckOpening(cfg)
+	for i := range cfg.Opening {
+		if why, ok := problems[i]; ok {
+			c.fail(fmt.Sprintf("openingSchedule[%d]", i), "%s", why)
+		}
+	}
 }
 
 // arrivals validates no-shows, arrival classes, walk-in patience and the

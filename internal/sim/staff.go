@@ -127,7 +127,12 @@ func (st *state) staffEvent(e *Engine, ev Event) {
 		// instant's coverage checks whether they stay or go home.
 	case kindBreakStart:
 		b := s.Breaks[ev.B]
-		if emp.status == busy {
+		if emp.status == busy || emp.status == onBreak {
+			// Busy, or still on an earlier (deferred) break: this one waits
+			// its turn. An older break still waiting is skipped, counted.
+			if emp.breakDue >= 0 {
+				st.skipBreak(e, i)
+			}
 			emp.breakDue, emp.breakDueAt = int(ev.B), e.Now()
 			return
 		}
@@ -136,6 +141,7 @@ func (st *state) staffEvent(e *Engine, ev Event) {
 		emp.status = available
 		emp.breakTaken += e.Now().Sub(emp.breakFrom)
 		st.emit(e.Now(), api.Info, "staff", name+" back from break")
+		st.takeDueBreak(e, i)
 	case kindBlockStart:
 		emp.reading = true
 	case kindBlockEnd:
@@ -169,6 +175,14 @@ func (st *state) skipBreak(e *Engine, i int) {
 func (st *state) taskDone(e *Engine, i int) {
 	emp := &st.emps[i]
 	emp.status, emp.task, emp.taskVisit = available, taskNone, -1
+	st.takeDueBreak(e, i)
+}
+
+// takeDueBreak starts a deferred break for a newly free employee if it is
+// still within the deferral limit and ends before the shift does, and
+// skips it (counted) otherwise.
+func (st *state) takeDueBreak(e *Engine, i int) {
+	emp := &st.emps[i]
 	if emp.breakDue >= 0 {
 		b := st.plan.Shifts[emp.shift].Breaks[emp.breakDue]
 		length := b.To - b.From
@@ -420,6 +434,15 @@ func (st *state) checkStaffing() error {
 			v := &st.dem.visits[rm.visit]
 			if v.state != visitInExam || v.room != r || st.emps[v.examBy].task != taskExam || st.emps[v.examBy].taskVisit != rm.visit {
 				return fmt.Errorf("room %s occupancy inconsistent with %s", rm.cfg.ID, visitID(rm.visit))
+			}
+			if st.cfg.Catalog[st.dem.orders[v.order].exam].Contrast {
+				if v.supervisor < 0 {
+					return fmt.Errorf("%s contrast exam without a supervisor", visitID(rm.visit))
+				}
+				rad := &st.emps[v.supervisor]
+				if rad.status == offDuty || st.plan.Shifts[rad.shift].Remote || st.now > rad.capAt {
+					return fmt.Errorf("%s contrast exam: %s not on duty on site within cap", visitID(rm.visit), rad.cfg.Name)
+				}
 			}
 		case rm.visit >= 0:
 			return fmt.Errorf("room %s has a visit but is %d", rm.cfg.ID, rm.state)

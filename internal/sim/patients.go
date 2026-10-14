@@ -148,16 +148,19 @@ func (st *state) fillVisit(r *api.PatientRow, vi int, now simtime.Time) {
 	v := &st.dem.visits[vi]
 	r.Visit = visitID(vi)
 	r.Arrived = st.cal.Clock(v.arrived)
+	// Waited: until now while still waiting (to register, at the desk, or
+	// for the exam); until the exam started once imaged; until they left or
+	// were rescheduled otherwise.
 	end := now
-	if v.state != visitWaiting {
+	switch v.state {
+	case visitInExam, visitDone:
+		end = v.examStart
+	case visitLeft, visitRescheduled:
 		end = v.endedAt
 	}
 	r.WaitedMin = int64(end.Sub(v.arrived) / simtime.Minute)
 	if v.appt >= 0 {
 		r.Punctuality = punctuality(v.late)
-	}
-	if v.state >= visitInExam && v.state != visitLeft && v.state != visitRescheduled {
-		r.WaitedMin = int64(v.examStart.Sub(v.arrived) / simtime.Minute)
 	}
 	switch v.state {
 	case visitArrived:

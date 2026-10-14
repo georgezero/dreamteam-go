@@ -270,8 +270,8 @@ func (c *checker) shift(sp string, s *Shift, e *sim.EmployeeConfig, rooms map[st
 	if t.To-t.From > maxShift {
 		c.fail(sp, "shift %s–%s is longer than maxShiftHours", s.Start, s.End)
 	}
-	if t.From+maxShift > simtime.Day {
-		c.fail(sp, "shift start %s + maxShiftHours runs past midnight (hold-over must end the same day)", s.Start)
+	if t.From+maxShift >= simtime.Day {
+		c.fail(sp, "shift start %s + maxShiftHours must end by accounting close (23:59:59): work may not cross midnight", s.Start)
 	}
 	switch s.Weeks {
 	case "":

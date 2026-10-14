@@ -34,6 +34,9 @@ type state struct {
 	// tasks remain; opClosedAt: today's operational close (0 if not yet).
 	closing    bool
 	opClosedAt simtime.Time
+	// The pending deadline wake (generation and time).
+	deadlineGen uint32
+	deadlineAt  simtime.Time
 
 	rooms []room
 	emps  []employee
@@ -114,6 +117,11 @@ const (
 	kindExamEnd // exam finished; the patient departs
 	kindDocEnd  // technologist documentation finished
 	kindWake    // eligibility wake for a room (§3.4 rule 4)
+	// kindDeadline re-runs dispatch when a time-based condition changes
+	// with no other event: a held employee stops being useful, a desk
+	// person can no longer fit a registration, a patient stops being
+	// servable (§3.4 rule 4, §6.9).
+	kindDeadline
 )
 
 func (st *state) emit(at simtime.Time, sev api.Severity, cat, text string) {
@@ -134,6 +142,8 @@ func (st *state) IsStale(ev Event) bool {
 		return ev.Gen != emp.gen || emp.status != onBreak || emp.breakUntil != ev.At
 	case kindWake:
 		return ev.Gen != st.rooms[ev.A].wakeGen
+	case kindDeadline:
+		return ev.Gen != st.deadlineGen
 	case kindCancel, kindGrace:
 		return st.dem.appts[ev.A].state != apptBooked
 	case kindArrive:
@@ -183,7 +193,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.examEnd(e, int(ev.A))
 	case kindDocEnd:
 		st.taskDone(e, int(ev.A))
-	case kindWake:
+	case kindWake, kindDeadline:
 	}
 }
 

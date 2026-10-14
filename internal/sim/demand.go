@@ -110,13 +110,15 @@ type slot struct {
 	why  uint8 // slotOK when bookable
 	appt int   // -1 when free
 	// staff is the set (bit per employee) of technologists rostered to the
-	// room at the slot's start; shared is set when some of them also staff
-	// another room then, so the slot competes for them (§5.3).
+	// room at any time during the slot; shared is set when some of them
+	// also staff another room during it, so the slot competes for them
+	// (§5.3).
 	staff  uint64
 	shared bool
 }
 
 type daySlots struct {
+	segs    []Segment // the day's planned coverage, for shared capacity
 	rooms   [][]slot
 	booked  int   // appointments holding a slot (every state but cancelled)
 	appts   []int // every appointment ever booked for the day, in booking order
@@ -199,6 +201,7 @@ func (st *state) buildDay(day int64) *daySlots {
 		return ds
 	}
 	cov := plan.Coverage()
+	ds.segs = cov.Segments
 	for r := range st.cfg.Rooms {
 		for _, t := range st.cfg.Templates[r][date.Weekday()] {
 			s := slot{SlotTemplate: t, appt: -1}
@@ -209,15 +212,18 @@ func (st *state) buildDay(day int64) *daySlots {
 				}
 			}
 			for _, seg := range cov.Segments {
-				if seg.Contains(t.From) {
-					for _, i := range seg.Rooms[r] {
-						s.staff |= 1 << uint(i)
-					}
-					for r2 := range seg.Rooms {
-						for _, i := range seg.Rooms[r2] {
-							if r2 != r && s.staff&(1<<uint(i)) != 0 {
-								s.shared = true
-							}
+				if seg.To <= t.From || seg.From >= t.To {
+					continue
+				}
+				var here uint64
+				for _, e := range seg.Rooms[r] {
+					here |= 1 << uint(e)
+				}
+				s.staff |= here
+				for r2 := range seg.Rooms {
+					for _, e := range seg.Rooms[r2] {
+						if r2 != r && here&(1<<uint(e)) != 0 {
+							s.shared = true
 						}
 					}
 				}
@@ -228,31 +234,75 @@ func (st *state) buildDay(day int64) *daySlots {
 	return ds
 }
 
-// sharedFree applies the shared-capacity rule (§5.3): a slot whose
-// technologists also staff other rooms is bookable only while fewer
-// overlapping appointments in those rooms hold them than there are
-// technologists. One technologist covering XR and CT can't be booked in
-// both rooms at once.
+// sharedFree applies the shared-capacity rule (§5.3): within every
+// stretch of the slot with constant coverage, the appointments already
+// booked in other rooms that need one of this room's technologists then
+// must leave at least one of them free. One technologist covering XR and
+// CT can't be booked in both rooms at once.
 func sharedFree(ds *daySlots, r int, s *slot) bool {
 	if !s.shared {
 		return true
 	}
-	load := 0
-	for r2 := range ds.rooms {
-		if r2 == r {
+	for _, seg := range ds.segs {
+		if seg.To <= s.From || seg.From >= s.To {
 			continue
 		}
-		for k := range ds.rooms[r2] {
-			o := &ds.rooms[r2][k]
-			if o.From >= s.To {
-				break
+		var here uint64
+		for _, e := range seg.Rooms[r] {
+			here |= 1 << uint(e)
+		}
+		lo, hi := max(seg.From, s.From), min(seg.To, s.To)
+		load := 0
+		for r2 := range ds.rooms {
+			if r2 == r {
+				continue
 			}
-			if o.appt >= 0 && o.staff&s.staff != 0 && s.From < o.To {
-				load++
+			for k := range ds.rooms[r2] {
+				o := &ds.rooms[r2][k]
+				if o.From >= hi {
+					break
+				}
+				if o.appt >= 0 && o.To > lo && o.staff&here != 0 {
+					load++
+				}
+			}
+		}
+		if load >= bits.OnesCount64(here) {
+			return false
+		}
+	}
+	return true
+}
+
+// CheckOpening books a scenario's opening schedule in order under the same
+// rules as any booking (free, bookable, shared capacity) and returns a
+// problem per appointment that breaks them, keyed by its index. Slot
+// existence and category are checked by the scenario package.
+func CheckOpening(cfg *Config) map[int]string {
+	st := &state{cfg: cfg, cal: simtime.NewCalendar(cfg.Start.AddDays(-cfg.WarmupDays)), startDay: cfg.WarmupDays}
+	out := map[int]string{}
+	for i, op := range cfg.Opening {
+		day := st.startDay + op.Day
+		st.ensureDays(day)
+		ds := st.dem.days[day]
+		for k := range ds.rooms[op.Room] {
+			s := &ds.rooms[op.Room][k]
+			if s.From != op.Start {
+				continue
+			}
+			switch {
+			case s.appt >= 0:
+				out[i] = "slot already used by another opening appointment"
+			case s.why != slotOK:
+				out[i] = "slot is not bookable"
+			case !sharedFree(ds, op.Room, s):
+				out[i] = "shared technologist already booked in another room at this time"
+			default:
+				s.appt = i
 			}
 		}
 	}
-	return load < bits.OnesCount64(s.staff)
+	return out
 }
 
 // scheduleDemand queues the day's exogenous orders (class DayBoundary).
@@ -400,8 +450,10 @@ func (st *state) firstFit(o *order, earliest int64, now simtime.Time) (pref, any
 				if s.Category != cat || s.appt >= 0 || s.why != slotOK || st.cal.At(d, s.From) < notBefore {
 					continue
 				}
-				if dayAny.idx >= 0 && s.From >= anyAt && (!inWindow(o.window, s.From) || dayPref.idx >= 0) {
-					continue // cannot improve today's picks
+				canAny := dayAny.idx < 0 || s.From < anyAt
+				canPref := inWindow(o.window, s.From) && (dayPref.idx < 0 || s.From < prefAt)
+				if !canAny && !canPref {
+					continue // cannot improve either of today's picks
 				}
 				if !sharedFree(ds, r, s) {
 					continue
@@ -545,6 +597,9 @@ func (st *state) loadOpening(e *Engine) {
 			key: key, patient: st.dem.patients, source: op.Source, tolerance: tol,
 			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1, visit: -1,
 		})
+		if !sharedFree(st.dem.days[day], op.Room, &st.dem.days[day].rooms[op.Room][idx]) {
+			panic("sim: opening schedule breaks shared capacity (scenario validation should catch this)")
+		}
 		st.book(e, oi, slotRef{day, op.Room, idx}, true)
 	}
 }
