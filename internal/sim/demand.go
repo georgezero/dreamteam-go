@@ -542,6 +542,9 @@ func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) boo
 	case hasAny && any.day-earliest <= o.tolerance:
 		pick = any
 	default:
+		if st.lossProbe != nil {
+			st.lossProbe(e.Now(), oi, earliest, hasAny, any.day)
+		}
 		o.state, o.endedAt = orderLost, e.Now()
 		st.countOrder(o, func(c *modalityCounts) { c.lost++ })
 		why := fmt.Sprintf("no %s slot within %d days", st.cfg.Catalog[o.exam].Modality, st.cfg.Policies.BookingHorizonDays)

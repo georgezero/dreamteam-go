@@ -1,0 +1,444 @@
+{
+ "name": "W130-MRfull-XRhalf",
+ "description": "V0.2 Step 0B: referral demand x1.30, imaging-weighted (primary/urgent care x1.10, the US/CT/MR-heavy sources x1.494); + MR technologist 11:30-20:00 ($45/h); XR slots halved in shared-technologist hours.",
+ "scenario": "established",
+ "overlay": {
+  "referralSources": [
+   {
+    "id": "SRC1",
+    "baseDailyMilliOrders": 26400
+   },
+   {
+    "id": "SRC2",
+    "baseDailyMilliOrders": 17925
+   },
+   {
+    "id": "SRC3",
+    "baseDailyMilliOrders": 8962
+   },
+   {
+    "id": "SRC4",
+    "baseDailyMilliOrders": 7469
+   },
+   {
+    "id": "SRC5",
+    "baseDailyMilliOrders": 7700
+   },
+   {
+    "id": "SRC6",
+    "baseDailyMilliOrders": 13444
+   }
+  ],
+  "employees": [
+   {
+    "id": "E11",
+    "name": "Alex",
+    "role": "technologist",
+    "skills": [
+     "MR"
+    ],
+    "pay": {
+     "type": "hourly",
+     "rateCents": 4500
+    },
+    "roster": {
+     "Mon": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Tue": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Wed": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Thu": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Fri": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     }
+    }
+   }
+  ],
+  "templates": {
+   "R1": [
+    {
+     "days": [
+      "Mon"
+     ],
+     "slots": [
+      {
+       "start": "08:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "08:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "09:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "09:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "10:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "10:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "16:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      }
+     ]
+    },
+    {
+     "days": [
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+     ],
+     "slots": [
+      {
+       "start": "08:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "08:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "09:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "09:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "10:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "10:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:45",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:15",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:45",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:15",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:45",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:15",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:45",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:15",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:45",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "16:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "16:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "17:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "17:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "18:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "18:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "19:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "19:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      }
+     ]
+    },
+    {
+     "days": [
+      "Sat"
+     ],
+     "slots": [
+      {
+       "start": "10:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "10:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "11:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "12:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "13:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "14:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "15:30",
+       "lenMin": 15,
+       "category": "XR_15"
+      },
+      {
+       "start": "16:00",
+       "lenMin": 15,
+       "category": "XR_15"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "seeds": "1-9",
+ "days": 90
+}

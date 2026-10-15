@@ -102,6 +102,19 @@ type window struct {
 	// site blocks (radiologists), basis points; overtime minutes.
 	StaffUtil map[string]int64 `json:"staffUtilBP"`
 	StaffOT   map[string]int64 `json:"staffOvertimeMin"`
+	// Referral orders received in the window and lost, diagnosed by the
+	// booking-loss probe (lossprobe_export_test.go), by modality: the
+	// primary cause (one per loss, by the documented precedence), every
+	// cause present (a loss counts once per cause), and by priority.
+	LossPrimary  map[string]map[string]int `json:"lossPrimary"`
+	LossAnyCause map[string]map[string]int `json:"lossAnyCause"`
+	LossPriority map[string]map[string]int `json:"lossPriority"`
+	// Per modality: days past the patient's last acceptable day to the
+	// first compatible slot (p50, p90 over losses with one), and the mean
+	// free minutes of other categories in the window.
+	LossBeyondP50 map[string]int64   `json:"lossBeyondP50Days"`
+	LossBeyondP90 map[string]int64   `json:"lossBeyondP90Days"`
+	LossOtherFree map[string]float64 `json:"lossOtherFreeMinMean"`
 }
 
 // tatStat: studies acquired in a window, as of its end. Percentiles and
@@ -197,6 +210,8 @@ func TestCalibrationReport(t *testing.T) {
 // actions (if any) at the takeover; every one must be accepted.
 func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*sim.World, int) []api.Action) seedRun {
 	w := sim.New(cfg, rng.SeedFromInt(seed))
+	var losses []sim.LossDiagnosis
+	w.SetLossProbe(func(d sim.LossDiagnosis) { losses = append(losses, d) })
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
 	if plan != nil {
@@ -219,6 +234,7 @@ func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*s
 		if d == 30 || d == days {
 			w.Engine().RunUntil(start.Add(simtime.Duration(d)*simtime.Day), nil)
 			win := measure(w, cfg, start, d)
+			lossCauses(win, losses, start, start.Add(simtime.Duration(d)*simtime.Day))
 			win.Backlog730 = slices.Clone(backlog)
 			r.Windows[fmt.Sprintf("%dd", d)] = win
 		}
@@ -230,6 +246,49 @@ func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*s
 		}
 	}
 	return r
+}
+
+// lossCauses tabulates the diagnosed losses of referral orders received
+// in (start, end].
+func lossCauses(win *window, losses []sim.LossDiagnosis, start, end simtime.Time) {
+	win.LossPrimary, win.LossAnyCause, win.LossPriority = map[string]map[string]int{}, map[string]map[string]int{}, map[string]map[string]int{}
+	win.LossBeyondP50, win.LossBeyondP90, win.LossOtherFree = map[string]int64{}, map[string]int64{}, map[string]float64{}
+	add := func(m map[string]map[string]int, md, k string) {
+		if m[md] == nil {
+			m[md] = map[string]int{}
+		}
+		m[md][k]++
+	}
+	beyond, other, n := map[string][]int64{}, map[string]int64{}, map[string]int{}
+	for _, d := range losses {
+		if d.WalkIn || d.Received <= start || d.Received > end {
+			continue
+		}
+		md := d.Modality
+		add(win.LossPrimary, md, d.Primary)
+		add(win.LossPriority, md, d.Priority)
+		for _, c := range []struct {
+			k  string
+			on bool
+		}{{"shared_tech", d.SharedConflict > 0}, {"not_rostered", d.Unstaffed > 0}, {"no_supervision", d.NoSupervision > 0},
+			{"notice", d.Notice > 0}, {"booked", d.Booked > 0}, {"other_category_free", d.OtherFree > 0},
+			{"no_template_slot", d.Slots == 0}, {"no_slot_in_horizon", d.NoSlotInHorizon}} {
+			if c.on {
+				add(win.LossAnyCause, md, c.k)
+			}
+		}
+		if d.BeyondDays >= 0 {
+			beyond[md] = append(beyond[md], d.BeyondDays)
+		}
+		other[md] += d.OtherFreeMin
+		n[md]++
+	}
+	for md, xs := range beyond {
+		win.LossBeyondP50[md], win.LossBeyondP90[md] = pctl(xs, 50), pctl(xs, 90)
+	}
+	for md, k := range n {
+		win.LossOtherFree[md] = float64(other[md]) / float64(k)
+	}
 }
 
 func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *window {

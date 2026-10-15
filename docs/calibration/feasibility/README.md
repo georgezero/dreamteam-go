@@ -1,5 +1,9 @@
 # V0.2 Step 0 — sustainable-practice feasibility sweep
 
+Follow-up: **Step 0B** (`step0b/README.md`) diagnosed the CT/XR booking
+losses (shared technologists, not templates) and tested CT/XR templates as an
+added lever; the gate still fails (best +0.5% T90 margin).
+
 **Question (owner decision 6, hard gate):** can the established practice
 become financially sustainable using only the documented V0.2 levers —
 referral demand and modality mix, technologist coverage, US slot packing,

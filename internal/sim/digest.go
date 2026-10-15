@@ -40,7 +40,7 @@ import (
 // "Type.field".
 var skipFields = map[string]bool{
 	"state.cfg": true, "state.log": true, "state.drawMemo": true, "state.staffBuf": true,
-	"state.dropOrder": true, "state.forceNoShow": true, "state.actions": true,
+	"state.dropOrder": true, "state.forceNoShow": true, "state.lossProbe": true, "state.actions": true,
 	"state.now":            true, // the time of the last transaction: when processing happened, not what
 	"metricsState.done":    true,
 	"finState.forceDenied": true,

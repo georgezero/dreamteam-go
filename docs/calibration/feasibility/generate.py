@@ -123,7 +123,7 @@ def describe(d, staff, pack, alloc):
             "W150": "DIAGNOSTIC, outside the documented demand range: referral demand x1.50, imaging-weighted (primary/urgent care x1.20, the US/CT/MR-heavy sources x%.3f)" % ((sum(SRC.values()) * 1.50 - 31000 * 1.2) / 32000)}
     s = [bits[d]]
     names = {"XRCT": "XR/CT day technologist (08:00-16:30, $38/h)", "USfull": "US technologist 11:30-20:00 ($44/h)",
-             "MRfull": "MR technologist 11:30-20:00 ($45/h)"}
+             "MRfull": "MR technologist 11:30-20:00 ($45/h)", "XRCTeve": "XR/CT technologist on X-ray 11:30-20:00 ($38/h)"}
     s += ["+ " + names[x] for x in staff]
     if pack:
         s.append("US_45 slots at 40 min (one more US_45 per weekday)")

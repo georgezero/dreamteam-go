@@ -66,6 +66,10 @@ type state struct {
 	// forceNoShow, if set (tests only), makes the patients of matching
 	// appointments never come: a change to hidden latent behavior.
 	forceNoShow func(start simtime.Time) bool
+	// lossProbe, if set (diagnostics only), is called when an order is
+	// lost, before the loss is recorded, with what FirstFit found. It must
+	// only read state: no draws, no mutation (V0.2 Step 0B).
+	lossProbe func(now simtime.Time, oi int, earliest int64, hasAny bool, anyDay int64)
 }
 
 // New builds a world from cfg. The calendar epoch is the start date minus

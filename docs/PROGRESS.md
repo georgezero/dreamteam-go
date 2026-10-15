@@ -7,6 +7,56 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 step 0B — CT/XR booking losses and templates (0.2.0-dev.0.1)
+
+Owner option B (2026-10-15): find why CT/XR referrals are lost while their
+rooms are ≈40% used, then test CT/XR templates as a permitted static lever.
+No action, scenario or gameplay change; `established` and `mini` untouched.
+
+* **Booking-loss probe** (diagnostics). Production change, explained: one
+  function field `state.lossProbe` (excluded from the state digest, like the
+  existing test hooks `dropOrder` and `forceNoShow`) and one nil-checked
+  call where `offer` records a loss. The diagnosis itself
+  (`internal/sim/lossprobe_export_test.go`, test builds only) classifies
+  every compatible slot in the lost patient's acceptance window by the first
+  FirstFit check it fails (booked, not rostered, no supervision, notice,
+  shared technologist). It assigns one primary cause by documented
+  precedence and also records every cause present. It reads state only.
+* **Neutrality:** `TestLossProbeIsPassive` (log, ledger, state and action
+  digests identical with and without the probe; every loss diagnosed once;
+  no unexplained free slot). The 20-seed Step 0 candidate reproduces its
+  per-seed results and fingerprint exactly with the probe on. Goldens
+  unchanged.
+* **Finding:** at the Step 0 best candidate, 72% of lost CT/XR referrals had
+  a free, staffed slot in their window, blocked because one technologist
+  covers both rooms (Riley mornings and Mondays, Sam evenings). 92% of them
+  are urgent or soon patients. The template category mix explains ≈7% of CT
+  losses.
+* **Templates and coverage** (`docs/calibration/feasibility/step0b/`; 13
+  manifests, 9 paired seeds, the best and its reference at 20):
+  * 12-minute XR slots: +$1.16k per 90 days (CI +0.36 to +1.96), margin
+    +0.4% → +0.5%. Recovered referrals displace walk-ins.
+  * XR halved in shared hours: −$2.3k per 30 days.
+  * XR grid staggered 5 minutes: −$5.2k (fragments shared time).
+  * An XR/CT technologist (day or evening): recovers 145–170 losses and pays
+    for itself, no more. Urgent breaches rise ×2–4: reading becomes the
+    constraint. Restoring it with the 65/55 allocation: −$5.3k.
+* **Verdict:** gate still not passed. The binding constraints are shared
+  technologist staffing, low XR contribution, evening reading coverage, and
+  fixed costs with salaried reading. Templates are exhausted. The best
+  configuration is +0.5% mean T90 margin, 14 of 20 seeds profitable.
+* **Tooling:** `report.py` takes a results directory and paired references
+  and adds booking-loss cause tables. The calibration harness records loss
+  causes per window.
+* **Verification:** `TestLossProbeIsPassive`; `go vet -tags calibration`;
+  calibration summary unchanged; full uncached `go test -count=1 ./...`.
+* **Open:** owner decision on the premise (design §17.2: adopt the
+  near-break-even candidate, build reading coverage and test teleradiology
+  substitution dynamically, or revisit the staffing model). The noon
+  shift-start fix stays a separate prerequisite. NO GO for action code.
+
+---
+
 ## V0.2 step 0 — design draft 2 and the feasibility gate (0.2.0-dev.0)
 
 Design and static experiments only: no engine, scenario, action or replay
