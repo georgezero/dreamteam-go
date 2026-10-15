@@ -22,7 +22,21 @@ run's own record was replayed from scratch and matched.
 
     go test ./cmd/dreamteam -run Golden              # all four (-short skips 90 days)
     dreamteam run -scenario established -seed 1 -days 7 \
-        -verify-replay -format json -golden testdata/golden/established-seed1-7d.json
+        -verify-replay -format json -golden testdata/golden/established-seed1-7d.json \
+        -golden-migrations testdata/golden/MIGRATIONS.json -allow-engine-mismatch
+
+## Historical references and the migration manifest
+
+These four files are historical compatibility fixtures: they stay
+byte-for-byte as their V0.1 engine wrote them. V0.2 Slice 1 changed the state
+digest's encoding (`dreamteam.state/v2`: the employment registry and
+guaranteed-pay counters) without changing any outcome, so exactly three fields
+differ in each: `digests.state`, `digests.run` and `replay.runDigest`.
+`MIGRATIONS.json` records each one's old and new value per reference, with the
+explanation. Under `-golden-migrations` a listed field must hold exactly its
+old value in the reference and its new value in the run; every other field is
+compared as before. A later state-schema change updates the manifest's new
+values and explanation, never the historical files.
 
 Exit 0: identical outcomes. Exit 4: a difference — stderr names the first
 differing JSON path with both values, the number of differences and the
@@ -33,7 +47,8 @@ engine difference) or a malformed file.
 
 ## Update (explicit only)
 
-Golden files change only when gameplay is meant to change. Regenerate with
+Golden files change only when gameplay is meant to change; a state-encoding
+change with identical outcomes goes in `MIGRATIONS.json` instead. Regenerate with
 the same command and `-write-golden FILE -overwrite`, review the diff, and
 say why in the commit message:
 
@@ -47,9 +62,9 @@ say why in the commit message:
         -verify-replay -format json -write-golden testdata/golden/established-seed1-7d-actions.json -overwrite
 
 A new engine version with unchanged outcomes needs no regeneration: the
-test compares with the engine mismatch allowed and reports it. Regenerate
-when convenient so the files name the current engine (they are then also
-byte-identical).
+test compares with the engine mismatch allowed and reports it. Since V0.2
+the four files are kept as historical references (owner decision), not
+regenerated to name the current engine.
 
 ## Cross-platform procedure
 
@@ -63,7 +78,9 @@ checkout of the same commit:
         cmp out.json testdata/golden/<matching file>                     # byte-identical?
     done
 
-or simply `go test ./cmd/dreamteam -run Golden`. Integers only, fixed
+(byte-identical only with the build that wrote the files; with a later one,
+compare with `-golden FILE -golden-migrations testdata/golden/MIGRATIONS.json
+-allow-engine-mismatch`, exit 0) or simply `go test ./cmd/dreamteam -run Golden`. Integers only, fixed
 field order, sorted maps and 64-bit big-endian digest encodings mean the
 results should not depend on the platform, but that is only established
 where it has been run:

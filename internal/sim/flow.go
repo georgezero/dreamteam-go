@@ -267,6 +267,7 @@ func (st *state) accountingClose(e *Engine) {
 			fail("%s still on regular duty at accounting close", emp.cfg.Name)
 		}
 	}
+	st.guaranteeClose()
 	n := 0
 	for _, ai := range st.dem.days[st.day].appts {
 		a := &st.dem.appts[ai]

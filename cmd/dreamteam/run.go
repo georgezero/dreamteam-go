@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
@@ -29,6 +30,7 @@ const (
 // output holds the result flags shared by run and replay.
 type output struct {
 	format, golden, writeGolden string
+	migrations                  string
 	overwrite, allowEngine      bool
 }
 
@@ -38,6 +40,7 @@ func (o *output) flags(fs *flag.FlagSet) {
 	fs.StringVar(&o.writeGolden, "write-golden", "", "write the result as a golden reference")
 	fs.BoolVar(&o.overwrite, "overwrite", false, "let -write-golden replace an existing file")
 	fs.BoolVar(&o.allowEngine, "allow-engine-mismatch", false, "accept a golden or session from another build (reported)")
+	fs.StringVar(&o.migrations, "golden-migrations", "", "migration manifest: fields of the -golden reference changed by a documented schema change")
 }
 
 func (o *output) check() error {
@@ -82,7 +85,21 @@ func (o *output) emit(r *session.Result, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stderr, "dreamteam:", err)
 			return exitError
 		}
-		c, err := session.Compare(want, r, o.allowEngine)
+		var migrated map[string]session.FieldChange
+		if o.migrations != "" {
+			raw, err := os.ReadFile(o.migrations)
+			if err != nil {
+				fmt.Fprintln(stderr, "dreamteam:", err)
+				return exitError
+			}
+			m, err := session.DecodeMigrations(raw)
+			if err != nil {
+				fmt.Fprintln(stderr, "dreamteam:", err)
+				return exitIncompatible
+			}
+			migrated = m.References[filepath.Base(o.golden)]
+		}
+		c, err := session.CompareMigrated(want, r, o.allowEngine, migrated)
 		if c != nil {
 			fmt.Fprint(stderr, c)
 		}

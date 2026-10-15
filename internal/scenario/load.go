@@ -232,6 +232,9 @@ type Employee struct {
 	Pay              Pay               `json:"pay"`
 	SiteAllocationBP int64             `json:"siteAllocationBP,omitempty"`
 	Roster           map[string]*Shift `json:"roster"`
+	// ContractedWeeklyMinutes is an hourly employee's contracted paid time
+	// per week (V0.2); when absent it is inferred from the roster.
+	ContractedWeeklyMinutes *int64 `json:"contractedWeeklyMinutes,omitempty"`
 }
 
 // Pay is hourly (rateCents per hour) or salaried (rateCents per year).

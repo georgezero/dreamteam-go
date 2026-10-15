@@ -1,0 +1,68 @@
+{
+ "schema": "dreamteam.golden-migration/v1",
+ "engine": "0.2.0-dev.1",
+ "stateSchema": "dreamteam.state/v2",
+ "explanation": [
+  "V0.2 Slice 1 (employee contracts): the state digest's encoding becomes dreamteam.state/v2. It adds the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
+  "Outcomes are unchanged: every scenario's inferred contract is at or below its roster, so no guarantee is ever posted. Patient flow, reports, every ledger entry, the log, actions, the evaluation baseline and all result values are identical; only the state digest, and the run digests derived from it, differ.",
+  "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old and new value, and a comparison under it requires both exactly."
+ ],
+ "references": {
+  "established-seed1-7d.json": {
+   "digests.state": {
+    "old": "c4d6b46c4d9446a194943c619be5442fa5d44479c1847374db6afbaa97438d50",
+    "new": "4b13d2ccb53ad7961e68a0c0faa4299bec1e402a4b4574f1539cf3802dab4926"
+   },
+   "digests.run": {
+    "old": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce",
+    "new": "b4adb527b14ffbfb92018a2e4a9cfa7ae5031991d9311145c59d1f9fba6745ec"
+   },
+   "replay.runDigest": {
+    "old": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce",
+    "new": "b4adb527b14ffbfb92018a2e4a9cfa7ae5031991d9311145c59d1f9fba6745ec"
+   }
+  },
+  "established-seed1-90d.json": {
+   "digests.state": {
+    "old": "8c6575d355650c59eee855f4c1facc94c150a7df71b76ed125cb09c27c39af6f",
+    "new": "1676d75bdc9b3026076717f4533443aae98aaa421ef1d40cb4ec3478014f9d26"
+   },
+   "digests.run": {
+    "old": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d",
+    "new": "1e244517722e6c39b420b924ea4ea5c8991f765136d2965b75615e50a8690a86"
+   },
+   "replay.runDigest": {
+    "old": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d",
+    "new": "1e244517722e6c39b420b924ea4ea5c8991f765136d2965b75615e50a8690a86"
+   }
+  },
+  "mini-seed1-7d.json": {
+   "digests.state": {
+    "old": "f2dff6e4d307a0623b5b5f849607b03d1fa82751bbb8134cb0f11440cc362ce8",
+    "new": "8c6c1d90501b6baf67232b032c19b0b6c779d1b39d45e01756e8c418ff8a6540"
+   },
+   "digests.run": {
+    "old": "26adad6073236014503dd15759ab332500c0ade3a00ff7d920156582b0680c1d",
+    "new": "17cd2876c81feaa2b55c610f28cddbb6d8373f1590828d611d0ea15b7b4da1b9"
+   },
+   "replay.runDigest": {
+    "old": "26adad6073236014503dd15759ab332500c0ade3a00ff7d920156582b0680c1d",
+    "new": "17cd2876c81feaa2b55c610f28cddbb6d8373f1590828d611d0ea15b7b4da1b9"
+   }
+  },
+  "established-seed1-7d-actions.json": {
+   "digests.state": {
+    "old": "5a626a6308b7fd2df7320a9d471640d21292b9b87508a8b08b16c34e50c9942b",
+    "new": "268445212cbf1a8ff0d2709f0878988e1271ed4d553c491905271137ab73e388"
+   },
+   "digests.run": {
+    "old": "fb0ccb14a79c87e75c110abe2c14dfabbeb752bac60ddba14dbc9d818994d5f6",
+    "new": "58756da8376e8d75dd0a2a8ca7dd36ae78555508816a0b894391d4f288ae623a"
+   },
+   "replay.runDigest": {
+    "old": "fb0ccb14a79c87e75c110abe2c14dfabbeb752bac60ddba14dbc9d818994d5f6",
+    "new": "58756da8376e8d75dd0a2a8ca7dd36ae78555508816a0b894391d4f288ae623a"
+   }
+  }
+ }
+}

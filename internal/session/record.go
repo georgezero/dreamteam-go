@@ -337,6 +337,17 @@ type Report struct {
 	Replayed   Digests
 	RecSummary Summary
 	RepSummary Summary
+	// StateChanged is set when the record comes from a build with the
+	// earlier state encoding (dreamteam.state/v1): its outcomes (log,
+	// ledger, actions and summary) were verified exactly, and its state and
+	// run digests are not comparable with this build's (V0.2_DESIGN §12).
+	StateChanged bool
+}
+
+// stateV1Engine reports whether a build wrote the dreamteam.state/v1
+// encoding: every V0.1 build and the V0.2 Step 0 builds (0.2.0-dev.0.*).
+func stateV1Engine(engine string) bool {
+	return strings.HasPrefix(engine, "0.1.") || strings.HasPrefix(engine, "0.2.0-dev.0.")
 }
 
 func (rep *Report) fail(format string, args ...any) {
@@ -347,6 +358,12 @@ func (rep *Report) fail(format string, args ...any) {
 // String is a readable report.
 func (rep *Report) String() string {
 	var b strings.Builder
+	if rep.OK && rep.StateChanged {
+		fmt.Fprintf(&b, "OK: %d batches, %d actions replayed; outcomes verified (log, ledger, actions, summary); "+
+			"state encoding changed since %s, so state and run digests are not compared (run now %.16s…)\n",
+			rep.Batches, rep.Actions, rep.Engine, rep.Replayed.Run)
+		return b.String()
+	}
 	if rep.OK {
 		fmt.Fprintf(&b, "OK: %d batches, %d actions replayed; digests match (run %.16s…)\n", rep.Batches, rep.Actions, rep.Replayed.Run)
 		return b.String()
@@ -474,11 +491,24 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	}
 	for _, c := range []struct{ name, rec, got string }{
 		{"log", r.Digests.Log, rep.Replayed.Log}, {"ledger", r.Digests.Ledger, rep.Replayed.Ledger},
-		{"actions", r.Digests.Actions, rep.Replayed.Actions}, {"state", r.Digests.State, rep.Replayed.State},
-		{"run", r.Digests.Run, rep.Replayed.Run},
+		{"actions", r.Digests.Actions, rep.Replayed.Actions},
 	} {
 		if c.rec != c.got {
 			rep.fail("%s digest: recorded %.16s…, replayed %.16s…", c.name, c.rec, c.got)
+		}
+	}
+	// A record from a build with the v1 state encoding: once its outcomes
+	// are verified, its state and run digests cannot be (another encoding).
+	legacy := r.Engine != version.Number && stateV1Engine(r.Engine)
+	if rep.OK && legacy && (r.Digests.State != rep.Replayed.State || r.Digests.Run != rep.Replayed.Run) {
+		rep.StateChanged = true
+	} else {
+		for _, c := range []struct{ name, rec, got string }{
+			{"state", r.Digests.State, rep.Replayed.State}, {"run", r.Digests.Run, rep.Replayed.Run},
+		} {
+			if c.rec != c.got {
+				rep.fail("%s digest: recorded %.16s…, replayed %.16s…", c.name, c.rec, c.got)
+			}
 		}
 	}
 	if !rep.OK {

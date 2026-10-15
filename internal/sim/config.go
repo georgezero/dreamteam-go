@@ -226,6 +226,77 @@ type EmployeeConfig struct {
 	// this site, in basis points.
 	SiteAllocationBP int64
 	Roster           [7]*ShiftTemplate // by simtime.Weekday; nil means off
+	// Contract is an hourly employee's contract (zero for salaried staff).
+	Contract Contract
+}
+
+// Contract is an hourly employee's employment contract (V0.2_DESIGN §5.2):
+// the paid time guaranteed each full week, whatever is rostered. Worked
+// time above it is paid as worked; contracted time not worked is paid as a
+// guarantee (finance: guaranteeClose) and is never worked time.
+type Contract struct {
+	// Weekly is the contracted paid time per full week, overtime excluded.
+	Weekly simtime.Duration
+	// Inferred is set when the scenario does not state the contract: it is
+	// then the smaller net rota week of the original roster, frozen at load.
+	Inferred bool
+	// Weights spread the weekly guarantee over the days of a week, by rota
+	// week (A, B) and weekday: the original roster's net time (unpaid
+	// breaks excluded), frozen at load. A partial week guarantees only its
+	// employed days' share; later roster changes never move the weights.
+	Weights [2][7]simtime.Duration
+}
+
+// InferContract returns an hourly employee's contract as the roster implies
+// it: the smaller rota week's net rostered time, with the roster as the
+// accrual weights. Salaried staff have none (their salary is the guarantee).
+func InferContract(e *EmployeeConfig) Contract {
+	var c Contract
+	if e.Pay != Hourly {
+		return c
+	}
+	for wd, t := range e.Roster {
+		if t == nil {
+			continue
+		}
+		net := t.To - t.From
+		for _, b := range t.Breaks {
+			net -= b.To - b.From
+		}
+		for k, wk := range [2]int{WeekA, WeekB} {
+			if t.Weeks == WeekBoth || t.Weeks == wk {
+				c.Weights[k][wd] = net
+			}
+		}
+	}
+	c.Weekly, c.Inferred = min(c.weekTotal(0), c.weekTotal(1)), true
+	return c
+}
+
+func (c *Contract) weekTotal(k int) simtime.Duration {
+	var t simtime.Duration
+	for _, d := range c.Weights[k] {
+		t += d
+	}
+	return t
+}
+
+// DayCents is the guaranteed base pay at rate (cents an hour) a contract
+// day earns: the weekly guarantee's share by the weights of its rota week
+// (equal sevenths when that week has none), truncated to the cent per day
+// like worked day wages. A full week guarantees r×C less at most a cent a
+// contract day; at or below the roster, a day's guarantee never exceeds
+// the pay for its rostered time.
+func (c *Contract) DayCents(rate int64, week int, wd simtime.Weekday) int64 {
+	k := 0
+	if week == WeekB {
+		k = 1
+	}
+	total := c.weekTotal(k)
+	if total == 0 {
+		return rate * int64(c.Weekly) / (7 * 3600)
+	}
+	return rate * int64(c.Weekly) * int64(c.Weights[k][wd]) / (int64(total) * 3600)
 }
 
 // HasSkill reports whether the employee holds skill s.

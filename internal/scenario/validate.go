@@ -269,6 +269,7 @@ func Compile(f *File) (*sim.Config, error) {
 			}
 			ec.Roster[wd] = c.shift(fmt.Sprintf("%s.roster.%s", ep, wd), sh, &ec, rooms, cfg.Policies.MaxShift)
 		}
+		c.contract(ep, e.ContractedWeeklyMinutes, &ec)
 		cfg.Employees = append(cfg.Employees, ec)
 	}
 
@@ -282,6 +283,24 @@ func Compile(f *File) (*sim.Config, error) {
 		return nil, &ValidationError{c.issues}
 	}
 	return cfg, nil
+}
+
+// contract sets an hourly employee's contract (V0.2_DESIGN §5.2): the
+// stated contracted minutes, 1–2400 a week (the V0.2 hire band), or else
+// inferred from the roster. Its accrual weights are always the roster's.
+func (c *checker) contract(ep string, minutes *int64, e *sim.EmployeeConfig) {
+	e.Contract = sim.InferContract(e)
+	if minutes == nil {
+		return
+	}
+	switch {
+	case e.Pay != sim.Hourly:
+		c.fail(ep+".contractedWeeklyMinutes", "only hourly employees have contracted hours")
+	case *minutes < 1 || *minutes > 2400:
+		c.fail(ep+".contractedWeeklyMinutes", "%d is outside 1–2400", *minutes)
+	default:
+		e.Contract.Weekly, e.Contract.Inferred = simtime.Duration(*minutes)*simtime.Minute, false
+	}
 }
 
 func (c *checker) employeeSkills(ep string, e *sim.EmployeeConfig) {

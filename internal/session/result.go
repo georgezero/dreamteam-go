@@ -274,6 +274,51 @@ type Comparison struct {
 	Digests      []string // digests that differ
 	Differences  []string // field paths with expected and actual, document order
 	Total        int      // differing leaves (Differences is capped)
+	// Migrated lists the fields a documented migration accounted for:
+	// each held exactly its recorded old value in the reference and its
+	// recorded new value in the run.
+	Migrated []string
+}
+
+// MigrationSchema identifies a golden migration manifest.
+const MigrationSchema = "dreamteam.golden-migration/v1"
+
+// Migrations is a golden migration manifest (V0.2_DESIGN §11): historical
+// golden references stay byte-for-byte as their engine wrote them, and
+// the fields a documented state-schema change altered are listed per
+// reference with their old and new values. Every other field still has
+// to match exactly; a listed field must hold exactly its old value in the
+// reference and its new value in the run, so the new state stays pinned.
+type Migrations struct {
+	Schema      string   `json:"schema"`
+	Engine      string   `json:"engine"`      // the first build writing the new values
+	StateSchema string   `json:"stateSchema"` // the state digest's encoding since
+	Explanation []string `json:"explanation"`
+	// References: golden file name → field path ("digests.state") → change.
+	References map[string]map[string]FieldChange `json:"references"`
+}
+
+// FieldChange is one migrated field's value in the reference and now.
+type FieldChange struct {
+	Old string `json:"old"`
+	New string `json:"new"`
+}
+
+// DecodeMigrations reads a migration manifest strictly.
+func DecodeMigrations(raw []byte) (*Migrations, error) {
+	dec := json.NewDecoder(bytes.NewReader(raw))
+	dec.DisallowUnknownFields()
+	var m Migrations
+	if err := dec.Decode(&m); err != nil {
+		return nil, fmt.Errorf("%w: migration manifest: %v", ErrGoldenFormat, err)
+	}
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
+		return nil, fmt.Errorf("%w: data after the migration manifest", ErrGoldenFormat)
+	}
+	if m.Schema != MigrationSchema {
+		return nil, fmt.Errorf("%w: migration schema %q, this build reads %q", ErrGoldenIncompatible, m.Schema, MigrationSchema)
+	}
+	return &m, nil
 }
 
 // String is a readable report.
@@ -283,6 +328,9 @@ func (c *Comparison) String() string {
 		b.WriteString("compatible: yes\n")
 	} else {
 		fmt.Fprintf(&b, "compatible: NO — %s\n", strings.Join(c.Incompatible, "; "))
+	}
+	if len(c.Migrated) > 0 {
+		fmt.Fprintf(&b, "migrated (documented schema change, old and new values as recorded): %s\n", strings.Join(c.Migrated, ", "))
 	}
 	if c.Match {
 		b.WriteString("outcomes: identical to the golden reference\n")
@@ -333,6 +381,12 @@ func DecodeGolden(raw []byte) (map[string]any, error) {
 // an error unless allowEngine is set and only the engine differs — then the
 // outcomes are still compared and the engine difference is reported.
 func Compare(golden []byte, r *Result, allowEngine bool) (*Comparison, error) {
+	return CompareMigrated(golden, r, allowEngine, nil)
+}
+
+// CompareMigrated is Compare under a reference's migrated fields (nil:
+// none): see Migrations.
+func CompareMigrated(golden []byte, r *Result, allowEngine bool, migrated map[string]FieldChange) (*Comparison, error) {
 	want, err := DecodeGolden(golden)
 	if err != nil {
 		return nil, err
@@ -367,6 +421,25 @@ func Compare(golden []byte, r *Result, allowEngine bool) (*Comparison, error) {
 	if !c.Compatible && !(allowEngine && engineOnly) {
 		return c, ErrGoldenIncompatible
 	}
+	paths := make([]string, 0, len(migrated))
+	for p := range migrated {
+		paths = append(paths, p)
+	}
+	sort.Strings(paths)
+	for _, p := range paths {
+		ch := migrated[p]
+		keys := strings.Split(p, ".")
+		if a := str(want, keys...); a != ch.Old {
+			diff(c, "."+p, ch.Old, a) // the reference is not the one migrated
+		}
+		if b := str(got, keys...); b != ch.New {
+			diff(c, "."+p, ch.New, b) // the run does not reproduce the migrated value
+		}
+		for _, m := range []map[string]any{want, got} {
+			deletePath(m, keys)
+		}
+		c.Migrated = append(c.Migrated, p)
+	}
 	for _, k := range []string{"log", "ledger", "actions", "state", "run"} {
 		if str(want, "digests", k) != str(got, "digests", k) {
 			c.Digests = append(c.Digests, k)
@@ -378,6 +451,18 @@ func Compare(golden []byte, r *Result, allowEngine bool) (*Comparison, error) {
 		return c, ErrGoldenMismatch
 	}
 	return c, nil
+}
+
+// deletePath removes a field from a decoded JSON object.
+func deletePath(m map[string]any, keys []string) {
+	for _, k := range keys[:len(keys)-1] {
+		next, ok := m[k].(map[string]any)
+		if !ok {
+			return
+		}
+		m = next
+	}
+	delete(m, keys[len(keys)-1])
 }
 
 // diff walks expected and actual JSON in document order (object keys

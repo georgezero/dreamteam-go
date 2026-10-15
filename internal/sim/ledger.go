@@ -98,6 +98,7 @@ const (
 	entPayroll                        // payroll paid (a: day)
 	entPayAP                          // accounts payable paid (a: day)
 	entReversal                       // reverses entry a
+	entGuarantee                      // guaranteed-pay provision change at day close (a: employee, b: day)
 )
 
 // entryKey is an entry's idempotency key.

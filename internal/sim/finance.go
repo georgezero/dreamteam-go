@@ -280,7 +280,9 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 	led := &st.fin.led
 	st.finDay(day)
 	if st.isPayday(date) {
-		if amt := led.bal[acctAccruedPayroll]; amt < 0 {
+		// The week's guaranteed pay is not final until Sunday's close: it
+		// waits for the next payday after it (employment.go).
+		if amt := led.bal[acctAccruedPayroll] + st.openGuarantee(); amt < 0 {
 			led.mustPost(now, entryKey{kind: entPayroll, a: day}, line{acctAccruedPayroll, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.payrollPaid += -amt
 			st.evalPaid(&st.eval.basePayroll, -amt)
@@ -381,6 +383,9 @@ func (st *state) payWages(i int, paid simtime.Duration) {
 	if w > 0 {
 		st.accruePay(st.now, entryKey{kind: entWages, a: int64(i), b: st.day}, w)
 	}
+	// Worked pay at the regular rate replaces the contract guarantee
+	// (employment.go); the premium never counts toward it.
+	st.staff[i].weekB += emp.cfg.RateCents * int64(paid) / 3600
 }
 
 // studyCost posts supplies (contrast included) and the per-study IT charge

@@ -301,6 +301,8 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 		return "Wages accrued " + dayName(k.b), st.cfg.Employees[k.a].ID
 	case entSalary:
 		return "Salary accrued " + dayName(k.b), st.cfg.Employees[k.a].ID
+	case entGuarantee:
+		return "Guaranteed pay provision " + dayName(k.b), st.cfg.Employees[k.a].ID
 	case entFixed:
 		return "Fixed costs accrued " + dayName(k.a), ""
 	case entPayroll:

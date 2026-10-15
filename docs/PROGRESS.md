@@ -7,6 +7,114 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 1 — employee contract and capacity foundation (0.2.0-dev.1)
+
+The owner approved CONDITIONAL GO (2026-10-15). Decisions, design §18:
+* The measured 1.5–5% margin band.
+* ×1.30 demand.
+* A shared-staffing start, with reorganization as the player's objective.
+* Contracts kept at takeover; reductions only through termination and hiring.
+* Provisional scenario-specific T90 gates.
+
+Slice 1 builds the foundation and **adds no player action**. `established` and
+`mini` outcomes are unchanged.
+
+* **Contracts.** Hourly employees have contracted weekly hours. A scenario
+  may state them (`contractedWeeklyMinutes`, 1–2,400); otherwise they are
+  inferred from the roster as the smaller net rota week: E01/E03/E05 40 h,
+  E04/E06 39.5 h. The accrual weights (the original roster by rota week and
+  weekday) are frozen at load. Salaried staff have no contract hours; their
+  salary is the guarantee.
+* **Guaranteed pay.** Worked pay is posted exactly as before. At accounting
+  close the week's guarantee earns the day's share, and a signed provision
+  tops worked pay up to the contract (wages and benefits). Sunday's close
+  finalizes the week. Guaranteed time is never worked time, so it creates no
+  overtime and is never paid twice. A payday pays accrued payroll less the
+  week's still-open guarantee. The provision stays inside accrued payroll
+  rather than a new account, so the evaluation baseline's account list and
+  digest are unchanged (design §5.5, revision of §9).
+* **Employment registry** (state, digested): stable ID, lifecycle stage
+  (only `active` until hiring exists), employed dates, contract and the
+  week's pay counters. Checked every transaction. Observations show stage,
+  contract minutes, the inferred flag, this week's open guarantee and the
+  severance termination would owe (two contracted weeks with benefits).
+* **Whole-schedule staffing check** (`World.CheckStaffing`, read-only). For
+  a hypothetical roster change from a future day, it re-books every booked
+  appointment in survivor order with the booking rule's own predicates. It
+  reports each one that would be left `unstaffed`, without supervision
+  (`no_supervision`), or competing for shared technologists
+  (`shared_capacity`). It cancels, moves and displaces nothing, and makes no
+  draw or log entry.
+  * About 11 ms over the full horizon.
+  * 150 unchanged-roster checks (established, the sustainable start and
+    mini; 10 seeds; takeover to day 89) found no inconsistent existing
+    booking.
+* **Transition analysis** (design §5.6).
+  * The shared start (`W130-SHR-MRft`) is built from existing scenario
+    inputs. Its takeover contracts are Riley 40 h, Sam 39.5 h and Alex 40 h.
+  * The lead staffing is reachable with the five approved actions:
+    * `hire` Jamie, plus 27.5 h and 20 h replacements for Sam and Alex.
+    * `terminate` Sam and Alex.
+    * `set_roster` for Riley.
+    * `set_reading_allocation` for the radiologists.
+  * The plan reaches exactly the proposed 8-technologist cap during notice.
+    At the earliest it is complete around day 41.
+  * The saving comes from the part-time conversions: keeping every contract
+    and only adding Jamie measured −$1.2k a month in Step 0C.
+  * Estimated upfront cost is ≈$20–25k (recruiting, severance, training,
+    overlap) against ≈$6k a month of headroom. **The full plan may not pay
+    back within T90.** The dynamic benchmark must measure it; gameplay
+    documentation does not promise +2.8%.
+* **Compatibility.**
+  * The state encoding is `dreamteam.state/v2`. Each historical golden
+    reference differs in exactly `digests.state`, `digests.run` and
+    `replay.runDigest`. Log, ledger, actions and baseline digests and every
+    outcome value are identical.
+  * The references stay byte-for-byte. `testdata/golden/MIGRATIONS.json`
+    records old and new values with the explanation, and `-golden-migrations`
+    requires both exactly.
+  * Session records from v1-state builds (`0.1.*`, `0.2.0-dev.0.*`) replay
+    with outcomes verified (action results, log, ledger, actions, summary)
+    and the state change reported. Any other engine still needs every
+    digest.
+  * The Step 0C sustainable start and the lead candidate reproduce their
+    committed per-seed results exactly (9 seeds each).
+* **Regression tests.** Written before the implementation and shown failing
+  against stubs:
+  * The design's worked payroll examples to the cent (no work, 32 of 40,
+    45 h with premium, 28 of 20, 40 of 40).
+  * Provision reversal, partial week and rounding.
+  * Contract inference; the registry in the state digest.
+  * Guaranteed pay with a roster below the contract, and payday exclusion.
+  * Neutrality of contracts at or below the roster: ledger and log hashes
+    equal.
+  * Extensions taking the week into overtime; `TestGuaranteeWithOvertime`
+    passed against the stub too, so it is a guard.
+  * Scenario validation and the start and lead contracts.
+  * Unchanged-schedule, lost-coverage, shared-capacity, supervision,
+    read-only and rejection staffing checks.
+  * Golden migration strictness and v1-state replay. The replay test fails
+    with the rule disabled.
+* **Remaining for later slices:**
+  * Growable staff sets (64-employee bit set).
+  * Date-aware rosters and plan versions.
+  * Recruiting and severance postings.
+  * Displacement.
+  * The five actions.
+  * Session v2.
+  * The named `sustainable` scenario.
+  * Service-gate calibration from dynamic plans.
+* **Verification:**
+  * Full uncached `go test -count=1 ./...` passed: 7 packages, sim 349 s,
+    cmd 65 s.
+  * `go vet` clean (default, calibration and acceptance tags); gofmt clean.
+  * The four goldens are unchanged and match under the migration manifest
+    (90 days included).
+  * `-verify-replay` matched on every reference.
+  * The 90-day run time is unchanged within noise (MEASUREMENTS.md).
+
+---
+
 ## V0.2 step 0C — late shifts and staffing architectures (0.2.0-dev.0.2)
 
 Owner option G (2026-10-15): fix the noon shift-start limit, then test

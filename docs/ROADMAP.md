@@ -22,7 +22,9 @@ Each version is a playable build. Nothing ships as "framework only".
 **V0.2–V0.6: proposed in V0.2 design draft 2, pending the Step 0 gate** (first
 sweep 2026-10-14 and Step 0B 2026-10-15 did not pass; Step 0C 2026-10-15, a
 revised staffing architecture, passes conditionally at ×1.30 demand with a
-≈2.8% margin: CONDITIONAL GO pending owner decisions, design §18).
+≈2.8% margin: CONDITIONAL GO, approved by the owner 2026-10-15, design §18).
+V0.2 is being implemented in slices; Slice 1, the employee contract and
+capacity foundation with no new action, is built (design §5.5).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

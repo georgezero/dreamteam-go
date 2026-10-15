@@ -36,6 +36,12 @@ import (
 // entries sorted by their encoding: the digest is the same on every
 // platform. A digest is never part of an observation.
 
+// StateSchema names the state digest's encoding. v2 (V0.2 Slice 1) adds
+// the employment registry: identity, lifecycle, contracts and the week's
+// guaranteed-pay counters. Outcomes of a V0.1 scenario without V0.2
+// actions are unchanged; only state and run digests differ from v1.
+const StateSchema = "dreamteam.state/v2"
+
 // skipFields names struct fields the state walk leaves out, by
 // "Type.field".
 var skipFields = map[string]bool{
@@ -163,7 +169,7 @@ func sub(v reflect.Value) []byte {
 // StateDigest hashes the authoritative state and the live pending events.
 func (w *World) StateDigest() string {
 	d := &stateHasher{h: sha256.New()}
-	d.str("dreamteam.state/v1")
+	d.str(StateSchema)
 	d.u64(uint64(w.eng.Now()))
 	d.value(reflect.ValueOf(w.st).Elem())
 	// The interval tally as of now: where it was last accrued is an

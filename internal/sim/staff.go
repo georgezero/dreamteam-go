@@ -550,6 +550,7 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 			Skills: slices.Clone(emp.cfg.Skills), Status: api.StaffOff, SiteBP: emp.cfg.SiteAllocationBP,
 			Rooms: staffing[i], Held: emp.held, OvertimeMin: int64(st.overtimeNow(i, now) / simtime.Minute)}
 		x.WeekPaidMin = int64(emp.weekPaid / simtime.Minute)
+		st.observeEmployment(&x, i)
 		if emp.cfg.Pay == Hourly {
 			x.HourlyCents = emp.cfg.RateCents
 		}

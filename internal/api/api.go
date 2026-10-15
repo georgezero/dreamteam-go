@@ -138,6 +138,16 @@ type Employee struct {
 	HourlyCents   int64  `json:"hourlyCents,omitempty"`
 	WeekPaidMin   int64  `json:"weekPaidMin"`
 	ApprovedOTMin int64  `json:"approvedOTMin,omitempty"` // of OvertimeMin, approved in advance
+	// Employment (V0.2): the lifecycle stage ("active"); an hourly
+	// employee's contracted weekly minutes, whether they were inferred from
+	// the roster, the guaranteed pay provisioned this week for contracted
+	// time not worked, and the severance termination would owe (two
+	// contracted weeks with benefits).
+	Employment       string `json:"employment,omitempty"`
+	ContractMin      int64  `json:"contractMin,omitempty"`
+	ContractInferred bool   `json:"contractInferred,omitempty"`
+	GuaranteeCents   int64  `json:"guaranteeCents,omitempty"`
+	SeveranceCents   int64  `json:"severanceCents,omitempty"`
 }
 
 // Desk coverage levels.

@@ -272,3 +272,14 @@ never changes them; `TestTUIRunReplaysHeadless`).
 FirstFit: outcomes identical, but best-of-six play time moved only 1.10 →
 1.07 s (days are rarely full for the category searched), so not worth the
 extra state.
+
+## 2026-10-15 — V0.2 Slice 1: employee contracts (Pi 4, ≈79 °C, load average ≈3)
+
+Interleaved wall times of `dreamteam run -scenario established -seed 7 -days
+90 -format json`, the 0.2.0-dev.0.2 build (44c2df4) against this one, four
+runs each: 3.36–4.41 s before, 3.30–4.84 s after (best 3.36 → 3.30 s): the
+daily guarantee close is not measurable.
+
+| Measurement | Command | Result |
+|---|---|---|
+| Whole-schedule staffing check: Sam removed from tomorrow, the established practice's full booked horizon at the takeover | `go test ./internal/sim -run X -bench StaffingCheck -benchtime 10x -count 3 -benchmem` | 11.3–16.1 ms/op, 1.7 MB/op, 11.8k allocs/op |

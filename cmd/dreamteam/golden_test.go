@@ -12,6 +12,7 @@ import (
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/session"
+	"github.com/georgezero/dreamteam-go/internal/sim"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 	"github.com/georgezero/dreamteam-go/internal/version"
 )
@@ -53,7 +54,8 @@ func TestGoldenReferences(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		out, errs, code := runJSON(t, append(ref.args, "-verify-replay", "-golden", path, "-allow-engine-mismatch")...)
+		out, errs, code := runJSON(t, append(ref.args, "-verify-replay", "-golden", path, "-allow-engine-mismatch",
+			"-golden-migrations", filepath.Join(goldenDir, "MIGRATIONS.json"))...)
 		if code != exitOK {
 			t.Errorf("%s: exit %d\n%s", ref.file, code, errs)
 			continue
@@ -117,9 +119,6 @@ func TestGoldenComparisonReports(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// The reference may name an older engine (outcomes unchanged): stamp
-	// this one, so each case below changes exactly one thing.
-	golden = editGolden(t, golden, func(m map[string]any) { m["engine"] = version.Number })
 	out, _, code := runJSON(t, "-scenario", "mini", "-seed", "1", "-days", "7", "-verify-replay")
 	if code != 0 {
 		t.Fatal(code)
@@ -128,6 +127,13 @@ func TestGoldenComparisonReports(t *testing.T) {
 	if err := json.Unmarshal(out, &r); err != nil {
 		t.Fatal(err)
 	}
+	// The reference may name an older engine and state encoding (outcomes
+	// unchanged, MIGRATIONS.json): stamp this build's, so each case below
+	// changes exactly one thing.
+	golden = editGolden(t, golden, func(m map[string]any) {
+		m["engine"] = version.Number
+		get(m, "digests")["state"], get(m, "digests")["run"], get(m, "replay")["runDigest"] = r.Digests.State, r.Digests.Run, r.Digests.Run
+	})
 	cases := []struct {
 		name string
 		edit func(m map[string]any)
@@ -322,5 +328,65 @@ func TestResultReconciles(t *testing.T) {
 		if exams != r.Window.Ops.Exams {
 			t.Errorf("%s: calendar exams %d, window %d", ref.file, exams, r.Window.Ops.Exams)
 		}
+	}
+}
+
+// V0.2 Slice 1: the historical references are kept byte-for-byte; the
+// state-schema change is documented field by field in MIGRATIONS.json.
+// Without the manifest exactly those fields differ; under it each must
+// hold its recorded old value in the reference and new value in the run.
+func TestGoldenMigrations(t *testing.T) {
+	raw, err := os.ReadFile(filepath.Join(goldenDir, "MIGRATIONS.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	m, err := session.DecodeMigrations(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.StateSchema != sim.StateSchema || len(m.References) != len(references) {
+		t.Fatalf("manifest: state schema %q (build %q), %d references", m.StateSchema, sim.StateSchema, len(m.References))
+	}
+	golden, _ := os.ReadFile(filepath.Join(goldenDir, "mini-seed1-7d.json"))
+	out, _, _ := runJSON(t, "-scenario", "mini", "-seed", "1", "-days", "7", "-verify-replay")
+	var r session.Result
+	json.Unmarshal(out, &r)
+	mig := m.References["mini-seed1-7d.json"]
+
+	// Without the manifest: the migrated fields, and nothing else, differ.
+	c, err := session.Compare(golden, &r, true)
+	if !errors.Is(err, session.ErrGoldenMismatch) || c.Total != len(mig) {
+		t.Fatalf("unmigrated comparison: %v, %d differences, want %d\n%s", err, c.Total, len(mig), c)
+	}
+	for _, d := range c.Differences {
+		if _, ok := mig[strings.SplitN(strings.TrimPrefix(d, "."), ":", 2)[0]]; !ok {
+			t.Errorf("difference %s is not a migrated field", d)
+		}
+	}
+	// Under it: identical.
+	if c, err := session.CompareMigrated(golden, &r, true, mig); err != nil || !c.Match || len(c.Migrated) != len(mig) {
+		t.Fatalf("migrated comparison: %v\n%s", err, c)
+	}
+	// A run that does not reproduce the recorded new state fails, and so
+	// does a reference that is not the recorded old one.
+	wrongNew := map[string]session.FieldChange{}
+	for k, v := range mig {
+		wrongNew[k] = v
+	}
+	wrongNew["digests.state"] = session.FieldChange{Old: mig["digests.state"].Old, New: "00"}
+	if _, err := session.CompareMigrated(golden, &r, true, wrongNew); !errors.Is(err, session.ErrGoldenMismatch) {
+		t.Errorf("a different new state digest passed: %v", err)
+	}
+	tampered := editGolden(t, golden, func(m map[string]any) { get(m, "digests")["state"] = "00" })
+	if _, err := session.CompareMigrated(tampered, &r, true, mig); !errors.Is(err, session.ErrGoldenMismatch) {
+		t.Errorf("a reference with another old state digest passed: %v", err)
+	}
+	// Outcomes are still compared under a migration.
+	changed := editGolden(t, golden, func(m map[string]any) { get(m, "balances")["cashCents"] = json.Number("1") })
+	if _, err := session.CompareMigrated(changed, &r, true, mig); !errors.Is(err, session.ErrGoldenMismatch) {
+		t.Errorf("an outcome difference passed under the migration: %v", err)
+	}
+	if _, err := session.DecodeMigrations([]byte(`{"schema": "dreamteam.golden-migration/v1", "extra": 1}`)); !errors.Is(err, session.ErrGoldenFormat) {
+		t.Errorf("unknown manifest field: %v", err)
 	}
 }

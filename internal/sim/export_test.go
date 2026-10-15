@@ -235,7 +235,11 @@ type LineInfo struct {
 
 var entryKindNames = map[entryKind]string{entOpening: "opening", entRevenue: "revenue", entStudyCost: "study_cost",
 	entPayment: "payment", entSettle: "settle", entWages: "wages", entSalary: "salary", entFixed: "fixed",
-	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal"}
+	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal", entGuarantee: "guarantee"}
+
+// OpenGuarantee is the guaranteed pay provisioned this week and not yet
+// final (wages and benefits).
+func (w *World) OpenGuarantee() int64 { return w.st.openGuarantee() }
 
 // Journal lists every posted entry.
 func (w *World) Journal() []EntryInfo {

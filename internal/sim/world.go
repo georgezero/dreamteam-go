@@ -40,6 +40,7 @@ type state struct {
 
 	rooms []room
 	emps  []employee
+	staff []employment // employment registry, parallel to emps (employment.go)
 	dem   demandState
 	fin   finState
 	// met measures the practice (metrics.go); alerts watch it from the
@@ -87,6 +88,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 	for i := range cfg.Employees {
 		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], shift: -1})
 	}
+	st.initStaff()
 	st.initDemand()
 	st.initFinance()
 	st.initMetrics()
@@ -337,6 +339,9 @@ func (st *state) CheckInvariants() error {
 		return err
 	}
 	if err := st.checkFinance(); err != nil {
+		return err
+	}
+	if err := st.checkStaff(); err != nil {
 		return err
 	}
 	return st.checkDemand()
