@@ -1,0 +1,387 @@
+{
+ "name": "D115-MRfull-USfull-XRCT-P40-A55",
+ "description": "V0.2 Step 0 feasibility sweep (static overlay): referral demand x1.15 (every source); + MR technologist 11:30-20:00 ($45/h); + US technologist 11:30-20:00 ($44/h); + XR/CT day technologist (08:00-16:30, $38/h); US_45 slots at 40 min (one more US_45 per weekday); radiologist site allocation 55%/45%.",
+ "scenario": "established",
+ "overlay": {
+  "referralSources": [
+   {
+    "id": "SRC1",
+    "baseDailyMilliOrders": 27600
+   },
+   {
+    "id": "SRC2",
+    "baseDailyMilliOrders": 13800
+   },
+   {
+    "id": "SRC3",
+    "baseDailyMilliOrders": 6900
+   },
+   {
+    "id": "SRC4",
+    "baseDailyMilliOrders": 5750
+   },
+   {
+    "id": "SRC5",
+    "baseDailyMilliOrders": 8050
+   },
+   {
+    "id": "SRC6",
+    "baseDailyMilliOrders": 10350
+   }
+  ],
+  "employees": [
+   {
+    "id": "E11",
+    "name": "Alex",
+    "role": "technologist",
+    "skills": [
+     "MR"
+    ],
+    "pay": {
+     "type": "hourly",
+     "rateCents": 4500
+    },
+    "roster": {
+     "Mon": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Tue": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Wed": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Thu": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Fri": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R4",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "id": "E10",
+    "name": "Drew",
+    "role": "technologist",
+    "skills": [
+     "US"
+    ],
+    "pay": {
+     "type": "hourly",
+     "rateCents": 4400
+    },
+    "roster": {
+     "Mon": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R2",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Tue": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R2",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Wed": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R2",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Thu": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R2",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     },
+     "Fri": {
+      "start": "11:30",
+      "end": "20:00",
+      "assignment": "R2",
+      "breaks": [
+       [
+        "15:30",
+        "16:00"
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "id": "E09",
+    "name": "Jamie",
+    "role": "technologist",
+    "skills": [
+     "CT",
+     "XR"
+    ],
+    "pay": {
+     "type": "hourly",
+     "rateCents": 3800
+    },
+    "roster": {
+     "Mon": {
+      "start": "08:00",
+      "end": "16:30",
+      "assignment": "R3",
+      "breaks": [
+       [
+        "12:30",
+        "13:00"
+       ]
+      ]
+     },
+     "Tue": {
+      "start": "08:00",
+      "end": "16:30",
+      "assignment": "R3",
+      "breaks": [
+       [
+        "12:30",
+        "13:00"
+       ]
+      ]
+     },
+     "Wed": {
+      "start": "08:00",
+      "end": "16:30",
+      "assignment": "R3",
+      "breaks": [
+       [
+        "12:30",
+        "13:00"
+       ]
+      ]
+     },
+     "Thu": {
+      "start": "08:00",
+      "end": "16:30",
+      "assignment": "R3",
+      "breaks": [
+       [
+        "12:30",
+        "13:00"
+       ]
+      ]
+     },
+     "Fri": {
+      "start": "08:00",
+      "end": "16:30",
+      "assignment": "R3",
+      "breaks": [
+       [
+        "12:30",
+        "13:00"
+       ]
+      ]
+     }
+    }
+   },
+   {
+    "id": "E07",
+    "siteAllocationBP": 5500
+   },
+   {
+    "id": "E08",
+    "siteAllocationBP": 4500
+   }
+  ],
+  "templates": {
+   "R2": [
+    {
+     "days": [
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri"
+     ],
+     "slots": [
+      {
+       "start": "09:30",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "10:10",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "10:50",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "11:20",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "12:00",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "12:30",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "14:00",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "14:40",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "15:10",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "15:50",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "16:20",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "17:00",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "17:30",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "18:10",
+       "lenMin": 40,
+       "category": "US_45"
+      },
+      {
+       "start": "18:50",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "19:20",
+       "lenMin": 40,
+       "category": "US_45"
+      }
+     ]
+    },
+    {
+     "days": [
+      "Sat"
+     ],
+     "slots": [
+      {
+       "start": "10:00",
+       "lenMin": 45,
+       "count": 2,
+       "category": "US_45"
+      },
+      {
+       "start": "11:30",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "12:00",
+       "lenMin": 45,
+       "count": 2,
+       "category": "US_45"
+      },
+      {
+       "start": "14:00",
+       "lenMin": 45,
+       "category": "US_45"
+      },
+      {
+       "start": "14:45",
+       "lenMin": 30,
+       "category": "US_30"
+      },
+      {
+       "start": "15:15",
+       "lenMin": 45,
+       "category": "US_45"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "seeds": "1-9",
+ "days": 90
+}

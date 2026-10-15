@@ -30,8 +30,21 @@ import (
 //
 //	go test -tags calibration ./internal/sim -run CalibrationExperiments -v -timeout 120m
 //	DT_EXPERIMENTS=three-techs,strategy-b   (default: all manifests)
+//	DT_EXP_DIR, DT_RES_DIR   another manifest set and its results, relative
+//	                         to this package (the V0.2 feasibility sweep:
+//	                         ../../docs/calibration/feasibility/{experiments,results})
+//
+// Manifests run in parallel (go test -parallel), seeds within one serially;
+// every result depends only on its manifest.
 
-const expDir, resDir = "../../docs/calibration/experiments", "../../docs/calibration/results"
+var expDir, resDir = envOr("DT_EXP_DIR", "../../docs/calibration/experiments"), envOr("DT_RES_DIR", "../../docs/calibration/results")
+
+func envOr(name, def string) string {
+	if v := os.Getenv(name); v != "" {
+		return v
+	}
+	return def
+}
 
 type manifest struct {
 	Name        string          `json:"name"`
@@ -68,27 +81,32 @@ func TestCalibrationExperiments(t *testing.T) {
 			want[n] = true
 		}
 	}
-	for _, p := range paths {
-		raw, err := os.ReadFile(p)
-		if err != nil {
-			t.Fatal(err)
+	t.Run("run", func(t *testing.T) {
+		for _, p := range paths {
+			raw, err := os.ReadFile(p)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var m manifest
+			dec := json.NewDecoder(strings.NewReader(string(raw)))
+			dec.DisallowUnknownFields()
+			if err := dec.Decode(&m); err != nil {
+				t.Fatalf("%s: %v", p, err)
+			}
+			if len(want) > 0 && !want[m.Name] {
+				continue
+			}
+			t.Run(m.Name, func(t *testing.T) {
+				t.Parallel()
+				res := runExperiment(t, m)
+				out, _ := json.MarshalIndent(res, "", " ")
+				if err := os.WriteFile(filepath.Join(resDir, m.Name+".json"), append(out, '\n'), 0o644); err != nil {
+					t.Fatal(err)
+				}
+				t.Logf("%s: %s", m.Name, oneLine(res))
+			})
 		}
-		var m manifest
-		dec := json.NewDecoder(strings.NewReader(string(raw)))
-		dec.DisallowUnknownFields()
-		if err := dec.Decode(&m); err != nil {
-			t.Fatalf("%s: %v", p, err)
-		}
-		if len(want) > 0 && !want[m.Name] {
-			continue
-		}
-		res := runExperiment(t, m)
-		out, _ := json.MarshalIndent(res, "", " ")
-		if err := os.WriteFile(filepath.Join(resDir, m.Name+".json"), append(out, '\n'), 0o644); err != nil {
-			t.Fatal(err)
-		}
-		t.Logf("%s: %s", m.Name, oneLine(res))
-	}
+	})
 	writeSummary(t)
 }
 
@@ -179,6 +197,15 @@ func keyMetrics(w *window) map[string]float64 {
 	m["overtimeH"] = float64(w.OTMin) / 60
 	m["approvedOvertimeH"] = float64(w.ApprOTMin) / 60
 	m["walkInsDeclined"] = float64(w.Extra["walkInsDeclined"])
+	m["reports"] = float64(w.Reports)
+	m["reportsPer30d"] = float64(w.Reports) * 30 / float64(w.Days)
+	m["laborK"] = float64(w.Labor) / 100_000
+	m["fixedK"] = float64(w.Fixed) / 100_000
+	m["variableK"] = float64(w.Variable) / 100_000
+	m["cashEndK"] = float64(w.CashEnd) / 100_000
+	m["arChangeK"] = float64(w.ARChange) / 100_000
+	m["noShows"] = float64(w.NoShows)
+	m["cancelled"] = float64(w.Cancelled)
 	// The order cohort: arrived = completed + ended without an exam +
 	// outstanding, by origin.
 	class := map[string]string{"imaged": "Completed", "reported": "Completed", "lost": "Ended", "cancelled": "Ended",
@@ -209,6 +236,14 @@ func keyMetrics(w *window) map[string]float64 {
 	for k, md := range w.Mods {
 		m["tueFri"+md] = w.TueFriDay[k]
 		m["delayP50Days"+md] = float64(w.DelayP50[k])
+		m["delayP90Days"+md] = float64(w.DelayP90[k])
+		m["leadP50Days"+md] = float64(w.LeadP50[k])
+		m["leadP90Days"+md] = float64(w.LeadP90[k])
+		m["exams"+md] = float64(w.Exams[k])
+		m["orders"+md] = float64(w.Orders[k])
+		m["lost"+md] = float64(w.LostDecl[k] + w.LostNoSlot[k])
+		m["utilStaffedPct"+md] = float64(w.UtilStaff[k]) / 100
+		m["utilOpenPct"+md] = float64(w.UtilOpen[k]) / 100
 		m["reqLeadP50Days"+md] = float64(w.ReqLeadP50[k])
 	}
 	for key, ts := range w.TATByPri {

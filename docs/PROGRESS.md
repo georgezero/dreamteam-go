@@ -7,6 +7,55 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 step 0 — design draft 2 and the feasibility gate (0.2.0-dev.0)
+
+Design and static experiments only: no engine, scenario, action or replay
+change. No-action outcomes are those of v0.1.0.
+
+* **V0.1.0 published.** GitHub Release "DreamTeam v0.1.0" from the existing
+  tag (89b1779), after CI (run 38663474125) and a full uncached suite on the
+  tagged tree passed.
+* **Design draft 2** (`docs/V0.2_DESIGN.md`) applies the six owner decisions
+  and resolves the 18 review findings (Appendix A): staff registry separate
+  from the scenario; contracted, rostered and worked hours with guaranteed
+  weekly pay and no double payment (legacy contracts inferred, including
+  two 39.5-hour employees); the lifecycle from recruiting to severance; five
+  actions with schemas, atomic batches, no-op rules and previews separating
+  guaranteed from forecast costs; whole-schedule booking reconciliation and
+  a practice-caused displacement lifecycle; employed vs outsourced reading
+  with no price floor; finance postings; neutrality and golden migration;
+  session v2 with a v1 reader; the T90 metric vector, baseline-relative
+  service gates and an exploit table. `docs/ROADMAP.md` re-scoped V0.2–V0.6
+  (V0.6 restored), V0.1 sections unchanged.
+* **Step 0 feasibility sweep** (`docs/calibration/feasibility/`): 53 static
+  overlays (demand ×1.00–1.30 uniform and imaging-weighted, XR/CT, US and MR
+  technologists, 40-minute US slots, radiologist allocation 50/40–65/55),
+  9 paired seeds at 30 and 90 days, the best three and the base at 20 seeds,
+  plus a labelled out-of-range diagnostic (×1.50). Calibration harness:
+  `DT_EXP_DIR`/`DT_RES_DIR`, parallel manifests, more aggregated figures;
+  historical results untouched (summary regenerates byte-identically).
+  `generate.py` writes the manifests, `report.py` the tables.
+* **Gate result: not passed.** The best permitted configuration
+  (imaging-weighted ×1.30 + MR evening technologist) breaks even: +0.4%
+  mean T90 margin (−0.9 to +2.4), T90 profit +$2.8k mean (95% CI −$0.2k to
+  +$5.7k), 12 of 20 seeds profitable. Demand ×1.50 gives only +1.6%: the
+  practice cannot book it (CT and XR lose hundreds of referrals at ≈40% room
+  use; US and MR are single rooms). Fixed costs and salaried reading are
+  ≈58% of expenses; cutting the allocation collapses reporting at higher
+  volume; US 40-minute slots change nothing; only the MR evening
+  technologist pays.
+* **Engine constraint found:** no shift may start after 12:00 (validation:
+  start + 12 h `maxShiftHours` before midnight), so part-time evening shifts
+  cannot be expressed; those cells are blocked (upper bound ≈+2.4–3.8%).
+* **Verification:** `go vet -tags calibration ./internal/sim`;
+  `TestCalibrationSummary` (historical summary unchanged); the sweep itself
+  (four runs, all passing); `go test ./...`.
+* **Open:** owner decision on the scenario premise (draft 2 §17.2: accept
+  break-even, CT/XR template levers, cost base, reimbursement, teleradiology
+  substitution, a second US room); then re-sweep. NO GO for action code.
+
+---
+
 ## V0.1.0 — release preparation (v0.1.0)
 
 Release preparation only: no change to mechanics, RNG, scenarios,

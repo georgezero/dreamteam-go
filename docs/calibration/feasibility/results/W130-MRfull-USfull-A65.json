@@ -1,0 +1,10606 @@
+{
+ "experiment": {
+  "name": "W130-MRfull-USfull-A65",
+  "description": "V0.2 Step 0 feasibility sweep (static overlay): referral demand x1.30, imaging-weighted (primary/urgent care x1.10, the US/CT/MR-heavy sources x1.494); + MR technologist 11:30-20:00 ($45/h); + US technologist 11:30-20:00 ($44/h); radiologist site allocation 65%/55%.",
+  "scenario": "established",
+  "overlay": {
+   "referralSources": [
+    {
+     "id": "SRC1",
+     "baseDailyMilliOrders": 26400
+    },
+    {
+     "id": "SRC2",
+     "baseDailyMilliOrders": 17925
+    },
+    {
+     "id": "SRC3",
+     "baseDailyMilliOrders": 8962
+    },
+    {
+     "id": "SRC4",
+     "baseDailyMilliOrders": 7469
+    },
+    {
+     "id": "SRC5",
+     "baseDailyMilliOrders": 7700
+    },
+    {
+     "id": "SRC6",
+     "baseDailyMilliOrders": 13444
+    }
+   ],
+   "employees": [
+    {
+     "id": "E11",
+     "name": "Alex",
+     "role": "technologist",
+     "skills": [
+      "MR"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 4500
+     },
+     "roster": {
+      "Mon": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R4",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Tue": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R4",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Wed": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R4",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Thu": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R4",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Fri": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R4",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "id": "E10",
+     "name": "Drew",
+     "role": "technologist",
+     "skills": [
+      "US"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 4400
+     },
+     "roster": {
+      "Mon": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R2",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Tue": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R2",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Wed": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R2",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Thu": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R2",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      },
+      "Fri": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "R2",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ]
+      }
+     }
+    },
+    {
+     "id": "E07",
+     "siteAllocationBP": 6500
+    },
+    {
+     "id": "E08",
+     "siteAllocationBP": 5500
+    }
+   ]
+  },
+  "seeds": "1-9",
+  "days": 90
+ },
+ "engine": "0.1.0",
+ "baseScenarioFingerprint": "b1cbc2a0108f22e34082a0d39f72499678a3eb2f8b2501d483f3525a39ad806a",
+ "scenarioFingerprint": "54fcb8311abb06415bbbb21dd5071f915fb629f45e631726201c9b38681241af",
+ "overlaySHA256": "7bc7521ce40cf55eacf110c9749e854f016a734ea04cc22d64d2a12fadc5be2b",
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9
+ ],
+ "aggregate": {
+  "30d": {
+   "approvedOvertimeH": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "arChangeK": {
+    "mean": 11.6,
+    "min": 7.4,
+    "max": 17.4
+   },
+   "cancelled": {
+    "mean": 161.3,
+    "min": 139,
+    "max": 176
+   },
+   "cashEndK": {
+    "mean": 145.3,
+    "min": 138.5,
+    "max": 152
+   },
+   "cohortReferralArrived": {
+    "mean": 1917.9,
+    "min": 1867,
+    "max": 1961
+   },
+   "cohortReferralCompleted": {
+    "mean": 819.7,
+    "min": 793,
+    "max": 839
+   },
+   "cohortReferralEnded": {
+    "mean": 311.8,
+    "min": 275,
+    "max": 337
+   },
+   "cohortReferralOutstanding": {
+    "mean": 786.4,
+    "min": 742,
+    "max": 831
+   },
+   "cohortReferral_booked": {
+    "mean": 742.7,
+    "min": 701,
+    "max": 791
+   },
+   "cohortReferral_cancelled": {
+    "mean": 48.9,
+    "min": 40,
+    "max": 57
+   },
+   "cohortReferral_imaged": {
+    "mean": 9.4,
+    "min": 7,
+    "max": 15
+   },
+   "cohortReferral_left": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortReferral_lost": {
+    "mean": 231.8,
+    "min": 201,
+    "max": 262
+   },
+   "cohortReferral_no-show": {
+    "mean": 31.1,
+    "min": 27,
+    "max": 36
+   },
+   "cohortReferral_recall": {
+    "mean": 43.8,
+    "min": 39,
+    "max": 53
+   },
+   "cohortReferral_reported": {
+    "mean": 810.2,
+    "min": 783,
+    "max": 832
+   },
+   "cohortReferral_visit": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortWalkInArrived": {
+    "mean": 229.8,
+    "min": 196,
+    "max": 272
+   },
+   "cohortWalkInCompleted": {
+    "mean": 99.1,
+    "min": 78,
+    "max": 118
+   },
+   "cohortWalkInEnded": {
+    "mean": 129.9,
+    "min": 111,
+    "max": 160
+   },
+   "cohortWalkInOutstanding": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 4
+   },
+   "cohortWalkIn_booked": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 4
+   },
+   "cohortWalkIn_cancelled": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "cohortWalkIn_imaged": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "cohortWalkIn_left": {
+    "mean": 129.2,
+    "min": 111,
+    "max": 159
+   },
+   "cohortWalkIn_lost": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 1
+   },
+   "cohortWalkIn_no-show": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "cohortWalkIn_recall": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortWalkIn_reported": {
+    "mean": 99,
+    "min": 78,
+    "max": 118
+   },
+   "cohortWalkIn_visit": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "delayP50DaysCT": {
+    "mean": 1.7,
+    "min": 1,
+    "max": 2
+   },
+   "delayP50DaysMR": {
+    "mean": 1.3,
+    "min": 1,
+    "max": 2
+   },
+   "delayP50DaysUS": {
+    "mean": 3,
+    "min": 2,
+    "max": 4
+   },
+   "delayP50DaysXR": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "delayP90DaysCT": {
+    "mean": 7,
+    "min": 5,
+    "max": 8
+   },
+   "delayP90DaysMR": {
+    "mean": 8.6,
+    "min": 7,
+    "max": 12
+   },
+   "delayP90DaysUS": {
+    "mean": 17.1,
+    "min": 15,
+    "max": 19
+   },
+   "delayP90DaysXR": {
+    "mean": 4.2,
+    "min": 3,
+    "max": 5
+   },
+   "exams": {
+    "mean": 1646,
+    "min": 1630,
+    "max": 1666
+   },
+   "examsCT": {
+    "mean": 404,
+    "min": 394,
+    "max": 427
+   },
+   "examsMR": {
+    "mean": 250.7,
+    "min": 244,
+    "max": 257
+   },
+   "examsPer30d": {
+    "mean": 1646,
+    "min": 1630,
+    "max": 1666
+   },
+   "examsUS": {
+    "mean": 284.4,
+    "min": 274,
+    "max": 299
+   },
+   "examsXR": {
+    "mean": 706.9,
+    "min": 687,
+    "max": 730
+   },
+   "fixedK": {
+    "mean": 86.8,
+    "min": 86.8,
+    "max": 86.8
+   },
+   "laborK": {
+    "mean": 132.6,
+    "min": 132.1,
+    "max": 133.3
+   },
+   "leadP50DaysCT": {
+    "mean": 9.6,
+    "min": 8,
+    "max": 12
+   },
+   "leadP50DaysMR": {
+    "mean": 11.6,
+    "min": 10,
+    "max": 13
+   },
+   "leadP50DaysUS": {
+    "mean": 18.8,
+    "min": 16,
+    "max": 21
+   },
+   "leadP50DaysXR": {
+    "mean": 8.4,
+    "min": 8,
+    "max": 9
+   },
+   "leadP90DaysCT": {
+    "mean": 50.2,
+    "min": 48,
+    "max": 53
+   },
+   "leadP90DaysMR": {
+    "mean": 48.6,
+    "min": 44,
+    "max": 55
+   },
+   "leadP90DaysUS": {
+    "mean": 50.6,
+    "min": 48,
+    "max": 54
+   },
+   "leadP90DaysXR": {
+    "mean": 45.3,
+    "min": 41,
+    "max": 51
+   },
+   "lostCT": {
+    "mean": 75.6,
+    "min": 60,
+    "max": 92
+   },
+   "lostMR": {
+    "mean": 35.7,
+    "min": 27,
+    "max": 44
+   },
+   "lostUS": {
+    "mean": 77.1,
+    "min": 63,
+    "max": 101
+   },
+   "lostXR": {
+    "mean": 43.4,
+    "min": 35,
+    "max": 51
+   },
+   "marginPct": {
+    "mean": -2.3,
+    "min": -3.6,
+    "max": -1
+   },
+   "netRevenueK": {
+    "mean": 259.3,
+    "min": 255.5,
+    "max": 262.5
+   },
+   "noShows": {
+    "mean": 114.2,
+    "min": 90,
+    "max": 126
+   },
+   "opexK": {
+    "mean": 265.2,
+    "min": 264.2,
+    "max": 266.6
+   },
+   "ordersCT": {
+    "mean": 518.3,
+    "min": 477,
+    "max": 545
+   },
+   "ordersMR": {
+    "mean": 315,
+    "min": 293,
+    "max": 351
+   },
+   "ordersUS": {
+    "mean": 376.8,
+    "min": 356,
+    "max": 414
+   },
+   "ordersXR": {
+    "mean": 707.8,
+    "min": 662,
+    "max": 746
+   },
+   "overTargetPct": {
+    "mean": 6.6,
+    "min": 5.5,
+    "max": 8
+   },
+   "overtimeH": {
+    "mean": 68.8,
+    "min": 56.1,
+    "max": 81.5
+   },
+   "profitK": {
+    "mean": -5.9,
+    "min": -9.1,
+    "max": -2.7
+   },
+   "readUtilPct": {
+    "mean": 82,
+    "min": 80.3,
+    "max": 84.3
+   },
+   "referralLost": {
+    "mean": 231.8,
+    "min": 201,
+    "max": 262
+   },
+   "referralOrders": {
+    "mean": 1917.9,
+    "min": 1867,
+    "max": 1961
+   },
+   "reports": {
+    "mean": 1638.2,
+    "min": 1622,
+    "max": 1659
+   },
+   "reportsPer30d": {
+    "mean": 1638.2,
+    "min": 1622,
+    "max": 1659
+   },
+   "reqLeadP50DaysCT": {
+    "mean": 6.9,
+    "min": 6,
+    "max": 8
+   },
+   "reqLeadP50DaysMR": {
+    "mean": 7.8,
+    "min": 7,
+    "max": 9
+   },
+   "reqLeadP50DaysUS": {
+    "mean": 9.2,
+    "min": 8,
+    "max": 10
+   },
+   "reqLeadP50DaysXR": {
+    "mean": 6.2,
+    "min": 5,
+    "max": 7
+   },
+   "routineAcquired": {
+    "mean": 1455.6,
+    "min": 1419,
+    "max": 1475
+   },
+   "routineBreaches": {
+    "mean": 63.7,
+    "min": 54,
+    "max": 76
+   },
+   "routineCTAcquired": {
+    "mean": 357.8,
+    "min": 332,
+    "max": 384
+   },
+   "routineCTBreaches": {
+    "mean": 21.9,
+    "min": 16,
+    "max": 29
+   },
+   "routineCTCompleted": {
+    "mean": 354.4,
+    "min": 328,
+    "max": 380
+   },
+   "routineCTMaxMin": {
+    "mean": 3468.3,
+    "min": 2699,
+    "max": 3655
+   },
+   "routineCTOldestUnfinishedMin": {
+    "mean": 647.2,
+    "min": 581,
+    "max": 710
+   },
+   "routineCTOvernightBreaches": {
+    "mean": 21.9,
+    "min": 16,
+    "max": 29
+   },
+   "routineCTP50Min": {
+    "mean": 69.2,
+    "min": 53,
+    "max": 90
+   },
+   "routineCTP90Min": {
+    "mean": 924.1,
+    "min": 839,
+    "max": 1068
+   },
+   "routineCTUnfinished": {
+    "mean": 3.3,
+    "min": 2,
+    "max": 5
+   },
+   "routineCompleted": {
+    "mean": 1447.6,
+    "min": 1412,
+    "max": 1469
+   },
+   "routineMRAcquired": {
+    "mean": 234,
+    "min": 227,
+    "max": 244
+   },
+   "routineMRBreaches": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 2
+   },
+   "routineMRCompleted": {
+    "mean": 232.9,
+    "min": 225,
+    "max": 242
+   },
+   "routineMRMaxMin": {
+    "mean": 1907.3,
+    "min": 1019,
+    "max": 3610
+   },
+   "routineMROldestUnfinishedMin": {
+    "mean": 430.7,
+    "min": 0,
+    "max": 667
+   },
+   "routineMROvernightBreaches": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 2
+   },
+   "routineMRP50Min": {
+    "mean": 67.7,
+    "min": 58,
+    "max": 84
+   },
+   "routineMRP90Min": {
+    "mean": 817.6,
+    "min": 790,
+    "max": 866
+   },
+   "routineMRUnfinished": {
+    "mean": 1.1,
+    "min": 0,
+    "max": 2
+   },
+   "routineMaxMin": {
+    "mean": 3472.3,
+    "min": 2699,
+    "max": 3655
+   },
+   "routineOldestUnfinishedMin": {
+    "mean": 684.2,
+    "min": 633,
+    "max": 729
+   },
+   "routineOvernightBreaches": {
+    "mean": 63.7,
+    "min": 54,
+    "max": 76
+   },
+   "routineP50Min": {
+    "mean": 59.3,
+    "min": 50,
+    "max": 79
+   },
+   "routineP90Min": {
+    "mean": 828.7,
+    "min": 798,
+    "max": 885
+   },
+   "routineUSAcquired": {
+    "mean": 269.9,
+    "min": 257,
+    "max": 281
+   },
+   "routineUSBreaches": {
+    "mean": 12.3,
+    "min": 10,
+    "max": 14
+   },
+   "routineUSCompleted": {
+    "mean": 268.2,
+    "min": 256,
+    "max": 279
+   },
+   "routineUSMaxMin": {
+    "mean": 2696.8,
+    "min": 2638,
+    "max": 2773
+   },
+   "routineUSOldestUnfinishedMin": {
+    "mean": 663.4,
+    "min": 625,
+    "max": 686
+   },
+   "routineUSOvernightBreaches": {
+    "mean": 12.3,
+    "min": 10,
+    "max": 14
+   },
+   "routineUSP50Min": {
+    "mean": 60,
+    "min": 50,
+    "max": 78
+   },
+   "routineUSP90Min": {
+    "mean": 860,
+    "min": 813,
+    "max": 935
+   },
+   "routineUSUnfinished": {
+    "mean": 1.7,
+    "min": 1,
+    "max": 3
+   },
+   "routineUnfinished": {
+    "mean": 8,
+    "min": 6,
+    "max": 11
+   },
+   "routineXRAcquired": {
+    "mean": 593.9,
+    "min": 568,
+    "max": 610
+   },
+   "routineXRBreaches": {
+    "mean": 29,
+    "min": 23,
+    "max": 34
+   },
+   "routineXRCompleted": {
+    "mean": 592,
+    "min": 566,
+    "max": 608
+   },
+   "routineXRMaxMin": {
+    "mean": 2686,
+    "min": 2587,
+    "max": 2777
+   },
+   "routineXROldestUnfinishedMin": {
+    "mean": 489.7,
+    "min": 0,
+    "max": 729
+   },
+   "routineXROvernightBreaches": {
+    "mean": 29,
+    "min": 23,
+    "max": 34
+   },
+   "routineXRP50Min": {
+    "mean": 50.1,
+    "min": 40,
+    "max": 69
+   },
+   "routineXRP90Min": {
+    "mean": 304,
+    "min": 127,
+    "max": 781
+   },
+   "routineXRUnfinished": {
+    "mean": 1.9,
+    "min": 0,
+    "max": 5
+   },
+   "soonAcquired": {
+    "mean": 171,
+    "min": 153,
+    "max": 199
+   },
+   "soonBreaches": {
+    "mean": 43.7,
+    "min": 34,
+    "max": 54
+   },
+   "soonCTAcquired": {
+    "mean": 44.9,
+    "min": 27,
+    "max": 62
+   },
+   "soonCTBreaches": {
+    "mean": 19.6,
+    "min": 10,
+    "max": 27
+   },
+   "soonCTCompleted": {
+    "mean": 44.1,
+    "min": 27,
+    "max": 61
+   },
+   "soonCTMaxMin": {
+    "mean": 2523.8,
+    "min": 2348,
+    "max": 2656
+   },
+   "soonCTOldestUnfinishedMin": {
+    "mean": 353.4,
+    "min": 0,
+    "max": 719
+   },
+   "soonCTOvernightBreaches": {
+    "mean": 18.8,
+    "min": 10,
+    "max": 26
+   },
+   "soonCTP50Min": {
+    "mean": 98.8,
+    "min": 85,
+    "max": 118
+   },
+   "soonCTP90Min": {
+    "mean": 924.1,
+    "min": 843,
+    "max": 992
+   },
+   "soonCTUnfinished": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "soonCompleted": {
+    "mean": 169.1,
+    "min": 153,
+    "max": 198
+   },
+   "soonMRAcquired": {
+    "mean": 16,
+    "min": 11,
+    "max": 20
+   },
+   "soonMRBreaches": {
+    "mean": 7.9,
+    "min": 3,
+    "max": 11
+   },
+   "soonMRCompleted": {
+    "mean": 15.3,
+    "min": 11,
+    "max": 20
+   },
+   "soonMRMaxMin": {
+    "mean": 936.1,
+    "min": 814,
+    "max": 1027
+   },
+   "soonMROldestUnfinishedMin": {
+    "mean": 285,
+    "min": 0,
+    "max": 675
+   },
+   "soonMROvernightBreaches": {
+    "mean": 7.2,
+    "min": 3,
+    "max": 11
+   },
+   "soonMRP50Min": {
+    "mean": 248.4,
+    "min": 61,
+    "max": 704
+   },
+   "soonMRP90Min": {
+    "mean": 874.6,
+    "min": 813,
+    "max": 962
+   },
+   "soonMRUnfinished": {
+    "mean": 0.7,
+    "min": 0,
+    "max": 2
+   },
+   "soonMaxMin": {
+    "mean": 2582.2,
+    "min": 2493,
+    "max": 2656
+   },
+   "soonOldestUnfinishedMin": {
+    "mean": 578.4,
+    "min": 0,
+    "max": 719
+   },
+   "soonOvernightBreaches": {
+    "mean": 41.8,
+    "min": 33,
+    "max": 52
+   },
+   "soonP50Min": {
+    "mean": 55.7,
+    "min": 36,
+    "max": 68
+   },
+   "soonP90Min": {
+    "mean": 872.8,
+    "min": 799,
+    "max": 986
+   },
+   "soonUSAcquired": {
+    "mean": 13.3,
+    "min": 8,
+    "max": 19
+   },
+   "soonUSBreaches": {
+    "mean": 4.2,
+    "min": 1,
+    "max": 10
+   },
+   "soonUSCompleted": {
+    "mean": 13.3,
+    "min": 8,
+    "max": 19
+   },
+   "soonUSMaxMin": {
+    "mean": 1581.8,
+    "min": 675,
+    "max": 2632
+   },
+   "soonUSOldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonUSOvernightBreaches": {
+    "mean": 4.2,
+    "min": 1,
+    "max": 10
+   },
+   "soonUSP50Min": {
+    "mean": 126.6,
+    "min": 48,
+    "max": 665
+   },
+   "soonUSP90Min": {
+    "mean": 1156.1,
+    "min": 675,
+    "max": 2466
+   },
+   "soonUSUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonUnfinished": {
+    "mean": 1.9,
+    "min": 0,
+    "max": 4
+   },
+   "soonXRAcquired": {
+    "mean": 96.8,
+    "min": 85,
+    "max": 117
+   },
+   "soonXRBreaches": {
+    "mean": 12,
+    "min": 8,
+    "max": 17
+   },
+   "soonXRCompleted": {
+    "mean": 96.3,
+    "min": 85,
+    "max": 116
+   },
+   "soonXRMaxMin": {
+    "mean": 2555.3,
+    "min": 2435,
+    "max": 2643
+   },
+   "soonXROldestUnfinishedMin": {
+    "mean": 278.2,
+    "min": 0,
+    "max": 678
+   },
+   "soonXROvernightBreaches": {
+    "mean": 11.6,
+    "min": 8,
+    "max": 16
+   },
+   "soonXRP50Min": {
+    "mean": 32.7,
+    "min": 22,
+    "max": 57
+   },
+   "soonXRP90Min": {
+    "mean": 731.1,
+    "min": 101,
+    "max": 2393
+   },
+   "soonXRUnfinished": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 1
+   },
+   "tatP50Min": {
+    "mean": 58.6,
+    "min": 48,
+    "max": 77
+   },
+   "tatP90Min": {
+    "mean": 829.6,
+    "min": 799,
+    "max": 881
+   },
+   "techBusyPct": {
+    "mean": 69.6,
+    "min": 68.5,
+    "max": 70.4
+   },
+   "tueFriCT": {
+    "mean": 19,
+    "min": 18.3,
+    "max": 20
+   },
+   "tueFriMR": {
+    "mean": 11.5,
+    "min": 11,
+    "max": 11.8
+   },
+   "tueFriUS": {
+    "mean": 12.4,
+    "min": 11.6,
+    "max": 13.1
+   },
+   "tueFriXR": {
+    "mean": 32.5,
+    "min": 31.2,
+    "max": 33.9
+   },
+   "urgentAcquired": {
+    "mean": 19.4,
+    "min": 11,
+    "max": 28
+   },
+   "urgentBreaches": {
+    "mean": 1.8,
+    "min": 0,
+    "max": 4
+   },
+   "urgentCTAcquired": {
+    "mean": 1.7,
+    "min": 1,
+    "max": 4
+   },
+   "urgentCTBreaches": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "urgentCTCompleted": {
+    "mean": 1.6,
+    "min": 1,
+    "max": 3
+   },
+   "urgentCTMaxMin": {
+    "mean": 27.9,
+    "min": 13,
+    "max": 55
+   },
+   "urgentCTOldestUnfinishedMin": {
+    "mean": 85.1,
+    "min": 0,
+    "max": 596
+   },
+   "urgentCTOvernightBreaches": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentCTP50Min": {
+    "mean": 18.3,
+    "min": 12,
+    "max": 27
+   },
+   "urgentCTP90Min": {
+    "mean": 27.9,
+    "min": 13,
+    "max": 55
+   },
+   "urgentCTUnfinished": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "urgentCompleted": {
+    "mean": 19,
+    "min": 11,
+    "max": 27
+   },
+   "urgentMRAcquired": {
+    "mean": 1,
+    "min": 1,
+    "max": 1
+   },
+   "urgentMRBreaches": {
+    "mean": 0.2,
+    "min": 0,
+    "max": 1
+   },
+   "urgentMRCompleted": {
+    "mean": 1,
+    "min": 1,
+    "max": 1
+   },
+   "urgentMRMaxMin": {
+    "mean": 187.3,
+    "min": 26,
+    "max": 908
+   },
+   "urgentMROldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentMROvernightBreaches": {
+    "mean": 0.2,
+    "min": 0,
+    "max": 1
+   },
+   "urgentMRP50Min": {
+    "mean": 187.3,
+    "min": 26,
+    "max": 908
+   },
+   "urgentMRP90Min": {
+    "mean": 187.3,
+    "min": 26,
+    "max": 908
+   },
+   "urgentMRUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentMaxMin": {
+    "mean": 846.7,
+    "min": 18,
+    "max": 2607
+   },
+   "urgentOldestUnfinishedMin": {
+    "mean": 199.9,
+    "min": 0,
+    "max": 602
+   },
+   "urgentOvernightBreaches": {
+    "mean": 1,
+    "min": 0,
+    "max": 3
+   },
+   "urgentP50Min": {
+    "mean": 13,
+    "min": 8,
+    "max": 19
+   },
+   "urgentP90Min": {
+    "mean": 368.8,
+    "min": 15,
+    "max": 2388
+   },
+   "urgentUSAcquired": {
+    "mean": 2.2,
+    "min": 1,
+    "max": 3
+   },
+   "urgentUSBreaches": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 1
+   },
+   "urgentUSCompleted": {
+    "mean": 2.2,
+    "min": 1,
+    "max": 3
+   },
+   "urgentUSMaxMin": {
+    "mean": 291.6,
+    "min": 16,
+    "max": 714
+   },
+   "urgentUSOldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentUSOvernightBreaches": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 1
+   },
+   "urgentUSP50Min": {
+    "mean": 24.8,
+    "min": 16,
+    "max": 42
+   },
+   "urgentUSP90Min": {
+    "mean": 291.6,
+    "min": 16,
+    "max": 714
+   },
+   "urgentUSUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentUnfinished": {
+    "mean": 0.4,
+    "min": 0,
+    "max": 2
+   },
+   "urgentXRAcquired": {
+    "mean": 16.2,
+    "min": 9,
+    "max": 26
+   },
+   "urgentXRBreaches": {
+    "mean": 1.3,
+    "min": 0,
+    "max": 3
+   },
+   "urgentXRCompleted": {
+    "mean": 15.9,
+    "min": 9,
+    "max": 26
+   },
+   "urgentXRMaxMin": {
+    "mean": 674.1,
+    "min": 15,
+    "max": 2607
+   },
+   "urgentXROldestUnfinishedMin": {
+    "mean": 133.7,
+    "min": 0,
+    "max": 602
+   },
+   "urgentXROvernightBreaches": {
+    "mean": 0.7,
+    "min": 0,
+    "max": 3
+   },
+   "urgentXRP50Min": {
+    "mean": 11.1,
+    "min": 7,
+    "max": 17
+   },
+   "urgentXRP90Min": {
+    "mean": 299.6,
+    "min": 10,
+    "max": 2388
+   },
+   "urgentXRUnfinished": {
+    "mean": 0.3,
+    "min": 0,
+    "max": 2
+   },
+   "utilOpenPctCT": {
+    "mean": 38.5,
+    "min": 36.8,
+    "max": 40
+   },
+   "utilOpenPctMR": {
+    "mean": 61.8,
+    "min": 59.7,
+    "max": 63.4
+   },
+   "utilOpenPctUS": {
+    "mean": 54.6,
+    "min": 52.4,
+    "max": 56.9
+   },
+   "utilOpenPctXR": {
+    "mean": 40.5,
+    "min": 39.3,
+    "max": 42.3
+   },
+   "utilStaffedPctCT": {
+    "mean": 42.2,
+    "min": 40,
+    "max": 43.7
+   },
+   "utilStaffedPctMR": {
+    "mean": 69.3,
+    "min": 67,
+    "max": 71.1
+   },
+   "utilStaffedPctUS": {
+    "mean": 67,
+    "min": 64.4,
+    "max": 69.9
+   },
+   "utilStaffedPctXR": {
+    "mean": 44.3,
+    "min": 43.1,
+    "max": 46
+   },
+   "variableK": {
+    "mean": 42,
+    "min": 41.3,
+    "max": 42.7
+   },
+   "walkIns": {
+    "mean": 229.8,
+    "min": 196,
+    "max": 272
+   },
+   "walkInsDeclined": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "walkInsLeft": {
+    "mean": 129.2,
+    "min": 111,
+    "max": 159
+   }
+  },
+  "90d": {
+   "approvedOvertimeH": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "arChangeK": {
+    "mean": 19.4,
+    "min": 10.1,
+    "max": 37.4
+   },
+   "cancelled": {
+    "mean": 466.9,
+    "min": 429,
+    "max": 504
+   },
+   "cashEndK": {
+    "mean": 66.6,
+    "min": 56.2,
+    "max": 78.9
+   },
+   "cohortReferralArrived": {
+    "mean": 5469.4,
+    "min": 5338,
+    "max": 5571
+   },
+   "cohortReferralCompleted": {
+    "mean": 3458.9,
+    "min": 3405,
+    "max": 3494
+   },
+   "cohortReferralEnded": {
+    "mean": 962.3,
+    "min": 887,
+    "max": 1044
+   },
+   "cohortReferralOutstanding": {
+    "mean": 1048.2,
+    "min": 999,
+    "max": 1114
+   },
+   "cohortReferral_booked": {
+    "mean": 997.3,
+    "min": 948,
+    "max": 1060
+   },
+   "cohortReferral_cancelled": {
+    "mean": 185,
+    "min": 169,
+    "max": 203
+   },
+   "cohortReferral_imaged": {
+    "mean": 10.4,
+    "min": 7,
+    "max": 16
+   },
+   "cohortReferral_left": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortReferral_lost": {
+    "mean": 638.1,
+    "min": 568,
+    "max": 703
+   },
+   "cohortReferral_no-show": {
+    "mean": 139.2,
+    "min": 127,
+    "max": 148
+   },
+   "cohortReferral_recall": {
+    "mean": 50.9,
+    "min": 42,
+    "max": 59
+   },
+   "cohortReferral_reported": {
+    "mean": 3448.4,
+    "min": 3394,
+    "max": 3487
+   },
+   "cohortReferral_visit": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortWalkInArrived": {
+    "mean": 662.4,
+    "min": 602,
+    "max": 719
+   },
+   "cohortWalkInCompleted": {
+    "mean": 301.7,
+    "min": 274,
+    "max": 323
+   },
+   "cohortWalkInEnded": {
+    "mean": 360,
+    "min": 326,
+    "max": 397
+   },
+   "cohortWalkInOutstanding": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "cohortWalkIn_booked": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "cohortWalkIn_cancelled": {
+    "mean": 1.1,
+    "min": 0,
+    "max": 4
+   },
+   "cohortWalkIn_imaged": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "cohortWalkIn_left": {
+    "mean": 357.4,
+    "min": 324,
+    "max": 392
+   },
+   "cohortWalkIn_lost": {
+    "mean": 1.4,
+    "min": 0,
+    "max": 3
+   },
+   "cohortWalkIn_no-show": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortWalkIn_recall": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "cohortWalkIn_reported": {
+    "mean": 300.9,
+    "min": 273,
+    "max": 321
+   },
+   "cohortWalkIn_visit": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "delayP50DaysCT": {
+    "mean": 1,
+    "min": 1,
+    "max": 1
+   },
+   "delayP50DaysMR": {
+    "mean": 1.2,
+    "min": 1,
+    "max": 2
+   },
+   "delayP50DaysUS": {
+    "mean": 2.3,
+    "min": 2,
+    "max": 3
+   },
+   "delayP50DaysXR": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "delayP90DaysCT": {
+    "mean": 6.4,
+    "min": 6,
+    "max": 7
+   },
+   "delayP90DaysMR": {
+    "mean": 7.9,
+    "min": 6,
+    "max": 9
+   },
+   "delayP90DaysUS": {
+    "mean": 16.9,
+    "min": 14,
+    "max": 19
+   },
+   "delayP90DaysXR": {
+    "mean": 3.9,
+    "min": 3,
+    "max": 5
+   },
+   "exams": {
+    "mean": 4761.7,
+    "min": 4708,
+    "max": 4788
+   },
+   "examsCT": {
+    "mean": 1184.4,
+    "min": 1127,
+    "max": 1232
+   },
+   "examsMR": {
+    "mean": 731.2,
+    "min": 724,
+    "max": 741
+   },
+   "examsPer30d": {
+    "mean": 1587.2,
+    "min": 1569.3,
+    "max": 1596
+   },
+   "examsUS": {
+    "mean": 822.2,
+    "min": 793,
+    "max": 840
+   },
+   "examsXR": {
+    "mean": 2023.8,
+    "min": 1964,
+    "max": 2094
+   },
+   "fixedK": {
+    "mean": 259.8,
+    "min": 259.8,
+    "max": 259.8
+   },
+   "laborK": {
+    "mean": 392.4,
+    "min": 391.8,
+    "max": 392.8
+   },
+   "leadP50DaysCT": {
+    "mean": 9.1,
+    "min": 8,
+    "max": 11
+   },
+   "leadP50DaysMR": {
+    "mean": 11.3,
+    "min": 10,
+    "max": 12
+   },
+   "leadP50DaysUS": {
+    "mean": 18.8,
+    "min": 15,
+    "max": 21
+   },
+   "leadP50DaysXR": {
+    "mean": 8.2,
+    "min": 8,
+    "max": 9
+   },
+   "leadP90DaysCT": {
+    "mean": 51.4,
+    "min": 49,
+    "max": 56
+   },
+   "leadP90DaysMR": {
+    "mean": 50.9,
+    "min": 48,
+    "max": 54
+   },
+   "leadP90DaysUS": {
+    "mean": 53.8,
+    "min": 52,
+    "max": 56
+   },
+   "leadP90DaysXR": {
+    "mean": 49.3,
+    "min": 44,
+    "max": 52
+   },
+   "lostCT": {
+    "mean": 197.3,
+    "min": 159,
+    "max": 244
+   },
+   "lostMR": {
+    "mean": 102.1,
+    "min": 81,
+    "max": 116
+   },
+   "lostUS": {
+    "mean": 222.9,
+    "min": 165,
+    "max": 277
+   },
+   "lostXR": {
+    "mean": 115.8,
+    "min": 92,
+    "max": 134
+   },
+   "marginPct": {
+    "mean": -1.8,
+    "min": -2.9,
+    "max": -0.6
+   },
+   "netRevenueK": {
+    "mean": 764.6,
+    "min": 755.7,
+    "max": 773.8
+   },
+   "noShows": {
+    "mean": 325.9,
+    "min": 286,
+    "max": 354
+   },
+   "opexK": {
+    "mean": 778.7,
+    "min": 777.4,
+    "max": 780.4
+   },
+   "ordersCT": {
+    "mean": 1456,
+    "min": 1400,
+    "max": 1545
+   },
+   "ordersMR": {
+    "mean": 912.3,
+    "min": 884,
+    "max": 938
+   },
+   "ordersUS": {
+    "mean": 1073.8,
+    "min": 991,
+    "max": 1124
+   },
+   "ordersXR": {
+    "mean": 2027.3,
+    "min": 1949,
+    "max": 2120
+   },
+   "overTargetPct": {
+    "mean": 6.7,
+    "min": 5.8,
+    "max": 7.6
+   },
+   "overtimeH": {
+    "mean": 194.8,
+    "min": 180,
+    "max": 204.9
+   },
+   "profitK": {
+    "mean": -14.1,
+    "min": -21.7,
+    "max": -4.7
+   },
+   "readUtilPct": {
+    "mean": 81.3,
+    "min": 80.3,
+    "max": 82.3
+   },
+   "referralLost": {
+    "mean": 638.1,
+    "min": 568,
+    "max": 703
+   },
+   "referralOrders": {
+    "mean": 5469.4,
+    "min": 5338,
+    "max": 5571
+   },
+   "reports": {
+    "mean": 4752.1,
+    "min": 4700,
+    "max": 4782
+   },
+   "reportsPer30d": {
+    "mean": 1584,
+    "min": 1566.7,
+    "max": 1594
+   },
+   "reqLeadP50DaysCT": {
+    "mean": 6.8,
+    "min": 5,
+    "max": 8
+   },
+   "reqLeadP50DaysMR": {
+    "mean": 7.9,
+    "min": 7,
+    "max": 9
+   },
+   "reqLeadP50DaysUS": {
+    "mean": 9.3,
+    "min": 9,
+    "max": 10
+   },
+   "reqLeadP50DaysXR": {
+    "mean": 6,
+    "min": 5,
+    "max": 7
+   },
+   "routineAcquired": {
+    "mean": 4180.9,
+    "min": 4131,
+    "max": 4261
+   },
+   "routineBreaches": {
+    "mean": 183.1,
+    "min": 167,
+    "max": 201
+   },
+   "routineCTAcquired": {
+    "mean": 1030.7,
+    "min": 971,
+    "max": 1068
+   },
+   "routineCTBreaches": {
+    "mean": 63.9,
+    "min": 56,
+    "max": 75
+   },
+   "routineCTCompleted": {
+    "mean": 1027.2,
+    "min": 968,
+    "max": 1063
+   },
+   "routineCTMaxMin": {
+    "mean": 3585.9,
+    "min": 3540,
+    "max": 3655
+   },
+   "routineCTOldestUnfinishedMin": {
+    "mean": 2336,
+    "min": 2245,
+    "max": 2584
+   },
+   "routineCTOvernightBreaches": {
+    "mean": 60.4,
+    "min": 54,
+    "max": 69
+   },
+   "routineCTP50Min": {
+    "mean": 67.6,
+    "min": 57,
+    "max": 77
+   },
+   "routineCTP90Min": {
+    "mean": 909.1,
+    "min": 873,
+    "max": 947
+   },
+   "routineCTUnfinished": {
+    "mean": 3.4,
+    "min": 2,
+    "max": 6
+   },
+   "routineCompleted": {
+    "mean": 4171.3,
+    "min": 4122,
+    "max": 4255
+   },
+   "routineMRAcquired": {
+    "mean": 680.7,
+    "min": 659,
+    "max": 691
+   },
+   "routineMRBreaches": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "routineMRCompleted": {
+    "mean": 680.7,
+    "min": 659,
+    "max": 691
+   },
+   "routineMRMaxMin": {
+    "mean": 2490.8,
+    "min": 1078,
+    "max": 3624
+   },
+   "routineMROldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "routineMROvernightBreaches": {
+    "mean": 0.8,
+    "min": 0,
+    "max": 2
+   },
+   "routineMRP50Min": {
+    "mean": 66.1,
+    "min": 61,
+    "max": 72
+   },
+   "routineMRP90Min": {
+    "mean": 804.6,
+    "min": 778,
+    "max": 827
+   },
+   "routineMRUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "routineMaxMin": {
+    "mean": 3593.2,
+    "min": 3540,
+    "max": 3655
+   },
+   "routineOldestUnfinishedMin": {
+    "mean": 2398.3,
+    "min": 2328,
+    "max": 2597
+   },
+   "routineOvernightBreaches": {
+    "mean": 173.6,
+    "min": 160,
+    "max": 189
+   },
+   "routineP50Min": {
+    "mean": 57.8,
+    "min": 52,
+    "max": 64
+   },
+   "routineP90Min": {
+    "mean": 823,
+    "min": 807,
+    "max": 858
+   },
+   "routineUSAcquired": {
+    "mean": 781.6,
+    "min": 751,
+    "max": 804
+   },
+   "routineUSBreaches": {
+    "mean": 33.4,
+    "min": 29,
+    "max": 39
+   },
+   "routineUSCompleted": {
+    "mean": 781.6,
+    "min": 751,
+    "max": 804
+   },
+   "routineUSMaxMin": {
+    "mean": 2724.7,
+    "min": 2659,
+    "max": 2785
+   },
+   "routineUSOldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "routineUSOvernightBreaches": {
+    "mean": 33.4,
+    "min": 29,
+    "max": 39
+   },
+   "routineUSP50Min": {
+    "mean": 57.8,
+    "min": 54,
+    "max": 63
+   },
+   "routineUSP90Min": {
+    "mean": 857.2,
+    "min": 833,
+    "max": 885
+   },
+   "routineUSUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "routineUnfinished": {
+    "mean": 9.6,
+    "min": 6,
+    "max": 13
+   },
+   "routineXRAcquired": {
+    "mean": 1688,
+    "min": 1638,
+    "max": 1778
+   },
+   "routineXRBreaches": {
+    "mean": 85,
+    "min": 76,
+    "max": 95
+   },
+   "routineXRCompleted": {
+    "mean": 1681.9,
+    "min": 1630,
+    "max": 1774
+   },
+   "routineXRMaxMin": {
+    "mean": 2724.2,
+    "min": 2681,
+    "max": 2783
+   },
+   "routineXROldestUnfinishedMin": {
+    "mean": 2391.9,
+    "min": 2328,
+    "max": 2597
+   },
+   "routineXROvernightBreaches": {
+    "mean": 78.9,
+    "min": 71,
+    "max": 85
+   },
+   "routineXRP50Min": {
+    "mean": 49.2,
+    "min": 42,
+    "max": 55
+   },
+   "routineXRP90Min": {
+    "mean": 179.3,
+    "min": 157,
+    "max": 211
+   },
+   "routineXRUnfinished": {
+    "mean": 6.1,
+    "min": 4,
+    "max": 10
+   },
+   "soonAcquired": {
+    "mean": 518.1,
+    "min": 474,
+    "max": 559
+   },
+   "soonBreaches": {
+    "mean": 129.6,
+    "min": 104,
+    "max": 147
+   },
+   "soonCTAcquired": {
+    "mean": 145.7,
+    "min": 112,
+    "max": 171
+   },
+   "soonCTBreaches": {
+    "mean": 61.2,
+    "min": 45,
+    "max": 74
+   },
+   "soonCTCompleted": {
+    "mean": 145,
+    "min": 112,
+    "max": 170
+   },
+   "soonCTMaxMin": {
+    "mean": 2577.4,
+    "min": 2451,
+    "max": 2703
+   },
+   "soonCTOldestUnfinishedMin": {
+    "mean": 1196.8,
+    "min": 0,
+    "max": 2192
+   },
+   "soonCTOvernightBreaches": {
+    "mean": 60.6,
+    "min": 45,
+    "max": 73
+   },
+   "soonCTP50Min": {
+    "mean": 98.8,
+    "min": 80,
+    "max": 124
+   },
+   "soonCTP90Min": {
+    "mean": 900.9,
+    "min": 856,
+    "max": 932
+   },
+   "soonCTUnfinished": {
+    "mean": 0.7,
+    "min": 0,
+    "max": 2
+   },
+   "soonCompleted": {
+    "mean": 515.7,
+    "min": 472,
+    "max": 555
+   },
+   "soonMRAcquired": {
+    "mean": 47.9,
+    "min": 38,
+    "max": 62
+   },
+   "soonMRBreaches": {
+    "mean": 21.9,
+    "min": 15,
+    "max": 27
+   },
+   "soonMRCompleted": {
+    "mean": 47.9,
+    "min": 38,
+    "max": 62
+   },
+   "soonMRMaxMin": {
+    "mean": 972.7,
+    "min": 905,
+    "max": 1027
+   },
+   "soonMROldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonMROvernightBreaches": {
+    "mean": 21.9,
+    "min": 15,
+    "max": 27
+   },
+   "soonMRP50Min": {
+    "mean": 179.1,
+    "min": 76,
+    "max": 700
+   },
+   "soonMRP90Min": {
+    "mean": 878.3,
+    "min": 813,
+    "max": 936
+   },
+   "soonMRUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonMaxMin": {
+    "mean": 2606.2,
+    "min": 2542,
+    "max": 2703
+   },
+   "soonOldestUnfinishedMin": {
+    "mean": 1778,
+    "min": 0,
+    "max": 2517
+   },
+   "soonOvernightBreaches": {
+    "mean": 127,
+    "min": 102,
+    "max": 147
+   },
+   "soonP50Min": {
+    "mean": 54.7,
+    "min": 45,
+    "max": 62
+   },
+   "soonP90Min": {
+    "mean": 856.8,
+    "min": 819,
+    "max": 906
+   },
+   "soonUSAcquired": {
+    "mean": 35.4,
+    "min": 26,
+    "max": 41
+   },
+   "soonUSBreaches": {
+    "mean": 8.1,
+    "min": 5,
+    "max": 14
+   },
+   "soonUSCompleted": {
+    "mean": 35.4,
+    "min": 26,
+    "max": 41
+   },
+   "soonUSMaxMin": {
+    "mean": 1825.1,
+    "min": 880,
+    "max": 2632
+   },
+   "soonUSOldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonUSOvernightBreaches": {
+    "mean": 8.1,
+    "min": 5,
+    "max": 14
+   },
+   "soonUSP50Min": {
+    "mean": 55.1,
+    "min": 36,
+    "max": 71
+   },
+   "soonUSP90Min": {
+    "mean": 939.8,
+    "min": 648,
+    "max": 2377
+   },
+   "soonUSUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "soonUnfinished": {
+    "mean": 2.4,
+    "min": 0,
+    "max": 6
+   },
+   "soonXRAcquired": {
+    "mean": 289.1,
+    "min": 265,
+    "max": 328
+   },
+   "soonXRBreaches": {
+    "mean": 38.3,
+    "min": 31,
+    "max": 47
+   },
+   "soonXRCompleted": {
+    "mean": 287.3,
+    "min": 265,
+    "max": 327
+   },
+   "soonXRMaxMin": {
+    "mean": 2593,
+    "min": 2542,
+    "max": 2643
+   },
+   "soonXROldestUnfinishedMin": {
+    "mean": 1540.1,
+    "min": 0,
+    "max": 2517
+   },
+   "soonXROvernightBreaches": {
+    "mean": 36.4,
+    "min": 28,
+    "max": 44
+   },
+   "soonXRP50Min": {
+    "mean": 32,
+    "min": 26,
+    "max": 40
+   },
+   "soonXRP90Min": {
+    "mean": 698.2,
+    "min": 140,
+    "max": 985
+   },
+   "soonXRUnfinished": {
+    "mean": 1.8,
+    "min": 0,
+    "max": 5
+   },
+   "tatP50Min": {
+    "mean": 56.7,
+    "min": 50,
+    "max": 63
+   },
+   "tatP90Min": {
+    "mean": 828.4,
+    "min": 813,
+    "max": 861
+   },
+   "techBusyPct": {
+    "mean": 69.3,
+    "min": 68.6,
+    "max": 69.8
+   },
+   "tueFriCT": {
+    "mean": 19.1,
+    "min": 18.1,
+    "max": 19.8
+   },
+   "tueFriMR": {
+    "mean": 11.5,
+    "min": 11.3,
+    "max": 11.7
+   },
+   "tueFriUS": {
+    "mean": 12.3,
+    "min": 11.8,
+    "max": 12.6
+   },
+   "tueFriXR": {
+    "mean": 31.7,
+    "min": 30.5,
+    "max": 33.1
+   },
+   "urgentAcquired": {
+    "mean": 62.7,
+    "min": 53,
+    "max": 74
+   },
+   "urgentBreaches": {
+    "mean": 7.6,
+    "min": 4,
+    "max": 12
+   },
+   "urgentCTAcquired": {
+    "mean": 8.1,
+    "min": 4,
+    "max": 12
+   },
+   "urgentCTBreaches": {
+    "mean": 1.7,
+    "min": 0,
+    "max": 4
+   },
+   "urgentCTCompleted": {
+    "mean": 8,
+    "min": 4,
+    "max": 12
+   },
+   "urgentCTMaxMin": {
+    "mean": 563.3,
+    "min": 42,
+    "max": 934
+   },
+   "urgentCTOldestUnfinishedMin": {
+    "mean": 248.4,
+    "min": 0,
+    "max": 2236
+   },
+   "urgentCTOvernightBreaches": {
+    "mean": 1.1,
+    "min": 0,
+    "max": 4
+   },
+   "urgentCTP50Min": {
+    "mean": 22.3,
+    "min": 18,
+    "max": 29
+   },
+   "urgentCTP90Min": {
+    "mean": 486.9,
+    "min": 40,
+    "max": 926
+   },
+   "urgentCTUnfinished": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "urgentCompleted": {
+    "mean": 62.6,
+    "min": 52,
+    "max": 74
+   },
+   "urgentMRAcquired": {
+    "mean": 3,
+    "min": 1,
+    "max": 5
+   },
+   "urgentMRBreaches": {
+    "mean": 1.4,
+    "min": 0,
+    "max": 2
+   },
+   "urgentMRCompleted": {
+    "mean": 3,
+    "min": 1,
+    "max": 5
+   },
+   "urgentMRMaxMin": {
+    "mean": 703.1,
+    "min": 31,
+    "max": 908
+   },
+   "urgentMROldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentMROvernightBreaches": {
+    "mean": 1.3,
+    "min": 0,
+    "max": 2
+   },
+   "urgentMRP50Min": {
+    "mean": 210.3,
+    "min": 28,
+    "max": 710
+   },
+   "urgentMRP90Min": {
+    "mean": 703.1,
+    "min": 31,
+    "max": 908
+   },
+   "urgentMRUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentMaxMin": {
+    "mean": 1601.8,
+    "min": 754,
+    "max": 2607
+   },
+   "urgentOldestUnfinishedMin": {
+    "mean": 248.4,
+    "min": 0,
+    "max": 2236
+   },
+   "urgentOvernightBreaches": {
+    "mean": 6.1,
+    "min": 4,
+    "max": 10
+   },
+   "urgentP50Min": {
+    "mean": 14.2,
+    "min": 10,
+    "max": 19
+   },
+   "urgentP90Min": {
+    "mean": 337.3,
+    "min": 47,
+    "max": 714
+   },
+   "urgentUSAcquired": {
+    "mean": 5.2,
+    "min": 2,
+    "max": 9
+   },
+   "urgentUSBreaches": {
+    "mean": 1.6,
+    "min": 0,
+    "max": 3
+   },
+   "urgentUSCompleted": {
+    "mean": 5.2,
+    "min": 2,
+    "max": 9
+   },
+   "urgentUSMaxMin": {
+    "mean": 631.2,
+    "min": 18,
+    "max": 735
+   },
+   "urgentUSOldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentUSOvernightBreaches": {
+    "mean": 1.6,
+    "min": 0,
+    "max": 3
+   },
+   "urgentUSP50Min": {
+    "mean": 95.6,
+    "min": 16,
+    "max": 676
+   },
+   "urgentUSP90Min": {
+    "mean": 631.2,
+    "min": 18,
+    "max": 735
+   },
+   "urgentUSUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentUnfinished": {
+    "mean": 0.1,
+    "min": 0,
+    "max": 1
+   },
+   "urgentXRAcquired": {
+    "mean": 46.7,
+    "min": 33,
+    "max": 56
+   },
+   "urgentXRBreaches": {
+    "mean": 3.1,
+    "min": 1,
+    "max": 6
+   },
+   "urgentXRCompleted": {
+    "mean": 46.7,
+    "min": 33,
+    "max": 56
+   },
+   "urgentXRMaxMin": {
+    "mean": 1540.6,
+    "min": 668,
+    "max": 2607
+   },
+   "urgentXROldestUnfinishedMin": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "urgentXROvernightBreaches": {
+    "mean": 2.3,
+    "min": 1,
+    "max": 4
+   },
+   "urgentXRP50Min": {
+    "mean": 11,
+    "min": 9,
+    "max": 13
+   },
+   "urgentXRP90Min": {
+    "mean": 49.7,
+    "min": 40,
+    "max": 61
+   },
+   "urgentXRUnfinished": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "utilOpenPctCT": {
+    "mean": 38.5,
+    "min": 37,
+    "max": 40.2
+   },
+   "utilOpenPctMR": {
+    "mean": 60.9,
+    "min": 60.1,
+    "max": 61.5
+   },
+   "utilOpenPctUS": {
+    "mean": 53.8,
+    "min": 51,
+    "max": 54.7
+   },
+   "utilOpenPctXR": {
+    "mean": 39.2,
+    "min": 37.9,
+    "max": 41
+   },
+   "utilStaffedPctCT": {
+    "mean": 42.2,
+    "min": 40.7,
+    "max": 44
+   },
+   "utilStaffedPctMR": {
+    "mean": 69.2,
+    "min": 68.3,
+    "max": 69.8
+   },
+   "utilStaffedPctUS": {
+    "mean": 66.8,
+    "min": 63.4,
+    "max": 67.9
+   },
+   "utilStaffedPctXR": {
+    "mean": 43,
+    "min": 41.5,
+    "max": 44.8
+   },
+   "variableK": {
+    "mean": 122.6,
+    "min": 121.7,
+    "max": 124
+   },
+   "walkIns": {
+    "mean": 662.4,
+    "min": 602,
+    "max": 719
+   },
+   "walkInsDeclined": {
+    "mean": 0,
+    "min": 0,
+    "max": 0
+   },
+   "walkInsLeft": {
+    "mean": 357.4,
+    "min": 324,
+    "max": 392
+   }
+  }
+ },
+ "perSeed": [
+  {
+   "seed": 1,
+   "takeover": {
+    "Unread": 3,
+    "Reading": 0,
+    "OpenClaims": 2293,
+    "ReceivablesCents": 35990117
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      698,
+      366,
+      515,
+      294
+     ],
+     "walkIns": [
+      186,
+      24,
+      21,
+      0
+     ],
+     "booked": [
+      647,
+      281,
+      428,
+      256
+     ],
+     "lostDeclined": [
+      40,
+      73,
+      79,
+      26
+     ],
+     "lostNoSlot": [
+      1,
+      3,
+      0,
+      1
+     ],
+     "leadP50Days": [
+      9,
+      18,
+      9,
+      12
+     ],
+     "leadP90Days": [
+      41,
+      51,
+      53,
+      49
+     ],
+     "requestedLeadP50Days": [
+      6,
+      10,
+      6,
+      8
+     ],
+     "requestedLeadP90Days": [
+      41,
+      51,
+      45,
+      48
+     ],
+     "capacityDelayP50Days": [
+      0,
+      4,
+      2,
+      1
+     ],
+     "capacityDelayP90Days": [
+      4,
+      17,
+      8,
+      9
+     ],
+     "exams": [
+      708,
+      274,
+      418,
+      253
+     ],
+     "tueFriPerDay": [
+      33,
+      11.647058823529411,
+      19.647058823529413,
+      11.411764705882353
+     ],
+     "monPerDay": [
+      17,
+      12,
+      10,
+      11.75
+     ],
+     "satPerDay": [
+      11.25,
+      3.75,
+      6.5,
+      0
+     ],
+     "utilOpenBP": [
+      4028,
+      5342,
+      3915,
+      6217
+     ],
+     "utilStaffedBP": [
+      4409,
+      6561,
+      4283,
+      6985
+     ],
+     "coverageBP": [
+      9134,
+      8141,
+      9142,
+      8900
+     ],
+     "reports": 1640,
+     "scheduled": 1811,
+     "cancelled": 159,
+     "noShows": 90,
+     "walkInsLeft": 136,
+     "techUtilBP": 6968,
+     "readUtilBP": 8225,
+     "tatP50Min": 60,
+     "tatP90Min": 818,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1463,
+       "completed": 1452,
+       "unfinished": 11,
+       "p50Min": 60,
+       "p90Min": 818,
+       "maxMin": 3543,
+       "breaches": 56,
+       "overnightBreaches": 56,
+       "oldestUnfinishedMin": 691
+      },
+      "routine/CT": {
+       "acquired": 365,
+       "completed": 360,
+       "unfinished": 5,
+       "p50Min": 66,
+       "p90Min": 857,
+       "maxMin": 3543,
+       "breaches": 19,
+       "overnightBreaches": 19,
+       "oldestUnfinishedMin": 691
+      },
+      "routine/MR": {
+       "acquired": 232,
+       "completed": 232,
+       "unfinished": 0,
+       "p50Min": 64,
+       "p90Min": 794,
+       "maxMin": 1138,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 265,
+       "completed": 264,
+       "unfinished": 1,
+       "p50Min": 61,
+       "p90Min": 856,
+       "maxMin": 2684,
+       "breaches": 12,
+       "overnightBreaches": 12,
+       "oldestUnfinishedMin": 632
+      },
+      "routine/XR": {
+       "acquired": 601,
+       "completed": 596,
+       "unfinished": 5,
+       "p50Min": 55,
+       "p90Min": 211,
+       "maxMin": 2587,
+       "breaches": 25,
+       "overnightBreaches": 25,
+       "oldestUnfinishedMin": 570
+      },
+      "soon": {
+       "acquired": 167,
+       "completed": 163,
+       "unfinished": 4,
+       "p50Min": 61,
+       "p90Min": 833,
+       "maxMin": 2573,
+       "breaches": 42,
+       "overnightBreaches": 38,
+       "oldestUnfinishedMin": 653
+      },
+      "soon/CT": {
+       "acquired": 51,
+       "completed": 49,
+       "unfinished": 2,
+       "p50Min": 85,
+       "p90Min": 899,
+       "maxMin": 2573,
+       "breaches": 21,
+       "overnightBreaches": 19,
+       "oldestUnfinishedMin": 630
+      },
+      "soon/MR": {
+       "acquired": 20,
+       "completed": 18,
+       "unfinished": 2,
+       "p50Min": 160,
+       "p90Min": 871,
+       "maxMin": 895,
+       "breaches": 11,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 653
+      },
+      "soon/US": {
+       "acquired": 8,
+       "completed": 8,
+       "unfinished": 0,
+       "p50Min": 58,
+       "p90Min": 675,
+       "maxMin": 675,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 88,
+       "completed": 88,
+       "unfinished": 0,
+       "p50Min": 29,
+       "p90Min": 101,
+       "maxMin": 2435,
+       "breaches": 8,
+       "overnightBreaches": 8,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 23,
+       "completed": 22,
+       "unfinished": 1,
+       "p50Min": 8,
+       "p90Min": 20,
+       "maxMin": 52,
+       "breaches": 1,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 602
+      },
+      "urgent/CT": {
+       "acquired": 2,
+       "completed": 2,
+       "unfinished": 0,
+       "p50Min": 12,
+       "p90Min": 20,
+       "maxMin": 20,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 52,
+       "p90Min": 52,
+       "maxMin": 52,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 16,
+       "p90Min": 16,
+       "maxMin": 16,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 19,
+       "completed": 18,
+       "unfinished": 1,
+       "p50Min": 7,
+       "p90Min": 19,
+       "maxMin": 33,
+       "breaches": 1,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 602
+      }
+     },
+     "overTarget": 99,
+     "acquired": 1653,
+     "backlog0730TueFri": [
+      11,
+      14,
+      14,
+      2,
+      8,
+      11,
+      9,
+      4,
+      12,
+      10,
+      7,
+      4,
+      12,
+      12,
+      17,
+      1,
+      14
+     ],
+     "unreadAtClose": [
+      14,
+      14,
+      15,
+      15,
+      2,
+      8,
+      11,
+      9,
+      8,
+      16,
+      4,
+      12,
+      10,
+      7,
+      9,
+      8,
+      4,
+      12,
+      12,
+      17,
+      17,
+      23,
+      1,
+      14,
+      16
+     ],
+     "revenuePerReportCents": [
+      5062,
+      17514,
+      23606,
+      32290
+     ],
+     "netRevenueCents": 26240803,
+     "laborCents": 13243529,
+     "fixedCents": 8678716,
+     "variableCents": 4197980,
+     "opexCents": 26506676,
+     "profitCents": -265873,
+     "marginBP": -101,
+     "collectionsCents": 24799073,
+     "disbursementsCents": 25172742,
+     "arChangeCents": 1425141,
+     "cashEndCents": 14626331,
+     "overtimeMin": 4236,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 709,
+       "cancelled": 52,
+       "imaged": 15,
+       "lost": 223,
+       "no-show": 28,
+       "recall": 41,
+       "reported": 805
+      },
+      "walk-in": {
+       "imaged": 1,
+       "left": 136,
+       "reported": 94
+      }
+     },
+     "extra": {
+      "heldOver": 43,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 92
+     },
+     "staffUtilBP": {
+      "Alex": 5462,
+      "Casey": 6696,
+      "Dr. Avery": 8466,
+      "Dr. Blake": 7942,
+      "Drew": 4637,
+      "Jordan": 4400,
+      "Morgan": 6380,
+      "Riley": 8775,
+      "Sam": 9444,
+      "Taylor": 3244
+     },
+     "staffOvertimeMin": {
+      "Alex": 178,
+      "Casey": 97,
+      "Dr. Avery": 1,
+      "Dr. Blake": 1453,
+      "Drew": 127,
+      "Jordan": 44,
+      "Morgan": 30,
+      "Riley": 475,
+      "Sam": 1761,
+      "Taylor": 67
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      1995,
+      1076,
+      1439,
+      889
+     ],
+     "walkIns": [
+      530,
+      72,
+      55,
+      0
+     ],
+     "booked": [
+      1872,
+      865,
+      1269,
+      782
+     ],
+     "lostDeclined": [
+      93,
+      203,
+      156,
+      92
+     ],
+     "lostNoSlot": [
+      6,
+      6,
+      3,
+      9
+     ],
+     "leadP50Days": [
+      8,
+      20,
+      8,
+      12
+     ],
+     "leadP90Days": [
+      44,
+      55,
+      56,
+      51
+     ],
+     "requestedLeadP50Days": [
+      5,
+      10,
+      6,
+      7
+     ],
+     "requestedLeadP90Days": [
+      44,
+      55,
+      51,
+      51
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      4,
+      17,
+      6,
+      8
+     ],
+     "exams": [
+      2033,
+      821,
+      1206,
+      725
+     ],
+     "tueFriPerDay": [
+      32.11764705882353,
+      12.098039215686274,
+      19.372549019607842,
+      11.254901960784315
+     ],
+     "monPerDay": [
+      17.416666666666668,
+      12.083333333333334,
+      10,
+      11.583333333333334
+     ],
+     "satPerDay": [
+      11.692307692307692,
+      3.5384615384615383,
+      6.153846153846154,
+      0
+     ],
+     "utilOpenBP": [
+      3914,
+      5391,
+      3849,
+      6052
+     ],
+     "utilStaffedBP": [
+      4295,
+      6697,
+      4222,
+      6877
+     ],
+     "coverageBP": [
+      9113,
+      8050,
+      9117,
+      8800
+     ],
+     "reports": 4779,
+     "scheduled": 5246,
+     "cancelled": 456,
+     "noShows": 286,
+     "walkInsLeft": 354,
+     "techUtilBP": 6931,
+     "readUtilBP": 8111,
+     "tatP50Min": 59,
+     "tatP90Min": 833,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4160,
+       "completed": 4154,
+       "unfinished": 6,
+       "p50Min": 60,
+       "p90Min": 833,
+       "maxMin": 3588,
+       "breaches": 182,
+       "overnightBreaches": 176,
+       "oldestUnfinishedMin": 2365
+      },
+      "routine/CT": {
+       "acquired": 1025,
+       "completed": 1023,
+       "unfinished": 2,
+       "p50Min": 68,
+       "p90Min": 894,
+       "maxMin": 3581,
+       "breaches": 64,
+       "overnightBreaches": 62,
+       "oldestUnfinishedMin": 2335
+      },
+      "routine/MR": {
+       "acquired": 659,
+       "completed": 659,
+       "unfinished": 0,
+       "p50Min": 66,
+       "p90Min": 796,
+       "maxMin": 3588,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 781,
+       "completed": 781,
+       "unfinished": 0,
+       "p50Min": 60,
+       "p90Min": 877,
+       "maxMin": 2749,
+       "breaches": 39,
+       "overnightBreaches": 39,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1695,
+       "completed": 1691,
+       "unfinished": 4,
+       "p50Min": 54,
+       "p90Min": 211,
+       "maxMin": 2681,
+       "breaches": 78,
+       "overnightBreaches": 74,
+       "oldestUnfinishedMin": 2365
+      },
+      "soon": {
+       "acquired": 551,
+       "completed": 548,
+       "unfinished": 3,
+       "p50Min": 52,
+       "p90Min": 819,
+       "maxMin": 2606,
+       "breaches": 145,
+       "overnightBreaches": 141,
+       "oldestUnfinishedMin": 2311
+      },
+      "soon/CT": {
+       "acquired": 171,
+       "completed": 170,
+       "unfinished": 1,
+       "p50Min": 86,
+       "p90Min": 856,
+       "maxMin": 2573,
+       "breaches": 64,
+       "overnightBreaches": 63,
+       "oldestUnfinishedMin": 2192
+      },
+      "soon/MR": {
+       "acquired": 62,
+       "completed": 62,
+       "unfinished": 0,
+       "p50Min": 101,
+       "p90Min": 844,
+       "maxMin": 971,
+       "breaches": 27,
+       "overnightBreaches": 27,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 36,
+       "completed": 36,
+       "unfinished": 0,
+       "p50Min": 67,
+       "p90Min": 685,
+       "maxMin": 1005,
+       "breaches": 11,
+       "overnightBreaches": 11,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 282,
+       "completed": 280,
+       "unfinished": 2,
+       "p50Min": 28,
+       "p90Min": 727,
+       "maxMin": 2606,
+       "breaches": 43,
+       "overnightBreaches": 40,
+       "oldestUnfinishedMin": 2311
+      },
+      "urgent": {
+       "acquired": 74,
+       "completed": 74,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 60,
+       "maxMin": 2438,
+       "breaches": 8,
+       "overnightBreaches": 6,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 10,
+       "completed": 10,
+       "unfinished": 0,
+       "p50Min": 22,
+       "p90Min": 40,
+       "maxMin": 60,
+       "breaches": 1,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 4,
+       "completed": 4,
+       "unfinished": 0,
+       "p50Min": 52,
+       "p90Min": 898,
+       "maxMin": 898,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 4,
+       "completed": 4,
+       "unfinished": 0,
+       "p50Min": 16,
+       "p90Min": 712,
+       "maxMin": 712,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 56,
+       "completed": 56,
+       "unfinished": 0,
+       "p50Min": 9,
+       "p90Min": 41,
+       "maxMin": 2438,
+       "breaches": 4,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 335,
+     "acquired": 4785,
+     "backlog0730TueFri": [
+      11,
+      14,
+      14,
+      2,
+      8,
+      11,
+      9,
+      4,
+      12,
+      10,
+      7,
+      4,
+      12,
+      12,
+      17,
+      1,
+      14,
+      16,
+      15,
+      3,
+      7,
+      10,
+      15,
+      3,
+      15,
+      12,
+      17,
+      4,
+      14,
+      16,
+      26,
+      6,
+      11,
+      9,
+      10,
+      4,
+      14,
+      9,
+      7,
+      4,
+      17,
+      12,
+      5,
+      3,
+      15,
+      11,
+      15,
+      3,
+      9,
+      7,
+      9
+     ],
+     "unreadAtClose": [
+      14,
+      14,
+      15,
+      15,
+      2,
+      8,
+      11,
+      9,
+      8,
+      16,
+      4,
+      12,
+      10,
+      7,
+      9,
+      8,
+      4,
+      12,
+      12,
+      17,
+      17,
+      23,
+      1,
+      14,
+      16,
+      15,
+      13,
+      9,
+      3,
+      7,
+      10,
+      15,
+      11,
+      23,
+      3,
+      15,
+      12,
+      17,
+      11,
+      9,
+      4,
+      14,
+      16,
+      26,
+      16,
+      26,
+      6,
+      11,
+      9,
+      10,
+      8,
+      7,
+      4,
+      14,
+      9,
+      7,
+      14,
+      26,
+      4,
+      17,
+      12,
+      5,
+      14,
+      11,
+      3,
+      15,
+      11,
+      15,
+      10,
+      24,
+      3,
+      9,
+      7,
+      9,
+      3,
+      9
+     ],
+     "revenuePerReportCents": [
+      5060,
+      17252,
+      23325,
+      31730
+     ],
+     "netRevenueCents": 76847679,
+     "laborCents": 39244367,
+     "fixedCents": 25979033,
+     "variableCents": 12245042,
+     "opexCents": 77854893,
+     "profitCents": -1007214,
+     "marginBP": -131,
+     "collectionsCents": 73905279,
+     "disbursementsCents": 82005450,
+     "arChangeCents": 1662747,
+     "cashEndCents": 6899829,
+     "overtimeMin": 12046,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 976,
+       "cancelled": 180,
+       "imaged": 8,
+       "lost": 568,
+       "no-show": 139,
+       "recall": 57,
+       "reported": 3471
+      },
+      "walk-in": {
+       "cancelled": 2,
+       "imaged": 1,
+       "left": 354,
+       "lost": 2,
+       "reported": 298
+      }
+     },
+     "extra": {
+      "heldOver": 121,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 283
+     },
+     "staffUtilBP": {
+      "Alex": 5524,
+      "Casey": 6474,
+      "Dr. Avery": 8411,
+      "Dr. Blake": 7756,
+      "Drew": 4849,
+      "Jordan": 4365,
+      "Morgan": 6391,
+      "Riley": 8581,
+      "Sam": 9372,
+      "Taylor": 3103
+     },
+     "staffOvertimeMin": {
+      "Alex": 487,
+      "Casey": 320,
+      "Dr. Avery": 1,
+      "Dr. Blake": 3942,
+      "Drew": 630,
+      "Jordan": 92,
+      "Morgan": 155,
+      "Riley": 1462,
+      "Sam": 4787,
+      "Taylor": 166
+     }
+    }
+   }
+  },
+  {
+   "seed": 2,
+   "takeover": {
+    "Unread": 2,
+    "Reading": 0,
+    "OpenClaims": 2327,
+    "ReceivablesCents": 36291833
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      732,
+      391,
+      545,
+      293
+     ],
+     "walkIns": [
+      181,
+      27,
+      12,
+      0
+     ],
+     "booked": [
+      675,
+      302,
+      441,
+      253
+     ],
+     "lostDeclined": [
+      43,
+      85,
+      92,
+      33
+     ],
+     "lostNoSlot": [
+      1,
+      0,
+      0,
+      0
+     ],
+     "leadP50Days": [
+      8,
+      19,
+      11,
+      12
+     ],
+     "leadP90Days": [
+      41,
+      50,
+      53,
+      45
+     ],
+     "requestedLeadP50Days": [
+      6,
+      10,
+      7,
+      7
+     ],
+     "requestedLeadP90Days": [
+      41,
+      50,
+      53,
+      43
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      2,
+      1
+     ],
+     "capacityDelayP90Days": [
+      5,
+      17,
+      8,
+      12
+     ],
+     "exams": [
+      717,
+      279,
+      395,
+      250
+     ],
+     "tueFriPerDay": [
+      32.705882352941174,
+      12.176470588235293,
+      18.470588235294116,
+      11.588235294117647
+     ],
+     "monPerDay": [
+      18.25,
+      11.75,
+      10.25,
+      10
+     ],
+     "satPerDay": [
+      12.5,
+      3.25,
+      5.75,
+      0
+     ],
+     "utilOpenBP": [
+      4037,
+      5439,
+      3752,
+      6155
+     ],
+     "utilStaffedBP": [
+      4413,
+      6681,
+      4095,
+      6915
+     ],
+     "coverageBP": [
+      9147,
+      8141,
+      9162,
+      8900
+     ],
+     "reports": 1633,
+     "scheduled": 1838,
+     "cancelled": 176,
+     "noShows": 124,
+     "walkInsLeft": 111,
+     "techUtilBP": 6888,
+     "readUtilBP": 8229,
+     "tatP50Min": 56,
+     "tatP90Min": 818,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1460,
+       "completed": 1452,
+       "unfinished": 8,
+       "p50Min": 57,
+       "p90Min": 817,
+       "maxMin": 3598,
+       "breaches": 66,
+       "overnightBreaches": 66,
+       "oldestUnfinishedMin": 686
+      },
+      "routine/CT": {
+       "acquired": 367,
+       "completed": 364,
+       "unfinished": 3,
+       "p50Min": 79,
+       "p90Min": 981,
+       "maxMin": 3562,
+       "breaches": 24,
+       "overnightBreaches": 24,
+       "oldestUnfinishedMin": 581
+      },
+      "routine/MR": {
+       "acquired": 232,
+       "completed": 232,
+       "unfinished": 0,
+       "p50Min": 70,
+       "p90Min": 801,
+       "maxMin": 3598,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 263,
+       "completed": 261,
+       "unfinished": 2,
+       "p50Min": 55,
+       "p90Min": 833,
+       "maxMin": 2773,
+       "breaches": 11,
+       "overnightBreaches": 11,
+       "oldestUnfinishedMin": 686
+      },
+      "routine/XR": {
+       "acquired": 598,
+       "completed": 595,
+       "unfinished": 3,
+       "p50Min": 48,
+       "p90Min": 184,
+       "maxMin": 2771,
+       "breaches": 30,
+       "overnightBreaches": 30,
+       "oldestUnfinishedMin": 565
+      },
+      "soon": {
+       "acquired": 166,
+       "completed": 164,
+       "unfinished": 2,
+       "p50Min": 51,
+       "p90Min": 931,
+       "maxMin": 2643,
+       "breaches": 42,
+       "overnightBreaches": 40,
+       "oldestUnfinishedMin": 634
+      },
+      "soon/CT": {
+       "acquired": 27,
+       "completed": 27,
+       "unfinished": 0,
+       "p50Min": 85,
+       "p90Min": 931,
+       "maxMin": 2425,
+       "breaches": 10,
+       "overnightBreaches": 10,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 18,
+       "completed": 17,
+       "unfinished": 1,
+       "p50Min": 164,
+       "p90Min": 871,
+       "maxMin": 1023,
+       "breaches": 9,
+       "overnightBreaches": 8,
+       "oldestUnfinishedMin": 634
+      },
+      "soon/US": {
+       "acquired": 16,
+       "completed": 16,
+       "unfinished": 0,
+       "p50Min": 53,
+       "p90Min": 2466,
+       "maxMin": 2632,
+       "breaches": 7,
+       "overnightBreaches": 7,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 105,
+       "completed": 104,
+       "unfinished": 1,
+       "p50Min": 34,
+       "p90Min": 847,
+       "maxMin": 2643,
+       "breaches": 16,
+       "overnightBreaches": 15,
+       "oldestUnfinishedMin": 609
+      },
+      "urgent": {
+       "acquired": 15,
+       "completed": 15,
+       "unfinished": 0,
+       "p50Min": 11,
+       "p90Min": 37,
+       "maxMin": 49,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 27,
+       "p90Min": 27,
+       "maxMin": 27,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 14,
+       "completed": 14,
+       "unfinished": 0,
+       "p50Min": 10,
+       "p90Min": 37,
+       "maxMin": 49,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 108,
+     "acquired": 1641,
+     "backlog0730TueFri": [
+      11,
+      10,
+      9,
+      2,
+      12,
+      11,
+      13,
+      5,
+      8,
+      10,
+      14,
+      4,
+      11,
+      10,
+      10,
+      2,
+      11
+     ],
+     "unreadAtClose": [
+      10,
+      9,
+      11,
+      12,
+      2,
+      12,
+      11,
+      13,
+      17,
+      27,
+      5,
+      8,
+      10,
+      14,
+      18,
+      19,
+      4,
+      11,
+      10,
+      10,
+      10,
+      22,
+      2,
+      11,
+      10
+     ],
+     "revenuePerReportCents": [
+      5023,
+      17625,
+      23536,
+      33248
+     ],
+     "netRevenueCents": 25938247,
+     "laborCents": 13303269,
+     "fixedCents": 8678716,
+     "variableCents": 4203647,
+     "opexCents": 26572083,
+     "profitCents": -633836,
+     "marginBP": -244,
+     "collectionsCents": 25230424,
+     "disbursementsCents": 25349834,
+     "arChangeCents": 805465,
+     "cashEndCents": 14880590,
+     "overtimeMin": 4537,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 791,
+       "cancelled": 50,
+       "imaged": 10,
+       "lost": 254,
+       "no-show": 33,
+       "recall": 40,
+       "reported": 783
+      },
+      "walk-in": {
+       "booked": 1,
+       "left": 111,
+       "reported": 108
+      }
+     },
+     "extra": {
+      "heldOver": 47,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 103
+     },
+     "staffUtilBP": {
+      "Alex": 5230,
+      "Casey": 6677,
+      "Dr. Avery": 8520,
+      "Dr. Blake": 7888,
+      "Drew": 4926,
+      "Jordan": 4384,
+      "Morgan": 6229,
+      "Riley": 8672,
+      "Sam": 9245,
+      "Taylor": 3027
+     },
+     "staffOvertimeMin": {
+      "Alex": 232,
+      "Casey": 291,
+      "Dr. Avery": 0,
+      "Dr. Blake": 1422,
+      "Drew": 243,
+      "Jordan": 28,
+      "Morgan": 41,
+      "Riley": 484,
+      "Sam": 1723,
+      "Taylor": 69
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2062,
+      1081,
+      1490,
+      884
+     ],
+     "walkIns": [
+      545,
+      80,
+      44,
+      0
+     ],
+     "booked": [
+      1919,
+      839,
+      1238,
+      781
+     ],
+     "lostDeclined": [
+      121,
+      233,
+      235,
+      89
+     ],
+     "lostNoSlot": [
+      5,
+      5,
+      9,
+      6
+     ],
+     "leadP50Days": [
+      9,
+      19,
+      11,
+      11
+     ],
+     "leadP90Days": [
+      47,
+      53,
+      52,
+      48
+     ],
+     "requestedLeadP50Days": [
+      6,
+      10,
+      8,
+      8
+     ],
+     "requestedLeadP90Days": [
+      47,
+      52,
+      52,
+      48
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      5,
+      17,
+      7,
+      8
+     ],
+     "exams": [
+      2059,
+      817,
+      1164,
+      730
+     ],
+     "tueFriPerDay": [
+      32.333333333333336,
+      12.215686274509803,
+      18.705882352941178,
+      11.529411764705882
+     ],
+     "monPerDay": [
+      18,
+      11.833333333333334,
+      9.25,
+      10.75
+     ],
+     "satPerDay": [
+      12,
+      3.076923076923077,
+      6.3076923076923075,
+      0
+     ],
+     "utilOpenBP": [
+      3940,
+      5403,
+      3790,
+      6067
+     ],
+     "utilStaffedBP": [
+      4327,
+      6712,
+      4156,
+      6897
+     ],
+     "coverageBP": [
+      9107,
+      8050,
+      9118,
+      8797
+     ],
+     "reports": 4761,
+     "scheduled": 5305,
+     "cancelled": 482,
+     "noShows": 341,
+     "walkInsLeft": 359,
+     "techUtilBP": 6928,
+     "readUtilBP": 8163,
+     "tatP50Min": 55,
+     "tatP90Min": 816,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4225,
+       "completed": 4214,
+       "unfinished": 11,
+       "p50Min": 56,
+       "p90Min": 810,
+       "maxMin": 3620,
+       "breaches": 188,
+       "overnightBreaches": 177,
+       "oldestUnfinishedMin": 2382
+      },
+      "routine/CT": {
+       "acquired": 1048,
+       "completed": 1044,
+       "unfinished": 4,
+       "p50Min": 70,
+       "p90Min": 929,
+       "maxMin": 3562,
+       "breaches": 63,
+       "overnightBreaches": 59,
+       "oldestUnfinishedMin": 2245
+      },
+      "routine/MR": {
+       "acquired": 683,
+       "completed": 683,
+       "unfinished": 0,
+       "p50Min": 67,
+       "p90Min": 803,
+       "maxMin": 3620,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 771,
+       "completed": 771,
+       "unfinished": 0,
+       "p50Min": 55,
+       "p90Min": 833,
+       "maxMin": 2773,
+       "breaches": 32,
+       "overnightBreaches": 32,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1723,
+       "completed": 1716,
+       "unfinished": 7,
+       "p50Min": 47,
+       "p90Min": 168,
+       "maxMin": 2771,
+       "breaches": 91,
+       "overnightBreaches": 84,
+       "oldestUnfinishedMin": 2382
+      },
+      "soon": {
+       "acquired": 491,
+       "completed": 491,
+       "unfinished": 0,
+       "p50Min": 50,
+       "p90Min": 874,
+       "maxMin": 2703,
+       "breaches": 112,
+       "overnightBreaches": 112,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/CT": {
+       "acquired": 112,
+       "completed": 112,
+       "unfinished": 0,
+       "p50Min": 80,
+       "p90Min": 923,
+       "maxMin": 2703,
+       "breaches": 45,
+       "overnightBreaches": 45,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 47,
+       "completed": 47,
+       "unfinished": 0,
+       "p50Min": 164,
+       "p90Min": 874,
+       "maxMin": 1023,
+       "breaches": 23,
+       "overnightBreaches": 23,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 41,
+       "completed": 41,
+       "unfinished": 0,
+       "p50Min": 55,
+       "p90Min": 911,
+       "maxMin": 2632,
+       "breaches": 8,
+       "overnightBreaches": 8,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 291,
+       "completed": 291,
+       "unfinished": 0,
+       "p50Min": 33,
+       "p90Min": 770,
+       "maxMin": 2643,
+       "breaches": 36,
+       "overnightBreaches": 36,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 54,
+       "completed": 54,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 61,
+       "maxMin": 2507,
+       "breaches": 6,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 4,
+       "completed": 4,
+       "unfinished": 0,
+       "p50Min": 27,
+       "p90Min": 61,
+       "maxMin": 61,
+       "breaches": 1,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 5,
+       "completed": 5,
+       "unfinished": 0,
+       "p50Min": 676,
+       "p90Min": 709,
+       "maxMin": 709,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 45,
+       "completed": 45,
+       "unfinished": 0,
+       "p50Min": 11,
+       "p90Min": 49,
+       "maxMin": 2507,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 306,
+     "acquired": 4770,
+     "backlog0730TueFri": [
+      11,
+      10,
+      9,
+      2,
+      12,
+      11,
+      13,
+      5,
+      8,
+      10,
+      14,
+      4,
+      11,
+      10,
+      10,
+      2,
+      11,
+      10,
+      11,
+      3,
+      8,
+      14,
+      14,
+      4,
+      12,
+      11,
+      11,
+      4,
+      12,
+      14,
+      10,
+      2,
+      15,
+      12,
+      10,
+      4,
+      7,
+      7,
+      12,
+      1,
+      7,
+      7,
+      11,
+      4,
+      12,
+      10,
+      13,
+      2,
+      9,
+      11,
+      15
+     ],
+     "unreadAtClose": [
+      10,
+      9,
+      11,
+      12,
+      2,
+      12,
+      11,
+      13,
+      17,
+      27,
+      5,
+      8,
+      10,
+      14,
+      18,
+      19,
+      4,
+      11,
+      10,
+      10,
+      10,
+      22,
+      2,
+      11,
+      10,
+      11,
+      10,
+      11,
+      3,
+      8,
+      14,
+      14,
+      11,
+      19,
+      4,
+      12,
+      11,
+      11,
+      13,
+      14,
+      4,
+      12,
+      14,
+      10,
+      13,
+      17,
+      2,
+      15,
+      12,
+      10,
+      9,
+      12,
+      4,
+      7,
+      7,
+      12,
+      12,
+      25,
+      1,
+      7,
+      7,
+      11,
+      10,
+      9,
+      4,
+      12,
+      10,
+      13,
+      9,
+      22,
+      2,
+      9,
+      11,
+      15,
+      10,
+      11
+     ],
+     "revenuePerReportCents": [
+      5042,
+      17188,
+      23530,
+      32047
+     ],
+     "netRevenueCents": 76170055,
+     "laborCents": 39254716,
+     "fixedCents": 25979033,
+     "variableCents": 12260532,
+     "opexCents": 77880732,
+     "profitCents": -1710677,
+     "marginBP": -224,
+     "collectionsCents": 74032988,
+     "disbursementsCents": 81943829,
+     "arChangeCents": 1110404,
+     "cashEndCents": 7089159,
+     "overtimeMin": 11907,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 991,
+       "cancelled": 193,
+       "imaged": 11,
+       "lost": 703,
+       "no-show": 148,
+       "recall": 53,
+       "reported": 3418
+      },
+      "walk-in": {
+       "booked": 1,
+       "left": 359,
+       "lost": 3,
+       "reported": 306
+      }
+     },
+     "extra": {
+      "heldOver": 134,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 288
+     },
+     "staffUtilBP": {
+      "Alex": 5539,
+      "Casey": 6517,
+      "Dr. Avery": 8480,
+      "Dr. Blake": 7787,
+      "Drew": 5021,
+      "Jordan": 4419,
+      "Morgan": 6172,
+      "Riley": 8633,
+      "Sam": 9316,
+      "Taylor": 3042
+     },
+     "staffOvertimeMin": {
+      "Alex": 702,
+      "Casey": 442,
+      "Dr. Avery": 50,
+      "Dr. Blake": 3801,
+      "Drew": 554,
+      "Jordan": 110,
+      "Morgan": 154,
+      "Riley": 1178,
+      "Sam": 4746,
+      "Taylor": 165
+     }
+    }
+   }
+  },
+  {
+   "seed": 3,
+   "takeover": {
+    "Unread": 3,
+    "Reading": 0,
+    "OpenClaims": 2279,
+    "ReceivablesCents": 35623675
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      720,
+      366,
+      524,
+      334
+     ],
+     "walkIns": [
+      174,
+      31,
+      9,
+      0
+     ],
+     "booked": [
+      654,
+      297,
+      430,
+      278
+     ],
+     "lostDeclined": [
+      50,
+      63,
+      84,
+      43
+     ],
+     "lostNoSlot": [
+      0,
+      0,
+      1,
+      1
+     ],
+     "leadP50Days": [
+      9,
+      16,
+      10,
+      13
+     ],
+     "leadP90Days": [
+      49,
+      51,
+      48,
+      49
+     ],
+     "requestedLeadP50Days": [
+      7,
+      9,
+      7,
+      9
+     ],
+     "requestedLeadP90Days": [
+      49,
+      51,
+      46,
+      49
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      2,
+      1
+     ],
+     "capacityDelayP90Days": [
+      5,
+      15,
+      7,
+      9
+     ],
+     "exams": [
+      691,
+      297,
+      394,
+      257
+     ],
+     "tueFriPerDay": [
+      31.88235294117647,
+      13.058823529411764,
+      18.529411764705884,
+      11.764705882352942
+     ],
+     "monPerDay": [
+      16.75,
+      11,
+      9.5,
+      11.5
+     ],
+     "satPerDay": [
+      12,
+      4.25,
+      6.25,
+      0
+     ],
+     "utilOpenBP": [
+      3980,
+      5688,
+      3746,
+      6344
+     ],
+     "utilStaffedBP": [
+      4364,
+      6986,
+      4105,
+      7113
+     ],
+     "coverageBP": [
+      9120,
+      8141,
+      9125,
+      8918
+     ],
+     "reports": 1630,
+     "scheduled": 1856,
+     "cancelled": 168,
+     "noShows": 124,
+     "walkInsLeft": 128,
+     "techUtilBP": 7026,
+     "readUtilBP": 8201,
+     "tatP50Min": 57,
+     "tatP90Min": 818,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1471,
+       "completed": 1461,
+       "unfinished": 10,
+       "p50Min": 56,
+       "p90Min": 809,
+       "maxMin": 3549,
+       "breaches": 58,
+       "overnightBreaches": 58,
+       "oldestUnfinishedMin": 681
+      },
+      "routine/CT": {
+       "acquired": 353,
+       "completed": 350,
+       "unfinished": 3,
+       "p50Min": 69,
+       "p90Min": 845,
+       "maxMin": 3549,
+       "breaches": 18,
+       "overnightBreaches": 18,
+       "oldestUnfinishedMin": 661
+      },
+      "routine/MR": {
+       "acquired": 244,
+       "completed": 242,
+       "unfinished": 2,
+       "p50Min": 62,
+       "p90Min": 790,
+       "maxMin": 1082,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 634
+      },
+      "routine/US": {
+       "acquired": 281,
+       "completed": 279,
+       "unfinished": 2,
+       "p50Min": 56,
+       "p90Min": 847,
+       "maxMin": 2659,
+       "breaches": 13,
+       "overnightBreaches": 13,
+       "oldestUnfinishedMin": 681
+      },
+      "routine/XR": {
+       "acquired": 593,
+       "completed": 590,
+       "unfinished": 3,
+       "p50Min": 47,
+       "p90Min": 156,
+       "maxMin": 2686,
+       "breaches": 27,
+       "overnightBreaches": 27,
+       "oldestUnfinishedMin": 631
+      },
+      "soon": {
+       "acquired": 153,
+       "completed": 153,
+       "unfinished": 0,
+       "p50Min": 62,
+       "p90Min": 933,
+       "maxMin": 2590,
+       "breaches": 35,
+       "overnightBreaches": 35,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/CT": {
+       "acquired": 40,
+       "completed": 40,
+       "unfinished": 0,
+       "p50Min": 101,
+       "p90Min": 974,
+       "maxMin": 2533,
+       "breaches": 18,
+       "overnightBreaches": 18,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 13,
+       "completed": 13,
+       "unfinished": 0,
+       "p50Min": 75,
+       "p90Min": 819,
+       "maxMin": 933,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 15,
+       "completed": 15,
+       "unfinished": 0,
+       "p50Min": 58,
+       "p90Min": 702,
+       "maxMin": 943,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 85,
+       "completed": 85,
+       "unfinished": 0,
+       "p50Min": 57,
+       "p90Min": 821,
+       "maxMin": 2590,
+       "breaches": 9,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 15,
+       "completed": 13,
+       "unfinished": 2,
+       "p50Min": 9,
+       "p90Min": 15,
+       "maxMin": 18,
+       "breaches": 2,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 601
+      },
+      "urgent/CT": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 13,
+       "maxMin": 13,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 18,
+       "p90Min": 18,
+       "maxMin": 18,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 13,
+       "completed": 11,
+       "unfinished": 2,
+       "p50Min": 8,
+       "p90Min": 10,
+       "maxMin": 15,
+       "breaches": 2,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 601
+      }
+     },
+     "overTarget": 95,
+     "acquired": 1639,
+     "backlog0730TueFri": [
+      8,
+      9,
+      12,
+      1,
+      9,
+      13,
+      13,
+      5,
+      14,
+      14,
+      11,
+      2,
+      8,
+      12,
+      12,
+      1,
+      8
+     ],
+     "unreadAtClose": [
+      9,
+      12,
+      14,
+      16,
+      1,
+      9,
+      13,
+      13,
+      11,
+      22,
+      5,
+      14,
+      14,
+      11,
+      8,
+      9,
+      2,
+      8,
+      12,
+      12,
+      13,
+      23,
+      1,
+      8,
+      12
+     ],
+     "revenuePerReportCents": [
+      5165,
+      17202,
+      23727,
+      31169
+     ],
+     "netRevenueCents": 25896535,
+     "laborCents": 13256850,
+     "fixedCents": 8678716,
+     "variableCents": 4219526,
+     "opexCents": 26541543,
+     "profitCents": -645008,
+     "marginBP": -249,
+     "collectionsCents": 25127950,
+     "disbursementsCents": 25331033,
+     "arChangeCents": 809515,
+     "cashEndCents": 14796917,
+     "overtimeMin": 4023,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 752,
+       "cancelled": 51,
+       "imaged": 11,
+       "lost": 242,
+       "no-show": 30,
+       "recall": 49,
+       "reported": 809
+      },
+      "walk-in": {
+       "left": 128,
+       "lost": 1,
+       "no-show": 1,
+       "reported": 84
+      }
+     },
+     "extra": {
+      "heldOver": 50,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 75
+     },
+     "staffUtilBP": {
+      "Alex": 5528,
+      "Casey": 6856,
+      "Dr. Avery": 8628,
+      "Dr. Blake": 7699,
+      "Drew": 5398,
+      "Jordan": 4406,
+      "Morgan": 6275,
+      "Riley": 8681,
+      "Sam": 9142,
+      "Taylor": 3005
+     },
+     "staffOvertimeMin": {
+      "Alex": 241,
+      "Casey": 262,
+      "Dr. Avery": 47,
+      "Dr. Blake": 1206,
+      "Drew": 188,
+      "Jordan": 25,
+      "Morgan": 58,
+      "Riley": 448,
+      "Sam": 1486,
+      "Taylor": 58
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2120,
+      1071,
+      1435,
+      936
+     ],
+     "walkIns": [
+      540,
+      74,
+      42,
+      0
+     ],
+     "booked": [
+      1967,
+      874,
+      1209,
+      836
+     ],
+     "lostDeclined": [
+      129,
+      191,
+      213,
+      89
+     ],
+     "lostNoSlot": [
+      5,
+      2,
+      3,
+      8
+     ],
+     "leadP50Days": [
+      8,
+      17,
+      10,
+      12
+     ],
+     "leadP90Days": [
+      50,
+      52,
+      54,
+      52
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      8,
+      9
+     ],
+     "requestedLeadP90Days": [
+      50,
+      52,
+      54,
+      51
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      5,
+      15,
+      6,
+      7
+     ],
+     "exams": [
+      2094,
+      831,
+      1127,
+      736
+     ],
+     "tueFriPerDay": [
+      33.05882352941177,
+      12.411764705882353,
+      18.11764705882353,
+      11.509803921568627
+     ],
+     "monPerDay": [
+      18.166666666666668,
+      11.416666666666666,
+      8.75,
+      11.5
+     ],
+     "satPerDay": [
+      12,
+      3.6153846153846154,
+      6.3076923076923075,
+      0
+     ],
+     "utilOpenBP": [
+      4020,
+      5431,
+      3700,
+      6149
+     ],
+     "utilStaffedBP": [
+      4420,
+      6747,
+      4067,
+      6982
+     ],
+     "coverageBP": [
+      9093,
+      8050,
+      9097,
+      8807
+     ],
+     "reports": 4782,
+     "scheduled": 5312,
+     "cancelled": 458,
+     "noShows": 331,
+     "walkInsLeft": 361,
+     "techUtilBP": 6947,
+     "readUtilBP": 8074,
+     "tatP50Min": 53,
+     "tatP90Min": 814,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4261,
+       "completed": 4255,
+       "unfinished": 6,
+       "p50Min": 54,
+       "p90Min": 808,
+       "maxMin": 3549,
+       "breaches": 167,
+       "overnightBreaches": 161,
+       "oldestUnfinishedMin": 2328
+      },
+      "routine/CT": {
+       "acquired": 1001,
+       "completed": 999,
+       "unfinished": 2,
+       "p50Min": 61,
+       "p90Min": 890,
+       "maxMin": 3549,
+       "breaches": 57,
+       "overnightBreaches": 55,
+       "oldestUnfinishedMin": 2301
+      },
+      "routine/MR": {
+       "acquired": 691,
+       "completed": 691,
+       "unfinished": 0,
+       "p50Min": 62,
+       "p90Min": 778,
+       "maxMin": 1082,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 791,
+       "completed": 791,
+       "unfinished": 0,
+       "p50Min": 54,
+       "p90Min": 841,
+       "maxMin": 2659,
+       "breaches": 31,
+       "overnightBreaches": 31,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1778,
+       "completed": 1774,
+       "unfinished": 4,
+       "p50Min": 47,
+       "p90Min": 165,
+       "maxMin": 2686,
+       "breaches": 79,
+       "overnightBreaches": 75,
+       "oldestUnfinishedMin": 2328
+      },
+      "soon": {
+       "acquired": 474,
+       "completed": 472,
+       "unfinished": 2,
+       "p50Min": 55,
+       "p90Min": 856,
+       "maxMin": 2590,
+       "breaches": 104,
+       "overnightBreaches": 102,
+       "oldestUnfinishedMin": 2265
+      },
+      "soon/CT": {
+       "acquired": 121,
+       "completed": 121,
+       "unfinished": 0,
+       "p50Min": 84,
+       "p90Min": 896,
+       "maxMin": 2533,
+       "breaches": 47,
+       "overnightBreaches": 47,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 42,
+       "completed": 42,
+       "unfinished": 0,
+       "p50Min": 107,
+       "p90Min": 925,
+       "maxMin": 1018,
+       "breaches": 20,
+       "overnightBreaches": 20,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 38,
+       "completed": 38,
+       "unfinished": 0,
+       "p50Min": 56,
+       "p90Min": 648,
+       "maxMin": 2424,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 273,
+       "completed": 271,
+       "unfinished": 2,
+       "p50Min": 34,
+       "p90Min": 670,
+       "maxMin": 2590,
+       "breaches": 32,
+       "overnightBreaches": 30,
+       "oldestUnfinishedMin": 2265
+      },
+      "urgent": {
+       "acquired": 53,
+       "completed": 52,
+       "unfinished": 1,
+       "p50Min": 10,
+       "p90Min": 68,
+       "maxMin": 754,
+       "breaches": 7,
+       "overnightBreaches": 4,
+       "oldestUnfinishedMin": 2236
+      },
+      "urgent/CT": {
+       "acquired": 5,
+       "completed": 4,
+       "unfinished": 1,
+       "p50Min": 18,
+       "p90Min": 709,
+       "maxMin": 709,
+       "breaches": 2,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 2236
+      },
+      "urgent/MR": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 86,
+       "p90Min": 754,
+       "maxMin": 754,
+       "breaches": 2,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 2,
+       "completed": 2,
+       "unfinished": 0,
+       "p50Min": 16,
+       "p90Min": 18,
+       "maxMin": 18,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 43,
+       "completed": 43,
+       "unfinished": 0,
+       "p50Min": 10,
+       "p90Min": 53,
+       "maxMin": 695,
+       "breaches": 3,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 278,
+     "acquired": 4788,
+     "backlog0730TueFri": [
+      8,
+      9,
+      12,
+      1,
+      9,
+      13,
+      13,
+      5,
+      14,
+      14,
+      11,
+      2,
+      8,
+      12,
+      12,
+      1,
+      8,
+      12,
+      11,
+      4,
+      7,
+      11,
+      12,
+      5,
+      10,
+      13,
+      11,
+      3,
+      8,
+      13,
+      9,
+      3,
+      7,
+      9,
+      7,
+      2,
+      9,
+      16,
+      16,
+      3,
+      8,
+      15,
+      12,
+      4,
+      12,
+      11,
+      15,
+      0,
+      13,
+      11,
+      4
+     ],
+     "unreadAtClose": [
+      9,
+      12,
+      14,
+      16,
+      1,
+      9,
+      13,
+      13,
+      11,
+      22,
+      5,
+      14,
+      14,
+      11,
+      8,
+      9,
+      2,
+      8,
+      12,
+      12,
+      13,
+      23,
+      1,
+      8,
+      12,
+      11,
+      12,
+      14,
+      4,
+      7,
+      11,
+      12,
+      6,
+      13,
+      5,
+      10,
+      13,
+      11,
+      9,
+      10,
+      3,
+      8,
+      13,
+      9,
+      10,
+      16,
+      3,
+      7,
+      9,
+      7,
+      10,
+      13,
+      2,
+      9,
+      16,
+      16,
+      15,
+      23,
+      3,
+      8,
+      15,
+      12,
+      10,
+      11,
+      4,
+      12,
+      11,
+      15,
+      10,
+      18,
+      0,
+      13,
+      11,
+      4,
+      11,
+      9
+     ],
+     "revenuePerReportCents": [
+      5099,
+      17016,
+      23619,
+      31433
+     ],
+     "netRevenueCents": 75568299,
+     "laborCents": 39185720,
+     "fixedCents": 25979033,
+     "variableCents": 12184128,
+     "opexCents": 77735332,
+     "profitCents": -2167033,
+     "marginBP": -286,
+     "collectionsCents": 73372987,
+     "disbursementsCents": 81927444,
+     "arChangeCents": 1192066,
+     "cashEndCents": 6445543,
+     "overtimeMin": 10798,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 1060,
+       "cancelled": 187,
+       "imaged": 7,
+       "lost": 640,
+       "no-show": 127,
+       "recall": 54,
+       "reported": 3487
+      },
+      "walk-in": {
+       "left": 361,
+       "lost": 1,
+       "reported": 294
+      }
+     },
+     "extra": {
+      "heldOver": 132,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 266
+     },
+     "staffUtilBP": {
+      "Alex": 5380,
+      "Casey": 6813,
+      "Dr. Avery": 8445,
+      "Dr. Blake": 7635,
+      "Drew": 4964,
+      "Jordan": 4440,
+      "Morgan": 6274,
+      "Riley": 8636,
+      "Sam": 9293,
+      "Taylor": 3014
+     },
+     "staffOvertimeMin": {
+      "Alex": 639,
+      "Casey": 457,
+      "Dr. Avery": 50,
+      "Dr. Blake": 3176,
+      "Drew": 516,
+      "Jordan": 93,
+      "Morgan": 321,
+      "Riley": 1079,
+      "Sam": 4285,
+      "Taylor": 177
+     }
+    }
+   }
+  },
+  {
+   "seed": 4,
+   "takeover": {
+    "Unread": 2,
+    "Reading": 0,
+    "OpenClaims": 2264,
+    "ReceivablesCents": 35240937
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      684,
+      359,
+      527,
+      297
+     ],
+     "walkIns": [
+      185,
+      22,
+      13,
+      0
+     ],
+     "booked": [
+      620,
+      287,
+      453,
+      260
+     ],
+     "lostDeclined": [
+      45,
+      62,
+      60,
+      31
+     ],
+     "lostNoSlot": [
+      1,
+      2,
+      0,
+      0
+     ],
+     "leadP50Days": [
+      8,
+      19,
+      9,
+      11
+     ],
+     "leadP90Days": [
+      44,
+      49,
+      51,
+      44
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      44,
+      48,
+      45,
+      44
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      2,
+      2
+     ],
+     "capacityDelayP90Days": [
+      4,
+      16,
+      7,
+      8
+     ],
+     "exams": [
+      696,
+      281,
+      408,
+      245
+     ],
+     "tueFriPerDay": [
+      32,
+      12.294117647058824,
+      19.294117647058822,
+      11.058823529411764
+     ],
+     "monPerDay": [
+      17.75,
+      11,
+      8.75,
+      11.75
+     ],
+     "satPerDay": [
+      12.5,
+      3.75,
+      6,
+      0
+     ],
+     "utilOpenBP": [
+      3998,
+      5243,
+      3944,
+      5972
+     ],
+     "utilStaffedBP": [
+      4404,
+      6440,
+      4345,
+      6702
+     ],
+     "coverageBP": [
+      9077,
+      8141,
+      9079,
+      8911
+     ],
+     "reports": 1622,
+     "scheduled": 1833,
+     "cancelled": 165,
+     "noShows": 120,
+     "walkInsLeft": 127,
+     "techUtilBP": 6847,
+     "readUtilBP": 8115,
+     "tatP50Min": 48,
+     "tatP90Min": 800,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1419,
+       "completed": 1412,
+       "unfinished": 7,
+       "p50Min": 50,
+       "p90Min": 798,
+       "maxMin": 2699,
+       "breaches": 62,
+       "overnightBreaches": 62,
+       "oldestUnfinishedMin": 729
+      },
+      "routine/CT": {
+       "acquired": 350,
+       "completed": 348,
+       "unfinished": 2,
+       "p50Min": 53,
+       "p90Min": 839,
+       "maxMin": 2699,
+       "breaches": 16,
+       "overnightBreaches": 16,
+       "oldestUnfinishedMin": 655
+      },
+      "routine/MR": {
+       "acquired": 233,
+       "completed": 233,
+       "unfinished": 0,
+       "p50Min": 64,
+       "p90Min": 794,
+       "maxMin": 1019,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 268,
+       "completed": 265,
+       "unfinished": 3,
+       "p50Min": 50,
+       "p90Min": 838,
+       "maxMin": 2638,
+       "breaches": 12,
+       "overnightBreaches": 12,
+       "oldestUnfinishedMin": 669
+      },
+      "routine/XR": {
+       "acquired": 568,
+       "completed": 566,
+       "unfinished": 2,
+       "p50Min": 40,
+       "p90Min": 150,
+       "maxMin": 2682,
+       "breaches": 34,
+       "overnightBreaches": 34,
+       "oldestUnfinishedMin": 729
+      },
+      "soon": {
+       "acquired": 194,
+       "completed": 191,
+       "unfinished": 3,
+       "p50Min": 36,
+       "p90Min": 841,
+       "maxMin": 2632,
+       "breaches": 47,
+       "overnightBreaches": 44,
+       "oldestUnfinishedMin": 599
+      },
+      "soon/CT": {
+       "acquired": 56,
+       "completed": 54,
+       "unfinished": 2,
+       "p50Min": 96,
+       "p90Min": 971,
+       "maxMin": 2632,
+       "breaches": 26,
+       "overnightBreaches": 24,
+       "oldestUnfinishedMin": 599
+      },
+      "soon/MR": {
+       "acquired": 11,
+       "completed": 11,
+       "unfinished": 0,
+       "p50Min": 70,
+       "p90Min": 834,
+       "maxMin": 905,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 10,
+       "completed": 10,
+       "unfinished": 0,
+       "p50Min": 50,
+       "p90Min": 726,
+       "maxMin": 827,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 117,
+       "completed": 116,
+       "unfinished": 1,
+       "p50Min": 22,
+       "p90Min": 760,
+       "maxMin": 2553,
+       "breaches": 16,
+       "overnightBreaches": 15,
+       "oldestUnfinishedMin": 540
+      },
+      "urgent": {
+       "acquired": 17,
+       "completed": 17,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 664,
+       "maxMin": 704,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 2,
+       "completed": 2,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 42,
+       "maxMin": 42,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 26,
+       "p90Min": 26,
+       "maxMin": 26,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 664,
+       "maxMin": 664,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 11,
+       "completed": 11,
+       "unfinished": 0,
+       "p50Min": 11,
+       "p90Min": 50,
+       "maxMin": 704,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 111,
+     "acquired": 1630,
+     "backlog0730TueFri": [
+      11,
+      12,
+      7,
+      3,
+      12,
+      12,
+      13,
+      3,
+      10,
+      11,
+      8,
+      4,
+      12,
+      10,
+      6,
+      3,
+      8
+     ],
+     "unreadAtClose": [
+      12,
+      7,
+      10,
+      15,
+      3,
+      12,
+      12,
+      13,
+      12,
+      25,
+      3,
+      10,
+      11,
+      8,
+      13,
+      11,
+      4,
+      12,
+      10,
+      6,
+      13,
+      23,
+      3,
+      8,
+      10
+     ],
+     "revenuePerReportCents": [
+      5200,
+      17078,
+      23672,
+      31907
+     ],
+     "netRevenueCents": 25763023,
+     "laborCents": 13246384,
+     "fixedCents": 8678716,
+     "variableCents": 4143325,
+     "opexCents": 26454876,
+     "profitCents": -691853,
+     "marginBP": -268,
+     "collectionsCents": 24143747,
+     "disbursementsCents": 25284144,
+     "arChangeCents": 1638247,
+     "cashEndCents": 13859603,
+     "overtimeMin": 3965,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 740,
+       "cancelled": 40,
+       "imaged": 7,
+       "lost": 201,
+       "no-show": 34,
+       "recall": 50,
+       "reported": 795
+      },
+      "walk-in": {
+       "left": 127,
+       "lost": 1,
+       "reported": 92
+      }
+     },
+     "extra": {
+      "heldOver": 42,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 82
+     },
+     "staffUtilBP": {
+      "Alex": 5324,
+      "Casey": 6462,
+      "Dr. Avery": 8522,
+      "Dr. Blake": 7638,
+      "Drew": 4800,
+      "Jordan": 4336,
+      "Morgan": 6010,
+      "Riley": 8683,
+      "Sam": 9481,
+      "Taylor": 3174
+     },
+     "staffOvertimeMin": {
+      "Alex": 316,
+      "Casey": 74,
+      "Dr. Avery": 31,
+      "Dr. Blake": 1239,
+      "Drew": 241,
+      "Jordan": 27,
+      "Morgan": 77,
+      "Riley": 354,
+      "Sam": 1551,
+      "Taylor": 50
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2004,
+      1059,
+      1439,
+      938
+     ],
+     "walkIns": [
+      530,
+      66,
+      47,
+      0
+     ],
+     "booked": [
+      1869,
+      835,
+      1246,
+      817
+     ],
+     "lostDeclined": [
+      114,
+      215,
+      173,
+      112
+     ],
+     "lostNoSlot": [
+      10,
+      6,
+      7,
+      4
+     ],
+     "leadP50Days": [
+      8,
+      20,
+      9,
+      11
+     ],
+     "leadP90Days": [
+      50,
+      54,
+      52,
+      49
+     ],
+     "requestedLeadP50Days": [
+      6,
+      10,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      50,
+      54,
+      49,
+      48
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      2
+     ],
+     "capacityDelayP90Days": [
+      4,
+      17,
+      7,
+      9
+     ],
+     "exams": [
+      2015,
+      793,
+      1197,
+      727
+     ],
+     "tueFriPerDay": [
+      31.980392156862745,
+      11.764705882352942,
+      19.333333333333332,
+      11.392156862745098
+     ],
+     "monPerDay": [
+      16.583333333333332,
+      11.25,
+      9.333333333333334,
+      11.333333333333334
+     ],
+     "satPerDay": [
+      11.846153846153847,
+      3.4615384615384617,
+      6,
+      0
+     ],
+     "utilOpenBP": [
+      3953,
+      5101,
+      3981,
+      6012
+     ],
+     "utilStaffedBP": [
+      4348,
+      6336,
+      4376,
+      6830
+     ],
+     "coverageBP": [
+      9090,
+      8050,
+      9097,
+      8803
+     ],
+     "reports": 4724,
+     "scheduled": 5292,
+     "cancelled": 492,
+     "noShows": 338,
+     "walkInsLeft": 346,
+     "techUtilBP": 6855,
+     "readUtilBP": 8029,
+     "tatP50Min": 50,
+     "tatP90Min": 813,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4131,
+       "completed": 4122,
+       "unfinished": 9,
+       "p50Min": 52,
+       "p90Min": 807,
+       "maxMin": 3598,
+       "breaches": 177,
+       "overnightBreaches": 168,
+       "oldestUnfinishedMin": 2432
+      },
+      "routine/CT": {
+       "acquired": 1042,
+       "completed": 1038,
+       "unfinished": 4,
+       "p50Min": 57,
+       "p90Min": 928,
+       "maxMin": 3598,
+       "breaches": 62,
+       "overnightBreaches": 58,
+       "oldestUnfinishedMin": 2341
+      },
+      "routine/MR": {
+       "acquired": 684,
+       "completed": 684,
+       "unfinished": 0,
+       "p50Min": 63,
+       "p90Min": 789,
+       "maxMin": 1101,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 751,
+       "completed": 751,
+       "unfinished": 0,
+       "p50Min": 54,
+       "p90Min": 848,
+       "maxMin": 2689,
+       "breaches": 34,
+       "overnightBreaches": 34,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1654,
+       "completed": 1649,
+       "unfinished": 5,
+       "p50Min": 42,
+       "p90Min": 157,
+       "maxMin": 2682,
+       "breaches": 81,
+       "overnightBreaches": 76,
+       "oldestUnfinishedMin": 2432
+      },
+      "soon": {
+       "acquired": 547,
+       "completed": 546,
+       "unfinished": 1,
+       "p50Min": 45,
+       "p90Min": 841,
+       "maxMin": 2632,
+       "breaches": 124,
+       "overnightBreaches": 123,
+       "oldestUnfinishedMin": 2219
+      },
+      "soon/CT": {
+       "acquired": 148,
+       "completed": 148,
+       "unfinished": 0,
+       "p50Min": 92,
+       "p90Min": 908,
+       "maxMin": 2632,
+       "breaches": 59,
+       "overnightBreaches": 59,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 38,
+       "completed": 38,
+       "unfinished": 0,
+       "p50Min": 76,
+       "p90Min": 876,
+       "maxMin": 905,
+       "breaches": 17,
+       "overnightBreaches": 17,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 33,
+       "completed": 33,
+       "unfinished": 0,
+       "p50Min": 36,
+       "p90Min": 695,
+       "maxMin": 943,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 328,
+       "completed": 327,
+       "unfinished": 1,
+       "p50Min": 26,
+       "p90Min": 704,
+       "maxMin": 2623,
+       "breaches": 43,
+       "overnightBreaches": 42,
+       "oldestUnfinishedMin": 2219
+      },
+      "urgent": {
+       "acquired": 54,
+       "completed": 54,
+       "unfinished": 0,
+       "p50Min": 16,
+       "p90Min": 664,
+       "maxMin": 860,
+       "breaches": 6,
+       "overnightBreaches": 6,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 7,
+       "completed": 7,
+       "unfinished": 0,
+       "p50Min": 19,
+       "p90Min": 42,
+       "maxMin": 42,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 5,
+       "completed": 5,
+       "unfinished": 0,
+       "p50Min": 28,
+       "p90Min": 860,
+       "maxMin": 860,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 9,
+       "completed": 9,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 704,
+       "maxMin": 704,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 33,
+       "completed": 33,
+       "unfinished": 0,
+       "p50Min": 11,
+       "p90Min": 49,
+       "maxMin": 707,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 307,
+     "acquired": 4732,
+     "backlog0730TueFri": [
+      11,
+      12,
+      7,
+      3,
+      12,
+      12,
+      13,
+      3,
+      10,
+      11,
+      8,
+      4,
+      12,
+      10,
+      6,
+      3,
+      8,
+      10,
+      9,
+      4,
+      12,
+      9,
+      13,
+      3,
+      11,
+      7,
+      9,
+      3,
+      8,
+      11,
+      10,
+      3,
+      10,
+      8,
+      14,
+      6,
+      12,
+      10,
+      9,
+      1,
+      8,
+      11,
+      10,
+      2,
+      13,
+      17,
+      10,
+      2,
+      12,
+      15,
+      14
+     ],
+     "unreadAtClose": [
+      12,
+      7,
+      10,
+      15,
+      3,
+      12,
+      12,
+      13,
+      12,
+      25,
+      3,
+      10,
+      11,
+      8,
+      13,
+      11,
+      4,
+      12,
+      10,
+      6,
+      13,
+      23,
+      3,
+      8,
+      10,
+      9,
+      12,
+      7,
+      4,
+      12,
+      9,
+      13,
+      11,
+      17,
+      3,
+      11,
+      7,
+      9,
+      11,
+      8,
+      3,
+      8,
+      11,
+      10,
+      12,
+      20,
+      3,
+      10,
+      8,
+      14,
+      12,
+      12,
+      6,
+      12,
+      10,
+      9,
+      8,
+      21,
+      1,
+      8,
+      11,
+      10,
+      12,
+      13,
+      2,
+      13,
+      17,
+      10,
+      14,
+      23,
+      2,
+      12,
+      15,
+      14,
+      10,
+      10
+     ],
+     "revenuePerReportCents": [
+      5188,
+      17213,
+      23739,
+      31712
+     ],
+     "netRevenueCents": 76248430,
+     "laborCents": 39177760,
+     "fixedCents": 25979033,
+     "variableCents": 12271740,
+     "opexCents": 77814984,
+     "profitCents": -1566554,
+     "marginBP": -205,
+     "collectionsCents": 73662815,
+     "disbursementsCents": 81848880,
+     "arChangeCents": 1836284,
+     "cashEndCents": 6813935,
+     "overtimeMin": 10975,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 984,
+       "cancelled": 181,
+       "imaged": 10,
+       "lost": 641,
+       "no-show": 143,
+       "recall": 48,
+       "reported": 3433
+      },
+      "walk-in": {
+       "booked": 1,
+       "cancelled": 1,
+       "left": 346,
+       "lost": 1,
+       "reported": 294
+      }
+     },
+     "extra": {
+      "heldOver": 132,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 271
+     },
+     "staffUtilBP": {
+      "Alex": 5560,
+      "Casey": 6406,
+      "Dr. Avery": 8403,
+      "Dr. Blake": 7587,
+      "Drew": 4637,
+      "Jordan": 4317,
+      "Morgan": 6002,
+      "Riley": 8679,
+      "Sam": 9482,
+      "Taylor": 3105
+     },
+     "staffOvertimeMin": {
+      "Alex": 593,
+      "Casey": 373,
+      "Dr. Avery": 51,
+      "Dr. Blake": 3375,
+      "Drew": 614,
+      "Jordan": 82,
+      "Morgan": 270,
+      "Riley": 1220,
+      "Sam": 4203,
+      "Taylor": 190
+     }
+    }
+   }
+  },
+  {
+   "seed": 5,
+   "takeover": {
+    "Unread": 4,
+    "Reading": 0,
+    "OpenClaims": 2277,
+    "ReceivablesCents": 34803631
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      730,
+      356,
+      522,
+      312
+     ],
+     "walkIns": [
+      201,
+      29,
+      22,
+      0
+     ],
+     "booked": [
+      662,
+      281,
+      433,
+      272
+     ],
+     "lostDeclined": [
+      50,
+      66,
+      82,
+      32
+     ],
+     "lostNoSlot": [
+      1,
+      1,
+      2,
+      0
+     ],
+     "leadP50Days": [
+      9,
+      16,
+      12,
+      11
+     ],
+     "leadP90Days": [
+      51,
+      49,
+      49,
+      53
+     ],
+     "requestedLeadP50Days": [
+      7,
+      8,
+      8,
+      7
+     ],
+     "requestedLeadP90Days": [
+      51,
+      47,
+      46,
+      53
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      2,
+      1
+     ],
+     "capacityDelayP90Days": [
+      4,
+      15,
+      8,
+      8
+     ],
+     "exams": [
+      718,
+      275,
+      395,
+      244
+     ],
+     "tueFriPerDay": [
+      32.8235294117647,
+      11.823529411764707,
+      18.58823529411765,
+      11
+     ],
+     "monPerDay": [
+      18.25,
+      11.5,
+      9.75,
+      11.25
+     ],
+     "satPerDay": [
+      12.75,
+      3.75,
+      6,
+      0
+     ],
+     "utilOpenBP": [
+      4141,
+      5390,
+      3825,
+      6084
+     ],
+     "utilStaffedBP": [
+      4554,
+      6621,
+      4200,
+      6821
+     ],
+     "coverageBP": [
+      9091,
+      8141,
+      9106,
+      8918
+     ],
+     "reports": 1627,
+     "scheduled": 1817,
+     "cancelled": 162,
+     "noShows": 126,
+     "walkInsLeft": 134,
+     "techUtilBP": 6891,
+     "readUtilBP": 8185,
+     "tatP50Min": 49,
+     "tatP90Min": 799,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1447,
+       "completed": 1439,
+       "unfinished": 8,
+       "p50Min": 50,
+       "p90Min": 799,
+       "maxMin": 3546,
+       "breaches": 55,
+       "overnightBreaches": 55,
+       "oldestUnfinishedMin": 633
+      },
+      "routine/CT": {
+       "acquired": 350,
+       "completed": 347,
+       "unfinished": 3,
+       "p50Min": 57,
+       "p90Min": 841,
+       "maxMin": 3546,
+       "breaches": 16,
+       "overnightBreaches": 16,
+       "oldestUnfinishedMin": 603
+      },
+      "routine/MR": {
+       "acquired": 230,
+       "completed": 228,
+       "unfinished": 2,
+       "p50Min": 58,
+       "p90Min": 798,
+       "maxMin": 1043,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 633
+      },
+      "routine/US": {
+       "acquired": 257,
+       "completed": 256,
+       "unfinished": 1,
+       "p50Min": 52,
+       "p90Min": 813,
+       "maxMin": 2655,
+       "breaches": 12,
+       "overnightBreaches": 12,
+       "oldestUnfinishedMin": 625
+      },
+      "routine/XR": {
+       "acquired": 610,
+       "completed": 608,
+       "unfinished": 2,
+       "p50Min": 40,
+       "p90Min": 127,
+       "maxMin": 2596,
+       "breaches": 27,
+       "overnightBreaches": 27,
+       "oldestUnfinishedMin": 558
+      },
+      "soon": {
+       "acquired": 162,
+       "completed": 161,
+       "unfinished": 1,
+       "p50Min": 45,
+       "p90Min": 814,
+       "maxMin": 2493,
+       "breaches": 34,
+       "overnightBreaches": 33,
+       "oldestUnfinishedMin": 643
+      },
+      "soon/CT": {
+       "acquired": 44,
+       "completed": 43,
+       "unfinished": 1,
+       "p50Min": 97,
+       "p90Min": 992,
+       "maxMin": 2451,
+       "breaches": 19,
+       "overnightBreaches": 18,
+       "oldestUnfinishedMin": 643
+      },
+      "soon/MR": {
+       "acquired": 13,
+       "completed": 13,
+       "unfinished": 0,
+       "p50Min": 61,
+       "p90Min": 813,
+       "maxMin": 814,
+       "breaches": 4,
+       "overnightBreaches": 4,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 15,
+       "completed": 15,
+       "unfinished": 0,
+       "p50Min": 48,
+       "p90Min": 896,
+       "maxMin": 2442,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 90,
+       "completed": 90,
+       "unfinished": 0,
+       "p50Min": 26,
+       "p90Min": 124,
+       "maxMin": 2493,
+       "breaches": 8,
+       "overnightBreaches": 8,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 23,
+       "completed": 23,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 48,
+       "maxMin": 49,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 17,
+       "maxMin": 17,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 40,
+       "p90Min": 40,
+       "maxMin": 40,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 42,
+       "p90Min": 46,
+       "maxMin": 46,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 18,
+       "completed": 18,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 48,
+       "maxMin": 49,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 89,
+     "acquired": 1632,
+     "backlog0730TueFri": [
+      8,
+      10,
+      12,
+      3,
+      12,
+      9,
+      7,
+      2,
+      11,
+      9,
+      11,
+      3,
+      8,
+      10,
+      10,
+      1,
+      12
+     ],
+     "unreadAtClose": [
+      10,
+      12,
+      13,
+      11,
+      3,
+      12,
+      9,
+      7,
+      11,
+      18,
+      2,
+      11,
+      9,
+      11,
+      10,
+      11,
+      3,
+      8,
+      10,
+      10,
+      11,
+      24,
+      1,
+      12,
+      9
+     ],
+     "revenuePerReportCents": [
+      5076,
+      17655,
+      24480,
+      32009
+     ],
+     "netRevenueCents": 25879176,
+     "laborCents": 13226952,
+     "fixedCents": 8678716,
+     "variableCents": 4131675,
+     "opexCents": 26423794,
+     "profitCents": -544618,
+     "marginBP": -210,
+     "collectionsCents": 24153053,
+     "disbursementsCents": 25306146,
+     "arChangeCents": 1736537,
+     "cashEndCents": 13846907,
+     "overtimeMin": 3853,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 745,
+       "cancelled": 57,
+       "imaged": 9,
+       "lost": 234,
+       "no-show": 29,
+       "recall": 41,
+       "reported": 805
+      },
+      "walk-in": {
+       "left": 134,
+       "reported": 118
+      }
+     },
+     "extra": {
+      "heldOver": 51,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 106
+     },
+     "staffUtilBP": {
+      "Alex": 5404,
+      "Casey": 6440,
+      "Dr. Avery": 8484,
+      "Dr. Blake": 7834,
+      "Drew": 5008,
+      "Jordan": 4370,
+      "Morgan": 5984,
+      "Riley": 8684,
+      "Sam": 9424,
+      "Taylor": 3243
+     },
+     "staffOvertimeMin": {
+      "Alex": 133,
+      "Casey": 162,
+      "Dr. Avery": 11,
+      "Dr. Blake": 1300,
+      "Drew": 100,
+      "Jordan": 25,
+      "Morgan": 8,
+      "Riley": 414,
+      "Sam": 1655,
+      "Taylor": 42
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      1981,
+      991,
+      1458,
+      908
+     ],
+     "walkIns": [
+      582,
+      82,
+      55,
+      0
+     ],
+     "booked": [
+      1841,
+      829,
+      1250,
+      806
+     ],
+     "lostDeclined": [
+      116,
+      161,
+      189,
+      90
+     ],
+     "lostNoSlot": [
+      5,
+      4,
+      11,
+      7
+     ],
+     "leadP50Days": [
+      8,
+      15,
+      10,
+      11
+     ],
+     "leadP90Days": [
+      52,
+      54,
+      49,
+      54
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      52,
+      54,
+      48,
+      53
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      3,
+      14,
+      7,
+      8
+     ],
+     "exams": [
+      1964,
+      806,
+      1214,
+      724
+     ],
+     "tueFriPerDay": [
+      30.54901960784314,
+      11.941176470588236,
+      19.686274509803923,
+      11.313725490196079
+     ],
+     "monPerDay": [
+      17.666666666666668,
+      11.5,
+      9.416666666666666,
+      11.25
+     ],
+     "satPerDay": [
+      12.153846153846153,
+      3.5384615384615383,
+      6.230769230769231,
+      0
+     ],
+     "utilOpenBP": [
+      3842,
+      5293,
+      3882,
+      6049
+     ],
+     "utilStaffedBP": [
+      4232,
+      6575,
+      4272,
+      6869
+     ],
+     "coverageBP": [
+      9078,
+      8050,
+      9087,
+      8806
+     ],
+     "reports": 4700,
+     "scheduled": 5200,
+     "cancelled": 429,
+     "noShows": 354,
+     "walkInsLeft": 392,
+     "techUtilBP": 6896,
+     "readUtilBP": 8172,
+     "tatP50Min": 59,
+     "tatP90Min": 822,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4139,
+       "completed": 4129,
+       "unfinished": 10,
+       "p50Min": 60,
+       "p90Min": 820,
+       "maxMin": 3546,
+       "breaches": 175,
+       "overnightBreaches": 165,
+       "oldestUnfinishedMin": 2370
+      },
+      "routine/CT": {
+       "acquired": 1053,
+       "completed": 1051,
+       "unfinished": 2,
+       "p50Min": 71,
+       "p90Min": 873,
+       "maxMin": 3546,
+       "breaches": 56,
+       "overnightBreaches": 54,
+       "oldestUnfinishedMin": 2286
+      },
+      "routine/MR": {
+       "acquired": 682,
+       "completed": 682,
+       "unfinished": 0,
+       "p50Min": 68,
+       "p90Min": 820,
+       "maxMin": 1078,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 766,
+       "completed": 766,
+       "unfinished": 0,
+       "p50Min": 62,
+       "p90Min": 847,
+       "maxMin": 2685,
+       "breaches": 35,
+       "overnightBreaches": 35,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1638,
+       "completed": 1630,
+       "unfinished": 8,
+       "p50Min": 51,
+       "p90Min": 157,
+       "maxMin": 2708,
+       "breaches": 84,
+       "overnightBreaches": 76,
+       "oldestUnfinishedMin": 2370
+      },
+      "soon": {
+       "acquired": 507,
+       "completed": 505,
+       "unfinished": 2,
+       "p50Min": 60,
+       "p90Min": 845,
+       "maxMin": 2542,
+       "breaches": 128,
+       "overnightBreaches": 126,
+       "oldestUnfinishedMin": 2141
+      },
+      "soon/CT": {
+       "acquired": 155,
+       "completed": 153,
+       "unfinished": 2,
+       "p50Min": 124,
+       "p90Min": 876,
+       "maxMin": 2451,
+       "breaches": 74,
+       "overnightBreaches": 72,
+       "oldestUnfinishedMin": 2141
+      },
+      "soon/MR": {
+       "acquired": 39,
+       "completed": 39,
+       "unfinished": 0,
+       "p50Min": 97,
+       "p90Min": 813,
+       "maxMin": 926,
+       "breaches": 15,
+       "overnightBreaches": 15,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 34,
+       "completed": 34,
+       "unfinished": 0,
+       "p50Min": 45,
+       "p90Min": 726,
+       "maxMin": 2442,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 279,
+       "completed": 279,
+       "unfinished": 0,
+       "p50Min": 40,
+       "p90Min": 787,
+       "maxMin": 2542,
+       "breaches": 34,
+       "overnightBreaches": 34,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 62,
+       "completed": 62,
+       "unfinished": 0,
+       "p50Min": 14,
+       "p90Min": 48,
+       "maxMin": 889,
+       "breaches": 4,
+       "overnightBreaches": 4,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 6,
+       "completed": 6,
+       "unfinished": 0,
+       "p50Min": 19,
+       "p90Min": 889,
+       "maxMin": 889,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 40,
+       "p90Min": 704,
+       "maxMin": 704,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 6,
+       "completed": 6,
+       "unfinished": 0,
+       "p50Min": 42,
+       "p90Min": 716,
+       "maxMin": 716,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 47,
+       "completed": 47,
+       "unfinished": 0,
+       "p50Min": 12,
+       "p90Min": 48,
+       "maxMin": 668,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 307,
+     "acquired": 4708,
+     "backlog0730TueFri": [
+      8,
+      10,
+      12,
+      3,
+      12,
+      9,
+      7,
+      2,
+      11,
+      9,
+      11,
+      3,
+      8,
+      10,
+      10,
+      1,
+      12,
+      9,
+      12,
+      1,
+      10,
+      14,
+      12,
+      3,
+      13,
+      15,
+      16,
+      4,
+      14,
+      15,
+      11,
+      2,
+      11,
+      12,
+      15,
+      2,
+      15,
+      14,
+      9,
+      4,
+      11,
+      11,
+      15,
+      3,
+      7,
+      8,
+      9,
+      3,
+      9,
+      11,
+      9
+     ],
+     "unreadAtClose": [
+      10,
+      12,
+      13,
+      11,
+      3,
+      12,
+      9,
+      7,
+      11,
+      18,
+      2,
+      11,
+      9,
+      11,
+      10,
+      11,
+      3,
+      8,
+      10,
+      10,
+      11,
+      24,
+      1,
+      12,
+      9,
+      12,
+      10,
+      11,
+      1,
+      10,
+      14,
+      12,
+      9,
+      16,
+      3,
+      13,
+      15,
+      16,
+      10,
+      12,
+      4,
+      14,
+      15,
+      11,
+      14,
+      26,
+      2,
+      11,
+      12,
+      15,
+      11,
+      9,
+      2,
+      15,
+      14,
+      9,
+      11,
+      23,
+      4,
+      11,
+      11,
+      15,
+      14,
+      12,
+      3,
+      7,
+      8,
+      9,
+      9,
+      19,
+      3,
+      9,
+      11,
+      9,
+      8,
+      12
+     ],
+     "revenuePerReportCents": [
+      5098,
+      17269,
+      24013,
+      32326
+     ],
+     "netRevenueCents": 77383798,
+     "laborCents": 39263144,
+     "fixedCents": 25979033,
+     "variableCents": 12223488,
+     "opexCents": 77852116,
+     "profitCents": -468318,
+     "marginBP": -60,
+     "collectionsCents": 72710230,
+     "disbursementsCents": 82027894,
+     "arChangeCents": 3742402,
+     "cashEndCents": 5682336,
+     "overtimeMin": 12294,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 994,
+       "cancelled": 172,
+       "imaged": 11,
+       "lost": 583,
+       "no-show": 142,
+       "recall": 42,
+       "reported": 3394
+      },
+      "walk-in": {
+       "booked": 1,
+       "cancelled": 4,
+       "left": 392,
+       "lost": 1,
+       "reported": 321
+      }
+     },
+     "extra": {
+      "heldOver": 140,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 295
+     },
+     "staffUtilBP": {
+      "Alex": 5646,
+      "Casey": 6353,
+      "Dr. Avery": 8425,
+      "Dr. Blake": 7873,
+      "Drew": 4898,
+      "Jordan": 4345,
+      "Morgan": 6075,
+      "Riley": 8443,
+      "Sam": 9525,
+      "Taylor": 3091
+     },
+     "staffOvertimeMin": {
+      "Alex": 500,
+      "Casey": 504,
+      "Dr. Avery": 15,
+      "Dr. Blake": 4147,
+      "Drew": 518,
+      "Jordan": 68,
+      "Morgan": 206,
+      "Riley": 1051,
+      "Sam": 5129,
+      "Taylor": 150
+     }
+    }
+   }
+  },
+  {
+   "seed": 6,
+   "takeover": {
+    "Unread": 5,
+    "Reading": 0,
+    "OpenClaims": 2318,
+    "ReceivablesCents": 36255266
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      746,
+      372,
+      477,
+      351
+     ],
+     "walkIns": [
+      194,
+      30,
+      17,
+      0
+     ],
+     "booked": [
+      686,
+      274,
+      405,
+      297
+     ],
+     "lostDeclined": [
+      39,
+      89,
+      64,
+      37
+     ],
+     "lostNoSlot": [
+      1,
+      1,
+      0,
+      2
+     ],
+     "leadP50Days": [
+      8,
+      21,
+      8,
+      12
+     ],
+     "leadP90Days": [
+      49,
+      54,
+      49,
+      48
+     ],
+     "requestedLeadP50Days": [
+      6,
+      10,
+      6,
+      8
+     ],
+     "requestedLeadP90Days": [
+      49,
+      54,
+      44,
+      48
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      3,
+      19,
+      5,
+      8
+     ],
+     "exams": [
+      730,
+      289,
+      394,
+      247
+     ],
+     "tueFriPerDay": [
+      33.94117647058823,
+      12.529411764705882,
+      18.294117647058822,
+      11.588235294117647
+     ],
+     "monPerDay": [
+      18.5,
+      11.5,
+      9.5,
+      9.75
+     ],
+     "satPerDay": [
+      11.5,
+      4.25,
+      6.25,
+      0
+     ],
+     "utilOpenBP": [
+      4231,
+      5638,
+      3681,
+      6129
+     ],
+     "utilStaffedBP": [
+      4599,
+      6924,
+      4002,
+      6872
+     ],
+     "coverageBP": [
+      9199,
+      8141,
+      9199,
+      8918
+     ],
+     "reports": 1656,
+     "scheduled": 1808,
+     "cancelled": 145,
+     "noShows": 110,
+     "walkInsLeft": 128,
+     "techUtilBP": 6991,
+     "readUtilBP": 8030,
+     "tatP50Min": 58,
+     "tatP90Min": 821,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1435,
+       "completed": 1427,
+       "unfinished": 8,
+       "p50Min": 60,
+       "p90Min": 822,
+       "maxMin": 3502,
+       "breaches": 54,
+       "overnightBreaches": 54,
+       "oldestUnfinishedMin": 665
+      },
+      "routine/CT": {
+       "acquired": 332,
+       "completed": 328,
+       "unfinished": 4,
+       "p50Min": 66,
+       "p90Min": 857,
+       "maxMin": 3502,
+       "breaches": 21,
+       "overnightBreaches": 21,
+       "oldestUnfinishedMin": 655
+      },
+      "routine/MR": {
+       "acquired": 227,
+       "completed": 225,
+       "unfinished": 2,
+       "p50Min": 70,
+       "p90Min": 824,
+       "maxMin": 1056,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 665
+      },
+      "routine/US": {
+       "acquired": 273,
+       "completed": 271,
+       "unfinished": 2,
+       "p50Min": 61,
+       "p90Min": 853,
+       "maxMin": 2680,
+       "breaches": 10,
+       "overnightBreaches": 10,
+       "oldestUnfinishedMin": 659
+      },
+      "routine/XR": {
+       "acquired": 603,
+       "completed": 603,
+       "unfinished": 0,
+       "p50Min": 52,
+       "p90Min": 168,
+       "maxMin": 2645,
+       "breaches": 23,
+       "overnightBreaches": 23,
+       "oldestUnfinishedMin": 0
+      },
+      "soon": {
+       "acquired": 199,
+       "completed": 198,
+       "unfinished": 1,
+       "p50Min": 53,
+       "p90Min": 833,
+       "maxMin": 2526,
+       "breaches": 50,
+       "overnightBreaches": 49,
+       "oldestUnfinishedMin": 719
+      },
+      "soon/CT": {
+       "acquired": 62,
+       "completed": 61,
+       "unfinished": 1,
+       "p50Min": 87,
+       "p90Min": 843,
+       "maxMin": 2348,
+       "breaches": 27,
+       "overnightBreaches": 26,
+       "oldestUnfinishedMin": 719
+      },
+      "soon/MR": {
+       "acquired": 20,
+       "completed": 20,
+       "unfinished": 0,
+       "p50Min": 115,
+       "p90Min": 844,
+       "maxMin": 945,
+       "breaches": 9,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 16,
+       "completed": 16,
+       "unfinished": 0,
+       "p50Min": 51,
+       "p90Min": 2377,
+       "maxMin": 2466,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 101,
+       "completed": 101,
+       "unfinished": 0,
+       "p50Min": 27,
+       "p90Min": 114,
+       "maxMin": 2526,
+       "breaches": 9,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 26,
+       "completed": 26,
+       "unfinished": 0,
+       "p50Min": 14,
+       "p90Min": 61,
+       "maxMin": 2519,
+       "breaches": 3,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 26,
+       "completed": 26,
+       "unfinished": 0,
+       "p50Min": 14,
+       "p90Min": 61,
+       "maxMin": 2519,
+       "breaches": 3,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 107,
+     "acquired": 1660,
+     "backlog0730TueFri": [
+      11,
+      13,
+      17,
+      3,
+      17,
+      19,
+      10,
+      2,
+      13,
+      11,
+      11,
+      2,
+      14,
+      11,
+      10,
+      5,
+      14
+     ],
+     "unreadAtClose": [
+      13,
+      17,
+      18,
+      15,
+      3,
+      17,
+      19,
+      10,
+      6,
+      14,
+      2,
+      13,
+      11,
+      11,
+      9,
+      9,
+      2,
+      14,
+      11,
+      10,
+      14,
+      25,
+      5,
+      14,
+      9
+     ],
+     "revenuePerReportCents": [
+      5222,
+      18041,
+      23953,
+      31655
+     ],
+     "netRevenueCents": 26252752,
+     "laborCents": 13282652,
+     "fixedCents": 8678716,
+     "variableCents": 4232225,
+     "opexCents": 26580044,
+     "profitCents": -327292,
+     "marginBP": -124,
+     "collectionsCents": 25439815,
+     "disbursementsCents": 25240600,
+     "arChangeCents": 741354,
+     "cashEndCents": 15199215,
+     "overtimeMin": 4571,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 765,
+       "cancelled": 43,
+       "imaged": 9,
+       "lost": 233,
+       "no-show": 32,
+       "recall": 53,
+       "reported": 811
+      },
+      "walk-in": {
+       "booked": 1,
+       "left": 128,
+       "lost": 1,
+       "reported": 111
+      }
+     },
+     "extra": {
+      "heldOver": 50,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 108
+     },
+     "staffUtilBP": {
+      "Alex": 5491,
+      "Casey": 6426,
+      "Dr. Avery": 8250,
+      "Dr. Blake": 7771,
+      "Drew": 5272,
+      "Jordan": 4390,
+      "Morgan": 6304,
+      "Riley": 8820,
+      "Sam": 9269,
+      "Taylor": 3153
+     },
+     "staffOvertimeMin": {
+      "Alex": 117,
+      "Casey": 97,
+      "Dr. Avery": 0,
+      "Dr. Blake": 1534,
+      "Drew": 330,
+      "Jordan": 32,
+      "Morgan": 99,
+      "Riley": 619,
+      "Sam": 1676,
+      "Taylor": 63
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2119,
+      1124,
+      1400,
+      928
+     ],
+     "walkIns": [
+      521,
+      74,
+      59,
+      0
+     ],
+     "booked": [
+      1986,
+      835,
+      1194,
+      812
+     ],
+     "lostDeclined": [
+      108,
+      269,
+      194,
+      99
+     ],
+     "lostNoSlot": [
+      6,
+      8,
+      4,
+      11
+     ],
+     "leadP50Days": [
+      8,
+      21,
+      8,
+      12
+     ],
+     "leadP90Days": [
+      52,
+      55,
+      49,
+      51
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      5,
+      8
+     ],
+     "requestedLeadP90Days": [
+      51,
+      55,
+      47,
+      51
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      3,
+      19,
+      6,
+      8
+     ],
+     "exams": [
+      2082,
+      827,
+      1146,
+      732
+     ],
+     "tueFriPerDay": [
+      32.84313725490196,
+      12.372549019607844,
+      18.235294117647058,
+      11.588235294117647
+     ],
+     "monPerDay": [
+      18.5,
+      11.416666666666666,
+      9.166666666666666,
+      10.833333333333334
+     ],
+     "satPerDay": [
+      11.692307692307692,
+      3.5384615384615383,
+      6.615384615384615,
+      0
+     ],
+     "utilOpenBP": [
+      4096,
+      5469,
+      3747,
+      6145
+     ],
+     "utilStaffedBP": [
+      4475,
+      6793,
+      4093,
+      6981
+     ],
+     "coverageBP": [
+      9152,
+      8050,
+      9155,
+      8802
+     ],
+     "reports": 4780,
+     "scheduled": 5308,
+     "cancelled": 481,
+     "noShows": 326,
+     "walkInsLeft": 348,
+     "techUtilBP": 6973,
+     "readUtilBP": 8034,
+     "tatP50Min": 54,
+     "tatP90Min": 824,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4160,
+       "completed": 4152,
+       "unfinished": 8,
+       "p50Min": 56,
+       "p90Min": 820,
+       "maxMin": 3624,
+       "breaches": 168,
+       "overnightBreaches": 160,
+       "oldestUnfinishedMin": 2332
+      },
+      "routine/CT": {
+       "acquired": 971,
+       "completed": 968,
+       "unfinished": 3,
+       "p50Min": 62,
+       "p90Min": 888,
+       "maxMin": 3623,
+       "breaches": 62,
+       "overnightBreaches": 59,
+       "oldestUnfinishedMin": 2252
+      },
+      "routine/MR": {
+       "acquired": 684,
+       "completed": 684,
+       "unfinished": 0,
+       "p50Min": 67,
+       "p90Min": 810,
+       "maxMin": 3624,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 789,
+       "completed": 789,
+       "unfinished": 0,
+       "p50Min": 55,
+       "p90Min": 853,
+       "maxMin": 2785,
+       "breaches": 29,
+       "overnightBreaches": 29,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1716,
+       "completed": 1711,
+       "unfinished": 5,
+       "p50Min": 49,
+       "p90Min": 166,
+       "maxMin": 2783,
+       "breaches": 76,
+       "overnightBreaches": 71,
+       "oldestUnfinishedMin": 2332
+      },
+      "soon": {
+       "acquired": 559,
+       "completed": 555,
+       "unfinished": 4,
+       "p50Min": 50,
+       "p90Min": 843,
+       "maxMin": 2567,
+       "breaches": 141,
+       "overnightBreaches": 137,
+       "oldestUnfinishedMin": 2227
+      },
+      "soon/CT": {
+       "acquired": 166,
+       "completed": 165,
+       "unfinished": 1,
+       "p50Min": 97,
+       "p90Min": 898,
+       "maxMin": 2489,
+       "breaches": 74,
+       "overnightBreaches": 73,
+       "oldestUnfinishedMin": 2123
+      },
+      "soon/MR": {
+       "acquired": 47,
+       "completed": 47,
+       "unfinished": 0,
+       "p50Min": 121,
+       "p90Min": 844,
+       "maxMin": 945,
+       "breaches": 22,
+       "overnightBreaches": 22,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 35,
+       "completed": 35,
+       "unfinished": 0,
+       "p50Min": 51,
+       "p90Min": 2377,
+       "maxMin": 2567,
+       "breaches": 14,
+       "overnightBreaches": 14,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 311,
+       "completed": 308,
+       "unfinished": 3,
+       "p50Min": 27,
+       "p90Min": 140,
+       "maxMin": 2566,
+       "breaches": 31,
+       "overnightBreaches": 28,
+       "oldestUnfinishedMin": 2227
+      },
+      "urgent": {
+       "acquired": 68,
+       "completed": 68,
+       "unfinished": 0,
+       "p50Min": 15,
+       "p90Min": 686,
+       "maxMin": 2519,
+       "breaches": 9,
+       "overnightBreaches": 7,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 9,
+       "completed": 9,
+       "unfinished": 0,
+       "p50Min": 24,
+       "p90Min": 725,
+       "maxMin": 725,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 31,
+       "p90Min": 31,
+       "maxMin": 31,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 28,
+       "p90Min": 686,
+       "maxMin": 686,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 55,
+       "completed": 55,
+       "unfinished": 0,
+       "p50Min": 12,
+       "p90Min": 61,
+       "maxMin": 2519,
+       "breaches": 6,
+       "overnightBreaches": 4,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 318,
+     "acquired": 4787,
+     "backlog0730TueFri": [
+      11,
+      13,
+      17,
+      3,
+      17,
+      19,
+      10,
+      2,
+      13,
+      11,
+      11,
+      2,
+      14,
+      11,
+      10,
+      5,
+      14,
+      9,
+      10,
+      3,
+      11,
+      6,
+      17,
+      2,
+      10,
+      11,
+      14,
+      5,
+      13,
+      10,
+      10,
+      1,
+      8,
+      10,
+      9,
+      4,
+      14,
+      13,
+      19,
+      2,
+      8,
+      11,
+      11,
+      2,
+      11,
+      10,
+      5,
+      6,
+      10,
+      11,
+      10
+     ],
+     "unreadAtClose": [
+      13,
+      17,
+      18,
+      15,
+      3,
+      17,
+      19,
+      10,
+      6,
+      14,
+      2,
+      13,
+      11,
+      11,
+      9,
+      9,
+      2,
+      14,
+      11,
+      10,
+      14,
+      25,
+      5,
+      14,
+      9,
+      10,
+      15,
+      15,
+      3,
+      11,
+      6,
+      17,
+      17,
+      30,
+      2,
+      10,
+      11,
+      14,
+      6,
+      12,
+      5,
+      13,
+      10,
+      10,
+      12,
+      21,
+      1,
+      8,
+      10,
+      9,
+      11,
+      12,
+      4,
+      14,
+      13,
+      19,
+      6,
+      16,
+      2,
+      8,
+      11,
+      11,
+      11,
+      11,
+      2,
+      11,
+      10,
+      5,
+      9,
+      13,
+      6,
+      10,
+      11,
+      10,
+      10,
+      12
+     ],
+     "revenuePerReportCents": [
+      5165,
+      17990,
+      23633,
+      31568
+     ],
+     "netRevenueCents": 76636304,
+     "laborCents": 39216162,
+     "fixedCents": 25979033,
+     "variableCents": 12325864,
+     "opexCents": 77907510,
+     "profitCents": -1271206,
+     "marginBP": -165,
+     "collectionsCents": 74799407,
+     "disbursementsCents": 81908889,
+     "arChangeCents": 1007949,
+     "cashEndCents": 7890518,
+     "overtimeMin": 11592,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 991,
+       "cancelled": 196,
+       "imaged": 10,
+       "lost": 699,
+       "no-show": 145,
+       "recall": 59,
+       "reported": 3471
+      },
+      "walk-in": {
+       "cancelled": 2,
+       "imaged": 1,
+       "left": 348,
+       "lost": 2,
+       "reported": 301
+      }
+     },
+     "extra": {
+      "heldOver": 142,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 287
+     },
+     "staffUtilBP": {
+      "Alex": 5681,
+      "Casey": 6500,
+      "Dr. Avery": 8275,
+      "Dr. Blake": 7750,
+      "Drew": 5141,
+      "Jordan": 4395,
+      "Morgan": 6206,
+      "Riley": 8657,
+      "Sam": 9299,
+      "Taylor": 3089
+     },
+     "staffOvertimeMin": {
+      "Alex": 536,
+      "Casey": 171,
+      "Dr. Avery": 9,
+      "Dr. Blake": 3703,
+      "Drew": 763,
+      "Jordan": 80,
+      "Morgan": 195,
+      "Riley": 1654,
+      "Sam": 4295,
+      "Taylor": 179
+     }
+    }
+   }
+  },
+  {
+   "seed": 7,
+   "takeover": {
+    "Unread": 1,
+    "Reading": 0,
+    "OpenClaims": 2277,
+    "ReceivablesCents": 36068971
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      705,
+      379,
+      526,
+      327
+     ],
+     "walkIns": [
+      180,
+      30,
+      12,
+      0
+     ],
+     "booked": [
+      651,
+      295,
+      453,
+      282
+     ],
+     "lostDeclined": [
+      33,
+      74,
+      67,
+      40
+     ],
+     "lostNoSlot": [
+      2,
+      1,
+      0,
+      1
+     ],
+     "leadP50Days": [
+      8,
+      20,
+      9,
+      11
+     ],
+     "leadP90Days": [
+      42,
+      48,
+      52,
+      46
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      42,
+      47,
+      51,
+      45
+     ],
+     "capacityDelayP50Days": [
+      0,
+      4,
+      1,
+      2
+     ],
+     "capacityDelayP90Days": [
+      4,
+      18,
+      6,
+      8
+     ],
+     "exams": [
+      715,
+      284,
+      403,
+      252
+     ],
+     "tueFriPerDay": [
+      32.76470588235294,
+      12.529411764705882,
+      19.058823529411764,
+      11.588235294117647
+     ],
+     "monPerDay": [
+      19,
+      11.25,
+      8.5,
+      11.75
+     ],
+     "satPerDay": [
+      12,
+      3.75,
+      7,
+      0
+     ],
+     "utilOpenBP": [
+      4122,
+      5373,
+      3907,
+      6156
+     ],
+     "utilStaffedBP": [
+      4504,
+      6599,
+      4264,
+      6908
+     ],
+     "coverageBP": [
+      9150,
+      8141,
+      9161,
+      8910
+     ],
+     "reports": 1647,
+     "scheduled": 1835,
+     "cancelled": 164,
+     "noShows": 109,
+     "walkInsLeft": 127,
+     "techUtilBP": 6942,
+     "readUtilBP": 8172,
+     "tatP50Min": 64,
+     "tatP90Min": 861,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1464,
+       "completed": 1458,
+       "unfinished": 6,
+       "p50Min": 64,
+       "p90Min": 866,
+       "maxMin": 3619,
+       "breaches": 72,
+       "overnightBreaches": 72,
+       "oldestUnfinishedMin": 710
+      },
+      "routine/CT": {
+       "acquired": 352,
+       "completed": 349,
+       "unfinished": 3,
+       "p50Min": 72,
+       "p90Min": 1068,
+       "maxMin": 3619,
+       "breaches": 29,
+       "overnightBreaches": 29,
+       "oldestUnfinishedMin": 710
+      },
+      "routine/MR": {
+       "acquired": 235,
+       "completed": 234,
+       "unfinished": 1,
+       "p50Min": 74,
+       "p90Min": 858,
+       "maxMin": 3610,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 613
+      },
+      "routine/US": {
+       "acquired": 275,
+       "completed": 274,
+       "unfinished": 1,
+       "p50Min": 66,
+       "p90Min": 885,
+       "maxMin": 2763,
+       "breaches": 13,
+       "overnightBreaches": 13,
+       "oldestUnfinishedMin": 674
+      },
+      "routine/XR": {
+       "acquired": 602,
+       "completed": 601,
+       "unfinished": 1,
+       "p50Min": 53,
+       "p90Min": 203,
+       "maxMin": 2777,
+       "breaches": 29,
+       "overnightBreaches": 29,
+       "oldestUnfinishedMin": 662
+      },
+      "soon": {
+       "acquired": 173,
+       "completed": 171,
+       "unfinished": 2,
+       "p50Min": 68,
+       "p90Min": 799,
+       "maxMin": 2541,
+       "breaches": 48,
+       "overnightBreaches": 46,
+       "oldestUnfinishedMin": 678
+      },
+      "soon/CT": {
+       "acquired": 51,
+       "completed": 51,
+       "unfinished": 0,
+       "p50Min": 118,
+       "p90Min": 863,
+       "maxMin": 2510,
+       "breaches": 23,
+       "overnightBreaches": 23,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 16,
+       "completed": 15,
+       "unfinished": 1,
+       "p50Min": 704,
+       "p90Min": 906,
+       "maxMin": 908,
+       "breaches": 10,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 675
+      },
+      "soon/US": {
+       "acquired": 9,
+       "completed": 9,
+       "unfinished": 0,
+       "p50Min": 89,
+       "p90Min": 718,
+       "maxMin": 718,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 97,
+       "completed": 96,
+       "unfinished": 1,
+       "p50Min": 30,
+       "p90Min": 696,
+       "maxMin": 2541,
+       "breaches": 14,
+       "overnightBreaches": 13,
+       "oldestUnfinishedMin": 678
+      },
+      "urgent": {
+       "acquired": 17,
+       "completed": 17,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 2388,
+       "maxMin": 2607,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 47,
+       "p90Min": 47,
+       "maxMin": 47,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 16,
+       "completed": 16,
+       "unfinished": 0,
+       "p50Min": 12,
+       "p90Min": 2388,
+       "maxMin": 2607,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 123,
+     "acquired": 1654,
+     "backlog0730TueFri": [
+      7,
+      10,
+      11,
+      3,
+      11,
+      13,
+      14,
+      3,
+      13,
+      16,
+      13,
+      3,
+      8,
+      14,
+      17,
+      3,
+      11
+     ],
+     "unreadAtClose": [
+      10,
+      11,
+      7,
+      9,
+      3,
+      11,
+      13,
+      14,
+      16,
+      24,
+      3,
+      13,
+      16,
+      13,
+      15,
+      16,
+      3,
+      8,
+      14,
+      17,
+      18,
+      29,
+      3,
+      11,
+      8
+     ],
+     "revenuePerReportCents": [
+      5224,
+      17942,
+      22620,
+      31148
+     ],
+     "netRevenueCents": 25545289,
+     "laborCents": 13209661,
+     "fixedCents": 8678716,
+     "variableCents": 4182011,
+     "opexCents": 26456839,
+     "profitCents": -911550,
+     "marginBP": -356,
+     "collectionsCents": 24921614,
+     "disbursementsCents": 25261540,
+     "arChangeCents": 747713,
+     "cashEndCents": 14660074,
+     "overtimeMin": 3363,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 752,
+       "cancelled": 52,
+       "imaged": 7,
+       "lost": 218,
+       "no-show": 36,
+       "recall": 40,
+       "reported": 832
+      },
+      "walk-in": {
+       "booked": 1,
+       "left": 127,
+       "reported": 94
+      }
+     },
+     "extra": {
+      "heldOver": 41,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 92
+     },
+     "staffUtilBP": {
+      "Alex": 5479,
+      "Casey": 6628,
+      "Dr. Avery": 8360,
+      "Dr. Blake": 7951,
+      "Drew": 4822,
+      "Jordan": 4408,
+      "Morgan": 6286,
+      "Riley": 8663,
+      "Sam": 9470,
+      "Taylor": 3192
+     },
+     "staffOvertimeMin": {
+      "Alex": 113,
+      "Casey": 51,
+      "Dr. Avery": 5,
+      "Dr. Blake": 896,
+      "Drew": 292,
+      "Jordan": 36,
+      "Morgan": 9,
+      "Riley": 597,
+      "Sam": 1293,
+      "Taylor": 66
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2011,
+      1067,
+      1545,
+      932
+     ],
+     "walkIns": [
+      534,
+      95,
+      52,
+      0
+     ],
+     "booked": [
+      1883,
+      841,
+      1301,
+      817
+     ],
+     "lostDeclined": [
+      109,
+      220,
+      230,
+      108
+     ],
+     "lostNoSlot": [
+      4,
+      5,
+      2,
+      2
+     ],
+     "leadP50Days": [
+      8,
+      18,
+      9,
+      11
+     ],
+     "leadP90Days": [
+      51,
+      52,
+      51,
+      49
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      6,
+      8
+     ],
+     "requestedLeadP90Days": [
+      51,
+      52,
+      49,
+      48
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      3,
+      17,
+      7,
+      8
+     ],
+     "exams": [
+      2020,
+      835,
+      1189,
+      741
+     ],
+     "tueFriPerDay": [
+      31.313725490196077,
+      12.647058823529411,
+      19.19607843137255,
+      11.666666666666666
+     ],
+     "monPerDay": [
+      19.166666666666668,
+      11.333333333333334,
+      8.916666666666666,
+      11.5
+     ],
+     "satPerDay": [
+      12.23076923076923,
+      3.3076923076923075,
+      6.615384615384615,
+      0
+     ],
+     "utilOpenBP": [
+      3952,
+      5432,
+      3837,
+      6126
+     ],
+     "utilStaffedBP": [
+      4322,
+      6748,
+      4192,
+      6959
+     ],
+     "coverageBP": [
+      9142,
+      8050,
+      9152,
+      8803
+     ],
+     "reports": 4772,
+     "scheduled": 5269,
+     "cancelled": 470,
+     "noShows": 324,
+     "walkInsLeft": 358,
+     "techUtilBP": 6972,
+     "readUtilBP": 8210,
+     "tatP50Min": 63,
+     "tatP90Min": 861,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4204,
+       "completed": 4194,
+       "unfinished": 10,
+       "p50Min": 64,
+       "p90Min": 858,
+       "maxMin": 3619,
+       "breaches": 199,
+       "overnightBreaches": 189,
+       "oldestUnfinishedMin": 2419
+      },
+      "routine/CT": {
+       "acquired": 1046,
+       "completed": 1040,
+       "unfinished": 6,
+       "p50Min": 77,
+       "p90Min": 947,
+       "maxMin": 3619,
+       "breaches": 75,
+       "overnightBreaches": 69,
+       "oldestUnfinishedMin": 2419
+      },
+      "routine/MR": {
+       "acquired": 682,
+       "completed": 682,
+       "unfinished": 0,
+       "p50Min": 69,
+       "p90Min": 827,
+       "maxMin": 3610,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 804,
+       "completed": 804,
+       "unfinished": 0,
+       "p50Min": 63,
+       "p90Min": 885,
+       "maxMin": 2763,
+       "breaches": 34,
+       "overnightBreaches": 34,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1672,
+       "completed": 1668,
+       "unfinished": 4,
+       "p50Min": 55,
+       "p90Min": 203,
+       "maxMin": 2777,
+       "breaches": 89,
+       "overnightBreaches": 85,
+       "oldestUnfinishedMin": 2361
+      },
+      "soon": {
+       "acquired": 516,
+       "completed": 512,
+       "unfinished": 4,
+       "p50Min": 62,
+       "p90Min": 845,
+       "maxMin": 2574,
+       "breaches": 135,
+       "overnightBreaches": 131,
+       "oldestUnfinishedMin": 2322
+      },
+      "soon/CT": {
+       "acquired": 134,
+       "completed": 133,
+       "unfinished": 1,
+       "p50Min": 118,
+       "p90Min": 932,
+       "maxMin": 2574,
+       "breaches": 59,
+       "overnightBreaches": 58,
+       "oldestUnfinishedMin": 2135
+      },
+      "soon/MR": {
+       "acquired": 56,
+       "completed": 56,
+       "unfinished": 0,
+       "p50Min": 97,
+       "p90Min": 890,
+       "maxMin": 948,
+       "breaches": 24,
+       "overnightBreaches": 24,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 26,
+       "completed": 26,
+       "unfinished": 0,
+       "p50Min": 71,
+       "p90Min": 718,
+       "maxMin": 880,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 300,
+       "completed": 297,
+       "unfinished": 3,
+       "p50Min": 36,
+       "p90Min": 772,
+       "maxMin": 2550,
+       "breaches": 47,
+       "overnightBreaches": 44,
+       "oldestUnfinishedMin": 2322
+      },
+      "urgent": {
+       "acquired": 65,
+       "completed": 65,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 47,
+       "maxMin": 2607,
+       "breaches": 6,
+       "overnightBreaches": 6,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 9,
+       "completed": 9,
+       "unfinished": 0,
+       "p50Min": 22,
+       "p90Min": 907,
+       "maxMin": 907,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 47,
+       "p90Min": 710,
+       "maxMin": 710,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 5,
+       "completed": 5,
+       "unfinished": 0,
+       "p50Min": 19,
+       "p90Min": 687,
+       "maxMin": 687,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 48,
+       "completed": 48,
+       "unfinished": 0,
+       "p50Min": 11,
+       "p90Min": 40,
+       "maxMin": 2607,
+       "breaches": 3,
+       "overnightBreaches": 3,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 340,
+     "acquired": 4785,
+     "backlog0730TueFri": [
+      7,
+      10,
+      11,
+      3,
+      11,
+      13,
+      14,
+      3,
+      13,
+      16,
+      13,
+      3,
+      8,
+      14,
+      17,
+      3,
+      11,
+      8,
+      11,
+      3,
+      9,
+      15,
+      23,
+      2,
+      13,
+      12,
+      13,
+      4,
+      13,
+      10,
+      9,
+      2,
+      8,
+      12,
+      13,
+      2,
+      13,
+      14,
+      12,
+      2,
+      11,
+      7,
+      8,
+      3,
+      12,
+      11,
+      7,
+      3,
+      12,
+      13,
+      12
+     ],
+     "unreadAtClose": [
+      10,
+      11,
+      7,
+      9,
+      3,
+      11,
+      13,
+      14,
+      16,
+      24,
+      3,
+      13,
+      16,
+      13,
+      15,
+      16,
+      3,
+      8,
+      14,
+      17,
+      18,
+      29,
+      3,
+      11,
+      8,
+      11,
+      11,
+      15,
+      3,
+      9,
+      15,
+      23,
+      21,
+      24,
+      2,
+      13,
+      12,
+      13,
+      14,
+      15,
+      4,
+      13,
+      10,
+      9,
+      7,
+      18,
+      2,
+      8,
+      12,
+      13,
+      12,
+      8,
+      2,
+      13,
+      14,
+      12,
+      11,
+      23,
+      2,
+      11,
+      7,
+      8,
+      12,
+      12,
+      3,
+      12,
+      11,
+      7,
+      12,
+      23,
+      3,
+      12,
+      13,
+      12,
+      13,
+      14
+     ],
+     "revenuePerReportCents": [
+      5134,
+      17734,
+      23046,
+      30819
+     ],
+     "netRevenueCents": 76043674,
+     "laborCents": 39250169,
+     "fixedCents": 25979033,
+     "variableCents": 12304680,
+     "opexCents": 77920333,
+     "profitCents": -1876659,
+     "marginBP": -246,
+     "collectionsCents": 73731764,
+     "disbursementsCents": 82001106,
+     "arChangeCents": 1521287,
+     "cashEndCents": 6730658,
+     "overtimeMin": 11677,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 1019,
+       "cancelled": 184,
+       "imaged": 11,
+       "lost": 680,
+       "no-show": 146,
+       "recall": 49,
+       "reported": 3466
+      },
+      "walk-in": {
+       "imaged": 2,
+       "left": 358,
+       "reported": 321
+      }
+     },
+     "extra": {
+      "heldOver": 128,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 311
+     },
+     "staffUtilBP": {
+      "Alex": 5598,
+      "Casey": 6643,
+      "Dr. Avery": 8411,
+      "Dr. Blake": 7972,
+      "Drew": 4912,
+      "Jordan": 4351,
+      "Morgan": 6400,
+      "Riley": 8548,
+      "Sam": 9368,
+      "Taylor": 3143
+     },
+     "staffOvertimeMin": {
+      "Alex": 606,
+      "Casey": 197,
+      "Dr. Avery": 15,
+      "Dr. Blake": 3523,
+      "Drew": 705,
+      "Jordan": 107,
+      "Morgan": 259,
+      "Riley": 1464,
+      "Sam": 4597,
+      "Taylor": 200
+     }
+    }
+   }
+  },
+  {
+   "seed": 8,
+   "takeover": {
+    "Unread": 2,
+    "Reading": 0,
+    "OpenClaims": 2320,
+    "ReceivablesCents": 34967196
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      662,
+      388,
+      520,
+      308
+     ],
+     "walkIns": [
+      237,
+      23,
+      12,
+      0
+     ],
+     "booked": [
+      610,
+      305,
+      440,
+      268
+     ],
+     "lostDeclined": [
+      35,
+      72,
+      73,
+      34
+     ],
+     "lostNoSlot": [
+      2,
+      1,
+      0,
+      2
+     ],
+     "leadP50Days": [
+      8,
+      20,
+      9,
+      10
+     ],
+     "leadP90Days": [
+      43,
+      52,
+      48,
+      55
+     ],
+     "requestedLeadP50Days": [
+      5,
+      9,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      43,
+      51,
+      46,
+      53
+     ],
+     "capacityDelayP50Days": [
+      0,
+      4,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      4,
+      19,
+      7,
+      7
+     ],
+     "exams": [
+      700,
+      282,
+      427,
+      257
+     ],
+     "tueFriPerDay": [
+      31.823529411764707,
+      12.117647058823529,
+      20,
+      11.647058823529411
+     ],
+     "monPerDay": [
+      19.75,
+      12,
+      10,
+      11.75
+     ],
+     "satPerDay": [
+      12.25,
+      3.75,
+      6.5,
+      0
+     ],
+     "utilOpenBP": [
+      3944,
+      5308,
+      3995,
+      6330
+     ],
+     "utilStaffedBP": [
+      4319,
+      6520,
+      4374,
+      7110
+     ],
+     "coverageBP": [
+      9130,
+      8141,
+      9133,
+      8903
+     ],
+     "reports": 1659,
+     "scheduled": 1836,
+     "cancelled": 174,
+     "noShows": 104,
+     "walkInsLeft": 159,
+     "techUtilBP": 7041,
+     "readUtilBP": 8432,
+     "tatP50Min": 77,
+     "tatP90Min": 881,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1475,
+       "completed": 1469,
+       "unfinished": 6,
+       "p50Min": 79,
+       "p90Min": 885,
+       "maxMin": 3540,
+       "breaches": 74,
+       "overnightBreaches": 74,
+       "oldestUnfinishedMin": 671
+      },
+      "routine/CT": {
+       "acquired": 384,
+       "completed": 380,
+       "unfinished": 4,
+       "p50Min": 90,
+       "p90Min": 994,
+       "maxMin": 3540,
+       "breaches": 27,
+       "overnightBreaches": 27,
+       "oldestUnfinishedMin": 642
+      },
+      "routine/MR": {
+       "acquired": 240,
+       "completed": 239,
+       "unfinished": 1,
+       "p50Min": 84,
+       "p90Min": 866,
+       "maxMin": 1042,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 667
+      },
+      "routine/US": {
+       "acquired": 267,
+       "completed": 266,
+       "unfinished": 1,
+       "p50Min": 78,
+       "p90Min": 935,
+       "maxMin": 2698,
+       "breaches": 14,
+       "overnightBreaches": 14,
+       "oldestUnfinishedMin": 671
+      },
+      "routine/XR": {
+       "acquired": 584,
+       "completed": 584,
+       "unfinished": 0,
+       "p50Min": 69,
+       "p90Min": 781,
+       "maxMin": 2690,
+       "breaches": 33,
+       "overnightBreaches": 33,
+       "oldestUnfinishedMin": 0
+      },
+      "soon": {
+       "acquired": 163,
+       "completed": 161,
+       "unfinished": 2,
+       "p50Min": 66,
+       "p90Min": 885,
+       "maxMin": 2656,
+       "breaches": 41,
+       "overnightBreaches": 39,
+       "oldestUnfinishedMin": 603
+      },
+      "soon/CT": {
+       "acquired": 39,
+       "completed": 39,
+       "unfinished": 0,
+       "p50Min": 118,
+       "p90Min": 980,
+       "maxMin": 2656,
+       "breaches": 16,
+       "overnightBreaches": 16,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 16,
+       "completed": 14,
+       "unfinished": 2,
+       "p50Min": 186,
+       "p90Min": 951,
+       "maxMin": 975,
+       "breaches": 9,
+       "overnightBreaches": 7,
+       "oldestUnfinishedMin": 603
+      },
+      "soon/US": {
+       "acquired": 12,
+       "completed": 12,
+       "unfinished": 0,
+       "p50Min": 67,
+       "p90Min": 838,
+       "maxMin": 985,
+       "breaches": 5,
+       "overnightBreaches": 5,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 96,
+       "completed": 96,
+       "unfinished": 0,
+       "p50Min": 37,
+       "p90Min": 724,
+       "maxMin": 2635,
+       "breaches": 11,
+       "overnightBreaches": 11,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 28,
+       "completed": 27,
+       "unfinished": 1,
+       "p50Min": 19,
+       "p90Min": 60,
+       "maxMin": 714,
+       "breaches": 4,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 596
+      },
+      "urgent/CT": {
+       "acquired": 4,
+       "completed": 3,
+       "unfinished": 1,
+       "p50Min": 21,
+       "p90Min": 55,
+       "maxMin": 55,
+       "breaches": 1,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 596
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 51,
+       "p90Min": 51,
+       "maxMin": 51,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 31,
+       "p90Min": 714,
+       "maxMin": 714,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 20,
+       "completed": 20,
+       "unfinished": 0,
+       "p50Min": 17,
+       "p90Min": 57,
+       "maxMin": 65,
+       "breaches": 2,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 119,
+     "acquired": 1666,
+     "backlog0730TueFri": [
+      16,
+      17,
+      18,
+      4,
+      12,
+      16,
+      16,
+      2,
+      11,
+      13,
+      16,
+      6,
+      16,
+      13,
+      12,
+      3,
+      13
+     ],
+     "unreadAtClose": [
+      17,
+      18,
+      14,
+      16,
+      4,
+      12,
+      16,
+      16,
+      14,
+      21,
+      2,
+      11,
+      13,
+      16,
+      16,
+      19,
+      6,
+      16,
+      13,
+      12,
+      13,
+      26,
+      3,
+      13,
+      9
+     ],
+     "revenuePerReportCents": [
+      5117,
+      17963,
+      23627,
+      30362
+     ],
+     "netRevenueCents": 26213762,
+     "laborCents": 13326733,
+     "fixedCents": 8678716,
+     "variableCents": 4266588,
+     "opexCents": 26658488,
+     "profitCents": -444726,
+     "marginBP": -169,
+     "collectionsCents": 24743270,
+     "disbursementsCents": 25315583,
+     "arChangeCents": 1618290,
+     "cashEndCents": 14427687,
+     "overtimeMin": 4889,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 701,
+       "cancelled": 55,
+       "imaged": 8,
+       "lost": 219,
+       "no-show": 27,
+       "recall": 41,
+       "reported": 827
+      },
+      "walk-in": {
+       "cancelled": 1,
+       "left": 159,
+       "reported": 112
+      }
+     },
+     "extra": {
+      "heldOver": 47,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 108
+     },
+     "staffUtilBP": {
+      "Alex": 5810,
+      "Casey": 6685,
+      "Dr. Avery": 8723,
+      "Dr. Blake": 8091,
+      "Drew": 4934,
+      "Jordan": 4455,
+      "Morgan": 6082,
+      "Riley": 8602,
+      "Sam": 9732,
+      "Taylor": 3300
+     },
+     "staffOvertimeMin": {
+      "Alex": 376,
+      "Casey": 129,
+      "Dr. Avery": 0,
+      "Dr. Blake": 1535,
+      "Drew": 338,
+      "Jordan": 40,
+      "Morgan": 79,
+      "Riley": 399,
+      "Sam": 1928,
+      "Taylor": 60
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      1949,
+      1084,
+      1485,
+      885
+     ],
+     "walkIns": [
+      555,
+      88,
+      38,
+      0
+     ],
+     "booked": [
+      1840,
+      849,
+      1292,
+      796
+     ],
+     "lostDeclined": [
+      84,
+      231,
+      178,
+      74
+     ],
+     "lostNoSlot": [
+      8,
+      7,
+      2,
+      7
+     ],
+     "leadP50Days": [
+      8,
+      19,
+      9,
+      10
+     ],
+     "leadP90Days": [
+      48,
+      53,
+      49,
+      52
+     ],
+     "requestedLeadP50Days": [
+      6,
+      9,
+      7,
+      8
+     ],
+     "requestedLeadP90Days": [
+      48,
+      53,
+      47,
+      52
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      1,
+      1
+     ],
+     "capacityDelayP90Days": [
+      4,
+      18,
+      6,
+      6
+     ],
+     "exams": [
+      1974,
+      830,
+      1232,
+      733
+     ],
+     "tueFriPerDay": [
+      30.784313725490197,
+      12.431372549019608,
+      19.80392156862745,
+      11.431372549019608
+     ],
+     "monPerDay": [
+      17.666666666666668,
+      11.916666666666666,
+      9.666666666666666,
+      11.5
+     ],
+     "satPerDay": [
+      12.384615384615385,
+      3.076923076923077,
+      6.538461538461538,
+      0
+     ],
+     "utilOpenBP": [
+      3807,
+      5422,
+      4021,
+      6120
+     ],
+     "utilStaffedBP": [
+      4175,
+      6735,
+      4403,
+      6953
+     ],
+     "coverageBP": [
+      9120,
+      8050,
+      9131,
+      8802
+     ],
+     "reports": 4752,
+     "scheduled": 5286,
+     "cancelled": 504,
+     "noShows": 295,
+     "walkInsLeft": 375,
+     "techUtilBP": 6975,
+     "readUtilBP": 8230,
+     "tatP50Min": 62,
+     "tatP90Min": 842,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4183,
+       "completed": 4170,
+       "unfinished": 13,
+       "p50Min": 63,
+       "p90Min": 831,
+       "maxMin": 3540,
+       "breaches": 191,
+       "overnightBreaches": 178,
+       "oldestUnfinishedMin": 2597
+      },
+      "routine/CT": {
+       "acquired": 1068,
+       "completed": 1063,
+       "unfinished": 5,
+       "p50Min": 74,
+       "p90Min": 925,
+       "maxMin": 3540,
+       "breaches": 68,
+       "overnightBreaches": 63,
+       "oldestUnfinishedMin": 2584
+      },
+      "routine/MR": {
+       "acquired": 673,
+       "completed": 673,
+       "unfinished": 0,
+       "p50Min": 72,
+       "p90Min": 812,
+       "maxMin": 1136,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 787,
+       "completed": 787,
+       "unfinished": 0,
+       "p50Min": 62,
+       "p90Min": 874,
+       "maxMin": 2698,
+       "breaches": 31,
+       "overnightBreaches": 31,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1655,
+       "completed": 1647,
+       "unfinished": 8,
+       "p50Min": 53,
+       "p90Min": 193,
+       "maxMin": 2690,
+       "breaches": 92,
+       "overnightBreaches": 84,
+       "oldestUnfinishedMin": 2597
+      },
+      "soon": {
+       "acquired": 519,
+       "completed": 513,
+       "unfinished": 6,
+       "p50Min": 59,
+       "p90Min": 882,
+       "maxMin": 2656,
+       "breaches": 130,
+       "overnightBreaches": 124,
+       "oldestUnfinishedMin": 2517
+      },
+      "soon/CT": {
+       "acquired": 152,
+       "completed": 151,
+       "unfinished": 1,
+       "p50Min": 103,
+       "p90Min": 917,
+       "maxMin": 2656,
+       "breaches": 61,
+       "overnightBreaches": 60,
+       "oldestUnfinishedMin": 2180
+      },
+      "soon/MR": {
+       "acquired": 57,
+       "completed": 57,
+       "unfinished": 0,
+       "p50Min": 149,
+       "p90Min": 936,
+       "maxMin": 991,
+       "breaches": 25,
+       "overnightBreaches": 25,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 37,
+       "completed": 37,
+       "unfinished": 0,
+       "p50Min": 51,
+       "p90Min": 829,
+       "maxMin": 985,
+       "breaches": 9,
+       "overnightBreaches": 9,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 273,
+       "completed": 268,
+       "unfinished": 5,
+       "p50Min": 35,
+       "p90Min": 729,
+       "maxMin": 2635,
+       "breaches": 35,
+       "overnightBreaches": 30,
+       "oldestUnfinishedMin": 2517
+      },
+      "urgent": {
+       "acquired": 67,
+       "completed": 67,
+       "unfinished": 0,
+       "p50Min": 19,
+       "p90Min": 714,
+       "maxMin": 934,
+       "breaches": 12,
+       "overnightBreaches": 10,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 12,
+       "completed": 12,
+       "unfinished": 0,
+       "p50Min": 29,
+       "p90Min": 926,
+       "maxMin": 934,
+       "breaches": 4,
+       "overnightBreaches": 4,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 3,
+       "completed": 3,
+       "unfinished": 0,
+       "p50Min": 710,
+       "p90Min": 760,
+       "maxMin": 760,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 6,
+       "completed": 6,
+       "unfinished": 0,
+       "p50Min": 22,
+       "p90Min": 714,
+       "maxMin": 714,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 46,
+       "completed": 46,
+       "unfinished": 0,
+       "p50Min": 13,
+       "p90Min": 57,
+       "maxMin": 837,
+       "breaches": 4,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 333,
+     "acquired": 4769,
+     "backlog0730TueFri": [
+      16,
+      17,
+      18,
+      4,
+      12,
+      16,
+      16,
+      2,
+      11,
+      13,
+      16,
+      6,
+      16,
+      13,
+      12,
+      3,
+      13,
+      9,
+      7,
+      2,
+      10,
+      9,
+      11,
+      2,
+      9,
+      12,
+      12,
+      3,
+      12,
+      12,
+      11,
+      3,
+      9,
+      13,
+      14,
+      5,
+      11,
+      12,
+      12,
+      5,
+      6,
+      12,
+      11,
+      4,
+      12,
+      11,
+      6,
+      3,
+      12,
+      14,
+      15
+     ],
+     "unreadAtClose": [
+      17,
+      18,
+      14,
+      16,
+      4,
+      12,
+      16,
+      16,
+      14,
+      21,
+      2,
+      11,
+      13,
+      16,
+      16,
+      19,
+      6,
+      16,
+      13,
+      12,
+      13,
+      26,
+      3,
+      13,
+      9,
+      7,
+      13,
+      13,
+      2,
+      10,
+      9,
+      11,
+      9,
+      21,
+      2,
+      9,
+      12,
+      12,
+      9,
+      10,
+      3,
+      12,
+      12,
+      11,
+      14,
+      22,
+      3,
+      9,
+      13,
+      14,
+      12,
+      11,
+      5,
+      11,
+      12,
+      12,
+      10,
+      18,
+      5,
+      6,
+      12,
+      11,
+      8,
+      12,
+      4,
+      12,
+      11,
+      6,
+      6,
+      14,
+      3,
+      12,
+      14,
+      15,
+      20,
+      19
+     ],
+     "revenuePerReportCents": [
+      5033,
+      17747,
+      23597,
+      31837
+     ],
+     "netRevenueCents": 77339249,
+     "laborCents": 39275968,
+     "fixedCents": 25979033,
+     "variableCents": 12399029,
+     "opexCents": 78040481,
+     "profitCents": -701232,
+     "marginBP": -90,
+     "collectionsCents": 73830976,
+     "disbursementsCents": 82024087,
+     "arChangeCents": 3087859,
+     "cashEndCents": 6806889,
+     "overtimeMin": 11982,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 948,
+       "cancelled": 203,
+       "imaged": 16,
+       "lost": 591,
+       "no-show": 129,
+       "recall": 51,
+       "reported": 3465
+      },
+      "walk-in": {
+       "booked": 2,
+       "cancelled": 1,
+       "imaged": 2,
+       "left": 375,
+       "lost": 1,
+       "reported": 300
+      }
+     },
+     "extra": {
+      "heldOver": 136,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 283
+     },
+     "staffUtilBP": {
+      "Alex": 5651,
+      "Casey": 6534,
+      "Dr. Avery": 8518,
+      "Dr. Blake": 7890,
+      "Drew": 5117,
+      "Jordan": 4357,
+      "Morgan": 6104,
+      "Riley": 8538,
+      "Sam": 9520,
+      "Taylor": 3112
+     },
+     "staffOvertimeMin": {
+      "Alex": 685,
+      "Casey": 335,
+      "Dr. Avery": 18,
+      "Dr. Blake": 3720,
+      "Drew": 749,
+      "Jordan": 86,
+      "Morgan": 188,
+      "Riley": 1236,
+      "Sam": 4788,
+      "Taylor": 173
+     }
+    }
+   }
+  },
+  {
+   "seed": 9,
+   "takeover": {
+    "Unread": 1,
+    "Reading": 0,
+    "OpenClaims": 2314,
+    "ReceivablesCents": 35908754
+   },
+   "windows": {
+    "30d": {
+     "days": 30,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      693,
+      414,
+      509,
+      319
+     ],
+     "walkIns": [
+      152,
+      29,
+      15,
+      0
+     ],
+     "booked": [
+      633,
+      306,
+      427,
+      273
+     ],
+     "lostDeclined": [
+      47,
+      100,
+      75,
+      35
+     ],
+     "lostNoSlot": [
+      0,
+      1,
+      1,
+      3
+     ],
+     "leadP50Days": [
+      9,
+      20,
+      9,
+      12
+     ],
+     "leadP90Days": [
+      48,
+      51,
+      49,
+      48
+     ],
+     "requestedLeadP50Days": [
+      7,
+      9,
+      7,
+      7
+     ],
+     "requestedLeadP90Days": [
+      48,
+      51,
+      46,
+      47
+     ],
+     "capacityDelayP50Days": [
+      0,
+      3,
+      2,
+      2
+     ],
+     "capacityDelayP90Days": [
+      5,
+      18,
+      7,
+      8
+     ],
+     "exams": [
+      687,
+      299,
+      402,
+      251
+     ],
+     "tueFriPerDay": [
+      31.176470588235293,
+      13,
+      19.294117647058822,
+      11.470588235294118
+     ],
+     "monPerDay": [
+      19,
+      12.5,
+      7.25,
+      11
+     ],
+     "satPerDay": [
+      12.25,
+      4.25,
+      6.25,
+      0
+     ],
+     "utilOpenBP": [
+      3932,
+      5674,
+      3911,
+      6209
+     ],
+     "utilStaffedBP": [
+      4305,
+      6969,
+      4282,
+      6961
+     ],
+     "coverageBP": [
+      9132,
+      8141,
+      9132,
+      8918
+     ],
+     "reports": 1630,
+     "scheduled": 1823,
+     "cancelled": 139,
+     "noShows": 121,
+     "walkInsLeft": 113,
+     "techUtilBP": 7009,
+     "readUtilBP": 8256,
+     "tatP50Min": 58,
+     "tatP90Min": 850,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 1466,
+       "completed": 1458,
+       "unfinished": 8,
+       "p50Min": 58,
+       "p90Min": 844,
+       "maxMin": 3655,
+       "breaches": 76,
+       "overnightBreaches": 76,
+       "oldestUnfinishedMin": 692
+      },
+      "routine/CT": {
+       "acquired": 367,
+       "completed": 364,
+       "unfinished": 3,
+       "p50Min": 71,
+       "p90Min": 1035,
+       "maxMin": 3655,
+       "breaches": 27,
+       "overnightBreaches": 27,
+       "oldestUnfinishedMin": 627
+      },
+      "routine/MR": {
+       "acquired": 233,
+       "completed": 231,
+       "unfinished": 2,
+       "p50Min": 63,
+       "p90Min": 833,
+       "maxMin": 3578,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 664
+      },
+      "routine/US": {
+       "acquired": 280,
+       "completed": 278,
+       "unfinished": 2,
+       "p50Min": 61,
+       "p90Min": 880,
+       "maxMin": 2721,
+       "breaches": 14,
+       "overnightBreaches": 14,
+       "oldestUnfinishedMin": 674
+      },
+      "routine/XR": {
+       "acquired": 586,
+       "completed": 585,
+       "unfinished": 1,
+       "p50Min": 47,
+       "p90Min": 756,
+       "maxMin": 2740,
+       "breaches": 33,
+       "overnightBreaches": 33,
+       "oldestUnfinishedMin": 692
+      },
+      "soon": {
+       "acquired": 162,
+       "completed": 160,
+       "unfinished": 2,
+       "p50Min": 59,
+       "p90Min": 986,
+       "maxMin": 2586,
+       "breaches": 54,
+       "overnightBreaches": 52,
+       "oldestUnfinishedMin": 677
+      },
+      "soon/CT": {
+       "acquired": 34,
+       "completed": 33,
+       "unfinished": 1,
+       "p50Min": 102,
+       "p90Min": 864,
+       "maxMin": 2586,
+       "breaches": 16,
+       "overnightBreaches": 15,
+       "oldestUnfinishedMin": 590
+      },
+      "soon/MR": {
+       "acquired": 17,
+       "completed": 17,
+       "unfinished": 0,
+       "p50Min": 701,
+       "p90Min": 962,
+       "maxMin": 1027,
+       "breaches": 11,
+       "overnightBreaches": 11,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 19,
+       "completed": 19,
+       "unfinished": 0,
+       "p50Min": 665,
+       "p90Min": 1007,
+       "maxMin": 2548,
+       "breaches": 10,
+       "overnightBreaches": 10,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 92,
+       "completed": 91,
+       "unfinished": 1,
+       "p50Min": 32,
+       "p90Min": 2393,
+       "maxMin": 2582,
+       "breaches": 17,
+       "overnightBreaches": 16,
+       "oldestUnfinishedMin": 677
+      },
+      "urgent": {
+       "acquired": 11,
+       "completed": 11,
+       "unfinished": 0,
+       "p50Min": 9,
+       "p90Min": 26,
+       "maxMin": 908,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 21,
+       "p90Min": 21,
+       "maxMin": 21,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 1,
+       "completed": 1,
+       "unfinished": 0,
+       "p50Min": 908,
+       "p90Min": 908,
+       "maxMin": 908,
+       "breaches": 1,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 9,
+       "completed": 9,
+       "unfinished": 0,
+       "p50Min": 8,
+       "p90Min": 26,
+       "maxMin": 26,
+       "breaches": 0,
+       "overnightBreaches": 0,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 131,
+     "acquired": 1639,
+     "backlog0730TueFri": [
+      13,
+      12,
+      14,
+      4,
+      10,
+      14,
+      13,
+      3,
+      11,
+      10,
+      9,
+      3,
+      14,
+      12,
+      11,
+      3,
+      16
+     ],
+     "unreadAtClose": [
+      12,
+      14,
+      12,
+      17,
+      4,
+      10,
+      14,
+      13,
+      17,
+      26,
+      3,
+      11,
+      10,
+      9,
+      15,
+      18,
+      3,
+      14,
+      12,
+      11,
+      15,
+      27,
+      3,
+      16,
+      10
+     ],
+     "revenuePerReportCents": [
+      5154,
+      17535,
+      23277,
+      30529
+     ],
+     "netRevenueCents": 25676311,
+     "laborCents": 13237972,
+     "fixedCents": 8678716,
+     "variableCents": 4178426,
+     "opexCents": 26481565,
+     "profitCents": -805254,
+     "marginBP": -313,
+     "collectionsCents": 24747984,
+     "disbursementsCents": 25293841,
+     "arChangeCents": 887370,
+     "cashEndCents": 14454143,
+     "overtimeMin": 3732,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 729,
+       "cancelled": 40,
+       "imaged": 9,
+       "lost": 262,
+       "no-show": 31,
+       "recall": 39,
+       "reported": 825
+      },
+      "walk-in": {
+       "booked": 4,
+       "left": 113,
+       "lost": 1,
+       "reported": 78
+      }
+     },
+     "extra": {
+      "heldOver": 44,
+      "noCoverage": 0,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 76
+     },
+     "staffUtilBP": {
+      "Alex": 5803,
+      "Casey": 6382,
+      "Dr. Avery": 8576,
+      "Dr. Blake": 7881,
+      "Drew": 5310,
+      "Jordan": 4369,
+      "Morgan": 6408,
+      "Riley": 8476,
+      "Sam": 9431,
+      "Taylor": 3015
+     },
+     "staffOvertimeMin": {
+      "Alex": 294,
+      "Casey": 203,
+      "Dr. Avery": 0,
+      "Dr. Blake": 1080,
+      "Drew": 265,
+      "Jordan": 45,
+      "Morgan": 55,
+      "Riley": 387,
+      "Sam": 1340,
+      "Taylor": 59
+     }
+    },
+    "90d": {
+     "days": 90,
+     "mods": [
+      "XR",
+      "US",
+      "CT",
+      "MR"
+     ],
+     "orders": [
+      2005,
+      1111,
+      1413,
+      911
+     ],
+     "walkIns": [
+      489,
+      69,
+      44,
+      0
+     ],
+     "booked": [
+      1869,
+      872,
+      1245,
+      794
+     ],
+     "lostDeclined": [
+      113,
+      236,
+      161,
+      102
+     ],
+     "lostNoSlot": [
+      6,
+      4,
+      6,
+      10
+     ],
+     "leadP50Days": [
+      9,
+      20,
+      8,
+      12
+     ],
+     "leadP90Days": [
+      50,
+      56,
+      51,
+      52
+     ],
+     "requestedLeadP50Days": [
+      7,
+      9,
+      7,
+      7
+     ],
+     "requestedLeadP90Days": [
+      50,
+      56,
+      48,
+      51
+     ],
+     "capacityDelayP50Days": [
+      0,
+      2,
+      1,
+      2
+     ],
+     "capacityDelayP90Days": [
+      4,
+      18,
+      6,
+      9
+     ],
+     "exams": [
+      1973,
+      840,
+      1185,
+      733
+     ],
+     "tueFriPerDay": [
+      30.45098039215686,
+      12.627450980392156,
+      19.333333333333332,
+      11.431372549019608
+     ],
+     "monPerDay": [
+      19,
+      11.416666666666666,
+      8.166666666666666,
+      11.5
+     ],
+     "satPerDay": [
+      12.307692307692308,
+      3.6923076923076925,
+      6.230769230769231,
+      0
+     ],
+     "utilOpenBP": [
+      3791,
+      5441,
+      3842,
+      6123
+     ],
+     "utilStaffedBP": [
+      4150,
+      6759,
+      4203,
+      6956
+     ],
+     "coverageBP": [
+      9136,
+      8050,
+      9141,
+      8803
+     ],
+     "reports": 4719,
+     "scheduled": 5248,
+     "cancelled": 430,
+     "noShows": 338,
+     "walkInsLeft": 324,
+     "techUtilBP": 6916,
+     "readUtilBP": 8124,
+     "tatP50Min": 55,
+     "tatP90Min": 831,
+     "tatByPriority": {
+      "routine": {
+       "acquired": 4165,
+       "completed": 4152,
+       "unfinished": 13,
+       "p50Min": 55,
+       "p90Min": 820,
+       "maxMin": 3655,
+       "breaches": 201,
+       "overnightBreaches": 188,
+       "oldestUnfinishedMin": 2360
+      },
+      "routine/CT": {
+       "acquired": 1022,
+       "completed": 1019,
+       "unfinished": 3,
+       "p50Min": 68,
+       "p90Min": 908,
+       "maxMin": 3655,
+       "breaches": 68,
+       "overnightBreaches": 65,
+       "oldestUnfinishedMin": 2261
+      },
+      "routine/MR": {
+       "acquired": 688,
+       "completed": 688,
+       "unfinished": 0,
+       "p50Min": 61,
+       "p90Min": 806,
+       "maxMin": 3578,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/US": {
+       "acquired": 794,
+       "completed": 794,
+       "unfinished": 0,
+       "p50Min": 55,
+       "p90Min": 857,
+       "maxMin": 2721,
+       "breaches": 36,
+       "overnightBreaches": 36,
+       "oldestUnfinishedMin": 0
+      },
+      "routine/XR": {
+       "acquired": 1661,
+       "completed": 1651,
+       "unfinished": 10,
+       "p50Min": 45,
+       "p90Min": 194,
+       "maxMin": 2740,
+       "breaches": 95,
+       "overnightBreaches": 85,
+       "oldestUnfinishedMin": 2360
+      },
+      "soon": {
+       "acquired": 499,
+       "completed": 499,
+       "unfinished": 0,
+       "p50Min": 59,
+       "p90Min": 906,
+       "maxMin": 2586,
+       "breaches": 147,
+       "overnightBreaches": 147,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/CT": {
+       "acquired": 152,
+       "completed": 152,
+       "unfinished": 0,
+       "p50Min": 105,
+       "p90Min": 902,
+       "maxMin": 2586,
+       "breaches": 68,
+       "overnightBreaches": 68,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/MR": {
+       "acquired": 43,
+       "completed": 43,
+       "unfinished": 0,
+       "p50Min": 700,
+       "p90Min": 903,
+       "maxMin": 1027,
+       "breaches": 24,
+       "overnightBreaches": 24,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/US": {
+       "acquired": 39,
+       "completed": 39,
+       "unfinished": 0,
+       "p50Min": 64,
+       "p90Min": 869,
+       "maxMin": 2548,
+       "breaches": 11,
+       "overnightBreaches": 11,
+       "oldestUnfinishedMin": 0
+      },
+      "soon/XR": {
+       "acquired": 265,
+       "completed": 265,
+       "unfinished": 0,
+       "p50Min": 29,
+       "p90Min": 985,
+       "maxMin": 2582,
+       "breaches": 44,
+       "overnightBreaches": 44,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent": {
+       "acquired": 67,
+       "completed": 67,
+       "unfinished": 0,
+       "p50Min": 15,
+       "p90Min": 688,
+       "maxMin": 908,
+       "breaches": 10,
+       "overnightBreaches": 7,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/CT": {
+       "acquired": 11,
+       "completed": 11,
+       "unfinished": 0,
+       "p50Min": 21,
+       "p90Min": 83,
+       "maxMin": 743,
+       "breaches": 3,
+       "overnightBreaches": 1,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/MR": {
+       "acquired": 2,
+       "completed": 2,
+       "unfinished": 0,
+       "p50Min": 688,
+       "p90Min": 908,
+       "maxMin": 908,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/US": {
+       "acquired": 7,
+       "completed": 7,
+       "unfinished": 0,
+       "p50Min": 24,
+       "p90Min": 735,
+       "maxMin": 735,
+       "breaches": 2,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      },
+      "urgent/XR": {
+       "acquired": 47,
+       "completed": 47,
+       "unfinished": 0,
+       "p50Min": 10,
+       "p90Min": 49,
+       "maxMin": 887,
+       "breaches": 3,
+       "overnightBreaches": 2,
+       "oldestUnfinishedMin": 0
+      }
+     },
+     "overTarget": 358,
+     "acquired": 4731,
+     "backlog0730TueFri": [
+      13,
+      12,
+      14,
+      4,
+      10,
+      14,
+      13,
+      3,
+      11,
+      10,
+      9,
+      3,
+      14,
+      12,
+      11,
+      3,
+      16,
+      10,
+      8,
+      4,
+      6,
+      13,
+      13,
+      2,
+      13,
+      13,
+      9,
+      4,
+      14,
+      14,
+      6,
+      3,
+      11,
+      10,
+      13,
+      4,
+      9,
+      13,
+      14,
+      1,
+      9,
+      9,
+      15,
+      3,
+      14,
+      14,
+      12,
+      3,
+      8,
+      14,
+      8
+     ],
+     "unreadAtClose": [
+      12,
+      14,
+      12,
+      17,
+      4,
+      10,
+      14,
+      13,
+      17,
+      26,
+      3,
+      11,
+      10,
+      9,
+      15,
+      18,
+      3,
+      14,
+      12,
+      11,
+      15,
+      27,
+      3,
+      16,
+      10,
+      8,
+      10,
+      14,
+      4,
+      6,
+      13,
+      13,
+      7,
+      15,
+      2,
+      13,
+      13,
+      9,
+      12,
+      12,
+      4,
+      14,
+      14,
+      6,
+      11,
+      23,
+      3,
+      11,
+      10,
+      13,
+      11,
+      12,
+      4,
+      9,
+      13,
+      14,
+      12,
+      23,
+      1,
+      9,
+      9,
+      15,
+      17,
+      19,
+      3,
+      14,
+      14,
+      12,
+      10,
+      13,
+      3,
+      8,
+      14,
+      8,
+      8,
+      13
+     ],
+     "revenuePerReportCents": [
+      5046,
+      17385,
+      23602,
+      30614
+     ],
+     "netRevenueCents": 75915912,
+     "laborCents": 39266929,
+     "fixedCents": 25979033,
+     "variableCents": 12169729,
+     "opexCents": 77802142,
+     "profitCents": -1886230,
+     "marginBP": -248,
+     "collectionsCents": 72609095,
+     "disbursementsCents": 81986802,
+     "arChangeCents": 2269177,
+     "cashEndCents": 5622293,
+     "overtimeMin": 11944,
+     "approvedOvertimeMin": 0,
+     "orderCohort": {
+      "referral": {
+       "booked": 1013,
+       "cancelled": 169,
+       "imaged": 10,
+       "lost": 638,
+       "no-show": 134,
+       "recall": 45,
+       "reported": 3431
+      },
+      "walk-in": {
+       "booked": 2,
+       "imaged": 1,
+       "left": 324,
+       "lost": 2,
+       "reported": 273
+      }
+     },
+     "extra": {
+      "heldOver": 137,
+      "noCoverage": 1,
+      "walkInsDeclined": 0,
+      "walkInsImaged": 253
+     },
+     "staffUtilBP": {
+      "Alex": 5647,
+      "Casey": 6470,
+      "Dr. Avery": 8508,
+      "Dr. Blake": 7670,
+      "Drew": 5007,
+      "Jordan": 4276,
+      "Morgan": 6317,
+      "Riley": 8279,
+      "Sam": 9416,
+      "Taylor": 2994
+     },
+     "staffOvertimeMin": {
+      "Alex": 610,
+      "Casey": 705,
+      "Dr. Avery": 24,
+      "Dr. Blake": 3685,
+      "Drew": 632,
+      "Jordan": 107,
+      "Morgan": 162,
+      "Riley": 1210,
+      "Sam": 4608,
+      "Taylor": 196
+     }
+    }
+   }
+  }
+ ]
+}

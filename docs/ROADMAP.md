@@ -13,21 +13,28 @@ Each version is a playable build. Nothing ships as "framework only".
 | Version | Theme | Depends on |
 |---|---|---|
 | **V0.1** | Engine + playable TUI: a typical Tuesday at an established practice | — |
-| **V0.2** | Operations control: interactive scheduling & staffing, disruptions, save/load, agent-interface skeleton | V0.1 |
-| **V0.3** | Financial management: claims workflow, denials, collections, payroll cycles, monthly close | V0.1 (V0.2 for save) |
-| **V0.4** | Growth: hiring, equipment, extended hours, referrals & reputation, New Practice scenario, goals | V0.2, V0.3 |
-| **V0.5** | WebUI on the same engine + benchmark framework (scenario packs, baselines, scoring) | V0.2 (API), V0.4 for growth benchmarks |
-| **V0.6** | AI-managed practice: LLM agent harness, human-vs-AI, safety evaluation, automation levels | V0.5 |
+| **V0.2** | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
+| **V0.3** | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
+| **V0.4** | Financial management: claims, denials, statements, monthly close and financing | V0.2 obligations; V0.3 controls |
+| **V0.5** | Growth: equipment, extended hours, referrals, New Practice, progression and richer workforce dynamics | V0.3, V0.4 |
+| **V0.6** | WebUI/SQLite, benchmark framework, managed-practice harness, comparisons and automation levels | V0.3 API, V0.4 statements, V0.5 growth benchmarks |
 
-Change from the brief's sequence: a **minimal observation/action JSON loop and
-scripted-policy runner** moves forward into V0.2. It is small, it keeps the
-action API honest from the start, and it lets us run baseline policies against
-balance changes long before agents exist. The full benchmark framework stays
-in V0.5.
+**V0.2–V0.6: proposed in V0.2 design draft 2, pending the Step 0 gate** (first
+sweep 2026-10-14 did not pass; owner decision on the scenario premise pending).
+See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
+contracts. V0.1 scope and acceptance history below remain unchanged.
+
+The staffing-first re-scope moves initial hiring/termination and the roster
+editor into V0.2. Exactly five new actions are included: `hire`, `terminate`,
+`set_roster`, `set_reading_allocation`, `contract_teleradiology`. Operations
+control and the minimal observation/action transport move to V0.3, finance to
+V0.4, and growth to V0.5. V0.6 retains both the former WebUI/benchmark scope and
+the managed-practice scope, staged framework first and harness second. No
+milestone is silently dropped.
 
 ```
-V0.1 ──▶ V0.2 ──┬──▶ V0.4 ──▶ V0.5 ──▶ V0.6
-   └──▶ V0.3 ───┘
+V0.1 ──▶ V0.2 ──▶ V0.3 ──▶ V0.4 ──▶ V0.5 ──▶ V0.6
+         Step 0 gate                         framework → harness
 ```
 
 ---
@@ -197,129 +204,173 @@ New Practice scenario · mouse · WebUI · SQLite · agents.
 
 ---
 
-## 3. V0.2 — Operations control
+## 3. V0.2 — Practice design
+
+**Proposed in V0.2 design draft 2, pending the Step 0 gate.**
+
+Deliverables
+
+* **Step 0, before action code:** static scenario-overlay feasibility sweep of
+  documented demand, technologist coverage, US packing and reading-allocation
+  levers. At least nine paired seeds at T30/T90; promising candidates expanded
+  to twenty. Fixed reimbursement, payer/patient behavior, exam/read durations
+  and expense rates. Resolve the 16:00–20:00 shift-validator limitation before
+  claiming part-time results. Stop if the allowed levers cannot sustain a
+  profitable practice with measured service and funding constraints.
+* Separate candidate `sustainable` scenario with measured achievable baseline
+  and useful remaining management decisions. Keep the struggling `established`
+  default and historical V0.1 fixtures. No forced 6–12% margin or inherited
+  MR-dark-after-16:30/backlog targets for the new scenario.
+* Five actions: `hire`, `terminate`, `set_roster`, `set_reading_allocation`,
+  `contract_teleradiology` (including contract cancellation). Atomic V0.2
+  batches; deterministic effective dates, previews, errors and no-ops.
+* Employee registry separate from scenario configuration; stable IDs; recruiting,
+  paid onboarding, active service, notice and termination. Mandatory hourly
+  contracts establish guaranteed weekly compensation and notice/severance;
+  rostered coverage and actual worked hours are distinct. No contract amendment
+  action. Weekly overtime premium applies only above the actual-hours threshold
+  (40 hours, ×1.5 in the supplied scenario).
+* `set_roster` only for hourly technologists/front desk. Whole-schedule booking
+  feasibility and explicit practice-caused displacement/reassignment/rescheduling
+  with retained patient history and financial consequences.
+* Employed radiologist allocation changes salary charge and reading blocks,
+  retaining fixed shifts and contrast presence. Teleradiology has tagged remote
+  readers, persistent lanes, coverage windows, locked retainers/per-read fees,
+  explicit settlement and service implications. No artificial outsourcing price
+  floor; compare total salary/vendor costs and service.
+* TUI staff/reading controls and coverage/obligation previews separating
+  guaranteed commitments from forecast incremental costs. Complete posting and
+  settlement for wages, guarantees, recruiting, severance and vendor costs.
+* Session v2 for new records, authoritative v1 reader with separately reported
+  outcome compatibility. Preserve historical golden references; record changed
+  state/run encodings and generate separate native references.
+* T90 primary management vector: operating margin, cash/financing, completed
+  exams, lost demand, access, urgent breaches, routine TAT and workforce
+  obligations. Baseline-relative minimum service gates and fixed-policy tail;
+  raw metrics visible on failure. T30 feedback, T180 optional validation.
+
+Acceptance
+
+* Step 0 evidence and design prerequisites close before action implementation;
+  action-plan calibration subsequently includes recruiting/training ramp and
+  upfront costs. Static profitability alone is insufficient release evidence.
+* All five actions validate, preview, commit and replay through sim/API/session,
+  headless and TUI paths; atomic failures/no-ops have no operational side effects.
+* No V0.2 actions on existing scenarios preserves legacy patient, reporting,
+  accounting, log and observable outcomes. State/run digest changes are explicit;
+  old fixtures remain unchanged.
+* Service/funding gates catch report deferral, patient displacement/refusal,
+  eliminated coverage, endpoint obligations and selective high-margin service;
+  no weighted composite conceals the metric vector.
+* Payroll and cash reconcile across departure and warm-up; remote reading works
+  through midnight/expiry; whole-schedule/shared-tech invariants hold.
+
+## 4. V0.3 — Operations control
+
+**Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
 Deliverables
 
 * Actions: `reassign_technologist`, `call_in_staff`, `send_home`,
-  `approve_overtime_week`, `change_roster`,
-  `edit_template`, `reserve_addon_slots`, `set_overbooking`, `set_late_policy`,
-  `reschedule_appointment`, `offer_earlier_slot`, `schedule_maintenance`.
-* Weekly staff roster editor (shifts, Saturday rotation) with coverage preview
-  and labor cost estimate.
-* Template editor (per room, per weekday) with expected-capacity preview.
-* Disruptions: stochastic equipment failures with noisy vendor ETA, staff
-  absences (call-outs at 06:00–07:30), late-running emergencies.
-* Front desk scheduling workload (phone requests consume desk time; abandonment).
-* Protocoling task for CT/MR add-ons (radiologist task with priority).
-* Save/load: versioned JSON snapshots (contains hidden state; game-only).
-* Scripted scenarios: "CT tech calls out 07:30", "MR down at 13:10".
-* Agent interface skeleton: `dreamteam agent --stdio` (JSONL observation →
-  action list → advance to next decision epoch); a scripted `greedy` policy
-  in Go using the same API.
-* Mouse support in TUI.
+  `approve_overtime_week`, `edit_template`, `reserve_addon_slots`,
+  `set_overbooking`, `set_late_policy`, `reschedule_appointment`,
+  `offer_earlier_slot`, `schedule_maintenance`. Initial roster editing remains
+  V0.2 `set_roster`; no duplicate `change_roster` action.
+* Template editor with capacity preview; discretionary rescheduling builds on
+  V0.2's patient-history and whole-schedule reconciliation contracts.
+* Equipment failures with noisy ETA, staff absences and late emergencies;
+  scripted “CT tech calls out 07:30” and “MR down at 13:10” scenarios.
+* Front-desk phone/scheduling work and abandonment; CT/MR add-on protocoling;
+  QA, preparation failures, incomplete exams and repeats.
+* Versioned save/load snapshots with hidden state restricted to the game/session
+  boundary; acceleration through saved state, not altered simulation semantics.
+* `dreamteam agent --stdio`: observation/action JSONL and scripted-policy runner
+  using the same API. Mouse support in TUI.
 
 Acceptance
 
-* Every action validated in `sim`, logged, replayable; rejected actions logged.
-* Save → load → continue gives the same digest as uninterrupted play.
-* The "CT tech sick" scenario is solvable via reassignment/call-in, and
-  `greedy` beats `do-nothing` on waits in ≥ 80% of 50 seeds.
-* Agent stdio loop runs 30 days headless with the scripted policy; observation
-  JSON validates against the published JSON Schema.
+* Actions validated, logged and replayable, including rejection records;
+  guarantee and displacement obligations remain binding under send-home/call-in.
+* Save/load continuation matches uninterrupted play; snapshots do not leak
+  through observations. Scripted-policy loop runs 30 days with schema-valid JSON.
+* The sick-tech scenario is solvable; a scripted greedy policy improves waits
+  over no action on ≥80% of 50 seeds while retaining service/financial gates.
 
-## 4. V0.3 — Financial management
+## 5. V0.4 — Financial management
+
+**Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
 Deliverables
 
-* Claims workflow: charge lag, submission, adjudication, partial payments,
-  denials with reason categories, rework queue and policy, write-offs.
-* Self-pay policies (estimate/collect at time of service).
-* Payroll cycles (biweekly), payables calendar, monthly close, monthly P&L,
-  balance sheet, cash-flow statement.
-* KPIs: days in A/R, denial rate, net collection rate, cost per exam,
-  contribution margin per modality/exam.
-* Finance screen: statements, A/R aging, payer view, cash forecast from
-  *known* obligations (no peeking at latent payment dates).
-* Accounting review with the **Finance** plugin (§10): chart of accounts, accrual
-  and close procedure, statement layout, reconciliation checks.
+* Claims workflow: charge/submission lag, adjudication, partial payment, denials
+  with reasons, rework policies and write-offs; self-pay estimates/collection.
+* Payroll/payables calendar UI, monthly close, P&L, balance sheet, cash-flow
+  statements and financing. This expands existing accrual/settlement and V0.2
+  obligations; it does not defer initial guaranteed pay or severance to V0.4.
+* Days in A/R, denial/net-collection rates, cost per exam, modality/exam
+  contribution; statements, aging, payer views and cash forecasts from known
+  obligations and observable collection estimates, without latent-date access.
+* Accounting review of chart of accounts, close procedure, reconciliation and
+  statement presentation (§10).
 
 Acceptance
 
-* Statements reconcile (balance sheet balances; cash-flow ties to cash).
-* Preset calibration bands hold over 6 simulated months.
-* Contribution-margin view makes the MR evening-capacity opportunity
-  discoverable without hidden data.
+* Statements reconcile, including guarantee/severance/vendor liabilities and
+  financing; cash-flow ties to cash. Scenario-specific calibration holds over
+  six months; contribution views reveal measured capacity opportunities.
 
-## 5. V0.4 — Growth and progression
+## 6. V0.5 — Growth and progression
+
+**Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
 Deliverables
 
-* Hiring (with recruiting lead time, onboarding productivity ramp), termination
-  with notice, raises; workload-driven turnover risk.
-* Equipment: lease/purchase scanners or a second US room, construction lead
-  time, financing (loan/lease), service contracts.
-* Extended hours / Sunday opening.
-* Referral sources with dynamic relationship strength driven by TAT, access
-  (lead time), patient experience, and outreach spending (demand thinning keeps
-  common random numbers).
-* Competition events (a competitor opens, payer rate cut).
-* **New Practice** scenario (low demand, thin cash, ramping referrals, no
-  warm-up history).
-* Goals and progression: scenario objectives (e.g., "reach 12% margin for a
-  quarter with no urgent TAT breaches"), monthly review screen, practice
-  valuation proxy with quality gates.
-* Investment-case review with the **financial-analysis** plugin (§10):
-  valuation proxy (EBITDA multiple vs DCF), lease-vs-buy for scanners, payback of
-  expansion options, financing terms.
+* Raises, workload-driven turnover/fatigue and richer onboarding; initial
+  hiring, termination and guaranteed-hours contracts remain V0.2 foundations.
+* Scanner/room lease or purchase, construction, financing, service contracts;
+  extended hours and Sunday opening.
+* Dynamic referral relationships driven by access, TAT, experience and outreach;
+  demand thinning preserves common random numbers. Competition and payer shocks.
+* New Practice scenario with low demand, thin cash, ramping referrals and no
+  warm-up; goals, monthly reviews and valuation with measured service gates.
+* Investment-case review: valuation, lease-vs-buy, expansion payback and terms
+  (§10). Scenario goals use achievable service baselines rather than assuming
+  zero urgent breaches or a universal 12% margin.
 
 Acceptance
 
-* New Practice is winnable (scripted heuristic reaches profitability within
-  18 simulated months on ≥ 70% of seeds) and losable.
-* Growth exploits from PLAN §3 are covered by tests (e.g., unchecked overbooking
-  degrades referrals and revenue over a quarter).
+* New Practice is winnable and losable: a scripted heuristic reaches sustained
+  profitability within 18 simulated months on ≥70% of seeds, meeting its gates.
+* Growth exploits from PLAN §3 are tested; overloaded service degrades modeled
+  referrals and finances without erasing workforce or patient obligations.
 
-## 6. V0.5 — WebUI and benchmark framework
+## 7. V0.6 — WebUI, benchmarks and managed practice
 
-Deliverables
+**Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
-* WebUI (templ + Datastar or equivalent, decided then) using `session` and
-  `api` only; feature parity with TUI dashboard, schedule, worklist, finance.
-* SQLite store (pure-Go driver) for saves index, run records, benchmark results,
-  long event logs.
-* Benchmark packs: scenario + seeds (public dev seeds, 256-bit secret test
-  seeds) + horizon + evaluation tail + decision epochs + scripted perturbations +
-  metric spec + constraints. Split into a public part and a private part
-  (seeds, perturbation timing). Agents run as isolated processes (PLAN §9.7).
-* Baselines: do-nothing, rules, greedy, random-valid, simple look-ahead
-  optimizer (optionally a MIP via an external solver process, decided then).
-* Scoring report: metric vectors with confidence intervals across seeds,
-  constraint violations, rejected actions; optional composite score.
+Deliverables, staged within the milestone
 
-Acceptance
-
-* Two baselines × 100 seeds × 30 days run in < 5 min on the Pi.
-* Results reproducible from stored run records.
-* WebUI and TUI produce identical digests for the same action log.
-
-## 7. V0.6 — AI-managed practice
-
-Deliverables
-
-* LLM agent harness over the stdio/HTTP agent API (provider-agnostic; budget
-  and token accounting; tool-call style actions).
-* Human-vs-agent leaderboard on benchmark packs; human play recorded through
-  the same decision-epoch protocol.
-* Safety evaluation: hard-constraint attempt rate, urgent-case handling,
-  workforce welfare metrics.
-* Automation levels as a game mechanic: manual → automated scheduling &
-  billing → AI operations manager; compare outcomes.
+1. WebUI through `session`/`api`, with TUI dashboard/schedule/worklist/finance
+   parity; SQLite saves index, run records, benchmark results and long logs.
+2. Benchmark packs: scenarios, public development/private test seeds, horizons,
+   evaluation tails, decision epochs, perturbations, metric specifications and
+   constraints. Public/private split and isolated processes per PLAN §9.7.
+   Baselines: no action, rules, greedy, random-valid and simple look-ahead.
+   Reports retain vectors, confidence intervals, constraints and rejected
+   actions; management eligibility remains gate-based, without a weighted score.
+3. Provider-independent language-model agent harness over stdio/HTTP with budget
+   and token accounting; human-versus-agent comparisons on the same decision protocol; hidden-state
+   audits, hard-constraint attempts, urgent service and workforce evaluation.
+   Automation levels: manual, automated scheduling/billing, operations manager.
 
 Acceptance
 
-* An LLM agent completes a 30-day pack without harness errors; all actions
-  replay; no hidden-state access paths exist (audited).
+* Two baselines ×100 seeds ×30 days in <5 minutes on the benchmark Pi target;
+  results reproduced from records, with version/schema compatibility explicit.
+* WebUI and TUI produce identical native digests for identical actions.
+* A managed-practice agent completes a pack without harness errors, with all
+  actions replayed and no hidden-state access. Human and agent comparisons use
+  the same service gates, commitment accounting and evaluation tail.
 
 ---
 
@@ -330,7 +381,7 @@ Acceptance
 | Unit | `simtime`, `rng` samplers, queue, ledger, policies | every commit |
 | Table tests | action validation, state transitions | every commit |
 | Property | chunking invariance; invariants over random seeds; conservation; replay equality | every commit (short), nightly (long) |
-| Golden | start-state digest, 7-day and 90-day digests per preset; CLI output; TUI views | every commit; regenerate only with intentional gameplay changes |
+| Golden | start-state digest, 7-day and 90-day digests per preset; CLI output; TUI views | every commit; preserve historical references and record separate native references for intentional gameplay or state-schema changes |
 | Cross-arch | golden digests on `amd64` and `arm64` (GitHub Actions has native arm64 runners) | CI |
 | Leakage | observation deny-list reflection; same-past/different-future; StepVisible | every commit |
 | Calibration | multi-seed KPI bands per preset (`-tags calibration`, minutes) | before release, after balance changes |
@@ -369,8 +420,8 @@ code, and neither replaces imaging-specific data.
 | When | Tool | Use | Output |
 |---|---|---|---|
 | V0.1 step 18 | Spreadsheet (xlsx) | **P&L calibration workbook**: monthly volume × payer mix × rates − payroll − fixed − variable costs, with one input sheet per profitability preset. Lets assumptions be tuned and sanity-checked without running the sim | `docs/calibration/pnl-model.xlsx`; inputs mirror scenario JSON keys |
-| V0.3 | Anthropic **Finance** plugin (journal entries, reconciliation, statements, variance analysis, month-end close) | review ledger design, close procedure, statement reconciliation | review notes in a turn report; fixes in `sim` |
-| V0.4 | Anthropic **financial-analysis** plugin (DCF, three-statement models) | valuation proxy, lease-vs-buy, expansion payback | investment-case notes; parameters in scenario JSON |
+| V0.4 | Anthropic **Finance** plugin (journal entries, reconciliation, statements, variance analysis, month-end close) | review ledger design, close procedure, statement reconciliation | review notes in a turn report; fixes in `sim` |
+| V0.5 | Anthropic **financial-analysis** plugin (DCF, three-statement models) | valuation proxy, lease-vs-buy, expansion payback | investment-case notes; parameters in scenario JSON |
 
 Limits: these plugins are general corporate finance. Imaging-specific numbers
 (reimbursement, denial rates, days in A/R, staffing ratios, radiologist
