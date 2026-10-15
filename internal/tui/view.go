@@ -49,6 +49,9 @@ func (m *Model) render() string {
 	case screenActions:
 		body = m.actionsBody(w, h-3)
 		hints = " ↑↓ choose  ←→ change  [ ] day  enter submit  d dash  s sched  space run  q quit"
+	case screenStaff:
+		body = m.staffBody(w, h-3)
+		hints = " ↑↓ choose  ←→ change  enter submit (hire / terminate)  a actions  d dash  space run  q quit"
 	case screenSummary:
 		body = m.summaryBody(w, h-3)
 		hints = " ←→ day  t today  tab day/since takeover  enter dashboard  h history  f finance  space run  q quit"
@@ -73,7 +76,7 @@ func (m *Model) render() string {
 		if m.autoPause {
 			auto = "on"
 		}
-		hints = " space run  1-5 speed  n next  e end of day  a actions  p s w f l  A auto:" + auto + "  ? help  q quit"
+		hints = " space run  1-5 speed  n next  e end of day  a actions  m staff  p s w f l  A auto:" + auto + "  ? help  q quit"
 	}
 	lines := []string{m.topBar(w)}
 	for i := 0; i < h-3; i++ {
@@ -314,12 +317,12 @@ func (m *Model) helpBody(w, n int) []string {
 		{"SCREENS", ""},
 		{"d / esc", "dashboard          b  briefing        h  history"},
 		{"s", "schedule           p  patients        w  worklist"},
-		{"l", "event log          f  finance         a  actions"},
+		{"l", "event log          f  finance         a  actions   m  staff"},
 		{"IN SCREENS", ""},
 		{"↑↓ j k ←→ t", "move, scroll, page days (t: today)"},
 		{"tab", "next filter or view (patients, log, finance, summary)"},
 		{"!", "log: severity filter (all · warnings & alerts · alerts only)"},
-		{"enter", "open (patient, journey) or submit (actions)"},
+		{"enter", "open (patient, journey) or submit (actions, staff)"},
 		{"SESSION", ""},
 		{"ctrl+s ctrl+o", "save · reload the saved file (replays it)"},
 		{"ctrl+v", "verify: replay this run from scenario, seed and actions"},
@@ -462,8 +465,13 @@ func roleLabel(e api.Employee) string {
 func staffLines(o api.Observation) []string {
 	var out []string
 	for _, e := range o.Staff {
+		if e.Employment == api.EmploymentTerminated || e.Employment == api.EmploymentRecruiting {
+			continue // not on the payroll's working staff today (the staff screen lists them)
+		}
 		var st string
 		switch e.Status {
+		case api.StaffTraining:
+			st = "◌ training until " + e.EndsAt + dimStyle.Render(" · no patients")
 		case api.StaffOnDuty:
 			st = openStyle.Render("●") + " on duty until " + e.EndsAt
 			if len(e.Rooms) > 0 {
@@ -592,6 +600,9 @@ func minutes(m int64) string {
 func staffSummary(o api.Observation) string {
 	var techs, techsOn, rads, radsOn int
 	for _, e := range o.Staff {
+		if e.Employment == api.EmploymentTerminated || e.Employment == api.EmploymentRecruiting {
+			continue
+		}
 		on := e.Status == api.StaffOnDuty || e.Status == api.StaffBusy || e.Status == api.StaffReading ||
 			e.Status == api.StaffOtherDuties || e.Status == api.StaffReadingFree
 		switch e.Role {

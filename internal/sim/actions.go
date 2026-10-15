@@ -31,6 +31,8 @@ type actionRecord struct {
 	ok     bool
 	code   string
 	msg    string
+	// V0.2: the employee a hire was given and when the change takes effect.
+	employee, effective string
 }
 
 type actionState struct {
@@ -41,7 +43,17 @@ type actionState struct {
 func actionID(i int) string { return pubID('X', int64(i+1), 5) }
 
 // Apply applies one batch of actions now and returns their results.
-func (w *World) Apply(actions []api.Action) []api.ActionResult {
+func (w *World) Apply(actions []api.Action) []api.ActionResult { return w.applyBatch(actions, false) }
+
+// ApplyLegacy applies a batch with V0.1 semantics only: every action one
+// by one through the V0.1 path, so a V0.2 type is an unknown action, as
+// it was when a v1 session record was written (its authoritative replay,
+// V0.2_DESIGN §12).
+func (w *World) ApplyLegacy(actions []api.Action) []api.ActionResult {
+	return w.applyBatch(actions, true)
+}
+
+func (w *World) applyBatch(actions []api.Action, legacy bool) []api.ActionResult {
 	if len(actions) == 0 {
 		return nil // no decision, no batch
 	}
@@ -52,6 +64,25 @@ func (w *World) Apply(actions []api.Action) []api.ActionResult {
 	st.actions.batches++
 	changed := false
 	var out []api.ActionResult
+	if !legacy && slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
+		// A V0.2 batch: atomic (staffing.go).
+		w.eng.Batch(func() {
+			res := st.staffBatch(w.eng, actions, true)
+			for k, a := range actions {
+				r := &res[k]
+				changed = changed || (r.ok && r.code == api.ActionAccepted)
+				st.actions.log = append(st.actions.log, actionRecord{at: now, batch: st.actions.batches, action: a, ok: r.ok,
+					code: r.code, msg: r.msg, employee: r.employee, effective: r.effective})
+				out = append(out, st.actionResult(len(st.actions.log)-1))
+			}
+		})
+		if changed {
+			w.eng.Settle()
+		} else {
+			st.now = prev
+		}
+		return out
+	}
 	w.eng.Batch(func() {
 		for _, a := range actions {
 			ok, code, msg := st.apply(w.eng, a, true)
@@ -79,15 +110,42 @@ func (w *World) Validate(a api.Action) api.ActionResult {
 	st := w.st
 	prev := st.now
 	st.now = w.eng.Now()
+	defer func() { st.now = prev }()
+	if isV2Action(a.Type) {
+		r := st.staffBatch(w.eng, []api.Action{a}, false)[0]
+		return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: r.ok, Code: r.code, Message: r.msg, EffectiveAt: r.effective}
+	}
 	ok, code, msg := st.apply(w.eng, a, false)
-	st.now = prev
 	return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: ok, Code: code, Message: msg}
+}
+
+// ValidateBatch checks a batch against the state now without applying or
+// recording it: a V0.2 batch as one atomic unit, a legacy batch as Validate
+// of each action against the state now (legacy actions apply one by one).
+func (w *World) ValidateBatch(actions []api.Action) []api.ActionResult {
+	if !slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
+		var out []api.ActionResult
+		for _, a := range actions {
+			out = append(out, w.Validate(a))
+		}
+		return out
+	}
+	st := w.st
+	prev := st.now
+	st.now = w.eng.Now()
+	defer func() { st.now = prev }()
+	var out []api.ActionResult
+	for k, r := range st.staffBatch(w.eng, actions, false) {
+		out = append(out, api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: actions[k], OK: r.ok, Code: r.code,
+			Message: r.msg, EffectiveAt: r.effective})
+	}
+	return out
 }
 
 func (st *state) actionResult(i int) api.ActionResult {
 	r := &st.actions.log[i]
 	return api.ActionResult{ID: actionID(i), Batch: r.batch, Time: st.cal.ISO(r.at), Action: r.action,
-		OK: r.ok, Code: r.code, Message: r.msg}
+		OK: r.ok, Code: r.code, Message: r.msg, EmployeeID: r.employee, EffectiveAt: r.effective}
 }
 
 // apply validates a and, if do is set and it is valid, applies it.
@@ -100,6 +158,8 @@ func (st *state) apply(e *Engine, a api.Action, do bool) (ok bool, code, msg str
 	case api.ActSetWorklistPolicy:
 		return st.setWorklist(e, a, do)
 	}
+	// The V0.1 message, unchanged: recorded v1 results replay exactly. (A
+	// hire or terminate never reaches here: it makes a V0.2 batch.)
 	return false, "unknown_action", fmt.Sprintf("Unknown action %q (V0.1: %s, %s, %s).", a.Type,
 		api.ActExtendShift, api.ActSetWalkInPolicy, api.ActSetWorklistPolicy)
 }
@@ -109,7 +169,7 @@ const MaxExtension = 4 * simtime.Hour
 
 // planFor is day's plan: the roster with the extensions approved for it.
 func (st *state) planFor(day int64) DayPlan {
-	p := st.cfg.Plan(st.cal.Date(st.cal.StartOfDay(day)))
+	p := st.cfg.planOf(st.cal.Date(st.cal.StartOfDay(day)), st.dayTerms(day))
 	for i, d := range st.ext[day] {
 		if k := p.ByEmp[i]; k >= 0 {
 			p.Shifts[k].To += d
@@ -129,14 +189,14 @@ func (st *state) planFor(day int64) DayPlan {
 func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, string) {
 	i := -1
 	for k := range st.emps {
-		if st.emps[k].cfg.ID == a.Employee {
+		if st.emps[k].terms.ID == a.Employee {
 			i = k
 		}
 	}
 	if i < 0 {
 		return false, "unknown_employee", fmt.Sprintf("No employee %q.", a.Employee)
 	}
-	ec := &st.cfg.Employees[i]
+	ec := st.emps[i].terms
 	name := ec.Name
 	// The raw value first: converting before the check could overflow.
 	if a.Minutes < 1 || a.Minutes > int64(MaxExtension/simtime.Minute) {
@@ -255,7 +315,8 @@ func (w *World) Roster(day int64) []api.RosterEntry {
 	st := w.st
 	plan := st.planFor(day)
 	var out []api.RosterEntry
-	for i, ec := range st.cfg.Employees {
+	for i := range st.emps {
+		ec := st.emps[i].terms
 		k := plan.ByEmp[i]
 		if k < 0 {
 			continue
@@ -284,10 +345,10 @@ func (st *state) observeExtensions(o *api.Observation, today int64) {
 	slices.Sort(days)
 	for _, d := range days {
 		plan := st.planFor(d)
-		for i := range st.cfg.Employees {
+		for i := range st.emps {
 			if x := st.ext[d][i]; x > 0 && plan.ByEmp[i] >= 0 {
 				o.Extensions = append(o.Extensions, api.Extension{Date: st.cal.Date(st.cal.StartOfDay(d)).String(),
-					Employee: st.cfg.Employees[i].ID, Name: st.cfg.Employees[i].Name, Minutes: int64(x / simtime.Minute),
+					Employee: st.emps[i].terms.ID, Name: st.emps[i].terms.Name, Minutes: int64(x / simtime.Minute),
 					Until: simtime.FormatClock(plan.Shifts[plan.ByEmp[i]].To)})
 			}
 		}
@@ -405,7 +466,7 @@ func (w *World) ActionLog() []api.ActionResult {
 // template slots that would become bookable.
 func (st *state) extensionEffect(day int64, plan DayPlan, k int, d simtime.Duration) (covers, opens string) {
 	sh := plan.Shifts[k]
-	ec := &st.cfg.Employees[sh.Employee]
+	ec := plan.emps[sh.Employee]
 	last := sh.To + d - 1 // a moment inside the extra time
 	ext := sh
 	ext.To += d

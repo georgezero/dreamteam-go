@@ -773,6 +773,18 @@ else is persisted and no serialized world is trusted. File
   length) is reported apart from the outcomes; the first differing path
   is reported with both values. References live in `testdata/golden/`
   (README there).
+* **V0.2 Slice 2: session v2** (V0.2_DESIGN §5.7, §12). This build
+  writes `dreamteam.session/v2`: the v1 shape plus the `hire` and
+  `terminate` actions (`requestId`, `role`, `skills`, `rateCents`,
+  `contractedWeeklyMinutes`, `roster` {A, B}, `startDate`; `employee`,
+  `lastDay`), their results' `employeeId` and `effectiveAt`, and `legacy`
+  for a continued v1 session (the v1 record embedded, its compatibility,
+  and this build's transition digests at its end). V0.1 actions and
+  results encode exactly as in v1, so the action digest of a V0.1 run is
+  unchanged. v1 files are read with separate strict v1 DTOs; a registry
+  of named legacy builds replaces the engine-mismatch switch for them
+  (outcomes verified, state encoding changed). The state digest encoding
+  is `dreamteam.state/v3`.
 * **Snapshots** (§3.6) are not built: replay is authoritative, and a
   snapshot cache may come later (V0.2) as an accelerator verified against
   the digests.

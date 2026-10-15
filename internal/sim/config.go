@@ -204,6 +204,12 @@ const (
 	Technologist Role = "technologist"
 	Radiologist  Role = "radiologist"
 	OpsManager   Role = "ops_manager"
+	// Trainee is the working role of a new hire in onboarding (V0.2_DESIGN
+	// §5.3): on duty and paid, with no patient-service capacity — no room
+	// staffing, registration or contrast supervision. It is never a hired
+	// or scenario role, only the view the plan and the runtime use on a
+	// training day.
+	Trainee Role = "trainee"
 )
 
 // PayType says whether overtime rules apply.
@@ -226,6 +232,11 @@ type EmployeeConfig struct {
 	// this site, in basis points.
 	SiteAllocationBP int64
 	Roster           [7]*ShiftTemplate // by simtime.Weekday; nil means off
+	// Alt holds a second shift for a weekday whose rota weeks differ (a
+	// hired roster's A and B shifts; V0.2_DESIGN §6.2): Roster[wd] then
+	// applies to one rota week and Alt[wd] to the other. Scenario rosters
+	// leave it empty.
+	Alt [7]*ShiftTemplate
 	// Contract is an hourly employee's contract (zero for salaried staff).
 	Contract Contract
 }
@@ -297,6 +308,17 @@ func (c *Contract) DayCents(rate int64, week int, wd simtime.Weekday) int64 {
 		return rate * int64(c.Weekly) / (7 * 3600)
 	}
 	return rate * int64(c.Weekly) * int64(c.Weights[k][wd]) / (int64(total) * 3600)
+}
+
+// ShiftOn is the employee's shift template for a weekday in rota week
+// week, or nil when off.
+func (c *EmployeeConfig) ShiftOn(wd simtime.Weekday, week int) *ShiftTemplate {
+	for _, t := range [2]*ShiftTemplate{c.Roster[wd], c.Alt[wd]} {
+		if t != nil && (t.Weeks == WeekBoth || t.Weeks == week) {
+			return t
+		}
+	}
+	return nil
 }
 
 // HasSkill reports whether the employee holds skill s.
@@ -410,30 +432,46 @@ func (s *Shift) CoversRoom(room string, c simtime.Duration) bool {
 
 // DayPlan is the roster materialized for one date.
 type DayPlan struct {
-	Date    simtime.Date
-	Week    int
-	Hours   *Span // nil when closed
-	Shifts  []Shift
-	ByEmp   []int // index into Shifts per employee, -1 when off
-	cfg     *Config
+	Date   simtime.Date
+	Week   int
+	Hours  *Span // nil when closed
+	Shifts []Shift
+	ByEmp  []int // index into Shifts per employee, -1 when off
+	cfg    *Config
+	// emps are the employees' terms by index, as working that day (nil:
+	// not employed that day; a trainee's training view in onboarding).
+	emps    []*EmployeeConfig
 	Reading [][]Span // per employee: site reading blocks (radiologists)
 }
 
-// Plan materializes the roster for date d.
+// Plan materializes the scenario's roster for date d.
 func (c *Config) Plan(d simtime.Date) DayPlan {
-	wd := d.Weekday()
-	p := DayPlan{Date: d, Week: c.RotaWeek(d), Hours: c.Hours[wd], cfg: c,
-		ByEmp: make([]int, len(c.Employees)), Reading: make([][]Span, len(c.Employees))}
+	emps := make([]*EmployeeConfig, len(c.Employees))
 	for i := range c.Employees {
+		emps[i] = &c.Employees[i]
+	}
+	return c.planOf(d, emps)
+}
+
+// planOf materializes the roster of emps (by employee index; nil entries
+// are not employed that day) for date d.
+func (c *Config) planOf(d simtime.Date, emps []*EmployeeConfig) DayPlan {
+	wd := d.Weekday()
+	p := DayPlan{Date: d, Week: c.RotaWeek(d), Hours: c.Hours[wd], cfg: c, emps: emps,
+		ByEmp: make([]int, len(emps)), Reading: make([][]Span, len(emps))}
+	for i, e := range emps {
 		p.ByEmp[i] = -1
-		t := c.Employees[i].Roster[wd]
-		if t == nil || (t.Weeks != WeekBoth && t.Weeks != p.Week) {
+		if e == nil {
+			continue
+		}
+		t := e.ShiftOn(wd, p.Week)
+		if t == nil {
 			continue
 		}
 		p.ByEmp[i] = len(p.Shifts)
 		p.Shifts = append(p.Shifts, Shift{Employee: i, ShiftTemplate: *t})
-		if c.Employees[i].Role == Radiologist {
-			p.Reading[i] = ReadingBlocks(t.Span, c.Employees[i].SiteAllocationBP)
+		if e.Role == Radiologist {
+			p.Reading[i] = ReadingBlocks(t.Span, e.SiteAllocationBP)
 		}
 	}
 	return p
@@ -515,7 +553,7 @@ func (p *DayPlan) Coverage() Coverage {
 			if !s.OnDutyAt(at) {
 				continue
 			}
-			emp := &p.cfg.Employees[s.Employee]
+			emp := p.emps[s.Employee]
 			if seg.Open {
 				for r, room := range p.cfg.Rooms {
 					if staffs(emp, s, room, at) {
@@ -627,7 +665,7 @@ func (c *Coverage) OnBreak(r int) []Span {
 		}
 		for si := range p.Shifts {
 			sh := &p.Shifts[si]
-			emp := &p.cfg.Employees[sh.Employee]
+			emp := p.emps[sh.Employee]
 			if sh.Contains(seg.From) && !sh.OnDutyAt(seg.From) && staffs(emp, sh, room, seg.From) {
 				if n := len(out); n > 0 && out[n-1].To == seg.From {
 					out[n-1].To = seg.To

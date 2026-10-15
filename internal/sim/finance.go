@@ -233,6 +233,8 @@ type finState struct {
 	pending []int
 	// Independent totals for the reconciliation invariants.
 	receipts, payrollPaid, apPaid, payrollAccrued, apAccrued int64
+	// V0.2: severance paid on its paydays (cash out).
+	severancePaid int64
 	// forceDenied, if set (tests only), makes matching claims denied and
 	// written off: a change to a hidden latent outcome.
 	forceDenied func(ci int) bool
@@ -290,6 +292,9 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Payroll paid %s (wages and benefits accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
 		}
+	}
+	if st.isPayday(date) {
+		st.paySeverance(now, day)
 	}
 	if date.Day == 1 {
 		if amt := led.bal[acctAP]; amt < 0 {
@@ -589,9 +594,9 @@ func (st *state) checkFinance() error {
 		return fmt.Errorf("A/R %d, open claims owe %d", led.bal[acctAR], ar)
 	case -led.bal[acctRevenue] != revenue:
 		return fmt.Errorf("revenue %d, claims expected %d", -led.bal[acctRevenue], revenue)
-	case led.bal[acctCash] != st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid:
+	case led.bal[acctCash] != st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid:
 		return fmt.Errorf("cash %d, opening adjustment + receipts − disbursements %d", led.bal[acctCash],
-			st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid)
+			st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid)
 	case -led.bal[acctEquity] != st.fin.opening.adjustment:
 		return fmt.Errorf("opening equity %d, adjustment %d", -led.bal[acctEquity], st.fin.opening.adjustment)
 	case -led.bal[acctAccruedPayroll] != st.fin.payrollAccrued-st.fin.payrollPaid:

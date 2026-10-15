@@ -128,15 +128,18 @@ type ResultBalances struct {
 	ReceivablesCents    int64 `json:"receivablesCents"`
 	PayablesCents       int64 `json:"payablesCents"`
 	AccruedPayrollCents int64 `json:"accruedPayrollCents"`
-	EquityCents         int64 `json:"equityCents"`
-	MinCashCents        int64 `json:"minCashCents"` // lowest since day 1
-	DaysBelowZero       int64 `json:"daysBelowZero"`
+	// V0.2: severance recognized and not yet paid (omitted when zero).
+	SeverancePayableCents int64 `json:"severancePayableCents,omitempty"`
+	EquityCents           int64 `json:"equityCents"`
+	MinCashCents          int64 `json:"minCashCents"` // lowest since day 1
+	DaysBelowZero         int64 `json:"daysBelowZero"`
 }
 
 // ResultObligations is what is outstanding at the end.
 type ResultObligations struct {
 	NextPayroll        api.Obligation    `json:"nextPayroll"`
 	NextPayables       api.Obligation    `json:"nextPayables"`
+	SeveranceDue       []api.Obligation  `json:"severanceDue,omitempty"` // V0.2: by payday
 	OpenClaims         int               `json:"openClaims"`
 	ClaimsAging        []api.AgingBucket `json:"claimsAging"`
 	Unread             int               `json:"unread"`
@@ -215,9 +218,10 @@ func (s *Session) Result(verify bool) (*Result, error) {
 
 	f := o.Finance
 	r.Balances = ResultBalances{CashCents: f.CashCents, ReceivablesCents: f.ARCents, PayablesCents: f.APCents,
-		AccruedPayrollCents: f.AccruedPayrollCents, EquityCents: f.BalanceSheet.EquityCents,
+		AccruedPayrollCents: f.AccruedPayrollCents, SeverancePayableCents: f.BalanceSheet.SeverancePayableCents,
+		EquityCents:  f.BalanceSheet.EquityCents,
 		MinCashCents: f.Financing.MinCashCents, DaysBelowZero: f.Financing.DaysBelowZero}
-	ob := ResultObligations{NextPayroll: f.NextPayroll, NextPayables: f.NextPayables, OpenClaims: f.Claims.Open,
+	ob := ResultObligations{NextPayroll: f.NextPayroll, NextPayables: f.NextPayables, SeveranceDue: f.SeveranceDue, OpenClaims: f.Claims.Open,
 		ClaimsAging: f.Claims.Aging, Unread: o.Worklist.Unread, Reading: o.Worklist.Reading,
 		RecallList: o.Demand.RecallList, Policies: o.Policies, ApprovedExtensions: o.Extensions}
 	if ob.ClaimsAging == nil {

@@ -283,3 +283,30 @@ daily guarantee close is not measurable.
 | Measurement | Command | Result |
 |---|---|---|
 | Whole-schedule staffing check: Sam removed from tomorrow, the established practice's full booked horizon at the takeover | `go test ./internal/sim -run X -bench StaffingCheck -benchtime 10x -count 3 -benchmem` | 11.3–16.1 ms/op, 1.7 MB/op, 11.8k allocs/op |
+
+## 2026-10-15 — V0.2 Slice 2: hire and terminate (Pi 4, 82–84 °C and throttled, load average ≈5.5 from unrelated processes)
+
+Interleaved wall times of `dreamteam run -scenario established -seed 7 -days
+90 -format json`, Slice 1 (19dcd10) against this build, ten runs each:
+best 3.20 s before, 3.49 s after; medians overlap (≈4 s, load-dominated).
+The load-independent figures are the benchmarks' allocation counts
+(`go test ./internal/sim -run X -bench 'EstablishedWarmup$|EstablishedPlay90$' -benchtime 3x -count 2 -benchmem`):
+
+| Benchmark | Slice 1 | Slice 2 |
+|---|---|---|
+| Established warm-up (180 days) | 1.49–1.68 s/op, 93.4 MB, 1.397M allocs | 1.61–2.46 s/op, 104.3 MB, 1.415M allocs |
+| Established, 90 days of play | 1.09–1.45 s/op, 73.4 MB, 1.229M allocs | 1.14–1.66 s/op, 78.6 MB, 1.241M allocs |
+
+So about +1% allocations and +7–12% bytes (wider slots for the growable
+staff set, appointment and order fields, the per-day registry view) and,
+on best times, about +5% CPU. No new hot spot: `sharedFree` is ≈10% of the
+profile, as before. The Pi 4's 90-day waiver (V0.1) still applies; not
+re-measured on the Cortex-A76 (busy with the acceptance runs).
+
+| Measurement | Command | Result |
+|---|---|---|
+| Whole-schedule staffing check (Slice 1 benchmark) | `-bench StaffingCheck$ -benchtime 10x -count 2 -benchmem` | 12.2–23.0 ms/op, 2.1 MB/op, 12.1k allocs/op |
+| Termination preview at the takeover (validation, the booked horizon re-planned, survivors, provisional replacements) | `-bench StaffingPreviewTermination` | 20.8–24.0 ms/op, 3.5 MB/op, 21.6k allocs/op |
+| Committing that termination (severance, reconciliation, 84 displacements re-offered) | `-bench StaffingCommitTermination` | 29.9–30.6 ms/op, 2.9 MB/op, 25.9k allocs/op |
+| Staff screen render with a termination preview, 160×48 | `go test ./internal/tui -run StaffScreenRenderTime -v` | 25 ms per frame |
+| 60 days with the V0.2 reference plan vs no actions | `dreamteam run -days 60 [-actions testdata/golden/established-staffing.actions.json]` | 3.29–4.98 s vs 3.05–4.27 s: no difference beyond noise |

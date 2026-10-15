@@ -86,6 +86,8 @@ type flowCounts struct {
 	otApprovedSec                    simtime.Duration // of otSec, approved in advance (extend_shift)
 	otApprovedCost                   int64
 	acquired, reportsFinal, breaches int // studies; reports; TAT targets missed
+	// disp counts practice-caused displacements (displace.go).
+	disp [numDisp]int
 }
 
 func visitID(i int) string { return pubID('V', int64(i+1), 5) }
@@ -120,7 +122,7 @@ func (st *state) scheduleArrival(e *Engine, ai int) {
 	e.Push(Event{At: start.Add(st.cfg.Policies.Grace), Class: ClassDeadline, Kind: kindGrace, A: int64(ai)})
 
 	att := st.hash("attempt", o.key.keys(a.attempt)...)
-	lead := a.day - st.cal.DayIndex(a.bookedAt)
+	lead := a.noShowLead
 	ppm := b.NoShowPPM[st.cfg.Catalog[o.exam].Modality] +
 		min(b.NoShowMaxLeadPPM, rng.PPM(lead/10)*b.NoShowPerTenDaysPPM)
 	if rng.Bernoulli(att.Lane(0), ppm) || (st.forceNoShow != nil && st.forceNoShow(start)) {

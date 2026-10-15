@@ -231,8 +231,10 @@ func Compile(f *File) (*sim.Config, error) {
 		cfg.Rooms = append(cfg.Rooms, rc)
 	}
 
-	if len(f.Employees) > 64 {
-		c.fail("employees", "at most 64 employees")
+	// V0.2 Slice 2: staffing sets grow with the registry (no 64-employee
+	// mask); the bound only keeps a scenario file sane.
+	if len(f.Employees) > 1000 {
+		c.fail("employees", "at most 1000 employees")
 	}
 	ids := map[string]bool{}
 	for i, e := range f.Employees {

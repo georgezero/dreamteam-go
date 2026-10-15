@@ -7,7 +7,9 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.1** (`0.1.0`). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
+Status: **V0.1** (`0.1.0`) is the release; `main` is V0.2 development
+(`0.2.0-dev.2`: hiring and termination, see below and
+`docs/V0.2_DESIGN.md` §5.7). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
@@ -37,6 +39,7 @@ time for the keys.
 | `d` `b` `h` | dashboard · takeover briefing · daily history |
 | `s` `p` `w` | schedule · patients · radiology worklist |
 | `l` `f` `a` | event log · finance · actions |
+| `m` | staff: hire and terminate, with a preview (V0.2 development) |
 | `↑↓` `j` `k` `←→` `t` | move, scroll, page days (`t`: today) |
 | `tab` / `!` | next filter or view / log severity filter |
 | `enter` / `esc` | open or submit / back |
@@ -63,6 +66,34 @@ Three actions, from the actions screen (`a`):
 
 Patients already admitted are always served, after closing if necessary
 (with the overtime it costs); nobody is sent home because of the clock.
+
+### Hiring and termination (V0.2 development)
+
+From the staff screen (`m`), or as `hire` and `terminate` actions:
+
+* **Hire** from a fixed offer table (XR, CT, XR+CT, US or MR technologist,
+  front desk) at a standard or premium rate. The premium rate buys a
+  shorter recruiting lead (28 or 21 days for technologists, 14 or 7 for the
+  desk), not productivity.
+  * The recruiting fee ($3,000 or $1,000) is charged at once.
+  * The new employee is paid from the start date. They work no patients
+    until they have attended 40 hours of rostered training (24 for the
+    desk), and work independently from the next midnight.
+  * The contract's weekly hours are guaranteed, and the regular roster may
+    not exceed them.
+  * At most 8 technologists and 4 desk staff at once; people on notice
+    still count.
+* **Terminate** an hourly technologist or front desk employee.
+  * The last day is at least 14 days ahead. Contract pay continues to the
+    last day, whatever the roster.
+  * Two contracted weeks' severance is recognized at once and paid on the
+    first payday after the last day.
+  * Booked patients who lose their technologist are rebooked (no earlier
+    than their original time, within their tolerance) or lost to
+    displacement. The preview names each one before you commit.
+
+A batch containing either action is atomic: one invalid item refuses the
+whole batch.
 
 ## Scenarios
 
@@ -99,14 +130,39 @@ An actions file is a list of timestamped batches:
 ]
 ```
 
+Hiring and termination use the same file:
+
+```json
+[
+ {"time": "2026-10-13T06:00:00", "actions": [
+   {"type": "terminate", "employee": "E04", "lastDay": "2026-11-10"},
+   {"type": "hire", "requestId": "ct-1", "role": "technologist", "skills": ["XR", "CT"],
+    "rateCents": 4200, "contractedWeeklyMinutes": 960, "startDate": "2026-11-03",
+    "roster": {
+      "A": {"Tue": {"start": "11:30", "end": "20:00", "breaks": [["15:30", "16:00"]], "assignment": "R3",
+                    "covers": [{"room": "R1", "from": "16:15", "until": "20:00"}]},
+            "Wed": {"start": "11:30", "end": "20:00", "breaks": [["15:30", "16:00"]], "assignment": "R3", "covers": []}},
+      "B": {"Tue": {"start": "11:30", "end": "20:00", "breaks": [["15:30", "16:00"]], "assignment": "R3", "covers": []}}}}]}
+]
+```
+
+Weekdays left out of a rota week are days off; the two weeks alternate
+from the scenario's week A.
+
+(`testdata/golden/established-staffing.actions.json` is a complete one.)
+
 A saved session (`ctrl+s` in the game, or `-save`) records the scenario,
 seed and action batches with five digests (event log, ledger, actions,
 state, run). Loading it replays from scratch; a mismatch is reported, never
-silently accepted. Exit codes: 0 ok · 1 error · 2 invalid input · 3 replay
+silently accepted. This build writes `dreamteam.session/v2`. It still loads
+v1 files: those from earlier builds replay with their outcomes verified,
+and saving such a session writes a v2 file that keeps the v1 record as its
+verified prefix. Exit codes: 0 ok · 1 error · 2 invalid input · 3 replay
 failure · 4 golden mismatch · 5 incompatible.
 
-Golden references in `testdata/golden/` pin four runs; see its README for
-checking and (deliberately) regenerating them.
+Golden references in `testdata/golden/` pin four V0.1 runs and one V0.2
+hire-and-terminate run; see its README for checking and (deliberately)
+regenerating them.
 
 ## Development
 

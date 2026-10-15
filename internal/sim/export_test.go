@@ -32,7 +32,7 @@ type OrderInfo struct {
 
 var orderStateNames = [...]string{orderBooked: "booked", orderRecall: "recall", orderLost: "lost",
 	orderCancelled: "cancelled", orderVisit: "visit", orderNoShow: "no-show", orderLeft: "left", orderImaged: "imaged",
-	orderReported: "reported"}
+	orderReported: "reported", orderDisplacedLost: "displaced-lost"}
 
 // Orders lists every disclosed order (opening schedule included).
 func (w *World) Orders() []OrderInfo {
@@ -56,6 +56,10 @@ type ApptInfo struct {
 	BookedAt        simtime.Time
 	EndedAt         simtime.Time
 	Visit           int
+	// V0.2: behavioral attempt, replacement placement, the no-show lead
+	// basis and the confirmation flag.
+	Attempt, Placement, NoShowLead int64
+	Confirmed                      bool
 }
 
 // Appointments lists every appointment ever booked.
@@ -65,7 +69,8 @@ func (w *World) Appointments() []ApptInfo {
 		s := w.st.dem.days[a.day].rooms[a.room][a.slot]
 		out = append(out, ApptInfo{ID: apptID(i), Order: orderID(a.order), Exam: w.st.cfg.Catalog[w.st.dem.orders[a.order].exam].Code,
 			Room: a.room, Day: a.day, Span: s.Span, Cancelled: a.state == apptCancelled,
-			State: apptStateNames[a.state], BookedAt: a.bookedAt, EndedAt: a.endedAt, Visit: a.visit})
+			State: apptStateNames[a.state], BookedAt: a.bookedAt, EndedAt: a.endedAt, Visit: a.visit,
+			Attempt: a.attempt, Placement: a.placement, NoShowLead: a.noShowLead, Confirmed: a.confirmed})
 	}
 	return out
 }
@@ -235,7 +240,8 @@ type LineInfo struct {
 
 var entryKindNames = map[entryKind]string{entOpening: "opening", entRevenue: "revenue", entStudyCost: "study_cost",
 	entPayment: "payment", entSettle: "settle", entWages: "wages", entSalary: "salary", entFixed: "fixed",
-	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal", entGuarantee: "guarantee"}
+	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal", entGuarantee: "guarantee",
+	entRecruiting: "recruiting", entSeverance: "severance", entSeverancePay: "severance_pay"}
 
 // OpenGuarantee is the guaranteed pay provisioned this week and not yet
 // final (wages and benefits).
@@ -371,4 +377,52 @@ func (w *World) ClaimOrders() []string {
 		out = append(out, orderID(c.order))
 	}
 	return out
+}
+
+// DisplacementInfo is one practice-caused displacement record.
+type DisplacementInfo struct {
+	Appt, Order, Cause, Reason, Resolution, Replacement string
+	Actions                                             []int
+	At                                                  simtime.Time
+}
+
+// Displacements lists the displacement records in order.
+func (w *World) Displacements() []DisplacementInfo {
+	var out []DisplacementInfo
+	for _, x := range w.st.dem.displaced {
+		d := DisplacementInfo{Appt: apptID(x.Appt), Order: orderID(x.Order), Cause: x.Cause, Reason: x.Reason,
+			Resolution: x.Resolution, Actions: x.Actions, At: x.At}
+		if x.Replacement >= 0 {
+			d.Replacement = apptID(x.Replacement)
+		}
+		out = append(out, d)
+	}
+	return out
+}
+
+// OrderAnchor is an order's tolerance anchor (day index) and tolerance.
+func (w *World) OrderAnchor(id string) (anchor, tolerance int64) {
+	for i := range w.st.dem.orders {
+		if orderID(i) == id {
+			return w.st.dem.orders[i].anchor, w.st.dem.orders[i].tolerance
+		}
+	}
+	panic("no order " + id)
+}
+
+// RegistryLen is the number of employment records.
+func (w *World) RegistryLen() int { return len(w.st.staff) }
+
+// SlotStaffWords is the longest slot staff set (in 64-bit words, the
+// inline one included) over the materialized days.
+func (w *World) SlotStaffWords() int {
+	n := 0
+	for _, ds := range w.st.dem.days {
+		for r := range ds.rooms {
+			for _, s := range ds.rooms[r] {
+				n = max(n, 1+len(s.staff.hi))
+			}
+		}
+	}
+	return n
 }

@@ -526,6 +526,35 @@ previewed live ("Preview ✓ Shift extended: Morgan today until 19:15 (+1h
 header, "+1h 15m approved" in the staff panel and "+ext" in the staff
 summary. Fits 80×24.
 
+### 4.9b Staff screen (V0.2 Slice 2)
+
+`m` opens the staff screen: the V0.2 `hire` and `terminate` actions,
+submitted through the same `Apply` as everything else, with a live
+read-only preview (`PreviewStaffing`) of the cursor row.
+
+* **Hire** form (`↑↓` row, `←→` change, `enter` submits): the offer (the
+  fixed table: XR, CT, XR+CT, US, MR technologist, front desk), the pay
+  tier (standard or premium, with its rate and recruiting lead), a roster
+  pattern (day, late, Tuesday–Saturday or evening shifts in the offer's
+  room; the desk for front desk), the contract (30-minute steps; the
+  roster may not exceed it) and the start date (from the earliest the lead
+  allows).
+* **Terminate** rows: every hourly technologist and front desk employee not
+  already leaving, with the earliest lawful last day (`←→` later) and the
+  severance it would owe.
+* **Preview**: the validation message; guaranteed amounts (recruiting
+  fee, weekly guarantee, earliest exit cost, severance, contract pay to the
+  last day) apart from forecasts (estimates); a hire's training period,
+  productive date and the slots it would open; the bookings a termination
+  would displace, with a capacity-only provisional replacement each.
+  Nothing is allocated or changed by previewing.
+* **Staff** table: every employee with stage (recruiting, onboarding,
+  active, notice, terminated), contract, rate, start and independent dates,
+  training attended, last day and severance (due or paid).
+
+Fits 80×24 (the table is cut first). The dashboard hint bar and help list
+`m staff`.
+
 ### 4.10 Daily summary (end of day)
 
 Shown when `e` completes or the day ends with auto-pause on:

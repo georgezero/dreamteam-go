@@ -51,99 +51,57 @@ type StaffingConflict struct {
 	Start       simtime.Duration
 	Priority    Priority
 	Reason      string
+	appt        int
 }
 
 // CheckStaffing reports the booked appointments that a staffing change
 // would leave without qualified coverage, day by day in survivor order.
 // With no change it reports none: every booking was made against the
-// roster in force (V0.1 never takes capacity away).
+// roster in force (and a removal of coverage is reconciled when it is
+// committed, displace.go).
 func (w *World) CheckStaffing(ch StaffingChange) ([]StaffingConflict, error) {
 	st := w.st
 	if today := st.cal.DayIndex(w.eng.Now()); ch.From <= today {
 		return nil, fmt.Errorf("a staffing change starts after today (day %d), not day %d", today, ch.From)
 	}
-	cfg := *st.cfg
-	cfg.Employees = slices.Clone(st.cfg.Employees)
-	changed := map[int]bool{}
+	over := map[int]*EmployeeConfig{}
 	for _, id := range sortedKeys(ch.Rosters) {
-		i := slices.IndexFunc(cfg.Employees, func(e EmployeeConfig) bool { return e.ID == id })
+		i := st.findEmployee(id)
 		if i < 0 {
 			return nil, fmt.Errorf("unknown employee %q", id)
 		}
+		t := *st.emps[i].terms
 		ro := ch.Rosters[id]
-		if err := st.checkRoster(&cfg.Employees[i], ro); err != nil {
+		if err := st.checkRoster(&t, ro); err != nil {
 			return nil, fmt.Errorf("%s: %w", id, err)
 		}
-		cfg.Employees[i].Roster, changed[i] = ro, true
+		t.Roster, t.Alt = ro, [7]*ShiftTemplate{}
+		over[i] = &t
 	}
 	var out []StaffingConflict
 	for day := ch.From; day < int64(len(st.dem.days)); day++ {
-		out = append(out, st.checkDay(&cfg, changed, day)...)
-	}
-	return out, nil
-}
-
-// checkDay re-books day's appointments under cfg's rosters.
-func (st *state) checkDay(cfg *Config, changed map[int]bool, day int64) []StaffingConflict {
-	ds := st.dem.days[day]
-	type cand struct{ room, k, appt int }
-	var cands []cand
-	for r := range ds.rooms {
-		for k := range ds.rooms[r] {
-			if a := ds.rooms[r][k].appt; a >= 0 {
-				cands = append(cands, cand{r, k, a})
+		emps := st.dayTerms(day)
+		for i, t := range over {
+			if emps[i] == nil {
+				continue // not employed that day
+			}
+			if emps[i].Role == Trainee {
+				v := *emps[i]
+				v.Roster, v.Alt = t.Roster, t.Alt
+				emps[i] = &v
+				continue
+			}
+			emps[i] = t
+		}
+		plan := st.cfg.planOf(st.cal.Date(st.cal.StartOfDay(day)), emps)
+		for i, d := range st.ext[day] {
+			if k := plan.ByEmp[i]; k >= 0 && over[i] == nil {
+				plan.Shifts[k].To += d // approved extensions of unchanged shifts stand
 			}
 		}
+		out = append(out, st.survivors(day, plan)...)
 	}
-	if len(cands) == 0 {
-		return nil
-	}
-	plan := cfg.Plan(st.cal.Date(st.cal.StartOfDay(day)))
-	for i, d := range st.ext[day] {
-		if k := plan.ByEmp[i]; k >= 0 && !changed[i] {
-			plan.Shifts[k].To += d // approved extensions of unchanged shifts stand
-		}
-	}
-	cov := plan.Coverage()
-	tmp := &daySlots{segs: cov.Segments, rooms: make([][]slot, len(ds.rooms))}
-	for r := range ds.rooms {
-		tmp.rooms[r] = slices.Clone(ds.rooms[r])
-		for k := range tmp.rooms[r] {
-			tmp.rooms[r][k].appt = -1
-			st.coverSlot(&cov, r, &tmp.rooms[r][k])
-		}
-	}
-	slices.SortFunc(cands, func(a, b cand) int {
-		pa, pb := st.dem.orders[st.dem.appts[a.appt].order].priority, st.dem.orders[st.dem.appts[b.appt].order].priority
-		switch {
-		case pa != pb:
-			return int(pb) - int(pa)
-		case ds.rooms[a.room][a.k].From != ds.rooms[b.room][b.k].From:
-			return int(ds.rooms[a.room][a.k].From - ds.rooms[b.room][b.k].From)
-		case st.dem.appts[a.appt].bookedAt != st.dem.appts[b.appt].bookedAt:
-			return int(st.dem.appts[a.appt].bookedAt - st.dem.appts[b.appt].bookedAt)
-		}
-		return a.appt - b.appt
-	})
-	var out []StaffingConflict
-	for _, c := range cands {
-		s := &tmp.rooms[c.room][c.k]
-		why := ""
-		switch {
-		case s.why == slotUnstaffed:
-			why = ConflictUnstaffed
-		case s.why == slotNoSupervision:
-			why = ConflictNoSupervision
-		case !sharedFree(tmp, c.room, s):
-			why = ConflictShared
-		default:
-			s.appt = c.appt
-			continue
-		}
-		out = append(out, StaffingConflict{Appointment: apptID(c.appt), Day: day, Room: st.cfg.Rooms[c.room].ID,
-			Start: s.From, Priority: st.dem.orders[st.dem.appts[c.appt].order].priority, Reason: why})
-	}
-	return out
+	return out, nil
 }
 
 // checkRoster makes the structural checks a hypothetical roster needs to

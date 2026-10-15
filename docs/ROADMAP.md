@@ -24,7 +24,10 @@ sweep 2026-10-14 and Step 0B 2026-10-15 did not pass; Step 0C 2026-10-15, a
 revised staffing architecture, passes conditionally at ×1.30 demand with a
 ≈2.8% margin: CONDITIONAL GO, approved by the owner 2026-10-15, design §18).
 V0.2 is being implemented in slices; Slice 1, the employee contract and
-capacity foundation with no new action, is built (design §5.5).
+capacity foundation with no new action, is built (design §5.5); Slice 2,
+`hire` and `terminate` with practice-caused displacement and session v2, is
+built (design §5.7). Slices 3–5 (`set_roster`, `set_reading_allocation`,
+`contract_teleradiology`) remain.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

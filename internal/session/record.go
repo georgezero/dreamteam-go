@@ -30,9 +30,15 @@ import (
 // time through Apply — and checks every action result and the final
 // digests. No serialized world is trusted.
 
-// RecordSchema identifies the session file format. A different schema is
-// refused; fields are never reinterpreted.
-const RecordSchema = "dreamteam.session/v1"
+// RecordSchema identifies the session file format this build writes. It
+// reads it and v1 (record_v1.go); any other schema is refused, and fields
+// are never reinterpreted.
+//
+// v2 (V0.2 Slice 2) adds the V0.2 staffing actions (hire, terminate) and
+// their results (the employee ID a hire was given, the effective date),
+// atomic V0.2 batches, and the legacy prefix of a continued v1 session.
+// A V0.1 action and its result encode exactly as in v1.
+const RecordSchema = "dreamteam.session/v2"
 
 // Record is one saved session.
 type Record struct {
@@ -45,18 +51,53 @@ type Record struct {
 	Seed     int64          `json:"seed"`
 	// Times: simulation seconds since the scenario epoch, with the
 	// practice-local ISO time alongside for reading.
-	EpochDate string  `json:"epochDate"` // the calendar's day 0
-	StartSec  int64   `json:"startSec"`  // the takeover
-	Start     string  `json:"start"`
-	UntilSec  int64   `json:"untilSec"` // where the run was saved
-	Until     string  `json:"until"`
-	Batches   []Batch `json:"batches"`
-	Digests   Digests `json:"digests"`
-	Summary   Summary `json:"summary"`
+	EpochDate string `json:"epochDate"` // the calendar's day 0
+	StartSec  int64  `json:"startSec"`  // the takeover
+	Start     string `json:"start"`
+	UntilSec  int64  `json:"untilSec"` // where the run was saved
+	Until     string `json:"until"`
+	// Legacy (v2) is the v1 session this one continues: the v1 record
+	// verbatim, replayed first through the legacy path; Batches then holds
+	// only the batches after it.
+	Legacy  *LegacyPrefix `json:"legacy,omitempty"`
+	Batches []Batch       `json:"batches"`
+	Digests Digests       `json:"digests"`
+	Summary Summary       `json:"summary"`
 	// Checksum is the SHA-256 of the record's canonical JSON with this
 	// field empty: any change or damage to the file is detected.
 	Checksum string `json:"checksum"`
+
+	v1 json.RawMessage // a v1 record's canonical v1 encoding (decodeV1)
 }
+
+// LegacyPrefix is the v1 session a v2 record continues (V0.2_DESIGN §12).
+// The v1 record is embedded unchanged (its own checksum still holds) and
+// replayed in the legacy batch mode; its outcomes (log, ledger, action
+// digests and summary) are verified exactly, and, when its engine had
+// another state encoding, its state and run digests are not comparable.
+// Transition holds this build's digests at the end of the prefix, recorded
+// when the session was continued: a replay must reproduce them exactly
+// before the native batches run.
+type LegacyPrefix struct {
+	Schema     string          `json:"schema"`    // dreamteam.session/v1
+	Engine     string          `json:"engine"`    // the build that wrote it
+	Checksum   string          `json:"checksum"`  // its own checksum
+	BatchMode  string          `json:"batchMode"` // legacy_sequential: V0.1 actions applied one by one
+	LastBatch  int64           `json:"lastBatch"` // its last batch number (0: none)
+	UntilSec   int64           `json:"untilSec"`
+	Outcome    string          `json:"outcomeCompatibility"` // verified (outcomes) or exact (every digest)
+	State      string          `json:"stateCompatibility"`   // schema_changed or exact
+	Transition Digests         `json:"transition"`           // this build's digests at UntilSec
+	Record     json.RawMessage `json:"record"`
+}
+
+// Compatibility states.
+const (
+	CompatExact         = "exact"
+	CompatVerified      = "verified"
+	CompatSchemaChanged = "schema_changed"
+	batchModeLegacy     = "legacy_sequential"
+)
 
 // RecordScenario is the scenario a session ran: its identity and the
 // resolved file itself (after extends and presets), fingerprinted.
@@ -130,7 +171,9 @@ func (s *Session) summary() Summary {
 		Day: o.Day, Time: o.Time, CashCents: o.Finance.CashCents, ExamsSince: o.Flow.SinceStart.ExamsDone}
 }
 
-// Record builds the session's record at the current time.
+// Record builds the session's record at the current time. A session
+// continued from a v1 record keeps that record as its legacy prefix and
+// records only the batches after it.
 func (s *Session) Record() (*Record, error) {
 	if s.src == nil {
 		return nil, ErrUnsavable
@@ -144,9 +187,12 @@ func (s *Session) Record() (*Record, error) {
 		Scenario:  RecordScenario{ID: s.src.ID, Name: s.src.Name, Fingerprint: s.fp, Resolved: raw},
 		EpochDate: cal.Date(0).String(),
 		StartSec:  int64(s.w.StartTime()), Start: cal.ISO(s.w.StartTime()),
-		UntilSec: int64(s.Now()), Until: cal.ISO(s.Now()),
+		UntilSec: int64(s.Now()), Until: cal.ISO(s.Now()), Legacy: s.legacy,
 		Digests: s.Digests(), Summary: s.summary()}
 	for _, res := range s.w.ActionLog() {
+		if s.legacy != nil && res.Batch <= s.legacy.LastBatch {
+			continue // in the v1 prefix
+		}
 		if n := len(r.Batches); n == 0 || r.Batches[n-1].Batch != res.Batch {
 			at, err := cal.ParseISO(res.Time)
 			if err != nil {
@@ -283,22 +329,43 @@ func ReadRecord(path string) (*Record, error) {
 	return DecodeRecord(raw)
 }
 
-// DecodeRecord parses and checks a session record (see ReadRecord).
+// DecodeRecord parses and checks a session record (see ReadRecord): v2,
+// or v1 through its own strict reader.
 func DecodeRecord(raw []byte) (*Record, error) {
-	dec := json.NewDecoder(bytes.NewReader(raw))
-	dec.DisallowUnknownFields()
-	var r Record
-	if err := dec.Decode(&r); err != nil {
+	var head struct {
+		Schema string `json:"schema"`
+	}
+	if err := json.NewDecoder(bytes.NewReader(raw)).Decode(&head); err != nil {
 		return nil, fmt.Errorf("%w: cannot parse (%v; truncated?)", ErrCorrupt, err)
 	}
-	if err := dec.Decode(&struct{}{}); err != io.EOF {
-		return nil, fmt.Errorf("%w: data after the record", ErrCorrupt)
-	}
-	if r.Schema != RecordSchema {
-		return nil, fmt.Errorf("%w: schema %q, this build reads %q", ErrIncompatible, r.Schema, RecordSchema)
-	}
-	if want := r.checksum(); r.Checksum != want {
-		return nil, fmt.Errorf("%w: checksum %.12s… does not match the content (%.12s…)", ErrCorrupt, r.Checksum, want)
+	var r *Record
+	switch head.Schema {
+	case RecordSchemaV1:
+		v, err := decodeV1(raw)
+		if err != nil {
+			return nil, err
+		}
+		r = v
+	case RecordSchema:
+		dec := json.NewDecoder(bytes.NewReader(raw))
+		dec.DisallowUnknownFields()
+		r = &Record{}
+		if err := dec.Decode(r); err != nil {
+			return nil, fmt.Errorf("%w: cannot parse (%v; truncated?)", ErrCorrupt, err)
+		}
+		if err := dec.Decode(&struct{}{}); err != io.EOF {
+			return nil, fmt.Errorf("%w: data after the record", ErrCorrupt)
+		}
+		if want := r.checksum(); r.Checksum != want {
+			return nil, fmt.Errorf("%w: checksum %.12s… does not match the content (%.12s…)", ErrCorrupt, r.Checksum, want)
+		}
+		if r.Legacy != nil {
+			if _, err := r.prefix(); err != nil {
+				return nil, err
+			}
+		}
+	default:
+		return nil, fmt.Errorf("%w: schema %q, this build reads %q and %q", ErrIncompatible, head.Schema, RecordSchema, RecordSchemaV1)
 	}
 	f, err := scenario.Decode(r.Scenario.Resolved)
 	if err != nil {
@@ -311,7 +378,38 @@ func DecodeRecord(raw []byte) (*Record, error) {
 	if fp != r.Scenario.Fingerprint {
 		return nil, fmt.Errorf("%w: scenario fingerprint %.12s… does not match its content (%.12s…)", ErrCorrupt, r.Scenario.Fingerprint, fp)
 	}
-	return &r, nil
+	return r, nil
+}
+
+// prefix decodes and checks a v2 record's legacy prefix: an intact v1
+// record of the same scenario, seed and calendar, ending where the native
+// batches start.
+func (r *Record) prefix() (*Record, error) {
+	l := r.Legacy
+	p, err := decodeV1(l.Record)
+	if err != nil {
+		return nil, fmt.Errorf("legacy prefix: %w", err)
+	}
+	last := int64(0)
+	if n := len(p.Batches); n > 0 {
+		last = p.Batches[n-1].Batch
+	}
+	switch {
+	case l.Schema != RecordSchemaV1 || l.Engine != p.Engine || l.Checksum != p.Checksum || l.UntilSec != p.UntilSec || l.LastBatch != last:
+		return nil, fmt.Errorf("%w: legacy prefix description does not match its record", ErrCorrupt)
+	case l.BatchMode != batchModeLegacy:
+		return nil, fmt.Errorf("%w: legacy batch mode %q", ErrIncompatible, l.BatchMode)
+	case p.Scenario.Fingerprint != r.Scenario.Fingerprint || p.Seed != r.Seed || p.EpochDate != r.EpochDate || p.StartSec != r.StartSec:
+		return nil, fmt.Errorf("%w: legacy prefix is another run (scenario, seed or calendar)", ErrCorrupt)
+	case r.UntilSec < p.UntilSec:
+		return nil, fmt.Errorf("%w: the record ends before its legacy prefix", ErrCorrupt)
+	}
+	for _, b := range r.Batches {
+		if b.Batch <= last || b.AtSec < p.UntilSec {
+			return nil, fmt.Errorf("%w: batch %d is not after the legacy prefix", ErrCorrupt, b.Batch)
+		}
+	}
+	return p, nil
 }
 
 // ReplayOptions tune a replay.
@@ -337,17 +435,30 @@ type Report struct {
 	Replayed   Digests
 	RecSummary Summary
 	RepSummary Summary
-	// StateChanged is set when the record comes from a build with the
-	// earlier state encoding (dreamteam.state/v1): its outcomes (log,
+	// StateChanged is set when the record comes from a registered legacy
+	// build with another state encoding (record_v1.go): its outcomes (log,
 	// ledger, actions and summary) were verified exactly, and its state and
 	// run digests are not comparable with this build's (V0.2_DESIGN §12).
 	StateChanged bool
+	// Prefix is the replay of a continued record's v1 prefix (nil when
+	// there is none); the fields above then cover the native batches and
+	// the end of the run, verified exactly.
+	Prefix *Report
 }
 
-// stateV1Engine reports whether a build wrote the dreamteam.state/v1
-// encoding: every V0.1 build and the V0.2 Step 0 builds (0.2.0-dev.0.*).
-func stateV1Engine(engine string) bool {
-	return strings.HasPrefix(engine, "0.1.") || strings.HasPrefix(engine, "0.2.0-dev.0.")
+// Compatibility summarizes what the replay verified: native_exact (every
+// digest), legacy_outcomes_verified (a legacy record: outcomes exact,
+// state encoding changed), or, for a continued record, the prefix's and
+// the native part's, joined by "+".
+func (rep *Report) Compatibility() string {
+	own := "native_exact"
+	if rep.StateChanged {
+		own = "legacy_outcomes_verified"
+	}
+	if rep.Prefix != nil {
+		return "prefix:" + rep.Prefix.Compatibility() + "+" + own
+	}
+	return own
 }
 
 func (rep *Report) fail(format string, args ...any) {
@@ -358,6 +469,9 @@ func (rep *Report) fail(format string, args ...any) {
 // String is a readable report.
 func (rep *Report) String() string {
 	var b strings.Builder
+	if p := rep.Prefix; p != nil {
+		b.WriteString("v1 prefix: " + p.String())
+	}
 	if rep.OK && rep.StateChanged {
 		fmt.Fprintf(&b, "OK: %d batches, %d actions replayed; outcomes verified (log, ledger, actions, summary); "+
 			"state encoding changed since %s, so state and run digests are not compared (run now %.16s…)\n",
@@ -365,7 +479,11 @@ func (rep *Report) String() string {
 		return b.String()
 	}
 	if rep.OK {
-		fmt.Fprintf(&b, "OK: %d batches, %d actions replayed; digests match (run %.16s…)\n", rep.Batches, rep.Actions, rep.Replayed.Run)
+		what := "batches"
+		if rep.Prefix != nil {
+			what = "native batches after it"
+		}
+		fmt.Fprintf(&b, "OK: %d %s, %d actions replayed; digests match (run %.16s…)\n", rep.Batches, what, rep.Actions, rep.Replayed.Run)
 		return b.String()
 	}
 	fmt.Fprintf(&b, "MISMATCH (recorded by %s, replayed by %s):\n", rep.Engine, version.Number)
@@ -380,18 +498,125 @@ func (rep *Report) String() string {
 // applied at its time through Apply (rejections and no-ops too), then the
 // clock to the saved time. It checks each action result and the final
 // digests and returns the session at the saved time. err is ErrMismatch
-// (with the report) when anything differs.
+// (with the report) when anything differs; nothing is ever accepted
+// silently.
+//
+// Engines: a record from this build must match every digest. A record
+// from a registered legacy build (record_v1.go) must match every outcome
+// (action results, log, ledger and action digests, summary); its state
+// and run digests are compared only when they agree, and otherwise
+// reported as StateChanged. Any other engine is refused unless the
+// mismatch is allowed, and then still needs every digest to match.
+//
+// A v2 record continuing a v1 session first replays its v1 prefix that
+// way, checks this build's digests at the prefix end against those it
+// recorded, then applies the native batches and requires every digest.
 func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
+	if r.Legacy != nil {
+		return replayContinued(r, opts)
+	}
 	// OK only once everything has been checked (fail sets it false; an
 	// early refusal leaves it false too).
+	rep := &Report{OK: true, Engine: r.Engine, Batches: len(r.Batches), Recorded: r.Digests, RecSummary: r.Summary}
+	// Only v1 records come from legacy builds (they never wrote v2).
+	_, legacy := legacyState(r.Engine)
+	legacy = legacy && r.Engine != version.Number && r.Schema == RecordSchemaV1
+	if r.Engine != version.Number && !legacy && !opts.AllowEngineMismatch {
+		rep.OK = false
+		return nil, rep, fmt.Errorf("%w: recorded by %s, this is %s (replay with the engine mismatch allowed to compare outcomes)",
+			ErrIncompatible, r.Engine, version.Number)
+	}
+	if r.Schema == RecordSchemaV1 {
+		for _, b := range r.Batches {
+			for _, a := range b.Actions {
+				if !legacyOnly(a) {
+					rep.fail("batch %d: a %s action in a v1 record", b.Batch, a.Type)
+					return nil, rep, ErrMismatch
+				}
+			}
+		}
+	}
+	if !checkStructure(r, rep) {
+		return nil, rep, ErrMismatch
+	}
+	s, err := replaySession(r, rep)
+	if err != nil {
+		return s, rep, err
+	}
+	if err := applyBatches(s, r.Batches, opts, rep, r.Schema == RecordSchemaV1); err != nil {
+		return s, rep, err
+	}
+	if err := finish(s, r, opts, rep, legacy); err != nil {
+		return s, rep, err
+	}
+	s.saved = savePoint{at: s.Now(), actions: len(s.w.ActionLog()), valid: true}
+	if r.Schema == RecordSchemaV1 {
+		s.legacy = newPrefix(r, rep, s)
+	}
+	return s, rep, nil
+}
+
+// newPrefix describes a replayed v1 record as the legacy prefix of the
+// session continuing it.
+func newPrefix(r *Record, rep *Report, s *Session) *LegacyPrefix {
+	l := &LegacyPrefix{Schema: RecordSchemaV1, Engine: r.Engine, Checksum: r.Checksum, BatchMode: batchModeLegacy,
+		UntilSec: r.UntilSec, Outcome: CompatExact, State: CompatExact, Transition: s.Digests(), Record: r.v1}
+	if n := len(r.Batches); n > 0 {
+		l.LastBatch = r.Batches[n-1].Batch
+	}
+	if rep.StateChanged {
+		l.Outcome, l.State = CompatVerified, CompatSchemaChanged
+	}
+	return l
+}
+
+// replayContinued replays a v2 record with a legacy prefix.
+func replayContinued(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	rep := &Report{OK: true, Engine: r.Engine, Batches: len(r.Batches), Recorded: r.Digests, RecSummary: r.Summary}
 	if r.Engine != version.Number && !opts.AllowEngineMismatch {
 		rep.OK = false
 		return nil, rep, fmt.Errorf("%w: recorded by %s, this is %s (replay with the engine mismatch allowed to compare outcomes)",
 			ErrIncompatible, r.Engine, version.Number)
 	}
-	// Structure first: batches in time and number order, a result per
-	// action, the end after the last batch.
+	p, err := r.prefix()
+	if err != nil {
+		rep.OK = false
+		return nil, rep, err
+	}
+	s, prep, err := Replay(p, ReplayOptions{AllowEngineMismatch: true, Step: opts.Step, Noise: opts.Noise})
+	rep.Prefix = prep
+	if err != nil {
+		rep.fail("legacy prefix (recorded by %s): %v", p.Engine, err)
+		return s, rep, ErrMismatch
+	}
+	l := r.Legacy
+	want := CompatExact
+	if prep.StateChanged {
+		want = CompatVerified
+	}
+	if l.Outcome != want {
+		rep.fail("legacy prefix: recorded as %s, replay found %s", l.Outcome, want)
+	}
+	if got := s.Digests(); got != l.Transition {
+		rep.fail("transition digests at the prefix end: recorded %+v, replay gave %+v", l.Transition, got)
+	}
+	if !checkStructure(r, rep) || !rep.OK {
+		return s, rep, ErrMismatch
+	}
+	if err := applyBatches(s, r.Batches, opts, rep, false); err != nil {
+		return s, rep, err
+	}
+	if err := finish(s, r, opts, rep, false); err != nil {
+		return s, rep, err
+	}
+	s.legacy = l
+	s.saved = savePoint{at: s.Now(), actions: len(s.w.ActionLog()), valid: true}
+	return s, rep, nil
+}
+
+// checkStructure checks batches in time and number order, a result per
+// action, and the end after the last batch.
+func checkStructure(r *Record, rep *Report) bool {
 	for i, b := range r.Batches {
 		switch {
 		case i > 0 && (b.AtSec < r.Batches[i-1].AtSec || b.Batch <= r.Batches[i-1].Batch):
@@ -402,22 +627,25 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 			rep.fail("batch %d at %s is outside the run (%s to %s)", b.Batch, b.Time, r.Start, r.Until)
 		}
 	}
-	if !rep.OK {
-		return nil, rep, ErrMismatch
-	}
+	return rep.OK
+}
+
+// replaySession builds the recorded scenario's session at its takeover and
+// checks the record's times against its calendar.
+func replaySession(r *Record, rep *Report) (*Session, error) {
 	f, err := scenario.Decode(r.Scenario.Resolved)
 	if err != nil {
 		rep.OK = false
-		return nil, rep, fmt.Errorf("%w: embedded scenario: %v", ErrCorrupt, err)
+		return nil, fmt.Errorf("%w: embedded scenario: %v", ErrCorrupt, err)
 	}
 	if r.Scenario.ID != f.ID || r.Scenario.Name != f.Name {
 		rep.fail("scenario identity %q (%s) does not match its content %q (%s)", r.Scenario.ID, r.Scenario.Name, f.ID, f.Name)
-		return nil, rep, ErrMismatch
+		return nil, ErrMismatch
 	}
 	s, err := FromFile(f, r.Seed)
 	if err != nil {
 		rep.OK = false
-		return nil, rep, err
+		return nil, err
 	}
 	cal := s.Calendar()
 	// Every readable copy of a time agrees with the seconds it describes,
@@ -437,33 +665,48 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 		}
 	}
 	if !rep.OK {
-		return s, rep, ErrMismatch
+		return s, ErrMismatch
 	}
 	if got := cal.Date(0).String(); got != r.EpochDate || int64(s.w.StartTime()) != r.StartSec {
 		rep.fail("calendar: epoch %s, takeover %s; recorded %s, %s", got, cal.ISO(s.w.StartTime()), r.EpochDate, r.Start)
-		return s, rep, ErrMismatch
+		return s, ErrMismatch
 	}
-	advance := func(to simtime.Time) {
-		for now := s.Now(); now < to; {
-			next := to
-			if opts.Step > 0 {
-				next = min(to, now.Add(opts.Step))
-			}
-			if opts.Noise != nil {
-				opts.Noise(s, next)
-			}
-			s.w.Engine().RunUntil(next, nil)
-			now = next
+	return s, nil
+}
+
+// advanceTo moves s to time to, in chunks of opts.Step if set.
+func advanceTo(s *Session, to simtime.Time, opts ReplayOptions) {
+	for now := s.Now(); now < to; {
+		next := to
+		if opts.Step > 0 {
+			next = min(to, now.Add(opts.Step))
 		}
+		if opts.Noise != nil {
+			opts.Noise(s, next)
+		}
+		s.w.Engine().RunUntil(next, nil)
+		now = next
 	}
-	for _, b := range r.Batches {
+}
+
+// applyBatches applies each batch at its time and compares its results.
+// A v1 record's batches (legacy) apply with V0.1 semantics: a V0.2 type
+// was an unknown action when it was written.
+func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, legacy bool) error {
+	cal := s.Calendar()
+	for _, b := range batches {
 		at := simtime.Time(b.AtSec)
 		if at < s.Now() {
 			rep.fail("batch %d at %s is before the clock (%s): batches out of order", b.Batch, b.Time, cal.ISO(s.Now()))
-			return s, rep, ErrMismatch
+			return ErrMismatch
 		}
-		advance(at)
-		got := s.Apply(b.Actions...)
+		advanceTo(s, at, opts)
+		var got []api.ActionResult
+		if legacy {
+			got = s.w.ApplyLegacy(b.Actions)
+		} else {
+			got = s.Apply(b.Actions...)
+		}
 		rep.Actions += len(got)
 		if !reflect.DeepEqual(got, b.Results) {
 			for i := range b.Results {
@@ -477,14 +720,20 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 				}
 			}
 			rep.RepSummary = s.summary() // where the replay stood
-			return s, rep, ErrMismatch
+			return ErrMismatch
 		}
 	}
+	return nil
+}
+
+// finish runs to the saved time and compares the summary and digests;
+// legacy allows another state encoding once every outcome matched.
+func finish(s *Session, r *Record, opts ReplayOptions, rep *Report, legacy bool) error {
 	if simtime.Time(r.UntilSec) < s.Now() {
 		rep.fail("saved time %s is before the last batch", r.Until)
-		return s, rep, ErrMismatch
+		return ErrMismatch
 	}
-	advance(simtime.Time(r.UntilSec))
+	advanceTo(s, simtime.Time(r.UntilSec), opts)
 	rep.Replayed, rep.RepSummary = s.Digests(), s.summary()
 	if rep.RepSummary != r.Summary {
 		rep.fail("summary: recorded %+v, replayed %+v", r.Summary, rep.RepSummary)
@@ -497,9 +746,8 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 			rep.fail("%s digest: recorded %.16s…, replayed %.16s…", c.name, c.rec, c.got)
 		}
 	}
-	// A record from a build with the v1 state encoding: once its outcomes
+	// A record from a build with another state encoding: once its outcomes
 	// are verified, its state and run digests cannot be (another encoding).
-	legacy := r.Engine != version.Number && stateV1Engine(r.Engine)
 	if rep.OK && legacy && (r.Digests.State != rep.Replayed.State || r.Digests.Run != rep.Replayed.Run) {
 		rep.StateChanged = true
 	} else {
@@ -512,10 +760,9 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 		}
 	}
 	if !rep.OK {
-		return s, rep, ErrMismatch
+		return ErrMismatch
 	}
-	s.saved = savePoint{at: s.Now(), actions: len(s.w.ActionLog()), valid: true}
-	return s, rep, nil
+	return nil
 }
 
 // Load reads, checks and replays a session file, returning the session at

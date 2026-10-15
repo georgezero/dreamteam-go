@@ -29,7 +29,10 @@ const (
 )
 
 type employee struct {
+	// cfg is the employee as working today (a trainee's training view in
+	// onboarding); terms are the employee's own terms (employment.go).
 	cfg     *EmployeeConfig
+	terms   *EmployeeConfig
 	shift   int // index into state.plan.Shifts; -1 when off today
 	status  empStatus
 	done    bool // today's shift has ended and they went home
@@ -93,6 +96,10 @@ func (st *state) materialize(e *Engine, i int) {
 	emp := &st.emps[i]
 	emp.gen++
 	emp.shift = st.plan.ByEmp[i]
+	emp.cfg = emp.terms
+	if c := st.plan.emps[i]; c != nil {
+		emp.cfg = c
+	}
 	emp.status, emp.done, emp.reading = offDuty, false, false
 	emp.task, emp.taskVisit, emp.taskStudy, emp.over, emp.held, emp.heldRooms = taskNone, -1, -1, false, false, nil
 	emp.readFrom, emp.blockEndAt, emp.readDebt = 0, 0, 0
@@ -242,6 +249,9 @@ func (st *state) goOff(e *Engine, i int) {
 	apprCost := st.overtimeCost(emp, paid-(ot-appr), appr)
 	st.payWages(i, paid)
 	emp.weekPaid += paid
+	if emp.cfg.Role == Trainee {
+		st.staff[i].Trained += paid
+	}
 	emp.otToday += ot
 	emp.status, emp.done, emp.reading, emp.held, emp.over = offDuty, true, false, false, false
 	text := emp.cfg.Name + " off duty"
@@ -309,6 +319,9 @@ func (st *state) techStaffs(i, r int, clock simtime.Duration) bool {
 
 // describe summarizes a shift for the log: "XR, covers CT until 11:30".
 func (st *state) describe(emp *employee, s *Shift) string {
+	if emp.cfg.Role == Trainee {
+		return "training (paid, no patient capacity) · until " + simtime.FormatClock(s.To)
+	}
 	var parts []string
 	switch s.Assignment {
 	case AssignDesk:
@@ -546,13 +559,14 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 	}
 	for i := range st.emps {
 		emp := &st.emps[i]
-		x := api.Employee{ID: emp.cfg.ID, Name: emp.cfg.Name, Role: string(emp.cfg.Role),
-			Skills: slices.Clone(emp.cfg.Skills), Status: api.StaffOff, SiteBP: emp.cfg.SiteAllocationBP,
+		t := emp.terms
+		x := api.Employee{ID: t.ID, Name: t.Name, Role: string(t.Role),
+			Skills: slices.Clone(t.Skills), Status: api.StaffOff, SiteBP: t.SiteAllocationBP,
 			Rooms: staffing[i], Held: emp.held, OvertimeMin: int64(st.overtimeNow(i, now) / simtime.Minute)}
 		x.WeekPaidMin = int64(emp.weekPaid / simtime.Minute)
 		st.observeEmployment(&x, i)
-		if emp.cfg.Pay == Hourly {
-			x.HourlyCents = emp.cfg.RateCents
+		if t.Pay == Hourly {
+			x.HourlyCents = t.RateCents
 		}
 		if emp.shift >= 0 {
 			s := &st.plan.Shifts[emp.shift]
@@ -576,6 +590,9 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 				}
 			case available:
 				x.Status, x.EndsAt = api.StaffOnDuty, simtime.FormatClock(s.To)
+				if emp.cfg.Role == Trainee {
+					x.Status = api.StaffTraining
+				}
 				if emp.cfg.Role == Radiologist {
 					x.Status = api.StaffOtherDuties
 					if emp.reading && !emp.over {

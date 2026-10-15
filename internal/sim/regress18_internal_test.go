@@ -36,14 +36,14 @@ func testDay(segs []Segment) *daySlots {
 				if seg.To <= s.From || seg.From >= s.To {
 					continue
 				}
-				var here uint64
+				var here empSet
 				for _, e := range seg.Rooms[r] {
-					here |= 1 << uint(e)
+					here = here.with(e)
 				}
-				s.staff |= here
+				s.staff = s.staff.union(here)
 				for r2 := range seg.Rooms {
 					for _, e := range seg.Rooms[r2] {
-						if r2 != r && here&(1<<uint(e)) != 0 {
+						if r2 != r && here.has(e) {
 							s.shared = true
 						}
 					}
@@ -130,20 +130,28 @@ func TestRegress18SharedStaffFeasibility(t *testing.T) {
 // Every flowCounts field is folded by add and negated by scale: a counter
 // missing from either would silently vanish from closed days or periods.
 func TestRegress18FlowCountsFieldsFolded(t *testing.T) {
+	// Integer fields, and each element of array fields (V0.2: the
+	// displacement counters), get distinct values.
 	var g flowCounts
 	v := reflect.ValueOf(&g).Elem()
+	n := int64(0)
 	for i := 0; i < v.NumField(); i++ {
-		f := v.Field(i)
-		reflect.NewAt(f.Type(), unsafe.Pointer(f.UnsafeAddr())).Elem().SetInt(int64(i + 1))
+		f := reflect.NewAt(v.Field(i).Type(), unsafe.Pointer(v.Field(i).UnsafeAddr())).Elem()
+		if f.Kind() == reflect.Array {
+			for k := 0; k < f.Len(); k++ {
+				n++
+				f.Index(k).SetInt(n)
+			}
+			continue
+		}
+		n++
+		f.SetInt(n)
 	}
 	var f flowCounts
 	f.add(&g)
 	f.add(&g)
 	f.sub(&g)
-	fv := reflect.ValueOf(f)
-	for i := 0; i < fv.NumField(); i++ {
-		if got := fv.Field(i).Int(); got != int64(i+1) {
-			t.Errorf("flowCounts.%s: add/sub gives %d, want %d", fv.Type().Field(i).Name, got, i+1)
-		}
+	if f != g {
+		t.Errorf("flowCounts add/sub: got %+v, want %+v", f, g)
 	}
 }

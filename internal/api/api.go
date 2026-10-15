@@ -105,6 +105,7 @@ const (
 	StaffReading     = "reading"      // radiologist reading a study now
 	StaffOtherDuties = "other_duties" // radiologist on shift, outside site reading blocks
 	StaffReadingFree = "read_ready"   // radiologist in a site block, not reading (worklist empty or nothing fits)
+	StaffTraining    = "training"     // V0.2: a new hire in onboarding, on a paid training shift (no patient capacity)
 )
 
 // Employee is one staff member's observable status.
@@ -148,6 +149,42 @@ type Employee struct {
 	ContractInferred bool   `json:"contractInferred,omitempty"`
 	GuaranteeCents   int64  `json:"guaranteeCents,omitempty"`
 	SeveranceCents   int64  `json:"severanceCents,omitempty"`
+	// Hired (V0.2 hire): the start date, the first day of independent
+	// work, the offer and its recruiting fee, training required and
+	// attended. Leaving (V0.2 terminate): the last day and the severance
+	// recognized, with its payday.
+	Hired   *HireInfo `json:"hired,omitempty"`
+	Leaving *ExitInfo `json:"leaving,omitempty"`
+}
+
+// Employment stages (V0.2): the display stage; notice overlays the
+// service stage (recruiting, onboarding or active) until the last day.
+const (
+	EmploymentRecruiting = "recruiting"
+	EmploymentOnboarding = "onboarding"
+	EmploymentActive     = "active"
+	EmploymentNotice     = "notice"
+	EmploymentTerminated = "terminated"
+)
+
+// HireInfo is a hired employee's lifecycle.
+type HireInfo struct {
+	RequestID          string `json:"requestId"`
+	StartDate          string `json:"startDate"`
+	ProductiveDate     string `json:"productiveDate"` // first day of independent work
+	ServiceStage       string `json:"serviceStage"`
+	Offer              string `json:"offer"` // standard or premium pay tier
+	RecruitingFeeCents int64  `json:"recruitingFeeCents"`
+	TrainingMin        int64  `json:"trainingMin"`
+	TrainedMin         int64  `json:"trainedMin"`
+}
+
+// ExitInfo is an accepted termination.
+type ExitInfo struct {
+	LastDay         string `json:"lastDay"`
+	SeveranceCents  int64  `json:"severanceCents"`
+	SeverancePayday string `json:"severancePayday"`
+	SeverancePaid   bool   `json:"severancePaid"`
 }
 
 // Desk coverage levels.
@@ -371,6 +408,7 @@ const (
 	PatientMissed      = "missed"
 	PatientNoShow      = "no_show"
 	PatientRescheduled = "rescheduled"
+	PatientDisplaced   = "displaced" // V0.2: the practice took the appointment's coverage away
 	PatientLeft        = "left"
 	PatientSentToBook  = "booked_later" // walk-in given an appointment instead
 	PatientLost        = "lost"
@@ -520,10 +558,13 @@ type Finance struct {
 	// CashHistory is actual end-of-day cash for up to the last 30 days,
 	// oldest first; today's entry is the current balance. The takeover
 	// capital (Opening.AdjustmentCents) appears once, on the takeover day.
-	CashHistory  []DayAmount    `json:"cashHistory"`
-	NextPayroll  Obligation     `json:"nextPayroll"`  // next payday and the payroll accrued so far
-	NextPayables Obligation     `json:"nextPayables"` // next 1st of the month and the payables accrued so far
-	Accounts     []Account      `json:"accounts"`     // trial balance
+	CashHistory  []DayAmount `json:"cashHistory"`
+	NextPayroll  Obligation  `json:"nextPayroll"`  // next payday and the payroll accrued so far
+	NextPayables Obligation  `json:"nextPayables"` // next 1st of the month and the payables accrued so far
+	// SeveranceDue (V0.2) lists severance recognized and not yet paid, by
+	// payday (each paid on the first payday after the last day).
+	SeveranceDue []Obligation   `json:"severanceDue,omitempty"`
+	Accounts     []Account      `json:"accounts"` // trial balance
 	BalanceSheet BalanceSheet   `json:"balanceSheet"`
 	Opening      OpeningState   `json:"opening"`
 	Financing    Financing      `json:"financing"`
@@ -554,9 +595,15 @@ type FinancePeriod struct {
 	SuppliesCents  int64 `json:"suppliesCents"`
 	ITCents        int64 `json:"itCents"`
 	BillingCents   int64 `json:"billingCents"`
-	// The same expenses by behavior: labor (wages + benefits), fixed
-	// (monthly costs accrued daily) and variable (per-study supplies and IT,
-	// billing fees).
+	// V0.2 staffing changes: recruiting fees (at hire acceptance) and
+	// severance with its benefits (at termination acceptance). Omitted
+	// when zero, as in every V0.1 run.
+	RecruitingCents int64 `json:"recruitingCents,omitempty"`
+	SeveranceCents  int64 `json:"severanceCents,omitempty"`
+	// The same expenses by behavior: labor (wages + benefits, and
+	// severance), fixed (monthly costs accrued daily) and variable
+	// (per-study supplies and IT, billing fees). Recruiting fees are in
+	// none of the three.
 	LaborCents            int64 `json:"laborCents"`
 	FixedCents            int64 `json:"fixedCents"`
 	VariableCents         int64 `json:"variableCents"`
@@ -601,6 +648,7 @@ type BalanceSheet struct {
 	AssetsCents             int64 `json:"assetsCents"`
 	PayablesCents           int64 `json:"payablesCents"`
 	AccruedPayrollCents     int64 `json:"accruedPayrollCents"`
+	SeverancePayableCents   int64 `json:"severancePayableCents,omitempty"` // V0.2: recognized, not yet paid
 	LiabilitiesCents        int64 `json:"liabilitiesCents"`
 	OpeningCapitalCents     int64 `json:"openingCapitalCents"`
 	HistoryEarningsCents    int64 `json:"historyEarningsCents"`
@@ -845,6 +893,28 @@ type PeriodMetrics struct {
 	Workforce       WorkforceMetrics `json:"workforce"`
 	Alerts          AlertCounts      `json:"alerts"`
 	Actions         ActionCounts     `json:"actions"`
+	// Displacement (V0.2) is present once the practice has displaced a
+	// booked patient in the period.
+	Displacement *DisplacementMetrics `json:"displacement,omitempty"`
+}
+
+// DisplacementMetrics count practice-caused displacements (V0.2: a
+// staffing change took a booked appointment's coverage away) at the
+// decision that caused them — never patient cancellations or no-shows, and
+// apart from booking losses. Events counts displaced appointments; Orders
+// the orders displaced for the first time and Repeated those displaced
+// again; each resolves at once as Rebooked or lost (NoFeasibleSlot: no
+// slot in the horizon; Declined: none within the patient's tolerance of
+// the original wanted date). WalkInOrigin counts the events of walk-in
+// orders, which are also in the totals.
+type DisplacementMetrics struct {
+	Events         int `json:"events"`
+	Orders         int `json:"orders"`
+	Repeated       int `json:"repeated"`
+	Rebooked       int `json:"rebooked"`
+	NoFeasibleSlot int `json:"noFeasibleSlot"`
+	Declined       int `json:"declined"`
+	WalkInOrigin   int `json:"walkInOrigin"`
 }
 
 // ActionCounts are the actions attempted in a period.
@@ -891,12 +961,15 @@ type ModalityDemandMetrics struct {
 // booked slot time over bookable slot time (slots a technologist, and for
 // contrast an on-site radiologist, was rostered for).
 type ApptMetrics struct {
-	Scheduled   int   `json:"scheduled"`
-	Cancelled   int   `json:"cancelled"`
-	Arrived     int   `json:"arrived"`
-	NoShows     int   `json:"noShows"`
-	Missed      int   `json:"missed"` // of NoShows, not yet final
-	Rescheduled int   `json:"rescheduled"`
+	Scheduled   int `json:"scheduled"`
+	Cancelled   int `json:"cancelled"`
+	Arrived     int `json:"arrived"`
+	NoShows     int `json:"noShows"`
+	Missed      int `json:"missed"` // of NoShows, not yet final
+	Rescheduled int `json:"rescheduled"`
+	// Displaced (V0.2): taken away by a staffing change; neither a
+	// cancellation nor a no-show, and outside both rates' denominators.
+	Displaced   int   `json:"displaced,omitempty"`
 	NoShowRate  Ratio `json:"noShowRate"`
 	CancelRate  Ratio `json:"cancelRate"`
 	BookableSec int64 `json:"bookableSec"`
@@ -1156,6 +1229,8 @@ type WindowMoney struct {
 	ARChangeCents             int64 `json:"arChangeCents"`
 	APChangeCents             int64 `json:"apChangeCents"`
 	PayrollChangeCents        int64 `json:"payrollChangeCents"`
+	// V0.2: severance recognized less severance paid (omitted when zero).
+	SeverancePayableChangeCents int64 `json:"severancePayableChangeCents,omitempty"`
 
 	CashEndCents   int64 `json:"cashEndCents"`
 	MinCashCents   int64 `json:"minCashCents"`
@@ -1169,6 +1244,10 @@ const (
 	ActExtendShift       = "extend_shift"
 	ActSetWalkInPolicy   = "set_walkin_policy"
 	ActSetWorklistPolicy = "set_worklist_policy"
+	// V0.2 staffing actions (V0.2_DESIGN §6): a batch containing one holds
+	// only V0.2 actions and is atomic.
+	ActHire      = "hire"
+	ActTerminate = "terminate"
 )
 
 // Walk-in policies.
@@ -1192,7 +1271,10 @@ const (
 
 // Action is one decision. Fields by type: extend_shift — Employee (ID),
 // Minutes and optionally Date; set_walkin_policy — Policy and, for accept_until, Cutoff
-// ("HH:MM"); set_worklist_policy — Policy.
+// ("HH:MM"); set_worklist_policy — Policy. V0.2: hire — RequestID, Role,
+// Skills, RateCents, ContractedWeeklyMinutes, Roster, StartDate;
+// terminate — Employee, LastDay. Fields of other types are omitted, so a
+// V0.1 action encodes exactly as before.
 type Action struct {
 	Type     string `json:"type"`
 	Employee string `json:"employee,omitempty"`
@@ -1203,6 +1285,53 @@ type Action struct {
 	Date   string `json:"date,omitempty"`
 	Policy string `json:"policy,omitempty"`
 	Cutoff string `json:"cutoff,omitempty"`
+
+	RequestID               string   `json:"requestId,omitempty"`
+	Role                    string   `json:"role,omitempty"`
+	Skills                  []string `json:"skills,omitempty"`
+	RateCents               int64    `json:"rateCents,omitempty"`
+	ContractedWeeklyMinutes int64    `json:"contractedWeeklyMinutes,omitempty"`
+	Roster                  *Roster  `json:"roster,omitempty"`
+	StartDate               string   `json:"startDate,omitempty"`
+	LastDay                 string   `json:"lastDay,omitempty"` // terminate: inclusive
+}
+
+// Roster is a hire's two-week rota (V0.2_DESIGN §6.2): one shift or none
+// per weekday in rota weeks A and B, anchored to the scenario's week A.
+type Roster struct {
+	A Week `json:"A"`
+	B Week `json:"B"`
+}
+
+// Week is one rota week: a shift or null for every weekday.
+type Week struct {
+	Mon *Shift `json:"Mon"`
+	Tue *Shift `json:"Tue"`
+	Wed *Shift `json:"Wed"`
+	Thu *Shift `json:"Thu"`
+	Fri *Shift `json:"Fri"`
+	Sat *Shift `json:"Sat"`
+	Sun *Shift `json:"Sun"`
+}
+
+// Days returns the week's shifts Monday first.
+func (w *Week) Days() [7]*Shift { return [7]*Shift{w.Mon, w.Tue, w.Wed, w.Thu, w.Fri, w.Sat, w.Sun} }
+
+// Shift is one rostered shift: "HH:MM" times, unpaid breaks inside it, the
+// assignment (a room ID, or "desk") and cover windows in other rooms.
+type Shift struct {
+	Start      string      `json:"start"`
+	End        string      `json:"end"`
+	Breaks     [][2]string `json:"breaks"`
+	Assignment string      `json:"assignment"`
+	Covers     []Cover     `json:"covers"`
+}
+
+// Cover is a window in which a technologist also staffs another room.
+type Cover struct {
+	Room  string `json:"room"`
+	From  string `json:"from"`
+	Until string `json:"until"`
 }
 
 // Result codes other than rejections.
@@ -1223,6 +1352,10 @@ type ActionResult struct {
 	OK      bool   `json:"ok"`
 	Code    string `json:"code"`
 	Message string `json:"message"`
+	// V0.2 actions: the employee ID a hire was given, and when the change
+	// takes effect (the start date, or the first day after the last day).
+	EmployeeID  string `json:"employeeId,omitempty"`
+	EffectiveAt string `json:"effectiveAt,omitempty"`
 }
 
 // ActionLog counts every action attempted and lists the latest.
@@ -1261,4 +1394,86 @@ type Policies struct {
 	WalkIn       string `json:"walkIn"`
 	WalkInCutoff string `json:"walkInCutoff,omitempty"` // accept_until: "HH:MM"
 	Worklist     string `json:"worklist"`
+}
+
+// StaffingPreview is the read-only preview of a V0.2 staffing batch
+// (V0.2_DESIGN §6.5): what Apply would decide now, and what is known of
+// its consequences. Nothing is allocated (a hire has no ID until it is
+// committed) and nothing hidden is used: potential displacements are exact
+// under the submitted coverage, but whether a displaced patient accepts a
+// replacement is not known until commit — the provisional replacement
+// shown is the earliest feasible slot by capacity alone, as if every
+// patient accepted. Guaranteed are contractual amounts; Forecast are
+// estimates, labelled as such.
+type StaffingPreview struct {
+	AsOf          string                `json:"asOf"`
+	OK            bool                  `json:"ok"`
+	Results       []ActionResult        `json:"results"`
+	Hires         []HirePreview         `json:"hires,omitempty"`
+	Terminations  []TerminationPreview  `json:"terminations,omitempty"`
+	Displacements []DisplacementPreview `json:"displacements,omitempty"`
+	Guaranteed    []MoneyLine           `json:"guaranteed,omitempty"`
+	Forecast      []MoneyLine           `json:"forecast,omitempty"`
+}
+
+// HirePreview is a valid hire's terms and timeline.
+type HirePreview struct {
+	RequestID      string `json:"requestId"`
+	Offer          string `json:"offer"` // "XR+CT technologist"
+	Tier           string `json:"tier"`  // standard or premium
+	RateCents      int64  `json:"rateCents"`
+	LeadDays       int64  `json:"leadDays"`
+	ContractMin    int64  `json:"contractMin"`
+	RosterMinA     int64  `json:"rosterMinA"` // net of breaks, per rota week
+	RosterMinB     int64  `json:"rosterMinB"`
+	StartDate      string `json:"startDate"`
+	ProductiveDate string `json:"productiveDate"` // first day of independent work
+	TrainingMin    int64  `json:"trainingMin"`
+	TrainingDays   int64  `json:"trainingDays"` // calendar days from start to productive
+	// OpensSlots counts template slots within today's booking horizon that
+	// become bookable from the productive date, by modality.
+	OpensSlots []ModalityCount `json:"opensSlots,omitempty"`
+}
+
+// ModalityCount is a count by modality.
+type ModalityCount struct {
+	Modality string `json:"modality"`
+	Count    int    `json:"count"`
+}
+
+// TerminationPreview is a valid termination's notice and obligations.
+type TerminationPreview struct {
+	Employee         string      `json:"employee"`
+	Name             string      `json:"name"`
+	LastDay          string      `json:"lastDay"`
+	EndDate          string      `json:"endDate"` // employment ends at this midnight
+	NoticeDays       int64       `json:"noticeDays"`
+	SeveranceCents   int64       `json:"severanceCents"`
+	SeverancePayday  string      `json:"severancePayday"`
+	VoidedExtensions []Extension `json:"voidedExtensions,omitempty"`
+	Displaced        int         `json:"displaced"` // booked appointments that lose coverage (whole batch)
+}
+
+// DisplacementPreview is a booked appointment the batch would displace,
+// with the first condition it fails and a provisional replacement.
+type DisplacementPreview struct {
+	Appointment      string `json:"appointment"`
+	Patient          string `json:"patient"`
+	Exam             string `json:"exam"`
+	Priority         string `json:"priority"`
+	Date             string `json:"date"`
+	Start            string `json:"start"`
+	Room             string `json:"room"`
+	Reason           string `json:"reason"`                     // unstaffed, no_supervision, shared_capacity
+	ProvisionalDate  string `json:"provisionalDate,omitempty"`  // earliest feasible replacement (capacity only)
+	ProvisionalStart string `json:"provisionalStart,omitempty"` // empty: none in the horizon
+}
+
+// MoneyLine is one obligation or estimate: an amount in cents, when it is
+// recognized or paid, and its basis.
+type MoneyLine struct {
+	Label string `json:"label"`
+	Cents int64  `json:"cents"`
+	When  string `json:"when"`
+	Basis string `json:"basis"`
 }

@@ -7,6 +7,155 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 2 — hiring and termination (0.2.0-dev.2)
+
+The owner approved two player actions, `hire` and `terminate` (2026-10-15).
+`set_roster`, `set_reading_allocation` and `contract_teleradiology` are not
+in this slice. Design: `docs/V0.2_DESIGN.md` §5.7, with the deviations
+identified there. Without a V0.2 action every V0.1 outcome is unchanged.
+
+* **Registry and identity.**
+  * Hires get the first unused `H00001`, `H00002`, … (scenario IDs skipped),
+    allocated at commit only.
+  * A hire's terms are frozen in state; records are append-only and never
+    reused.
+  * Staffing sets are growable (no 64-employee mask); the scenario limit is
+    a 1,000-employee sanity bound.
+  * The state digest encoding is `dreamteam.state/v3`.
+* **Hire.**
+  * Validated in a fixed order: offer table (role, skills, exact standard or
+    premium rate), contract 1–2,400 minutes, start ≥ today + the tier's lead,
+    roster rules, 40 h (technologist) or 24 h (desk) of training within 60
+    days, and the 8-technologist / 4-desk caps including notice.
+  * The recruiting fee posts at acceptance (recruiting / A/P).
+  * From the start date the employee is paid (contract guarantee in equal
+    sevenths, training as worked time) but works under a training view with
+    no capacity: no room, registration, supervision, hold-over or extension.
+  * Independent from the midnight after the 40th (24th) attended hour.
+    Future slots open from that date.
+* **Terminate.**
+  * Hourly technologists and front desk only.
+  * Last day ≥ 14 days after today and the start; identical repeats are
+    `unchanged`; a moved or withdrawn notice is refused.
+  * Contract pay continues to the last day, whatever the roster; the last
+    week closes on the last day.
+  * Severance (two contracted weeks with benefits) is recognized at
+    acceptance (severance / severance payable) and paid on the first payday
+    after the last day.
+  * Approved extensions after the end are voided with a log line.
+  * Terminating a pending hire keeps the fee, runs the contract from the
+    start and owes severance.
+* **Displacement** (when the batch commits; design §5.7):
+  * The days after an employee's end are re-planned from the final registry
+    (a replacement hired in the same batch counts).
+  * Bookings are re-inserted in survivor order with the booking rule's own
+    predicates; those that cannot stay are displaced, all released first,
+    then offered a same-category slot no earlier than their original time,
+    accepted within the patient's tolerance of the original tolerance
+    anchor, else lost to displacement.
+  * The behavioral attempt, confirmation and no-show lead basis are kept, so
+    no new random draw is made.
+  * Each displacement has a record and its own counters, outside demand,
+    loss, cancellation and no-show figures.
+* **Atomic batches.** A batch with a V0.2 action holds only V0.2 actions
+  (`mixed_batch`); one refusal refuses all (`batch_rejected`) and commits
+  nothing; a valid batch commits in input order and reconciles once. V0.1
+  batches are unchanged.
+* **Finance.** New accounts `recruiting`, `severance`, `severance_payable`
+  (listed only once they hold a balance, so the baseline digest is
+  unchanged); statement lines; labor includes severance; the cash bridge
+  and cash identity include severance; severance due appears in
+  obligations.
+* **Previews.** `PreviewStaffing`: validation, terms, timeline, slots a hire
+  opens, exact potential displacements with capacity-only provisional
+  replacements, guaranteed and forecast money in separate tables. Pure.
+* **Session v2.** `dreamteam.session/v2`; v1 read by separate strict DTOs;
+  an engine registry (`0.1.*`, `0.2.0-dev.0.*`, `0.2.0-dev.1`) replays v1
+  records with outcomes verified; a continued v1 session saves as v2 with
+  the v1 record embedded and this build's transition digests.
+* **Interfaces.** API (`api.Action` fields, `ValidateBatch`,
+  `PreviewStaffing`), CLI actions files and replay, TUI staff screen `m`.
+* **Compatibility and neutrality.**
+  * The four historical goldens are byte-for-byte unchanged. They still differ
+    from this build in exactly `digests.state`, `digests.run` and
+    `replay.runDigest`; every outcome field, the log, ledger and action
+    digests and the baseline digest are identical (90 days and the V0.1
+    action fixture included). `MIGRATIONS.json` now records this build's
+    new values (`dreamteam.state/v3`) with the explanation.
+  * A fifth reference, `established-seed1-60d-staffing.json` (V0.2 actions,
+    written by this build), pins hire and terminate end to end.
+  * The Step 0C sustainable start and lead candidate reproduce their
+    committed per-seed and aggregate results exactly (9 seeds each).
+  * All five references are byte-identical on the Pi 4 (Cortex-A72) and the
+    Cortex-A76 machine. amd64 and macOS not run (no machine).
+* **Regression tests.** New: `staffing_test.go` (lifecycle and training
+  capacity, the §5.4 partial-week example to the cent, notice and severance
+  with a zero roster, every rejection code, repeats and conflicts, atomic
+  batches, headcount caps with notice, displacement records and preview
+  agreement, a replacement in the same batch displacing nobody,
+  shared-technologist displacement, tolerance anchor over 12
+  terminations, read-only and hidden-future-independent previews, more than
+  64 employees, the evaluation endpoint), `empset_test.go`,
+  session `staffing_test.go` (save/replay at every lifecycle boundary,
+  chunked and event-budgeted replay, v1 → v2 continuation and tampering),
+  TUI `staff_test.go`, and two acceptance-tagged checks (invariants after
+  every transaction for 50 seeds with the reference plan; 720 days of
+  turnover past 64 lifetime employees, reproducible).
+  * **Fail-before-fix evidence by mutation**: each guard was disabled in
+    turn and its test run; all 17 fail as required — trainee capacity,
+    guarantee from the start date, severance posting, severance payday,
+    notice pay, reconciliation, attempt preserved, tolerance anchor (at the
+    call site and in the rule), shared-technologist survivors, batch
+    atomicity, notice in the cap, training required, v1 transition check,
+    preview purity, sets past 64, v1 replay semantics for V0.2 type names. The first anchor test did not catch a
+    more lenient rule; `TestDisplacementToleranceAnchor` and
+    `TestAcceptReplacementAnchor` were added and do.
+* **Remaining limitations.**
+  * No `set_roster`: a hire's roster is fixed at hire; contracts change only
+    by termination and hiring (owner decision).
+  * Contrast-supervision displacement cannot arise yet (radiologists cannot
+    be terminated); the path is shared with the tested staffing check.
+  * The result schema stays `dreamteam.result/v1` with additive fields;
+    the T90 vector and gates are not built.
+  * Hire names are their IDs. The TUI offers fixed roster patterns, not a
+    roster editor.
+  * amd64/macOS determinism not yet run.
+* **Performance** (MEASUREMENTS.md): about +5% CPU and +7–12% memory on
+  a 90-day run (best of ten on a loaded, throttled Pi: 3.20 → 3.49 s); a
+  termination preview ≈21–24 ms and its commit ≈30 ms; the staff screen
+  renders in ≈25 ms with a live preview.
+* **Verification:**
+  * Full uncached `go test -count=1 -timeout 30m ./...` passed: 7 packages,
+    8.5 min on the loaded Pi (sim 503 s, cmd 83 s, session 75 s). `go vet`
+    clean for the default, calibration and acceptance tags; gofmt clean.
+  * Goldens: the four historical references match under the migration
+    manifest (90 days included); the V0.2 reference is byte-identical;
+    `-verify-replay` matched on all five.
+  * Acceptance on the Cortex-A76 (`-tags acceptance` test binary), all
+    passed, ≈1 h 31 min with the suites sharing four cores: V0.1 criterion
+    10 (50 seeds × 90 days, invariants after every transaction) and
+    criterion 9 (1,000 chunkings, 20.7 s); new: invariants after every
+    transaction for 50 seeds × 90 days with the V0.2 reference plan, and
+    720 days of turnover — 155 hires, registry 163, slot staff sets three
+    words wide, reproducible (44.5 s).
+* **Slice 3 prerequisites (exact).**
+  1. Date-aware roster versions: `planFor` composes registry terms by
+     date (`dayTerms`); `set_roster` adds dated versions behind it, with the
+     §6.4 composition (version keys, insert/replace/remove, tombstones).
+  2. Reuse `reconcile` for roster reductions (cause `roster_reduction`)
+     and `recoverDays` for additions; extensions that no longer fit a new
+     version must reject (§6.4), not be voided.
+  3. Training projections must be recomputed on a roster change before
+     the productive date (`training_delayed` displacement).
+  4. The regular-roster ≤ contract rule and §6.4's legacy-pattern rule for
+     initial employees (frozen original week totals).
+  5. Session v2 already carries arbitrary V0.2 actions; add the
+     `set_roster` DTO fields and canonical comparison.
+  6. Then the owner's benchmark: no action, partial and full
+     reorganization over the same 20 seeds at T30, T90 and T180.
+
+---
+
 ## V0.2 Slice 1 — employee contract and capacity foundation (0.2.0-dev.1)
 
 The owner approved CONDITIONAL GO (2026-10-15). Decisions, design §18:

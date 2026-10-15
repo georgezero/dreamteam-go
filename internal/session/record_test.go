@@ -194,6 +194,28 @@ func rewrite(t *testing.T, p string, edit func(*Record)) {
 	}
 }
 
+// rewriteV1 edits a record and writes it in the v1 format (as a V0.1 or
+// V0.2 Slice 1 build wrote it), re-signed.
+func rewriteV1(t *testing.T, p string, edit func(*Record)) {
+	t.Helper()
+	raw, err := os.ReadFile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r, err := DecodeRecord(raw)
+	if err != nil {
+		t.Fatal(err)
+	}
+	edit(r)
+	out, err := encodeV1(r)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(p, out, 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func copyFile(t *testing.T, from string) string {
 	t.Helper()
 	raw, err := os.ReadFile(from)
@@ -251,7 +273,7 @@ func TestCorruptAndIncompatibleFiles(t *testing.T) {
 	check("scenario", p, ErrCorrupt, "fingerprint")
 	// Another schema.
 	p = copyFile(t, good)
-	rewrite(t, p, func(r *Record) { r.Schema = "dreamteam.session/v2" })
+	rewrite(t, p, func(r *Record) { r.Schema = "dreamteam.session/v3" })
 	check("schema", p, ErrIncompatible, "schema")
 	// Another engine: refused by default, replayable on request.
 	p = copyFile(t, good)
@@ -260,26 +282,38 @@ func TestCorruptAndIncompatibleFiles(t *testing.T) {
 	if _, rep, err := Load(p, ReplayOptions{AllowEngineMismatch: true}); err != nil || !rep.OK || rep.Engine != "0.1.0-dev.1" || rep.StateChanged {
 		t.Errorf("engine mismatch allowed: %v %v", err, rep)
 	}
-	// V0.2 Slice 1: a record from a build with the v1 state encoding (its
-	// state and run digests are another encoding's) replays with outcomes
-	// verified and the state change reported; its outcomes still bind.
-	for _, engine := range []string{"0.1.0", "0.1.0-dev.18.2", "0.2.0-dev.0.2"} {
+	// A v1 record from a registered legacy build (another state encoding:
+	// its state and run digests are another encoding's) replays, by the
+	// compatibility registry and without the mismatch allowance, with
+	// outcomes verified and the state change reported; its outcomes still
+	// bind (V0.2 Slice 1; Slice 2 adds the registry and 0.2.0-dev.1).
+	for _, engine := range []string{"0.1.0", "0.1.0-dev.18.2", "0.2.0-dev.0.2", "0.2.0-dev.1"} {
 		p = copyFile(t, good)
-		rewrite(t, p, func(r *Record) {
+		rewriteV1(t, p, func(r *Record) {
 			r.Engine, r.Digests.State, r.Digests.Run = engine, strings.Repeat("1", 64), strings.Repeat("2", 64)
 		})
-		_, rep, err := Load(p, ReplayOptions{AllowEngineMismatch: true})
-		if err != nil || !rep.OK || !rep.StateChanged || !strings.Contains(rep.String(), "outcomes verified") {
+		_, rep, err := Load(p, ReplayOptions{})
+		if err != nil || !rep.OK || !rep.StateChanged || !strings.Contains(rep.String(), "outcomes verified") ||
+			rep.Compatibility() != "legacy_outcomes_verified" {
 			t.Errorf("v1-state record from %s: %v %v", engine, err, rep)
 		}
-		rewrite(t, p, func(r *Record) { r.Digests.Ledger = strings.Repeat("3", 64) })
+		rewriteV1(t, p, func(r *Record) { r.Digests.Ledger = strings.Repeat("3", 64) })
 		if _, rep, err := Load(p, ReplayOptions{AllowEngineMismatch: true}); !errors.Is(err, ErrMismatch) || rep.StateChanged {
 			t.Errorf("v1-state record from %s with another ledger: %v %v", engine, err, rep)
 		}
 	}
-	// A build that is not a v1-state build gets no such allowance.
+	// The registry is for v1 records: a v2 record claiming a legacy build
+	// is refused, and with the mismatch allowed needs every digest.
 	p = copyFile(t, good)
-	rewrite(t, p, func(r *Record) { r.Engine, r.Digests.State = "0.3.0", strings.Repeat("1", 64) })
+	rewrite(t, p, func(r *Record) { r.Engine, r.Digests.State = "0.1.0", strings.Repeat("1", 64) })
+	check("v2 from a legacy engine", p, ErrIncompatible, "recorded by 0.1.0")
+	if _, _, err := Load(p, ReplayOptions{AllowEngineMismatch: true}); !errors.Is(err, ErrMismatch) {
+		t.Errorf("v2 record from a legacy engine with another state digest: %v", err)
+	}
+	// A build that is not registered gets no such allowance.
+	p = copyFile(t, good)
+	rewriteV1(t, p, func(r *Record) { r.Engine, r.Digests.State = "0.3.0", strings.Repeat("1", 64) })
+	check("unregistered engine", p, ErrIncompatible, "recorded by 0.3.0")
 	if _, _, err := Load(p, ReplayOptions{AllowEngineMismatch: true}); !errors.Is(err, ErrMismatch) {
 		t.Errorf("state digest mismatch from 0.3.0: %v", err)
 	}

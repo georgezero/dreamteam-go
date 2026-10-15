@@ -56,6 +56,7 @@ const (
 	screenHistory
 	screenSummary
 	screenActions
+	screenStaff
 	screenHelp
 )
 
@@ -133,6 +134,8 @@ type Model struct {
 	actResult        *api.ActionResult
 	actDay           int64             // extension day, offset from today
 	roster           []api.RosterEntry // that day's shifts
+	// Staff screen (V0.2): the hire form and termination choices.
+	staff staffForm
 	// savePath is where ctrl+s saves when the session has no file yet.
 	savePath string
 }
@@ -175,7 +178,11 @@ func (m *Model) sessionKey(k string) bool {
 			m.status = "✗ Load failed: " + err.Error()
 		default:
 			m.sess = s
-			m.status = fmt.Sprintf("✓ Loaded %s: %d batches replayed, digests match; resumed at %s", p, rep.Batches, m.sess.Calendar().ISO(m.sess.Now()))
+			what := "digests match"
+			if rep.Compatibility() != "native_exact" {
+				what = "verified (" + rep.Compatibility() + "); saving writes a v2 record continuing it"
+			}
+			m.status = fmt.Sprintf("✓ Loaded %s: %d batches replayed, %s; resumed at %s", p, rep.Batches, what, m.sess.Calendar().ISO(m.sess.Now()))
 		}
 	case "ctrl+v":
 		m.running = false
@@ -196,7 +203,8 @@ func (m *Model) sessionKey(k string) bool {
 
 // New returns a paused model on s.
 func New(s *session.Session) *Model {
-	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24, actMinutes: map[string]int64{}}
+	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24, actMinutes: map[string]int64{},
+		staff: staffForm{lastShift: map[string]int64{}}}
 	m.status = "Paused. Press space to start the day."
 	m.refresh()
 	if s.AtStart() && m.obs.Finance.Opening.HistoryDays > 0 {
@@ -365,6 +373,9 @@ func (m *Model) screenKey(k string) bool {
 	if m.screen == screenActions && m.actionKey(k) {
 		return true
 	}
+	if m.screen == screenStaff && m.staffKey(k) {
+		return true
+	}
 	switch k {
 	case "d", "esc":
 		m.screen = screenDashboard
@@ -393,6 +404,9 @@ func (m *Model) screenKey(k string) bool {
 	case "a":
 		m.screen, m.actResult, m.actDay = screenActions, nil, 0
 		m.syncPolicyChoices()
+		return true
+	case "m":
+		m.screen, m.staff.result = screenStaff, nil
 		return true
 	}
 	switch m.screen {

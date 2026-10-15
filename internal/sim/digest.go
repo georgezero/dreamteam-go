@@ -38,9 +38,14 @@ import (
 
 // StateSchema names the state digest's encoding. v2 (V0.2 Slice 1) adds
 // the employment registry: identity, lifecycle, contracts and the week's
-// guaranteed-pay counters. Outcomes of a V0.1 scenario without V0.2
-// actions are unchanged; only state and run digests differ from v1.
-const StateSchema = "dreamteam.state/v2"
+// guaranteed-pay counters. v3 (V0.2 Slice 2) adds hires (terms, offer,
+// training), terminations (last day, severance), the productive date,
+// growable employee sets in slot staffing, practice-caused displacement
+// records and their counters, the new ledger accounts, and the tolerance
+// anchor, placement and booking-lead fields of orders and appointments.
+// Outcomes of a V0.1 scenario without V0.2 actions are unchanged; only
+// state and run digests differ.
+const StateSchema = "dreamteam.state/v3"
 
 // skipFields names struct fields the state walk leaves out, by
 // "Type.field".
@@ -52,9 +57,10 @@ var skipFields = map[string]bool{
 	"finState.forceDenied": true,
 	"ledger.keys":          true, "ledger.verified": true, "ledger.shadow": true, "ledger.cal": true,
 	"demandState.poisson": true, "demandState.catIdx": true,
-	"employee.cfg": true, "room.cfg": true,
-	"DayPlan.cfg": true, "Coverage.Plan": true,
-	"alertState.cfg": true, "alertState.wakeGen": true, "alertState.wakeAt": true,
+	"employee.cfg": true, "employee.terms": true, "room.cfg": true,
+	"DayPlan.cfg": true, "DayPlan.emps": true, "Coverage.Plan": true,
+	"employment.trainView": true, // derived from the hire's terms
+	"alertState.cfg":       true, "alertState.wakeGen": true, "alertState.wakeAt": true,
 	"metricsState.cum": true, // digested as a snapshot at the current time
 	"tally.actions":    true, // the action record's length: the action digest's
 }

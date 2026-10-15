@@ -208,6 +208,8 @@ func (st *state) apptStatus(ai int) (string, string) {
 		return api.PatientNoShow, "no-show"
 	case apptRescheduled:
 		return api.PatientRescheduled, "rescheduled"
+	case apptDisplaced:
+		return api.PatientDisplaced, "displaced by the practice"
 	}
 	return api.PatientWaiting, "arrived" // overwritten by fillVisit
 }
@@ -276,6 +278,9 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 		case apptRescheduled:
 			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.endedAt), Label: "Arrived, rescheduled",
 				Detail: punctuality(a.endedAt.Sub(start)) + "; too late to be seen", Done: true})
+		case apptDisplaced:
+			j.Steps = append(j.Steps, api.JourneyStep{Time: iso(a.endedAt), Label: "Displaced",
+				Detail: "by the practice: " + st.displacementWhy(ai), Done: true})
 		}
 	}
 	if o.visit >= 0 {
@@ -335,7 +340,7 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 		}
 	}
 	switch o.state {
-	case orderLost:
+	case orderLost, orderDisplacedLost:
 		j.Steps = append(j.Steps, api.JourneyStep{Time: iso(o.endedAt), Label: "Lost", Detail: o.lostWhy, Done: true})
 	case orderRecall:
 		j.Steps = append(j.Steps, api.JourneyStep{Label: "Recall list",
@@ -347,7 +352,7 @@ func (w *World) Journey(id string) (api.Journey, bool) {
 
 var orderStatusText = [...]string{orderBooked: "booked", orderRecall: "on the recall list", orderLost: "lost",
 	orderCancelled: "cancelled", orderVisit: "on site", orderNoShow: "no-show", orderLeft: "left without an exam",
-	orderImaged: "imaged, report pending", orderReported: "report final"}
+	orderImaged: "imaged, report pending", orderReported: "report final", orderDisplacedLost: "lost (displaced by the practice)"}
 
 // studySteps describes a study's reporting: documentation, the worklist,
 // the read and the final report. Read times appear only once the read

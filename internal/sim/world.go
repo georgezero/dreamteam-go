@@ -86,7 +86,7 @@ func New(cfg *Config, seed rng.Seed) *World {
 		st.rooms = append(st.rooms, room{cfg: &cfg.Rooms[i], visit: -1})
 	}
 	for i := range cfg.Employees {
-		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], shift: -1})
+		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], terms: &cfg.Employees[i], shift: -1})
 	}
 	st.initStaff()
 	st.initDemand()
@@ -292,6 +292,7 @@ func (st *state) Handle(e *Engine, ev Event) {
 func (st *state) dayStart(e *Engine, day int64) {
 	e.Push(Event{At: st.cal.StartOfDay(day + 1), Class: ClassDayBoundary, Kind: kindDayStart, A: day + 1})
 	st.day = day
+	st.lifecycleDayStart(day)
 	clear(st.drawMemo)
 	st.opened, st.closing, st.opClosedAt = false, false, 0
 	if st.cal.Weekday(e.Now()) == simtime.Monday {
@@ -342,6 +343,9 @@ func (st *state) CheckInvariants() error {
 		return err
 	}
 	if err := st.checkStaff(); err != nil {
+		return err
+	}
+	if err := st.checkDisplaced(); err != nil {
 		return err
 	}
 	return st.checkDemand()

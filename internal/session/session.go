@@ -23,6 +23,9 @@ type Session struct {
 	seed  int64
 	path  string
 	saved savePoint
+	// legacy is the v1 session this one continues (nil: none): kept as the
+	// prefix of every record it saves (record.go).
+	legacy *LegacyPrefix
 }
 
 // savePoint is what the last save or load covered.
@@ -185,6 +188,18 @@ func (s *Session) ActionLog() []api.ActionResult { return s.w.ActionLog() }
 
 // Validate previews an action now without applying or recording it.
 func (s *Session) Validate(a api.Action) api.ActionResult { return s.w.Validate(a) }
+
+// ValidateBatch checks a batch now without applying it (a V0.2 staffing
+// batch as one atomic unit).
+func (s *Session) ValidateBatch(actions ...api.Action) []api.ActionResult {
+	return s.w.ValidateBatch(actions)
+}
+
+// PreviewStaffing previews a V0.2 staffing batch now: validation, terms,
+// timeline, potential displacements and obligations. It changes nothing.
+func (s *Session) PreviewStaffing(actions ...api.Action) api.StaffingPreview {
+	return s.w.PreviewStaffing(actions)
+}
 
 // Schedule returns the schedule of the day offset days from today
 // (negative for past days).

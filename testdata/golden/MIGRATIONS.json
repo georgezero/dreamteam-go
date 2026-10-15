@@ -1,67 +1,68 @@
 {
  "schema": "dreamteam.golden-migration/v1",
- "engine": "0.2.0-dev.1",
- "stateSchema": "dreamteam.state/v2",
+ "engine": "0.2.0-dev.2",
+ "stateSchema": "dreamteam.state/v3",
  "explanation": [
-  "V0.2 Slice 1 (employee contracts): the state digest's encoding becomes dreamteam.state/v2. It adds the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
-  "Outcomes are unchanged: every scenario's inferred contract is at or below its roster, so no guarantee is ever posted. Patient flow, reports, every ledger entry, the log, actions, the evaluation baseline and all result values are identical; only the state digest, and the run digests derived from it, differ.",
-  "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old and new value, and a comparison under it requires both exactly."
+  "V0.2 Slice 1 (employee contracts): the state digest's encoding became dreamteam.state/v2. It added the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
+  "V0.2 Slice 2 (hire and terminate): the encoding is now dreamteam.state/v3. It adds each employee's hire and termination records and first productive day, growable employee sets in slot staffing (no 64-employee limit), practice-caused displacement records and counters, the recruiting, severance and severance-payable accounts, each order's tolerance anchor and placements, and each appointment's confirmation flag, no-show lead basis and placement. The session record schema is dreamteam.session/v2, which the run digest names.",
+  "Outcomes are unchanged: without a V0.2 action no employee is hired or terminated, every scenario's inferred contract is at or below its roster (so no guarantee is posted) and the V0.2 accounts hold nothing and are not listed. Patient flow, reports, every ledger entry, the log, actions, the evaluation baseline and all result values are identical; only the state digest, and the run digests derived from it, differ.",
+  "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old (historical) and new (this build's) value, and a comparison under it requires both exactly."
  ],
  "references": {
   "established-seed1-7d.json": {
    "digests.state": {
     "old": "c4d6b46c4d9446a194943c619be5442fa5d44479c1847374db6afbaa97438d50",
-    "new": "4b13d2ccb53ad7961e68a0c0faa4299bec1e402a4b4574f1539cf3802dab4926"
+    "new": "b9f721bd90717e8f2ce77bd8c63be9cc76b437dc1e0d25b909c295df8059179e"
    },
    "digests.run": {
     "old": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce",
-    "new": "b4adb527b14ffbfb92018a2e4a9cfa7ae5031991d9311145c59d1f9fba6745ec"
+    "new": "a9218a799a5b2d0aca7ccf9ca9b1e24a779b598f682b4131698f14e40a38c6d8"
    },
    "replay.runDigest": {
     "old": "7b99a6f7ffc145a65d33a9f47ad98f87186000c7418c7bf26ce0016ac667b5ce",
-    "new": "b4adb527b14ffbfb92018a2e4a9cfa7ae5031991d9311145c59d1f9fba6745ec"
+    "new": "a9218a799a5b2d0aca7ccf9ca9b1e24a779b598f682b4131698f14e40a38c6d8"
    }
   },
   "established-seed1-90d.json": {
    "digests.state": {
     "old": "8c6575d355650c59eee855f4c1facc94c150a7df71b76ed125cb09c27c39af6f",
-    "new": "1676d75bdc9b3026076717f4533443aae98aaa421ef1d40cb4ec3478014f9d26"
+    "new": "9976513ff71e132354983440c10d360fb80bb74ad0a6dd084216e93d7b6c1be2"
    },
    "digests.run": {
     "old": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d",
-    "new": "1e244517722e6c39b420b924ea4ea5c8991f765136d2965b75615e50a8690a86"
+    "new": "6e4e54ad5dcae061936d639301acc2b7ef66649ef7d57b8747f84476b4e8ba33"
    },
    "replay.runDigest": {
     "old": "12157065771c20e66fdfc0bcdc418a8ffb7ce87cb0f13e33d6f6d749ef60975d",
-    "new": "1e244517722e6c39b420b924ea4ea5c8991f765136d2965b75615e50a8690a86"
+    "new": "6e4e54ad5dcae061936d639301acc2b7ef66649ef7d57b8747f84476b4e8ba33"
    }
   },
   "mini-seed1-7d.json": {
    "digests.state": {
     "old": "f2dff6e4d307a0623b5b5f849607b03d1fa82751bbb8134cb0f11440cc362ce8",
-    "new": "8c6c1d90501b6baf67232b032c19b0b6c779d1b39d45e01756e8c418ff8a6540"
+    "new": "1ab60e4bdf6b27e6fb3290c360a698b9bf9004dcff3e48f9e1442b79ba6d0a12"
    },
    "digests.run": {
     "old": "26adad6073236014503dd15759ab332500c0ade3a00ff7d920156582b0680c1d",
-    "new": "17cd2876c81feaa2b55c610f28cddbb6d8373f1590828d611d0ea15b7b4da1b9"
+    "new": "532ed2e949e20a9744ff1c3ad17a7ec2c70df024e8c204af6a314ef945106b78"
    },
    "replay.runDigest": {
     "old": "26adad6073236014503dd15759ab332500c0ade3a00ff7d920156582b0680c1d",
-    "new": "17cd2876c81feaa2b55c610f28cddbb6d8373f1590828d611d0ea15b7b4da1b9"
+    "new": "532ed2e949e20a9744ff1c3ad17a7ec2c70df024e8c204af6a314ef945106b78"
    }
   },
   "established-seed1-7d-actions.json": {
    "digests.state": {
     "old": "5a626a6308b7fd2df7320a9d471640d21292b9b87508a8b08b16c34e50c9942b",
-    "new": "268445212cbf1a8ff0d2709f0878988e1271ed4d553c491905271137ab73e388"
+    "new": "b8af6c2901914f207cab01c6f9152b0567b9ac7675335916fbb24a4e85964d2a"
    },
    "digests.run": {
     "old": "fb0ccb14a79c87e75c110abe2c14dfabbeb752bac60ddba14dbc9d818994d5f6",
-    "new": "58756da8376e8d75dd0a2a8ca7dd36ae78555508816a0b894391d4f288ae623a"
+    "new": "81bb0bfeb59efb22be20bb0a65d33ef9e3a6a4f584c1447bce3f9125658fadb9"
    },
    "replay.runDigest": {
     "old": "fb0ccb14a79c87e75c110abe2c14dfabbeb752bac60ddba14dbc9d818994d5f6",
-    "new": "58756da8376e8d75dd0a2a8ca7dd36ae78555508816a0b894391d4f288ae623a"
+    "new": "81bb0bfeb59efb22be20bb0a65d33ef9e3a6a4f584c1447bce3f9125658fadb9"
    }
   }
  }

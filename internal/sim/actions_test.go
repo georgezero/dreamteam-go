@@ -75,7 +75,7 @@ func TestExtendShiftValidation(t *testing.T) {
 		{"07:00", extend("E06", 60), true, api.ActionAccepted},    // Morgan to 19:00
 		{"07:00", extend("E06", 60), true, api.ActionAccepted},    // and again, to 20:00
 		{"07:00", extend("E06", 60), false, "after_close"},        // now ending at close
-		{"07:00", api.Action{Type: "hire", Employee: "E01"}, false, "unknown_action"},
+		{"07:00", api.Action{Type: "promote", Employee: "E01"}, false, "unknown_action"},
 		{"07:00", walkIn("accept_sometimes", ""), false, "unknown_policy"},
 		{"07:00", walkIn(api.WalkInAcceptUntil, ""), false, "invalid_cutoff"},
 		{"07:00", walkIn(api.WalkInAcceptIfGap, "18:00"), false, "invalid_cutoff"},

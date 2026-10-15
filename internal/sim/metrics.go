@@ -221,6 +221,9 @@ func (f *flowCounts) add(g *flowCounts) {
 	f.acquired += g.acquired
 	f.reportsFinal += g.reportsFinal
 	f.breaches += g.breaches
+	for k := range f.disp {
+		f.disp[k] += g.disp[k]
+	}
 }
 
 // walkInCohort follows the walk-ins who arrived with orders [from, to)
@@ -323,6 +326,7 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 
 	// Appointments whose slot starts in [a.at, b.at).
 	p.Appointments = st.apptMetrics(a.at, b.at)
+	p.Displacement = dispMetrics(&f)
 
 	// Walk-ins.
 	wi := &p.WalkIns
@@ -366,8 +370,15 @@ func (st *state) periodMetrics(a, b *tally, complete bool) api.PeriodMetrics {
 	}
 
 	// Staff.
-	for i, ec := range st.cfg.Employees {
-		x, y := &a.emps[i], &b.emps[i]
+	// Employees disclosed by the period's end (a hire from its acceptance);
+	// one hired during the period has no tally at its start.
+	for i := range b.emps {
+		ec := st.emps[i].terms
+		var x0 empTally
+		x, y := &x0, &b.emps[i]
+		if i < len(a.emps) {
+			x = &a.emps[i]
+		}
 		sm := api.StaffMetrics{Name: ec.Name, Role: string(ec.Role), OnDutySec: secs(y.duty - x.duty), BusySec: secs(y.busy - x.busy),
 			BreakSec: secs(y.brk - x.brk), OvertimeSec: secs(y.over - x.over), ApprovedOvertimeSec: secs(y.approved - x.approved),
 			BlockSec:       secs(y.block - x.block),
@@ -426,14 +437,16 @@ func (st *state) apptMetrics(from, to simtime.Time) api.ApptMetrics {
 				m.NoShows++
 			case apptRescheduled:
 				m.Rescheduled++
+			case apptDisplaced:
+				m.Displaced++
 			}
 			if a.visit >= 0 {
 				m.Arrived++
 			}
 		}
 	}
-	m.NoShowRate = ratio(int64(m.NoShows), int64(m.Scheduled-m.Cancelled))
-	m.CancelRate = ratio(int64(m.Cancelled), int64(m.Scheduled))
+	m.NoShowRate = ratio(int64(m.NoShows), int64(m.Scheduled-m.Cancelled-m.Displaced))
+	m.CancelRate = ratio(int64(m.Cancelled), int64(m.Scheduled-m.Displaced))
 	m.Fill = ratio(m.BookedSec, m.BookableSec)
 	return m
 }
@@ -532,6 +545,9 @@ func (f *flowCounts) scale(k int) {
 	f.acquired *= k
 	f.reportsFinal *= k
 	f.breaches *= k
+	for j := range f.disp {
+		f.disp[j] *= k
+	}
 }
 
 // dayBounds returns the snapshots bounding day d: its midnight mark and

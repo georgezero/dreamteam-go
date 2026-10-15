@@ -34,8 +34,18 @@ const (
 	acctAccruedPayroll
 	acctAP
 	acctEquity
+	// V0.2 (appended; V0.1 accounts keep their numbers): recruiting fees,
+	// severance (with its benefits) and severance owed until its payday.
+	acctRecruiting
+	acctSeverance
+	acctSeverancePayable
 	numAccounts
 )
+
+// numLegacyAccounts is the V0.1 chart of accounts: its accounts are
+// always listed; a V0.2 account only once it has a balance (so a run
+// without V0.2 actions lists exactly the V0.1 chart).
+const numLegacyAccounts = acctRecruiting
 
 type acctKind uint8
 
@@ -52,21 +62,27 @@ var accountInfo = [numAccounts]struct {
 	id, name string
 	kind     acctKind
 }{
-	acctCash:           {"cash", "Cash", kindAsset},
-	acctAR:             {"accounts_receivable", "Accounts receivable", kindAsset},
-	acctRevenue:        {"patient_service_revenue", "Patient service revenue (net expected)", kindRevenue},
-	acctVariance:       {"collection_variance", "Collection variance", kindContra},
-	acctWages:          {"payroll", "Payroll expense", kindExpense},
-	acctBenefits:       {"benefits", "Benefits & payroll tax expense", kindExpense},
-	acctFacility:       {"facility", "Rent & facility", kindExpense},
-	acctEquipment:      {"equipment", "Equipment service & leases", kindExpense},
-	acctSupplies:       {"supplies", "Medical supplies & contrast", kindExpense},
-	acctIT:             {"it", "IT / PACS", kindExpense},
-	acctBilling:        {"billing", "Billing service fees", kindExpense},
-	acctAccruedPayroll: {"accrued_payroll", "Accrued payroll", kindLiability},
-	acctAP:             {"accounts_payable", "Accounts payable", kindLiability},
-	acctEquity:         {"opening_equity", "Opening equity", kindEquity},
+	acctCash:             {"cash", "Cash", kindAsset},
+	acctAR:               {"accounts_receivable", "Accounts receivable", kindAsset},
+	acctRevenue:          {"patient_service_revenue", "Patient service revenue (net expected)", kindRevenue},
+	acctVariance:         {"collection_variance", "Collection variance", kindContra},
+	acctWages:            {"payroll", "Payroll expense", kindExpense},
+	acctBenefits:         {"benefits", "Benefits & payroll tax expense", kindExpense},
+	acctFacility:         {"facility", "Rent & facility", kindExpense},
+	acctEquipment:        {"equipment", "Equipment service & leases", kindExpense},
+	acctSupplies:         {"supplies", "Medical supplies & contrast", kindExpense},
+	acctIT:               {"it", "IT / PACS", kindExpense},
+	acctBilling:          {"billing", "Billing service fees", kindExpense},
+	acctAccruedPayroll:   {"accrued_payroll", "Accrued payroll", kindLiability},
+	acctAP:               {"accounts_payable", "Accounts payable", kindLiability},
+	acctEquity:           {"opening_equity", "Opening equity", kindEquity},
+	acctRecruiting:       {"recruiting", "Recruiting fees", kindExpense},
+	acctSeverance:        {"severance", "Severance (with benefits)", kindExpense},
+	acctSeverancePayable: {"severance_payable", "Severance payable", kindLiability},
 }
+
+// listed reports whether account a appears in a chart listing.
+func (l *ledger) listed(a account) bool { return a < numLegacyAccounts || l.bal[a] != 0 }
 
 // maxMods bounds the modality dimension (XR, US, CT, MR).
 const maxMods = 4
@@ -87,18 +103,21 @@ type line struct {
 type entryKind uint8
 
 const (
-	entOpening   entryKind = iota + 1 // opening cash (a: 0)
-	entRevenue                        // report final (a: study)
-	entStudyCost                      // supplies and per-study IT at exam end (a: study)
-	entPayment                        // payment received (a: claim, b: payment number)
-	entSettle                         // claim settles: residual to collection variance (a: claim)
-	entWages                          // hourly pay for a worked day (a: employee, b: day)
-	entSalary                         // salaried daily accrual (a: employee, b: day)
-	entFixed                          // daily fixed-cost accrual (a: day)
-	entPayroll                        // payroll paid (a: day)
-	entPayAP                          // accounts payable paid (a: day)
-	entReversal                       // reverses entry a
-	entGuarantee                      // guaranteed-pay provision change at day close (a: employee, b: day)
+	entOpening      entryKind = iota + 1 // opening cash (a: 0)
+	entRevenue                           // report final (a: study)
+	entStudyCost                         // supplies and per-study IT at exam end (a: study)
+	entPayment                           // payment received (a: claim, b: payment number)
+	entSettle                            // claim settles: residual to collection variance (a: claim)
+	entWages                             // hourly pay for a worked day (a: employee, b: day)
+	entSalary                            // salaried daily accrual (a: employee, b: day)
+	entFixed                             // daily fixed-cost accrual (a: day)
+	entPayroll                           // payroll paid (a: day)
+	entPayAP                             // accounts payable paid (a: day)
+	entReversal                          // reverses entry a
+	entGuarantee                         // guaranteed-pay provision change at day close (a: employee, b: day)
+	entRecruiting                        // recruiting fee at hire acceptance (a: employee)
+	entSeverance                         // severance recognized at termination acceptance (a: employee)
+	entSeverancePay                      // severance paid on its payday (a: employee)
 )
 
 // entryKey is an entry's idempotency key.

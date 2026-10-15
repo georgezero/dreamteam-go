@@ -63,6 +63,9 @@ func (st *state) captureBaseline(e *Engine) {
 	b.PayablesCents = -led.bal[acctAP]
 	b.AccruedPayrollCents = -led.bal[acctAccruedPayroll]
 	for a := range numAccounts {
+		if !led.listed(a) {
+			continue // a V0.2 account with no balance: the V0.1 chart's listing (§11)
+		}
 		info := accountInfo[a]
 		bal := led.bal[a]
 		switch info.kind {
@@ -248,12 +251,13 @@ func (st *state) windowMoney() api.WindowMoney {
 	m.ARChangeCents = b.net[acctAR]
 	m.APChangeCents = -b.net[acctAP]
 	m.PayrollChangeCents = -b.net[acctAccruedPayroll]
+	m.SeverancePayableChangeCents = -b.net[acctSeverancePayable]
 	m.CashEndCents = ev.base.CashCents + m.CashChangeCents
 	m.MinCashCents = ev.minCash
 	m.ShortfallCents = max(0, -ev.minCash)
 
 	bridge := m.OperatingProfitCents - m.InheritedVarianceCents + m.AllocatedAccrualCents -
-		m.ARChangeCents + m.APChangeCents + m.PayrollChangeCents
+		m.ARChangeCents + m.APChangeCents + m.PayrollChangeCents + m.SeverancePayableChangeCents
 	m.Reconciled = bridge == m.OperatingCashFlowCents &&
 		m.OperatingCashFlowCents+m.CapitalTransfersCents == m.CashChangeCents
 	return m

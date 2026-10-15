@@ -2,6 +2,7 @@ package sim
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
@@ -61,8 +62,25 @@ func (st *state) observeFinance(o *api.Observation, now simtime.Time) {
 	st.observeBalance(&f, day)
 	f.NextPayroll = api.Obligation{Date: st.cal.Date(st.cal.StartOfDay(st.nextPayday(day))).String(), Cents: f.AccruedPayrollCents}
 	f.NextPayables = api.Obligation{Date: date.AddDays(int64(date.DaysInMonth() - date.Day + 1)).String(), Cents: f.APCents}
+	due := map[int64]int64{}
+	var days []int64
+	for i := range st.staff {
+		if x := st.staff[i].Exit; x != nil && !x.Paid {
+			if due[x.PayDay] == 0 {
+				days = append(days, x.PayDay)
+			}
+			due[x.PayDay] += x.SeveranceCents
+		}
+	}
+	slices.Sort(days)
+	for _, d := range days {
+		f.SeveranceDue = append(f.SeveranceDue, api.Obligation{Date: st.cal.Date(st.cal.StartOfDay(d)).String(), Cents: due[d]})
+	}
 
 	for a := range numAccounts {
+		if !led.listed(a) {
+			continue
+		}
 		info := accountInfo[a]
 		b := led.bal[a]
 		switch info.kind {
@@ -120,9 +138,11 @@ func (st *state) bookPeriod(label string, b *dayBook) api.FinancePeriod {
 			p.OperatingExpenseCents += n[a]
 		}
 	}
-	p.LaborCents = p.WagesCents + p.BenefitsCents
+	// V0.2: severance is labor; recruiting fees are their own line.
+	p.RecruitingCents, p.SeveranceCents = n[acctRecruiting], n[acctSeverance]
+	p.LaborCents = p.WagesCents + p.BenefitsCents + p.SeveranceCents
 	p.FixedCents = b.fixed
-	p.VariableCents = p.OperatingExpenseCents - p.LaborCents - p.FixedCents
+	p.VariableCents = p.OperatingExpenseCents - p.LaborCents - p.FixedCents - p.RecruitingCents
 	p.OperatingProfitCents = p.NetRevenueCents - p.OperatingExpenseCents
 	if p.NetRevenueCents > 0 {
 		p.MarginBP, p.MarginDefined = p.OperatingProfitCents*10_000/p.NetRevenueCents, true
@@ -298,11 +318,17 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 	case entSettle:
 		return "Claim settled: collection variance", claimID(int(k.a))
 	case entWages:
-		return "Wages accrued " + dayName(k.b), st.cfg.Employees[k.a].ID
+		return "Wages accrued " + dayName(k.b), st.emps[k.a].terms.ID
 	case entSalary:
-		return "Salary accrued " + dayName(k.b), st.cfg.Employees[k.a].ID
+		return "Salary accrued " + dayName(k.b), st.emps[k.a].terms.ID
 	case entGuarantee:
-		return "Guaranteed pay provision " + dayName(k.b), st.cfg.Employees[k.a].ID
+		return "Guaranteed pay provision " + dayName(k.b), st.emps[k.a].terms.ID
+	case entRecruiting:
+		return "Recruiting fee (hire accepted)", st.emps[k.a].terms.ID
+	case entSeverance:
+		return "Severance recognized (termination accepted)", st.emps[k.a].terms.ID
+	case entSeverancePay:
+		return "Severance paid", st.emps[k.a].terms.ID
 	case entFixed:
 		return "Fixed costs accrued " + dayName(k.a), ""
 	case entPayroll:
@@ -323,7 +349,8 @@ func (st *state) observeBalance(f *api.Finance, day int64) {
 	b.CashCents, b.ReceivablesCents = led.bal[acctCash], led.bal[acctAR]
 	b.AssetsCents = b.CashCents + b.ReceivablesCents
 	b.PayablesCents, b.AccruedPayrollCents = -led.bal[acctAP], -led.bal[acctAccruedPayroll]
-	b.LiabilitiesCents = b.PayablesCents + b.AccruedPayrollCents
+	b.SeverancePayableCents = -led.bal[acctSeverancePayable]
+	b.LiabilitiesCents = b.PayablesCents + b.AccruedPayrollCents + b.SeverancePayableCents
 	b.OpeningCapitalCents = -led.bal[acctEquity]
 	hist := led.sumDays(0, min(day, st.startDay-1))
 	b.HistoryEarningsCents = netRevenue(&hist) - opex(&hist)

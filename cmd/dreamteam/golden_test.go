@@ -32,6 +32,9 @@ var references = []struct {
 	{"mini-seed1-7d.json", []string{"-scenario", "mini", "-seed", "1", "-days", "7"}, false},
 	{"established-seed1-7d-actions.json", []string{"-scenario", "established", "-seed", "1", "-days", "7",
 		"-actions", goldenDir + "/established-7d.actions.json"}, false},
+	// V0.2 Slice 2: hire and terminate (written by 0.2.0-dev.2; no migration).
+	{"established-seed1-60d-staffing.json", []string{"-scenario", "established", "-seed", "1", "-days", "60",
+		"-actions", goldenDir + "/established-staffing.actions.json"}, true},
 }
 
 func runJSON(t *testing.T, args ...string) ([]byte, string, int) {
@@ -300,7 +303,7 @@ func TestResultReconciles(t *testing.T) {
 			t.Fatal(err)
 		}
 		b, m := r.Balances, r.Window.Money
-		if b.CashCents+b.ReceivablesCents != b.PayablesCents+b.AccruedPayrollCents+b.EquityCents {
+		if b.CashCents+b.ReceivablesCents != b.PayablesCents+b.AccruedPayrollCents+b.SeverancePayableCents+b.EquityCents {
 			t.Errorf("%s: assets ≠ liabilities + equity", ref.file)
 		}
 		if !m.Reconciled || m.CashEndCents != b.CashCents {
@@ -344,8 +347,23 @@ func TestGoldenMigrations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if m.StateSchema != sim.StateSchema || len(m.References) != len(references) {
-		t.Fatalf("manifest: state schema %q (build %q), %d references", m.StateSchema, sim.StateSchema, len(m.References))
+	// Every reference written by another engine is in the manifest; one
+	// written by this build (the V0.2 reference) needs no migration.
+	historical := 0
+	for _, ref := range references {
+		raw, _ := os.ReadFile(filepath.Join(goldenDir, ref.file))
+		var g struct{ Engine string }
+		json.Unmarshal(raw, &g)
+		_, listed := m.References[ref.file]
+		if g.Engine != version.Number {
+			historical++
+		}
+		if listed != (g.Engine != version.Number) {
+			t.Errorf("%s (engine %s): in the manifest %v", ref.file, g.Engine, listed)
+		}
+	}
+	if m.StateSchema != sim.StateSchema || len(m.References) != historical || historical != 4 {
+		t.Fatalf("manifest: state schema %q (build %q), %d references, %d historical", m.StateSchema, sim.StateSchema, len(m.References), historical)
 	}
 	golden, _ := os.ReadFile(filepath.Join(goldenDir, "mini-seed1-7d.json"))
 	out, _, _ := runJSON(t, "-scenario", "mini", "-seed", "1", "-days", "7", "-verify-replay")

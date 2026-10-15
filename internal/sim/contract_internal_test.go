@@ -30,7 +30,7 @@ func payrollState(t *testing.T, rate int64, weekly simtime.Duration) *state {
 		Policies: Policies{WeeklyHours: 40 * simtime.Hour, OvertimeBP: 15_000},
 		Finance:  FinanceConfig{BenefitsBP: 2500, PayrollAnchor: monday.AddDays(4), PayrollEveryDays: 14}}
 	st := &state{cfg: cfg, cal: simtime.NewCalendar(monday)}
-	st.emps = []employee{{cfg: &cfg.Employees[0], shift: -1}}
+	st.emps = []employee{{cfg: &cfg.Employees[0], terms: &cfg.Employees[0], shift: -1}}
 	st.initDemand()
 	st.initFinance()
 	st.initMetrics()

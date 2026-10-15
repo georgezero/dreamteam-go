@@ -47,6 +47,10 @@ const (
 	orderLeft                        // a walk-in left without an exam
 	orderImaged                      // imaged and departed; report pending
 	orderReported                    // report finalized
+	// orderDisplacedLost: the practice displaced its appointment (V0.2)
+	// and no replacement was booked: lost to practice displacement, apart
+	// from booking losses.
+	orderDisplacedLost
 	numOrderStates
 )
 
@@ -61,14 +65,22 @@ type order struct {
 	received  simtime.Time
 	earliest  int64 // day index of the earliest wanted date
 	tolerance int64 // days past earliest the patient accepts
-	attempt   int64
-	state     orderState
-	appt      int   // current or last appointment, -1 if none
-	appts     []int // every appointment booked for this order
-	visit     int   // current or last visit, -1 if none
-	walkIn    bool
-	lostWhy   string // observable reason, when lost
-	endedAt   simtime.Time
+	// anchor is the earliest date supplied to the current voluntary
+	// booking attempt's offer: practice displacements measure the
+	// patient's tolerance from it, never from a renewed date (V0.2_DESIGN
+	// §7.2). placements counts administrative replacements; displaced the
+	// times the practice displaced the order.
+	anchor     int64
+	placements int64
+	displaced  int
+	attempt    int64
+	state      orderState
+	appt       int   // current or last appointment, -1 if none
+	appts      []int // every appointment booked for this order
+	visit      int   // current or last visit, -1 if none
+	walkIn     bool
+	lostWhy    string // observable reason, when lost
+	endedAt    simtime.Time
 	// examAt is when the order's exam started (0 before); examSameVisit
 	// says it was on the walk-in visit itself, not a scheduled one.
 	examAt        simtime.Time
@@ -84,11 +96,12 @@ const (
 	apptMissed                       // provisional: not arrived by start + grace
 	apptNoShow                       // final, at accounting close
 	apptRescheduled                  // arrived too late (late policy) or after closing
+	apptDisplaced                    // the practice took its coverage away (V0.2); slot freed
 	numApptStates
 )
 
 var apptStateNames = [...]string{apptBooked: "booked", apptCancelled: "cancelled", apptArrived: "arrived",
-	apptMissed: "missed", apptNoShow: "no-show", apptRescheduled: "rescheduled"}
+	apptMissed: "missed", apptNoShow: "no-show", apptRescheduled: "rescheduled", apptDisplaced: "displaced"}
 
 type appt struct {
 	order    int
@@ -103,6 +116,14 @@ type appt struct {
 	visit    int          // -1 until the patient arrives
 	// scheduled is set once today's arrival and grace events are queued.
 	scheduled bool
+	// confirmed: no cancellation draw (the opening schedule). noShowLead
+	// is the booking lead in days the no-show probability uses; placement
+	// numbers an order's administrative replacements (0: none). A
+	// replacement for a displaced appointment keeps the original's
+	// confirmation, lead basis and behavioral attempt (V0.2_DESIGN §7.2).
+	confirmed  bool
+	noShowLead int64
+	placement  int64
 }
 
 // Why a template slot cannot be booked.
@@ -116,11 +137,11 @@ type slot struct {
 	SlotTemplate
 	why  uint8 // slotOK when bookable
 	appt int   // -1 when free
-	// staff is the set (bit per employee) of technologists rostered to the
-	// room at any time during the slot; shared is set when some of them
-	// also staff another room during it, so the slot competes for them
-	// (§5.3).
-	staff  uint64
+	// staff is the set of technologists (registry indices) rostered to
+	// the room at any time during the slot; shared is set when some of
+	// them also staff another room during it, so the slot competes for
+	// them (§5.3).
+	staff  empSet
 	shared bool
 }
 
@@ -156,8 +177,9 @@ type demandState struct {
 	visits           []visit
 	waiting          []int // open visits in arrival order
 	studies          []study
-	worklist         []int // unread and reading studies, in worklist-entry order
-	finals           []int // finalized studies, in finalization order
+	displaced        []displacement // practice-caused displacements, in order (displace.go)
+	worklist         []int          // unread and reading studies, in worklist-entry order
+	finals           []int          // finalized studies, in finalization order
 	flowToday        flowCounts
 	flowTotal        flowCounts
 	noShowsLastClose int
@@ -244,7 +266,7 @@ func (st *state) buildDay(day int64) *daySlots {
 // it is bookable, which technologists are rostered during it, and whether
 // it shares one with another room.
 func (st *state) coverSlot(cov *Coverage, r int, s *slot) {
-	s.why, s.staff, s.shared = slotOK, 0, false
+	s.why, s.staff, s.shared = slotOK, empSet{}, false
 	if ok, why := cov.SlotBookable(r, s.Span, st.cfg.Categories[s.Category].Contrast); !ok {
 		s.why = slotUnstaffed
 		if why == "no_supervision" {
@@ -255,14 +277,14 @@ func (st *state) coverSlot(cov *Coverage, r int, s *slot) {
 		if seg.To <= s.From || seg.From >= s.To {
 			continue
 		}
-		var here uint64
+		var here empSet
 		for _, e := range seg.Rooms[r] {
-			here |= 1 << uint(e)
+			here = here.with(e)
 		}
-		s.staff |= here
+		s.staff = s.staff.union(here)
 		for r2 := range seg.Rooms {
 			for _, e := range seg.Rooms[r2] {
-				if r2 != r && here&(1<<uint(e)) != 0 {
+				if r2 != r && here.has(e) {
 					s.shared = true
 				}
 			}
@@ -283,7 +305,7 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 	}
 	type piece struct {
 		from, to simtime.Duration
-		staff    uint64
+		staff    empSet
 	}
 	cut := func(room int, sp Span, proposed bool) ([]piece, bool) {
 		var out []piece
@@ -291,11 +313,11 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 			if seg.To <= sp.From || seg.From >= sp.To {
 				continue
 			}
-			var m uint64
+			var m empSet
 			for _, e := range seg.Rooms[room] {
-				m |= 1 << uint(e)
+				m = m.with(e)
 			}
-			if m == 0 {
+			if m.empty() {
 				if proposed {
 					return nil, false
 				}
@@ -309,9 +331,9 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 	if !ok {
 		return false
 	}
-	var comp uint64
+	var comp empSet
 	for _, p := range pieces {
-		comp |= p.staff
+		comp = comp.union(p.staff)
 	}
 	// The cluster linked to the new appointment by shared staff and
 	// overlapping time: assignments in disjoint clusters do not constrain
@@ -336,13 +358,13 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 				if o.From >= hi {
 					break
 				}
-				if o.appt < 0 || o.To <= lo || o.staff&comp == 0 || taken[ref{room, k}] {
+				if o.appt < 0 || o.To <= lo || !o.staff.meets(comp) || taken[ref{room, k}] {
 					continue
 				}
 				ps, _ := cut(room, o.Span, false)
 				linked := false
 				for _, p := range ps {
-					if p.staff&comp != 0 && overlaps(p) {
+					if p.staff.meets(comp) && overlaps(p) {
 						linked = true
 					}
 				}
@@ -351,7 +373,7 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 				}
 				taken[ref{room, k}] = true
 				for _, p := range ps {
-					comp |= p.staff
+					comp = comp.union(p.staff)
 					lo, hi = min(lo, p.from), max(hi, p.to)
 				}
 				pieces = append(pieces, ps...)
@@ -366,7 +388,7 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 		if a.to != b.to {
 			return int(a.to - b.to)
 		}
-		return int(a.staff) - int(b.staff)
+		return cmpSets(a.staff, b.staff)
 	})
 	// Assign technologists in start order; busy holds the technologists
 	// still in an earlier piece and when they come free.
@@ -381,12 +403,12 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 			return true
 		}
 		p := pieces[i]
-		var free uint64 = p.staff
+		free := p.staff
 		live := busy[:0:0]
 		for _, h := range busy {
 			if h.until > p.from {
 				live = append(live, h)
-				free &^= 1 << uint(h.tech)
+				free = free.without(h.tech)
 			}
 		}
 		key := make([]byte, 0, 8+12*len(live))
@@ -399,11 +421,7 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 			return v
 		}
 		res := false
-		for t := 0; free != 0 && !res; t++ {
-			if free&(1<<uint(t)) == 0 {
-				continue
-			}
-			free &^= 1 << uint(t)
+		for t := free.next(0); t >= 0 && !res; t = free.next(t + 1) {
 			next := append(slices.Clone(live), held{t, p.to})
 			slices.SortFunc(next, func(a, b held) int { return a.tech - b.tech })
 			res = assign(i+1, next)
@@ -420,6 +438,10 @@ func sharedFree(ds *daySlots, r int, s *slot) bool {
 // existence and category are checked by the scenario package.
 func CheckOpening(cfg *Config) map[int]string {
 	st := &state{cfg: cfg, cal: simtime.NewCalendar(cfg.Start.AddDays(-cfg.WarmupDays)), startDay: cfg.WarmupDays}
+	for i := range cfg.Employees {
+		st.emps = append(st.emps, employee{cfg: &cfg.Employees[i], terms: &cfg.Employees[i], shift: -1})
+	}
+	st.initStaff()
 	out := map[int]string{}
 	for i, op := range cfg.Opening {
 		day := st.startDay + op.Day
@@ -534,6 +556,7 @@ func (st *state) receiveOrder(e *Engine, key originKey) {
 // the order lost.
 func (st *state) offer(e *Engine, oi int, earliest int64, head, tail string) bool {
 	o := &st.dem.orders[oi]
+	o.anchor = earliest
 	pref, any, hasPref, hasAny := st.firstFit(o, earliest, e.Now())
 	var pick slotRef
 	switch {
@@ -641,7 +664,7 @@ func (st *state) book(e *Engine, oi int, r slotRef, confirmed bool) int {
 	}
 	ai := len(st.dem.appts)
 	st.dem.appts = append(st.dem.appts, appt{order: oi, room: r.room, day: r.day, slot: r.idx,
-		attempt: o.attempt, bookedAt: e.Now(), visit: -1})
+		attempt: o.attempt, bookedAt: e.Now(), visit: -1, confirmed: confirmed, noShowLead: r.day - st.cal.DayIndex(e.Now())})
 	s.appt = ai
 	ds := st.dem.days[r.day]
 	ds.booked++
@@ -738,7 +761,7 @@ func (st *state) loadOpening(e *Engine) {
 		tol := st.cfg.Behavior.ToleranceDays[op.Priority].Sample(st.hash("patient", key.keys()...).Lane(1))
 		st.dem.orders = append(st.dem.orders, order{
 			key: key, patient: st.dem.patients, source: op.Source, tolerance: tol,
-			exam: op.Exam, priority: op.Priority, earliest: day, appt: -1, visit: -1,
+			exam: op.Exam, priority: op.Priority, earliest: day, anchor: day, appt: -1, visit: -1,
 			payer: st.payerOf(st.hash("order.ext", key.keys()...).Lane(1)),
 		})
 		if !sharedFree(st.dem.days[day], op.Room, &st.dem.days[day].rooms[op.Room][idx]) {
@@ -801,9 +824,9 @@ func (st *state) checkDemand() error {
 		a := &d.appts[ai]
 		s := &d.days[a.day].rooms[a.room][a.slot]
 		o := &d.orders[a.order]
-		if a.state == apptCancelled {
+		if a.state == apptCancelled || a.state == apptDisplaced {
 			if s.appt == ai {
-				return fmt.Errorf("%s: cancelled but still holds its slot", apptID(ai))
+				return fmt.Errorf("%s: %s but still holds its slot", apptID(ai), apptStateNames[a.state])
 			}
 			continue
 		}
