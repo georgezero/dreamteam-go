@@ -54,8 +54,9 @@ type LossDiagnosis struct {
 	NoSupervision   int
 	Notice          int
 	SharedConflict  int
-	Unexplained     int // free and bookable: must stay 0 (FirstFit would have booked it)
-	OtherFree       int // free bookable slots of other categories in the modality's rooms
+	SharedAt        []simtime.Time // start of each shared-conflict slot (Step 0C)
+	Unexplained     int            // free and bookable: must stay 0 (FirstFit would have booked it)
+	OtherFree       int            // free bookable slots of other categories in the modality's rooms
 	OtherFreeMin    int64
 	Primary         string
 }
@@ -108,6 +109,7 @@ func (st *state) diagnoseLoss(now simtime.Time, oi int, earliest int64, hasAny b
 					d.Notice++
 				case !sharedFree(ds, r, s):
 					d.SharedConflict++
+					d.SharedAt = append(d.SharedAt, st.cal.At(day, s.From))
 				default:
 					d.Unexplained++
 				}

@@ -363,8 +363,8 @@ func (st *state) alertConditions(now simtime.Time) ([]cond, simtime.Time) {
 			continue
 		}
 		if warnAt := emp.capAt.Add(-cfg.CapWarn); now >= warnAt {
-			add(ruleCap, i, 2, 0, fmt.Sprintf("%s reaches the %d-hour shift limit at %s", emp.cfg.Name,
-				st.cfg.Policies.MaxShift/simtime.Hour, st.cal.Clock(emp.capAt)),
+			add(ruleCap, i, 2, 0, fmt.Sprintf("%s reaches %s at %s", emp.cfg.Name,
+				st.capName(emp.startAt, emp.capAt, "shift limit"), st.cal.Clock(emp.capAt)),
 				"work that cannot be finished by then is rescheduled; nobody works past the limit")
 		} else {
 			consider(warnAt)

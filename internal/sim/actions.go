@@ -172,7 +172,7 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	}
 	sh := plan.Shifts[k]
 	startAt, endAt := st.cal.At(day, sh.From), st.cal.At(day, sh.To)
-	capAt := startAt.Add(st.cfg.Policies.MaxShift)
+	capAt := st.cal.At(day, st.cfg.Policies.ShiftCap(sh.From))
 	if day == st.day {
 		emp := &st.emps[i]
 		switch {
@@ -185,8 +185,8 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	}
 	end := endAt.Add(d)
 	if end > capAt {
-		return false, "exceeds_max_shift", fmt.Sprintf("%s would work until %s, past the %d-hour limit at %s (at most +%s more).",
-			name, st.cal.Clock(end), st.cfg.Policies.MaxShift/simtime.Hour, st.cal.Clock(capAt), capAt.Sub(endAt))
+		return false, "exceeds_max_shift", fmt.Sprintf("%s would work until %s, past %s at %s (at most +%s more).",
+			name, st.cal.Clock(end), st.capName(startAt, capAt, "limit"), st.cal.Clock(capAt), capAt.Sub(endAt))
 	}
 	if plan.Hours == nil || sh.To >= plan.Hours.To {
 		return false, "after_close", fmt.Sprintf("%s's shift %s already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).", name, dateText)
@@ -264,7 +264,7 @@ func (w *World) Roster(day int64) []api.RosterEntry {
 		ext := st.ext[day][i]
 		x := api.RosterEntry{ID: ec.ID, Name: ec.Name, Role: string(ec.Role), Shift: span(sh.Span),
 			RosterEnd: simtime.FormatClock(sh.To - ext), ApprovedMin: int64(ext / simtime.Minute),
-			CapAt: simtime.FormatClock(sh.From + st.cfg.Policies.MaxShift)}
+			CapAt: simtime.FormatClock(st.cfg.Policies.ShiftCap(sh.From))}
 		if ec.Pay == Hourly {
 			x.HourlyCents = ec.RateCents
 		}

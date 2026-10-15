@@ -1,8 +1,12 @@
 # V0.2 Step 0 — sustainable-practice feasibility sweep
 
-Follow-up: **Step 0B** (`step0b/README.md`) diagnosed the CT/XR booking
+Follow-ups: **Step 0B** (`step0b/README.md`) diagnosed the CT/XR booking
 losses (shared technologists, not templates) and tested CT/XR templates as an
-added lever; the gate still fails (best +0.5% T90 margin).
+added lever; the gate still fails (best +0.5% T90 margin). **Step 0C**
+(`step0c/README.md`) fixed the noon shift-start limit and tested different
+technologist staffing architectures: a dedicated XR/CT day core with
+part-time evenings and restored reading earns +2.8% (20/20 seeds) at ×1.30
+demand, but not at ×1.15 (CONDITIONAL GO).
 
 **Question (owner decision 6, hard gate):** can the established practice
 become financially sustainable using only the documented V0.2 levers —
@@ -72,7 +76,8 @@ expressed**: scenario validation requires every shift's start plus
 `maxShiftHours` (12 h) to end by midnight, so no shift may start after
 12:00 (`internal/scenario/validate.go`). Evening coverage therefore costs
 a full shift. This is a V0.2 design input (part-time contracts need a
-per-shift or per-employee cap).
+per-shift or per-employee cap). (Fixed in Step 0C: the cap is now the earlier of
+start + `maxShiftHours` and accounting close.)
 
 Stages: (1) each lever alone from the base; (2) staffing packages × demand
 with `P40` and `A55`; (3) the same packages at the base allocation without

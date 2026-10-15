@@ -20,8 +20,9 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.6** | WebUI/SQLite, benchmark framework, managed-practice harness, comparisons and automation levels | V0.3 API, V0.4 statements, V0.5 growth benchmarks |
 
 **V0.2–V0.6: proposed in V0.2 design draft 2, pending the Step 0 gate** (first
-sweep 2026-10-14 and Step 0B 2026-10-15 did not pass; owner decision on the
-scenario premise pending).
+sweep 2026-10-14 and Step 0B 2026-10-15 did not pass; Step 0C 2026-10-15, a
+revised staffing architecture, passes conditionally at ×1.30 demand with a
+≈2.8% margin: CONDITIONAL GO pending owner decisions, design §18).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

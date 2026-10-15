@@ -45,8 +45,9 @@ type employee struct {
 	readFrom, blockEndAt simtime.Time
 	readDebt             simtime.Duration
 
-	// Today's shift in absolute time, and its hard cap
-	// (start + MaxShiftHours, SIMULATION_DESIGN §6.4). rosterEnd is the
+	// Today's shift in absolute time, and its hard cap (start +
+	// MaxShiftHours, never past accounting close: Policies.ShiftCap,
+	// SIMULATION_DESIGN §6.4). rosterEnd is the
 	// rostered end; endAt is the scheduled end, later by any approved
 	// extension (actions.go). Time past rosterEnd is overtime: approved up
 	// to endAt, required (held over) after it.
@@ -102,7 +103,7 @@ func (st *state) materialize(e *Engine, i int) {
 	s := &st.plan.Shifts[emp.shift]
 	emp.startAt, emp.endAt = st.cal.At(st.day, s.From), st.cal.At(st.day, s.To)
 	emp.rosterEnd = emp.endAt.Add(-st.ext[st.day][i])
-	emp.capAt = emp.startAt.Add(st.cfg.Policies.MaxShift)
+	emp.capAt = st.cal.At(st.day, st.cfg.Policies.ShiftCap(s.From))
 	push := func(at simtime.Duration, c Class, k Kind, b int64) {
 		e.Push(Event{At: st.cal.At(st.day, at), Class: c, Kind: k, Gen: emp.gen, A: int64(i), B: b})
 	}
@@ -429,6 +430,15 @@ func (st *state) desk() (level int, by int) {
 	return level, by
 }
 
+// capName names what sets a shift's cap: "the 12-hour <what>", or accounting
+// close for a shift starting late enough that it binds first.
+func (st *state) capName(startAt, capAt simtime.Time, what string) string {
+	if capAt == startAt.Add(st.cfg.Policies.MaxShift) {
+		return fmt.Sprintf("the %d-hour %s", st.cfg.Policies.MaxShift/simtime.Hour, what)
+	}
+	return "the end of the working day (accounting close)"
+}
+
 func (st *state) checkStaffing() error {
 	for i := range st.emps {
 		emp := &st.emps[i]
@@ -448,7 +458,7 @@ func (st *state) checkStaffing() error {
 		case st.now < emp.startAt:
 			return fmt.Errorf("%s on duty before the shift starts", emp.cfg.Name)
 		case st.now > emp.capAt:
-			return fmt.Errorf("%s on duty past the %s shift cap", emp.cfg.Name, st.cfg.Policies.MaxShift)
+			return fmt.Errorf("%s on duty past the shift cap %s", emp.cfg.Name, st.cal.Clock(emp.capAt))
 		case !emp.over && st.now >= emp.endAt:
 			return fmt.Errorf("%s past shift end but not marked over", emp.cfg.Name)
 		case (emp.status == busy) != (emp.task != taskNone):

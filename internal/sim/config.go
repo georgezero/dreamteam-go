@@ -569,3 +569,11 @@ func (c *Coverage) OnBreak(r int) []Span {
 	}
 	return out
 }
+
+// ShiftCap is the latest clock time a shift starting at from may run to,
+// holdover included (SIMULATION_DESIGN §6.4): MaxShift after its start, and
+// never past accounting close (23:59:59). MaxShift caps a shift's length,
+// not its start: a short shift may start late in the day.
+func (p Policies) ShiftCap(from simtime.Duration) simtime.Duration {
+	return min(from+p.MaxShift, simtime.Day-1)
+}

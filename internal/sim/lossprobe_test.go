@@ -44,7 +44,7 @@ func TestLossProbeIsPassive(t *testing.T) {
 		if d.Unexplained != 0 || d.Primary == "unexplained" {
 			t.Fatalf("%s: a free bookable slot in the window: %+v", d.Order, d)
 		}
-		if d.Slots != d.Booked+d.Unstaffed+d.NoSupervision+d.Notice+d.SharedConflict {
+		if d.Slots != d.Booked+d.Unstaffed+d.NoSupervision+d.Notice+d.SharedConflict || len(d.SharedAt) != d.SharedConflict {
 			t.Fatalf("%s: slot reasons do not add up: %+v", d.Order, d)
 		}
 	}

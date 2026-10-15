@@ -109,26 +109,29 @@ func TestRegress04HoldForRegisteringPatient(t *testing.T) {
 }
 
 // Finding 5: a shift whose 12-hour cap reaches midnight lets documentation
-// end at 00:00, after the next day has started. Either the scenario is
-// rejected (cap must end by accounting close), or, if it runs, the
-// overtime and the operational close must still be recorded for the day.
+// end at 00:00, after the next day has started. Since V0.2 Step 0C a shift
+// may start after noon; its cap is then accounting close (23:59:59), not
+// start + 12 h, so the scenario runs: the 23:30 patient, arriving 23:36,
+// cannot be imaged before the day's close and is rescheduled, and nobody
+// works past midnight.
 func TestRegress05MidnightBoundary(t *testing.T) {
-	f, err := scenario.Load(os.DirFS("testdata"), "micro-midnight.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if _, err := scenario.Compile(f); err != nil {
-		if !strings.Contains(err.Error(), "accounting close") {
-			t.Fatalf("rejected for the wrong reason: %v", err)
-		}
-		return // fixed: the day's work must end by accounting close
-	}
 	w, day := micro(t, "micro-midnight.json")
 	if err := runTo(w, day.Add(30*simtime.Hour)); err != nil {
 		t.Fatal(err)
 	}
-	if ot := w.Observe(0).Flow.SinceStart.OvertimeMin; ot != 15 {
-		t.Fatalf("overtime %dm recorded, want 15m (23:45–24:00)", ot)
+	if err := w.Check(); err != nil {
+		t.Fatal(err)
+	}
+	fl := w.Observe(0).Flow.SinceStart
+	if fl.ExamsStarted != 0 || fl.Rescheduled != 1 || fl.OvertimeMin != 0 {
+		t.Fatalf("exams %d, rescheduled %d, overtime %dm; want 0, 1, 0", fl.ExamsStarted, fl.Rescheduled, fl.OvertimeMin)
+	}
+	found := false
+	for _, l := range w.Observe(50).RecentLog {
+		found = found || strings.Contains(l.Text, "before the end of the working day")
+	}
+	if !found {
+		t.Fatal("no end-of-day reschedule reason logged")
 	}
 }
 

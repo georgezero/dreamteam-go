@@ -5,6 +5,7 @@ package sim_test
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"slices"
 	"sort"
@@ -115,6 +116,28 @@ type window struct {
 	LossBeyondP50 map[string]int64   `json:"lossBeyondP50Days"`
 	LossBeyondP90 map[string]int64   `json:"lossBeyondP90Days"`
 	LossOtherFree map[string]float64 `json:"lossOtherFreeMinMean"`
+	// When the shared-technologist conflicts fell (Step 0C): each lost
+	// referral with shared-conflict slots spreads a weight of 1 over them,
+	// by modality and slot "weekday hour" ("Tue 08").
+	LossSharedAt map[string]map[string]float64 `json:"lossSharedAt"`
+	// Staffing and obligations (Step 0C): qualified staffed hours per room
+	// during open hours, by modality; technologist on-duty hours; per
+	// person on-duty hours; final reports by modality; radiologist salary
+	// and benefits for the window (site allocation × annual salary ×
+	// (1 + benefits) × days / 365, an estimate to the dollar); liabilities
+	// and receivables at the window's end.
+	StaffedH   []float64          `json:"staffedHours"`
+	TechDutyH  float64            `json:"techDutyHours"`
+	StaffDutyH map[string]float64 `json:"staffDutyHours"`
+	ReportsMod []int              `json:"reportsByModality"`
+	ReadingEst int64              `json:"readingCostEstCents"`
+	APEnd      int64              `json:"payablesEndCents"`
+	PayrollEnd int64              `json:"accruedPayrollEndCents"`
+	AREnd      int64              `json:"receivablesEndCents"`
+	// Lowest cash in the window, sampled daily at the takeover's clock time
+	// (06:00), and the day it occurred (1 = the morning after the takeover).
+	MinCash    int64 `json:"minCashCents"`
+	MinCashDay int   `json:"minCashDay"`
 }
 
 // tatStat: studies acquired in a window, as of its end. Percentiles and
@@ -230,11 +253,16 @@ func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*s
 	cal := w.Calendar()
 	d0 := cal.DayIndex(start)
 	var backlog []int
+	minCash, minDay := int64(math.MaxInt64), 0
 	for d := 1; d <= days; d++ {
+		w.Engine().RunUntil(start.Add(simtime.Duration(d)*simtime.Day), nil)
+		if c := w.Observe(0).Finance.CashCents; c < minCash {
+			minCash, minDay = c, d
+		}
 		if d == 30 || d == days {
-			w.Engine().RunUntil(start.Add(simtime.Duration(d)*simtime.Day), nil)
 			win := measure(w, cfg, start, d)
-			lossCauses(win, losses, start, start.Add(simtime.Duration(d)*simtime.Day))
+			win.MinCash, win.MinCashDay = minCash, minDay
+			lossCauses(win, losses, cal, start, start.Add(simtime.Duration(d)*simtime.Day))
 			win.Backlog730 = slices.Clone(backlog)
 			r.Windows[fmt.Sprintf("%dd", d)] = win
 		}
@@ -250,7 +278,8 @@ func calibrate(t *testing.T, cfg *sim.Config, seed int64, days int, plan func(*s
 
 // lossCauses tabulates the diagnosed losses of referral orders received
 // in (start, end].
-func lossCauses(win *window, losses []sim.LossDiagnosis, start, end simtime.Time) {
+func lossCauses(win *window, losses []sim.LossDiagnosis, cal simtime.Calendar, start, end simtime.Time) {
+	win.LossSharedAt = map[string]map[string]float64{}
 	win.LossPrimary, win.LossAnyCause, win.LossPriority = map[string]map[string]int{}, map[string]map[string]int{}, map[string]map[string]int{}
 	win.LossBeyondP50, win.LossBeyondP90, win.LossOtherFree = map[string]int64{}, map[string]int64{}, map[string]float64{}
 	add := func(m map[string]map[string]int, md, k string) {
@@ -282,6 +311,12 @@ func lossCauses(win *window, losses []sim.LossDiagnosis, start, end simtime.Time
 		}
 		other[md] += d.OtherFreeMin
 		n[md]++
+		for _, at := range d.SharedAt {
+			if win.LossSharedAt[md] == nil {
+				win.LossSharedAt[md] = map[string]float64{}
+			}
+			win.LossSharedAt[md][cal.Weekday(at).String()+" "+cal.Clock(at)[:2]] += 1 / float64(len(d.SharedAt))
+		}
 	}
 	for md, xs := range beyond {
 		win.LossBeyondP50[md], win.LossBeyondP90[md] = pctl(xs, 50), pctl(xs, 90)
@@ -310,6 +345,7 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 	win.LeadP50, win.LeadP90, win.UtilOpen, win.UtilStaff, win.Coverage, win.RevPerRpt =
 		make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n)
 	win.TueFriDay, win.MonDay, win.SatDay = make([]float64, n), make([]float64, n), make([]float64, n)
+	win.StaffedH, win.ReportsMod = make([]float64, n), make([]int, n)
 	win.ReqLeadP50, win.ReqLeadP90, win.DelayP50, win.DelayP90 = make([]int64, n), make([]int64, n), make([]int64, n), make([]int64, n)
 	exam := map[string]string{}
 	for _, x := range cfg.Catalog {
@@ -363,6 +399,7 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 		k := modIdx[r.Modality]
 		win.Exams[k] += r.Exams
 		win.UtilOpen[k], win.UtilStaff[k], win.Coverage[k] = r.UtilOpen.BP(), r.UtilStaffed.BP(), r.Coverage.BP()
+		win.StaffedH[k] += float64(r.Coverage.Num) / 3600
 	}
 	// Per weekday type, from the calendar days fully inside the window.
 	var tf, mon, sat int
@@ -411,8 +448,15 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 		}
 	}
 	win.TechUtil, win.ReadUtil = api.Ratio{Num: tb, Den: td}.BP(), api.Ratio{Num: rb, Den: rd}.BP()
-	win.StaffUtil, win.StaffOT = map[string]int64{}, map[string]int64{}
+	win.TechDutyH = float64(td) / 3600
+	win.StaffUtil, win.StaffOT, win.StaffDutyH = map[string]int64{}, map[string]int64{}, map[string]float64{}
+	for _, ec := range cfg.Employees {
+		if ec.Role == sim.Radiologist && ec.Pay == sim.Salaried {
+			win.ReadingEst += ec.RateCents * ec.SiteAllocationBP / 10_000 * (10_000 + cfg.Finance.BenefitsBP) / 10_000 * int64(days) / 365
+		}
+	}
 	for _, s := range ops.Staff {
+		win.StaffDutyH[s.Name] = float64(s.OnDutySec) / 3600
 		u := s.Util.BP()
 		if s.Role == "radiologist" {
 			u = s.ReadUtil.BP()
@@ -420,6 +464,7 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 		win.StaffUtil[s.Name], win.StaffOT[s.Name] = u, s.OvertimeSec/60
 	}
 	for _, mm := range m.Ledger.ByModality {
+		win.ReportsMod[modIdx[mm.Modality]] += mm.ReportsFinal
 		if mm.ReportsFinal > 0 {
 			win.RevPerRpt[modIdx[mm.Modality]] = mm.NetRevenueCents / int64(mm.ReportsFinal)
 		}
@@ -429,6 +474,8 @@ func measure(w *sim.World, cfg *sim.Config, start simtime.Time, days int) *windo
 	win.MarginBP = m.Margin.BP()
 	win.Collect, win.Disburse, win.ARChange, win.CashEnd = m.CollectionsCents, m.DisbursementsCents, m.ARChangeCents, m.CashEndCents
 	win.OTMin, win.ApprOTMin = ops.Workforce.OvertimeSec/60, ops.Workforce.ApprovedOvertimeSec/60
+	fin := w.Observe(0).Finance
+	win.APEnd, win.PayrollEnd, win.AREnd = fin.APCents, fin.AccruedPayrollCents, fin.ARCents
 	win.Extra["walkInsDeclined"] = ops.WalkIns.Declined
 	win.Extra["walkInsImaged"] = ops.WalkIns.SameVisitExams
 	win.Extra["heldOver"] = ops.Workforce.HeldOver

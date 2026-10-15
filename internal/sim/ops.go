@@ -538,7 +538,7 @@ func (st *state) releaseHeld(e *Engine) {
 // returns a reason if not.
 func (st *state) servable(xi int, from simtime.Time, task simtime.Duration) (bool, string) {
 	x := &st.cfg.Catalog[xi]
-	qualified, fits := false, false
+	qualified, fits, dayBound := false, false, true
 	for i := range st.emps {
 		emp := &st.emps[i]
 		if emp.cfg.Role != Technologist || !emp.cfg.HasSkill(x.Modality) || emp.shift < 0 || emp.done ||
@@ -547,10 +547,13 @@ func (st *state) servable(xi int, from simtime.Time, task simtime.Duration) (boo
 		}
 		qualified = true
 		fits = fits || max(from, emp.startAt).Add(task) <= emp.capAt
+		dayBound = dayBound && emp.capAt != emp.startAt.Add(st.cfg.Policies.MaxShift)
 	}
 	switch {
 	case !qualified:
 		return false, fmt.Sprintf("no %s technologist for the rest of today", x.Modality)
+	case !fits && dayBound:
+		return false, fmt.Sprintf("no %s technologist can finish before the end of the working day (accounting close)", x.Modality)
 	case !fits:
 		return false, fmt.Sprintf("no %s technologist can finish within the %d-hour shift limit",
 			x.Modality, st.cfg.Policies.MaxShift/simtime.Hour)

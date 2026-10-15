@@ -7,6 +7,61 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 step 0C — late shifts and staffing architectures (0.2.0-dev.0.2)
+
+Owner option G (2026-10-15): fix the noon shift-start limit, then test
+explicitly different, fully costed technologist staffing architectures for a
+larger practice. No action code; `established` and `mini` untouched.
+
+* **Late shifts (engine).** A shift's cap, holdover included, is now the
+  earlier of start + `maxShiftHours` and accounting close (23:59:59):
+  `sim.Policies.ShiftCap`, used by runtime staffing, `extend_shift`, the
+  roster view and alerts. Validation rejects shifts longer than
+  `maxShiftHours` or ending after 23:59:59, not shifts starting after noon.
+  Messages name accounting close when it is the binding limit.
+  * Regression tests written failing first: `TestShortLateShifts`
+    (16:00–20:00, 17:00–20:00, 11:30–20:00, 19:00–23:59 valid; over-cap and
+    past-midnight rejected), `TestShiftCap`, `TestShortLateShiftsRun` (late
+    shifts staff their rooms; invariants hold daily).
+  * `TestRegress05MidnightBoundary` now runs its fixture: the late patient
+    is rescheduled and nobody works past midnight.
+  * Every existing roster starts before noon, so caps, goldens, replay and
+    determinism are unchanged.
+* **Harness** (calibration build tag, read-only): records conflict timing
+  (weekday × hour), qualified staffed hours, technologist duty hours,
+  reports by modality, estimated radiologist cost, payables, accrued
+  payroll, receivables and the lowest daily cash. The test-only loss probe
+  records each shared-conflict slot's start. The 20-seed Step 0B candidate
+  reproduces exactly.
+* **Sweep** (`docs/calibration/feasibility/step0c/`; 74 manifests; 9 paired
+  seeds, 20 for the leaders):
+  * 62% of CT shared-technologist losses were on Mondays.
+  * A part-time MR evening is worth +$4.9k a month with no volume change.
+  * Dedicated or float XR/CT coverage removes 80–95% of shared losses.
+  * Part-time beats full-time for the same coverage by $2.6–7.8k a month.
+  * The extra volume overwhelms reading: urgent p90 188 → 1,046 minutes at
+    the base allocation.
+* **Lead candidate** (×1.30 demand, 20 seeds): dedicated XR/CT day core,
+  part-time evenings, reading at 62.5/52.5%.
+  * Margin +2.8% (1.5–5.0%, median 2.6%); profitable on 20/20 seeds at T90
+    and in days 31–90; lowest cash ≈$51k.
+  * Breach rates better than the shared control: urgent 10.1% vs 10.4%,
+    soon 27% vs 37%, routine 4.2% vs 7.0%.
+  * 145 fewer lost referrals and 101 fewer walk-ins leaving.
+  * At ×1.15 demand every architecture loses money (lead −4.0%); at ×1.50,
+    out of range, +6.3%.
+* **Verdict: CONDITIONAL GO.** Owner decisions (design §18): accept a
+  ≈1.5–5% band; accept ×1.30 as the defining demand; choose the starting
+  state (the candidate, or the shared practice with reorganization as the
+  player's task); decide how part-time contracts are reached; freeze the
+  service tolerances.
+* **Housekeeping:** removed a committed `__pycache__` file; `.gitignore`
+  ignores `__pycache__/`.
+* **Verification:** new and updated regression tests; `go vet -tags
+  calibration`; control reproduction; full uncached `go test -count=1 ./...`.
+
+---
+
 ## V0.2 step 0B — CT/XR booking losses and templates (0.2.0-dev.0.1)
 
 Owner option B (2026-10-15): find why CT/XR referrals are lost while their
