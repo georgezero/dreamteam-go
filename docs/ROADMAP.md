@@ -82,8 +82,8 @@ criteria and determinism tests are the same as before; only the order changed.
 | 16 | TUI polish: responsive layouts (all breakpoints), help, filters, theme / `NO_COLOR` | all screens at every size | **golden screen snapshots at 80×24, 120×36, 160×48** (layout now stable). **As done (dev.18.3):** help `?`, log filters, NO_COLOR, `TestScreenSnapshots` |
 | 17 | End-to-end: TUI action → run record → headless replay | — | identical digests TUI vs headless. **As done (dev.18.3):** `TestTUIRunReplaysHeadless`; CI on amd64/arm64/macOS |
 | 18 | Calibration pass for `moderate` (per weekday type); preset bands; `docs/ASSUMPTIONS.md`; **P&L calibration workbook** (§10) | — | calibration suite (build tag); engine T30 margin within ±2 pp of the workbook for the same inputs. **As done:** the default became a struggling, capacity-constrained practice (owner decision); nine-seed report and calibration suite (`-tags calibration`); the `moderate` better-staffed preset, the workbook and `ASSUMPTIONS.md` moved to the next scenario milestone. **18.1:** review remediation (extension overflow, booking feasibility, walk-in cohorts), reproducible experiment manifests and results, urgent-turnaround analysis. **18.2:** urgency takes precedence under every worklist policy (gameplay rule); calibration phase closed |
-| 19 | Performance pass on the Pi (build, 90-day run, TUI CPU, Max-speed responsiveness) | — | acceptance criterion 16 |
-| 20 | README, docs sync, change notes | — | — |
+| 19 | Performance pass on the Pi (build, 90-day run, TUI CPU, Max-speed responsiveness) | — | acceptance criterion 16. **As done (dev.20):** measured and profiled; idle TUI 3.0% → 0.4%; Pi 4 misses `run -days 90` < 2 s (≈3.3 s, software SHA-256), a Cortex-A76 meets all targets (`docs/MEASUREMENTS.md`) |
+| 20 | README, docs sync, change notes | — | — **As done (dev.20):** `README.md`, `docs/ACCEPTANCE.md` |
 
 Notes:
 

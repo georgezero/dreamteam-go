@@ -265,3 +265,16 @@ func BenchmarkEstablishedWarmup(b *testing.B) {
 		w.Engine().RunUntil(w.StartTime(), nil)
 	}
 }
+
+// The 90 days of play after the takeover, warm-up excluded (criterion 16
+// asks for run --days 90 < 2 s including it).
+func BenchmarkEstablishedPlay90(b *testing.B) {
+	cfg := established(b)
+	for b.Loop() {
+		b.StopTimer()
+		w := sim.New(cfg, rng.SeedFromInt(7))
+		w.Engine().RunUntil(w.StartTime(), nil)
+		b.StartTimer()
+		w.Engine().RunUntil(w.StartTime().Add(90*simtime.Day), nil)
+	}
+}

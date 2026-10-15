@@ -21,9 +21,9 @@ evidence passes on the current commit; deviations say why.
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 8 | Same scenario, seed and actions give identical digests: headless vs TUI, any speed sequence, any frame rate, amd64 vs arm64 | Met on arm64 (two machines); amd64 and macOS in CI | `TestTUIRunReplaysHeadless` (random speeds, frame gaps, pauses, steps, alerts and actions from the actions screen; all five digests equal a headless rebuild and a replay), `TestSpeedsIdentical`, `TestResultIndependentOfChunkingAndSpeed`. `.github/workflows/ci.yml` runs the suite and the golden references on linux/amd64, linux/arm64 and darwin/arm64 and compares the three platforms' results byte for byte. |
-| 9 | Chunking invariance for ≥ 1,000 random chunkings | Met | `TestChunkingInvariance` (engine, 1,000 chunkings); `TestAcceptanceChunking` (`-tags acceptance`: the real simulation, warm-up through one day of operations, 1,000 random chunkings, log and state digests); `TestOperationsChunkingInvariance`, `TestReplayChunkingInvariance`, `TestMetricsChunkingInvariance`, `TestActionsChunkingAndNoise` |
-| 10 | All invariants hold for every timestamp over 50 seeds × 90 days | PENDING | `TestAcceptanceInvariants` (`-tags acceptance`) |
+| 8 | Same scenario, seed and actions give identical digests: headless vs TUI, any speed sequence, any frame rate, amd64 vs arm64 | Met | `TestTUIRunReplaysHeadless` (random speeds, frame gaps, pauses, steps, alerts and actions from the actions screen; all five digests equal a headless rebuild and a replay), `TestSpeedsIdentical`, `TestResultIndependentOfChunkingAndSpeed`. `.github/workflows/ci.yml` runs the suite and the golden references on linux/amd64, linux/arm64 and darwin/arm64 and compares the three platforms' results byte for byte; first run (75d217c) green: all four golden runs byte-identical on linux/amd64, linux/arm64 and darwin/arm64, and outcome-identical to the references (Go 1.26.0 there, 1.27.1 on the Pi). |
+| 9 | Chunking invariance for ≥ 1,000 random chunkings | Met | `TestChunkingInvariance` (engine, 1,000 chunkings); `TestAcceptanceChunking` (`-tags acceptance`: the real simulation, warm-up through one day of operations, 1,000 random chunkings, log and state digests; passed); `TestOperationsChunkingInvariance`, `TestReplayChunkingInvariance`, `TestMetricsChunkingInvariance`, `TestActionsChunkingAndNoise` |
+| 10 | All invariants hold for every timestamp over 50 seeds × 90 days | Met | `TestAcceptanceInvariants` (`-tags acceptance`): 50 seeds × 90 days from the takeover, every invariant after every transaction; passed (53.5 min on four Cortex-A76 cores) |
 | 11 | Leakage: observation deny-list reflection test; same-past / different-future observation equality; `StepVisible` | Met | `TestObservationHasNoLatentFields`, `TestOpeningStateHidesTheFuture`, `TestMetricsAndAlertsRevealNoFuture`, `TestIDsRevealNoFutureDemand`, `TestFinanceOutcomesNotLeaked`, `TestResultHasNoHiddenData`, `TestStepVisibleLandsOnNewEntry` |
 
 ## Realism and calibration
@@ -36,7 +36,7 @@ evidence passes on the current commit; deviations say why.
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 16 | Warm-up < 1.5 s; `run --days 90` < 2 s; TUI at 10 fps < 15% of a core at 15 min/s; Max speed responds to `space` within 100 ms | PENDING (performance pass) | `docs/MEASUREMENTS.md` |
+| 16 | Warm-up < 1.5 s; `run --days 90` < 2 s; TUI at 10 fps < 15% of a core at 15 min/s; Max speed responds to `space` within 100 ms | Partly met on the Pi 4; met on a Cortex-A76 | Pi 4 (throttled, loaded): warm-up 1.44–1.49 s best (met only at best), `run -days 90` ≈3.3 s (**not met**: no SHA-256 instructions; keyed draws are hashed), TUI 7.4–8.2% of a core at 15 min/s (met; idle 0.4%), Max-speed worst frame 52–94 ms (met). Cortex-A76 (joofi): warm-up 0.53 s, `run -days 90` 1.1–1.2 s. `docs/MEASUREMENTS.md`. Meeting 2 s on a Pi 4 would need a different keyed-draw hash: an engine-version decision for the owner. |
 
 ## Owner additions
 

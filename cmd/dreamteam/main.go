@@ -68,6 +68,9 @@ func usage() {
                             unless -overwrite)
   Exit codes: 0 ok · 1 error (I/O, scenario) · 2 invalid input · 3 replay failure
               · 4 golden mismatch · 5 incompatible or unsupported format
+  dreamteam scenario list | validate ID|FILE | coverage ID|FILE
+                                                   bundled scenarios; check one; show its
+                                                   weekly staffing coverage
   dreamteam version                                print the version
 
 In the terminal UI press ? for the keys. Colors follow the terminal; NO_COLOR=1 turns them off.
@@ -112,7 +115,10 @@ func play(args []string) int {
 	}
 	m := tui.New(s)
 	m.SetSavePath(*save)
-	if _, err := tea.NewProgram(m).Run(); err != nil {
+	// The model changes at most 10 times a second (its frame clock) plus on
+	// keys; a 20 fps renderer shows every change within 50 ms without
+	// polling at the default 60.
+	if _, err := tea.NewProgram(m, tea.WithFPS(20)).Run(); err != nil {
 		fmt.Fprintln(os.Stderr, "dreamteam:", err)
 		return 1
 	}

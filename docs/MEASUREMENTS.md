@@ -224,3 +224,51 @@ No engine change; warm-up and run times as in step 15.
 | First feasibility version (cut every booked slot on each call) | 2.4–3.0 s; profiling showed the cutting dominated, so booked slots are now screened by shared staff and time window before cutting |
 | `-tags calibration -run 'CalibrationExperiments$'`: 10 manifests, 9 seeds each (6 × 90 days, 4 × 30 days) | ≈270 s |
 | `TestRegress18WalkInCohorts` (established, 21 days, per-day cohort checks) | ≈3 s |
+
+## 2026-10-14 — V0.1 step 19: performance pass (criterion 16)
+
+Raspberry Pi 4 (Cortex-A72, 4 cores), at 80–83 °C (throttling) with other
+users' processes keeping the load average at 4–11; best of interleaved runs.
+The A72 has no SHA-256 instructions (`/proc/cpuinfo` features: fp asimd
+evtstrm crc32 cpuid), so Go uses its generic SHA-256.
+
+| Measurement | Command | Result | Target |
+|---|---|---|---|
+| Warm-up (180 days, in process) | `-bench EstablishedWarmup$` | 1.44–1.49 s best of six (1.6–2.4 s in loaded runs) | < 1.5 s: met at best, not under load |
+| 90 days of play after the takeover (in process) | `-bench EstablishedPlay90` (new) | 1.07–1.10 s best of six | — |
+| `dreamteam run -days 90 -seed 7 -format json` (warm-up, play, result with digests) | `meas.py` wall time | 3.3 s best of three (4.2–5.3 s loaded), 57–62 MB peak RSS | < 2 s: **not met** |
+| `dreamteam run -days 0` (warm-up and result) | same | 2.05 s best of three | — |
+| TUI paused (idle), 140×40 | `/proc/PID/stat` over 60 s in tmux | 0.4% of one core (was 3.0%) | — |
+| TUI running at 15 min/s, 10 fps, 140×40 | same | 7.4–8.2% of one core | < 15%: met |
+| Max speed: frame time (simulation step + render), 20 days | `-bench MaxSpeedFrames` (new) | p50 23–27 ms, worst 52–94 ms (one frame = one simulated day) | `space` within 100 ms: met |
+
+The same commit on joofi (Cortex-A76, 4 cores, with SHA-256 and AES
+instructions; load average 5–10): warm-up 0.53–0.61 s (`-bench`),
+90 days of play 0.41–0.47 s, `dreamteam run -days 90 -seed 7 -format json`
+1.09–1.22 s wall, `-days 0` 0.60–0.74 s — **every criterion 16 target is
+met on that class of machine**.
+
+Acceptance suite (`-tags acceptance`, test binary of 75d217c on joofi):
+criterion 10, invariants after every transaction for 50 seeds × 90 days of
+the established practice, passed in 53.5 min on four cores; criterion 9,
+1,000 random chunkings of the real simulation, passed in 22.6 s. On the Pi
+4, one seed of criterion 10 takes ≈7 min (the full invariant check walks
+every record after every transaction).
+
+**Profile of a 90-day run** (`-cpuprofile`, warm-up plus play): SHA-256
+16–17% (keyed draws `rng.Hash` and the log hash), order disclosure and
+booking 24% (of which FirstFit 13% and the shared-staff feasibility check
+6%), `fmt` for log text ≈6%, allocation and GC ≈15%, alerts 5.6%, the
+ledger 2.8%. No single hotspot: reaching 2 s on a Pi 4 needs either a
+different keyed-draw hash (it would change every outcome and digest, so
+it is an engine-version decision, not a tune-up) or broad allocation work.
+
+**Changes kept.** The frame clock stops while the game is paused (no
+renders between keys), and the renderer runs at 20 fps instead of Bubble
+Tea's default 60: idle CPU 3.0% → 0.4%; outcomes are unaffected (the TUI
+never changes them; `TestTUIRunReplaysHeadless`).
+
+**Tried and reverted.** A per-day free-slot count to skip full days in
+FirstFit: outcomes identical, but best-of-six play time moved only 1.10 →
+1.07 s (days are rarely full for the category searched), so not worth the
+extra state.

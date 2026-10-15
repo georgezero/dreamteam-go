@@ -87,6 +87,9 @@ type Model struct {
 	height    int
 	status    string
 	quitting  bool
+	// ticking: the frame clock runs only while the simulation does, so a
+	// paused TUI uses no CPU between keys.
+	ticking bool
 
 	screen screen
 	// Schedule screen: day offset from today, selected room, list scroll.
@@ -259,7 +262,10 @@ func filterPatients(rows []api.PatientRow, f int) []api.PatientRow {
 }
 
 // Init starts the frame clock.
-func (m *Model) Init() tea.Cmd { return tick() }
+func (m *Model) Init() tea.Cmd {
+	m.ticking = true
+	return tick()
+}
 
 // Update handles messages.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -268,9 +274,18 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width, m.height = msg.Width, msg.Height
 	case tickMsg:
 		m.frame(time.Time(msg))
+		if !m.running {
+			m.ticking = false // paused: no frames until space
+			return m, nil
+		}
 		return m, tick()
 	case tea.KeyPressMsg:
-		return m, m.key(msg.String())
+		cmd := m.key(msg.String())
+		if m.running && !m.ticking && cmd == nil {
+			m.ticking = true
+			return m, tick()
+		}
+		return m, cmd
 	}
 	return m, nil
 }

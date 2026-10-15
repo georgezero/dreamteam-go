@@ -7,6 +7,49 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## Steps 19–20 — Performance pass, acceptance results, release docs (v0.1.0-dev.20)
+
+**Acceptance results.** Criterion 10: invariants after every transaction,
+50 seeds × 90 days — passed (53.5 min on four Cortex-A76 cores; one seed
+takes ≈7 min on the Pi 4). Criterion 9: 1,000 random chunkings of the real
+simulation — passed. Criterion 8: the first CI run produced byte-identical
+golden runs on linux/amd64, linux/arm64 and darwin/arm64. Every criterion
+and its evidence: `docs/ACCEPTANCE.md`.
+
+**Performance (criterion 16)**, details in `docs/MEASUREMENTS.md`:
+
+| | Pi 4 (throttled, loaded) | Cortex-A76 (joofi) | Target |
+|---|---|---|---|
+| Warm-up | 1.44–1.49 s best | 0.53 s | < 1.5 s |
+| `run -days 90` | ≈3.3 s | 1.1–1.2 s | < 2 s |
+| TUI at 15 min/s | 7.4–8.2% of a core | — | < 15% |
+| TUI paused | 0.4% (was 3.0%) | — | — |
+| Max speed, worst frame | 52–94 ms | — | `space` within 100 ms |
+
+The Pi 4 misses the 90-day target: its CPU has no SHA-256 instructions and
+the keyed draws (the determinism contract) are SHA-256; the profile has no
+other dominant hotspot. Changing the draw hash would change every outcome
+and digest — an engine-version decision for the owner, not a tune-up. A
+per-day free-slot cache for FirstFit was tried (outcomes identical) and
+reverted: 3% at best.
+
+**Changes.** The TUI's frame clock stops while paused and the renderer runs
+at 20 fps (idle CPU 3.0% → 0.4%; outcomes unaffected). New benchmarks:
+`BenchmarkEstablishedPlay90` (sim) and `BenchmarkMaxSpeedFrames` (TUI frame
+times at Max). `dreamteam help` lists the `scenario` command.
+
+**Release docs.** `README.md` (what it is, quick start, controls, actions,
+scenarios, headless runs, sessions and replay, development, documents,
+known limitations) and `docs/ACCEPTANCE.md`.
+
+**Open for the owner.** (1) Accept criterion 16 on the Pi 4 as measured, or
+decide on a faster keyed-draw hash for a later engine version. (2)
+Criterion 1's "unread backlog at the takeover" does not hold for the
+struggling practice (reading is over-provisioned at its volume). (3) Tag
+V0.1 when satisfied.
+
+---
+
 ## Steps 16–17 — Acceptance pass, part 1: TUI polish and end-to-end replay (v0.1.0-dev.18.3)
 
 The V0.1 acceptance pass (ROADMAP §2), with the owner's list. The

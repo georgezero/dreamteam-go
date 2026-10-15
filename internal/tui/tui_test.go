@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -827,4 +828,41 @@ func snapshotText(r string) string {
 	top := strings.ReplaceAll(lines[0], "v"+version.Number, "vVERSION")
 	lines[0] = strings.Join(strings.Fields(top), " ")
 	return strings.Join(lines, "\n") + "\n"
+}
+
+// Max-speed responsiveness (criterion 16): a key is handled between
+// frames, so the longest frame (simulation step plus render) bounds the
+// delay before space takes effect. Reports p50, p99 and max frame time
+// over 20 simulated days of the established practice at Max.
+func BenchmarkMaxSpeedFrames(b *testing.B) {
+	for range b.N {
+		b.StopTimer()
+		s, err := session.Open("established", 1)
+		if err != nil {
+			b.Fatal(err)
+		}
+		m := New(s)
+		m.Update(tea.WindowSizeMsg{Width: 140, Height: 40})
+		m.key("space")
+		m.key("A") // no auto-pause: keep running
+		m.key("5")
+		end := s.Now().Add(20 * simtime.Day)
+		var ds []time.Duration
+		wall := time.Unix(0, 0)
+		b.StartTimer()
+		for s.Now() < end {
+			t0 := time.Now()
+			wall = wall.Add(frame)
+			m.frame(wall)
+			_ = m.render()
+			ds = append(ds, time.Since(t0))
+		}
+		b.StopTimer()
+		slices.Sort(ds)
+		b.ReportMetric(float64(ds[len(ds)/2].Microseconds())/1000, "p50-ms")
+		b.ReportMetric(float64(ds[len(ds)*99/100].Microseconds())/1000, "p99-ms")
+		b.ReportMetric(float64(ds[len(ds)-1].Microseconds())/1000, "max-ms")
+		b.ReportMetric(float64(len(ds)), "frames")
+		b.StartTimer()
+	}
 }
