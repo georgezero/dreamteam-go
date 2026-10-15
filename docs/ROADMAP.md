@@ -121,6 +121,11 @@ Functional
 
 1. `go run ./cmd/dreamteam` opens the TUI, paused, at Tuesday 06:00 of the
    established practice, with a populated schedule and an unread backlog.
+   *Accepted V0.1 deviation (owner, 2026-10-14):* the default established
+   practice is the struggling, imaging-constrained one; its takeover
+   worklist is naturally small or empty (reading has spare capacity at its
+   volume). No backlog is manufactured; the 5–20-study takeover target is
+   deferred to a future reporting-constrained scenario.
 2. Pressing `space` runs the day; patients arrive, register, are imaged,
    studies are read and finalized; the log, rooms, queues, worklist, cash and
    profit visibly change.
@@ -175,6 +180,11 @@ Performance (Raspberry Pi dev machine)
 16. Scenario build (180-day warm-up) < 1.5 s; `run --days 90` < 2 s; TUI at 10 fps uses < 15% of one
     core while running at 15 min/s; Max speed stays responsive to `space` within
     100 ms.
+    *Accepted V0.1 deviation (owner, 2026-10-14):* on the Raspberry Pi 4 the
+    headless `run --days 90` takes ≈3.3 s (no SHA-256 instructions; every
+    keyed draw is hashed); the 2 s target is waived for V0.1 on that machine.
+    The SHA-256 keyed RNG is kept: an alternative is a separately versioned
+    engine experiment. A Cortex-A76 meets every target.
 
 ### Deferred out of V0.1 (explicit)
 

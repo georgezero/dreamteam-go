@@ -7,6 +7,29 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.1.0 — release preparation (v0.1.0)
+
+Release preparation only: no change to mechanics, RNG, scenarios,
+actions, accounting or replay.
+
+* **Accepted deviations** (owner, 2026-10-14), recorded in
+  `docs/ACCEPTANCE.md`, `docs/ROADMAP.md` and the README: the Pi 4's ≈3.3 s
+  headless 90-day run (2 s target waived for V0.1; SHA-256 keyed RNG kept)
+  and the naturally small or empty takeover worklist of the struggling
+  default practice (no manufactured backlog; the 5–20 target moves to a
+  future reporting-constrained scenario).
+* **CI**: the Node 20 deprecation came from `actions/checkout@v4`,
+  `actions/setup-go@v5`, `actions/upload-artifact@v4` and
+  `actions/download-artifact@v4`; now `checkout@v7`, `setup-go@v7`,
+  `upload-artifact@v7`, `download-artifact@v8` (all Node 24). Matrix and
+  golden checks unchanged.
+* **Release notes**: `docs/RELEASE_NOTES.md` (new; newest first).
+* **Version** `0.1.0`. The golden references were not regenerated (no
+  outcome changed): they still name the engine that wrote them, and the
+  comparison reports the engine difference with outcomes identical.
+
+---
+
 ## Steps 19–20 — Performance pass, acceptance results, release docs (v0.1.0-dev.20)
 
 **Acceptance results.** Criterion 10: invariants after every transaction,

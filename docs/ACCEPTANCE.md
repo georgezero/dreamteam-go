@@ -4,11 +4,22 @@ Status of each V0.1 acceptance criterion (ROADMAP §2) with its evidence:
 an automated test, a command, or a recorded measurement. "Met" means the
 evidence passes on the current commit; deviations say why.
 
+The default scenario is the **struggling established practice**
+(`established`): capacity-constrained in imaging, losing money by design
+(step 18 owner decision).
+
+## Accepted V0.1 deviations (owner decision, 2026-10-14)
+
+| Criterion | Deviation | Decision |
+|---|---|---|
+| 1 — unread backlog at the takeover | The struggling practice's takeover worklist is naturally small or empty (mean 0.1 studies over nine seeds): it is constrained in imaging, not reporting. | Accepted. No backlog is manufactured (no injected studies, no slowed radiologists). The 5–20-study takeover target is deferred to a future reporting-constrained scenario. |
+| 16 — `run --days 90` < 2 s | ≈3.3 s on the Raspberry Pi 4, whose CPU lacks SHA-256 instructions; 1.1–1.2 s on a Cortex-A76. Warm-up (1.44–1.49 s), TUI CPU (7.4–8.2% at 15 min/s) and Max-speed responsiveness (worst frame < 100 ms) meet their targets on the Pi 4. | Accepted; the 2 s headless target is waived for the Pi 4 in V0.1. The SHA-256 keyed RNG is kept (changing it would change every outcome and golden reference); alternatives belong to a separately versioned engine experiment. |
+
 ## Functional
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 1 | `go run ./cmd/dreamteam` opens the TUI paused at Tuesday 06:00 of the established practice, with a populated schedule and an unread backlog | Met, with a calibration deviation | `TestStartsTuesdayMorning`, `TestKeys` (starts paused), `TestOpeningBriefing`. The schedule is populated; the takeover worklist is usually empty (mean 0.1 studies across nine seeds): the struggling practice's reading is over-provisioned for its volume (owner decision, step 18). A backlog builds during the day. |
+| 1 | `go run ./cmd/dreamteam` opens the TUI paused at Tuesday 06:00 of the established practice, with a populated schedule and an unread backlog | Met, with an accepted deviation (backlog) | `TestStartsTuesdayMorning`, `TestKeys` (starts paused), `TestOpeningBriefing`. The schedule is populated; the takeover worklist is usually empty (mean 0.1 studies across nine seeds): the struggling practice's reading is over-provisioned for its volume (owner decision, step 18). A backlog builds during the day. |
 | 2 | `space` runs the day: patients arrive, register, are imaged, studies are read and finalized; log, rooms, queues, worklist, cash and profit change | Met | `TestKeys`, `TestPacingDoesNotAffectOutcome`, `TestDashboardAlerts`, `TestWorklistScreen`, `TestFinanceScreen` |
 | 3 | Five speeds; `n` steps to the next observable entry; `e` completes the day with the summary; play continues into Wednesday | Met | `TestSpeedsIdentical`, `TestStepVisibleLandsOnNewEntry`, `TestEndOfDayStopsAtOperationalClose`, `TestEndOfDaySummary`, `TestKeys` |
 | 4 | Every screen renders at 80×24 and 140×40 without overflow; < 60×16 shows the size message | Met | `TestRenderFitsTerminal`: dashboard, schedule, log, patients, worklist, finance, history, briefing, actions, help and end-of-day summary at 80×24, 140×40, 120×36, 160×48 and 60×16; size message at 40×10 |
@@ -36,7 +47,7 @@ evidence passes on the current commit; deviations say why.
 
 | # | Criterion | Status | Evidence |
 |---|---|---|---|
-| 16 | Warm-up < 1.5 s; `run --days 90` < 2 s; TUI at 10 fps < 15% of a core at 15 min/s; Max speed responds to `space` within 100 ms | Partly met on the Pi 4; met on a Cortex-A76 | Pi 4 (throttled, loaded): warm-up 1.44–1.49 s best (met only at best), `run -days 90` ≈3.3 s (**not met**: no SHA-256 instructions; keyed draws are hashed), TUI 7.4–8.2% of a core at 15 min/s (met; idle 0.4%), Max-speed worst frame 52–94 ms (met). Cortex-A76 (joofi): warm-up 0.53 s, `run -days 90` 1.1–1.2 s. `docs/MEASUREMENTS.md`. Meeting 2 s on a Pi 4 would need a different keyed-draw hash: an engine-version decision for the owner. |
+| 16 | Warm-up < 1.5 s; `run --days 90` < 2 s; TUI at 10 fps < 15% of a core at 15 min/s; Max speed responds to `space` within 100 ms | Met with an accepted deviation (Pi 4 headless 90-day run); met in full on a Cortex-A76 | Pi 4 (throttled, loaded): warm-up 1.44–1.49 s best (met only at best), `run -days 90` ≈3.3 s (**not met**: no SHA-256 instructions; keyed draws are hashed), TUI 7.4–8.2% of a core at 15 min/s (met; idle 0.4%), Max-speed worst frame 52–94 ms (met). Cortex-A76 (joofi): warm-up 0.53 s, `run -days 90` 1.1–1.2 s. `docs/MEASUREMENTS.md`. The Pi 4 headless target is waived for V0.1 (above). |
 
 ## Owner additions
 

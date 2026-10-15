@@ -20,8 +20,8 @@ jobs:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Platform
@@ -53,7 +53,7 @@ jobs:
           check established-seed1-90d.json -scenario established -seed 1 -days 90
           check mini-seed1-7d.json -scenario mini -seed 1 -days 7
           check established-seed1-7d-actions.json -scenario established -seed 1 -days 7 -actions established-7d.actions.json
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
           path: out/
@@ -63,7 +63,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: results
       - name: Compare

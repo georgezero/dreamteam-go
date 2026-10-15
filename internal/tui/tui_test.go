@@ -820,13 +820,16 @@ func TestScreenSnapshots(t *testing.T) {
 	}
 }
 
-// snapshotText is the rendered screen as text, with the version in the top
-// bar replaced (and that line's padding collapsed) so a version bump alone
-// does not change a snapshot.
+// snapshotText is the rendered screen as text. The top bar keeps only its
+// right side (day, clock, run state): its left side holds the version,
+// whose length decides how much of the seed and practice name fits, so a
+// version bump alone must not change a snapshot (TestRenderFitsTerminal
+// checks the full bar).
 func snapshotText(r string) string {
 	lines := strings.Split(ansi.Strip(r), "\n")
-	top := strings.ReplaceAll(lines[0], "v"+version.Number, "vVERSION")
-	lines[0] = strings.Join(strings.Fields(top), " ")
+	if i := regexp.MustCompile(`(Mon|Tue|Wed|Thu|Fri|Sat|Sun) `).FindStringIndex(lines[0]); i != nil {
+		lines[0] = strings.Join(strings.Fields(lines[0][i[0]:]), " ")
+	}
 	return strings.Join(lines, "\n") + "\n"
 }
 

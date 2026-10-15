@@ -7,7 +7,7 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.1 pre-release** (`0.1.0-dev`). Everything is synthetic:
+Status: **V0.1** (`0.1.0`). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
@@ -68,7 +68,7 @@ Patients already admitted are always served, after closing if necessary
 
 | ID | Practice |
 |---|---|
-| `established` (default) | DreamTeam Imaging Center: four rooms (XR, US, CT, MR), four technologists (two sharing XR and CT, one US, one MR), a front-desk clerk and an operations manager, two radiologists; open weekdays 08:00–20:00 and Saturdays 10:00–18:00 (XR and CT). 180 days of history before the takeover. A **struggling, capacity-constrained practice**: demand ≈1,650 a month, ≈1,300–1,380 exams, operating margin around −12% to −14%. See `docs/calibration/step-18-report.md`. |
+| `established` (**default**: the struggling practice) | DreamTeam Imaging Center: four rooms (XR, US, CT, MR), four technologists (two sharing XR and CT, one US, one MR), a front-desk clerk and an operations manager, two radiologists; open weekdays 08:00–20:00 and Saturdays 10:00–18:00 (XR and CT). 180 days of history before the takeover. A **struggling, capacity-constrained practice**: demand ≈1,650 a month, ≈1,300–1,380 exams, operating margin around −12% to −14%. See `docs/calibration/step-18-report.md`. |
 | `mini` | The same practice with no history: a short opening schedule and an empty past, for tests and quick looks. |
 
     dreamteam scenario list
@@ -133,6 +133,7 @@ of `session` and `api` only), `internal/api` (observations and actions),
 | `docs/TUI_DESIGN.md` | screens and controls |
 | `docs/ROADMAP.md` | milestones V0.1–V0.6, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
+| `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
@@ -150,6 +151,12 @@ of `session` and `api` only), `internal/api` (observations and actions),
   coverage.
 * Save and load are keyboard-only (`ctrl+s`, `ctrl+o`); there is no file
   picker. No mouse support.
-* On a Raspberry Pi 4, `run -days 90` takes about 3 s (the target is 2 s;
-  about 1.1 s on a Cortex-A76): the Pi 4's CPU has no SHA-256
-  instructions, and every keyed draw is hashed. See `docs/MEASUREMENTS.md`.
+* On a Raspberry Pi 4, `run -days 90` takes about 3.3 s (about 1.1 s on a
+  Cortex-A76): the Pi 4's CPU has no SHA-256 instructions, and every keyed
+  draw is hashed. The 2 s target is waived for the Pi 4 in V0.1 (an
+  accepted deviation; the RNG is kept). Interactive play meets its targets.
+  See `docs/MEASUREMENTS.md`.
+* The default practice usually starts with an empty reading worklist: it is
+  short of imaging capacity, not reporting capacity (an accepted
+  deviation from the original V0.1 criterion; a reporting-constrained
+  scenario is future work).
