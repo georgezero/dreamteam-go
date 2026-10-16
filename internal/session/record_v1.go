@@ -168,7 +168,7 @@ func encodeV1(r *Record) ([]byte, error) {
 // any string: a V0.1 build recorded "hire" as an unknown action.)
 func legacyOnly(a api.Action) bool {
 	return a.RequestID == "" && a.Role == "" && a.Skills == nil && a.RateCents == 0 && a.ContractedWeeklyMinutes == 0 &&
-		a.Roster == nil && a.StartDate == "" && a.LastDay == "" && a.Op == "" && a.Effective == ""
+		a.Roster == nil && a.StartDate == "" && a.LastDay == "" && a.Op == "" && a.Effective == "" && a.SiteAllocationBP == 0
 }
 
 // Engine compatibility registry (V0.2_DESIGN §12): the builds whose
@@ -193,6 +193,7 @@ var legacyEngines = []struct {
 var earlierV2Engines = map[string]string{
 	"0.2.0-dev.2": batchModeSlice2, // V0.2 Slice 2: hire, terminate
 	"0.2.0-dev.3": batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
+	"0.2.0-dev.4": batchModeSlice3, // the dynamic staffing benchmark: Slice 3's action set
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

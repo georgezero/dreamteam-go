@@ -39,6 +39,9 @@ func newHypo(st *state, p *proposal) *hypo {
 	for _, rs := range p.rosters {
 		touch(rs.emp)
 	}
+	for _, as := range p.allocs {
+		touch(as.emp)
+	}
 	for _, sp := range p.hires {
 		v := sp.terms
 		v.Role, v.Skills = Trainee, nil
@@ -61,7 +64,7 @@ func (st *state) planHypo(day int64, h *hypo) DayPlan {
 		if np, ok := h.p.productive[i]; ok {
 			prod = np
 		}
-		emps[i] = st.workingView(i, day, h.p.versionsOf(st, i), prod, until)
+		emps[i] = st.allocated(i, day, h.p.allocsOf(st, i), st.workingView(i, day, h.p.versionsOf(st, i), prod, until))
 	}
 	for k, sp := range h.p.hires {
 		var t *EmployeeConfig
@@ -116,6 +119,9 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	}
 	for i, np := range p.productive {
 		first = min(first, np, st.staff[i].Productive)
+	}
+	for _, as := range p.allocs {
+		first = min(first, as.from)
 	}
 	plans := map[int64]DayPlan{}
 	for d := max(first, st.day+1); d < n; d++ {
@@ -208,6 +214,9 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	}
 	if len(p.rosters) > 0 {
 		st.previewRosters(&out, p, h, plans)
+	}
+	if len(p.allocs) > 0 {
+		st.previewAllocations(&out, p)
 	}
 	out.Displacements = st.provisional(plans, disp)
 	if len(disp) > 0 {
@@ -465,5 +474,61 @@ func (st *state) previewRosters(out *api.StaffingPreview, p *proposal, h *hypo, 
 		if closed[m] > 0 {
 			out.SlotsClosed = append(out.SlotsClosed, api.ModalityCount{Modality: m, Count: closed[m]})
 		}
+	}
+}
+
+// previewAllocations describes each allocation change of the batch: the
+// allocation, site reading time and salary before and after, until the
+// next version; the reporting backlog now; and the money — the salary
+// run-rate change as a guaranteed obligation from the effective date.
+// Shifts and contrast supervision are unchanged, and no booking moves.
+func (st *state) previewAllocations(out *api.StaffingPreview, p *proposal) {
+	date := func(d int64) string { return st.cal.Date(st.cal.StartOfDay(d)).String() }
+	mins := func(d simtime.Duration) int64 { return int64(d / simtime.Minute) }
+	var backlog, urgent int
+	var oldest simtime.Duration
+	for si := range st.dem.studies {
+		s := &st.dem.studies[si]
+		if s.state == studyFinal {
+			continue
+		}
+		backlog++
+		if s.priority == Urgent {
+			urgent++
+		}
+		oldest = max(oldest, st.now.Sub(s.acquiredAt))
+	}
+	for _, as := range p.allocs {
+		i := as.emp
+		t := st.emps[i].terms
+		ap := api.AllocationPreview{Employee: t.ID, Name: t.Name, Op: as.op, Effective: date(as.from), BeforeBP: as.was, AfterBP: as.then,
+			WithdrawBy: date(as.from - NoticeDays), BacklogStudies: backlog, BacklogUrgent: urgent, BacklogOldestMin: mins(oldest)}
+		for _, v := range p.allocsOf(st, i) {
+			if v.From > as.from {
+				ap.Until = date(v.From)
+				break
+			}
+		}
+		ba, bb := siteWeek(t, as.was)
+		aa, ab := siteWeek(t, as.then)
+		ap.BeforeSiteMinA, ap.BeforeSiteMinB, ap.AfterSiteMinA, ap.AfterSiteMinB = mins(ba), mins(bb), mins(aa), mins(ab)
+		ap.BeforeSalary30Cents, ap.AfterSalary30Cents = st.salary30(i, as.was), st.salary30(i, as.then)
+		out.Allocations = append(out.Allocations, ap)
+
+		who := st.staffLabel(i)
+		when := "per 30 days from " + ap.Effective
+		if ap.Until != "" {
+			when += " until " + ap.Until
+		} else {
+			when += " until changed (14 days' notice)"
+		}
+		out.Guaranteed = append(out.Guaranteed, api.MoneyLine{Label: "Salary allocation change · " + who,
+			Cents: ap.AfterSalary30Cents - ap.BeforeSalary30Cents, When: when,
+			Basis: fmt.Sprintf("%s salary × %s (was %s) with benefits, accrued daily and paid on paydays; withdrawable at no cost until %s",
+				money(t.RateCents), pct(as.then), pct(as.was), ap.WithdrawBy)})
+		d := (aa + ab - ba - bb) / 2
+		out.Forecast = append(out.Forecast, api.MoneyLine{Label: "Site reading capacity · " + who, Cents: 0, When: "from " + ap.Effective,
+			Basis: fmt.Sprintf("estimate: %+d min of site reading blocks a week (mean of rota weeks A and B) inside the same shifts; reports gained depend on the worklist and read times; supervision unchanged",
+				mins(d))})
 	}
 }

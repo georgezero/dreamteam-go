@@ -39,6 +39,9 @@ var references = []struct {
 	// V0.2 Slice 3: set_roster (written by 0.2.0-dev.3).
 	{"established-seed1-60d-roster.json", []string{"-scenario", "established", "-seed", "1", "-days", "60",
 		"-actions", goldenDir + "/established-roster.actions.json"}, true},
+	// V0.2 Slice 4: set_reading_allocation (written by 0.2.0-dev.5).
+	{"established-seed1-60d-allocation.json", []string{"-scenario", "established", "-seed", "1", "-days", "60",
+		"-actions", goldenDir + "/established-allocation.actions.json"}, true},
 }
 
 func runJSON(t *testing.T, args ...string) ([]byte, string, int) {

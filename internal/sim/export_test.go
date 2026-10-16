@@ -3,6 +3,7 @@ package sim
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
 	"reflect"
 
 	"github.com/georgezero/dreamteam-go/internal/rng"
@@ -429,3 +430,34 @@ func (w *World) SlotStaffWords() int {
 
 // RosterLogLen is the number of operations in employee id's roster log.
 func (w *World) RosterLogLen(id string) int { return len(w.st.staff[w.st.findEmployee(id)].RosterLog) }
+
+// PlanOn is day's plan as it would be materialized now (reading blocks,
+// shifts and extensions).
+func (w *World) PlanOn(day int64) DayPlan { return w.st.planFor(day) }
+
+// BookingView describes day's booking coverage: the coverage segments
+// that bookings are checked against and every slot's bookability,
+// staffing and shared flag.
+func (w *World) BookingView(day int64) string {
+	ds := w.st.dem.days[day]
+	return fmt.Sprintf("%v|%v", ds.segs, ds.rooms)
+}
+
+// SupervisionOn lists the planned contrast-supervision spans of day.
+func (w *World) SupervisionOn(day int64) []Span {
+	p := w.st.planFor(day)
+	var out []Span
+	for _, s := range p.Coverage().Segments {
+		if s.Supervision {
+			if n := len(out); n > 0 && out[n-1].To == s.From {
+				out[n-1].To = s.To
+				continue
+			}
+			out = append(out, s.Span)
+		}
+	}
+	return out
+}
+
+// DaysBuilt is the number of days whose booking slots exist.
+func (w *World) DaysBuilt() int64 { return int64(len(w.st.dem.days)) }

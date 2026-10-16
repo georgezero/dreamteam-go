@@ -204,7 +204,7 @@ func (m *Model) sessionKey(k string) bool {
 // New returns a paused model on s.
 func New(s *session.Session) *Model {
 	m := &Model{sess: s, speed: defaultSpeed, autoPause: true, width: 80, height: 24, actMinutes: map[string]int64{},
-		staff: staffForm{lastShift: map[string]int64{}}}
+		staff: staffForm{lastShift: map[string]int64{}, allocBP: map[string]int64{}, allocRemove: map[string]bool{}}}
 	m.status = "Paused. Press space to start the day."
 	m.refresh()
 	if s.AtStart() && m.obs.Finance.Opening.HistoryDays > 0 {

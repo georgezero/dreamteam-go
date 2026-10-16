@@ -62,6 +62,14 @@ func (w *World) ApplySlice2(actions []api.Action) []api.ActionResult {
 	return w.applyBatch(actions, slice2Actions)
 }
 
+// ApplySlice3 applies a batch with V0.2 Slice 3 semantics: hire,
+// terminate and set_roster make a V0.2 batch, and set_reading_allocation
+// is an unknown action, as it was when a 0.2.0-dev.3 or dev.4 record was
+// written (its authoritative replay).
+func (w *World) ApplySlice3(actions []api.Action) []api.ActionResult {
+	return w.applyBatch(actions, slice3Actions)
+}
+
 // applyBatch applies a batch; known is the V0.2 action set (nil: V0.1
 // semantics only).
 func (w *World) applyBatch(actions []api.Action, known []string) []api.ActionResult {

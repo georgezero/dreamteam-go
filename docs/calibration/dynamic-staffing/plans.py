@@ -72,6 +72,10 @@ def set_roster(emp, effective, r):
     return {"type": "set_roster", "op": "set", "employee": emp, "effective": effective, "roster": r}
 
 
+def set_allocation(emp, effective, bp):
+    return {"type": "set_reading_allocation", "op": "set", "employee": emp, "effective": effective, "siteAllocationBP": bp}
+
+
 # Standard offers (no premium): XR+CT $38, MR $45, 28-day recruiting lead,
 # so the earliest start from the takeover is Tuesday 2026-11-10.
 START = "2026-11-10"
@@ -127,6 +131,24 @@ PLANS = [
                 {"employee": "E03", "rosterEffective": ["2026-11-23"]}]},
 ]
 
+# Plan D (Slice 4, fixed 2026-10-16 before any run of it; V0.2_DESIGN
+# §5.10): plan C's six staffing actions, unchanged and in the same takeover
+# batch, followed by the Step 0C lead's reading allocation (A62): Dr. Avery
+# (E07) 60% -> 62.5%, Dr. Blake (E08) 50% -> 52.5%, at the earliest legal
+# effective date. An allocation change needs 14 days' notice on any
+# weekday: from the takeover (Tuesday 2026-10-13) that is Tuesday
+# 2026-10-27. D is never adjusted on evaluation results; if it does not
+# restore acceptable reporting, other allocations belong to a separate
+# development-seed experiment, not to these held-out seeds.
+ALLOC_FROM = "2026-10-27"
+_c = next(p for p in PLANS if p["name"] == "C-full-reorganization")
+PLANS.append({"name": "D-full-reading",
+              "description": "Plan C's staffing actions and timing, unchanged, plus the Step 0C lead's reading allocation: Dr. Avery (E07) 60% -> 62.5% and Dr. Blake (E08) 50% -> 52.5% from the earliest legal date, Tuesday 2026-10-27. One atomic batch at the takeover.",
+              "batches": [{"time": TAKEOVER, "actions": _c["batches"][0]["actions"] + [set_allocation("E07", ALLOC_FROM, 6250),
+                                                                                      set_allocation("E08", ALLOC_FROM, 5250)]}],
+              "expect": _c["expect"] + [{"employee": "E07", "allocation": [{"effective": ALLOC_FROM, "siteBP": 6250}]},
+                                        {"employee": "E08", "allocation": [{"effective": ALLOC_FROM, "siteBP": 5250}]}]})
+
 # Choice of the partial plan, fixed before any run: B-partial is the B
 # candidate with the highest mean T180 cumulative operating profit over the
 # paired no-action run on the development seeds, among candidates whose
@@ -153,6 +175,12 @@ BENCHMARK = {
                 "plans": ["A-no-action", "B1-mr-evening", "B2-float", "B3-float-mr-evening", "C-full-reorganization"]},
         # Held out: never run before the plans were frozen.
         "eval": {"seeds": "1001-1020", "plans": ["A-no-action", "B-partial", "C-full-reorganization"]},
+        # Slice 4 (0.2.0-dev.5): plan D validated on the development seeds
+        # (acceptance and lifecycle only; nothing is chosen), then A-D on the
+        # same held-out seeds. Results go to their own directories; the
+        # original dev and eval results above are kept as they were.
+        "reading-dev": {"seeds": "901-910", "plans": ["A-no-action", "C-full-reorganization", "D-full-reading"]},
+        "reading-eval": {"seeds": "1001-1020", "plans": ["A-no-action", "B-partial", "C-full-reorganization", "D-full-reading"]},
     },
 }
 

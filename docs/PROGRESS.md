@@ -7,6 +7,134 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 4 — reading allocation (0.2.0-dev.5)
+
+The owner approved `set_reading_allocation` after the dynamic staffing
+benchmark, and nothing else (`contract_teleradiology` comes later).
+Design and as-built notes: `docs/V0.2_DESIGN.md` §5.10. Benchmark:
+`docs/calibration/dynamic-staffing/` README, "Plan D". No reimbursement,
+demand, wage, reading-duration, equipment or opening-hour input changed.
+
+* **Action.** `set_reading_allocation` changes an employed salaried
+  radiologist's site share of paid time.
+  * **Ops:** `op: set` / `remove`, `employee`, `effective`,
+    `siteAllocationBP` 3,000–10,000.
+  * **Dates:** any weekday at least 14 days ahead, within the booking
+    horizon. Removal needs the same notice.
+  * **Versions:** dated, like roster versions. A pending version can be
+    replaced or withdrawn; versions in force or past never change; an
+    append-only log keeps every operation. A set equal to the allocation
+    in force, or the removal of an absent version, is `unchanged`; two
+    writes to one radiologist and date in a batch are
+    `invalid_parameters`.
+  * **Distinct from contracts and rosters:** radiologists have no
+    contract hours, and their shifts stay immutable.
+* **Reading and supervision.**
+  * The allocation in force each day sets that day's site reading blocks
+    through the existing 100-minute cycle inside the same shifts.
+    Worklist order, overrun debt, one read at a time, the p100-by-shift-
+    end claim rule and origin-keyed read times are untouched.
+  * Contrast supervision is presence on site and does not move (tested).
+  * Booking coverage segments were also cut at reading-block boundaries,
+    which allow shared-capacity handovers. They now keep the scenario
+    allocation's boundaries (`DayPlan.cutReading`), so an allocation
+    never changes technologist booking capacity and displaces nothing.
+    The test that fails without this covers days built after the change
+    and days a later hire rebuilds.
+* **Money.** The existing daily salary line uses the allocation in force
+  that day: daily rounding, benefits, and payday settlement through
+  accrued payroll. One accrual per radiologist per day, by its key, so no
+  time is charged twice. No new account or entry kind.
+  * Tested to the cent across two changes, with the cash bridge
+    reconciled.
+  * Previews show the salary run-rate change per 30 days as a guaranteed
+    obligation, with the date until which it can be withdrawn at no
+    cost.
+* **Batches and compatibility.**
+  * The new type mixes atomically with `hire`, `terminate` and
+    `set_roster`; any invalid item refuses the whole batch.
+  * A `mixed_batch` message names `set_reading_allocation` only when the
+    batch holds one, so every recorded message and golden is unchanged.
+  * Allocation versions are encoded in the state digest only when
+    present, so no-action state digests are unchanged too.
+  * 0.2.0-dev.3 and dev.4 records replay with Slice 3's action set (batch
+    mode `v0.2_slice3`). A genuine dev.4 record
+    (`testdata/sessions/mini-seed23-dev4.*`, from a clean af475fd
+    worktree) has the new type refused as `unknown_action` and
+    `mixed_batch`. It failed before registration, and failed again under
+    this build's action set; it now replays with every digest verified
+    and continues as a prefix. The benchmark's dev.4 session files verify
+    as `earlier_build_exact`.
+* **Interface.**
+  * **API:** `Employee.SiteBP` is the allocation in effect;
+    `Employee.AllocationChanges` lists pending ones.
+    `World/Session.ReadingAllocations()` gives each radiologist's
+    timeline with site reading minutes per rota week and salary per 30
+    days. `StaffingPreview.Allocations` gives before and after, the
+    withdrawal date and the reporting backlog.
+  * **CLI:** action files take the new type; golden
+    `established-seed1-60d-allocation.json`.
+  * **Session v2.**
+  * **TUI:** staff screen rows per radiologist (←→ share in 2.5-point
+    steps, `,` `.` date, `x` withdraw), the backlog line and a read-only
+    preview.
+* **Tests (fail-before-fix).** Nine `internal/sim/allocation_test.go`
+  tests failed before the action existed. They cover:
+  * date boundaries; bounds and shape; versions;
+  * salary proration; supervision and booking invariance;
+  * reading rules with urgent order; mixed batches; chunking; previews.
+
+  Session tests cover save and replay across effective dates (whole,
+  chunked, event-budgeted), a v1 record with the type name and the dev.4
+  record. There are also a TUI test and the new golden.
+* **Plan D benchmark (20 held-out seeds 1001–1020, 180 days).** D is plan
+  C's staffing plus Dr. Avery 62.5% and Dr. Blake 52.5% from Tue Oct 27,
+  the earliest legal date. D and its decision rule were fixed before any
+  run.
+  * **Reproduction:** A, B and C reproduce the original results exactly.
+  * **D against C:** +$13.7k radiologist salary, +74 ± 20 reports, $12.5k
+    of backlog revenue recovered. Profit −1.5 ± 3.2 $k at T180 and +0.6 ±
+    1.2 $k per 30 days in steady state. Imaging and access are identical.
+  * **Breach rates days 91–180 (urgent / soon / routine):** D 9.2 / 31.9
+    / 4.4%, C 52.7 / 88.2 / 55.3%, no action 10.7 / 38.1 / 7.2%. The
+    gates are met on the mean, but on all three gates only on 7/20 (T90)
+    and 11/20 (days 91–180) seeds.
+  * **Against no action:** +12.6 ± 1.4 $k at T180, break-even day 141
+    (113–164) on 20/20 seeds, cash payback by T180 on 1/20.
+  * **Decision: CONDITIONAL GO**, by the pre-registered rule. Its one
+    failing test compares single backlog samples on day 90 and day 180;
+    no action fails it too, and D's 30-day mean backlog is flat.
+    Conditions:
+    * the gates are met on average only;
+    * the soon rate is at its gate;
+    * the allocation buys service at about its own cost.
+
+    No other allocation was tried on the held-out seeds.
+* **Verification.**
+  * The full uncached suite passed on the Pi in 9 min 1 s (sim 537 s,
+    session 94 s, cmd 84 s, tui 27 s). An earlier run hit Go's default
+    10-minute timeout in `sim` while the Pi was also compiling; rerun with
+    `-timeout 60m` it passed.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * All seven golden references reproduce: the six historical ones under
+    `MIGRATIONS.json` as before, the new one byte for byte.
+  * `dreamteam verify` replays the three dev.4 benchmark sessions
+    (`earlier_build_exact`) and D's.
+  * Every plan replays whole and in 13-hour chunks (seeds 901 and 1001,
+    180 days).
+* **Limitations.**
+  * One allocation was tested.
+  * Gate pass rates per seed are modest.
+  * The rule's backlog test uses point samples.
+  * No recruiting uncertainty; ×1.30 demand only; 180 days; arm64 only.
+  * Teleradiology, the alternative for marginal and evening reads, is not
+    built yet.
+* **Next: Slice 5, `contract_teleradiology`.** Then test substitution
+  against allocation, on development seeds first.
+
+---
+
 ## V0.2 dynamic staffing benchmark (0.2.0-dev.4)
 
 The owner's milestone after Slice 3: can the sustainable scenario's shared

@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.golden-migration/v1",
- "engine": "0.2.0-dev.4",
+ "engine": "0.2.0-dev.5",
  "stateSchema": "dreamteam.state/v3",
  "explanation": [
   "V0.2 Slice 1 (employee contracts): the state digest's encoding became dreamteam.state/v2. It added the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
@@ -8,7 +8,8 @@
   "Outcomes are unchanged: without a V0.2 action no employee is hired or terminated, every scenario's inferred contract is at or below its roster (so no guarantee is posted) and the V0.2 accounts hold nothing and are not listed. Patient flow, reports, every ledger entry, the log, actions, the evaluation baseline and all result values are identical; only the state digest, and the run digests derived from it, differ.",
   "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old (historical) and new (this build's) value, and a comparison under it requires both exactly.",
   "V0.2 Slice 3 (set_roster) keeps dreamteam.state/v3: roster versions are encoded only when an employee has one, so every state above encodes as before. One observable message changed: a batch mixing a V0.1 action with V0.2 staffing actions is refused (mixed_batch) with a message naming the V0.2 actions, now 'hire, terminate, set_roster'. established-staffing.actions.json has such a batch, so in established-seed1-60d-staffing.json (written by 0.2.0-dev.2) the action record's digest, and the run digest derived from it, differ; the log, ledger and state digests and every outcome are identical. Replaying a 0.2.0-dev.2 session file applies its batches with that build's action set and reproduces its message and every digest exactly.",
-  "0.2.0-dev.4 (the dynamic staffing benchmark) changes no engine behaviour: established-seed1-60d-roster.json (written by 0.2.0-dev.3) is reproduced in every field, digests included, so it is listed with no changed field. A 0.2.0-dev.3 session file replays with every digest verified (batch mode v0.2_slice3)."
+  "0.2.0-dev.4 (the dynamic staffing benchmark) changes no engine behaviour: established-seed1-60d-roster.json (written by 0.2.0-dev.3) is reproduced in every field, digests included, so it is listed with no changed field. A 0.2.0-dev.3 session file replays with every digest verified (batch mode v0.2_slice3).",
+  "0.2.0-dev.5 (V0.2 Slice 4, set_reading_allocation) changes no outcome without the new action: a radiologist's allocation versions are encoded only when present, so every reference is reproduced as under 0.2.0-dev.4, and the refusal of a batch mixing a V0.1 action with V0.2 actions keeps its recorded message unless the batch holds a set_reading_allocation. 0.2.0-dev.3 and 0.2.0-dev.4 session files replay with every digest verified (batch mode v0.2_slice3)."
  ],
  "references": {
   "established-seed1-7d.json": {

@@ -49,12 +49,15 @@ import (
 // V0.2 Slice 3 extends v3 without changing any existing encoding: an
 // employee's roster versions and roster log (set_roster) are encoded only
 // when non-empty, introduced by a tag no length prefix can equal, so a
-// state without them encodes exactly as Slice 2's did (omitEmpty).
+// state without them encodes exactly as Slice 2's did (omitEmpty). Slice
+// 4 adds a radiologist's allocation versions and log
+// (set_reading_allocation) the same way.
 const StateSchema = "dreamteam.state/v3"
 
 // omitEmpty names slice fields, by "Type.field", that are encoded only
 // when non-empty, after omitTag: fields added to the v3 encoding.
-var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true}
+var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true,
+	"employment.Allocs": true, "employment.AllocLog": true}
 
 // omitTag introduces a present omitEmpty field. It has the top bit set,
 // which no length prefix (string, slice or map) can.
@@ -77,6 +80,8 @@ var skipFields = map[string]bool{
 	"metricsState.cum":        true, // digested as a snapshot at the current time
 	"tally.actions":           true, // the action record's length: the action digest's
 	"rosterVersion.trainView": true, // derived from the version's terms
+	"allocVersion.view":       true, // derived from the radiologist's terms
+	"DayPlan.cutReading":      true, // derived from the plan and the scenario
 }
 
 // stateHasher writes the canonical encoding into a buffer flushed to the

@@ -313,7 +313,8 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 		}
 		annual := c.RateCents
 		if c.Role == Radiologist {
-			annual = annual * c.SiteAllocationBP / 10_000
+			// The allocation in force today (allocation.go).
+			annual = annual * st.siteBP(i, day) / 10_000
 		}
 		if w := SalaryAccrual(annual, day); w > 0 {
 			st.accruePay(now, entryKey{kind: entSalary, a: int64(i), b: day}, w)

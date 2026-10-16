@@ -24,6 +24,13 @@ Recommendation: **CONDITIONAL GO**. Staffing actions give real, measurable
 agency at a credible payback. A service-acceptable full reorganization
 needs `set_reading_allocation` (see *Decision*).
 
+**Follow-up (Slice 4, plan D):** the same full reorganization with the
+lead's 62.5/52.5% reading allocation from its earliest legal date (Oct 27)
+brings breach rates back within the provisional gates on average and
+below no action. It costs about $2.5k a month in salary and keeps C's
+profit (+$12.6k at T180, break-even day 141). The pre-registered rule
+gives **CONDITIONAL GO** (see *Plan D*).
+
 All figures are from `results/eval/report.md`, which `report.py` generates
 from the per-seed result files. The plans were fixed on development seeds
 before any held-out seed was run.
@@ -331,14 +338,182 @@ value of radiologist management before teleradiology.
 
 Do not tune the plans further on seeds 1001–1020.
 
+## Plan D: full staffing with reading allocation (Slice 4, 0.2.0-dev.5)
+
+The owner's follow-up after Slice 4 (`set_reading_allocation`, V0.2_DESIGN
+§5.10): rerun the frozen plans on the same held-out seeds and add plan C
+with a defined reading adjustment. This section's method and decision rule
+were written on 2026-10-16, before any run of plan D. The original plans,
+seeds, results and conclusions above are unchanged.
+
+### Method (fixed before any run)
+
+* **Plan D (`plans/D-full-reading.json`)** is plan C's six staffing actions,
+  unchanged, in the same takeover batch. Two allocation changes follow
+  them: Dr. Avery (E07) 60% → 62.5% and Dr. Blake (E08) 50% → 52.5%. These
+  are the Step 0C lead's `A62` levels.
+* **Effective date: Tuesday 2026-10-27.** It is the earliest legal date:
+  an allocation change needs 14 days' notice, on any weekday, from the
+  takeover on Tuesday 2026-10-13.
+* **No tuning.** D is not adjusted on any result. If it does not restore
+  acceptable reporting, no other allocation is tried on seeds 1001–1020;
+  that belongs to a separate development-seed experiment.
+* **Validation.** D was run on development seeds 901–910 (`reading-dev`)
+  with A and C, for acceptance and lifecycle only; nothing was chosen.
+* **Evaluation.** A, B, C and D ran on held-out seeds 1001–1020
+  (`reading-eval`) for 180 days under 0.2.0-dev.5. A, B and C must
+  reproduce the original `results/eval` outcomes exactly: no allocation
+  action, no change. D is compared with C by paired difference.
+* **Measured:** incremental reading expense (radiologist salary), final
+  reports, revenue held in the reporting backlog (imaged, not yet billed),
+  breach rates, backlog size and age, imaging and losses, cumulative
+  operating profit, lowest cash, liabilities, and accrual and cash payback
+  against no action.
+
+### Decision rule (fixed before any run)
+
+"Acceptable reporting" means two things, judged on means across seeds:
+
+* the owner's provisional gates (§13.3: urgent ≤ 12%, soon ≤ 32%,
+  routine ≤ 6% breach rate) are met over T90 and over days 91–180;
+* the reporting backlog is not growing: at T180 it is at most 10% above
+  its T90 level.
+
+No action itself misses the soon and routine gates, so the paired
+difference against no action is reported alongside.
+
+* **GO:** D's reporting is acceptable, and D keeps the staffing plan's
+  economic benefit: its T180 cumulative profit over no action is positive,
+  with a 95% interval above zero.
+* **CONDITIONAL GO:** D significantly improves reporting over C (the
+  paired urgent-breach reduction has a 95% interval below zero) and keeps
+  a positive benefit, but at least one gate or the backlog condition
+  fails. More reading capacity or teleradiology is needed.
+* **NO GO:** D does not significantly improve reporting over C, or its
+  cost removes the economic benefit (T180 profit over no action ≤ 0).
+
+### Validation
+
+* **Development seeds 901–910 (`results/reading-dev/`):** D's eight
+  actions were accepted on every seed, and every lifecycle date and
+  allocation version matched the plan. A and C reproduced the original
+  development results exactly. Nothing was chosen.
+* **Held-out seeds (`results/reading-eval/`):**
+  * **A, B and C** under 0.2.0-dev.5 reproduce `results/eval` exactly,
+    in every per-seed trajectory, window, span, labor figure and check,
+    apart from the engine name.
+  * **Seed 1001 sessions:** the session replay check gives the same run
+    digests as the committed 0.2.0-dev.4 session files.
+  * **D** was accepted on every seed, with its lifecycle and allocations
+    as planned. It displaced the same two appointments as C, both
+    rebooked. Every endpoint reconciled to the cent, and no booking was
+    inconsistent.
+  * **Replay:** every plan, D included, saves and replays whole and in
+    13-hour chunks to identical digests (seeds 901 and 1001, 180 days).
+    `sessions/D-full-reading-seed1001.session.json` is D on seed 1001.
+
+### Results (20 held-out seeds, D − C paired unless stated)
+
+Generated tables: `results/reading-eval/reading.md` (D against C and no
+action) and `results/reading-eval/report.md` (all four plans, as for the
+original evaluation).
+
+| | T30 | T90 | days 91–180 | T180 |
+|---|---|---|---|---|
+| Reading expense (radiologist salary with benefits), $k | +1.4 | +6.3 | +7.4 | +13.7 |
+| Final reports | +5 ± 2 | +18 ± 10 | +55 ± 22 | +74 ± 20 |
+| Net revenue, $k | +0.9 ± 0.4 | +3.2 ± 1.8 | +9.4 ± 3.8 | +12.6 ± 3.3 |
+| Operating profit, $k | −0.5 ± 0.4 | −3.3 ± 1.7 | +1.8 ± 3.7 | −1.5 ± 3.2 |
+| Revenue held in the backlog at the endpoint (C → D), $k | 3.6 → 2.7 | 4.4 → 1.3 | — | 14.9 → 2.4 |
+
+Imaging, access, losses and displacement are identical to C's (Δ 0 on
+every seed), as designed: an allocation changes reading only.
+
+**Reporting service** (breach rate urgent / soon / routine, %):
+
+| | T90 | days 91–180 | backlog T90 / T180 | seeds meeting all three gates, T90 / days 91–180 |
+|---|---|---|---|---|
+| A, no action | 11.8 / 36.4 / 7.0 | 10.7 / 38.1 / 7.2 | 18 / 30 | 0 / 1 of 20 |
+| C, full staffing | 20.1 / 61.1 / 16.4 | 52.7 / 88.2 / 55.3 | 30 / 93 | 0 / 0 of 20 |
+| **D, full staffing + reading** | **11.3 / 31.6 / 5.1** | **9.2 / 31.9 / 4.4** | 12 / 20 | 7 / 11 of 20 |
+
+Against C, D cuts the breach rates by 43, 56 and 51 points in days
+91–180. Against no action, D is better on every rate: urgent −1.4 ± 2.2,
+soon −6.2 ± 3.8 and routine −2.8 ± 0.4 points. The urgent p90 TAT is 150
+minutes, against 2,900 for C. The backlog's p90 age at T180 is 816
+minutes, against 2,638 for C and 1,781 for no action.
+
+**Economics against no action:**
+
+| | Δ profit T30 / T90 / T180, $k | steady state / 30 d | accrual break-even | cash paid back by T180 | lowest cash (mean, min) | margin days 91–180 |
+|---|---|---|---|---|---|---|
+| C | −19.0 / −10.4 / +14.1 ± 2.7 | +8.2 ± 1.0 | day 134 (113–175), 20/20 | 11 of 20 | 35.9, 20.7 | 3.3% |
+| **D** | −19.5 / −13.7 / **+12.6 ± 1.4** | **+8.8 ± 0.6** | **day 141 (113–164), 20/20** | **1 of 20** | 33.3, 18.2 | 3.5% |
+| D − C (the allocation alone) | −0.5 / −3.3 / −1.5 ± 3.2 | +0.6 ± 1.2 | — | — | — | — |
+
+* **Cost of the allocation:** the 5 extra points cost $2.47k per 30 days
+  with benefits, $13.7k by T180. Radiologist salary rises from $54.2k to
+  $56.7k per 30 days.
+* **Payback:** the allocation roughly pays for itself in steady state. It
+  recovers the revenue C leaves in the backlog ($12.5k at T180) and adds
+  55 reports per 90 days. Over 180 days it is not significantly different
+  from C (−1.5 ± 3.2 $k).
+* **Cash:** cash payback is later. The salary is paid every payday, while
+  the revenue it brings forward is collected only after the claim and
+  payment lags: D's lowest cash is $2.6k below C's.
+* **Obligations:** liabilities are at C's level ($83k at T180). The
+  allocation is a recurring commitment of about $2.5k per 30 days until
+  changed, on 14 days' notice.
+
+### Decision
+
+**Rule outcome: CONDITIONAL GO.** The rule is the one fixed before any
+run, applied as written:
+
+* Gates met (means) over T90 and days 91–180: **yes**.
+* T180 profit over no action positive with a 95% interval above zero:
+  **yes**, +12.6 ± 1.4 $k.
+* Significant urgent-breach reduction against C: **yes**.
+* Backlog not growing (T180 at most 1.1 × T90): **no**, 12 → 20.
+
+The failing condition is the backlog sample. The rule compares single
+06:00 samples on day 90 (a Monday) and day 180 (a Sunday), and no action
+fails the same test (18 → 30). In 30-day blocks D's mean daily backlog is
+flat, below no action's in every block; C's grows from 35 to 85 (see
+`reading.md`, "Supplementary"). The rule outcome stands, but the reporting
+evidence is that `set_reading_allocation` restores service to the
+provisional gates.
+
+The remaining conditions are real:
+
+1. **The gates are met on the mean only.** All three are met on 7 of 20
+   seeds over T90 and 11 of 20 over days 91–180. The soon breach rate
+   (31.6–31.9%) sits at its 32% gate.
+2. **The allocation does not pay for itself.** It trades about $2.5k a
+   month of salary for restored turnaround and the revenue that comes
+   with it. D's profit advantage over no action is C's, not more. On cash,
+   D pays back by T180 on 1 of 20 seeds.
+3. **There is no headroom for growth.** More imaging, or a higher
+   allocation, raises salary in 2.5-point steps of $1.2k a month per
+   radiologist. Teleradiology's per-read pricing is the untested
+   alternative for the marginal and evening reads.
+
+Per the rule, no other allocation was tried on seeds 1001–1020. Whether
+a higher allocation, or teleradiology instead of part of it, gives
+better service per dollar is a separate development-seed experiment.
+
 ## Limitations
 
 * **One hand-authored plan per strategy, not optimized.**
   * Premium offers, staggered start dates and other partial plans (e.g. a
     part-time US evening for the US losses) were not tested.
   * The partial choice used 10 development seeds and a pre-declared rule.
-* **No reading action.** Plan C is the Step 0C lead without its reading
-  allocation, so its service result is not the lead candidate's.
+* **No reading action in A–C.** Plan C is the Step 0C lead without its
+  reading allocation, so its service result is not the lead candidate's;
+  plan D adds it (Slice 4).
+* **Plan D tries one allocation.** The design fixed it in advance and
+  nothing was tuned. The backlog test in its decision rule uses
+  single-day samples.
 * **The model has no recruiting uncertainty.** An accepted hire always
   starts and trains on schedule; no candidate declines and no one quits.
   Real transitions would be slower and riskier.
@@ -361,12 +536,17 @@ Do not tune the plans further on seeds 1001–1020.
 * **Inputs:** `plans.py` (plans, `benchmark.json`, selection rule),
   `plans/*.json` (the frozen plans; `B-partial` = `B1-mr-evening`
   renamed), `benchmark.json`.
-* **Tools:** `report.py` (tables, payback, `trajectory.csv`).
-* **Sessions:** `sessions/`, the three evaluation plans on seed 1001 played
-  to day 180 as session files. `dreamteam verify FILE` replays one;
+* **Tools:** `report.py` (tables, payback, `trajectory.csv`);
+  `report_reading.py` (plan D against C and no action, the reproduction
+  check against the original results, the decision rule).
+* **Sessions:** `sessions/`, the evaluation plans on seed 1001 played to
+  day 180 as session files (A–C written by 0.2.0-dev.4, which this build
+  replays with every digest verified; D by 0.2.0-dev.5). `dreamteam verify FILE` replays one;
   `dreamteam play -load FILE` opens it in the TUI to inspect the staff,
   rosters, worklist and finances.
-* **Results:** `results/eval/` and `results/dev/`. Each holds per-plan
+* **Results:** `results/eval/` and `results/dev/` (original, 0.2.0-dev.4);
+  `results/reading-eval/` and `results/reading-dev/` (with plan D,
+  0.2.0-dev.5, plus `reading.md`). Each holds per-plan
   result JSON (provenance, every action's result, lifecycle, daily
   trajectories, endpoint windows, spans, labor decomposition, checks),
   `report.md` and `trajectory.csv` (per seed and day: cumulative

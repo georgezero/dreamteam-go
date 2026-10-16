@@ -94,7 +94,7 @@ func openRosterEditor(t *testing.T, m *Model, id string) {
 	if k < 0 {
 		t.Fatalf("%s has no roster row", id)
 	}
-	for range hireRows + len(m.terminable()) + k {
+	for range hireRows + len(m.terminable()) + len(m.readers()) + k {
 		m.key("down")
 	}
 	m.key("enter")
@@ -207,5 +207,72 @@ func TestRosterEditorRenderTime(t *testing.T) {
 	t.Logf("roster editor render with a displacing preview: %s", per)
 	if per > 500*time.Millisecond {
 		t.Fatalf("render %s", per)
+	}
+}
+
+// V0.2 Slice 4: the reading allocation rows show each radiologist's share,
+// site reading time and pending changes with the reporting backlog,
+// preview the change read-only (salary per 30 days, site reading time,
+// withdrawal date), submit set_reading_allocation through the session's
+// Apply, withdraw a pending change, and fit 80×24.
+func TestReadingAllocationRows(t *testing.T) {
+	s, err := session.Open("mini", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	m.key("m")
+	if len(m.readers()) != 2 {
+		t.Fatalf("readers: %+v", m.readers())
+	}
+	for range hireRows + len(m.terminable()) {
+		m.key("down") // Dr. Avery's row
+	}
+	m.key("right") // 60% → 62.5%
+	before := s.Digests()
+	for range 3 {
+		_ = m.render()
+	}
+	if s.Digests() != before {
+		t.Fatal("rendering the allocation preview changed the run")
+	}
+	screen := ansi.Strip(m.render())
+	for _, want := range []string{"Reading allocation", "reporting backlog now", "‹ 62.5% › from ‹ Oct 27 ›", "If submitted: ✓"} {
+		if !strings.Contains(screen, want) {
+			t.Fatalf("staff screen lacks %q:\n%s", want, screen)
+		}
+	}
+	if lines := strings.Split(screen, "\n"); len(lines) != 24 {
+		t.Fatalf("%d lines at 80×24", len(lines))
+	}
+	m.Update(tea.WindowSizeMsg{Width: 160, Height: 48})
+	screen = ansi.Strip(m.render())
+	for _, want := range []string{"Salary allocation change · Dr. Avery (E07)", "Site reading capacity", "site share 60% → 62.5%", "withdrawable until Oct 13"} {
+		if !strings.Contains(screen, want) {
+			t.Fatalf("160×48 staff screen lacks %q:\n%s", want, screen)
+		}
+	}
+	m.key(".") // a day later
+	m.key("enter")
+	log := s.ActionLog()
+	if len(log) != 1 || log[0].Action.Type != api.ActSetReadingAllocation || !log[0].OK || log[0].Action.Effective != "2026-10-28" ||
+		log[0].Action.SiteAllocationBP != 6250 {
+		t.Fatalf("allocation from the staff screen: %+v", log)
+	}
+	if !strings.Contains(ansi.Strip(m.render()), "62.5% from Oct 28") {
+		t.Fatalf("pending change not shown:\n%s", ansi.Strip(m.render()))
+	}
+	m.key("x")
+	m.key("enter")
+	if log = s.ActionLog(); len(log) != 2 || !log[1].OK || log[1].Action.Op != api.RosterOpRemove {
+		t.Fatalf("withdraw: %+v", log[1:])
+	}
+	// Past the bounds: the share stops at 100%.
+	for range 20 {
+		m.key("right")
+	}
+	if a, _ := m.staffSelected(); a.SiteAllocationBP != 10000 {
+		t.Fatalf("share %d", a.SiteAllocationBP)
 	}
 }

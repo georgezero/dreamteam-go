@@ -347,3 +347,19 @@ The result files from the 0.2.0-dev.3 binary (development set on the Pi,
 evaluation set on the Cortex-A76) and from the 0.2.0-dev.4 binary (both
 sets on the Cortex-A76) are identical in every field but the engine name.
 
+## 2026-10-16 — V0.2 Slice 4: set_reading_allocation and plan D (Pi 4 at ≈82 °C, load average ≈6–8; Cortex-A76 "joofi", load average ≈2–6)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Plan D validation, 3 plans × 10 development seeds × 180 days, Cortex-A76 (compiled test binary) | `DT_DYN_SET=reading-dev ./sim-cal.test -test.run 'DynamicStaffing$' -test.parallel 3` | 70 s |
+| Evaluation, 4 plans × 20 held-out seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./sim-cal.test … -test.parallel 4` | 176 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, whole and in 13-hour chunks, Cortex-A76 | `./session-cal.test -test.run DynamicPlansReplay` (`DT_DYN_DAYS=180 DT_DYN_SEEDS=901,1001`) | 169 s |
+| `sim` package alone, uncached, Pi | `go test ./internal/sim -count=1 -timeout 60m` | 565 s |
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 9 min 1 s (sim 537 s, session 94 s, cmd 84 s, tui 27 s) |
+
+The default `go test ./...` timeout (10 minutes) was exceeded once by `sim`
+while the Pi was compiling in parallel; use `-timeout 60m` on the Pi. A, B
+and C under 0.2.0-dev.5 reproduce the 0.2.0-dev.4 evaluation results in
+every field but the engine name. Their seed-1001 sessions also reach the
+same run digests.
+

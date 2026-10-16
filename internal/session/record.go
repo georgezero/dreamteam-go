@@ -87,7 +87,7 @@ type LegacyPrefix struct {
 	Schema     string          `json:"schema"`    // dreamteam.session/v1, or v2 of an earlier V0.2 build
 	Engine     string          `json:"engine"`    // the build that wrote it
 	Checksum   string          `json:"checksum"`  // its own checksum
-	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only) or v0.2_slice3 (with set_roster)
+	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only) or v0.2_slice3 (with set_roster, before set_reading_allocation)
 	LastBatch  int64           `json:"lastBatch"` // its last batch number (0: none)
 	UntilSec   int64           `json:"untilSec"`
 	Outcome    string          `json:"outcomeCompatibility"` // verified (outcomes) or exact (every digest)
@@ -772,7 +772,8 @@ func advanceTo(s *Session, to simtime.Time, opts ReplayOptions) {
 // applyBatches applies each batch at its time and compares its results,
 // in the record's batch mode: a v1 record's batches with V0.1 semantics (a
 // V0.2 type was an unknown action when it was written), a Slice 2
-// record's with Slice 2's action set (set_roster was unknown then).
+// record's with Slice 2's action set (set_roster was unknown then), a
+// Slice 3 record's with Slice 3's (set_reading_allocation was unknown).
 func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, mode string) error {
 	cal := s.Calendar()
 	for _, b := range batches {
@@ -789,10 +790,7 @@ func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, 
 		case batchModeSlice2:
 			got = s.w.ApplySlice2(b.Actions)
 		case batchModeSlice3:
-			// Slice 3's action set is this build's: hire, terminate,
-			// set_roster and the V0.1 actions. A later action type would
-			// need Slice 3's own set here, as Slice 2 has.
-			got = s.Apply(b.Actions...)
+			got = s.w.ApplySlice3(b.Actions)
 		default:
 			got = s.Apply(b.Actions...)
 		}

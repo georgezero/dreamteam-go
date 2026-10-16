@@ -51,7 +51,7 @@ func (m *Model) render() string {
 		hints = " ↑↓ choose  ←→ change  [ ] day  enter submit  d dash  s sched  space run  q quit"
 	case screenStaff:
 		body = m.staffBody(w, h-3)
-		hints = " ↑↓ choose  ←→ change  enter submit (hire / terminate) or edit a roster  a actions  d dash  space run  q quit"
+		hints = " ↑↓ choose  ←→ change  enter submit (hire / terminate / allocation) or edit a roster  a actions  d dash  space run  q quit"
 		if m.staff.edit != nil {
 			hints = " ←→ day  ↑↓ field  +/- change  o on/off  , . effective  enter submit  esc back  space run  q quit"
 		}

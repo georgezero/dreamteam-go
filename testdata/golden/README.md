@@ -13,6 +13,7 @@ digest).
 | `established-seed1-7d-actions.json` | established, seed 1, 7 days, with `established-7d.actions.json` |
 | `established-seed1-60d-staffing.json` | **V0.2** (0.2.0-dev.2): established, seed 1, 60 days, with `established-staffing.actions.json` |
 | `established-seed1-60d-roster.json` | **V0.2 Slice 3** (0.2.0-dev.3): established, seed 1, 60 days, with `established-roster.actions.json` |
+| `established-seed1-60d-allocation.json` | **V0.2 Slice 4** (0.2.0-dev.5): established, seed 1, 60 days, with `established-allocation.actions.json` |
 
 `established-7d.actions.json` (input) holds a future-day shift extension,
 a walk-in policy change and back, a worklist policy change, a no-op and
@@ -40,9 +41,24 @@ Tuesday in one batch (nobody displaced); refuses a roster dated after a
 termination in the same batch (`not_employed`); and terminates Jordan,
 voiding a pending version.
 
+`established-allocation.actions.json` (input, V0.2 Slice 4) has the
+following batches:
+
+* both radiologists' allocations raised from Oct 27 (60 → 62.5%,
+  50 → 52.5%);
+* three refusals: 13 days' notice (`notice_too_short`), a technologist
+  (`wrong_role`) and 29% (`allocation_out_of_band`);
+* an accepted mixed batch with an XR+CT hire and a later change for Dr.
+  Blake;
+* a refused batch mixing a V0.1 policy change with an allocation
+  (`mixed_batch`, whose message now names `set_reading_allocation`);
+* a withdrawal of the pending change with a no-op repeat (`unchanged`);
+* two further versions from Nov 30;
+* the withdrawal of one of them.
+
 ## Check
 
-    go test ./cmd/dreamteam -run Golden              # all six (-short skips the long ones)
+    go test ./cmd/dreamteam -run Golden              # all seven (-short skips the long ones)
     dreamteam run -scenario established -seed 1 -days 7 \
         -verify-replay -format json -golden testdata/golden/established-seed1-7d.json \
         -golden-migrations testdata/golden/MIGRATIONS.json -allow-engine-mismatch

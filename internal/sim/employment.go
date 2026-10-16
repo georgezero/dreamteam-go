@@ -74,6 +74,11 @@ type employment struct {
 	// empty without set_roster (and then not encoded in the state digest).
 	Rosters   []rosterVersion
 	RosterLog []rosterEntry
+	// Allocs are a radiologist's dated site allocations in date order
+	// (allocation.go); AllocLog every set and removal, append-only. Both
+	// are empty without set_reading_allocation (and then not encoded).
+	Allocs   []allocVersion
+	AllocLog []allocEntry
 }
 
 // hireRecord is an accepted hire (§5.1, §6.3).
@@ -140,11 +145,11 @@ func (st *state) initStaff() {
 }
 
 // workingTerms is employee i's terms as working on day, with the roster
-// version in effect then: nil when not employed, the training view in
-// onboarding, the terms otherwise.
+// version (or a radiologist's allocation) in effect then: nil when not
+// employed, the training view in onboarding, the terms otherwise.
 func (st *state) workingTerms(i int, day int64) *EmployeeConfig {
 	r := &st.staff[i]
-	return st.workingView(i, day, r.Rosters, r.Productive, r.Until)
+	return st.allocated(i, day, r.Allocs, st.workingView(i, day, r.Rosters, r.Productive, r.Until))
 }
 
 // dayTerms is every employee's working terms on day (planFor's input).
@@ -348,7 +353,10 @@ func (st *state) checkStaff() error {
 	if owed != -st.fin.led.bal[acctSeverancePayable] {
 		return fmt.Errorf("severance payable %d, unpaid terminations owe %d", -st.fin.led.bal[acctSeverancePayable], owed)
 	}
-	return st.checkRosters()
+	if err := st.checkRosters(); err != nil {
+		return err
+	}
+	return st.checkAllocations()
 }
 
 // observeEmployment fills employee i's employment, contract and lifecycle.
@@ -366,6 +374,7 @@ func (st *state) observeEmployment(x *api.Employee, i int) {
 			TrainedMin: int64(r.Trained / simtime.Minute), RequestID: h.RequestID, ServiceStage: stageNames[r.serviceOn(st.day)]}
 	}
 	st.observeRosters(x, i, st.day)
+	st.observeAllocations(x, i, st.day)
 	if e := r.Exit; e != nil {
 		x.Leaving = &api.ExitInfo{LastDay: date(e.LastDay), SeveranceCents: e.SeveranceCents,
 			SeverancePayday: date(e.PayDay), SeverancePaid: e.Paid}

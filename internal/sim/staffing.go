@@ -11,7 +11,8 @@ import (
 )
 
 // V0.2 staffing actions: hire and terminate (Slice 2), set_roster (Slice
-// 3, roster.go) (V0.2_DESIGN §5.3, §5.8, §6.1–§6.4, §7).
+// 3, roster.go), set_reading_allocation (Slice 4, allocation.go)
+// (V0.2_DESIGN §5.3, §5.8, §5.10, §6.1–§6.4, §7).
 //
 // A batch holding a V0.2 action holds only V0.2 actions (else every item
 // is refused, the first legacy one as mixed_batch) and is atomic: every
@@ -20,8 +21,8 @@ import (
 // checked as a whole (checkComposed); one invalid item refuses the whole
 // batch (it gets its own code, every other item batch_rejected) and
 // nothing is committed. A valid batch commits in input order — hires get
-// their IDs, recruiting fees and severance post, roster versions enter
-// their timelines — then trainees' productive dates move, and the
+// their IDs, recruiting fees and severance post, roster and allocation
+// versions enter their timelines — then trainees' productive dates move, and the
 // bookings of every day the batch changes are reconciled once, against
 // the final timeline (displace.go), and one dispatch runs.
 //
@@ -31,12 +32,15 @@ import (
 // content is request_conflict; a different last day already_terminating.
 
 // V0.2 action sets: the types that make a V0.2 batch. This build knows
-// set_roster too; a 0.2.0-dev.2 record (Slice 2) is replayed with its own
-// set, where set_roster was an unknown V0.1-path action (session package,
+// set_roster and set_reading_allocation too; a 0.2.0-dev.2 record (Slice
+// 2) is replayed with its own set, where set_roster was an unknown
+// V0.1-path action, and a 0.2.0-dev.3 or dev.4 record (Slice 3) with
+// Slice 3's, where set_reading_allocation was (session package,
 // V0.2_DESIGN §12).
 var (
-	v2Actions     = []string{api.ActHire, api.ActTerminate, api.ActSetRoster}
+	v2Actions     = []string{api.ActHire, api.ActTerminate, api.ActSetRoster, api.ActSetReadingAllocation}
 	slice2Actions = []string{api.ActHire, api.ActTerminate}
+	slice3Actions = []string{api.ActHire, api.ActTerminate, api.ActSetRoster}
 )
 
 func isV2Action(t string) bool { return slices.Contains(v2Actions, t) }
@@ -50,6 +54,7 @@ type staffOutcome struct {
 	hire      *hireSpec
 	term      *termSpec
 	roster    *rosterSpec
+	alloc     *allocSpec
 }
 
 // hireSpec is a validated hire, not yet committed.
@@ -82,6 +87,12 @@ type proposal struct {
 	// (trainees only, set by checkComposed).
 	versions   map[int][]rosterVersion
 	productive map[int]int64
+	// allocs are the batch's allocation changes; aversions the composed
+	// allocation timelines of the radiologists they change; akeys the
+	// (radiologist, date) pairs written.
+	allocs    []*allocSpec
+	aversions map[int][]allocVersion
+	akeys     map[rosterKey]bool
 }
 
 // staffBatch validates a V0.2 batch and, if do, commits it. known is the
@@ -90,16 +101,23 @@ type proposal struct {
 func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []string) ([]staffOutcome, *proposal) {
 	out := make([]staffOutcome, len(actions))
 	fail := -1
+	// The refusal names the staffing actions as earlier builds did, and
+	// set_reading_allocation only when the batch holds one: a batch
+	// without it keeps its recorded message.
+	names := slices.DeleteFunc(slices.Clone(known), func(t string) bool { return t == api.ActSetReadingAllocation })
+	if slices.ContainsFunc(actions, func(a api.Action) bool { return a.Type == api.ActSetReadingAllocation }) && slices.Contains(known, api.ActSetReadingAllocation) {
+		names = append(names, api.ActSetReadingAllocation)
+	}
 	for k, a := range actions {
 		if !slices.Contains(known, a.Type) {
 			out[k] = staffOutcome{code: "mixed_batch", msg: fmt.Sprintf("%q cannot share a batch with V0.2 staffing actions (%s): submit it in its own batch at the same time.",
-				a.Type, strings.Join(known, ", "))}
+				a.Type, strings.Join(names, ", "))}
 			fail = k
 			break
 		}
 	}
 	p := &proposal{reqs: map[string]bool{}, emps: map[int]bool{}, rkeys: map[rosterKey]bool{},
-		versions: map[int][]rosterVersion{}, productive: map[int]int64{}}
+		versions: map[int][]rosterVersion{}, productive: map[int]int64{}, aversions: map[int][]allocVersion{}, akeys: map[rosterKey]bool{}}
 	if fail < 0 {
 		for k, a := range actions {
 			var o staffOutcome
@@ -108,8 +126,10 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 				o = st.checkHire(a, p)
 			case api.ActTerminate:
 				o = st.checkTerminate(a, p)
-			default:
+			case api.ActSetRoster:
 				o = st.checkSetRoster(a, p, k)
+			default:
+				o = st.checkSetAllocation(a, p)
 			}
 			out[k] = o
 			if !o.ok {
@@ -169,6 +189,8 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 			from = min(from, o.roster.from)
 			causes = append(causes, len(st.actions.log)+k)
 			add(causeRosterChanged)
+		case o.alloc != nil:
+			st.commitAlloc(o.alloc, len(st.actions.log)+k)
 		}
 	}
 	if moved, delayed := st.trainingMoves(p); moved != noEnd {
@@ -190,7 +212,8 @@ func (st *state) checkHire(a api.Action, p *proposal) staffOutcome {
 		return staffOutcome{code: code, msg: fmt.Sprintf(format, args...)}
 	}
 	switch {
-	case a.Employee != "" || a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.LastDay != "" || a.Op != "" || a.Effective != "":
+	case a.Employee != "" || a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.LastDay != "" || a.Op != "" || a.Effective != "" ||
+		a.SiteAllocationBP != 0:
 		return bad("invalid_schema", "hire takes requestId, role, skills, rateCents, contractedWeeklyMinutes, roster and startDate only.")
 	case a.RequestID == "" || len(a.RequestID) > 128:
 		return bad("invalid_schema", "hire needs a requestId of 1–128 characters.")
@@ -655,7 +678,8 @@ func (st *state) checkTerminate(a api.Action, p *proposal) staffOutcome {
 	}
 	switch {
 	case a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.RequestID != "" || a.Role != "" ||
-		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.Op != "" || a.Effective != "":
+		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.Op != "" || a.Effective != "" ||
+		a.SiteAllocationBP != 0:
 		return bad("invalid_schema", "terminate takes employee and lastDay only.")
 	case a.Employee == "" || a.LastDay == "":
 		return bad("invalid_schema", "terminate needs employee and lastDay.")

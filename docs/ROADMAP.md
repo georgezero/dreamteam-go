@@ -30,9 +30,12 @@ built (design §5.7); Slice 3, `set_roster` with dated roster versions, is
 built (design §5.8). The owner's dynamic staffing benchmark (design §5.9,
 `docs/calibration/dynamic-staffing/`) found staffing reorganizations paying
 back within 180 days on 20/20 held-out seeds, but the full one breaks report
-turnaround without reading actions: CONDITIONAL GO. Next: Slice 4
-(`set_reading_allocation`), then the same frozen plans rerun with a defined
-reading adjustment; then Slice 5 (`contract_teleradiology`).
+turnaround without reading actions: CONDITIONAL GO. Slice 4,
+`set_reading_allocation`, is built (design §5.10). Rerunning the frozen
+plans with the full reorganization plus the lead's 62.5/52.5% allocation
+(plan D) returned reporting within the provisional gates on average, at
+about the allocation's own salary cost: CONDITIONAL GO. Next: Slice 5
+(`contract_teleradiology`).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

@@ -8,10 +8,12 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
-// The staff screen (V0.2 Slices 2–3): the staff registry with each
-// employee's lifecycle, contract and pending roster changes, a hire form,
-// termination rows and roster rows (enter opens the roster editor,
-// roster.go). Like the actions screen it only submits through the
+// The staff screen (V0.2 Slices 2–4): the staff registry with each
+// employee's lifecycle, contract and pending roster and allocation
+// changes, a hire form, termination rows, reading allocation rows (one per
+// salaried radiologist: ←→ the site share, , . the effective date, x
+// withdraw a pending change) and roster rows (enter opens the roster
+// editor, roster.go). Like the actions screen it only submits through the
 // session's Apply; the row under the cursor is previewed with
 // PreviewStaffing (read-only: it changes nothing, allocates no ID and
 // reveals no hidden patient outcome).
@@ -73,6 +75,12 @@ type staffForm struct {
 	lastShift         map[string]int64
 	result            *api.ActionResult
 	edit              *rosterEditor // the open roster editor, if any
+	// Reading allocation rows: the chosen share by radiologist (0: the
+	// one in force on the date), the effective date in days after the
+	// earliest, and a pending change to withdraw instead.
+	allocBP     map[string]int64
+	allocShift  int64
+	allocRemove map[string]bool
 }
 
 // rosterFor lists the patterns that suit an offer (desk for front desk,
@@ -161,6 +169,57 @@ func (m *Model) terminateAction(e api.Employee) api.Action {
 	return api.Action{Type: api.ActTerminate, Employee: e.ID, LastDay: earliest.AddDays(m.staff.lastShift[e.ID]).String()}
 }
 
+// readers lists the radiologists whose site allocation can be changed.
+func (m *Model) readers() []api.ReadingAllocation {
+	var out []api.ReadingAllocation
+	for _, r := range m.sess.ReadingAllocations() {
+		if r.Editable {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+// allocEffective is the chosen effective date of an allocation change.
+func (m *Model) allocEffective(r api.ReadingAllocation) string {
+	d, _ := simtime.ParseDate(r.EarliestEffective)
+	return d.AddDays(m.staff.allocShift).String()
+}
+
+// allocOn is r's allocation in force on date, and whether a pending
+// change takes effect exactly then.
+func allocOn(r api.ReadingAllocation, date string) (bp int64, pending bool) {
+	for _, v := range r.Versions {
+		if v.Effective <= date {
+			bp, pending = v.SiteBP, v.Pending && v.Effective == date
+		}
+	}
+	return bp, pending
+}
+
+// allocAction is the set_reading_allocation a reading allocation row
+// describes.
+func (m *Model) allocAction(r api.ReadingAllocation) api.Action {
+	date := m.allocEffective(r)
+	if m.staff.allocRemove[r.Employee] {
+		return api.Action{Type: api.ActSetReadingAllocation, Op: api.RosterOpRemove, Employee: r.Employee, Effective: date}
+	}
+	bp := m.staff.allocBP[r.Employee]
+	if bp == 0 {
+		bp, _ = allocOn(r, date)
+	}
+	return api.Action{Type: api.ActSetReadingAllocation, Op: api.RosterOpSet, Employee: r.Employee, Effective: date, SiteAllocationBP: bp}
+}
+
+// readerRow is the radiologist of the cursor's allocation row, if it is one.
+func (m *Model) readerRow() (api.ReadingAllocation, bool) {
+	k := m.staff.sel - hireRows - len(m.terminable())
+	if r := m.readers(); k >= 0 && k < len(r) {
+		return r[k], true
+	}
+	return api.ReadingAllocation{}, false
+}
+
 // staffSelected is the cursor row's action (a roster row has none: enter
 // opens the editor).
 func (m *Model) staffSelected() (api.Action, bool) {
@@ -171,12 +230,15 @@ func (m *Model) staffSelected() (api.Action, bool) {
 	if k := f.sel - hireRows; k < len(m.terminable()) {
 		return m.terminateAction(m.terminable()[k]), true
 	}
+	if r, ok := m.readerRow(); ok {
+		return m.allocAction(r), true
+	}
 	return api.Action{}, false
 }
 
 // rosterRow is the employee of the cursor's roster row, if it is one.
 func (m *Model) rosterRow() (api.Employee, bool) {
-	k := m.staff.sel - hireRows - len(m.terminable())
+	k := m.staff.sel - hireRows - len(m.terminable()) - len(m.readers())
 	if r := m.rosterable(); k >= 0 && k < len(r) {
 		return r[k], true
 	}
@@ -189,7 +251,7 @@ func (m *Model) staffKey(k string) bool {
 	if f.edit != nil {
 		return m.rosterKey(k)
 	}
-	rows := hireRows + len(m.terminable()) + len(m.rosterable())
+	rows := hireRows + len(m.terminable()) + len(m.readers()) + len(m.rosterable())
 	switch k {
 	case "up", "k":
 		f.sel = max(0, f.sel-1)
@@ -221,7 +283,36 @@ func (m *Model) staffKey(k string) bool {
 			if e := m.terminable(); f.sel-hireRows < len(e) {
 				id := e[f.sel-hireRows].ID
 				f.lastShift[id] = max(0, f.lastShift[id]+int64(step))
+			} else if r, ok := m.readerRow(); ok {
+				bp := m.allocAction(r).SiteAllocationBP
+				if bp == 0 {
+					bp, _ = allocOn(r, m.allocEffective(r))
+				}
+				f.allocBP[r.Employee] = min(r.MaxBP, max(r.MinBP, bp+int64(step)*250))
+				f.allocRemove[r.Employee] = false
 			}
+		}
+	case ",", ".":
+		if _, ok := m.readerRow(); !ok {
+			return false
+		}
+		if k == "," {
+			f.allocShift = max(0, f.allocShift-1)
+		} else {
+			f.allocShift++
+		}
+		for id := range f.allocRemove {
+			f.allocRemove[id] = false
+		}
+	case "x":
+		r, ok := m.readerRow()
+		if !ok {
+			return false
+		}
+		if _, pending := allocOn(r, m.allocEffective(r)); pending {
+			f.allocRemove[r.Employee] = !f.allocRemove[r.Employee]
+		} else {
+			m.status = "No pending allocation change on " + shortDate(m.allocEffective(r)) + " to withdraw."
 		}
 	case "enter":
 		if e, ok := m.rosterRow(); ok {
@@ -233,6 +324,10 @@ func (m *Model) staffKey(k string) bool {
 			r := m.sess.Apply(a)[0]
 			f.result = &r
 			m.status = resultText(r)
+			if r.OK && a.Type == api.ActSetReadingAllocation {
+				delete(f.allocBP, a.Employee)
+				f.allocRemove[a.Employee] = false
+			}
 		}
 	default:
 		return false
@@ -290,8 +385,32 @@ func (m *Model) staffBody(w, n int) []string {
 	if sel, ok := m.staffSelected(); ok {
 		lines = append(lines, m.previewLines(m.sess.PreviewStaffing(sel), w, n-len(lines))...)
 	}
+	lines = append(lines, "", titleStyle.Render(" Reading allocation")+dimStyle.Render(" — salaried radiologists' site share: ←→ share · , . date (≥ 14 days ahead) · x withdraw; salary follows; shifts and supervision unchanged"))
+	wl := o.Worklist
+	lines = append(lines, dimStyle.Render(fmt.Sprintf("   reporting backlog now: %d unread, %d reading, %d urgent · oldest %s", wl.Unread, wl.Reading, wl.Urgent, minutes(wl.OldestMin))))
+	for k, r := range m.readers() {
+		a := m.allocAction(r)
+		cur := r.Versions[0]
+		for _, v := range r.Versions {
+			if v.InEffect {
+				cur = v
+			}
+		}
+		choice := "‹ " + pctBP(a.SiteAllocationBP) + " ›"
+		if a.Op == api.RosterOpRemove {
+			choice = "‹ WITHDRAW ›"
+		}
+		pend := ""
+		for _, v := range r.Versions {
+			if v.Pending {
+				pend += fmt.Sprintf(" · %s from %s", pctBP(v.SiteBP), shortDate(v.Effective))
+			}
+		}
+		lines = append(lines, fmt.Sprintf(" %s %-7s %-12s now %-6s site %s/wk  →  %s from ‹ %s ›%s", cursor(hireRows+len(m.terminable())+k), trim(r.Employee, 7),
+			trim(r.Name, 12), pctBP(cur.SiteBP), minutes((cur.SiteMinA+cur.SiteMinB)/2), choice, shortDate(a.Effective), dimStyle.Render(pend)))
+	}
 	lines = append(lines, "", titleStyle.Render(" Rosters")+dimStyle.Render(" — enter edits: dated from a Monday ≥ 14 days ahead; the contract is paid whatever is rostered"))
-	base := hireRows + len(m.terminable())
+	base := hireRows + len(m.terminable()) + len(m.readers())
 	for k, e := range m.rosterable() {
 		pend := ""
 		for _, c := range e.RosterChanges {
@@ -370,6 +489,11 @@ func (m *Model) previewLines(p api.StaffingPreview, w, n int) []string {
 				}
 				lines = append(lines, dimStyle.Render(line))
 			}
+			for _, a := range p.Allocations {
+				lines = append(lines, dimStyle.Render(fmt.Sprintf(" %s from %s: site share %s → %s · site reading %s → %s a week · salary %s → %s per 30 days · withdrawable until %s",
+					a.Employee, shortDate(a.Effective), pctBP(a.BeforeBP), pctBP(a.AfterBP), minutes((a.BeforeSiteMinA+a.BeforeSiteMinB)/2),
+					minutes((a.AfterSiteMinA+a.AfterSiteMinB)/2), dollars(a.BeforeSalary30Cents), dollars(a.AfterSalary30Cents), shortDate(a.WithdrawBy))))
+			}
 			if len(p.Rosters) > 0 {
 				count := func(cs []api.ModalityCount) string {
 					var out []string
@@ -429,6 +553,12 @@ func (m *Model) staffTable() []string {
 		for _, c := range e.RosterChanges {
 			dates = strings.TrimPrefix(dates+" · ", " · ") + fmt.Sprintf("roster from %s", shortDate(c.Effective))
 		}
+		if e.SiteBP > 0 {
+			contract = "site " + pctBP(e.SiteBP)
+		}
+		for _, c := range e.AllocationChanges {
+			dates = strings.TrimPrefix(dates+" · ", " · ") + fmt.Sprintf("site %s from %s", pctBP(c.SiteBP), shortDate(c.Effective))
+		}
 		lines = append(lines, fmt.Sprintf("   %-7s %-12s %-13s %-12s %-9s %-8s %s", trim(e.ID, 7), trim(e.Name, 12),
 			trim(strings.ReplaceAll(e.Role, "_", " "), 13), e.Employment, contract, rate, dates))
 	}
@@ -449,4 +579,13 @@ func dollars(c int64) string {
 		return "−$" + s
 	}
 	return "$" + s
+}
+
+// pctBP formats basis points as a percentage: "62.5%".
+func pctBP(bp int64) string {
+	s := fmt.Sprint(bp / 100)
+	if f := bp % 100; f != 0 {
+		s += strings.TrimRight(fmt.Sprintf(".%02d", f), "0")
+	}
+	return s + "%"
 }

@@ -442,6 +442,12 @@ type DayPlan struct {
 	// not employed that day; a trainee's training view in onboarding).
 	emps    []*EmployeeConfig
 	Reading [][]Span // per employee: site reading blocks (radiologists)
+	// cutReading, when set, holds every radiologist's blocks at the
+	// scenario allocation: the boundaries Coverage cuts at, so a changed
+	// allocation (set_reading_allocation) never moves booking segments
+	// and the shared-capacity handovers they allow. Nil when every
+	// allocation is the scenario's (derived, not state).
+	cutReading [][]Span
 }
 
 // Plan materializes the scenario's roster for date d.
@@ -472,6 +478,16 @@ func (c *Config) planOf(d simtime.Date, emps []*EmployeeConfig) DayPlan {
 		p.Shifts = append(p.Shifts, Shift{Employee: i, ShiftTemplate: *t})
 		if e.Role == Radiologist {
 			p.Reading[i] = ReadingBlocks(t.Span, e.SiteAllocationBP)
+			if i < len(c.Employees) && e.SiteAllocationBP != c.Employees[i].SiteAllocationBP && p.cutReading == nil {
+				p.cutReading = make([][]Span, len(emps))
+			}
+		}
+	}
+	if p.cutReading != nil {
+		for _, s := range p.Shifts {
+			if i := s.Employee; i < len(c.Employees) && c.Employees[i].Role == Radiologist {
+				p.cutReading[i] = ReadingBlocks(s.Span, c.Employees[i].SiteAllocationBP)
+			}
 		}
 	}
 	return p
@@ -517,7 +533,8 @@ type Segment struct {
 	Desk  int
 	// Supervision is true when a radiologist is on duty and on site.
 	Supervision bool
-	// Reading counts radiologists in a site reading block.
+	// Reading counts radiologists in a site reading block (at the
+	// scenario allocation: see DayPlan.cutReading).
 	Reading int
 }
 
@@ -536,7 +553,11 @@ func (p *DayPlan) Coverage() Coverage {
 			cuts = append(cuts, cv.From, cv.To)
 		}
 	}
-	for _, blocks := range p.Reading {
+	reading := p.Reading
+	if p.cutReading != nil {
+		reading = p.cutReading
+	}
+	for _, blocks := range reading {
 		for _, b := range blocks {
 			cuts = append(cuts, b.From, b.To)
 		}
@@ -566,7 +587,7 @@ func (p *DayPlan) Coverage() Coverage {
 				if !s.Remote {
 					seg.Supervision = true
 				}
-				for _, b := range p.Reading[s.Employee] {
+				for _, b := range reading[s.Employee] {
 					if b.Contains(at) {
 						seg.Reading++
 					}

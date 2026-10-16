@@ -2,7 +2,11 @@
 
 package sim
 
-import "github.com/georgezero/dreamteam-go/internal/simtime"
+import (
+	"slices"
+
+	"github.com/georgezero/dreamteam-go/internal/simtime"
+)
 
 // LaborPosting is one posted labor entry, for the dynamic staffing
 // benchmark's cost decomposition (calib_dynamic_test.go): the expense it
@@ -49,4 +53,29 @@ func (w *World) LaborPostings(from simtime.Time) []LaborPosting {
 		out = append(out, LaborPosting{Kind: kind, Employee: st.emps[key.a].terms.ID, Day: day, At: e.at, Cents: c})
 	}
 	return out
+}
+
+// Backlog is the reporting backlog now (unread and reading studies): its
+// count, the net revenue it will recognize when reported (expected net,
+// at each order's payer), and the mean and p90 age since imaging.
+func (w *World) Backlog() (n int, revenueCents int64, meanAge, p90Age simtime.Duration) {
+	st := w.st
+	var ages []simtime.Duration
+	var total simtime.Duration
+	for si := range st.dem.studies {
+		s := &st.dem.studies[si]
+		if s.state != studyUnread && s.state != studyReading {
+			continue
+		}
+		o := &st.dem.orders[s.order]
+		revenueCents += st.cfg.Finance.ExpectedNetCents(&st.cfg.Catalog[s.exam], o.payer)
+		a := st.now.Sub(s.acquiredAt)
+		ages = append(ages, a)
+		total += a
+	}
+	if len(ages) == 0 {
+		return 0, 0, 0, 0
+	}
+	slices.Sort(ages)
+	return len(ages), revenueCents, total / simtime.Duration(len(ages)), ages[(len(ages)*9+9)/10-1]
 }

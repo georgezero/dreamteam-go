@@ -22,8 +22,8 @@ import (
 )
 
 // The V0.2 dynamic staffing benchmark (docs/calibration/dynamic-staffing):
-// fixed, hand-authored action plans — hire, terminate, set_roster and the
-// V0.1 controls — applied through World.Apply to the sustainable starting
+// fixed, hand-authored action plans — hire, terminate, set_roster,
+// set_reading_allocation (plan D) and the V0.1 controls — applied through World.Apply to the sustainable starting
 // practice, every seed the same actions at the same instants, from the
 // takeover for 180 days. It measures what the plans cost and earn against
 // the paired no-action run, day by day; it changes nothing in the model.
@@ -71,6 +71,13 @@ type dynExpect struct {
 	LastDay    string   `json:"lastDay,omitempty"`
 	Replaces   string   `json:"replaces,omitempty"` // whose work a hire takes over: their pay once it is productive is overlap
 	Rosters    []string `json:"rosterEffective,omitempty"`
+	// Allocation: a radiologist's dated site allocations, in date order.
+	Allocation []dynAlloc `json:"allocation,omitempty"`
+}
+
+type dynAlloc struct {
+	Effective string `json:"effective"`
+	SiteBP    int64  `json:"siteBP"`
 }
 
 type dynResult struct {
@@ -158,8 +165,13 @@ type dynExtra struct {
 	ReportsByModality map[string]int          `json:"reportsByModality"`
 	Backlog           int                     `json:"backlog"`           // unread + reading
 	BacklogOldestMin  int64                   `json:"backlogOldestMin"`  // oldest unfinished study
-	BacklogByPriority map[string]int          `json:"backlogByPriority"` // unread + reading
-	InconsistentBooks int                     `json:"inconsistentBookings"`
+	BacklogMeanAgeMin int64                   `json:"backlogMeanAgeMin"` // since imaging
+	BacklogP90AgeMin  int64                   `json:"backlogP90AgeMin"`
+	// BacklogRevenueCents is the net revenue the backlog will recognize
+	// when reported: imaged, not yet billed.
+	BacklogRevenueCents int64          `json:"backlogRevenueCents"`
+	BacklogByPriority   map[string]int `json:"backlogByPriority"` // unread + reading
+	InconsistentBooks   int            `json:"inconsistentBookings"`
 }
 
 // dynSpan: orders received and studies acquired in a span of days.
@@ -183,6 +195,7 @@ type dynLabor struct {
 	GuaranteeCents  int64 `json:"guaranteeCents"` // guaranteed pay for contracted time not worked
 	WorkedCents     int64 `json:"workedCents"`    // all hourly worked pay (training and overlap included)
 	SalaryCents     int64 `json:"salaryCents"`
+	ReadingCents    int64 `json:"readingSalaryCents"` // of SalaryCents, the radiologists' (their site allocation)
 }
 
 type dynChecks struct {
@@ -484,6 +497,8 @@ func dynMeasureExtra(t *testing.T, w *sim.World) *dynExtra {
 	for _, b := range o.Worklist.ByPriority {
 		x.BacklogByPriority[b.Key] = b.Unread + b.Reading
 	}
+	_, rev, mean, p90 := w.Backlog()
+	x.BacklogRevenueCents, x.BacklogMeanAgeMin, x.BacklogP90AgeMin = rev, int64(mean/simtime.Minute), int64(p90/simtime.Minute)
 	conflicts, err := w.CheckStaffing(sim.StaffingChange{From: w.DayIndex() + 1})
 	if err != nil {
 		t.Fatal(err)
@@ -568,6 +583,21 @@ func dynCheckLifecycle(t *testing.T, w *sim.World, p dynPlan, r *dynSeed) {
 		if x.LastDay != "" && e.LastDay != x.LastDay {
 			bad("%s last day %s, want %s", x.Employee, e.LastDay, x.LastDay)
 		}
+		if len(x.Allocation) > 0 {
+			var got []dynAlloc
+			for _, a := range w.ReadingAllocations() {
+				if a.Employee == e.ID {
+					for _, v := range a.Versions {
+						if v.Effective != "" {
+							got = append(got, dynAlloc{v.Effective, v.SiteBP})
+						}
+					}
+				}
+			}
+			if !slices.Equal(got, x.Allocation) {
+				bad("%s allocations %v, want %v", x.Employee, got, x.Allocation)
+			}
+		}
 		if len(x.Rosters) > 0 {
 			plan, ok := w.RosterPlan(e.ID)
 			var got []string
@@ -606,6 +636,10 @@ func dynLaborCosts(t *testing.T, w *sim.World, cfg *sim.Config, start simtime.Ti
 			replacedBy[ids[x.Replaces]] = ids[x.Employee]
 		}
 	}
+	readers := map[string]bool{}
+	for _, e := range cfg.Employees {
+		readers[e.ID] = e.Role == sim.Radiologist
+	}
 	posts := w.LaborPostings(start)
 	r.ByEmp = map[string]*dynLabor{}
 	for _, k := range endpoints {
@@ -625,6 +659,9 @@ func dynLaborCosts(t *testing.T, w *sim.World, cfg *sim.Config, start simtime.Ti
 					l.GuaranteeCents += ps.Cents
 				case "salary":
 					l.SalaryCents += ps.Cents
+					if readers[ps.Employee] {
+						l.ReadingCents += ps.Cents
+					}
 				case "worked":
 					l.WorkedCents += ps.Cents
 					if pd, ok := productive[ps.Employee]; ok && ps.Day < pd {

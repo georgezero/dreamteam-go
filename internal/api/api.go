@@ -158,6 +158,50 @@ type Employee struct {
 	// RosterChanges are the employee's accepted roster versions not yet in
 	// effect (V0.2 Slice 3), in date order.
 	RosterChanges []RosterChange `json:"rosterChanges,omitempty"`
+	// AllocationChanges are a radiologist's accepted site allocations not
+	// yet in effect (V0.2 Slice 4), in date order. SiteBP above is the
+	// allocation in effect today.
+	AllocationChanges []AllocationChange `json:"allocationChanges,omitempty"`
+}
+
+// AllocationChange is a pending site allocation.
+type AllocationChange struct {
+	Effective string `json:"effective"`
+	SiteBP    int64  `json:"siteBP"`
+	Action    string `json:"action"` // the accepting action's ID
+}
+
+// ReadingAllocation is an employed salaried radiologist's site allocation
+// timeline (V0.2 Slice 4): the scenario allocation and every dated
+// version, with the site reading time and salary of each.
+type ReadingAllocation struct {
+	Employee          string `json:"employee"`
+	Name              string `json:"name"`
+	AnnualSalaryCents int64  `json:"annualSalaryCents"` // the whole salary; the site pays its allocated share
+	InEffectBP        int64  `json:"inEffectBP"`
+	// Editable is set while employed; EarliestEffective is then the first
+	// lawful effective date (14 days ahead, any weekday). MinBP and MaxBP
+	// are the bounds.
+	Editable          bool                `json:"editable"`
+	EarliestEffective string              `json:"earliestEffective,omitempty"`
+	MinBP             int64               `json:"minBP"`
+	MaxBP             int64               `json:"maxBP"`
+	Versions          []AllocationVersion `json:"versions"`
+}
+
+// AllocationVersion is one allocation of the timeline. Effective is empty
+// for the scenario allocation. SiteMinA and SiteMinB are the site reading
+// blocks' minutes in rota weeks A and B; Salary30Cents the salary with
+// benefits per 30 days.
+type AllocationVersion struct {
+	Effective     string `json:"effective,omitempty"`
+	SiteBP        int64  `json:"siteBP"`
+	SiteMinA      int64  `json:"siteMinA"`
+	SiteMinB      int64  `json:"siteMinB"`
+	Salary30Cents int64  `json:"salary30Cents"`
+	InEffect      bool   `json:"inEffect"`
+	Pending       bool   `json:"pending"`
+	Action        string `json:"action,omitempty"`
 }
 
 // RosterChange is a pending roster version.
@@ -1293,9 +1337,12 @@ const (
 	// V0.2 Slice 3: a dated roster version of an hourly technologist or
 	// front desk employee (op "set" or "remove").
 	ActSetRoster = "set_roster"
+	// V0.2 Slice 4: a dated site reading allocation of an employed
+	// salaried radiologist (op "set" or "remove").
+	ActSetReadingAllocation = "set_reading_allocation"
 )
 
-// set_roster operations.
+// set_roster and set_reading_allocation operations.
 const (
 	RosterOpSet    = "set"    // insert or replace the version effective on a date
 	RosterOpRemove = "remove" // remove a pending version: its predecessor resumes
@@ -1325,7 +1372,8 @@ const (
 // ("HH:MM"); set_worklist_policy — Policy. V0.2: hire — RequestID, Role,
 // Skills, RateCents, ContractedWeeklyMinutes, Roster, StartDate;
 // terminate — Employee, LastDay; set_roster — Op, Employee, Effective and
-// (op set) Roster. Fields of other types are omitted, so a V0.1 action
+// (op set) Roster; set_reading_allocation — Op, Employee, Effective and
+// (op set) SiteAllocationBP. Fields of other types are omitted, so a V0.1 action
 // encodes exactly as before.
 type Action struct {
 	Type     string `json:"type"`
@@ -1350,6 +1398,10 @@ type Action struct {
 	// Monday at least 14 days ahead).
 	Op        string `json:"op,omitempty"`
 	Effective string `json:"effective,omitempty"`
+	// set_reading_allocation (op set): the site share of the
+	// radiologist's paid time, 3,000–10,000 basis points, effective on a
+	// date at least 14 days ahead.
+	SiteAllocationBP int64 `json:"siteAllocationBP,omitempty"`
 }
 
 // Roster is a hire's two-week rota (V0.2_DESIGN §6.2): one shift or none
@@ -1468,6 +1520,7 @@ type StaffingPreview struct {
 	Hires        []HirePreview        `json:"hires,omitempty"`
 	Terminations []TerminationPreview `json:"terminations,omitempty"`
 	Rosters      []RosterPreview      `json:"rosters,omitempty"`
+	Allocations  []AllocationPreview  `json:"allocations,omitempty"`
 	// Coverage differences of the whole batch (V0.2 Slice 3): template
 	// slots in the booking horizon it makes bookable or takes away, by
 	// modality (booked or not).
@@ -1515,6 +1568,37 @@ type RosterPreview struct {
 	ProductiveAfter  string `json:"productiveAfter,omitempty"`
 	// Approved extensions in the changed interval, all still valid.
 	Extensions []Extension `json:"extensions,omitempty"`
+}
+
+// AllocationPreview is a valid set_reading_allocation's effect (V0.2
+// Slice 4): the allocation before and after from the effective date until
+// the next version, site reading time per rota week, salary with
+// benefits per 30 days, the last day it can still be withdrawn, and the
+// reporting backlog now. Shifts and contrast supervision never change.
+type AllocationPreview struct {
+	Employee  string `json:"employee"`
+	Name      string `json:"name"`
+	Op        string `json:"op"`
+	Effective string `json:"effective"`
+	Until     string `json:"until,omitempty"` // the next version (exclusive)
+	BeforeBP  int64  `json:"beforeBP"`
+	AfterBP   int64  `json:"afterBP"`
+	// Site reading minutes in rota weeks A and B, before and after.
+	BeforeSiteMinA int64 `json:"beforeSiteMinA"`
+	BeforeSiteMinB int64 `json:"beforeSiteMinB"`
+	AfterSiteMinA  int64 `json:"afterSiteMinA"`
+	AfterSiteMinB  int64 `json:"afterSiteMinB"`
+	// Salary with benefits per 30 days, before and after.
+	BeforeSalary30Cents int64 `json:"beforeSalary30Cents"`
+	AfterSalary30Cents  int64 `json:"afterSalary30Cents"`
+	// WithdrawBy is the last decision day on which the change can still
+	// be withdrawn (op remove needs the same notice).
+	WithdrawBy string `json:"withdrawBy"`
+	// The reporting backlog now: unfinished studies, of them urgent, and
+	// the oldest one's age since imaging.
+	BacklogStudies   int   `json:"backlogStudies"`
+	BacklogUrgent    int   `json:"backlogUrgent"`
+	BacklogOldestMin int64 `json:"backlogOldestMin"`
 }
 
 // ModalityCount is a count by modality.

@@ -561,7 +561,7 @@ func (st *state) observeStaff(o *api.Observation, now simtime.Time) {
 		emp := &st.emps[i]
 		t := emp.terms
 		x := api.Employee{ID: t.ID, Name: t.Name, Role: string(t.Role),
-			Skills: slices.Clone(t.Skills), Status: api.StaffOff, SiteBP: t.SiteAllocationBP,
+			Skills: slices.Clone(t.Skills), Status: api.StaffOff, SiteBP: st.siteBP(i, st.day),
 			Rooms: staffing[i], Held: emp.held, OvertimeMin: int64(st.overtimeNow(i, now) / simtime.Minute)}
 		x.WeekPaidMin = int64(emp.weekPaid / simtime.Minute)
 		st.observeEmployment(&x, i)
