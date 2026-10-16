@@ -351,8 +351,9 @@ func TestGoldenMigrations(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Every reference written by another engine is in the manifest; one
-	// written by this build (the Slice 3 reference) needs no migration.
+	// Every reference written by another engine is in the manifest (the
+	// Slice 3 reference with no changed field); one written by this build
+	// would need no migration.
 	historical := 0
 	for _, ref := range references {
 		raw, _ := os.ReadFile(filepath.Join(goldenDir, ref.file))
@@ -366,7 +367,7 @@ func TestGoldenMigrations(t *testing.T) {
 			t.Errorf("%s (engine %s): in the manifest %v", ref.file, g.Engine, listed)
 		}
 	}
-	if m.StateSchema != sim.StateSchema || len(m.References) != historical || historical != 5 {
+	if m.StateSchema != sim.StateSchema || len(m.References) != historical || historical != 6 {
 		t.Fatalf("manifest: state schema %q (build %q), %d references, %d historical", m.StateSchema, sim.StateSchema, len(m.References), historical)
 	}
 	golden, _ := os.ReadFile(filepath.Join(goldenDir, "mini-seed1-7d.json"))

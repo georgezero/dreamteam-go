@@ -192,6 +192,7 @@ var legacyEngines = []struct {
 // action then), and a session continuing one embeds it as its prefix.
 var earlierV2Engines = map[string]string{
 	"0.2.0-dev.2": batchModeSlice2, // V0.2 Slice 2: hire, terminate
+	"0.2.0-dev.3": batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

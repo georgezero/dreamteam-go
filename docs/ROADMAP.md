@@ -27,9 +27,12 @@ V0.2 is being implemented in slices; Slice 1, the employee contract and
 capacity foundation with no new action, is built (design §5.5); Slice 2,
 `hire` and `terminate` with practice-caused displacement and session v2, is
 built (design §5.7); Slice 3, `set_roster` with dated roster versions, is
-built (design §5.8). Next: the owner's dynamic benchmark with the actions
-built so far; then Slices 4–5 (`set_reading_allocation`,
-`contract_teleradiology`).
+built (design §5.8). The owner's dynamic staffing benchmark (design §5.9,
+`docs/calibration/dynamic-staffing/`) found staffing reorganizations paying
+back within 180 days on 20/20 held-out seeds, but the full one breaks report
+turnaround without reading actions: CONDITIONAL GO. Next: Slice 4
+(`set_reading_allocation`), then the same frozen plans rerun with a defined
+reading adjustment; then Slice 5 (`contract_teleradiology`).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

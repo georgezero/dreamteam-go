@@ -327,3 +327,23 @@ check per employee and day.
 | Slice 2 termination preview / commit, same run (unchanged allocations) | `-bench 'StaffingPreviewTermination|StaffingCommitTermination'` | 30.8–31.7 / 29.2–33.6 ms/op; 21.6k / 26.0k allocs |
 | Roster editor render with a displacing preview, 160×48 | `go test ./internal/tui -run RosterEditorRenderTime -v` | 48 ms per frame (under load) |
 | The six golden references and the Slice 2 session on the Cortex-A76 | `run_refs` (each `run … -verify-replay -golden`) | 9.2 s in all; outputs byte-identical to the Pi's |
+
+## 2026-10-16 — V0.2 dynamic staffing benchmark (Pi 4 at 80–83 °C; Cortex-A76 "joofi", shared with other work, load average up to ≈13)
+
+No engine code changed. The benchmark harness (`-tags calibration`,
+`internal/sim/calib_dynamic_test.go`) plays 180 days per seed and plan.
+Each day it samples the evaluation window and balances; at T30, T90 and
+T180 it measures and runs a whole-schedule staffing check.
+
+| Measurement | Command | Result |
+|---|---|---|
+| One plan, one seed, 180 days (full plan C), Pi, alone | `DT_DYN_SET=dev DT_DYN_SEEDS=901 DT_DYN_PLANS=C-full-reorganization go test -tags calibration ./internal/sim -run 'DynamicStaffing$'` | 9.9 s |
+| Development set, 5 plans × 10 seeds × 180 days, Pi | `DT_DYN_SET=dev … -parallel 3` | 6 min 57 s |
+| Evaluation set, 3 plans × 20 seeds × 180 days, Cortex-A76 (compiled test binary) | `DT_DYN_SET=eval ./sim-cal.test -test.parallel 3` | 202 s idle; slower while shared |
+| Session replay check, 6 plans × 2 seeds × 180 days, saved and replayed whole and in 13-hour chunks, Cortex-A76 | `./session-cal.test -test.run DynamicPlansReplay` (`DT_DYN_DAYS=180 DT_DYN_SEEDS=901,1001`) | 226 s (loaded) |
+| Full uncached suite after the version bump, Pi | `go test -count=1 -timeout 60m ./...` | 9 min 6 s (sim 530 s, session 104 s, cmd 100 s, tui 31 s) |
+
+The result files from the 0.2.0-dev.3 binary (development set on the Pi,
+evaluation set on the Cortex-A76) and from the 0.2.0-dev.4 binary (both
+sets on the Cortex-A76) are identical in every field but the engine name.
+

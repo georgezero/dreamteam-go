@@ -87,7 +87,7 @@ type LegacyPrefix struct {
 	Schema     string          `json:"schema"`    // dreamteam.session/v1, or v2 of an earlier V0.2 build
 	Engine     string          `json:"engine"`    // the build that wrote it
 	Checksum   string          `json:"checksum"`  // its own checksum
-	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), or v0.2_slice2 (hire and terminate only)
+	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only) or v0.2_slice3 (with set_roster)
 	LastBatch  int64           `json:"lastBatch"` // its last batch number (0: none)
 	UntilSec   int64           `json:"untilSec"`
 	Outcome    string          `json:"outcomeCompatibility"` // verified (outcomes) or exact (every digest)
@@ -103,6 +103,7 @@ const (
 	CompatSchemaChanged = "schema_changed"
 	batchModeLegacy     = "legacy_sequential"
 	batchModeSlice2     = "v0.2_slice2"
+	batchModeSlice3     = "v0.2_slice3"
 	batchModeCurrent    = ""
 )
 
@@ -402,6 +403,9 @@ func decodeV2(raw []byte) (*Record, error) {
 	return r, nil
 }
 
+// earlierMode reports whether mode is a registered earlier V0.2 build's.
+func earlierMode(mode string) bool { return mode == batchModeSlice2 || mode == batchModeSlice3 }
+
 // batchMode is how a record's own batches apply: a v1 record's V0.1
 // actions one by one, an earlier V0.2 build's with its action set, and
 // otherwise this build's.
@@ -587,7 +591,7 @@ func Replay(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	_, legacy := legacyState(r.Engine)
 	legacy = legacy && r.Engine != version.Number && r.Schema == RecordSchemaV1
 	mode := batchMode(r)
-	rep.Earlier = mode == batchModeSlice2
+	rep.Earlier = earlierMode(mode)
 	if r.Engine != version.Number && !legacy && !rep.Earlier && !opts.AllowEngineMismatch {
 		rep.OK = false
 		return nil, rep, fmt.Errorf("%w: recorded by %s, this is %s (replay with the engine mismatch allowed to compare outcomes)",
@@ -645,7 +649,7 @@ func newPrefix(r *Record, rep *Report, s *Session) *LegacyPrefix {
 func replayContinued(r *Record, opts ReplayOptions) (*Session, *Report, error) {
 	rep := &Report{OK: true, Engine: r.Engine, Batches: len(r.Batches), Recorded: r.Digests, RecSummary: r.Summary}
 	mode := batchMode(r)
-	rep.Earlier = mode == batchModeSlice2
+	rep.Earlier = earlierMode(mode)
 	if r.Engine != version.Number && !rep.Earlier && !opts.AllowEngineMismatch {
 		rep.OK = false
 		return nil, rep, fmt.Errorf("%w: recorded by %s, this is %s (replay with the engine mismatch allowed to compare outcomes)",
@@ -784,6 +788,11 @@ func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, 
 			got = s.w.ApplyLegacy(b.Actions)
 		case batchModeSlice2:
 			got = s.w.ApplySlice2(b.Actions)
+		case batchModeSlice3:
+			// Slice 3's action set is this build's: hire, terminate,
+			// set_roster and the V0.1 actions. A later action type would
+			// need Slice 3's own set here, as Slice 2 has.
+			got = s.Apply(b.Actions...)
 		default:
 			got = s.Apply(b.Actions...)
 		}

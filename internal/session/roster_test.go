@@ -221,3 +221,53 @@ func TestV1ContinuationWithRoster(t *testing.T) {
 		t.Fatalf("v1 → v2 with set_roster: %v %s", err, repString(rep))
 	}
 }
+
+const slice3Fixture = "../../testdata/sessions/mini-seed22-slice3.session.json"
+
+// A record written by the Slice 3 build (0.2.0-dev.3, testdata/sessions):
+// set_roster set and remove, hire, terminate and a V0.1 extension, all
+// accepted. This build has the same action set and state encoding, so the
+// record replays with every digest verified, continues, and saves with the
+// Slice 3 record embedded verbatim as its prefix.
+func TestSlice3RecordReplaysAndContinues(t *testing.T) {
+	l, rep, err := Load(slice3Fixture, ReplayOptions{})
+	if err != nil || !rep.OK || !rep.Earlier || rep.Compatibility() != "earlier_build_exact" || rep.Replayed != rep.Recorded {
+		t.Fatalf("Slice 3 record: %v %s", err, repString(rep))
+	}
+	if p, _ := l.RosterPlan("E03"); len(p.Versions) != 2 || p.Versions[1].Effective != "2026-11-09" {
+		t.Fatalf("Riley's roster plan after replay: %+v", p.Versions)
+	}
+	for _, step := range []simtime.Duration{37 * simtime.Minute, 9 * simtime.Hour} {
+		if _, rep, err := Load(slice3Fixture, ReplayOptions{Step: step}); err != nil || rep.Replayed != rep.Recorded {
+			t.Fatalf("step %s: %v %s", step, err, repString(rep))
+		}
+	}
+	at(t, l, 10, "09:00")
+	if res := l.Apply(rosterAct("E03", "2026-11-16", riley(l, "Mon"))); !res[0].OK {
+		t.Fatalf("set_roster after the Slice 3 record: %+v", res)
+	}
+	at(t, l, 12, "12:00")
+	p := saveTemp(t, l)
+	raw, _ := os.ReadFile(p)
+	cont, err := DecodeRecord(raw)
+	if err != nil || cont.Legacy == nil || cont.Legacy.Engine != "0.2.0-dev.3" || cont.Legacy.BatchMode != "v0.2_slice3" ||
+		cont.Legacy.Outcome != CompatExact || cont.Legacy.State != CompatExact || len(cont.Batches) != 1 {
+		t.Fatalf("continued record: %v %+v", err, cont.Legacy)
+	}
+	fixture, _ := os.ReadFile(slice3Fixture)
+	var a, b bytes.Buffer
+	json.Compact(&a, fixture)
+	json.Compact(&b, cont.Legacy.Record)
+	if a.String() != b.String() {
+		t.Fatal("the Slice 3 record is not embedded verbatim")
+	}
+	l2, rep, err := Load(p, ReplayOptions{})
+	if err != nil || rep.Compatibility() != "prefix:earlier_build_exact+native_exact" || l2.Digests() != l.Digests() {
+		t.Fatalf("continued load: %v %s", err, repString(rep))
+	}
+	q := copyFile(t, p)
+	rewrite(t, q, func(r *Record) { r.Legacy.BatchMode = batchModeCurrent })
+	if _, _, err := Load(q, ReplayOptions{}); !errors.Is(err, ErrIncompatible) {
+		t.Errorf("batch mode tampered: %v", err)
+	}
+}

@@ -7,6 +7,106 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 dynamic staffing benchmark (0.2.0-dev.4)
+
+The owner's milestone after Slice 3: can the sustainable scenario's shared
+start be improved with the implemented actions alone, and at what
+transition cost and payback? Benchmark: `docs/calibration/dynamic-staffing/`
+(README, plans, per-seed results, reports, trajectories, sessions). Design:
+`docs/V0.2_DESIGN.md` §5.9. **No engine behaviour, economics, demand,
+wages, hours or patient behaviour changed, and no action was added.**
+
+* **Plans.** `plans.py` writes them as fixed timed action batches, applied
+  through `World.Apply` identically on every seed. Each submits one atomic
+  batch at the takeover with standard offers; V0.1 controls stay at their
+  defaults.
+  * **A, no action.**
+  * **B, partial:** convert the MR evening. `hire` a 20 h 16:00–20:00 MR
+    technologist and `terminate` Alex (40 h) once it is productive.
+  * **C, full:** the closest legal path to Step 0C's `DED-MRpt`. It hires a
+    CT day core (40 h), an XR/CT evening (27.5 h) and an MR evening (20 h);
+    terminates Sam and Alex; and moves Riley to X-ray only with `set_roster`
+    from Monday Nov 23.
+  * **Feasibility:** every step is legal (lead, training, notice,
+    headcount 8 of 8, Monday effective date, no coverage gap). Only Step
+    0C's reading allocation awaits Slice 4.
+* **No overfitting.**
+  * B was chosen among three candidates (MR conversion, Step 0C's XR/CT
+    float, both) on development seeds 901–910. The rule was written into
+    `plans.py` before any run: the best T180 increment with the urgent
+    breach rate at most 5 points worse. The float candidates failed that
+    rule.
+  * The evaluation used 20 held-out seeds, 1001–1020, never used before
+    (Steps 0–0C used 1–20), for 180 days.
+* **Validation, every seed:** all actions were accepted; every lifecycle
+  date matched the plan; at most 8 technologists; no inconsistent booking
+  at any endpoint; the cash bridge reconciled; labor postings summed to
+  the window's labor to the cent.
+  * C displaced one CT contrast appointment on 2 of 20 seeds, rebooked the
+    same day: a break-relief cover was needed in X-ray.
+  * Each plan replays authoritatively from a saved session, whole and in
+    chunks, to the same digests.
+* **Results (20 held-out seeds, Δ against the paired no-action run).**
+  * **B:** costs $9.8k (recruiting 3.0, severance 4.5, training 2.2). Δ
+    profit at T30 / T90 / T180 is −8.0 / −2.0 / **+12.9 ± 0.1** $k, and
+    +$5.0k a month in steady state. Break-even is **day 101** (100–106) on
+    20/20 seeds; cash pays back on 20/20 (median day 114). Service is
+    unchanged.
+  * **C:** costs $23.7k (recruiting 9.0, severance 8.4, training 6.2). Δ
+    profit at T30 / T90 / T180 is −19.0 / −10.4 / **+14.1 ± 2.7** $k, and
+    +$8.2k a month. Break-even is **day 134** (113–175) on 20/20 seeds;
+    cash pays back on 11/20 by T180. Lowest cash is $20.7k.
+  * **C, days 91–180:** imaging +265 exams, lost referrals −179, walk-ins
+    leaving −90. But reading cannot keep up:
+    * urgent, soon and routine breach rates are 52.7%, 88.2% and 55.3%,
+      against 10.7%, 38.1% and 7.2% with no action;
+    * the backlog is 93 against 30 and still growing.
+  * **Guaranteed pay** is negligible in both plans. **Unrecovered demand:**
+    US "not rostered" losses (≈405 per 90 days) are untouched by every
+    plan.
+* **Decision: CONDITIONAL GO.**
+  * Staffing actions give measurable agency with credible payback;
+    transitions are complete by day 42 and do not call for a different
+    starting state.
+  * The full reorganization's service needs `set_reading_allocation`.
+  * Next: Slice 4, then rerun the same frozen plans on the same held-out
+    seeds with C plus an explicitly defined reading adjustment.
+* **Code (test and session compatibility only).**
+  * `internal/sim/calib_dynamic_test.go` is the harness (build tag
+    `calibration`). It reads `benchmark.json` and `plans/`, samples daily,
+    measures endpoints and spans, decomposes labor, and checks
+    lifecycles. `calib_export_test.go` is a read-only ledger export for
+    tests.
+  * `internal/session/calib_dynamic_test.go` saves and replays every plan.
+  * `report.py` builds the paired tables, payback and `trajectory.csv`.
+* **Version and compatibility.** 0.2.0-dev.4 registers 0.2.0-dev.3 as an
+  earlier V0.2 build: batch mode `v0.2_slice3`, the same action set.
+  * A genuine dev.3 session file, `testdata/sessions/mini-seed22-slice3.*`,
+    built from a clean 5fdfb95 worktree, replays with every digest and
+    continues as a prefix (`TestSlice3RecordReplaysAndContinues`). It
+    failed as an engine mismatch before the registration (fail-before-fix).
+  * The Slice 3 golden is listed in `MIGRATIONS.json` with no changed
+    field.
+* **Verification.**
+  * The full uncached suite passed on the Pi in 9 min 6 s; `go vet` is
+    clean for the default, `acceptance` and `calibration` tags; gofmt is
+    clean.
+  * Benchmark results from the dev.3 and dev.4 binaries, on the Pi and on
+    the Cortex-A76, are identical in every field but the engine name.
+* **Limitations.**
+  * One hand-authored plan per strategy, not optimized; premium offers and
+    US coverage untested.
+  * No recruiting uncertainty in the model.
+  * Demand fixed at ×1.30 (×1.15 not rerun).
+  * 180-day horizon.
+  * Accrual expenses fees and severance at acceptance, and revenue waits
+    for the report.
+  * The provisional service gates are missed by every staffing-only plan,
+    including no action on soon and routine.
+  * amd64 not run.
+
+---
+
 ## V0.2 Slice 3 — roster changes (0.2.0-dev.3)
 
 The owner approved `set_roster` (2026-10-15). `set_reading_allocation` and

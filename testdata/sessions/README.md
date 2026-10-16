@@ -6,8 +6,9 @@ wrote them, to test that this build replays them authoritatively.
 | File | Written by | Run |
 |---|---|---|
 | `mini-seed21-slice2.session.json` | 0.2.0-dev.2 (V0.2 Slice 2, commit 2da900d) | mini, seed 21, 9 days, with `mini-seed21-slice2.actions.json` |
+| `mini-seed22-slice3.session.json` | 0.2.0-dev.3 (V0.2 Slice 3, commit 5fdfb95) | mini, seed 22, 9 days, with `mini-seed22-slice3.actions.json` |
 
-It was made with that build's binary:
+Each was made with its build's binary, from a clean worktree of that commit:
 
     git worktree add /tmp/dev2 2da900d && (cd /tmp/dev2 && go build -o dreamteam-dev2 ./cmd/dreamteam)
     dreamteam-dev2 run -scenario mini -seed 21 -days 9 \
@@ -22,3 +23,13 @@ terminate. This build replays the file with Slice 2's action set and every
 digest verified (`dreamteam verify` reports `earlier_build_exact`), and
 continues it with the file embedded as the new record's prefix
 (`internal/session/roster_test.go`).
+
+The Slice 3 file was made the same way from 5fdfb95, with
+`-seed 22 -actions testdata/sessions/mini-seed22-slice3.actions.json`. Its
+batches are a hire with a roster version for Riley, a termination, a V0.1
+extension, and a batch that withdraws Riley's version and sets another a
+week later. Every action was accepted. Slice 3's action set is this
+build's, so it replays in batch mode `v0.2_slice3` with every digest
+verified (`earlier_build_exact`) and continues with the file embedded as
+the new record's prefix (`TestSlice3RecordReplaysAndContinues`). Before
+0.2.0-dev.3 was registered, this build refused it as an engine mismatch.
