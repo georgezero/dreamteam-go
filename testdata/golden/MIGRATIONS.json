@@ -1,12 +1,13 @@
 {
  "schema": "dreamteam.golden-migration/v1",
- "engine": "0.2.0-dev.2",
+ "engine": "0.2.0-dev.3",
  "stateSchema": "dreamteam.state/v3",
  "explanation": [
   "V0.2 Slice 1 (employee contracts): the state digest's encoding became dreamteam.state/v2. It added the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
   "V0.2 Slice 2 (hire and terminate): the encoding is now dreamteam.state/v3. It adds each employee's hire and termination records and first productive day, growable employee sets in slot staffing (no 64-employee limit), practice-caused displacement records and counters, the recruiting, severance and severance-payable accounts, each order's tolerance anchor and placements, and each appointment's confirmation flag, no-show lead basis and placement. The session record schema is dreamteam.session/v2, which the run digest names.",
   "Outcomes are unchanged: without a V0.2 action no employee is hired or terminated, every scenario's inferred contract is at or below its roster (so no guarantee is posted) and the V0.2 accounts hold nothing and are not listed. Patient flow, reports, every ledger entry, the log, actions, the evaluation baseline and all result values are identical; only the state digest, and the run digests derived from it, differ.",
-  "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old (historical) and new (this build's) value, and a comparison under it requires both exactly."
+  "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old (historical) and new (this build's) value, and a comparison under it requires both exactly.",
+  "V0.2 Slice 3 (set_roster) keeps dreamteam.state/v3: roster versions are encoded only when an employee has one, so every state above encodes as before. One observable message changed: a batch mixing a V0.1 action with V0.2 staffing actions is refused (mixed_batch) with a message naming the V0.2 actions, now 'hire, terminate, set_roster'. established-staffing.actions.json has such a batch, so in established-seed1-60d-staffing.json (written by 0.2.0-dev.2) the action record's digest, and the run digest derived from it, differ; the log, ledger and state digests and every outcome are identical. Replaying a 0.2.0-dev.2 session file applies its batches with that build's action set and reproduces its message and every digest exactly."
  ],
  "references": {
   "established-seed1-7d.json": {
@@ -63,6 +64,24 @@
    "replay.runDigest": {
     "old": "fb0ccb14a79c87e75c110abe2c14dfabbeb752bac60ddba14dbc9d818994d5f6",
     "new": "81bb0bfeb59efb22be20bb0a65d33ef9e3a6a4f584c1447bce3f9125658fadb9"
+   }
+  },
+  "established-seed1-60d-staffing.json": {
+   "actions.digest": {
+    "old": "9afa6ad3256f7363580bbc175eebda84605a1bbe3ee9800113df05584a6e4b5b",
+    "new": "0bbf81c4489bc275ba9f321cab31e61e67724fda428115d0acc4ed07aeadf609"
+   },
+   "digests.actions": {
+    "old": "9afa6ad3256f7363580bbc175eebda84605a1bbe3ee9800113df05584a6e4b5b",
+    "new": "0bbf81c4489bc275ba9f321cab31e61e67724fda428115d0acc4ed07aeadf609"
+   },
+   "digests.run": {
+    "old": "c3622c7fd3314398f6d5324c1b8969cd51a11f8973a5235f2e4f91426c465102",
+    "new": "a2adfe9304bb7a22662a02daf191bd75982fb333e7513f057a3860c668b92236"
+   },
+   "replay.runDigest": {
+    "old": "c3622c7fd3314398f6d5324c1b8969cd51a11f8973a5235f2e4f91426c465102",
+    "new": "a2adfe9304bb7a22662a02daf191bd75982fb333e7513f057a3860c668b92236"
    }
   }
  }

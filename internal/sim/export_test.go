@@ -352,11 +352,11 @@ func (w *World) Config() *Config { return w.st.cfg }
 func (w *World) StateDigestParts() map[string]string {
 	out := map[string]string{}
 	v := reflect.ValueOf(w.st).Elem()
-	for _, i := range fieldsOf(v.Type()) {
+	for _, f := range fieldsOf(v.Type()) {
 		d := &stateHasher{h: sha256.New()}
-		d.value(v.Field(i))
+		d.value(v.Field(f.i))
 		d.flush()
-		out[v.Type().Field(i).Name] = hex.EncodeToString(d.h.Sum(nil))[:12]
+		out[v.Type().Field(f.i).Name] = hex.EncodeToString(d.h.Sum(nil))[:12]
 	}
 	return out
 }
@@ -426,3 +426,6 @@ func (w *World) SlotStaffWords() int {
 	}
 	return n
 }
+
+// RosterLogLen is the number of operations in employee id's roster log.
+func (w *World) RosterLogLen(id string) int { return len(w.st.staff[w.st.findEmployee(id)].RosterLog) }

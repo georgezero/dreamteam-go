@@ -8,11 +8,13 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
-// The staff screen (V0.2 Slice 2): the staff registry with each employee's
-// lifecycle and contract, a hire form and termination rows. Like the
-// actions screen it only submits through the session's Apply; the row
-// under the cursor is previewed with PreviewStaffing (read-only: it changes
-// nothing, allocates no ID and reveals no hidden patient outcome).
+// The staff screen (V0.2 Slices 2–3): the staff registry with each
+// employee's lifecycle, contract and pending roster changes, a hire form,
+// termination rows and roster rows (enter opens the roster editor,
+// roster.go). Like the actions screen it only submits through the
+// session's Apply; the row under the cursor is previewed with
+// PreviewStaffing (read-only: it changes nothing, allocates no ID and
+// reveals no hidden patient outcome).
 
 // offerChoice is one recruitable offer (the fixed V0.2 table, as the
 // simulation publishes it in its validation messages; mirrored here).
@@ -70,6 +72,7 @@ type staffForm struct {
 	startShift        int64 // days after the earliest start
 	lastShift         map[string]int64
 	result            *api.ActionResult
+	edit              *rosterEditor // the open roster editor, if any
 }
 
 // rosterFor lists the patterns that suit an offer (desk for front desk,
@@ -158,7 +161,8 @@ func (m *Model) terminateAction(e api.Employee) api.Action {
 	return api.Action{Type: api.ActTerminate, Employee: e.ID, LastDay: earliest.AddDays(m.staff.lastShift[e.ID]).String()}
 }
 
-// staffSelected is the cursor row's action.
+// staffSelected is the cursor row's action (a roster row has none: enter
+// opens the editor).
 func (m *Model) staffSelected() (api.Action, bool) {
 	f := &m.staff
 	if f.sel < hireRows {
@@ -170,10 +174,22 @@ func (m *Model) staffSelected() (api.Action, bool) {
 	return api.Action{}, false
 }
 
+// rosterRow is the employee of the cursor's roster row, if it is one.
+func (m *Model) rosterRow() (api.Employee, bool) {
+	k := m.staff.sel - hireRows - len(m.terminable())
+	if r := m.rosterable(); k >= 0 && k < len(r) {
+		return r[k], true
+	}
+	return api.Employee{}, false
+}
+
 // staffKey handles the staff screen's keys; it reports whether k was one.
 func (m *Model) staffKey(k string) bool {
 	f := &m.staff
-	rows := hireRows + len(m.terminable())
+	if f.edit != nil {
+		return m.rosterKey(k)
+	}
+	rows := hireRows + len(m.terminable()) + len(m.rosterable())
 	switch k {
 	case "up", "k":
 		f.sel = max(0, f.sel-1)
@@ -208,6 +224,11 @@ func (m *Model) staffKey(k string) bool {
 			}
 		}
 	case "enter":
+		if e, ok := m.rosterRow(); ok {
+			m.openRoster(e.ID)
+			f.result = nil
+			return true
+		}
 		if a, ok := m.staffSelected(); ok {
 			r := m.sess.Apply(a)[0]
 			f.result = &r
@@ -223,9 +244,14 @@ func (m *Model) staffKey(k string) bool {
 func (m *Model) staffBody(w, n int) []string {
 	o := m.obs
 	f := &m.staff
+	if f.edit != nil {
+		return m.rosterBody(w, n)
+	}
 	lines := []string{titleStyle.Render(section(fmt.Sprintf("STAFF · %s %s %s", o.Weekday, shortDate(o.Date), o.Clock), w))}
+	curLine := 0
 	cursor := func(i int) string {
 		if i == f.sel {
+			curLine = len(lines) // the line about to be appended
 			return titleStyle.Render(">")
 		}
 		return " "
@@ -262,12 +288,54 @@ func (m *Model) staffBody(w, n int) []string {
 		lines = append(lines, wrapAfter(mark, r.Message, w, 2)...)
 	}
 	if sel, ok := m.staffSelected(); ok {
-		p := m.sess.PreviewStaffing(sel)
+		lines = append(lines, m.previewLines(m.sess.PreviewStaffing(sel), w, n-len(lines))...)
+	}
+	lines = append(lines, "", titleStyle.Render(" Rosters")+dimStyle.Render(" — enter edits: dated from a Monday ≥ 14 days ahead; the contract is paid whatever is rostered"))
+	base := hireRows + len(m.terminable())
+	for k, e := range m.rosterable() {
+		pend := ""
+		for _, c := range e.RosterChanges {
+			pend += fmt.Sprintf(" · from %s %s", shortDate(c.Effective), minutes(c.NetMinA))
+		}
+		today := e.Shift
+		if today == "" {
+			today = "off today"
+		}
+		lines = append(lines, fmt.Sprintf(" %s %-7s %-12s contract %-7s %s%s", cursor(base+k), trim(e.ID, 7), trim(e.Name, 12),
+			minutes(e.ContractMin), today, dimStyle.Render(pend)))
+	}
+	lines = append(lines, "")
+	lines = append(lines, m.staffTable()...)
+	// Keep the cursor row in view on a short terminal: scroll the form.
+	if cut := curLine - (n - 4); cut > 0 {
+		lines = append(lines[:2:2], lines[2+cut:]...)
+	}
+	if len(lines) > n {
+		lines = lines[:n]
+	}
+	return lines
+}
+
+// previewLines renders a staffing preview: the verdict, guaranteed and
+// forecast money apart, hires' training, roster changes, coverage
+// differences and the bookings that would lose coverage.
+func (m *Model) previewLines(p api.StaffingPreview, w, n int) []string {
+	var lines []string
+	{
 		mark := dimStyle.Render(" If submitted: ") + openStyle.Render("✓ ")
 		if !p.OK {
 			mark = dimStyle.Render(" If submitted: ") + alertStyle.Render("✗ ")
 		}
-		lines = append(lines, wrapAfter(mark, p.Results[0].Message, w, 3)...)
+		msg := ""
+		for _, r := range p.Results {
+			if !r.OK || msg == "" {
+				msg = r.Message
+			}
+			if !r.OK && r.Code != "batch_rejected" {
+				break
+			}
+		}
+		lines = append(lines, wrapAfter(mark, msg, w, 3)...)
 		if p.OK {
 			lines = append(lines, dimStyle.Render(" Guaranteed (contractual):"))
 			for _, g := range p.Guaranteed {
@@ -291,6 +359,30 @@ func (m *Model) staffBody(w, n int) []string {
 				lines = append(lines, dimStyle.Render(fmt.Sprintf(" Training %s from %s; independent from %s; opens %s slots in the booking horizon.",
 					minutes(h.TrainingMin), shortDate(h.StartDate), shortDate(h.ProductiveDate), strings.Join(append(opens, "no other")[:max(1, len(opens))], ", "))))
 			}
+			for _, r := range p.Rosters {
+				line := fmt.Sprintf(" %s from %s: rostered %s/%s → %s/%s (A/B) · contract %s", r.Employee, shortDate(r.Effective),
+					minutes(r.BeforeMinA), minutes(r.BeforeMinB), minutes(r.AfterMinA), minutes(r.AfterMinB), minutes(r.ContractMin))
+				if r.ProductiveBefore != "" {
+					line += fmt.Sprintf(" · independent %s → %s", shortDate(r.ProductiveBefore), shortDate(r.ProductiveAfter))
+				}
+				for _, x := range r.Extensions {
+					line += fmt.Sprintf(" · extension %s +%dm kept", shortDate(x.Date), x.Minutes)
+				}
+				lines = append(lines, dimStyle.Render(line))
+			}
+			if len(p.Rosters) > 0 {
+				count := func(cs []api.ModalityCount) string {
+					var out []string
+					for _, c := range cs {
+						out = append(out, fmt.Sprintf("%d %s", c.Count, c.Modality))
+					}
+					if len(out) == 0 {
+						return "none"
+					}
+					return strings.Join(out, ", ")
+				}
+				lines = append(lines, dimStyle.Render(fmt.Sprintf(" Coverage in the booking horizon: slots opened %s · closed %s", count(p.SlotsOpened), count(p.SlotsClosed))))
+			}
 			if len(p.Displacements) > 0 {
 				lines = append(lines, warnStyle.Render(fmt.Sprintf(" %d booked appointments lose coverage:", len(p.Displacements))))
 				for _, d := range p.Displacements {
@@ -306,11 +398,6 @@ func (m *Model) staffBody(w, n int) []string {
 				}
 			}
 		}
-	}
-	lines = append(lines, "")
-	lines = append(lines, m.staffTable()...)
-	if len(lines) > n {
-		lines = lines[:n]
 	}
 	return lines
 }
@@ -338,6 +425,9 @@ func (m *Model) staffTable() []string {
 				paid = "paid"
 			}
 			dates = strings.TrimPrefix(dates+" · ", " · ") + fmt.Sprintf("last day %s · severance %s %s", shortDate(l.LastDay), dollars(l.SeveranceCents), paid)
+		}
+		for _, c := range e.RosterChanges {
+			dates = strings.TrimPrefix(dates+" · ", " · ") + fmt.Sprintf("roster from %s", shortDate(c.Effective))
 		}
 		lines = append(lines, fmt.Sprintf("   %-7s %-12s %-13s %-12s %-9s %-8s %s", trim(e.ID, 7), trim(e.Name, 12),
 			trim(strings.ReplaceAll(e.Role, "_", " "), 13), e.Employment, contract, rate, dates))

@@ -14,9 +14,9 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
-// V0.2 Slice 2 at scale (acceptance build tag, slow):
+// V0.2 Slices 2–3 at scale (acceptance build tag, slow):
 //
-//	go test -tags acceptance ./internal/sim -run AcceptanceStaffing -v -timeout 600m
+//	go test -tags acceptance ./internal/sim -run 'AcceptanceStaffing|AcceptanceRoster' -v -timeout 600m
 //
 // DT_SEEDS shrinks the invariant run; DT_DAYS the turnover run.
 
@@ -25,7 +25,18 @@ import (
 // and without a gap, a hire terminated before its start, displacement,
 // severance paydays): the golden fixture's batches, at their times.
 func TestAcceptanceStaffingInvariants(t *testing.T) {
-	raw, err := os.ReadFile("../../testdata/golden/established-staffing.actions.json")
+	invariantsWith(t, "../../testdata/golden/established-staffing.actions.json")
+}
+
+// V0.2 Slice 3: the same with the roster reference plan (versions,
+// replacement, withdrawal, an exchange of coverage, a trainee's delayed
+// training, an extension conflict, a termination voiding a version).
+func TestAcceptanceRosterInvariants(t *testing.T) {
+	invariantsWith(t, "../../testdata/golden/established-roster.actions.json")
+}
+
+func invariantsWith(t *testing.T, file string) {
+	raw, err := os.ReadFile(file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -120,4 +131,85 @@ func TestAcceptanceStaffingTurnover(t *testing.T) {
 		t.Fatal("turnover run not reproducible")
 	}
 	t.Logf("%d hires over %d days; registry %d; slot staff words %d", hired, days, w.RegistryLen(), w.SlotStaffWords())
+}
+
+// Long roster churn: every two weeks each technologist and the front desk
+// alternate between their original roster and one day fewer (a new
+// version each time, past versions accumulating), a hire's trainee roster
+// is changed before its start, and staff are hired and given notice — with
+// the invariants checked daily and the run reproducible.
+func TestAcceptanceRosterChurn(t *testing.T) {
+	days := int64(envInt("DT_DAYS", 720))
+	run := func() (*sim.World, int) {
+		w := sim.New(established(t), rng.SeedFromInt(5))
+		w.Engine().RunUntil(w.StartTime(), nil)
+		cal := w.Calendar()
+		date := func(d int64) string { return cal.Date(cal.StartOfDay(d)).String() }
+		xr := weekOf(shiftAt("R1", "07:00", "15:30", "11:00", "11:30"), weekdays...)
+		changes := 0
+		for k := int64(0); k < days; k++ {
+			day := w.DayIndex()
+			if cal.Date(cal.StartOfDay(day)).Weekday() == simtime.Monday && k%14 < 7 {
+				eff := date(day + 14)
+				var batch []api.Action
+				for _, e := range w.Observe(0).Staff {
+					p, ok := w.RosterPlan(e.ID)
+					if !ok || !p.Editable || e.Leaving != nil {
+						continue
+					}
+					r := p.Versions[0].Roster
+					if (k/14)%2 == 0 {
+						for _, wk := range []*api.Week{&r.A, &r.B} {
+							for _, d := range []**api.Shift{&wk.Wed, &wk.Thu, &wk.Fri, &wk.Tue} {
+								if *d != nil {
+									*d = nil
+									break
+								}
+							}
+						}
+					}
+					batch = append(batch, api.Action{Type: api.ActSetRoster, Op: api.RosterOpSet, Employee: e.ID, Effective: eff, Roster: &r})
+				}
+				for _, r := range w.Apply(batch) {
+					if !r.OK {
+						t.Fatalf("day %d: %+v", k, r)
+					}
+					if r.Code == api.ActionAccepted {
+						changes++
+					}
+				}
+			}
+			if k%30 == 0 {
+				res := w.Apply([]api.Action{hireOf("xr-"+strconv.FormatInt(k, 10), "technologist", []string{"XR"}, 4000, 2400, xr, date(day+21))})
+				if res[0].OK && res[0].EmployeeID != "" {
+					// Trainee: Fridays off from the first Monday it may change.
+					thin := api.Roster{A: weekOf(shiftAt("R1", "07:00", "15:30", "11:00", "11:30"), "Mon", "Tue", "Wed", "Thu")}
+					thin.B = thin.A
+					p, _ := w.RosterPlan(res[0].EmployeeID)
+					w.Apply([]api.Action{{Type: api.ActSetRoster, Op: api.RosterOpSet, Employee: res[0].EmployeeID, Effective: p.EarliestEffective, Roster: &thin}})
+				}
+			}
+			if k%30 == 20 {
+				for _, e := range w.Observe(0).Staff {
+					if e.Hired != nil && e.Leaving == nil && e.Employment == api.EmploymentActive {
+						w.Apply([]api.Action{terminateOf(e.ID, date(day+15))})
+						break
+					}
+				}
+			}
+			if err := runTo(w, cal.StartOfDay(day+1).Add(6*simtime.Hour)); err != nil {
+				t.Fatalf("day %d: %v", k, err)
+			}
+			if err := w.Check(); err != nil {
+				t.Fatalf("day %d: %v", k, err)
+			}
+		}
+		return w, changes
+	}
+	w, changes := run()
+	again, _ := run()
+	if again.StateDigest() != w.StateDigest() || again.LedgerHash() != w.LedgerHash() {
+		t.Fatal("roster churn not reproducible")
+	}
+	t.Logf("%d roster versions accepted over %d days; registry %d", changes, days, w.RegistryLen())
 }

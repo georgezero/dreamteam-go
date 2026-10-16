@@ -51,7 +51,10 @@ func (m *Model) render() string {
 		hints = " ↑↓ choose  ←→ change  [ ] day  enter submit  d dash  s sched  space run  q quit"
 	case screenStaff:
 		body = m.staffBody(w, h-3)
-		hints = " ↑↓ choose  ←→ change  enter submit (hire / terminate)  a actions  d dash  space run  q quit"
+		hints = " ↑↓ choose  ←→ change  enter submit (hire / terminate) or edit a roster  a actions  d dash  space run  q quit"
+		if m.staff.edit != nil {
+			hints = " ←→ day  ↑↓ field  +/- change  o on/off  , . effective  enter submit  esc back  space run  q quit"
+		}
 	case screenSummary:
 		body = m.summaryBody(w, h-3)
 		hints = " ←→ day  t today  tab day/since takeover  enter dashboard  h history  f finance  space run  q quit"
@@ -320,9 +323,9 @@ func (m *Model) helpBody(w, n int) []string {
 		{"l", "event log          f  finance         a  actions   m  staff"},
 		{"IN SCREENS", ""},
 		{"↑↓ j k ←→ t", "move, scroll, page days (t: today)"},
-		{"tab", "next filter or view (patients, log, finance, summary)"},
-		{"!", "log: severity filter (all · warnings & alerts · alerts only)"},
-		{"enter", "open (patient, journey) or submit (actions, staff)"},
+		{"tab  !", "next filter or view · ! log severity filter"},
+		{"enter", "open or submit (actions, staff) · staff: edit a roster"},
+		{"roster editor", "←→ day ↑↓ field +/- change · o on/off · b c w , . x r esc"},
 		{"SESSION", ""},
 		{"ctrl+s ctrl+o", "save · reload the saved file (replays it)"},
 		{"ctrl+v", "verify: replay this run from scenario, seed and actions"},

@@ -195,6 +195,10 @@ func (s *Session) ValidateBatch(actions ...api.Action) []api.ActionResult {
 	return s.w.ValidateBatch(actions)
 }
 
+// RosterPlan is an employee's roster timeline (V0.2 Slice 3): the original
+// roster, every dated version, today's and the pending ones.
+func (s *Session) RosterPlan(id string) (api.RosterPlan, bool) { return s.w.RosterPlan(id) }
+
 // PreviewStaffing previews a V0.2 staffing batch now: validation, terms,
 // timeline, potential displacements and obligations. It changes nothing.
 func (s *Session) PreviewStaffing(actions ...api.Action) api.StaffingPreview {

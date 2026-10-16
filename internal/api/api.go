@@ -155,6 +155,48 @@ type Employee struct {
 	// recognized, with its payday.
 	Hired   *HireInfo `json:"hired,omitempty"`
 	Leaving *ExitInfo `json:"leaving,omitempty"`
+	// RosterChanges are the employee's accepted roster versions not yet in
+	// effect (V0.2 Slice 3), in date order.
+	RosterChanges []RosterChange `json:"rosterChanges,omitempty"`
+}
+
+// RosterChange is a pending roster version.
+type RosterChange struct {
+	Effective string `json:"effective"`
+	NetMinA   int64  `json:"netMinA"` // rostered net of breaks, per rota week
+	NetMinB   int64  `json:"netMinB"`
+	Action    string `json:"action"` // the accepting action's ID
+}
+
+// RosterPlan is one employee's roster timeline (V0.2 Slice 3): the
+// original roster and every dated version, with what each contains.
+type RosterPlan struct {
+	Employee    string   `json:"employee"`
+	Name        string   `json:"name"`
+	Role        string   `json:"role"`
+	Skills      []string `json:"skills"`
+	ContractMin int64    `json:"contractMin"`
+	// Editable is set for an hourly technologist or front desk employee
+	// still employed; EarliestEffective is then the first lawful
+	// effective date (a Monday at least 14 days ahead, before any end).
+	Editable          bool   `json:"editable"`
+	EarliestEffective string `json:"earliestEffective,omitempty"`
+	// Assignments are the rooms (or "desk") the employee may be assigned
+	// to or cover, in room order.
+	Assignments []string        `json:"assignments,omitempty"`
+	Versions    []RosterVersion `json:"versions"`
+}
+
+// RosterVersion is one roster of the timeline. Effective is empty for the
+// original roster (the scenario's, or the hire's).
+type RosterVersion struct {
+	Effective string `json:"effective,omitempty"`
+	Roster    Roster `json:"roster"`
+	NetMinA   int64  `json:"netMinA"`
+	NetMinB   int64  `json:"netMinB"`
+	InEffect  bool   `json:"inEffect"` // the version working today
+	Pending   bool   `json:"pending"`  // not yet in effect
+	Action    string `json:"action,omitempty"`
 }
 
 // Employment stages (V0.2): the display stage; notice overlays the
@@ -1248,6 +1290,15 @@ const (
 	// only V0.2 actions and is atomic.
 	ActHire      = "hire"
 	ActTerminate = "terminate"
+	// V0.2 Slice 3: a dated roster version of an hourly technologist or
+	// front desk employee (op "set" or "remove").
+	ActSetRoster = "set_roster"
+)
+
+// set_roster operations.
+const (
+	RosterOpSet    = "set"    // insert or replace the version effective on a date
+	RosterOpRemove = "remove" // remove a pending version: its predecessor resumes
 )
 
 // Walk-in policies.
@@ -1273,8 +1324,9 @@ const (
 // Minutes and optionally Date; set_walkin_policy — Policy and, for accept_until, Cutoff
 // ("HH:MM"); set_worklist_policy — Policy. V0.2: hire — RequestID, Role,
 // Skills, RateCents, ContractedWeeklyMinutes, Roster, StartDate;
-// terminate — Employee, LastDay. Fields of other types are omitted, so a
-// V0.1 action encodes exactly as before.
+// terminate — Employee, LastDay; set_roster — Op, Employee, Effective and
+// (op set) Roster. Fields of other types are omitted, so a V0.1 action
+// encodes exactly as before.
 type Action struct {
 	Type     string `json:"type"`
 	Employee string `json:"employee,omitempty"`
@@ -1294,6 +1346,10 @@ type Action struct {
 	Roster                  *Roster  `json:"roster,omitempty"`
 	StartDate               string   `json:"startDate,omitempty"`
 	LastDay                 string   `json:"lastDay,omitempty"` // terminate: inclusive
+	// set_roster: "set" or "remove", and the version's effective date (a
+	// Monday at least 14 days ahead).
+	Op        string `json:"op,omitempty"`
+	Effective string `json:"effective,omitempty"`
 }
 
 // Roster is a hire's two-week rota (V0.2_DESIGN §6.2): one shift or none
@@ -1406,11 +1462,17 @@ type Policies struct {
 // patient accepted. Guaranteed are contractual amounts; Forecast are
 // estimates, labelled as such.
 type StaffingPreview struct {
-	AsOf          string                `json:"asOf"`
-	OK            bool                  `json:"ok"`
-	Results       []ActionResult        `json:"results"`
-	Hires         []HirePreview         `json:"hires,omitempty"`
-	Terminations  []TerminationPreview  `json:"terminations,omitempty"`
+	AsOf         string               `json:"asOf"`
+	OK           bool                 `json:"ok"`
+	Results      []ActionResult       `json:"results"`
+	Hires        []HirePreview        `json:"hires,omitempty"`
+	Terminations []TerminationPreview `json:"terminations,omitempty"`
+	Rosters      []RosterPreview      `json:"rosters,omitempty"`
+	// Coverage differences of the whole batch (V0.2 Slice 3): template
+	// slots in the booking horizon it makes bookable or takes away, by
+	// modality (booked or not).
+	SlotsOpened   []ModalityCount       `json:"slotsOpened,omitempty"`
+	SlotsClosed   []ModalityCount       `json:"slotsClosed,omitempty"`
 	Displacements []DisplacementPreview `json:"displacements,omitempty"`
 	Guaranteed    []MoneyLine           `json:"guaranteed,omitempty"`
 	Forecast      []MoneyLine           `json:"forecast,omitempty"`
@@ -1435,6 +1497,26 @@ type HirePreview struct {
 	OpensSlots []ModalityCount `json:"opensSlots,omitempty"`
 }
 
+// RosterPreview is a valid set_roster's effect (V0.2 Slice 3).
+type RosterPreview struct {
+	Employee    string `json:"employee"`
+	Name        string `json:"name"`
+	Op          string `json:"op"`
+	Effective   string `json:"effective"`
+	Until       string `json:"until,omitempty"` // the next version or the end of employment (exclusive)
+	ContractMin int64  `json:"contractMin"`     // unchanged by any roster
+	// Rostered net of breaks per rota week, before and after.
+	BeforeMinA int64 `json:"beforeMinA"`
+	BeforeMinB int64 `json:"beforeMinB"`
+	AfterMinA  int64 `json:"afterMinA"`
+	AfterMinB  int64 `json:"afterMinB"`
+	// A trainee's first day of independent work, before and after.
+	ProductiveBefore string `json:"productiveBefore,omitempty"`
+	ProductiveAfter  string `json:"productiveAfter,omitempty"`
+	// Approved extensions in the changed interval, all still valid.
+	Extensions []Extension `json:"extensions,omitempty"`
+}
+
 // ModalityCount is a count by modality.
 type ModalityCount struct {
 	Modality string `json:"modality"`
@@ -1451,7 +1533,10 @@ type TerminationPreview struct {
 	SeveranceCents   int64       `json:"severanceCents"`
 	SeverancePayday  string      `json:"severancePayday"`
 	VoidedExtensions []Extension `json:"voidedExtensions,omitempty"`
-	Displaced        int         `json:"displaced"` // booked appointments that lose coverage (whole batch)
+	// VoidedRosters are pending roster versions effective on or after the
+	// end (their effective dates): voided, never resurrected.
+	VoidedRosters []string `json:"voidedRosters,omitempty"`
+	Displaced     int      `json:"displaced"` // booked appointments that lose coverage (whole batch)
 }
 
 // DisplacementPreview is a booked appointment the batch would displace,

@@ -69,6 +69,11 @@ type employment struct {
 	// trainView is the training-day view of the hire's terms (role
 	// Trainee): derived from Hire.Terms, not state.
 	trainView *EmployeeConfig
+	// Rosters are the dated roster versions in date order (roster.go);
+	// RosterLog every set, removal and voiding, append-only. Both are
+	// empty without set_roster (and then not encoded in the state digest).
+	Rosters   []rosterVersion
+	RosterLog []rosterEntry
 }
 
 // hireRecord is an accepted hire (§5.1, §6.3).
@@ -134,22 +139,12 @@ func (st *state) initStaff() {
 	}
 }
 
-// workingTerms is employee i's terms as working on day: nil when not
-// employed then, the training view in onboarding, the terms otherwise.
+// workingTerms is employee i's terms as working on day, with the roster
+// version in effect then: nil when not employed, the training view in
+// onboarding, the terms otherwise.
 func (st *state) workingTerms(i int, day int64) *EmployeeConfig {
 	r := &st.staff[i]
-	switch {
-	case !r.employed(day):
-		return nil
-	case day < r.Productive:
-		if r.trainView == nil {
-			v := *r.Hire.Terms
-			v.Role, v.Skills = Trainee, nil
-			r.trainView = &v
-		}
-		return r.trainView
-	}
-	return st.emps[i].terms
+	return st.workingView(i, day, r.Rosters, r.Productive, r.Until)
 }
 
 // dayTerms is every employee's working terms on day (planFor's input).
@@ -353,7 +348,7 @@ func (st *state) checkStaff() error {
 	if owed != -st.fin.led.bal[acctSeverancePayable] {
 		return fmt.Errorf("severance payable %d, unpaid terminations owe %d", -st.fin.led.bal[acctSeverancePayable], owed)
 	}
-	return nil
+	return st.checkRosters()
 }
 
 // observeEmployment fills employee i's employment, contract and lifecycle.
@@ -370,6 +365,7 @@ func (st *state) observeEmployment(x *api.Employee, i int) {
 			RecruitingFeeCents: h.FeeCents, TrainingMin: int64(h.Training / simtime.Minute),
 			TrainedMin: int64(r.Trained / simtime.Minute), RequestID: h.RequestID, ServiceStage: stageNames[r.serviceOn(st.day)]}
 	}
+	st.observeRosters(x, i, st.day)
 	if e := r.Exit; e != nil {
 		x.Leaving = &api.ExitInfo{LastDay: date(e.LastDay), SeveranceCents: e.SeveranceCents,
 			SeverancePayday: date(e.PayDay), SeverancePaid: e.Paid}

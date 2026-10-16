@@ -43,17 +43,28 @@ type actionState struct {
 func actionID(i int) string { return pubID('X', int64(i+1), 5) }
 
 // Apply applies one batch of actions now and returns their results.
-func (w *World) Apply(actions []api.Action) []api.ActionResult { return w.applyBatch(actions, false) }
+func (w *World) Apply(actions []api.Action) []api.ActionResult {
+	return w.applyBatch(actions, v2Actions)
+}
 
 // ApplyLegacy applies a batch with V0.1 semantics only: every action one
 // by one through the V0.1 path, so a V0.2 type is an unknown action, as
 // it was when a v1 session record was written (its authoritative replay,
 // V0.2_DESIGN §12).
 func (w *World) ApplyLegacy(actions []api.Action) []api.ActionResult {
-	return w.applyBatch(actions, true)
+	return w.applyBatch(actions, nil)
 }
 
-func (w *World) applyBatch(actions []api.Action, legacy bool) []api.ActionResult {
+// ApplySlice2 applies a batch with V0.2 Slice 2 semantics: hire and
+// terminate make a V0.2 batch, and set_roster is an unknown action, as
+// it was when a 0.2.0-dev.2 record was written (its authoritative replay).
+func (w *World) ApplySlice2(actions []api.Action) []api.ActionResult {
+	return w.applyBatch(actions, slice2Actions)
+}
+
+// applyBatch applies a batch; known is the V0.2 action set (nil: V0.1
+// semantics only).
+func (w *World) applyBatch(actions []api.Action, known []string) []api.ActionResult {
 	if len(actions) == 0 {
 		return nil // no decision, no batch
 	}
@@ -64,10 +75,10 @@ func (w *World) applyBatch(actions []api.Action, legacy bool) []api.ActionResult
 	st.actions.batches++
 	changed := false
 	var out []api.ActionResult
-	if !legacy && slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
+	if slices.ContainsFunc(actions, func(a api.Action) bool { return slices.Contains(known, a.Type) }) {
 		// A V0.2 batch: atomic (staffing.go).
 		w.eng.Batch(func() {
-			res := st.staffBatch(w.eng, actions, true)
+			res, _ := st.staffBatch(w.eng, actions, true, known)
 			for k, a := range actions {
 				r := &res[k]
 				changed = changed || (r.ok && r.code == api.ActionAccepted)
@@ -112,7 +123,8 @@ func (w *World) Validate(a api.Action) api.ActionResult {
 	st.now = w.eng.Now()
 	defer func() { st.now = prev }()
 	if isV2Action(a.Type) {
-		r := st.staffBatch(w.eng, []api.Action{a}, false)[0]
+		res, _ := st.staffBatch(w.eng, []api.Action{a}, false, v2Actions)
+		r := res[0]
 		return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: r.ok, Code: r.code, Message: r.msg, EffectiveAt: r.effective}
 	}
 	ok, code, msg := st.apply(w.eng, a, false)
@@ -135,7 +147,8 @@ func (w *World) ValidateBatch(actions []api.Action) []api.ActionResult {
 	st.now = w.eng.Now()
 	defer func() { st.now = prev }()
 	var out []api.ActionResult
-	for k, r := range st.staffBatch(w.eng, actions, false) {
+	res, _ := st.staffBatch(w.eng, actions, false, v2Actions)
+	for k, r := range res {
 		out = append(out, api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: actions[k], OK: r.ok, Code: r.code,
 			Message: r.msg, EffectiveAt: r.effective})
 	}
@@ -310,6 +323,32 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	return true, api.ActionAccepted, msg
 }
 
+// extensionCovers is what shift k of plan would cover in d of extra time
+// at its end: the rooms it staffs, the desk, or contrast supervision (""
+// when nothing: a trainee, or a remote radiologist).
+func extensionCovers(plan DayPlan, k int, d simtime.Duration, rooms []RoomConfig) string {
+	sh := plan.Shifts[k]
+	ec := plan.emps[sh.Employee]
+	last := sh.To + d - 1 // a moment inside the extra time
+	ext := sh
+	ext.To += d
+	var mods []string
+	for _, room := range rooms {
+		if staffs(ec, &ext, room, last) {
+			mods = append(mods, room.Modality)
+		}
+	}
+	switch {
+	case len(mods) > 0:
+		return "staffs " + strings.Join(mods, "+")
+	case deskLevel(ec) != DeskClosed:
+		return "covers the desk"
+	case ec.Role == Radiologist && !sh.Remote:
+		return "on site for contrast supervision (reading blocks unchanged)"
+	}
+	return ""
+}
+
 // Roster returns day's shifts with any approved extensions.
 func (w *World) Roster(day int64) []api.RosterEntry {
 	st := w.st
@@ -466,24 +505,10 @@ func (w *World) ActionLog() []api.ActionResult {
 // template slots that would become bookable.
 func (st *state) extensionEffect(day int64, plan DayPlan, k int, d simtime.Duration) (covers, opens string) {
 	sh := plan.Shifts[k]
-	ec := plan.emps[sh.Employee]
-	last := sh.To + d - 1 // a moment inside the extra time
 	ext := sh
 	ext.To += d
-	var rooms []string
-	for _, room := range st.cfg.Rooms {
-		if staffs(ec, &ext, room, last) {
-			rooms = append(rooms, room.Modality)
-		}
-	}
-	switch {
-	case len(rooms) > 0:
-		covers = "staffs " + strings.Join(rooms, "+")
-	case deskLevel(ec) != DeskClosed:
-		covers = "covers the desk"
-	case ec.Role == Radiologist && !sh.Remote:
-		covers = "on site for contrast supervision (reading blocks unchanged)"
-	}
+	covers = extensionCovers(plan, k, d, st.cfg.Rooms)
+	staffsRoom := strings.HasPrefix(covers, "staffs ")
 	if covers == "" {
 		return "", ""
 	}
@@ -520,7 +545,7 @@ func (st *state) extensionEffect(day int64, plan DayPlan, k int, d simtime.Durat
 	switch {
 	case len(parts) > 0:
 		opens = " · opens " + strings.Join(parts, ", ") + " slots for booking"
-	case len(rooms) > 0:
+	case staffsRoom:
 		opens = " · no slot newly bookable (already staffed, or no template slots then)"
 	}
 	return covers, opens

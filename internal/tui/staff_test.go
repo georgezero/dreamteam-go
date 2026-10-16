@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -80,6 +81,130 @@ func TestStaffScreenRenderTime(t *testing.T) {
 	}
 	per := time.Since(t0) / n
 	t.Logf("staff screen render with a termination preview: %s", per)
+	if per > 500*time.Millisecond {
+		t.Fatalf("render %s", per)
+	}
+}
+
+// openRosterEditor opens the staff screen's roster editor for employee id.
+func openRosterEditor(t *testing.T, m *Model, id string) {
+	t.Helper()
+	m.key("m")
+	k := slices.IndexFunc(m.rosterable(), func(e api.Employee) bool { return e.ID == id })
+	if k < 0 {
+		t.Fatalf("%s has no roster row", id)
+	}
+	for range hireRows + len(m.terminable()) + k {
+		m.key("down")
+	}
+	m.key("enter")
+	if m.staff.edit == nil || m.staff.edit.emp != id {
+		t.Fatal("the roster editor did not open")
+	}
+}
+
+// V0.2 Slice 3: the roster editor edits a weekly or fortnightly pattern
+// for a chosen Monday, previews it read-only, submits set_roster through
+// the session's Apply and withdraws a pending change; a refused edit
+// shows why. It fits 80×24.
+func TestRosterEditor(t *testing.T) {
+	s, err := session.Open("mini", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 80, Height: 24})
+	openRosterEditor(t, m, "E03")
+	before := s.Digests()
+	for range 3 {
+		_ = m.render()
+	}
+	if s.Digests() != before {
+		t.Fatal("rendering the roster editor changed the run")
+	}
+	screen := ansi.Strip(m.render())
+	for _, want := range []string{"ROSTER · Riley (E03)", "effective ‹ Nov 2 ›", "weekly", "Mon", "If submitted: ✓", "nothing changed"} {
+		if !strings.Contains(screen, want) {
+			t.Fatalf("editor lacks %q:\n%s", want, screen)
+		}
+	}
+	if lines := strings.Split(screen, "\n"); len(lines) != 24 {
+		t.Fatalf("%d lines at 80×24", len(lines))
+	}
+	// Weekly: Fridays off from Nov 2.
+	for range 4 {
+		m.key("right")
+	}
+	m.key("o")
+	if screen := ansi.Strip(m.render()); !strings.Contains(screen, "rostered 32h 00m (A) · 32h 00m (B)") || !strings.Contains(screen, "Guaranteed") {
+		t.Fatalf("after Fri off:\n%s", screen)
+	}
+	m.key("enter")
+	log := s.ActionLog()
+	if n := len(log); n != 1 || log[0].Action.Type != api.ActSetRoster || !log[0].OK || log[0].Action.Effective != "2026-11-02" ||
+		log[0].Action.Roster.A.Fri != nil || log[0].Action.Roster.B.Fri != nil || log[0].Action.Roster.A.Thu == nil {
+		t.Fatalf("set_roster from the editor: %+v", log)
+	}
+	// Fortnightly, a week later: week B's Monday off too.
+	m.key("w")
+	m.key(".")
+	for range 3 {
+		m.key("right") // A Fri → A Sat, A Sun, B Mon
+	}
+	m.key("o")
+	m.key("enter")
+	if log = s.ActionLog(); len(log) != 2 || !log[1].OK || log[1].Action.Effective != "2026-11-09" ||
+		log[1].Action.Roster.B.Mon != nil || log[1].Action.Roster.A.Mon == nil {
+		t.Fatalf("fortnightly: %+v", log[1:])
+	}
+	// Withdraw it.
+	m.key("x")
+	m.key("enter")
+	if log = s.ActionLog(); len(log) != 3 || !log[2].OK || log[2].Action.Op != api.RosterOpRemove || log[2].Action.Effective != "2026-11-09" {
+		t.Fatalf("withdraw: %+v", log[2:])
+	}
+	// A roster past the contract: previewed ✗, refused with the reason.
+	for range 3 {
+		m.key("left") // B Mon → A Sun, A Sat, A Fri
+	}
+	m.key("o")    // A Fri back on: 40 h in week A
+	m.key("down") // the end field
+	m.key("+")    // 40 h 15 min
+	if screen := ansi.Strip(m.render()); !strings.Contains(screen, "If submitted: ✗") {
+		t.Fatalf("over-contract preview:\n%s", screen)
+	}
+	m.key("enter")
+	if r := s.ActionLog()[3]; r.OK || r.Code != "invalid_roster" || !strings.Contains(ansi.Strip(m.render()), "Refused ✗") {
+		t.Fatalf("over contract: %+v", r)
+	}
+	m.key("esc")
+	if m.staff.edit != nil || !strings.Contains(ansi.Strip(m.render()), "from Nov 2 32h 00m") {
+		t.Fatalf("staff screen after the editor:\n%s", ansi.Strip(m.render()))
+	}
+}
+
+// The roster editor's live preview reconciles the whole horizon; it stays
+// within a frame budget on a Pi 4 at the established practice.
+func TestRosterEditorRenderTime(t *testing.T) {
+	if testing.Short() {
+		t.Skip("timing")
+	}
+	s, err := session.Open("established", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 160, Height: 48})
+	openRosterEditor(t, m, "E04")
+	m.key("right")
+	m.key("o") // Sam's Tuesdays off: dozens of bookings lose coverage
+	t0 := time.Now()
+	const n = 5
+	for range n {
+		_ = m.render()
+	}
+	per := time.Since(t0) / n
+	t.Logf("roster editor render with a displacing preview: %s", per)
 	if per > 500*time.Millisecond {
 		t.Fatalf("render %s", per)
 	}

@@ -310,3 +310,20 @@ re-measured on the Cortex-A76 (busy with the acceptance runs).
 | Committing that termination (severance, reconciliation, 84 displacements re-offered) | `-bench StaffingCommitTermination` | 29.9–30.6 ms/op, 2.9 MB/op, 25.9k allocs/op |
 | Staff screen render with a termination preview, 160×48 | `go test ./internal/tui -run StaffScreenRenderTime -v` | 25 ms per frame |
 | 60 days with the V0.2 reference plan vs no actions | `dreamteam run -days 60 [-actions testdata/golden/established-staffing.actions.json]` | 3.29–4.98 s vs 3.05–4.27 s: no difference beyond noise |
+
+## 2026-10-15 — V0.2 Slice 3: set_roster (Pi 4, ≈80 °C, load average ≈4–6 from unrelated processes)
+
+Interleaved wall times of `dreamteam run -scenario established -seed 7 -days
+90 -format json`, Slice 2 (2da900d) against this build, eight runs each:
+best 3.40 s before, 3.41 s after; medians ≈3.9 s both (load-dominated). The
+90-day play benchmark allocates exactly as in Slice 2 (78.6 MB, 1.241M
+allocations): without a version, resolving the roster costs one empty-slice
+check per employee and day.
+
+| Measurement | Command | Result |
+|---|---|---|
+| Roster preview at the takeover: Sam's Tuesdays off (validation, composed timeline, the booked horizon re-planned, survivors, coverage differences, provisional replacements) | `go test ./internal/sim -run X -bench RosterPreview -benchtime 10x -count 2 -benchmem` | 28.2–28.3 ms/op, 4.1 MB/op, 32.5k allocs/op |
+| Committing it (version, one reconciliation, displacements re-offered) | `-bench RosterCommit` | 25.3–25.7 ms/op, 2.6 MB/op, 22.9k allocs/op |
+| Slice 2 termination preview / commit, same run (unchanged allocations) | `-bench 'StaffingPreviewTermination|StaffingCommitTermination'` | 30.8–31.7 / 29.2–33.6 ms/op; 21.6k / 26.0k allocs |
+| Roster editor render with a displacing preview, 160×48 | `go test ./internal/tui -run RosterEditorRenderTime -v` | 48 ms per frame (under load) |
+| The six golden references and the Slice 2 session on the Cortex-A76 | `run_refs` (each `run … -verify-replay -golden`) | 9.2 s in all; outputs byte-identical to the Pi's |

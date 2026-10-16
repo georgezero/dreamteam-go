@@ -39,7 +39,7 @@ time for the keys.
 | `d` `b` `h` | dashboard · takeover briefing · daily history |
 | `s` `p` `w` | schedule · patients · radiology worklist |
 | `l` `f` `a` | event log · finance · actions |
-| `m` | staff: hire and terminate, with a preview (V0.2 development) |
+| `m` | staff: hire, terminate and edit rosters, with a preview (V0.2 development) |
 | `↑↓` `j` `k` `←→` `t` | move, scroll, page days (`t`: today) |
 | `tab` / `!` | next filter or view / log severity filter |
 | `enter` / `esc` | open or submit / back |
@@ -92,8 +92,26 @@ From the staff screen (`m`), or as `hire` and `terminate` actions:
     than their original time, within their tolerance) or lost to
     displacement. The preview names each one before you commit.
 
-A batch containing either action is atomic: one invalid item refuses the
-whole batch.
+* **Change a roster** (`set_roster`) of an hourly technologist or front
+  desk employee: a new weekly or fortnightly pattern from a Monday at least
+  14 days ahead, replacing the previous one until the next change. Pending
+  changes can be replaced or withdrawn; past ones never change.
+  * The contract does not change: contracted hours are paid whatever is
+    rostered, so a shorter (even empty) roster saves nothing, and notice
+    and severance stay as they were. The roster may not exceed the
+    contract.
+  * The same rules as a hire's roster: qualified rooms only, breaks, at
+    most six days a week, and 10 hours' rest from the latest time a shift
+    may run to (its cap) to the next start, across the change too.
+  * An approved overtime extension the new roster cannot carry refuses
+    the change; a trainee's roster change moves the date they become
+    independent.
+  * In the staff screen, enter on a roster row opens the roster editor.
+
+A batch containing any of these actions is atomic: one invalid item refuses
+the whole batch, and the bookings affected are reconciled once, against the
+batch's final staffing (so two employees can swap shifts without
+displacing anyone).
 
 ## Scenarios
 
@@ -147,9 +165,22 @@ Hiring and termination use the same file:
 ```
 
 Weekdays left out of a rota week are days off; the two weeks alternate
-from the scenario's week A.
+from the scenario's week A. A roster change has the same shape:
 
-(`testdata/golden/established-staffing.actions.json` is a complete one.)
+```json
+[
+ {"time": "2026-10-13T06:00:00", "actions": [
+   {"type": "set_roster", "op": "set", "employee": "E03", "effective": "2026-11-02",
+    "roster": {"A": {"Mon": {"start": "07:45", "end": "16:15", "breaks": [["11:30", "12:00"]], "assignment": "R1", "covers": []},
+                     "Tue": {"start": "07:45", "end": "16:15", "breaks": [["11:30", "12:00"]], "assignment": "R1", "covers": []}},
+               "B": {"Mon": {"start": "07:45", "end": "16:15", "breaks": [["11:30", "12:00"]], "assignment": "R1", "covers": []}}}}]},
+ {"time": "2026-10-20T09:00:00", "actions": [
+   {"type": "set_roster", "op": "remove", "employee": "E03", "effective": "2026-11-02"}]}
+]
+```
+
+(`testdata/golden/established-staffing.actions.json` and
+`established-roster.actions.json` are complete ones.)
 
 A saved session (`ctrl+s` in the game, or `-save`) records the scenario,
 seed and action batches with five digests (event log, ledger, actions,
@@ -157,12 +188,14 @@ state, run). Loading it replays from scratch; a mismatch is reported, never
 silently accepted. This build writes `dreamteam.session/v2`. It still loads
 v1 files: those from earlier builds replay with their outcomes verified,
 and saving such a session writes a v2 file that keeps the v1 record as its
-verified prefix. Exit codes: 0 ok · 1 error · 2 invalid input · 3 replay
-failure · 4 golden mismatch · 5 incompatible.
+verified prefix. Saves from the previous development build (0.2.0-dev.2)
+replay with every digest verified, with that build's actions, and are kept
+the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
+· 3 replay failure · 4 golden mismatch · 5 incompatible.
 
-Golden references in `testdata/golden/` pin four V0.1 runs and one V0.2
-hire-and-terminate run; see its README for checking and (deliberately)
-regenerating them.
+Golden references in `testdata/golden/` pin four V0.1 runs and two V0.2
+runs (hire and terminate; roster changes); see its README for checking and
+(deliberately) regenerating them.
 
 ## Development
 

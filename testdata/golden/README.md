@@ -12,6 +12,7 @@ digest).
 | `mini-seed1-7d.json` | mini practice, seed 1, 7 days from the takeover |
 | `established-seed1-7d-actions.json` | established, seed 1, 7 days, with `established-7d.actions.json` |
 | `established-seed1-60d-staffing.json` | **V0.2** (0.2.0-dev.2): established, seed 1, 60 days, with `established-staffing.actions.json` |
+| `established-seed1-60d-roster.json` | **V0.2 Slice 3** (0.2.0-dev.3): established, seed 1, 60 days, with `established-roster.actions.json` |
 
 `established-7d.actions.json` (input) holds a future-day shift extension,
 a walk-in policy change and back, a worklist policy change, a no-op and
@@ -28,9 +29,20 @@ before her start; and includes a V0.1 extension in a separate batch at the
 same instant, a refused mixed batch, an identical repeat (`unchanged`) and
 a termination of someone who has already left (`not_employed`).
 
+`established-roster.actions.json` (input, V0.2 Slice 3) hires an XR+CT
+technologist on Sam's pattern but Monday instead of Tuesday, and a CT
+trainee; drops Riley's Monday CT cover (CT bookings displaced and
+rebooked); approves an extension and then refuses a roster that would strand
+it (`extension_conflict`); gives Riley and Jordan successive versions,
+withdraws one and repeats one (`unchanged`); delays the trainee's training
+before the start; has the new technologist and Sam exchange Monday and
+Tuesday in one batch (nobody displaced); refuses a roster dated after a
+termination in the same batch (`not_employed`); and terminates Jordan,
+voiding a pending version.
+
 ## Check
 
-    go test ./cmd/dreamteam -run Golden              # all four (-short skips 90 days)
+    go test ./cmd/dreamteam -run Golden              # all six (-short skips the long ones)
     dreamteam run -scenario established -seed 1 -days 7 \
         -verify-replay -format json -golden testdata/golden/established-seed1-7d.json \
         -golden-migrations testdata/golden/MIGRATIONS.json -allow-engine-mismatch
@@ -51,6 +63,14 @@ explanation. Under `-golden-migrations` a listed field must hold exactly its
 old value in the reference and its new value in the run; every other field is
 compared as before. A later state-schema change updates the manifest's new
 values and explanation, never the historical files.
+
+V0.2 Slice 3 keeps the state encoding: roster versions are encoded only
+when present. It changed one message: a mixed batch's refusal now names
+`set_roster` among the V0.2 actions. The Slice 2 reference
+(`established-seed1-60d-staffing.json`, written by 0.2.0-dev.2) has such a
+batch, so four of its fields differ (`actions.digest`, `digests.actions`,
+`digests.run`, `replay.runDigest`), recorded in the manifest. The log,
+ledger and state digests and every outcome are identical.
 
 Exit 0: identical outcomes. Exit 4: a difference — stderr names the first
 differing JSON path with both values, the number of differences and the

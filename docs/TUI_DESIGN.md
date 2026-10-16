@@ -555,6 +555,47 @@ read-only preview (`PreviewStaffing`) of the cursor row.
 Fits 80×24 (the table is cut first). The dashboard hint bar and help list
 `m staff`.
 
+### 4.9c Roster editor (V0.2 Slice 3)
+
+The staff screen lists a **Rosters** row for every hourly technologist and
+front desk employee still employed: contract, today's shift and the
+pending changes (`from Nov 16 32h 00m`). `enter` on a row opens the roster
+editor for that employee; `esc` returns to the staff screen.
+
+```
+─ ROSTER · Sam (E04) · technologist · contract 39h 30m ─────────────────
+ effective ‹ Nov 2 › (Mondays from Nov 2) · weekly: both rota weeks alike · set
+ in force: original (39h 30m)
+    Mon       Tue       Wed       Thu       Fri       Sat       Sun
+ AB off       ›1130–2000 1130–2000 1130–2000 1130–2000 1000–1800 off
+              R3 b +R1  R3 b +R1  R3 b +R1  R3 b +R1  R3 b +R1
+ Tue: ‹start 11:30› · end 20:00 · break 15:30–16:00 · room R3 · cover R1 16:15–20:00
+ rostered 39h 30m (A) · 39h 30m (B) · contract 39h 30m, paid whatever is rostered
+ If submitted: ✓ …   Guaranteed …   Forecast …   Coverage: slots opened … closed …
+```
+
+* The grid shows one row per rota week (one `AB` row in weekly mode): each
+  day's shift, its room (`dsk` for the desk), `b` for a break and `+R1`
+  for a cover. The cursor day's fields are listed below it.
+* Keys: `←→` day · `↑↓` field (start, end, break, room, cover) · `+`/`-`
+  change it (15 minutes; next or previous qualified room) · `o` day
+  on/off (a new day copies the nearest shift) · `b` break on/off · `c`
+  cycle the cover room · `w` weekly ⇄ fortnightly (weekly copies week A to
+  B) · `,` `.` effective Monday earlier/later · `x` withdraw the pending
+  change on that date · `r` reset to the roster in force then · `enter`
+  submit · `esc` back. `space`, `1`–`5`, `q` and `?` stay global.
+* The live preview (`PreviewStaffing`, read-only) shows the verdict, with
+  the first rule a refused roster breaks (contract, rest, breaks,
+  qualified rooms, overtime conflicts with the extension's date). It also
+  shows rostered hours before and after against the unchanged contract, a
+  trainee's independent date before and after, and the extensions kept.
+  The guaranteed weekly contract cost is shown apart from the forecast
+  (contracted time not rostered, overtime kept, displaced bookings),
+  together with the slots the change opens and closes and every booked
+  appointment it would displace, each with a provisional replacement.
+* The staff table lists each pending roster change. Fits 80×24 (the
+  preview is cut first). The help screen lists the editor's keys.
+
 ### 4.10 Daily summary (end of day)
 
 Shown when `e` completes or the day ends with auto-pause on:

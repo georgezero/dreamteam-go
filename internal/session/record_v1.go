@@ -168,7 +168,7 @@ func encodeV1(r *Record) ([]byte, error) {
 // any string: a V0.1 build recorded "hire" as an unknown action.)
 func legacyOnly(a api.Action) bool {
 	return a.RequestID == "" && a.Role == "" && a.Skills == nil && a.RateCents == 0 && a.ContractedWeeklyMinutes == 0 &&
-		a.Roster == nil && a.StartDate == "" && a.LastDay == ""
+		a.Roster == nil && a.StartDate == "" && a.LastDay == "" && a.Op == "" && a.Effective == ""
 }
 
 // Engine compatibility registry (V0.2_DESIGN §12): the builds whose
@@ -183,6 +183,15 @@ var legacyEngines = []struct {
 	{prefix: "0.1.", state: "dreamteam.state/v1"},         // V0.1
 	{prefix: "0.2.0-dev.0.", state: "dreamteam.state/v1"}, // V0.2 Step 0 builds
 	{exact: "0.2.0-dev.1", state: "dreamteam.state/v2"},   // V0.2 Slice 1
+}
+
+// Earlier V0.2 builds that wrote v2 records, with the V0.2 action set they
+// knew (V0.2_DESIGN §12). Their state encoding is this build's, so their
+// records replay with every digest verified; their batches apply with
+// their own action set (a later action type was an unknown V0.1-path
+// action then), and a session continuing one embeds it as its prefix.
+var earlierV2Engines = map[string]string{
+	"0.2.0-dev.2": batchModeSlice2, // V0.2 Slice 2: hire, terminate
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

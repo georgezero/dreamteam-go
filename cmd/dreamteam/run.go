@@ -328,7 +328,12 @@ func replayCmd(args []string, stdout, stderr io.Writer, quiet bool) int {
 		}
 		return exitReplay
 	}
-	if r.Engine != rep.Engine || r.Engine != s.Engine() {
+	switch c := rep.Compatibility(); {
+	case r.Engine == s.Engine():
+	case rep.Earlier || rep.StateChanged || rep.Prefix != nil && c != "native_exact":
+		// A registered earlier build: replayed in its own batch mode.
+		fmt.Fprintf(stderr, "compatibility: %s — recorded by %s, replayed by %s in its own batch mode\n", c, r.Engine, s.Engine())
+	default:
 		fmt.Fprintf(stderr, "compatible: NO — recorded by %s, replayed by %s (allowed); verification: digests match\n", r.Engine, s.Engine())
 	}
 	if quiet {

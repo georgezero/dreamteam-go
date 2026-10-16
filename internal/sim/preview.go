@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"fmt"
 	"slices"
 	"strconv"
 
@@ -16,24 +17,34 @@ import (
 
 // hypo is a batch's proposed registry changes.
 type hypo struct {
-	until map[int]int64 // proposed ends (first day no longer employed)
-	hires []*hireSpec
-	views []*EmployeeConfig // the hires' training views
+	p       *proposal
+	until   map[int]int64     // proposed ends (first day no longer employed)
+	touched []int             // existing employees whose working terms change
+	views   []*EmployeeConfig // the hires' training views
 }
 
-func newHypo(res []staffOutcome) *hypo {
-	h := &hypo{until: map[int]int64{}}
-	for _, o := range res {
-		switch {
-		case o.code != api.ActionAccepted:
-		case o.hire != nil:
-			v := o.hire.terms
-			v.Role, v.Skills = Trainee, nil
-			h.hires, h.views = append(h.hires, o.hire), append(h.views, &v)
-		case o.term != nil:
-			h.until[o.term.emp] = o.term.lastDay + 1
+func newHypo(st *state, p *proposal) *hypo {
+	h := &hypo{p: p, until: map[int]int64{}}
+	seen := map[int]bool{}
+	touch := func(i int) {
+		if !seen[i] {
+			seen[i] = true
+			h.touched = append(h.touched, i)
 		}
 	}
+	for _, t := range p.terms {
+		h.until[t.emp] = t.lastDay + 1
+		touch(t.emp)
+	}
+	for _, rs := range p.rosters {
+		touch(rs.emp)
+	}
+	for _, sp := range p.hires {
+		v := sp.terms
+		v.Role, v.Skills = Trainee, nil
+		h.views = append(h.views, &v)
+	}
+	slices.Sort(h.touched)
 	return h
 }
 
@@ -41,12 +52,18 @@ func newHypo(res []staffOutcome) *hypo {
 // extensions (those of employees who would have left drop out).
 func (st *state) planHypo(day int64, h *hypo) DayPlan {
 	emps := st.dayTerms(day)
-	for i, u := range h.until {
-		if day >= u {
-			emps[i] = nil
+	for _, i := range h.touched {
+		r := &st.staff[i]
+		until, prod := r.Until, r.Productive
+		if u, ok := h.until[i]; ok {
+			until = u
 		}
+		if np, ok := h.p.productive[i]; ok {
+			prod = np
+		}
+		emps[i] = st.workingView(i, day, h.p.versionsOf(st, i), prod, until)
 	}
-	for k, sp := range h.hires {
+	for k, sp := range h.p.hires {
 		var t *EmployeeConfig
 		switch {
 		case day < sp.from:
@@ -81,8 +98,8 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	if !out.OK || !slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
 		return out
 	}
-	res := st.staffBatch(w.eng, actions, false)
-	h := newHypo(res)
+	res, p := st.staffBatch(w.eng, actions, false, v2Actions)
+	h := newHypo(st, p)
 	date := func(d int64) string { return st.cal.Date(st.cal.StartOfDay(d)).String() }
 	n := int64(len(st.dem.days))
 
@@ -91,8 +108,14 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	for _, u := range h.until {
 		first = min(first, u)
 	}
-	for _, sp := range h.hires {
+	for _, sp := range p.hires {
 		first = min(first, sp.productive)
+	}
+	for _, rs := range p.rosters {
+		first = min(first, rs.from)
+	}
+	for i, np := range p.productive {
+		first = min(first, np, st.staff[i].Productive)
 	}
 	plans := map[int64]DayPlan{}
 	for d := max(first, st.day+1); d < n; d++ {
@@ -100,7 +123,7 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	}
 
 	// Hires: terms, timeline and the slots their capacity opens.
-	for _, sp := range h.hires {
+	for _, sp := range p.hires {
 		t := &sp.terms
 		var a, b simtime.Duration
 		for wd := range 7 {
@@ -151,6 +174,11 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 		t := st.emps[i].terms
 		tp := api.TerminationPreview{Employee: t.ID, Name: t.Name, LastDay: date(last), EndDate: date(last + 1),
 			NoticeDays: last - st.day, SeveranceCents: st.severance(i), SeverancePayday: date(st.nextPayday(last)), Displaced: len(disp)}
+		for _, v := range p.versionsOf(st, i) {
+			if v.From > last {
+				tp.VoidedRosters = append(tp.VoidedRosters, date(v.From))
+			}
+		}
 		var days []int64
 		for d := range st.ext {
 			if d > last && st.ext[d][i] > 0 {
@@ -177,6 +205,9 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 				Basis: "minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it"})
 		out.Forecast = append(out.Forecast, api.MoneyLine{Label: "Contract cost no longer owed · " + who, Cents: st.weeklyGuarantee(i),
 			When: "per full week from " + tp.EndDate, Basis: "estimate: the contract guarantee with benefits; overtime and hold-over not modeled"})
+	}
+	if len(p.rosters) > 0 {
+		st.previewRosters(&out, p, h, plans)
 	}
 	out.Displacements = st.provisional(plans, disp)
 	if len(disp) > 0 {
@@ -320,4 +351,119 @@ func (st *state) provisional(plans map[int64]DayPlan, disp []StaffingConflict) [
 		out = append(out, byAppt[x.appt])
 	}
 	return out
+}
+
+// previewRosters describes each roster change of the batch: hours before
+// and after against the unchanged contract, a trainee's productive date,
+// the approved extensions kept, the batch's coverage differences, and the
+// money — the guarantee (unchanged) apart from forecast idle contract time
+// and overtime.
+func (st *state) previewRosters(out *api.StaffingPreview, p *proposal, h *hypo, plans map[int64]DayPlan) {
+	date := func(d int64) string { return st.cal.Date(st.cal.StartOfDay(d)).String() }
+	mins := func(d simtime.Duration) int64 { return int64(d / simtime.Minute) }
+	for _, rs := range p.rosters {
+		i := rs.emp
+		r := &st.staff[i]
+		t := st.emps[i].terms
+		vs := p.versionsOf(st, i)
+		until := r.Until
+		if u, ok := h.until[i]; ok {
+			until = u
+		}
+		end := until
+		for _, v := range vs {
+			if v.From > rs.from {
+				end = min(end, v.From)
+				break
+			}
+		}
+		ba, bb := rostered(rs.was)
+		aa, ab := rostered(rs.then)
+		rp := api.RosterPreview{Employee: t.ID, Name: t.Name, Op: rs.op, Effective: date(rs.from),
+			ContractMin: mins(r.Contract.Weekly), BeforeMinA: mins(ba), BeforeMinB: mins(bb), AfterMinA: mins(aa), AfterMinB: mins(ab)}
+		if end < noEnd {
+			rp.Until = date(end)
+		}
+		if r.Hire != nil && r.Productive > st.day && r.Productive < noEnd {
+			rp.ProductiveBefore = date(r.Productive)
+			rp.ProductiveAfter = rp.ProductiveBefore
+			if np, ok := p.productive[i]; ok {
+				rp.ProductiveAfter = date(np)
+			}
+		}
+		var days []int64
+		for d, m := range st.ext {
+			if d >= rs.from && d < end && m[i] > 0 {
+				days = append(days, d)
+			}
+		}
+		slices.Sort(days)
+		var otMin int64
+		for _, d := range days {
+			x := api.Extension{Date: date(d), Employee: t.ID, Name: t.Name, Minutes: mins(st.ext[d][i])}
+			if pl, ok := plans[d]; ok && pl.ByEmp[i] >= 0 {
+				x.Until = simtime.FormatClock(pl.Shifts[pl.ByEmp[i]].To)
+			}
+			rp.Extensions = append(rp.Extensions, x)
+			otMin += x.Minutes
+		}
+		out.Rosters = append(out.Rosters, rp)
+
+		who := st.staffLabel(i)
+		when := "from " + rp.Effective
+		if rp.Until != "" {
+			when += " until " + rp.Until
+		}
+		out.Guaranteed = append(out.Guaranteed, api.MoneyLine{Label: "Contract guarantee per full week · " + who, Cents: st.weeklyGuarantee(i),
+			When: "unchanged by the roster", Basis: hours(r.Contract.Weekly) + " × " + rate(t.RateCents) + " with benefits, paid whatever is rostered; notice and severance unchanged"})
+		c := r.Contract.Weekly
+		ia, ib := max(0, c-aa), max(0, c-ab)
+		if ia > 0 || ib > 0 {
+			cost := func(d simtime.Duration) int64 {
+				w := t.RateCents * int64(d) / 3600
+				return w + roundDiv(w*st.cfg.Finance.BenefitsBP, 10_000)
+			}
+			basis := hours(ia) + " a week"
+			if ia != ib {
+				basis = fmt.Sprintf("%s (week A), %s (week B)", hours(ia), hours(ib))
+			}
+			out.Forecast = append(out.Forecast, api.MoneyLine{Label: "Contracted time not rostered · " + who, Cents: (cost(ia) + cost(ib)) / 2,
+				When: "per week " + when, Basis: "estimate: " + basis + " paid as guarantee with benefits (part of the guarantee above, not extra), unless worked through extensions or hold-over"})
+		}
+		if otMin > 0 {
+			out.Forecast = append(out.Forecast, api.MoneyLine{Label: "Approved extensions kept · " + who, Cents: t.RateCents * otMin / 60,
+				When: when, Basis: fmt.Sprintf("estimate: %d min at the base rate; the overtime premium applies past %d h in a week", otMin,
+					st.cfg.Policies.WeeklyHours/simtime.Hour)})
+		}
+	}
+	// Coverage differences of the whole batch.
+	opened, closed := map[string]int{}, map[string]int{}
+	for d := st.day + 1; d < int64(len(st.dem.days)); d++ {
+		pl, ok := plans[d]
+		if !ok || pl.Hours == nil {
+			continue
+		}
+		cov := pl.Coverage()
+		ds := st.dem.days[d]
+		for r := range ds.rooms {
+			for _, s := range ds.rooms[r] {
+				x := s
+				st.coverSlot(&cov, r, &x)
+				switch m := st.cfg.Rooms[r].Modality; {
+				case s.why != slotOK && x.why == slotOK:
+					opened[m]++
+				case s.why == slotOK && x.why != slotOK:
+					closed[m]++
+				}
+			}
+		}
+	}
+	for _, m := range st.modalities() {
+		if opened[m] > 0 {
+			out.SlotsOpened = append(out.SlotsOpened, api.ModalityCount{Modality: m, Count: opened[m]})
+		}
+		if closed[m] > 0 {
+			out.SlotsClosed = append(out.SlotsClosed, api.ModalityCount{Modality: m, Count: closed[m]})
+		}
+	}
 }

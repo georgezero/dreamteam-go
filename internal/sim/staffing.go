@@ -10,25 +10,36 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
-// V0.2 staffing actions, Slice 2: hire and terminate (V0.2_DESIGN §5.3,
-// §6.1–§6.3, §7).
+// V0.2 staffing actions: hire and terminate (Slice 2), set_roster (Slice
+// 3, roster.go) (V0.2_DESIGN §5.3, §5.8, §6.1–§6.4, §7).
 //
 // A batch holding a V0.2 action holds only V0.2 actions (else every item
 // is refused, the first legacy one as mixed_batch) and is atomic: every
 // item is validated, in input order, against the state now plus the
-// earlier items of the batch; one invalid item refuses the whole batch
-// (it gets its own code, every other item batch_rejected) and nothing is
-// committed. A valid batch commits in input order — hires get their IDs,
-// recruiting fees and severance post — then the bookings of every day a
-// termination takes coverage from are reconciled once, against the final
-// timeline (displace.go), and one dispatch runs.
+// earlier items of the batch, and then the composed roster timelines are
+// checked as a whole (checkComposed); one invalid item refuses the whole
+// batch (it gets its own code, every other item batch_rejected) and
+// nothing is committed. A valid batch commits in input order — hires get
+// their IDs, recruiting fees and severance post, roster versions enter
+// their timelines — then trainees' productive dates move, and the
+// bookings of every day the batch changes are reconciled once, against
+// the final timeline (displace.go), and one dispatch runs.
 //
 // Identical repeats are no-ops (ok, unchanged): a hire whose requestId was
 // already accepted with the same content, even after the employee left;
 // a termination with the same last day. A reused requestId with other
 // content is request_conflict; a different last day already_terminating.
 
-func isV2Action(t string) bool { return t == api.ActHire || t == api.ActTerminate }
+// V0.2 action sets: the types that make a V0.2 batch. This build knows
+// set_roster too; a 0.2.0-dev.2 record (Slice 2) is replayed with its own
+// set, where set_roster was an unknown V0.1-path action (session package,
+// V0.2_DESIGN §12).
+var (
+	v2Actions     = []string{api.ActHire, api.ActTerminate, api.ActSetRoster}
+	slice2Actions = []string{api.ActHire, api.ActTerminate}
+)
+
+func isV2Action(t string) bool { return slices.Contains(v2Actions, t) }
 
 // staffOutcome is one V0.2 item's validation or commit result.
 type staffOutcome struct {
@@ -38,6 +49,7 @@ type staffOutcome struct {
 	effective string // the start date, or the first day after the last day
 	hire      *hireSpec
 	term      *termSpec
+	roster    *rosterSpec
 }
 
 // hireSpec is a validated hire, not yet committed.
@@ -59,37 +71,56 @@ type termSpec struct {
 
 // proposal is what a batch's earlier items have proposed.
 type proposal struct {
-	hires []*hireSpec
-	terms []*termSpec
-	reqs  map[string]bool
-	emps  map[int]bool
+	hires   []*hireSpec
+	terms   []*termSpec
+	rosters []*rosterSpec
+	reqs    map[string]bool
+	emps    map[int]bool
+	rkeys   map[rosterKey]bool
+	// versions are the composed roster timelines of the employees the
+	// batch reschedules; productive their recomputed productive dates
+	// (trainees only, set by checkComposed).
+	versions   map[int][]rosterVersion
+	productive map[int]int64
 }
 
-// staffBatch validates a V0.2 batch and, if do, commits it.
-func (st *state) staffBatch(e *Engine, actions []api.Action, do bool) []staffOutcome {
+// staffBatch validates a V0.2 batch and, if do, commits it. known is the
+// action set the batch is applied with (v2Actions, or slice2Actions for a
+// Slice 2 record).
+func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []string) ([]staffOutcome, *proposal) {
 	out := make([]staffOutcome, len(actions))
 	fail := -1
 	for k, a := range actions {
-		if !isV2Action(a.Type) {
-			out[k] = staffOutcome{code: "mixed_batch", msg: fmt.Sprintf("%q cannot share a batch with V0.2 staffing actions (hire, terminate): submit it in its own batch at the same time.", a.Type)}
+		if !slices.Contains(known, a.Type) {
+			out[k] = staffOutcome{code: "mixed_batch", msg: fmt.Sprintf("%q cannot share a batch with V0.2 staffing actions (%s): submit it in its own batch at the same time.",
+				a.Type, strings.Join(known, ", "))}
 			fail = k
 			break
 		}
 	}
-	p := &proposal{reqs: map[string]bool{}, emps: map[int]bool{}}
+	p := &proposal{reqs: map[string]bool{}, emps: map[int]bool{}, rkeys: map[rosterKey]bool{},
+		versions: map[int][]rosterVersion{}, productive: map[int]int64{}}
 	if fail < 0 {
 		for k, a := range actions {
 			var o staffOutcome
-			if a.Type == api.ActHire {
+			switch a.Type {
+			case api.ActHire:
 				o = st.checkHire(a, p)
-			} else {
+			case api.ActTerminate:
 				o = st.checkTerminate(a, p)
+			default:
+				o = st.checkSetRoster(a, p, k)
 			}
 			out[k] = o
 			if !o.ok {
 				fail = k
 				break
 			}
+		}
+	}
+	if fail < 0 && len(p.rosters) > 0 {
+		if k, o := st.checkComposed(p); k >= 0 {
+			out[k], fail = o, k
 		}
 	}
 	if fail >= 0 {
@@ -99,21 +130,27 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool) []staffOut
 					fail+1, len(actions), out[fail].code)}
 			}
 		}
-		return out
+		return out, p
 	}
 	if !do {
-		return out
+		return out, p
 	}
 	changed := false
 	for k := range out {
 		changed = changed || out[k].code == api.ActionAccepted
 	}
 	if !changed {
-		return out
+		return out, p
 	}
 	st.beforeChange()
 	from := noEnd
 	var causes []int
+	var why []string
+	add := func(c string) {
+		if !slices.Contains(why, c) {
+			why = append(why, c)
+		}
+	}
 	for k := range out {
 		o := &out[k]
 		switch {
@@ -126,12 +163,24 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool) []staffOut
 			st.commitTerminate(o.term, len(st.actions.log)+k)
 			from = min(from, o.term.lastDay+1)
 			causes = append(causes, len(st.actions.log)+k)
+			add(causeEmploymentEnded)
+		case o.roster != nil:
+			st.commitRoster(o.roster, len(st.actions.log)+k)
+			from = min(from, o.roster.from)
+			causes = append(causes, len(st.actions.log)+k)
+			add(causeRosterChanged)
+		}
+	}
+	if moved, delayed := st.trainingMoves(p); moved != noEnd {
+		from = min(from, moved)
+		if delayed {
+			add(causeTrainingDelayed)
 		}
 	}
 	if from != noEnd {
-		st.reconcile(e, from, causeEmploymentEnded, causes)
+		st.reconcile(e, from, strings.Join(why, "+"), causes)
 	}
-	return out
+	return out, p
 }
 
 // --- hire ----------------------------------------------------------------
@@ -141,7 +190,7 @@ func (st *state) checkHire(a api.Action, p *proposal) staffOutcome {
 		return staffOutcome{code: code, msg: fmt.Sprintf(format, args...)}
 	}
 	switch {
-	case a.Employee != "" || a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.LastDay != "":
+	case a.Employee != "" || a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.LastDay != "" || a.Op != "" || a.Effective != "":
 		return bad("invalid_schema", "hire takes requestId, role, skills, rateCents, contractedWeeklyMinutes, roster and startDate only.")
 	case a.RequestID == "" || len(a.RequestID) > 128:
 		return bad("invalid_schema", "hire needs a requestId of 1–128 characters.")
@@ -298,6 +347,15 @@ func clockHM(s string) (simtime.Duration, bool) {
 // rota week within the contract; MinRest between one shift's cap and the
 // next start, across weeks.
 func (st *state) hireRoster(t *EmployeeConfig, r *api.Roster) error {
+	if err := st.parseRoster(t, r); err != nil {
+		return err
+	}
+	return st.rosterRules(t)
+}
+
+// parseRoster converts r into t's Roster and Alt, checking each shift on
+// its own (hireShift).
+func (st *state) parseRoster(t *EmployeeConfig, r *api.Roster) error {
 	var weeks [2][7]*ShiftTemplate
 	for k, w := range []*api.Week{&r.A, &r.B} {
 		days := w.Days()
@@ -314,11 +372,37 @@ func (st *state) hireRoster(t *EmployeeConfig, r *api.Roster) error {
 			weeks[k][wd] = tpl
 		}
 	}
-	for k := range weeks {
+	t.Roster, t.Alt = [7]*ShiftTemplate{}, [7]*ShiftTemplate{}
+	for wd := range 7 {
+		a, b := weeks[0][wd], weeks[1][wd]
+		switch {
+		case a == nil && b == nil:
+		case a != nil && b != nil && sameTemplate(a, b):
+			t.Roster[wd] = a
+		case b == nil:
+			a.Weeks, t.Roster[wd] = WeekA, a
+		case a == nil:
+			b.Weeks, t.Roster[wd] = WeekB, b
+		default:
+			a.Weeks, b.Weeks = WeekA, WeekB
+			t.Roster[wd], t.Alt[wd] = a, b
+		}
+	}
+	return nil
+}
+
+// rosterRules checks t's whole A/B roster: at most MaxWorkDays a rota
+// week, net rostered time in each within the contract, and MinRest
+// between one shift's cap and the next start across the 14-day cycle.
+func (st *state) rosterRules(t *EmployeeConfig) error {
+	at := func(n int) *ShiftTemplate { // n: 0 = week A Monday … 13 = week B Sunday
+		return t.ShiftOn(simtime.Weekday((n%7+1)%7), WeekA+(n/7)%2)
+	}
+	for k := range 2 {
 		n := 0
 		var net simtime.Duration
-		for _, tpl := range weeks[k] {
-			if tpl != nil {
+		for d := range 7 {
+			if tpl := at(7*k + d); tpl != nil {
 				n++
 				net += netTime(tpl)
 			}
@@ -333,9 +417,8 @@ func (st *state) hireRoster(t *EmployeeConfig, r *api.Roster) error {
 		}
 	}
 	// Rest between consecutive days over the 14-day cycle (A Mon … B Sun).
-	at := func(n int) *ShiftTemplate { return weeks[(n/7)%2][simtime.Weekday((n%7+1)%7)] }
 	for n := 0; n < 14; n++ {
-		a, b := at(n), at(n+1)
+		a, b := at(n), at((n+1)%14)
 		if a == nil || b == nil {
 			continue
 		}
@@ -343,21 +426,6 @@ func (st *state) hireRoster(t *EmployeeConfig, r *api.Roster) error {
 			return fmt.Errorf("roster: only %s between the latest permitted end of week %s %s's shift (%s) and the next start (%s); at least %s",
 				rest, "AB"[(n/7)%2:(n/7)%2+1], simtime.Weekday((n%7+1)%7), simtime.FormatClock(st.cfg.Policies.ShiftCap(a.From)),
 				simtime.FormatClock(b.From), MinRest)
-		}
-	}
-	for wd := range 7 {
-		a, b := weeks[0][wd], weeks[1][wd]
-		switch {
-		case a == nil && b == nil:
-		case a != nil && b != nil && sameTemplate(a, b):
-			t.Roster[wd] = a
-		case b == nil:
-			a.Weeks, t.Roster[wd] = WeekA, a
-		case a == nil:
-			b.Weeks, t.Roster[wd] = WeekB, b
-		default:
-			a.Weeks, b.Weeks = WeekA, WeekB
-			t.Roster[wd], t.Alt[wd] = a, b
 		}
 	}
 	return nil
@@ -587,7 +655,7 @@ func (st *state) checkTerminate(a api.Action, p *proposal) staffOutcome {
 	}
 	switch {
 	case a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.RequestID != "" || a.Role != "" ||
-		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "":
+		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.Op != "" || a.Effective != "":
 		return bad("invalid_schema", "terminate takes employee and lastDay only.")
 	case a.Employee == "" || a.LastDay == "":
 		return bad("invalid_schema", "terminate needs employee and lastDay.")
@@ -666,6 +734,7 @@ func (st *state) commitTerminate(ts *termSpec, action int) {
 	st.fin.led.mustPost(st.now, entryKey{kind: entSeverance, a: int64(i)},
 		line{acctSeverance, -1, sev, -1}, line{acctSeverancePayable, -1, -sev, -1})
 	st.emit(st.now, api.Info, "actions", st.termText(ts))
+	st.voidRosters(i, action)
 	var days []int64
 	for d := range st.ext {
 		if d >= r.Until && st.ext[d][i] > 0 {

@@ -785,6 +785,14 @@ else is persisted and no serialized world is trusted. File
   of named legacy builds replaces the engine-mismatch switch for them
   (outcomes verified, state encoding changed). The state digest encoding
   is `dreamteam.state/v3`.
+* **V0.2 Slice 3: set_roster** (V0.2_DESIGN §5.8, §12). The action adds
+  `op` and `effective` (with `employee` and `roster`), absent from every
+  other action. Roster versions and the roster log are encoded in the
+  state digest only when present, so `dreamteam.state/v3` is unchanged for
+  every earlier state. A second registry names earlier V0.2 builds
+  (`0.2.0-dev.2`): their v2 records replay with their own action set and
+  every digest verified, and a continued one becomes the prefix of the new
+  record.
 * **Snapshots** (§3.6) are not built: replay is authoritative, and a
   snapshot cache may come later (V0.2) as an accelerator verified against
   the digests.
@@ -1983,6 +1991,26 @@ Action catalog by version:
 | V0.3 | `set_denial_rework`, `set_self_pay_policy`, `set_billing_priority` |
 | V0.2 (roster) | `change_roster` (weekly roster editor, ROADMAP V0.2) |
 | V0.4 | `hire`, `terminate`, `lease_equipment`, `extend_hours`, `referral_outreach` |
+
+**As re-scoped by V0.2 (V0.2_DESIGN §2, §6).** The table above is the
+original plan; V0.2 builds exactly five staffing actions instead, in
+slices: `hire` and `terminate` (Slice 2), `set_roster` (Slice 3), then
+`set_reading_allocation` and `contract_teleradiology`. Built so far:
+
+```json
+{"type": "hire", "requestId": "ct-1", "role": "technologist", "skills": ["CT"], "rateCents": 4000,
+ "contractedWeeklyMinutes": 2400, "roster": {"A": {…}, "B": {…}}, "startDate": "2026-11-10"}
+{"type": "terminate", "employee": "E04", "lastDay": "2026-11-10"}
+{"type": "set_roster", "op": "set", "employee": "E03", "effective": "2026-11-02", "roster": {"A": {…}, "B": {…}}}
+{"type": "set_roster", "op": "remove", "employee": "E03", "effective": "2026-11-02"}
+```
+
+A roster is one shift or `null` per weekday in rota weeks A and B
+(`start`, `end`, `breaks`, `assignment`, `covers`). A batch holding any of
+these is atomic and holds only them (`mixed_batch`); results add
+`employeeId` (a hire) and `effectiveAt`. Previews: `PreviewStaffing`,
+`ValidateBatch`, `RosterPlan`. Semantics and every rejection code:
+V0.2_DESIGN §5.7 (hire, terminate) and §5.8 (set_roster).
 
 Validation is in `sim` and is the only gatekeeper — TUI, CLI, Web and agents
 call the same `Apply`. Each action has: schema validation, permission

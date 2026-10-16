@@ -10,9 +10,9 @@ import (
 )
 
 // Practice-caused displacement (V0.2_DESIGN §7). A committed staffing
-// change that takes coverage away (Slice 2: a termination's end) is
-// reconciled once per batch, at the decision instant, against the final
-// timeline:
+// change that takes coverage away (a termination's end, a roster version,
+// a trainee's later productive date) is reconciled once per batch, at the
+// decision instant, against the final timeline:
 //
 //  1. Every materialized day from the earliest change on is re-planned
 //     from the registry, and its booked appointments are re-inserted in
@@ -311,15 +311,36 @@ func conflictText(reason string) string {
 	return reason
 }
 
-// causeText names what displaced: "Sam (E04) leaves after Sat Nov 21".
+// causeText names what displaced: "Sam (E04) leaves after Sat Nov 21",
+// "Riley (E03)'s roster changes from Mon Nov 16". A batch's cause lists
+// its kinds of change joined by "+" (employment_ended, roster_changed,
+// training_delayed).
 func (st *state) causeText(cause string, actions []int) string {
-	if cause != causeEmploymentEnded {
-		return cause
-	}
 	var who []string
-	for i := range st.staff {
-		if x := st.staff[i].Exit; x != nil && slices.Contains(actions, x.Action) {
-			who = append(who, fmt.Sprintf("%s leaves after %s", st.staffLabel(i), st.dayLabel(x.LastDay)))
+	for _, c := range strings.Split(cause, "+") {
+		switch c {
+		case causeEmploymentEnded:
+			for i := range st.staff {
+				if x := st.staff[i].Exit; x != nil && slices.Contains(actions, x.Action) {
+					who = append(who, fmt.Sprintf("%s leaves after %s", st.staffLabel(i), st.dayLabel(x.LastDay)))
+				}
+			}
+		case causeRosterChanged:
+			for i := range st.staff {
+				for _, e := range st.staff[i].RosterLog {
+					if e.Op != rosterVoided && slices.Contains(actions, e.Action) {
+						verb := "changes"
+						if e.Op == rosterRemove {
+							verb = "change is withdrawn"
+						}
+						who = append(who, fmt.Sprintf("%s's roster %s from %s", st.staffLabel(i), verb, st.dayLabel(e.From)))
+					}
+				}
+			}
+		case causeTrainingDelayed:
+			who = append(who, "training completes later")
+		default:
+			who = append(who, c)
 		}
 	}
 	return strings.Join(who, "; ")

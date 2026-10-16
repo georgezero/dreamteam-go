@@ -7,6 +7,128 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 3 — roster changes (0.2.0-dev.3)
+
+The owner approved `set_roster` (2026-10-15). `set_reading_allocation` and
+`contract_teleradiology` are not in this slice. Design: `docs/V0.2_DESIGN.md`
+§5.8, with the deviations identified there. Without a `set_roster` action
+every earlier outcome is unchanged.
+
+* **Roster versions.**
+  * An hourly technologist's or front desk employee's roster is now a
+    timeline: the original (scenario or hire, immutable) and dated versions.
+    Each version is a full A/B pattern from a Monday, in force until the
+    next.
+  * `op: set` inserts a version or replaces a pending one; `op: remove`
+    withdraws a pending one, and its predecessor resumes. Several
+    successive versions are allowed.
+  * Versions in effect or past never change. Every operation, including
+    replaced, withdrawn and voided versions, stays in the employee's roster
+    log.
+  * The version for a date is resolved behind the per-day registry view
+    that the plan, the runtime and the booking predicates already use.
+* **Validation** (in order): shape; employee (hourly technologist or front
+  desk, still employed); effective date (`past_date`, `not_monday`, 14 days'
+  notice, horizon, before the end of employment); each shift as for a hire
+  (rooms of the employee's skills, desk for the front desk, breaks, cap);
+  `unchanged` when equal to the roster already in force; then the
+  whole-roster rules — at most six days a rota week, **net rostered time
+  ≤ the contract** in each rota week (the employee's own original roster
+  may always be restored), rest. Then the batch's composed timelines are
+  checked as a whole:
+  * no version after a termination (in either batch order);
+  * rest across every version boundary, withdrawals included;
+  * a trainee still completing training within 60 days
+    (`training_incomplete`);
+  * every approved extension still valid on its new shift
+    (`extension_conflict`, naming the date: refused, never silently
+    cancelled).
+* **Rest rule, one for hiring, rosters and overtime:** 10 hours from a
+  shift's cap — the latest permitted release, min(start + 12 h,
+  23:59:59) — to the next day's start. Approved extensions and hold-over
+  cannot pass the cap, so no approval can break the rule. Tested at the
+  day boundary within a pattern (A→B and B→A), across versions, after a
+  withdrawal, and at exactly 10 hours.
+* **Contract and money.** Contracted hours, rate, accrual weights, notice
+  and severance never change with the roster; nothing new is posted. A full
+  week under a four-day or a zero-hour roster pays Riley's contract exactly
+  ($1,440 + benefits); severance is identical before and after a cut.
+* **Atomic batches and displacement.** A batch commits in input order,
+  moves trainees' productive dates, then reconciles once, against the final
+  timeline, from the earliest affected day: the same survivor and
+  re-offer lifecycle as Slice 2. Causes: `employment_ended`,
+  `roster_changed`, `training_delayed` (joined by `+`). A coordinated
+  exchange (an XR+CT hire and Sam swapping Monday and Tuesday) displaces
+  nobody in either order, while each half alone displaces 11 bookings.
+  A termination voids pending versions on or after the end (logged), as
+  it voids extensions (unchanged).
+* **Training.** A roster change before the first working day or during
+  training recomputes the productive date from the composed timeline (past
+  days are the attended ones). A delay displaces the bookings that relied on
+  the trainee (including XR bookings losing a shared technologist); an
+  earlier completion opens capacity. Capacity is never granted before
+  completion (invariant).
+* **Preview.** Rostered hours before and after against the unchanged
+  contract, the interval, a trainee's productive date before and after, the
+  extensions kept, the batch's slots opened and closed by modality, exact
+  displacements with provisional replacements, and the guaranteed weekly
+  contract cost apart from forecasts (contracted time not rostered,
+  extensions kept, displaced bookings). Pure and independent of the hidden
+  future (tested).
+* **Interfaces.** `api.Action` gains `op` and `effective`;
+  `api.Employee.RosterChanges`; `World/Session.RosterPlan`; CLI actions
+  files; session v2; the TUI roster editor (staff screen `m`, enter on a
+  roster row): weekly or fortnightly grid, field editing, effective Monday,
+  withdrawal, live preview.
+* **Compatibility.**
+  * State digest still `dreamteam.state/v3`: versions are encoded only when
+    present.
+  * A genuine 0.2.0-dev.2 save, built with that commit's binary and kept
+    in `testdata/sessions`, replays under this build with every digest
+    equal. Its batches apply with Slice 2's action set (`ApplySlice2`),
+    where `set_roster` was an unknown action. Before the version bump the
+    same file failed replay (fail-before-fix). Continued, it becomes the
+    prefix of a new v2 record
+    (`prefix:earlier_build_exact+native_exact`).
+  * v1 → v2 continuation with roster changes replays.
+  * The four V0.1 goldens are unchanged under the manifest. The Slice 2
+    golden differs only in its action and run digests: its mixed batch's
+    refusal message now names `set_roster`. This is recorded in
+    `MIGRATIONS.json` and confirmed by diffing the dev.2 and dev.3 action
+    records (log, ledger and state identical).
+  * A sixth reference, `established-seed1-60d-roster.json`, pins the roster
+    plan (36 displacements, all rebooked).
+* Verification:
+  * Full uncached suite (`go test -count=1 -timeout 60m ./...`) passes on
+    the Pi in 8 min 19 s: cmd 86 s, session 88.5 s, sim 488 s, tui 24 s.
+    `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * Acceptance (`-tags acceptance -run Acceptance`) passes on joofi in
+    128 min: the V0.1 criteria, staffing turnover (155 hires over 720
+    days) and roster churn (340 roster versions accepted over 720 days),
+    with the invariants checked daily; 156 tests and subtests, no failure.
+  * All six golden references and the Slice 2 session fixture give
+    byte-identical outputs on the Pi and on joofi.
+  * Fail-before-fix mutations: all 20 guards were caught (not_monday,
+    notice, contract, pattern rest, boundary rest, extension conflict,
+    extension on the composed view, training projection, trainee capacity
+    early, void on termination, composed not_employed, duplicate date
+    claim, unchanged, version resolution, reconcile after roster,
+    per-item reconcile, guarantee after a roster cut, digest omit-empty,
+    Slice 2 batch mode, original-roster restore only when exact).
+* Performance (Pi, `docs/MEASUREMENTS.md`): the 90-day run is unchanged
+  (best of 8 interleaved: 3.40 s dev.2, 3.41 s dev.3); EstablishedPlay90
+  allocations unchanged (78.6 MB, 1.241M). A roster preview costs
+  28.2–28.3 ms, a commit 25.3–25.7 ms; the editor renders in 48 ms.
+* Limitations: the rest rule is conservative (measured from the cap, see
+  deviation 1); break rules are not applied to approved extensions;
+  radiologist and supervision displacement remain untestable until the
+  reading actions; the result schema is still v1; amd64 and macOS were
+  not run; coverage differences are reported per batch, not per change;
+  the TUI edits only the first cover of a shift.
+
+---
+
 ## V0.2 Slice 2 — hiring and termination (0.2.0-dev.2)
 
 The owner approved two player actions, `hire` and `terminate` (2026-10-15).

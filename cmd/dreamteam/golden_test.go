@@ -32,9 +32,13 @@ var references = []struct {
 	{"mini-seed1-7d.json", []string{"-scenario", "mini", "-seed", "1", "-days", "7"}, false},
 	{"established-seed1-7d-actions.json", []string{"-scenario", "established", "-seed", "1", "-days", "7",
 		"-actions", goldenDir + "/established-7d.actions.json"}, false},
-	// V0.2 Slice 2: hire and terminate (written by 0.2.0-dev.2; no migration).
+	// V0.2 Slice 2: hire and terminate (written by 0.2.0-dev.2; its mixed
+	// batch's message changed in Slice 3: MIGRATIONS.json).
 	{"established-seed1-60d-staffing.json", []string{"-scenario", "established", "-seed", "1", "-days", "60",
 		"-actions", goldenDir + "/established-staffing.actions.json"}, true},
+	// V0.2 Slice 3: set_roster (written by 0.2.0-dev.3).
+	{"established-seed1-60d-roster.json", []string{"-scenario", "established", "-seed", "1", "-days", "60",
+		"-actions", goldenDir + "/established-roster.actions.json"}, true},
 }
 
 func runJSON(t *testing.T, args ...string) ([]byte, string, int) {
@@ -348,7 +352,7 @@ func TestGoldenMigrations(t *testing.T) {
 		t.Fatal(err)
 	}
 	// Every reference written by another engine is in the manifest; one
-	// written by this build (the V0.2 reference) needs no migration.
+	// written by this build (the Slice 3 reference) needs no migration.
 	historical := 0
 	for _, ref := range references {
 		raw, _ := os.ReadFile(filepath.Join(goldenDir, ref.file))
@@ -362,7 +366,7 @@ func TestGoldenMigrations(t *testing.T) {
 			t.Errorf("%s (engine %s): in the manifest %v", ref.file, g.Engine, listed)
 		}
 	}
-	if m.StateSchema != sim.StateSchema || len(m.References) != historical || historical != 4 {
+	if m.StateSchema != sim.StateSchema || len(m.References) != historical || historical != 5 {
 		t.Fatalf("manifest: state schema %q (build %q), %d references, %d historical", m.StateSchema, sim.StateSchema, len(m.References), historical)
 	}
 	golden, _ := os.ReadFile(filepath.Join(goldenDir, "mini-seed1-7d.json"))

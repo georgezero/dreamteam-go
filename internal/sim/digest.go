@@ -45,7 +45,20 @@ import (
 // anchor, placement and booking-lead fields of orders and appointments.
 // Outcomes of a V0.1 scenario without V0.2 actions are unchanged; only
 // state and run digests differ.
+//
+// V0.2 Slice 3 extends v3 without changing any existing encoding: an
+// employee's roster versions and roster log (set_roster) are encoded only
+// when non-empty, introduced by a tag no length prefix can equal, so a
+// state without them encodes exactly as Slice 2's did (omitEmpty).
 const StateSchema = "dreamteam.state/v3"
+
+// omitEmpty names slice fields, by "Type.field", that are encoded only
+// when non-empty, after omitTag: fields added to the v3 encoding.
+var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true}
+
+// omitTag introduces a present omitEmpty field. It has the top bit set,
+// which no length prefix (string, slice or map) can.
+const omitTag = 0xD7A1_0000_0000_0003
 
 // skipFields names struct fields the state walk leaves out, by
 // "Type.field".
@@ -61,8 +74,9 @@ var skipFields = map[string]bool{
 	"DayPlan.cfg": true, "DayPlan.emps": true, "Coverage.Plan": true,
 	"employment.trainView": true, // derived from the hire's terms
 	"alertState.cfg":       true, "alertState.wakeGen": true, "alertState.wakeAt": true,
-	"metricsState.cum": true, // digested as a snapshot at the current time
-	"tally.actions":    true, // the action record's length: the action digest's
+	"metricsState.cum":        true, // digested as a snapshot at the current time
+	"tally.actions":           true, // the action record's length: the action digest's
+	"rosterVersion.trainView": true, // derived from the version's terms
 }
 
 // stateHasher writes the canonical encoding into a buffer flushed to the
@@ -92,23 +106,31 @@ func (d *stateHasher) str(s string) {
 // fieldsOf lists a struct type's encoded fields (cached).
 var (
 	fieldMu    sync.Mutex
-	fieldCache = map[reflect.Type][]int{}
+	fieldCache = map[reflect.Type][]field{}
 )
 
-func fieldsOf(t reflect.Type) []int {
+// field is an encoded struct field: its index, and whether it is omitted
+// when empty.
+type field struct {
+	i    int
+	omit bool
+}
+
+func fieldsOf(t reflect.Type) []field {
 	fieldMu.Lock()
 	defer fieldMu.Unlock()
 	if fs, ok := fieldCache[t]; ok {
 		return fs
 	}
-	var fs []int
+	var fs []field
 	for i := 0; i < t.NumField(); i++ {
 		switch t.Field(i).Type.Kind() {
 		case reflect.Func, reflect.Interface, reflect.Chan, reflect.UnsafePointer:
 			continue // not state: hooks, hash states (digested on their own)
 		}
-		if !skipFields[t.Name()+"."+t.Field(i).Name] {
-			fs = append(fs, i)
+		name := t.Name() + "." + t.Field(i).Name
+		if !skipFields[name] {
+			fs = append(fs, field{i, omitEmpty[name]})
 		}
 	}
 	fieldCache[t] = fs
@@ -156,8 +178,15 @@ func (d *stateHasher) value(v reflect.Value) {
 			d.buf = append(append(d.buf, e.k...), e.v...)
 		}
 	case reflect.Struct:
-		for _, i := range fieldsOf(v.Type()) {
-			d.value(v.Field(i))
+		for _, f := range fieldsOf(v.Type()) {
+			x := v.Field(f.i)
+			if f.omit {
+				if x.Len() == 0 {
+					continue
+				}
+				d.u64(omitTag)
+			}
+			d.value(x)
 		}
 	case reflect.Func, reflect.Interface, reflect.Chan, reflect.UnsafePointer:
 	default:

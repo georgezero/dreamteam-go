@@ -26,8 +26,10 @@ revised staffing architecture, passes conditionally at ×1.30 demand with a
 V0.2 is being implemented in slices; Slice 1, the employee contract and
 capacity foundation with no new action, is built (design §5.5); Slice 2,
 `hire` and `terminate` with practice-caused displacement and session v2, is
-built (design §5.7). Slices 3–5 (`set_roster`, `set_reading_allocation`,
-`contract_teleradiology`) remain.
+built (design §5.7); Slice 3, `set_roster` with dated roster versions, is
+built (design §5.8). Next: the owner's dynamic benchmark with the actions
+built so far; then Slices 4–5 (`set_reading_allocation`,
+`contract_teleradiology`).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 
