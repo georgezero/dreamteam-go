@@ -429,3 +429,22 @@ The simulation's production code is unchanged, so the engine benchmarks
 were not rerun. The benchmark results under 0.2.0-dev.9 match the
 committed archive in every field but the engine name.
 
+
+## 2026-10-17 — V0.2 Slice 5C.0a: evaluation policy v0.2-eval-2 (Pi 4 at ≈79 °C, load average ≈4.1; Cortex-A76 "joofi", load average ≈4.8 falling to 1.2)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 11 min 40 s (sim 672 s, session 221 s, cmd 132 s, eval 48 s, tui 41 s) |
+| Evaluator tests, Pi | `go test ./internal/eval -count=1` | 16–48 s (36 tests; the exact operating characteristics take 1.6 s) |
+| Operating characteristics with Monte Carlo, Pi | `DT_OC=1 go test ./internal/eval -run OperatingCharacteristics` | 441 s (27 configurations × 4,000 evaluations of 40 seeds) |
+| Targeted mutations, Pi | 27 mutations, each with its tests | about 2 min in all |
+| Recorder integration, Pi | `go test ./internal/sim -run EvalRecordOnRealRuns` | 5–8 s (five mini runs to the common horizon's observation end) |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 (shared, loaded) | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 75 s |
+| Evaluation, 4 plans × 20 reference seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 3` | 205 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` | 167 s |
+
+The simulation's production code is unchanged, so the engine benchmarks
+were not rerun. The benchmark results under 0.2.0-dev.10 match the
+committed archive in every field but the engine name. The slower joofi
+times reflect its shared load.
+

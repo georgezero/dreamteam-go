@@ -46,6 +46,41 @@ type synth struct {
 	inherited               int   // inherited unfinished routine studies
 	teleOnlyOf, apptSHA     string
 	observeShort            int64 // end observation this much earlier (seconds)
+	horizon                 int64 // the common horizon, seconds after t0 (0: this record's own tail end)
+	payables                int64 // obligations at every capture and sample (cents)
+	// late: extra soon CT referrals a seed, received and wanted on the
+	// given days, resolved (with out) an hour after resolve (open when out
+	// is OutOpen).
+	late []lateOrders
+	// bursts: breach permille of one priority's studies acquired in days
+	// [from, to); rare: a routine US order every rare-th day, lost (never
+	// served) when rareLost.
+	bursts   []burst
+	rare     int
+	rareLost bool
+}
+
+type lateOrders struct {
+	n                      int
+	recv, want, resolveDay float64
+	out                    string
+}
+
+type burst struct {
+	q        string
+	from, to int64
+	pm       int
+}
+
+// breachPMAt is the breach permille of a study of priority q acquired at
+// acq.
+func (s synth) breachPMAt(q string, acq int64) int {
+	for _, b := range s.bursts {
+		if b.q == q && acq >= t0+b.from*daySec && acq < t0+b.to*daySec {
+			return b.pm
+		}
+	}
+	return s.breachPM[q]
 }
 
 func base(plan string, seed int64) synth {
@@ -57,7 +92,11 @@ func base(plan string, seed int64) synth {
 		profitPD:  10_000, cashPD: 5_000, cash0: 1_000_000, apptSHA: "same"}
 }
 
+// tailEnd is the record's common horizon.
 func (s synth) tailEnd() int64 {
+	if s.horizon > 0 {
+		return t0 + s.horizon
+	}
 	end := t0 + 150*daySec
 	if s.effect > 0 {
 		end = max(end, t0+s.effect+30*daySec)
@@ -65,8 +104,20 @@ func (s synth) tailEnd() int64 {
 	return end
 }
 
+var fixturePolicy *Policy
+
+// observedUntil is what the frozen policy needs (every closure and the
+// backlog block covering the horizon), less observeShort.
 func (s synth) observedUntil() int64 {
-	return max(s.tailEnd(), t0+180*daySec) + 1440*60 - s.observeShort
+	if fixturePolicy == nil {
+		p, _, err := LoadPolicy("../../" + PolicyPath)
+		if err != nil {
+			panic(err)
+		}
+		fixturePolicy = p
+	}
+	r := &Record{TakeoverSec: t0, TakeoverDate: t0Date, HorizonEndSec: s.tailEnd()}
+	return observationNeeded(fixturePolicy, r) - s.observeShort
 }
 
 func (s synth) money(at int64) Money {
@@ -75,10 +126,14 @@ func (s synth) money(at int64) Money {
 	m := Money{OperatingProfitCents: int64(float64(pd) * d), NetRevenueCents: int64(float64(4*s.profitPD) * d),
 		CashCents: s.cash0 + int64(float64(s.cashPD)*d), CashBridgeReconciles: true}
 	m.OperatingExpenseCents = m.NetRevenueCents - m.OperatingProfitCents
-	m.MinCashCents = s.cash0
-	if s.minCashSet {
-		m.MinCashCents = s.minCash
+	m.MinCashCents, m.MinCashSec = min(s.cash0, m.CashCents), t0
+	if m.CashCents < s.cash0 {
+		m.MinCashSec = at
 	}
+	if s.minCashSet {
+		m.MinCashCents, m.MinCashSec = s.minCash, t0+hour
+	}
+	m.PayablesCents = s.payables
 	return m
 }
 
@@ -88,7 +143,8 @@ func pm(i int, seed int64, x int) bool { return (i*379+int(seed)*17)%1000 < x }
 
 func (s synth) record() Record {
 	r := Record{Schema: RecordSchema, Plan: s.plan, Seed: s.seed, Engine: "test", ScenarioFingerprint: "fp",
-		TATTargetMin: testTargets, TakeoverSec: t0, TakeoverDate: t0Date, TeleOnlyOf: s.teleOnlyOf, AppointmentsSHA256: s.apptSHA}
+		TATTargetMin: testTargets, TakeoverSec: t0, TakeoverDate: t0Date, TeleOnlyOf: s.teleOnlyOf, AppointmentsSHA256: s.apptSHA,
+		HorizonEndSec: s.tailEnd()}
 	if s.lastAction > 0 {
 		r.LastActionSec = t0 + s.lastAction
 	}
@@ -98,8 +154,9 @@ func (s synth) record() Record {
 	r.ObservedUntilSec = s.observedUntil()
 	for k := range s.inherited {
 		acq := t0 - 2*hour + int64(k)*60
-		r.Studies = append(r.Studies, Study{ID: "I", Priority: "routine", Modality: "XR", AcquiredSec: acq, EnteredSec: acq, FinalSec: acq + 32*hour})
-		r.Orders = append(r.Orders, Order{ID: "IO", Priority: "routine", Modality: "XR", ReceivedSec: t0 - 3*daySec, WantedSec: t0 - 3*daySec})
+		r.Studies = append(r.Studies, Study{ID: "I", Priority: "routine", Modality: "XR", AcquiredSec: acq, EnteredSec: acq,
+			ClaimedSec: acq + 31*hour, ReadStartSec: acq + 31*hour, FinalSec: acq + 32*hour})
+		r.Orders = append(r.Orders, Order{ID: "IO", Priority: "routine", Modality: "XR", ReceivedSec: t0 - 3*daySec, WantedSec: t0 - 3*daySec, ResolvedSec: t0 + hour})
 	}
 	mods := map[string]string{"urgent": "MR", "soon": "CT", "routine": "XR"}
 	idx := map[string]int{}
@@ -108,7 +165,19 @@ func (s synth) record() Record {
 		at  int64
 		out string
 	}
-	var outs []served // per order: the time it resolves and how
+	var outs []served // per order: the time it resolves and how (0: open)
+	sec := func(d float64) int64 { return t0 + int64(d*daySec) }
+	for _, l := range s.late {
+		for k := range l.n {
+			o := Order{ID: "L", Priority: "soon", Modality: "CT", ReceivedSec: sec(l.recv) + int64(k)*60, WantedSec: sec(l.want) + int64(k)*60}
+			r.Orders = append(r.Orders, o)
+			if l.out == OutOpen {
+				outs = append(outs, served{0, OutOpen})
+			} else {
+				outs = append(outs, served{sec(l.resolveDay) + hour, l.out})
+			}
+		}
+	}
 	for d := range days {
 		for _, q := range Priorities {
 			for k := range s.perDay[q] {
@@ -128,7 +197,7 @@ func (s synth) record() Record {
 				st := Study{ID: "S", Priority: q, Modality: mods[q], AcquiredSec: acq, EnteredSec: acq}
 				tg := testTargets[q] * 60
 				tat := tg / 2
-				if pm(i, s.seed, s.breachPM[q]) {
+				if pm(i, s.seed, s.breachPMAt(q, acq)) {
 					tat = tg + 30*60
 					if pm(i, s.seed+3, s.neverPM[q]) {
 						tat = -1
@@ -145,6 +214,17 @@ func (s synth) record() Record {
 				r.Studies = append(r.Studies, st)
 			}
 		}
+		if s.rare > 0 && d%s.rare == 0 {
+			at := t0 + int64(d)*daySec + 2*hour
+			if at+hour <= r.ObservedUntilSec {
+				r.Orders = append(r.Orders, Order{ID: "R", Priority: "routine", Modality: "US", ReceivedSec: at, WantedSec: at})
+				if s.rareLost {
+					outs = append(outs, served{at, OutLost})
+				} else {
+					outs = append(outs, served{at + hour, OutServed})
+				}
+			}
+		}
 		for k := range s.walkIns {
 			at := t0 + int64(d)*daySec + 3*hour + int64(k)*60
 			if at > r.ObservedUntilSec {
@@ -157,6 +237,9 @@ func (s synth) record() Record {
 			}
 			outs = append(outs, served{at, out})
 		}
+	}
+	for i := s.inherited; i < len(r.Orders); i++ {
+		r.Orders[i].ResolvedSec = outs[i-s.inherited].at
 	}
 	for d := 1; d <= days; d++ {
 		at := t0 + int64(d)*daySec
@@ -181,7 +264,7 @@ func (s synth) record() Record {
 				oo = append(oo, OutNotDisclosed)
 			case i < s.inherited:
 				oo = append(oo, OutServed)
-			case outs[i-s.inherited].at <= c.at:
+			case outs[i-s.inherited].at != 0 && outs[i-s.inherited].at <= c.at:
 				oo = append(oo, outs[i-s.inherited].out)
 			default:
 				oo = append(oo, OutOpen)
@@ -204,7 +287,8 @@ func windowsAt(s synth) []capAt {
 // sample counts the record's studies at at, as a recorder would.
 func (s synth) sample(r *Record, d int, at int64, m Money) Sample {
 	date, _ := simtime.ParseDate(t0Date)
-	x := Sample{Day: d, AtSec: at, Date: date.AddDays(int64(d)).String(), ProfitCents: m.OperatingProfitCents, CashCents: m.CashCents}
+	x := Sample{Day: d, AtSec: at, Date: date.AddDays(int64(d)).String(), ProfitCents: m.OperatingProfitCents, CashCents: m.CashCents,
+		ObligationsCents: m.Obligations()}
 	for _, st := range r.Studies {
 		if st.AcquiredSec > t0 && st.AcquiredSec <= at {
 			x.AcquiredCum++
@@ -236,10 +320,17 @@ func records(n int, mk func(seed int64) synth) []Record {
 
 func testPolicy(t *testing.T) (*Policy, string) {
 	t.Helper()
-	p, d, err := LoadPolicy("../../docs/evaluation/policy-v0.2.json")
+	p, d := policyV2(t)
+	p.Scenario.Fingerprint = "fp" // the synthetic scenario
+	return p, d
+}
+
+// policyV2 is the policy in force, as committed.
+func policyV2(t *testing.T) (*Policy, string) {
+	t.Helper()
+	p, d, err := LoadPolicy("../../" + PolicyPath)
 	if err != nil {
 		t.Fatal(err)
 	}
-	p.Scenario.Fingerprint = "fp" // the synthetic scenario
 	return p, d
 }

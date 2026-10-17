@@ -1,0 +1,361 @@
+{
+ "schema": "dreamteam.evalpolicy/v2",
+ "id": "v0.2-eval-2",
+ "status": "frozen 2026-10-17 (Slice 5C.0a) before any strategy ranking, from the owner's decisions on the Astra High audit of v0.2-eval-1 (docs/audits/slice-5c0-eval-policy-audit.md); pending the Slice 5C.0b holdout runner and one independent review of the corrected framework before the holdout is unsealed",
+ "effective": "every evaluation from engine 0.2.0-dev.10 on; v0.2-eval-1 is superseded and no evaluation was ever run under it",
+ "notes": [
+  "Rationale for every value: docs/evaluation/README.md; each rule changed from v0.2-eval-1 is listed in changes. Rules were set from the owner's decisions, the gates' arithmetic, the measurement units and synthetic operating characteristics (docs/evaluation/oc-v0.2-eval-2.json), never from a candidate strategy's results.",
+  "The breach gates are the owner's provisional T90 gates of 2026-10-15, unchanged. No threshold is a weighted score: profit never offsets a failed gate. Every threshold is compared exactly (integer cross products in basis points): a value exactly at a tolerance is within it."
+ ],
+ "supersedes": {
+  "id": "v0.2-eval-1",
+  "path": "docs/evaluation/policy-v0.2.json",
+  "sha256": "337234ba49a86b62e294488bdc6d3b8450ae596d6a1b44934427f2a4c94dbf4f"
+ },
+ "scenario": {
+  "fingerprint": "e8718dbd1031feb326b4934d291f81eb14fd867d4a8fa6acc1673a75b55b76f8",
+  "tatTargetMin": {
+   "urgent": 60,
+   "soon": 240,
+   "routine": 1440
+  },
+  "rotaWeekA": "2026-10-12"
+ },
+ "horizons": {
+  "feedbackDays": 30,
+  "primaryDays": 90,
+  "operatingFromDay": 30,
+  "validationDays": 180,
+  "tail": {
+   "minDaysAfterPrimary": 60,
+   "daysAfterLatestEffect": 30
+  },
+  "closureMin": 1440
+ },
+ "service": {
+  "breachGate": {
+   "urgent": 0.12,
+   "soon": 0.32,
+   "routine": 0.06
+  },
+  "gatedWindows": [
+   "T90",
+   "tail"
+  ],
+  "validationWindows": [
+   "T180"
+  ],
+  "infoWindows": [
+   "T30",
+   "D31-90"
+  ],
+  "perSeedWindows": {
+   "urgent": [
+    "gated"
+   ],
+   "soon": [
+    "T90",
+    "tail"
+   ],
+   "routine": [
+    "T90",
+    "tail"
+   ]
+  },
+  "minCohort": {
+   "urgent": 43,
+   "soon": 88,
+   "routine": 23
+  },
+  "maxFailingSeedFraction": 0.1,
+  "planningRate": {
+   "urgent": 0.08,
+   "soon": 0.21,
+   "routine": 0.04
+  },
+  "operatingCharacteristics": "docs/evaluation/oc-v0.2-eval-2.json"
+ },
+ "caseSelection": {
+  "minStratumDue": 30,
+  "perSeedMaxServedDrop": 0.05,
+  "pooledMaxServedDrop": 0.02,
+  "maxAcquiredDrop": 0.02,
+  "maxLossRateIncrease": 0.02,
+  "blockingStrata": [
+   "priority",
+   "modality",
+   "inherited"
+  ]
+ },
+ "backlog": {
+  "blockDays": 28,
+  "rotaCycleDays": 14,
+  "growthFraction": 0.1,
+  "growthStudies": 2,
+  "exposureFloorStudyMin": 2880,
+  "staleAfterDueMin": 1440,
+  "persistentAfterDueDays": 14,
+  "maxUnstableSeedFraction": 0.1,
+  "legacyRule": "historical (plan D README): mean backlog at the day-180 sample at most 1.1 times the mean at the day-90 sample; single samples on different weekdays. Reported for comparison, never gated."
+ },
+ "finance": {
+  "minCashFloorCents": 0,
+  "maxInsolventSeeds": 0,
+  "maxPastDueCents": 0,
+  "employeeCommitmentDays": 14,
+  "maxFundingGapSeeds": 0
+ },
+ "payback": {
+  "horizonDays": [
+   90,
+   180
+  ],
+  "medianMinRepaidFraction": 0.5
+ },
+ "seeds": {
+  "development": "901-910",
+  "reference": "1001-1020",
+  "holdoutManifest": "docs/evaluation/holdout-v0.2.json"
+ },
+ "verdict": [
+  "INVALID: any record, comparison or evaluation integrity check fails (README §10). An invalid evaluation is not evidence; fix and rerun.",
+  "NO GO: any hard gate fails or lacks evidence: service (the joint seed rule over every per-seed gate of the gated windows, and every gated pooled rate), case selection (every failing stratum, and every blocking stratum lacking evidence), backlog, solvency, funding (no seed's obligations above its cash at any capture or daily sample).",
+  "GO (financial superiority): every hard gate passes; the plan's own mean operating profit is positive at T90 and at T180; the T90 paired 95% interval of incremental operating profit is above zero; and T180 validation holds (its joint seed rule and pooled rates pass, and its mean increment is positive).",
+  "CONDITIONAL GO (relative improvement): every hard gate passes and the mean T90 increment is positive without every GO condition; the missing conditions are listed.",
+  "CONDITIONAL GO (service purchase): every hard gate passes, the mean T90 increment is not positive, and the baseline fails the service gates the candidate passes: service restored at the stated cost. A baseline that fails only solvency, funding, backlog or case selection is not a service restoration.",
+  "NO GO (no benefit) otherwise: every hard gate passes but there is no T90 increment and the baseline's service already passes."
+ ],
+ "changes": [
+  {
+   "rule": "service.maxFailingSeedFraction (joint)",
+   "finding": "H5",
+   "was": "at most 10% of seeds failing or insufficient on each gate separately",
+   "now": "a seed fails if any per-seed service gate fails or lacks evidence; at most 10% of seeds may fail jointly; every gated pooled rate must also pass",
+   "rationale": "the owner's strict reliability requirement is per seed, not per gate: with separate limits 24 of 40 seeds could fail some gate",
+   "expectedImpact": "stricter: plans whose failures fall on different seeds in different gates no longer pass"
+  },
+  {
+   "rule": "service.perSeedWindows",
+   "finding": "H1",
+   "was": "each priority decided per seed in T90 and in the tail",
+   "now": "urgent decided per seed over the whole gated period (t0, tailEnd]; soon and routine per seed in T90 and the tail; every priority's pooled rate still gated in T90 and in the tail; 12% gate unchanged",
+   "rationale": "operating characteristics: at an 8% underlying urgent rate the separate windows reject a 40-seed evaluation with probability 0.98, the whole-period cohort 0.03 (independent studies)",
+   "expectedImpact": "far fewer false rejections of plans with acceptable urgent service; a per-seed urgent failure confined to the tail is caught by the tail's pooled rate and the backlog checks, not per seed"
+  },
+  {
+   "rule": "horizons.tail (common horizon)",
+   "finding": "H2",
+   "was": "each record's own tail end",
+   "now": "one horizon for the whole evaluation, covering every record's tail rule (and the latest commitment end); every record observed to the same instant; records that disagree are invalid",
+   "rationale": "paired windows must cover the same calendar interval",
+   "expectedImpact": "a late-effect candidate's baseline is observed and gated over the same longer tail"
+  },
+  {
+   "rule": "access (due cohorts, outcomes at the end of observation)",
+   "finding": "H3",
+   "was": "orders received in the window and due by its end, outcome at the window's end",
+   "now": "every new order whose original wanted time falls in the window, wherever received, outcome at the end of observation (open counts as not served); receipt-based loss and abandonment also followed to the end; inherited orders a guarded stratum",
+   "rationale": "an order received before a window and due in it was in no gated denominator",
+   "expectedImpact": "leaving future-due or difficult orders unresolved fails case selection"
+  },
+  {
+   "rule": "backlog",
+   "finding": "H4",
+   "was": "one final block against the reference block, mean growth only",
+   "now": "every whole block after the reference through the one covering the horizon, against the reference: mean and peak backlog, mean overdue and stale counts, overdue exposure; no study persistent (unfinished more than 14 days past due) at any sample",
+   "rationale": "persistent old work, a spike that recovers, deterioration after the last block and old work replacing new escaped the old rule",
+   "expectedImpact": "stricter; observation may extend to the covering block's end (day 166 for a day-150 horizon)"
+  },
+  {
+   "rule": "case selection (exact, strata, rare)",
+   "finding": "M1, M2",
+   "was": "floating-point drops; per-seed priority only; pooled strata under 30 due passed silently",
+   "now": "exact comparisons; per-seed priority and modality; pooled priority, modality, their intersection and inherited orders; acquisitions by priority and modality; a rare stratum is insufficient (never a pass), fails if dropped, and blocks eligibility for the blocking kinds",
+   "rationale": "exact tolerances must hold at equality; a missing stratum is not success",
+   "expectedImpact": "values exactly at a tolerance pass; rare intersections are reported, not passed"
+  },
+  {
+   "rule": "verdict",
+   "finding": "H7",
+   "was": "GO on incremental profit; CONDITIONAL GO for any ineligible baseline",
+   "now": "GO also needs positive absolute operating profit at T90 and T180; classifications financial superiority, relative improvement, service purchase, no benefit; service purchase only when the baseline fails service",
+   "rationale": "a loss-making plan is not a financial success; baseline insolvency is not service restoration",
+   "expectedImpact": "loss-making improvements are at most CONDITIONAL GO; service purchases are labelled as such"
+  },
+  {
+   "rule": "finance (obligations and funding)",
+   "finding": "M3",
+   "was": "funding gap checked at tailEnd only, blocking GO; no forward employee pay",
+   "now": "obligations include 14 days of contracted pay for everyone employed; the funding gap is checked at every capture and daily sample through the end of observation and is a hard gate; the minimum cash's posting time is recorded",
+   "rationale": "the owner's decision: unavoidable employee commitments and the full horizon",
+   "expectedImpact": "stricter; a plan that cannot cover two weeks of payroll and its recognized liabilities at any sample is NO GO"
+  },
+  {
+   "rule": "record integrity",
+   "finding": "M4, M5",
+   "was": "partial checks; payback silently excluded seeds; displacements counted at the finish",
+   "now": "required unique captures at their instants, one sample a day, ordered timestamps, outcomes consistent with resolution times, observation through every closure and the covering block; missing payback data invalidates; displacements counted by event time",
+   "rationale": "an incomplete record must not change a denominator",
+   "expectedImpact": "incomplete records are INVALID instead of silently partial"
+  },
+  {
+   "rule": "reporting labels",
+   "finding": "Low",
+   "was": "Wilson interval labelled as failing fraction; candidate and baseline worst rates possibly from different seeds; no worst profit seed; undefined values as zero",
+   "now": "seed-fraction label; each plan's worst seed and the largest paired increase with seeds; worst incremental-profit seed; means over defined values with their count",
+   "rationale": "labels must match the calculations",
+   "expectedImpact": "none on eligibility"
+  }
+ ],
+ "deferredMeasures": [
+  "Payer and referral-source strata (§13.2): not recorded; a refused patient's payer is never drawn.",
+  "Workforce obligations (§13.2, §13.3 DELTA_WORKFORCE): contracted, rostered and worked hours, training, overrun, premium hours, break entitlement and rest deficits.",
+  "Sustainable coverage capacity-hours (§13.3 DELTA_COVERAGE).",
+  "Access distributions wanted-to-first-booked, wanted-to-current-booked and wanted-to-actual-service for new demand (§13.2); reported instead: booking lead and, for inherited orders, wait past the wanted time.",
+  "Contribution by modality and the provisional guarantee shown apart from accrued payroll (§13.2).",
+  "Reading-mix coverage-gap exposure and outcome tails by reader kind (§13.2).",
+  "Every baseline-relative DELTA_* tolerance of §13.3: none is calibrated or gated."
+ ],
+ "historicalReferences": [
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/A-no-action.json",
+   "sha256": "a7285526e81632221b4312398137b3726d4e895976c12528bf32123e6705f21d"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B1-mr-evening.json",
+   "sha256": "7d313133d50e7f212888fa39a8976d1de098223b35b4186edb32a2b022515811"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B2-float.json",
+   "sha256": "ed316cd46cc34c47fa1f3ee4455d990ccdba33d8de5aabbbc8aaac41ff0e985c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B3-float-mr-evening.json",
+   "sha256": "50c47de0f6885579c9aea53abbe78648440ba97d570a38d9b6535d3f57e4a735"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/C-full-reorganization.json",
+   "sha256": "55f5247e9d9de081694bb9e7bcfdf40c0317a8d870e5281b19d6ce96b3059d01"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/report.md",
+   "sha256": "40d73a49f69ac5a00dd815fefec3a2f4f34857690dc85aece74b90bc313b1047"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/trajectory.csv",
+   "sha256": "f1ee11fe0d351012680df794c9fc1c99004ca37a2e3d3230b4483e5323d6b6ba"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/A-no-action.json",
+   "sha256": "e292e1369523df98df69e5db2fd536348532ca466a3568d0353f7344830e23ec"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/B-partial.json",
+   "sha256": "7794da84845aef5bd77d0c139b2ccf4181e9ad36ca49787e3cd186ac5fffef0c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/C-full-reorganization.json",
+   "sha256": "043142d120775194479c8ff0183789a3a91d364fc1adb69836638a4b021e8be8"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/report.md",
+   "sha256": "73cb7ecec7d1d319577c84e87262603927e66b3d34558d4890122a4c8bfa2d71"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/trajectory.csv",
+   "sha256": "ad68d487ff943669ca23aa63c7a544de84bacc704f995ddfd603fa734c3e35d0"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/A-no-action.json",
+   "sha256": "01649089776e1778556eab097b70b32eec02c65bbba252504915b3b62e7167ab"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/C-full-reorganization.json",
+   "sha256": "f5f340f1deb85cd23ffc752ab91e4e9a6663d60d4abac4b35ce46903444548f3"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/D-full-reading.json",
+   "sha256": "0e3fc9f76cc7257c200509258aa6daa647ea61e346a748d7a3992ac3e3aa3674"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/reading.md",
+   "sha256": "a702e0491c289a06643491dc34c0be6aad5dfb8c8e078c035243e6fe4ed56144"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/report.md",
+   "sha256": "39178bf587b7a0e518314449d0df4651420f71f719ea8b0d66865b66f8d1733f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/trajectory.csv",
+   "sha256": "df9eba7eb7df8fcea2ef8b33b767177bef41439e9079a654f9372cb4802b86c3"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/A-no-action.json",
+   "sha256": "013f0534e7c9056cb0ee8cd6da843db64ff4a6bfdde65be104f9f4d3fb9c7c3c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/B-partial.json",
+   "sha256": "58b197bb1b7e1b77fa257a8e9ff6d9fa4a24a1f909c40a3b0b0d3958f819146e"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/C-full-reorganization.json",
+   "sha256": "fec7ae9a5d5f682103ca440629877ebc65614b00b40a2170497dd12ac94a7e3f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/D-full-reading.json",
+   "sha256": "15dc838465e8f86d976d42f01a403f3a26035c93fc89e2735e29e0679142dc3c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/reading.md",
+   "sha256": "9743e7a28e6ba3a317c4d08f397ce80161c1461c293a748b82654c521d8ead05"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/report.md",
+   "sha256": "7d6a3209804d26007733ef2bb801fe676f81c9594c8b64203d44cf3695e990f2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/trajectory.csv",
+   "sha256": "1282e27c9f7557efd0dc0108db626a4b8e61df312ab0b177b1a1b245d0b5b7be"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/benchmark.json",
+   "sha256": "dbf4c0ea424485a4483241dae560e2fbdb2012272e334efaa6af639bef4b5a62"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/A-no-action.json",
+   "sha256": "8cb36a89e1afe9003e86c2753d2f43da81a0498cc61b9a8383a33fe466aae004"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B1-mr-evening.json",
+   "sha256": "dd3a8b740c3cb24e3a5d44b1e008cb2693cef9c4df98090bce26602e5368555f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B2-float.json",
+   "sha256": "4ea7ea402c56c794881b49345ee1d76ca38a1d6cc9ee4ed594e953b598ca6fb2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B3-float-mr-evening.json",
+   "sha256": "8d97a97d493d69ef1e03cadfac1dc378a9433d64bb414660435352f5042f75d6"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B-partial.json",
+   "sha256": "e5939ab6f5cccd964694a64fc4472838f66c432ef0bc3ee6300acc5e54fb47f2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/C-full-reorganization.json",
+   "sha256": "19a032ad28ee41d95e99a218d02d9e3ec4a91c0974c6c7b4aa8844169160bf01"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/D-full-reading.json",
+   "sha256": "1257cfec2c7d109f73fd460f466af98c45c934217b3a524c14d08f53603f78ad"
+  },
+  {
+   "path": "docs/calibration/teleradiology-5b/results/functional-dev.json",
+   "sha256": "75de712774da65f7fcd25a043ddad9057334034b202784876141fb33213b21ef"
+  },
+  {
+   "path": "docs/evaluation/policy-v0.2.json",
+   "sha256": "337234ba49a86b62e294488bdc6d3b8450ae596d6a1b44934427f2a4c94dbf4f"
+  }
+ ]
+}

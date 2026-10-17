@@ -22,10 +22,11 @@ import (
 // recording changes nothing in the run.
 
 // shortPolicy is the frozen policy over days 5 / 20 / 40 with a 10-day
-// tail and 14-day backlog blocks.
+// tail, 14-day backlog blocks (one rota cycle) and payback to days 20
+// and 40.
 func shortPolicy(t *testing.T, cfg *sim.Config) (*eval.Policy, string) {
 	t.Helper()
-	p, d, err := eval.LoadPolicy("../../docs/evaluation/policy-v0.2.json")
+	p, d, err := eval.LoadPolicy("../../" + eval.PolicyPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -33,6 +34,7 @@ func shortPolicy(t *testing.T, cfg *sim.Config) (*eval.Policy, string) {
 	h.FeedbackDays, h.PrimaryDays, h.OperatingFrom, h.ValidationDays = 5, 20, 5, 40
 	h.Tail.MinDaysAfterPrimary, h.Tail.DaysAfterEffect = 10, 5
 	p.Backlog.BlockDays = 14
+	p.Payback.Horizons = []int{20, 40}
 	p.Scenario.Fingerprint = ""
 	for q := sim.Routine; q <= sim.Urgent; q++ {
 		p.Scenario.TATTargetMin[q.String()] = int64(cfg.Policies.TATTarget[q] / simtime.Minute)
@@ -40,21 +42,19 @@ func shortPolicy(t *testing.T, cfg *sim.Config) (*eval.Policy, string) {
 	return p, d
 }
 
-// recordMini runs the mini practice on seed for the short policy's
-// horizons, applying a teleradiology contract at the takeover when tele
-// is set; record false runs the same without a recorder.
-func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (eval.Record, string) {
+// miniWorld is the mini practice at the takeover on seed. When tele is
+// set, a teleradiology contract is applied at the takeover, after before
+// (if any) has run: its last action and latest effect (0 without).
+func miniWorld(t *testing.T, seed int64, tele bool, before func(*sim.World)) (w *sim.World, last, effect int64) {
 	t.Helper()
 	cfg := *miniConfig(t)
 	cfg.EvaluationDays = 0
-	w := sim.New(&cfg, rng.SeedFromInt(seed))
+	w = sim.New(&cfg, rng.SeedFromInt(seed))
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
-	var rec *sim.EvalRecorder
-	if record {
-		rec = w.NewEvalRecorder(map[bool]string{false: "A", true: "T"}[tele], "", "", seed)
+	if before != nil {
+		before(w)
 	}
-	var last, effect int64
 	if tele {
 		eff := w.Calendar().Date(start.Add(14 * simtime.Day))
 		res := w.Apply([]api.Action{{Type: api.ActContractTeleradiology, Op: api.TeleOpStart, RequestID: "eval", Plan: "standard-v1",
@@ -64,10 +64,36 @@ func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (ev
 		}
 		last, effect = int64(start), int64(w.Calendar().StartOfDate(eff))
 	}
+	return w, last, effect
+}
+
+// commonHorizon is the evaluation's horizon over both plans, computed
+// before either runs: the latest tail end (the contract's, here).
+func commonHorizon(t *testing.T, p *eval.Policy, seed int64) int64 {
+	t.Helper()
+	w, last, effect := miniWorld(t, seed, true, nil)
+	t0 := int64(w.StartTime())
+	return max(eval.TailEnd(p, t0, 0, 0), eval.TailEnd(p, t0, effect, w.LatestCommitment(last)))
+}
+
+// recordMini runs the mini practice on seed for the short policy's
+// horizons, both plans to the common horizon and its observation end,
+// applying a teleradiology contract at the takeover when tele is set;
+// record false runs the same without a recorder.
+func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (eval.Record, string) {
+	t.Helper()
+	horizon := commonHorizon(t, p, seed)
+	var rec *sim.EvalRecorder
+	w, last, effect := miniWorld(t, seed, tele, func(w *sim.World) {
+		if record {
+			rec = w.NewEvalRecorder(map[bool]string{false: "A", true: "T"}[tele], "", "", seed, p.Finance.EmployeeCommitmentDays)
+		}
+	})
+	start := w.StartTime()
 	h := p.Horizons
 	day := func(n int) simtime.Time { return start.Add(simtime.Duration(n) * simtime.Day) }
-	tail := max(day(h.PrimaryDays+h.Tail.MinDaysAfterPrimary), simtime.Time(effect).Add(simtime.Duration(h.Tail.DaysAfterEffect)*simtime.Day))
-	end := max(tail, day(h.ValidationDays)).Add(simtime.Duration(h.ClosureMin) * simtime.Minute)
+	tail := simtime.Time(horizon)
+	end := simtime.Time(eval.ObservationEnd(p, int64(start), w.Calendar().Date(start).String(), horizon))
 	type mark struct {
 		at   simtime.Time
 		day  int    // a daily sample, or
@@ -98,7 +124,7 @@ func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (ev
 	if rec == nil {
 		return eval.Record{}, w.StateDigest()
 	}
-	return rec.Finish(last, effect, map[bool]string{true: "A"}[tele]), w.StateDigest()
+	return rec.Finish(last, effect, horizon, map[bool]string{true: "A"}[tele]), w.StateDigest()
 }
 
 func TestEvalRecordOnRealRuns(t *testing.T) {
@@ -144,8 +170,23 @@ func TestEvalRecordOnRealRuns(t *testing.T) {
 			t.Fatal("remote reading changed the bookings")
 		}
 	}
-	if c := rep.Comparisons[0]; !c.Valid || c.RemoteCost[eval.WinT90].Mean <= 0 {
+	if c := rep.Comparisons[0]; !c.Valid || c.RemoteCost[eval.WinT90].Mean <= 0 || c.Verdict == "" {
 		t.Fatalf("%+v", c)
+	}
+	// Both plans share the horizon, the contract's minimum term sets it,
+	// and the bridge carries the forward employee pay at every capture.
+	for _, r := range append(plans["A"], plans["T"]...) {
+		if r.HorizonEndSec != rep.HorizonEndSec || r.HorizonEndSec <= eval.TailEnd(p, r.TakeoverSec, 0, 0) {
+			t.Fatalf("%s: horizon %d, evaluation %d", r.Plan, r.HorizonEndSec, rep.HorizonEndSec)
+		}
+		for _, c := range r.Captures {
+			if c.Money.EmployeeCommitmentCents <= 0 || c.Money.MinCashSec < r.TakeoverSec {
+				t.Fatalf("%s %s: %+v", r.Plan, c.Name, c.Money)
+			}
+		}
+		if r.Plan == "T" && r.LatestCommitmentSec == 0 {
+			t.Fatal("no commitment recorded for the contract")
+		}
 	}
 	// The same runs record the same bytes.
 	again, _ := recordMini(t, p, 3, true, true)

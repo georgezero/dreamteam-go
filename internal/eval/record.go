@@ -2,7 +2,7 @@ package eval
 
 // RecordSchema names the per-seed measurement record: what a harness
 // observes of one plan on one seed. Times are simulation seconds.
-const RecordSchema = "dreamteam.evalrecord/v1"
+const RecordSchema = "dreamteam.evalrecord/v2"
 
 // Record is one plan's run on one seed, from the takeover until
 // ObservedUntil. Studies and orders are every one the window can see:
@@ -21,8 +21,16 @@ type Record struct {
 	// strictly before the primary endpoint (V0.2_DESIGN §13.1).
 	LastActionSec int64 `json:"lastActionSec"`
 	// LatestEffectSec: the latest accepted effect (hire productive,
-	// termination end, roster/allocation version, contract start or end).
-	LatestEffectSec  int64 `json:"latestEffectSec"`
+	// termination end, roster/allocation version, contract start or fixed
+	// end).
+	LatestEffectSec int64 `json:"latestEffectSec"`
+	// LatestCommitmentSec: the latest end of a minimum obligation accepted
+	// by the last action (a contract's minimum term, a notice period).
+	LatestCommitmentSec int64 `json:"latestCommitmentSec"`
+	// HorizonEndSec: the evaluation's common tail end, the same in every
+	// record of an evaluation and at least this record's required tail
+	// end; the tailEnd capture is taken there.
+	HorizonEndSec    int64 `json:"horizonEndSec"`
 	ObservedUntilSec int64 `json:"observedUntilSec"`
 	// TeleOnlyOf names the plan this one differs from only by
 	// teleradiology actions: their bookings must be identical.
@@ -59,9 +67,13 @@ type Order struct {
 	// WantedSec: the original wanted service time (the earliest day the
 	// patient asked for, at its start; a walk-in's arrival). A later
 	// promise never moves it.
-	WantedSec     int64 `json:"wantedSec"`
-	FirstApptSec  int64 `json:"firstApptSec"` // start of the first appointment booked (0: none)
-	Displacements int   `json:"displacements"`
+	WantedSec    int64 `json:"wantedSec"`
+	FirstApptSec int64 `json:"firstApptSec"` // start of the first appointment booked (0: none)
+	// ResolvedSec: when the order reached its outcome (imaged, lost, left,
+	// cancelled, no-show); 0 while open.
+	ResolvedSec int64 `json:"resolvedSec"`
+	// DisplacementSec: when the practice displaced it, each time.
+	DisplacementSec []int64 `json:"displacementSec"`
 }
 
 // Order outcomes, as of a capture.
@@ -93,6 +105,8 @@ type Sample struct {
 	FinalCum      int    `json:"finalCum"`
 	ProfitCents   int64  `json:"profitCents"` // evaluation operating profit, cumulative
 	CashCents     int64  `json:"cashCents"`
+	// ObligationsCents: the capture bridge's obligations at the sample.
+	ObligationsCents int64 `json:"obligationsCents"`
 }
 
 // Backlog is the unfinished total of a sample.
@@ -126,6 +140,11 @@ type Money struct {
 	SeverancePayableCents int64 `json:"severancePayableCents"`
 	// Earned but not yet posted: hourly pay of shifts in progress.
 	EarnedUnpostedWagesCents int64 `json:"earnedUnpostedWagesCents"`
+	// EmployeeCommitmentCents: contracted pay (with benefits) of the
+	// policy's commitment days after the capture's day, for everyone
+	// employed then (to the last day of anyone leaving sooner): the pay no
+	// action could avoid. It starts after the pay already accrued.
+	EmployeeCommitmentCents int64 `json:"employeeCommitmentCents"`
 	// Remote: fees committed by claims not yet final, and the minimum
 	// retainers still owed under accepted contracts (not yet accrued).
 	RemoteInFlightCents    int64 `json:"remoteInFlightCents"`
@@ -138,4 +157,15 @@ type Money struct {
 	RemoteRetainerCents int64 `json:"remoteRetainerCents"`
 	RemoteReadsCents    int64 `json:"remoteReadsCents"`
 	VendorPaidCents     int64 `json:"vendorPaidCents"`
+}
+
+// Obligations is the bridge at a capture: what is owed beyond the P&L's
+// accruals already paid — liabilities recognized, wages earned but not
+// posted, the unavoidable forward employee pay, remote fees committed,
+// minimum contract retainers still owed, and anything past due. Each
+// component starts where the one before it stops, so nothing is counted
+// twice; receivables and unbilled work are never set against it.
+func (m Money) Obligations() int64 {
+	return m.PayablesCents + m.AccruedPayrollCents + m.SeverancePayableCents + m.EarnedUnpostedWagesCents +
+		m.EmployeeCommitmentCents + m.RemoteInFlightCents + m.ContractMinimumCents + m.PastDueCents
 }

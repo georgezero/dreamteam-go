@@ -129,7 +129,7 @@ func TestInsufficientCohortsIdentified(t *testing.T) {
 	sr.Studies = append(sr.Studies, Study{Priority: "routine", Modality: "XR", AcquiredSec: short.tailEnd() - hour})
 	m = Measure(p, &sr)
 	c := m.Windows[WinTail].Cohorts["routine"]
-	if c.Unresolved == 0 || c.BreachRate.Defined || !hasPrefix(m.Integrity, "window tail: observed to") {
+	if c.Unresolved == 0 || c.BreachRate.Defined || !hasPrefix(m.Integrity, "observed to") {
 		t.Fatalf("%+v %v", c, m.Integrity)
 	}
 }
@@ -180,7 +180,7 @@ func TestBacklogTrendRotaAligned(t *testing.T) {
 	p, _ := testPolicy(t)
 	anchor, _ := simtime.ParseDate(p.Scenario.RotaWeekA)
 	mk := func(level func(d int) int) *Record {
-		r := &Record{TakeoverSec: t0}
+		r := &Record{TakeoverSec: t0, TakeoverDate: t0Date, HorizonEndSec: t0 + 150*daySec, TATTargetMin: testTargets}
 		date, _ := simtime.ParseDate(t0Date)
 		for d := 1; d <= 181; d++ {
 			x := date.AddDays(int64(d))
@@ -188,23 +188,34 @@ func TestBacklogTrendRotaAligned(t *testing.T) {
 		}
 		return r
 	}
+	final := func(bm BacklogMeasures) BlockCheck {
+		for _, c := range bm.Checks {
+			if c.Check == "mean" && c.FirstDay == bm.Later[len(bm.Later)-1].FirstDay {
+				return c
+			}
+		}
+		t.Fatalf("no final mean check: %+v", bm)
+		return BlockCheck{}
+	}
 	cycle := func(d int) int {
 		x, _ := simtime.ParseDate(t0Date)
 		k := mod(x.AddDays(int64(d)).Ordinal()-anchor.Ordinal(), 14)
 		return 10 + int(k)*3 // 10 on week-A Mondays … 49 on week-B Sundays
 	}
-	bm := measureBacklog(p, mk(cycle), t0+90*daySec, t0+150*daySec)
-	if bm.Status != "stable" || bm.Growth != 0 {
+	bm := measureBacklog(p, mk(cycle), t0+90*daySec)
+	if bm.Status != "stable" || final(bm).Value != final(bm).Reference {
 		t.Fatalf("%+v", bm)
 	}
-	for _, b := range []Block{bm.Reference, bm.Final} {
+	for _, b := range append([]Block{bm.Reference}, bm.Later...) {
 		x, _ := simtime.ParseDate(b.FirstDate)
 		if mod(x.Ordinal()-anchor.Ordinal(), 14) != 0 || b.LastDay-b.FirstDay != 27 {
 			t.Fatalf("block %+v not rota-aligned", b)
 		}
 	}
-	if bm.Reference.LastDay > 90 || bm.Final.LastDay > 150 || bm.Final.FirstDay <= bm.Reference.LastDay {
-		t.Fatalf("blocks %+v %+v", bm.Reference, bm.Final)
+	// The later blocks follow the reference through the one covering the
+	// horizon (day 150): 83–110, 111–138, 139–166.
+	if bm.Reference.LastDay > 90 || len(bm.Later) != 3 || bm.Later[0].FirstDay != bm.Reference.LastDay+1 || bm.Later[2].LastDay != 166 {
+		t.Fatalf("blocks %+v %+v", bm.Reference, bm.Later)
 	}
 	// Day 90 is a week-B Monday (level 31), day 180 a week-B Sunday (49):
 	// the single-sample rule reports growth that is only the rota.
@@ -212,7 +223,7 @@ func TestBacklogTrendRotaAligned(t *testing.T) {
 		t.Fatalf("legacy %d → %d holds %v", bm.LegacyDay90, bm.LegacyDay180, bm.LegacyHolds)
 	}
 	grow := func(d int) int { return cycle(d) + d/10 }
-	if bm := measureBacklog(p, mk(grow), t0+90*daySec, t0+150*daySec); bm.Status != "unstable" || bm.SlopePerDay <= 0 {
+	if bm := measureBacklog(p, mk(grow), t0+90*daySec); bm.Status != "unstable" || bm.SlopePerDay <= 0 {
 		t.Fatalf("%+v", bm)
 	}
 	// Within tolerance: max(10%, 2 studies) of the reference mean.
@@ -222,7 +233,7 @@ func TestBacklogTrendRotaAligned(t *testing.T) {
 		}
 		return cycle(d)
 	}
-	if bm := measureBacklog(p, mk(small), t0+90*daySec, t0+150*daySec); bm.Status != "stable" || bm.Growth != 2 {
+	if bm := measureBacklog(p, mk(small), t0+90*daySec); bm.Status != "stable" || final(bm).Value-final(bm).Reference != 2 {
 		t.Fatalf("%+v", bm)
 	}
 }
@@ -240,7 +251,7 @@ func TestMidnightBoundaries(t *testing.T) {
 		{Priority: "urgent", AcquiredSec: a + 18*hour - 30, FinalSec: a + 18*hour + 30}, // 23:59:30 to 00:00:30
 	}
 	r.Studies = xs
-	w := measureWindow(r, a, b, nil, &Capture{})
+	w := measureWindow(r, a, b, nil, &Capture{}, &Capture{})
 	c := w.Cohorts["urgent"]
 	if c.Acquired != 3 || c.Breaches != 1 || c.Finalized != 2 {
 		t.Fatalf("%+v", c)
@@ -376,23 +387,25 @@ func TestPaybackCensoring(t *testing.T) {
 		cr = append(cr, a)
 		ri[a.Seed] = &b
 	}
-	pb := payback(p, 90, cr, ri, func(s Sample) int64 { return s.ProfitCents })
+	pb, _ := payback(p, 90, cr, ri, func(s Sample) int64 { return s.ProfitCents })
 	if !slices.Equal(pb.Days, []int{30, 50, 80, 0, 0}) || pb.Repaid != 3 || pb.Censored != 2 || !pb.MedianDefined || pb.Median != 80 {
 		t.Fatalf("%+v", pb)
 	}
 	// Two of four: exactly half have repaid, by day 80.
-	pb = payback(p, 90, cr[1:], ri, func(s Sample) int64 { return s.ProfitCents })
+	pb, _ = payback(p, 90, cr[1:], ri, func(s Sample) int64 { return s.ProfitCents })
 	if !pb.MedianDefined || pb.Median != 80 || pb.Repaid != 2 || pb.Earliest != 50 || pb.Latest != 80 {
 		t.Fatalf("%+v", pb)
 	}
 	// One of three: fewer than half, no median.
-	pb = payback(p, 90, cr[2:], ri, func(s Sample) int64 { return s.ProfitCents })
+	pb, _ = payback(p, 90, cr[2:], ri, func(s Sample) int64 { return s.ProfitCents })
 	if pb.MedianDefined || pb.Median != 0 || pb.Repaid != 1 || pb.Censored != 2 {
 		t.Fatalf("%+v", pb)
 	}
-	// A seed without samples through the horizon is left out, not repaid.
-	if pb := payback(p, 180, cr, ri, func(s Sample) int64 { return s.ProfitCents }); len(pb.Days) != 0 || pb.MedianDefined {
-		t.Fatalf("%+v", pb)
+	// A seed without samples through the horizon is not left out
+	// silently: it is returned as missing (the comparison is then
+	// invalid), and no median is reported.
+	if pb, missing := payback(p, 180, cr, ri, func(s Sample) int64 { return s.ProfitCents }); len(pb.Days) != 0 || pb.MedianDefined || len(missing) != 5 || pb.Seeds != 5 {
+		t.Fatalf("%+v %v", pb, missing)
 	}
 }
 
@@ -488,24 +501,27 @@ func TestEvaluationDeterministic(t *testing.T) {
 }
 
 // The verdict rules (policy "verdict"): GO, the two CONDITIONAL GOs, NO GO
-// without benefit, and INVALID for an action at the primary endpoint.
+// without benefit, and INVALID for an action at the primary endpoint; a
+// late effect's tail is every plan's (the common horizon).
 func TestVerdictRules(t *testing.T) {
 	p, d := testPolicy(t)
+	const h = 170 * daySec // E's tail end: every record's horizon
 	failingBase := func(s int64) synth {
 		x := base("A", s)
 		x.breachPM["soon"] = 400 // 40% > 32%: the baseline fails service
+		x.horizon = h
 		return x
 	}
 	good := func(name string, pd, noise int64) func(int64) synth {
 		return func(s int64) synth {
 			x := base(name, s)
-			x.profitPD, x.profitNoise = pd, noise
+			x.profitPD, x.profitNoise, x.horizon = pd, noise, h
 			return x
 		}
 	}
 	late := func(s int64) synth {
 		x := base("L", s)
-		x.lastAction = 90 * daySec
+		x.lastAction, x.horizon = 90*daySec, h
 		return x
 	}
 	effect := func(s int64) synth {
@@ -517,10 +533,11 @@ func TestVerdictRules(t *testing.T) {
 	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{
 		"A": records(10, failingBase), "G": records(10, good("G", 30_000, 0)), "N": records(10, good("N", 10_500, 4_000)),
 		"S": records(10, good("S", 4_000, 0)), "L": records(10, late), "E": records(10, effect)}})
-	want := map[string]string{"G": GO, "N": CONDITIONAL, "S": CONDITIONAL, "L": INVALID, "E": GO}
+	want := map[string][2]string{"G": {GO, ClassFinancial}, "N": {CONDITIONAL, ClassRelative}, "S": {CONDITIONAL, ClassServicePurchase},
+		"L": {INVALID, ClassNotJudged}, "E": {GO, ClassFinancial}}
 	for n, v := range want {
-		if c := comparison(t, rep, n); c.Verdict != v {
-			t.Errorf("%s: %s, want %s (%v)", n, c.Verdict, v, c.Reasons)
+		if c := comparison(t, rep, n); c.Verdict != v[0] || c.Classification != v[1] {
+			t.Errorf("%s: %s (%s), want %s (%s) %v", n, c.Verdict, c.Classification, v[0], v[1], c.Reasons)
 		}
 	}
 	if pr := plan(rep, "E"); pr.PerSeed[0].Measures.TailEnd != t0+170*daySec {
@@ -528,8 +545,8 @@ func TestVerdictRules(t *testing.T) {
 	}
 	// A passing baseline: a costlier plan with no benefit is NO GO.
 	rep = Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{
-		"A": records(10, func(s int64) synth { return base("A", s) }), "S": records(10, good("S", 4_000, 0))}})
-	if c := comparison(t, rep, "S"); c.Verdict != NOGO {
+		"A": records(10, func(s int64) synth { x := base("A", s); x.horizon = h; return x }), "S": records(10, good("S", 4_000, 0))}})
+	if c := comparison(t, rep, "S"); c.Verdict != NOGO || c.Classification != ClassNoBenefit {
 		t.Fatalf("%s %v", c.Verdict, c.Reasons)
 	}
 }
@@ -579,10 +596,34 @@ func TestPolicyFrozen(t *testing.T) {
 	if p.Horizons.ClosureMin != 1440 || !slices.Equal(p.Service.Gated, []string{"T90", "tail"}) || p.Finance.MinCashFloorCents != 0 {
 		t.Fatalf("%+v", p.Horizons)
 	}
-	raw, _ := os.ReadFile("../../docs/evaluation/policy-v0.2.json")
+	if !slices.Equal(p.Service.PerSeedWindows["urgent"], []string{WinGated}) || p.Service.PlanningRate["urgent"] != 0.08 {
+		t.Fatalf("%+v", p.Service)
+	}
+	raw, _ := os.ReadFile("../../" + PolicyPath)
 	bad := bytes.Replace(raw, []byte(`"closureMin": 1440`), []byte(`"closureMin": 1440, "extra": 1`), 1)
 	if _, err := DecodePolicy(bad); err == nil {
 		t.Fatal("an unknown field is accepted")
+	}
+	// A tolerance that is not a whole number of basis points is refused.
+	frac := bytes.Replace(raw, []byte(`"pooledMaxServedDrop": 0.02`), []byte(`"pooledMaxServedDrop": 0.02005`), 1)
+	if _, err := DecodePolicy(frac); err == nil || !strings.Contains(err.Error(), "basis points") {
+		t.Fatalf("a fractional basis point is accepted: %v", err)
+	}
+	// The superseded policy is kept byte for byte, named by digest, and
+	// refused as a policy to evaluate under.
+	v1, err := os.ReadFile("../../" + PolicyV1Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(v1)
+	if hex.EncodeToString(sum[:]) != p.Supersedes.SHA256 || p.Supersedes.Path != PolicyV1Path {
+		t.Fatal("the superseded policy changed")
+	}
+	if _, err := DecodePolicy(v1); err == nil || !strings.Contains(err.Error(), "superseded") {
+		t.Fatalf("v1 decodes: %v", err)
+	}
+	if len(p.Changes) < 10 || len(p.Deferred) == 0 {
+		t.Fatalf("%d changes, %d deferred", len(p.Changes), len(p.Deferred))
 	}
 }
 

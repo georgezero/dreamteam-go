@@ -164,10 +164,12 @@ func GuardSeeds(seeds []int64, h *Holdout, holdout []int64, u *Unseal, policyDig
 	return nil
 }
 
-// Repository paths of the frozen evaluation.
+// Repository paths of the frozen evaluation: the policy in force, the
+// superseded one (kept byte for byte) and the holdout manifest.
 const (
-	PolicyPath  = "docs/evaluation/policy-v0.2.json"
-	HoldoutPath = "docs/evaluation/holdout-v0.2.json"
+	PolicyPath   = "docs/evaluation/policy-v0.2-eval-2.json"
+	PolicyV1Path = "docs/evaluation/policy-v0.2.json"
+	HoldoutPath  = "docs/evaluation/holdout-v0.2.json"
 )
 
 // GuardRepo is GuardSeeds with the repository's holdout, policy and

@@ -49,9 +49,15 @@ evaluation before any strategy is compared: per-seed service gates with
 evidence minimums, fixed acquisition cohorts, a rota-aligned backlog rule,
 transaction-level solvency, censored payback, case-selection guards, a
 40-seed sealed holdout and explicit verdict rules (`docs/evaluation`).
-Next: an independent audit of the frozen rules and the owner's confirmation
-of the proposed ones, then Slice 5C.1, strategy development on the
-development seeds.
+After an independent audit, Slice 5C.0a (0.2.0-dev.10, design §13.5)
+corrected it as policy v0.2-eval-2: joint seed reliability, an urgent
+evidence window chosen by operating characteristics, common paired
+horizons, access followed to resolution, backlog aging safeguards, exact
+case selection, absolute profit for GO and service-purchase
+classification. Next: Slice 5C.0b (the canonical holdout runner) and one
+independent review of the corrected framework before unsealing; Slice
+5C.1 strategy development proceeds on the development seeds, with ranking
+provisional until then.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 
