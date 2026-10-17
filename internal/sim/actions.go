@@ -33,6 +33,7 @@ type actionRecord struct {
 	msg    string
 	// V0.2: the employee a hire was given and when the change takes effect.
 	employee, effective string
+	contract            string // contract_teleradiology
 }
 
 type actionState struct {
@@ -70,6 +71,14 @@ func (w *World) ApplySlice3(actions []api.Action) []api.ActionResult {
 	return w.applyBatch(actions, slice3Actions)
 }
 
+// ApplySlice4 applies a batch with V0.2 Slice 4 semantics (0.2.0-dev.5 to
+// dev.7): hire, terminate, set_roster and set_reading_allocation make a
+// V0.2 batch, and contract_teleradiology is an unknown action, as it was
+// when those records were written (their authoritative replay).
+func (w *World) ApplySlice4(actions []api.Action) []api.ActionResult {
+	return w.applyBatch(actions, slice4Actions)
+}
+
 // applyBatch applies a batch; known is the V0.2 action set (nil: V0.1
 // semantics only).
 func (w *World) applyBatch(actions []api.Action, known []string) []api.ActionResult {
@@ -91,7 +100,7 @@ func (w *World) applyBatch(actions []api.Action, known []string) []api.ActionRes
 				r := &res[k]
 				changed = changed || (r.ok && r.code == api.ActionAccepted)
 				st.actions.log = append(st.actions.log, actionRecord{at: now, batch: st.actions.batches, action: a, ok: r.ok,
-					code: r.code, msg: r.msg, employee: r.employee, effective: r.effective})
+					code: r.code, msg: r.msg, employee: r.employee, effective: r.effective, contract: r.contract})
 				out = append(out, st.actionResult(len(st.actions.log)-1))
 			}
 		})
@@ -133,7 +142,8 @@ func (w *World) Validate(a api.Action) api.ActionResult {
 	if isV2Action(a.Type) {
 		res, _ := st.staffBatch(w.eng, []api.Action{a}, false, v2Actions)
 		r := res[0]
-		return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: r.ok, Code: r.code, Message: r.msg, EffectiveAt: r.effective}
+		return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: r.ok, Code: r.code, Message: r.msg, EffectiveAt: r.effective,
+			ContractID: r.contract}
 	}
 	ok, code, msg := st.apply(w.eng, a, false)
 	return api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: a, OK: ok, Code: code, Message: msg}
@@ -158,7 +168,7 @@ func (w *World) ValidateBatch(actions []api.Action) []api.ActionResult {
 	res, _ := st.staffBatch(w.eng, actions, false, v2Actions)
 	for k, r := range res {
 		out = append(out, api.ActionResult{Time: st.cal.ISO(w.eng.Now()), Action: actions[k], OK: r.ok, Code: r.code,
-			Message: r.msg, EffectiveAt: r.effective})
+			Message: r.msg, EffectiveAt: r.effective, ContractID: r.contract})
 	}
 	return out
 }
@@ -166,7 +176,7 @@ func (w *World) ValidateBatch(actions []api.Action) []api.ActionResult {
 func (st *state) actionResult(i int) api.ActionResult {
 	r := &st.actions.log[i]
 	return api.ActionResult{ID: actionID(i), Batch: r.batch, Time: st.cal.ISO(r.at), Action: r.action,
-		OK: r.ok, Code: r.code, Message: r.msg, EmployeeID: r.employee, EffectiveAt: r.effective}
+		OK: r.ok, Code: r.code, Message: r.msg, EmployeeID: r.employee, EffectiveAt: r.effective, ContractID: r.contract}
 }
 
 // apply validates a and, if do is set and it is valid, applies it.

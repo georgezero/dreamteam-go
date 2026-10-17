@@ -375,6 +375,9 @@ func (st *state) CheckInvariants() error {
 	if err := st.checkReading(); err != nil {
 		return err
 	}
+	if err := st.checkTeleMoney(); err != nil {
+		return err
+	}
 	if err := st.checkFinance(); err != nil {
 		return err
 	}
@@ -413,6 +416,10 @@ func (w *World) Observe(recent int) api.Observation {
 	st.observePractice(&o, now)
 	st.observeWorklist(&o, now)
 	st.observeFinance(&o, now)
+	if st.tele != nil {
+		v := st.teleView(now)
+		o.Teleradiology = &v
+	}
 	st.observeActions(&o)
 	o.Today = st.todayMetrics(now)
 	st.observeAlerts(&o, now)

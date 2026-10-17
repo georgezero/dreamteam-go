@@ -87,7 +87,7 @@ type LegacyPrefix struct {
 	Schema     string          `json:"schema"`    // dreamteam.session/v1, or v2 of an earlier V0.2 build
 	Engine     string          `json:"engine"`    // the build that wrote it
 	Checksum   string          `json:"checksum"`  // its own checksum
-	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only), v0.2_slice3 (with set_roster, before set_reading_allocation) v0.2_slice4 (0.2.0-dev.5: with set_reading_allocation, dev.5's rules) or v0.2_dev6 (0.2.0-dev.6: this build's action set and rules)
+	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only), v0.2_slice3 (with set_roster, before set_reading_allocation) v0.2_slice4 (0.2.0-dev.5: with set_reading_allocation, dev.5's rules), v0.2_dev6 (0.2.0-dev.6) or v0.2_dev7 (0.2.0-dev.7): Slice 4's action set, before contract_teleradiology, under this build's rules
 	LastBatch  int64           `json:"lastBatch"` // its last batch number (0: none)
 	UntilSec   int64           `json:"untilSec"`
 	Outcome    string          `json:"outcomeCompatibility"` // verified (outcomes) or exact (every digest)
@@ -106,6 +106,7 @@ const (
 	batchModeSlice3     = "v0.2_slice3"
 	batchModeSlice4     = "v0.2_slice4"
 	batchModeDev6       = "v0.2_dev6"
+	batchModeDev7       = "v0.2_dev7"
 	batchModeCurrent    = ""
 )
 
@@ -407,13 +408,15 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
-func dev5Rules(mode string) bool { return mode != batchModeCurrent && mode != batchModeDev6 }
+func dev5Rules(mode string) bool {
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7
+}
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1
 // actions one by one, an earlier V0.2 build's with its action set, and
@@ -789,9 +792,9 @@ func advanceTo(s *Session, to simtime.Time, opts ReplayOptions) {
 // V0.2 type was an unknown action when it was written), a Slice 2
 // record's with Slice 2's action set (set_roster was unknown then), a
 // Slice 3 record's with Slice 3's (set_reading_allocation was unknown), a
-// 0.2.0-dev.5 or 0.2.0-dev.6 record's with this build's action set; a
-// build before 0.2.0-dev.6 under dev.5's rules (sim.SetDev5Rules, set by
-// the caller).
+// 0.2.0-dev.5 to dev.7 record's with Slice 4's (contract_teleradiology was
+// unknown); a build before 0.2.0-dev.6 under dev.5's rules
+// (sim.SetDev5Rules, set by the caller).
 func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, mode string) error {
 	cal := s.Calendar()
 	for _, b := range batches {
@@ -810,9 +813,9 @@ func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, 
 		case batchModeSlice3:
 			got = s.w.ApplySlice3(b.Actions)
 		case batchModeSlice4:
-			got = s.w.Apply(b.Actions) // this build's action set, under dev.5's rules
-		case batchModeDev6:
-			got = s.w.Apply(b.Actions) // this build's action set and rules
+			got = s.w.ApplySlice4(b.Actions) // under dev.5's rules
+		case batchModeDev6, batchModeDev7:
+			got = s.w.ApplySlice4(b.Actions) // under this build's rules
 		default:
 			got = s.Apply(b.Actions...)
 		}

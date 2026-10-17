@@ -304,6 +304,8 @@ type Observation struct {
 	Flow     Flow         `json:"flow"`
 	Worklist Worklist     `json:"worklist"`
 	Finance  Finance      `json:"finance"`
+	// Teleradiology (V0.2 Slice 5B): present once a contract exists.
+	Teleradiology *Teleradiology `json:"teleradiology,omitempty"`
 	// Today is today's operational metrics so far (partial: Complete is
 	// false until the day ends).
 	Today    PeriodMetrics `json:"today"`
@@ -686,10 +688,14 @@ type FinancePeriod struct {
 	// when zero, as in every V0.1 run.
 	RecruitingCents int64 `json:"recruitingCents,omitempty"`
 	SeveranceCents  int64 `json:"severanceCents,omitempty"`
+	// V0.2 Slice 5B: teleradiology retainers (accrued each active day) and
+	// remote read fees (at report final). Omitted when zero.
+	RemoteRetainerCents int64 `json:"remoteRetainerCents,omitempty"`
+	RemoteReadsCents    int64 `json:"remoteReadsCents,omitempty"`
 	// The same expenses by behavior: labor (wages + benefits, and
 	// severance), fixed (monthly costs accrued daily) and variable
-	// (per-study supplies and IT, billing fees). Recruiting fees are in
-	// none of the three.
+	// (per-study supplies and IT, billing fees). Recruiting fees and
+	// teleradiology costs are in none of the three.
 	LaborCents            int64 `json:"laborCents"`
 	FixedCents            int64 `json:"fixedCents"`
 	VariableCents         int64 `json:"variableCents"`
@@ -1340,6 +1346,15 @@ const (
 	// V0.2 Slice 4: a dated site reading allocation of an employed
 	// salaried radiologist (op "set" or "remove").
 	ActSetReadingAllocation = "set_reading_allocation"
+	// V0.2 Slice 5B: a teleradiology contract from the plan catalog (op
+	// "start") or the fixed end of one (op "cancel").
+	ActContractTeleradiology = "contract_teleradiology"
+)
+
+// contract_teleradiology operations.
+const (
+	TeleOpStart  = "start"  // a new contract: plan, windows, scope, effective
+	TeleOpCancel = "cancel" // fix an open-ended contract's exclusive end date
 )
 
 // set_roster and set_reading_allocation operations.
@@ -1373,8 +1388,10 @@ const (
 // Skills, RateCents, ContractedWeeklyMinutes, Roster, StartDate;
 // terminate — Employee, LastDay; set_roster — Op, Employee, Effective and
 // (op set) Roster; set_reading_allocation — Op, Employee, Effective and
-// (op set) SiteAllocationBP. Fields of other types are omitted, so a V0.1 action
-// encodes exactly as before.
+// (op set) SiteAllocationBP; contract_teleradiology — Op and, op start,
+// RequestID, Plan, Windows, Scope, Effective, or, op cancel, Contract and
+// EndDate. Fields of other types are omitted, so a V0.1 action encodes
+// exactly as before.
 type Action struct {
 	Type     string `json:"type"`
 	Employee string `json:"employee,omitempty"`
@@ -1402,6 +1419,15 @@ type Action struct {
 	// radiologist's paid time, 3,000–10,000 basis points, effective on a
 	// date at least 14 days ahead.
 	SiteAllocationBP int64 `json:"siteAllocationBP,omitempty"`
+	// contract_teleradiology (V0.2 Slice 5B). op start: the catalog plan,
+	// the recurring windows ("weeknights", "saturday", "sunday"), the scope
+	// ("urgent" or "all") and the activation date (Effective, at least 14
+	// days ahead). op cancel: the contract ID and its exclusive end date.
+	Plan     string   `json:"plan,omitempty"`
+	Windows  []string `json:"windows,omitempty"`
+	Scope    string   `json:"scope,omitempty"`
+	Contract string   `json:"contract,omitempty"`
+	EndDate  string   `json:"endDate,omitempty"`
 }
 
 // Roster is a hire's two-week rota (V0.2_DESIGN §6.2): one shift or none
@@ -1464,6 +1490,8 @@ type ActionResult struct {
 	// takes effect (the start date, or the first day after the last day).
 	EmployeeID  string `json:"employeeId,omitempty"`
 	EffectiveAt string `json:"effectiveAt,omitempty"`
+	// contract_teleradiology: the contract started or cancelled.
+	ContractID string `json:"contractId,omitempty"`
 }
 
 // ActionLog counts every action attempted and lists the latest.
@@ -1514,13 +1542,14 @@ type Policies struct {
 // patient accepted. Guaranteed are contractual amounts; Forecast are
 // estimates, labelled as such.
 type StaffingPreview struct {
-	AsOf         string               `json:"asOf"`
-	OK           bool                 `json:"ok"`
-	Results      []ActionResult       `json:"results"`
-	Hires        []HirePreview        `json:"hires,omitempty"`
-	Terminations []TerminationPreview `json:"terminations,omitempty"`
-	Rosters      []RosterPreview      `json:"rosters,omitempty"`
-	Allocations  []AllocationPreview  `json:"allocations,omitempty"`
+	AsOf          string               `json:"asOf"`
+	OK            bool                 `json:"ok"`
+	Results       []ActionResult       `json:"results"`
+	Hires         []HirePreview        `json:"hires,omitempty"`
+	Terminations  []TerminationPreview `json:"terminations,omitempty"`
+	Rosters       []RosterPreview      `json:"rosters,omitempty"`
+	Allocations   []AllocationPreview  `json:"allocations,omitempty"`
+	Teleradiology []TelePreview        `json:"teleradiology,omitempty"`
 	// Coverage differences of the whole batch (V0.2 Slice 3): template
 	// slots in the booking horizon it makes bookable or takes away, by
 	// modality (booked or not).
@@ -1645,4 +1674,136 @@ type MoneyLine struct {
 	Cents int64  `json:"cents"`
 	When  string `json:"when"`
 	Basis string `json:"basis"`
+}
+
+// TelePlan is a teleradiology catalog plan's published terms (V0.2_DESIGN
+// §8.2). Terms are frozen in a contract when it is accepted.
+type TelePlan struct {
+	ID string `json:"id"`
+	// Monthly retainer by window, in catalog order; the selected windows
+	// add, accrued per active day (floor proration over the month's days).
+	Retainers []WindowPrice `json:"retainers"`
+	// Fee per finalized read by modality, plus NightSurchargeBP of it for
+	// a study claimed at NightFrom or later or before NightUntil.
+	ReadFees         []ModalityPrice `json:"readFees"`
+	NightSurchargeBP int64           `json:"nightSurchargeBP"`
+	NightFrom        string          `json:"nightFrom"`
+	NightUntil       string          `json:"nightUntil"`
+	NoticeDays       int64           `json:"noticeDays"`       // activation at least this far ahead
+	MinTermDays      int64           `json:"minTermDays"`      // end at least this long after activation
+	CancelNoticeDays int64           `json:"cancelNoticeDays"` // end at least this far ahead
+	Lanes            int             `json:"lanes"`            // for all contracts together
+	HandoffMin       int64           `json:"handoffMin"`
+	Scopes           []string        `json:"scopes"`
+}
+
+// WindowPrice is a coverage window's monthly retainer.
+type WindowPrice struct {
+	Window       string `json:"window"`
+	Hours        string `json:"hours"` // "Mon–Fri 18:00–08:00 next day"
+	MonthlyCents int64  `json:"monthlyCents"`
+}
+
+// ModalityPrice is a per-read fee.
+type ModalityPrice struct {
+	Modality string `json:"modality"`
+	Cents    int64  `json:"cents"`
+}
+
+// Teleradiology is the practice's remote reading: the catalog, every
+// contract, the two lanes, counts, turnaround and money (V0.2 Slice 5B).
+// Guaranteed lists contractual amounts (vendor bills owed, fees committed
+// by claims in flight, retainers through each contract's earliest exit);
+// Forecast lists estimates (run rates), never guaranteed.
+type Teleradiology struct {
+	Plans     []TelePlan     `json:"plans"`
+	Contracts []TeleContract `json:"contracts"`
+	Lanes     []TeleLane     `json:"lanes"`
+	Covering  string         `json:"covering,omitempty"` // the contract covering now
+	// Unread studies on the worklist now that the covering contract could
+	// claim (0 outside coverage).
+	EligibleWaiting int `json:"eligibleWaiting"`
+	InHandoff       int `json:"inHandoff"`
+	InRemoteRead    int `json:"inRemoteRead"`
+	// Final reports since the start by reader kind, and their mean
+	// turnaround (imaging end to final) in minutes.
+	RemoteReports    int   `json:"remoteReports"`
+	LocalReports     int   `json:"localReports"`
+	RemoteTATMeanMin int64 `json:"remoteTatMeanMin"`
+	LocalTATMeanMin  int64 `json:"localTatMeanMin"`
+	NightReads       int   `json:"nightReads"`
+	// Expense recognized to date, vendor bills unpaid (accounts payable,
+	// paid on PayableDate) and fees committed by claims not yet final.
+	RetainerCents int64       `json:"retainerCents"`
+	ReadFeesCents int64       `json:"readFeesCents"`
+	PaidCents     int64       `json:"paidCents"`
+	UnpaidCents   int64       `json:"unpaidCents"`
+	PayableDate   string      `json:"payableDate"`
+	InFlightCents int64       `json:"inFlightCents"`
+	Guaranteed    []MoneyLine `json:"guaranteed,omitempty"`
+	Forecast      []MoneyLine `json:"forecast,omitempty"`
+}
+
+// TeleContract is one contract: its frozen terms, dates and status.
+type TeleContract struct {
+	ID        string   `json:"id"`
+	Plan      string   `json:"plan"`
+	RequestID string   `json:"requestId"`
+	Windows   []string `json:"windows"`
+	Scope     string   `json:"scope"`
+	Effective string   `json:"effective"`         // activation (first covered date)
+	EndDate   string   `json:"endDate,omitempty"` // exclusive; empty while open-ended
+	Status    string   `json:"status"`            // pending, active or ended
+	// MinimumTermEnd is the earliest end the minimum term allows;
+	// EarliestEndDate the earliest an open-ended contract can be given now.
+	MinimumTermEnd       string          `json:"minimumTermEnd"`
+	EarliestEndDate      string          `json:"earliestEndDate,omitempty"`
+	MonthlyRetainerCents int64           `json:"monthlyRetainerCents"`
+	ReadFees             []ModalityPrice `json:"readFees"`
+	NightSurchargeBP     int64           `json:"nightSurchargeBP"`
+	Claims               int             `json:"claims"`
+	RetainerCents        int64           `json:"retainerCents"` // accrued to date
+	ReadFeesCents        int64           `json:"readFeesCents"` // recognized to date
+	Action               string          `json:"action"`
+	CancelAction         string          `json:"cancelAction,omitempty"`
+}
+
+// TeleLane is one remote lane now.
+type TeleLane struct {
+	Lane     int    `json:"lane"`  // 1 or 2
+	Phase    string `json:"phase"` // idle, handoff or reading
+	Study    string `json:"study,omitempty"`
+	Modality string `json:"modality,omitempty"`
+	Priority string `json:"priority,omitempty"`
+	Contract string `json:"contract,omitempty"`
+	Since    string `json:"since,omitempty"` // claim time
+	FeeCents int64  `json:"feeCents,omitempty"`
+	Night    bool   `json:"night,omitempty"`
+}
+
+// TelePreview is a valid contract_teleradiology item's effect.
+type TelePreview struct {
+	Op        string   `json:"op"`
+	Contract  string   `json:"contract,omitempty"` // op cancel
+	Plan      string   `json:"plan"`
+	Windows   []string `json:"windows"`
+	Scope     string   `json:"scope"`
+	Effective string   `json:"effective"`
+	EndDate   string   `json:"endDate,omitempty"`
+	// The earliest end the minimum term and notice allow, the monthly
+	// retainer, and the retainer guaranteed from tomorrow through EndDate
+	// (or, open-ended, through the earliest end).
+	MinimumTermEnd       string `json:"minimumTermEnd"`
+	MonthlyRetainerCents int64  `json:"monthlyRetainerCents"`
+	GuaranteedCents      int64  `json:"guaranteedCents"`
+	GuaranteedThrough    string `json:"guaranteedThrough"` // exclusive
+	// Trailing observed demand (the 28 days before now): studies that
+	// waited unread on the worklist inside the selected windows and scope,
+	// and their fees at the plan's prices: an upper bound on claims (two
+	// lanes; employed readers claim first), not a forecast of patients.
+	TrailingDays     int64           `json:"trailingDays"`
+	TrailingStudies  int             `json:"trailingStudies"`
+	TrailingFeeCents int64           `json:"trailingFeeCents"`
+	ReadFees         []ModalityPrice `json:"readFees"`
+	NightSurchargeBP int64           `json:"nightSurchargeBP"`
 }

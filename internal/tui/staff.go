@@ -13,7 +13,9 @@ import (
 // changes, a hire form, termination rows, reading allocation rows (one per
 // salaried radiologist: ←→ the site share, , . the effective date, x
 // withdraw a pending change) and roster rows (enter opens the roster
-// editor, roster.go). Like the actions screen it only submits through the
+// editor, roster.go) and teleradiology rows (V0.2 Slice 5B: a new
+// contract's windows, scope and activation date, and a cancellation row
+// per open-ended contract). Like the actions screen it only submits through the
 // session's Apply; the row under the cursor is previewed with
 // PreviewStaffing (read-only: it changes nothing, allocates no ID and
 // reveals no hidden patient outcome).
@@ -81,6 +83,86 @@ type staffForm struct {
 	allocBP     map[string]int64
 	allocShift  int64
 	allocRemove map[string]bool
+	// Teleradiology rows: the new contract's windows (a bit set in catalog
+	// order, 1–7), scope (0 all, 1 urgent) and activation in days after the
+	// earliest; each cancellation's end in days after its earliest.
+	teleWin   int
+	teleScope int
+	teleShift int64
+	teleEnd   map[string]int64
+}
+
+// Teleradiology form rows.
+const (
+	teleWindowsRow = iota
+	teleScopeRow
+	teleStartRow
+	teleRows
+)
+
+var teleWindowNames = []string{"weeknights", "saturday", "sunday"}
+
+// teleView is the session's teleradiology view.
+func (m *Model) teleView() api.Teleradiology { return m.sess.Teleradiology() }
+
+// teleCancellable lists the open-ended contracts not yet ended.
+func (m *Model) teleCancellable(v api.Teleradiology) []api.TeleContract {
+	var out []api.TeleContract
+	for _, c := range v.Contracts {
+		if c.EndDate == "" && c.Status != "ended" {
+			out = append(out, c)
+		}
+	}
+	return out
+}
+
+// teleBase is the first teleradiology row's index.
+func (m *Model) teleBase() int {
+	return hireRows + len(m.terminable()) + len(m.readers()) + len(m.rosterable())
+}
+
+// teleStartAction is the contract the form describes.
+func (m *Model) teleStartAction(v api.Teleradiology) api.Action {
+	f := &m.staff
+	if f.teleWin == 0 {
+		f.teleWin = 1
+	}
+	var ws []string
+	for k, n := range teleWindowNames {
+		if f.teleWin&(1<<k) != 0 {
+			ws = append(ws, n)
+		}
+	}
+	scope := "all"
+	if f.teleScope == 1 {
+		scope = "urgent"
+	}
+	plan := v.Plans[0]
+	return api.Action{Type: api.ActContractTeleradiology, Op: api.TeleOpStart,
+		RequestID: fmt.Sprintf("tui-tele-%s-%s-%d", m.obs.Date, strings.ReplaceAll(m.obs.Clock, ":", ""), len(v.Contracts)), Plan: plan.ID, Windows: ws, Scope: scope,
+		Effective: m.todayDate().AddDays(plan.NoticeDays + f.teleShift).String()}
+}
+
+// teleCancelAction is the cancellation of contract c the row describes.
+func (m *Model) teleCancelAction(c api.TeleContract) api.Action {
+	d, _ := simtime.ParseDate(c.EarliestEndDate)
+	return api.Action{Type: api.ActContractTeleradiology, Op: api.TeleOpCancel, Contract: c.ID, EndDate: d.AddDays(m.staff.teleEnd[c.ID]).String()}
+}
+
+// teleRow is the cursor's teleradiology row: a form row (0–2), or a
+// cancellation (row ≥ teleRows, with its contract).
+func (m *Model) teleRow(v api.Teleradiology) (int, api.TeleContract, bool) {
+	k := m.staff.sel - m.teleBase()
+	if k < 0 {
+		return 0, api.TeleContract{}, false
+	}
+	if k < teleRows {
+		return k, api.TeleContract{}, true
+	}
+	if cs := m.teleCancellable(v); k-teleRows < len(cs) {
+		return k, cs[k-teleRows], true
+	}
+	return 0, api.TeleContract{}, false
 }
 
 // rosterFor lists the patterns that suit an offer (desk for front desk,
@@ -233,6 +315,13 @@ func (m *Model) staffSelected() (api.Action, bool) {
 	if r, ok := m.readerRow(); ok {
 		return m.allocAction(r), true
 	}
+	v := m.teleView()
+	if k, c, ok := m.teleRow(v); ok {
+		if k < teleRows {
+			return m.teleStartAction(v), true
+		}
+		return m.teleCancelAction(c), true
+	}
 	return api.Action{}, false
 }
 
@@ -251,7 +340,8 @@ func (m *Model) staffKey(k string) bool {
 	if f.edit != nil {
 		return m.rosterKey(k)
 	}
-	rows := hireRows + len(m.terminable()) + len(m.readers()) + len(m.rosterable())
+	v := m.teleView()
+	rows := m.teleBase() + teleRows + len(m.teleCancellable(v))
 	switch k {
 	case "up", "k":
 		f.sel = max(0, f.sel-1)
@@ -290,6 +380,17 @@ func (m *Model) staffKey(k string) bool {
 				}
 				f.allocBP[r.Employee] = min(r.MaxBP, max(r.MinBP, bp+int64(step)*250))
 				f.allocRemove[r.Employee] = false
+			} else if tk, c, ok := m.teleRow(v); ok {
+				switch tk {
+				case teleWindowsRow:
+					f.teleWin = (max(f.teleWin, 1)-1+step+7)%7 + 1
+				case teleScopeRow:
+					f.teleScope = 1 - f.teleScope
+				case teleStartRow:
+					f.teleShift = max(0, f.teleShift+int64(step))
+				default:
+					f.teleEnd[c.ID] = max(0, f.teleEnd[c.ID]+int64(step))
+				}
 			}
 		}
 	case ",", ".":
@@ -423,6 +524,7 @@ func (m *Model) staffBody(w, n int) []string {
 		lines = append(lines, fmt.Sprintf(" %s %-7s %-12s contract %-7s %s%s", cursor(base+k), trim(e.ID, 7), trim(e.Name, 12),
 			minutes(e.ContractMin), today, dimStyle.Render(pend)))
 	}
+	lines = append(lines, m.teleLines(cursor, w)...)
 	lines = append(lines, "")
 	lines = append(lines, m.staffTable()...)
 	// Keep the cursor row in view on a short terminal: scroll the form.
@@ -431,6 +533,67 @@ func (m *Model) staffBody(w, n int) []string {
 	}
 	if len(lines) > n {
 		lines = lines[:n]
+	}
+	return lines
+}
+
+// teleLines renders the teleradiology section: the plan, the contracts,
+// the lanes and vendor money, the new-contract rows and a cancellation row
+// per open-ended contract.
+func (m *Model) teleLines(cursor func(int) string, w int) []string {
+	v := m.teleView()
+	plan := v.Plans[0]
+	var fees []string
+	for _, x := range plan.ReadFees {
+		fees = append(fees, fmt.Sprintf("%s %s", x.Modality, dollars(x.Cents)))
+	}
+	var rets []string
+	for _, x := range plan.Retainers {
+		rets = append(rets, fmt.Sprintf("%s %s/mo", x.Window, dollars(x.MonthlyCents)))
+	}
+	lines := []string{"", titleStyle.Render(" Teleradiology") + dimStyle.Render(fmt.Sprintf(" — plan %s: %s · per read %s, +%s claimed %s–%s · %d lanes in all, %dm handoff",
+		plan.ID, strings.Join(rets, ", "), strings.Join(fees, ", "), pctBP(plan.NightSurchargeBP), plan.NightFrom, plan.NightUntil, plan.Lanes, plan.HandoffMin)),
+		dimStyle.Render(fmt.Sprintf("   activation ≥ %d days ahead · end ≥ %d days ahead and ≥ %d days after activation (paid even with no reads) · ←→ change · enter submits",
+			plan.NoticeDays, plan.CancelNoticeDays, plan.MinTermDays))}
+	for _, c := range v.Contracts {
+		end := "open-ended (earliest end " + shortDate(c.EarliestEndDate) + ")"
+		if c.EndDate != "" {
+			end = "ends " + shortDate(c.EndDate)
+		}
+		lines = append(lines, fmt.Sprintf("   %s %-7s %s · %s · from %s, %s · %s/mo · %d reads · retainer %s, fees %s to date", c.ID, c.Status,
+			strings.Join(c.Windows, "+"), c.Scope, shortDate(c.Effective), end, dollars(c.MonthlyRetainerCents), c.Claims,
+			dollars(c.RetainerCents), dollars(c.ReadFeesCents)))
+	}
+	if len(v.Contracts) > 0 {
+		var lanes []string
+		for _, l := range v.Lanes {
+			s := fmt.Sprintf("lane %d %s", l.Lane, l.Phase)
+			if l.Study != "" {
+				s += fmt.Sprintf(" %s %s %s", l.Study, l.Modality, dollars(l.FeeCents))
+			}
+			lanes = append(lanes, s)
+		}
+		cov := "no coverage now"
+		if v.Covering != "" {
+			cov = fmt.Sprintf("%s covering, %d eligible waiting", v.Covering, v.EligibleWaiting)
+		}
+		lines = append(lines, dimStyle.Render(fmt.Sprintf("   %s · %s · reports remote %d (TAT %s) / local %d (TAT %s)", cov, strings.Join(lanes, " · "),
+			v.RemoteReports, minutes(v.RemoteTATMeanMin), v.LocalReports, minutes(v.LocalTATMeanMin))))
+		lines = append(lines, dimStyle.Render(fmt.Sprintf("   vendor: unpaid %s (paid %s) · in-flight fees %s committed · paid %s to date",
+			dollars(v.UnpaidCents), shortDate(v.PayableDate), dollars(v.InFlightCents), dollars(v.PaidCents))))
+	}
+	base := m.teleBase()
+	a := m.teleStartAction(v)
+	for i, row := range [][2]string{
+		{"windows ", strings.Join(a.Windows, " + ")},
+		{"scope   ", a.Scope},
+		{"from    ", a.Effective},
+	} {
+		lines = append(lines, fmt.Sprintf(" %s new contract %s ‹ %s ›", cursor(base+i), row[0], row[1]))
+	}
+	for k, c := range m.teleCancellable(v) {
+		x := m.teleCancelAction(c)
+		lines = append(lines, fmt.Sprintf(" %s cancel %s: end ‹ %s › (last covered day the day before)", cursor(base+teleRows+k), c.ID, x.EndDate))
 	}
 	return lines
 }
@@ -486,6 +649,15 @@ func (m *Model) previewLines(p api.StaffingPreview, w, n int) []string {
 				}
 				for _, x := range r.Extensions {
 					line += fmt.Sprintf(" · extension %s +%dm kept", shortDate(x.Date), x.Minutes)
+				}
+				lines = append(lines, dimStyle.Render(line))
+			}
+			for _, t := range p.Teleradiology {
+				line := fmt.Sprintf(" %s %s · %s · from %s · %s/mo · earliest end %s · trailing %d days: %d studies waited in these windows (fees %s)",
+					t.Op, strings.Join(t.Windows, "+"), t.Scope, shortDate(t.Effective), dollars(t.MonthlyRetainerCents), shortDate(t.MinimumTermEnd),
+					t.TrailingDays, t.TrailingStudies, dollars(t.TrailingFeeCents))
+				if t.Op == api.TeleOpCancel {
+					line = fmt.Sprintf(" cancel %s: ends %s · retainer %s guaranteed to the end", t.Contract, shortDate(t.EndDate), dollars(t.GuaranteedCents))
 				}
 				lines = append(lines, dimStyle.Render(line))
 			}

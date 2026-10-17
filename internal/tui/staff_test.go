@@ -276,3 +276,51 @@ func TestReadingAllocationRows(t *testing.T) {
 		t.Fatalf("share %d", a.SiteAllocationBP)
 	}
 }
+
+// V0.2 Slice 5B: the teleradiology rows show the plan and its terms,
+// preview the contract read-only, submit it, and offer its cancellation.
+func TestStaffTeleradiology(t *testing.T) {
+	s, err := session.Open("mini", 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	m := New(s)
+	m.Update(tea.WindowSizeMsg{Width: 160, Height: 60})
+	m.key("m")
+	for m.staff.sel < m.teleBase() {
+		m.key("down")
+	}
+	m.key("right") // windows: saturday
+	m.key("right") // weeknights + saturday
+	before := s.Digests()
+	screen := ansi.Strip(m.render())
+	if s.Digests() != before {
+		t.Fatal("rendering changed the run")
+	}
+	for _, want := range []string{"Teleradiology", "plan standard-v1", "weeknights $1,500/mo", "XR $12", "+20%",
+		"new contract windows  ‹ weeknights + saturday ›", "If submitted: ✓", "Teleradiology retainer to the earliest end", "trailing 28 days"} {
+		if !strings.Contains(screen, want) {
+			t.Fatalf("staff screen lacks %q:\n%s", want, screen)
+		}
+	}
+	m.key("enter")
+	log := s.ActionLog()
+	if len(log) != 1 || log[0].Action.Type != api.ActContractTeleradiology || !log[0].OK || log[0].ContractID != "T00001" ||
+		!slices.Equal(log[0].Action.Windows, []string{"weeknights", "saturday"}) {
+		t.Fatalf("contract from the staff screen: %+v", log)
+	}
+	screen = ansi.Strip(m.render())
+	if !strings.Contains(screen, "T00001 pending weeknights+saturday") || !strings.Contains(screen, "cancel T00001: end ‹") {
+		t.Fatalf("no contract or cancellation row:\n%s", screen)
+	}
+	for m.staff.sel < m.teleBase()+teleRows {
+		m.key("down")
+	}
+	m.key("enter")
+	if log = s.ActionLog(); len(log) != 2 || !log[1].OK || log[1].Action.Op != api.TeleOpCancel || log[1].ContractID != "T00001" {
+		t.Fatalf("cancellation from the staff screen: %+v", log[1:])
+	}
+	if strings.Contains(ansi.Strip(m.render()), "cancel T00001") {
+		t.Fatal("a cancelled contract still offers a cancellation")
+	}
+}

@@ -168,7 +168,8 @@ func encodeV1(r *Record) ([]byte, error) {
 // any string: a V0.1 build recorded "hire" as an unknown action.)
 func legacyOnly(a api.Action) bool {
 	return a.RequestID == "" && a.Role == "" && a.Skills == nil && a.RateCents == 0 && a.ContractedWeeklyMinutes == 0 &&
-		a.Roster == nil && a.StartDate == "" && a.LastDay == "" && a.Op == "" && a.Effective == "" && a.SiteAllocationBP == 0
+		a.Roster == nil && a.StartDate == "" && a.LastDay == "" && a.Op == "" && a.Effective == "" && a.SiteAllocationBP == 0 &&
+		a.Plan == "" && a.Windows == nil && a.Scope == "" && a.Contract == "" && a.EndDate == ""
 }
 
 // Engine compatibility registry (V0.2_DESIGN §12): the builds whose
@@ -195,7 +196,8 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.3": batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
 	"0.2.0-dev.4": batchModeSlice3, // the dynamic staffing benchmark: Slice 3's action set
 	"0.2.0-dev.5": batchModeSlice4, // V0.2 Slice 4: this action set, dev.5's reading and allocation rules
-	"0.2.0-dev.6": batchModeDev6,   // pre-Slice 5 remediation: this action set and rules
+	"0.2.0-dev.6": batchModeDev6,   // pre-Slice 5 remediation: Slice 4's action set, this build's rules
+	"0.2.0-dev.7": batchModeDev7,   // V0.2 Slice 5A (remote reading engine): Slice 4's action set, this build's rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

@@ -64,6 +64,12 @@ const StateSchema = "dreamteam.state/v3"
 var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true,
 	"employment.Allocs": true, "employment.AllocLog": true, "state.tele": true}
 
+// acctArrays names account-indexed array fields, by "Type.field". Their
+// first numV3Accounts elements encode as the array did under v3; the
+// accounts appended since (Slice 5B's teleradiology accounts) follow,
+// after omitTag, only when one is non-zero.
+var acctArrays = map[string]bool{"ledger.bal": true, "dayBook.net": true, "dayBook.byMod": true}
+
 // omitTag introduces a present omitEmpty field. It has the top bit set,
 // which no length prefix (string, slice or map) can.
 const omitTag = 0xD7A1_0000_0000_0003
@@ -123,8 +129,8 @@ var (
 // field is an encoded struct field: its index, and whether it is omitted
 // when empty.
 type field struct {
-	i    int
-	omit bool
+	i          int
+	omit, acct bool
 }
 
 func fieldsOf(t reflect.Type) []field {
@@ -141,7 +147,7 @@ func fieldsOf(t reflect.Type) []field {
 		}
 		name := t.Name() + "." + t.Field(i).Name
 		if !skipFields[name] {
-			fs = append(fs, field{i, omitEmpty[name]})
+			fs = append(fs, field{i, omitEmpty[name], acctArrays[name]})
 		}
 	}
 	fieldCache[t] = fs
@@ -197,11 +203,34 @@ func (d *stateHasher) value(v reflect.Value) {
 				}
 				d.u64(omitTag)
 			}
+			if f.acct {
+				d.accounts(x)
+				continue
+			}
 			d.value(x)
 		}
 	case reflect.Func, reflect.Interface, reflect.Chan, reflect.UnsafePointer:
 	default:
 		panic(fmt.Sprintf("sim: state digest cannot encode %s", v.Kind()))
+	}
+}
+
+// accounts encodes an account-indexed array (acctArrays).
+func (d *stateHasher) accounts(x reflect.Value) {
+	n := int(numV3Accounts)
+	d.u64(uint64(n))
+	for i := 0; i < n; i++ {
+		d.value(x.Index(i))
+	}
+	for i := n; i < x.Len(); i++ {
+		if !x.Index(i).IsZero() {
+			d.u64(omitTag)
+			d.u64(uint64(x.Len() - n))
+			for ; n < x.Len(); n++ {
+				d.value(x.Index(n))
+			}
+			return
+		}
 	}
 }
 

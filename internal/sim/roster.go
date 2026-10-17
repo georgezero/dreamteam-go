@@ -230,7 +230,7 @@ func (st *state) checkSetRoster(a api.Action, p *proposal, item int) staffOutcom
 	}
 	switch {
 	case a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.RequestID != "" || a.Role != "" ||
-		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.StartDate != "" || a.LastDay != "" || a.SiteAllocationBP != 0:
+		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.StartDate != "" || a.LastDay != "" || a.SiteAllocationBP != 0 || teleFields(a):
 		return bad("invalid_schema", "set_roster takes op, employee, effective and (op set) roster only.")
 	case a.Op != api.RosterOpSet && a.Op != api.RosterOpRemove:
 		return bad("invalid_schema", "set_roster needs op %q or %q.", api.RosterOpSet, api.RosterOpRemove)

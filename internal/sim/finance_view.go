@@ -140,9 +140,10 @@ func (st *state) bookPeriod(label string, b *dayBook) api.FinancePeriod {
 	}
 	// V0.2: severance is labor; recruiting fees are their own line.
 	p.RecruitingCents, p.SeveranceCents = n[acctRecruiting], n[acctSeverance]
+	p.RemoteRetainerCents, p.RemoteReadsCents = n[acctRemoteRetainer], n[acctRemoteReads]
 	p.LaborCents = p.WagesCents + p.BenefitsCents + p.SeveranceCents
 	p.FixedCents = b.fixed
-	p.VariableCents = p.OperatingExpenseCents - p.LaborCents - p.FixedCents - p.RecruitingCents
+	p.VariableCents = p.OperatingExpenseCents - p.LaborCents - p.FixedCents - p.RecruitingCents - p.RemoteRetainerCents - p.RemoteReadsCents
 	p.OperatingProfitCents = p.NetRevenueCents - p.OperatingExpenseCents
 	if p.NetRevenueCents > 0 {
 		p.MarginBP, p.MarginDefined = p.OperatingProfitCents*10_000/p.NetRevenueCents, true
@@ -329,6 +330,16 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 		return "Severance recognized (termination accepted)", st.emps[k.a].terms.ID
 	case entSeverancePay:
 		return "Severance paid", st.emps[k.a].terms.ID
+	case entRetainer:
+		return fmt.Sprintf("Teleradiology retainer (%s) %s", teleWindowNames[k.a%3], dayName(k.b)), teleID(int(k.a / 3))
+	case entRemoteRead:
+		cl := &st.tele.claims[k.b]
+		x := &st.cfg.Catalog[st.dem.studies[k.a].exam]
+		night := ""
+		if cl.night {
+			night = ", night"
+		}
+		return fmt.Sprintf("Teleradiology read fee: %s %s (%s%s)", x.Modality, x.Name, teleID(cl.contract), night), studyID(int(k.a))
 	case entFixed:
 		return "Fixed costs accrued " + dayName(k.a), ""
 	case entPayroll:

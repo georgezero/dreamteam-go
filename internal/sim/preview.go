@@ -218,6 +218,9 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	if len(p.allocs) > 0 {
 		st.previewAllocations(&out, p)
 	}
+	for _, ts := range p.teles {
+		st.telePreview(ts, &out)
+	}
 	out.Displacements = st.provisional(plans, disp)
 	if len(disp) > 0 {
 		k := 0

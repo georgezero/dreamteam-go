@@ -203,6 +203,10 @@ func (s *Session) RosterPlan(id string) (api.RosterPlan, bool) { return s.w.Rost
 // Slice 4): the scenario allocation and every dated version.
 func (s *Session) ReadingAllocations() []api.ReadingAllocation { return s.w.ReadingAllocations() }
 
+// Teleradiology is the remote reading view (V0.2 Slice 5B): the plan
+// catalog, contracts, lanes, remote reports and vendor money.
+func (s *Session) Teleradiology() api.Teleradiology { return s.w.Teleradiology() }
+
 // PreviewStaffing previews a V0.2 staffing batch now: validation, terms,
 // timeline, potential displacements and obligations. It changes nothing.
 func (s *Session) PreviewStaffing(actions ...api.Action) api.StaffingPreview {

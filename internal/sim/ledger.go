@@ -39,8 +39,16 @@ const (
 	acctRecruiting
 	acctSeverance
 	acctSeverancePayable
+	// V0.2 Slice 5B (appended): teleradiology retainers and remote read
+	// fees, both owed to the vendor through accounts payable.
+	acctRemoteRetainer
+	acctRemoteReads
 	numAccounts
 )
+
+// numV3Accounts is the chart the state/v3 encoding was defined with:
+// accounts appended after it are encoded only when non-zero (digest.go).
+const numV3Accounts = acctRemoteRetainer
 
 // numLegacyAccounts is the V0.1 chart of accounts: its accounts are
 // always listed; a V0.2 account only once it has a balance (so a run
@@ -79,6 +87,8 @@ var accountInfo = [numAccounts]struct {
 	acctRecruiting:       {"recruiting", "Recruiting fees", kindExpense},
 	acctSeverance:        {"severance", "Severance (with benefits)", kindExpense},
 	acctSeverancePayable: {"severance_payable", "Severance payable", kindLiability},
+	acctRemoteRetainer:   {"remote_retainer", "Teleradiology retainers", kindExpense},
+	acctRemoteReads:      {"remote_reads", "Teleradiology read fees", kindExpense},
 }
 
 // listed reports whether account a appears in a chart listing.
@@ -118,6 +128,8 @@ const (
 	entRecruiting                        // recruiting fee at hire acceptance (a: employee)
 	entSeverance                         // severance recognized at termination acceptance (a: employee)
 	entSeverancePay                      // severance paid on its payday (a: employee)
+	entRetainer                          // teleradiology retainer for an active day (a: contract×3 + window, b: day)
+	entRemoteRead                        // teleradiology read fee at report final (a: study, b: remote claim)
 )
 
 // entryKey is an entry's idempotency key.

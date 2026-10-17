@@ -274,7 +274,8 @@ func (st *state) payerOf(src rng.Source) int {
 
 // financeDayStart runs at 00:00: payroll and payables due today are paid
 // first (they cover what was accrued before today), then today's salaried
-// and fixed accruals post, and the day's claim submission is queued.
+// and fixed accruals and teleradiology retainers post, and the day's claim
+// submission is queued.
 func (st *state) financeDayStart(e *Engine, day int64) {
 	f := &st.cfg.Finance
 	now := e.Now()
@@ -300,6 +301,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 		if amt := led.bal[acctAP]; amt < 0 {
 			led.mustPost(now, entryKey{kind: entPayAP, a: day}, line{acctAP, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.apPaid += -amt
+			st.paidTele()
 			st.evalPaid(&st.eval.baseAP, -amt)
 			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Bills paid %s (rent, leases, service, supplies, fees accrued through %s)",
@@ -335,6 +337,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 		led.mustPost(now, entryKey{kind: entFixed, a: day}, lines...)
 		st.fin.apAccrued += total
 	}
+	st.accrueRetainers(now, day)
 	if businessDay(date) {
 		for _, ci := range st.fin.pending {
 			if st.fin.claims[ci].submitDue <= day {

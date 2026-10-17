@@ -32,15 +32,17 @@ import (
 // content is request_conflict; a different last day already_terminating.
 
 // V0.2 action sets: the types that make a V0.2 batch. This build knows
-// set_roster and set_reading_allocation too; a 0.2.0-dev.2 record (Slice
-// 2) is replayed with its own set, where set_roster was an unknown
-// V0.1-path action, and a 0.2.0-dev.3 or dev.4 record (Slice 3) with
-// Slice 3's, where set_reading_allocation was (session package,
-// V0.2_DESIGN §12).
+// set_roster, set_reading_allocation and contract_teleradiology too; a
+// 0.2.0-dev.2 record (Slice 2) is replayed with its own set, where
+// set_roster was an unknown V0.1-path action, a 0.2.0-dev.3 or dev.4
+// record (Slice 3) with Slice 3's, where set_reading_allocation was, and
+// a 0.2.0-dev.5 to dev.7 record (Slice 4) with Slice 4's, where
+// contract_teleradiology was (session package, V0.2_DESIGN §12).
 var (
-	v2Actions     = []string{api.ActHire, api.ActTerminate, api.ActSetRoster, api.ActSetReadingAllocation}
+	v2Actions     = []string{api.ActHire, api.ActTerminate, api.ActSetRoster, api.ActSetReadingAllocation, api.ActContractTeleradiology}
 	slice2Actions = []string{api.ActHire, api.ActTerminate}
 	slice3Actions = []string{api.ActHire, api.ActTerminate, api.ActSetRoster}
+	slice4Actions = []string{api.ActHire, api.ActTerminate, api.ActSetRoster, api.ActSetReadingAllocation}
 )
 
 func isV2Action(t string) bool { return slices.Contains(v2Actions, t) }
@@ -50,11 +52,13 @@ type staffOutcome struct {
 	ok        bool
 	code, msg string
 	employee  string // hire: the ID given (commit only)
+	contract  string // contract_teleradiology: the contract (start: at commit)
 	effective string // the start date, or the first day after the last day
 	hire      *hireSpec
 	term      *termSpec
 	roster    *rosterSpec
 	alloc     *allocSpec
+	tele      *teleSpec
 }
 
 // hireSpec is a validated hire, not yet committed.
@@ -93,6 +97,13 @@ type proposal struct {
 	allocs    []*allocSpec
 	aversions map[int][]allocVersion
 	akeys     map[rosterKey]bool
+	// teles are the batch's contract items; tcons the contract timeline
+	// they compose (nil until the first); treqs the start requestIds and
+	// tcancel the contracts cancelled in the batch.
+	teles   []*teleSpec
+	tcons   []teleContract
+	treqs   map[string]bool
+	tcancel map[int]bool
 }
 
 // staffBatch validates a V0.2 batch and, if do, commits it. known is the
@@ -102,11 +113,15 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 	out := make([]staffOutcome, len(actions))
 	fail := -1
 	// The refusal names the staffing actions as earlier builds did, and
-	// set_reading_allocation only when the batch holds one: a batch
-	// without it keeps its recorded message.
-	names := slices.DeleteFunc(slices.Clone(known), func(t string) bool { return t == api.ActSetReadingAllocation })
-	if slices.ContainsFunc(actions, func(a api.Action) bool { return a.Type == api.ActSetReadingAllocation }) && slices.Contains(known, api.ActSetReadingAllocation) {
-		names = append(names, api.ActSetReadingAllocation)
+	// set_reading_allocation or contract_teleradiology only when the
+	// batch holds one: a batch without them keeps its recorded message.
+	names := slices.DeleteFunc(slices.Clone(known), func(t string) bool {
+		return t == api.ActSetReadingAllocation || t == api.ActContractTeleradiology
+	})
+	for _, t := range []string{api.ActSetReadingAllocation, api.ActContractTeleradiology} {
+		if slices.ContainsFunc(actions, func(a api.Action) bool { return a.Type == t }) && slices.Contains(known, t) {
+			names = append(names, t)
+		}
 	}
 	for k, a := range actions {
 		if !slices.Contains(known, a.Type) {
@@ -117,7 +132,8 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 		}
 	}
 	p := &proposal{reqs: map[string]bool{}, emps: map[int]bool{}, rkeys: map[rosterKey]bool{},
-		versions: map[int][]rosterVersion{}, productive: map[int]int64{}, aversions: map[int][]allocVersion{}, akeys: map[rosterKey]bool{}}
+		versions: map[int][]rosterVersion{}, productive: map[int]int64{}, aversions: map[int][]allocVersion{}, akeys: map[rosterKey]bool{},
+		treqs: map[string]bool{}, tcancel: map[int]bool{}}
 	if fail < 0 {
 		for k, a := range actions {
 			var o staffOutcome
@@ -128,6 +144,8 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 				o = st.checkTerminate(a, p)
 			case api.ActSetRoster:
 				o = st.checkSetRoster(a, p, k)
+			case api.ActContractTeleradiology:
+				o = st.checkTeleAction(a, p)
 			default:
 				o = st.checkSetAllocation(a, p)
 			}
@@ -145,6 +163,11 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 	}
 	if fail < 0 && len(p.allocs) > 0 && !st.dev5 {
 		if k, o := st.checkAllocCommit(p, out); k >= 0 {
+			out[k], fail = o, k
+		}
+	}
+	if fail < 0 && len(p.teles) > 0 {
+		if k, o := st.checkTeleTimeline(p, out); k >= 0 {
 			out[k], fail = o, k
 		}
 	}
@@ -169,6 +192,7 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 	}
 	st.beforeChange()
 	from := noEnd
+	tele := false
 	var causes []int
 	var why []string
 	add := func(c string) {
@@ -196,7 +220,14 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 			add(causeRosterChanged)
 		case o.alloc != nil:
 			st.commitAlloc(o.alloc, len(st.actions.log)+k)
+		case o.tele != nil:
+			o.contract = st.commitTele(o.tele, len(st.actions.log)+k)
+			o.msg = st.teleText(o.tele, true)
+			tele = true
 		}
+	}
+	if tele {
+		st.scheduleTeleEdge(e)
 	}
 	if moved, delayed := st.trainingMoves(p); moved != noEnd {
 		from = min(from, moved)
@@ -218,7 +249,7 @@ func (st *state) checkHire(a api.Action, p *proposal) staffOutcome {
 	}
 	switch {
 	case a.Employee != "" || a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.LastDay != "" || a.Op != "" || a.Effective != "" ||
-		a.SiteAllocationBP != 0:
+		a.SiteAllocationBP != 0 || teleFields(a):
 		return bad("invalid_schema", "hire takes requestId, role, skills, rateCents, contractedWeeklyMinutes, roster and startDate only.")
 	case a.RequestID == "" || len(a.RequestID) > 128:
 		return bad("invalid_schema", "hire needs a requestId of 1–128 characters.")
@@ -684,7 +715,7 @@ func (st *state) checkTerminate(a api.Action, p *proposal) staffOutcome {
 	switch {
 	case a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.RequestID != "" || a.Role != "" ||
 		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.Op != "" || a.Effective != "" ||
-		a.SiteAllocationBP != 0:
+		a.SiteAllocationBP != 0 || teleFields(a):
 		return bad("invalid_schema", "terminate takes employee and lastDay only.")
 	case a.Employee == "" || a.LastDay == "":
 		return bad("invalid_schema", "terminate needs employee and lastDay.")

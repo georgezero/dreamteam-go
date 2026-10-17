@@ -156,7 +156,7 @@ func (st *state) checkSetAllocation(a api.Action, p *proposal) staffOutcome {
 	}
 	switch {
 	case a.Minutes != 0 || a.Date != "" || a.Policy != "" || a.Cutoff != "" || a.RequestID != "" || a.Role != "" ||
-		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.LastDay != "":
+		a.Skills != nil || a.RateCents != 0 || a.ContractedWeeklyMinutes != 0 || a.Roster != nil || a.StartDate != "" || a.LastDay != "" || teleFields(a):
 		return bad("invalid_schema", "set_reading_allocation takes op, employee, effective and (op set) siteAllocationBP only.")
 	case a.Op != api.RosterOpSet && a.Op != api.RosterOpRemove:
 		return bad("invalid_schema", "set_reading_allocation needs op %q or %q.", api.RosterOpSet, api.RosterOpRemove)

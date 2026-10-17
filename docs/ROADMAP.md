@@ -40,8 +40,12 @@ the audit's touching-block and overrun-debt scheduler defects and added a
 result reproduced. Slice 5A, the remote reading engine (0.2.0-dev.7, design
 §5.12), is built: tagged reader ownership, two persistent teleradiology
 lanes, half-open coverage windows and a common finalization path, with
-no player action yet. Next: Slice 5B (`contract_teleradiology` economics,
-action and accounting).
+no player action yet. Slice 5B, `contract_teleradiology` (0.2.0-dev.8, design
+§5.13), is built: the `standard-v1` catalog, start and cancel with notice,
+minimum term and successor rules, daily prorated retainers, read fees locked
+at claim, first-of-month vendor settlement, previews, the TUI and replay of
+earlier records. Next: Slice 5C, the evaluation, with its service, solvency
+and holdout rules frozen before any strategy is chosen.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

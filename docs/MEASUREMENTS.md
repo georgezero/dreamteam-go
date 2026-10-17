@@ -395,3 +395,20 @@ engine name.
 The benchmark results under 0.2.0-dev.7 match the committed archive
 (`results/reading-dev`, `results/reading-eval`) in every field but the
 engine name.
+
+
+## 2026-10-17 — V0.2 Slice 5B: teleradiology contracts (Pi 4 at ≈82 °C, load average ≈3.5; Cortex-A76 "joofi", shared, load average ≈1–3)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Engine benchmarks, 0.2.0-dev.7 against 0.2.0-dev.8, interleaved in both orders (6 samples each), Cortex-A76 | `./sim-devN.test -test.bench 'EstablishedPlay90\|Mini180' -test.run '^$' -test.benchmem -test.benchtime 4x` | Mini180: median 946 ms/op (dev.7) vs 970 ms/op (dev.8), ranges 935–959 vs 937–990. EstablishedPlay90: 387 vs 390 ms/op. No measurable difference. Allocations identical (3.73M; 1.24M); EstablishedPlay90 bytes 78.6 vs 78.2 MB/op |
+| Engine benchmarks, same, Pi (6 samples each, `-test.benchtime 2x`) | same | Mini180: median 2.89 vs 2.94 s/op. EstablishedPlay90: 1.34 vs 1.34 s/op. Spread ≈±25% under heat and load; allocations identical |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 66 s |
+| Evaluation, 4 plans × 20 held-out seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 3` | 220 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, whole and in 13-hour chunks, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` (`DT_DYN_DAYS=180 DT_DYN_SEEDS=901,1001`) | 179 s |
+| Acceptance (`-tags acceptance`), Cortex-A76 | `./acc.test -test.v -test.timeout 240m` | 2 h 35 min while shared, 396 subtests passed, none failed |
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 9 min 58 s (sim 560 s, session 133 s, cmd 98 s, tui 28 s) |
+
+The benchmark results under 0.2.0-dev.8 match the committed archive
+(`results/reading-dev`, `results/reading-eval`) in every field but the
+engine name.

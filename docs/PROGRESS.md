@@ -7,6 +7,122 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5B — teleradiology contract action and economics (0.2.0-dev.8)
+
+The owner accepted Slice 5A. This step exposes the remote reading engine
+through the player action `contract_teleradiology`, with §8.2's catalog
+and §8.4's economics: retainers, read fees locked at claim, payables and
+settlement, previews, observation, the TUI and replay. It invents no
+price, plan or lane, and changes no demand, reimbursement, wage,
+allocation, read duration, service threshold or frozen benchmark plan.
+5C (evaluation and any strategy) has not started. Design and as-built
+notes: `docs/V0.2_DESIGN.md` §5.13.
+
+* **Action.**
+  * `op start`: `requestId`, `plan` (`standard-v1`), `windows`, `scope`
+    and `effective`. Activation is at least 14 days ahead and inside the
+    booking horizon. The contract is open-ended, `T00001` onward.
+  * `op cancel`: `contract` and an exclusive `endDate` at least 30 days
+    ahead and at least 30 days after activation. Once fixed, the end
+    cannot move.
+  * Repeats are `unchanged`. A reused requestId with other terms is
+    `request_conflict`, and a moved end `already_cancelled`.
+  * Overlaps are judged on the timeline the whole batch leaves, so a
+    cancellation and its successor can share a batch.
+  * The batch is atomic like the staffing actions: a refusal leaves no
+    contract, posting, event or log line.
+* **Money**, in integer cents, with two appended expense accounts:
+  * **Retainers** accrue per selected window per active day, at 00:00 after
+    the day's payments: `floor(M×d/n) − floor(M×(d−1)/n)`. The minimum
+    term is owed with no reads.
+  * **Read fees** are locked at claim (night +20% at ≥ 22:00 or < 08:00),
+    committed while in flight and recognized once at the report's final.
+  * **Settlement:** both are paid by the existing first-of-month A/P
+    payment, which covers everything accrued before it; an expiry erases
+    nothing.
+  * **Revenue** stays at report final.
+* **Observation** (`Observation.teleradiology`, `Session.Teleradiology`):
+  * contracts and their status, dates and terms;
+  * coverage now, eligible waiting studies, and both lanes;
+  * remote and local reports with their mean turnaround;
+  * vendor money: recognized, paid, unpaid with its payment date, and
+    in-flight fees.
+  * Guaranteed amounts are listed apart from forecasts, and no future
+    draw is read.
+* **Preview:** `PreviewStaffing` covers the action, showing:
+  * the guaranteed retainer through the earliest end, and the
+    open-ended run rate;
+  * a labelled upper bound from trailing observed demand: the studies
+    that waited inside the windows in the last 28 days.
+* **TUI:** the staff screen (`m`) has a Teleradiology section: plan and
+  rules, contracts, coverage, lanes and the vendor balance. It has rows
+  for a new contract (windows, scope, activation) and one cancellation
+  row per open-ended contract, each previewed and submitted with enter.
+* **Replay and compatibility.**
+  * The new state is encoded only when a contract exists. The ledger's
+    account arrays encode the two new accounts only when non-zero, so
+    with no contract every state, log and ledger digest is as under dev.7
+    and every golden reference reproduces.
+  * 0.2.0-dev.7 is registered as an earlier build (batch mode
+    `v0.2_dev7`). dev.5–dev.7 records replay with Slice 4's action set,
+    in which the type was unknown.
+  * A genuine dev.7 record (`testdata/sessions/mini-seed27-dev7`) holds
+    an `unknown_action` and a `mixed_batch` refusal of the type. It
+    replays exactly, fails with this build's action set, and continues.
+* **Tests.** 28 targeted tests (27 in `internal/sim/telecontract_test.go`
+  and a save/load test in the session package), three dev.7 record tests
+  and a TUI test. Money is checked to the cent, including same-instant
+  midnight and expiry cases and repeated submissions.
+* **Fail-before-fix.**
+  * Run against the dev.7 engine with only the new API types, 26 of the
+    27 sim tests fail. The 27th, no-contract neutrality, passes before by
+    design and is covered by mutation.
+  * All 25 targeted mutations (M1–M25) are caught. They cover the rules
+    on notice, term, overlap and atomicity; proration, expiry and night
+    pricing; fee timing and settlement order; lanes and scope; previews;
+    and the digest, mixed-batch and dev.7 registration rules. M19
+    first failed to build; rewritten, it is caught by two tests.
+* **Functional validation** (development seeds 901–903 only; not a
+  strategy search; `docs/calibration/teleradiology-5b`).
+  * Steps: a contract on all windows, then cancelled at its earliest end,
+    then 90 days.
+  * Every seed activates, claims backlog, reports every claim at
+    catalog prices, and accrues retainers exactly ($6,100.01).
+  * Vendor bills settle completely, and nothing is claimed after the end.
+  * Ownership, ledger, payables and cash invariants hold daily. The cash
+    bridge reconciles, and bookings are identical to the no-contract run.
+  * Total reports equal the no-contract run's: here remote reads
+    substituted for later local reads, at $27.7–29.4k of operating profit over 90 days (the vendor cost).
+    That is for 5C to weigh, not a verdict.
+* **Verification.**
+  * Full uncached suite on the Pi: 9 min 58 s (sim 560 s, session 133 s,
+    cmd 98 s, tui 28 s). All goldens pass, and all 11 session files
+    replay as `earlier_build_exact`.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * Acceptance on the Cortex-A76: 2 h 35 min while shared, 396 subtests
+    passed and none failed.
+  * Without a contract the benchmark is unchanged. The plan D results
+    under dev.8 (development, 66 s; held out, 220 s) match the committed
+    archive in every field but the engine name. The 180-day session
+    replay check passes (179 s).
+  * Engine benchmarks, dev.7 against dev.8, show no measurable
+    difference. On the Pi, Mini180 medians are 2.89 vs 2.94 s and
+    EstablishedPlay90 1.34 vs 1.34 s. On the Cortex-A76 they are 946 vs
+    970 ms and 387 vs 390 ms, inside a 3–12% run-to-run spread.
+    Allocations are identical, and EstablishedPlay90 uses 0.4 MB/op less.
+* **Limitations.**
+  * There is one catalog plan, and a contract can be ended but not
+    edited.
+  * A batch cannot cancel the contract it starts.
+  * The trailing-demand preview is an upper bound, not a lane model.
+  * The evaluation window does not yet split reports, turnaround or cost
+    by reader kind, or attribute waits to absent coverage. That is 5C's,
+    frozen before any strategy.
+  * The shift-end lapse of local reading debt remains.
+
+---
+
 ## V0.2 Slice 5A — remote reading engine (0.2.0-dev.7)
 
 The owner accepted dev.6 and authorized Slice 5 in three stages with a

@@ -11,6 +11,7 @@ wrote them, to test that this build replays them authoritatively.
 | `mini-seed24-dev5.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 24, 30 days, with `mini-seed24-dev5.actions.json` |
 | `mini-seed25-dev5-reading.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 25, 20 days, with `mini-seed25-dev5-reading.actions.json` |
 | `mini-seed26-dev6.session.json` | 0.2.0-dev.6 (pre-Slice 5 remediation, commit 3c71669) | mini, seed 26, 25 days, with `mini-seed26-dev6.actions.json` |
+| `mini-seed27-dev7.session.json` | 0.2.0-dev.7 (V0.2 Slice 5A, commit 855acfe) | mini, seed 27, 25 days, with `mini-seed27-dev7.actions.json` |
 
 Each was made with its build's binary, from a clean worktree of that commit:
 
@@ -96,3 +97,22 @@ embedded as the new record's prefix (`internal/session/dev6_test.go`).
 Before 0.2.0-dev.6 was registered, this build refused it as an engine
 mismatch. Registered under dev.5's rules, it fails at its second batch,
 which dev.5's allocation validation accepts.
+
+The 0.2.0-dev.7 file was made the same way from 855acfe, with `-seed 27
+-days 25`. Its batches are:
+
+* a `contract_teleradiology` start alone, refused as `unknown_action`
+  (dev.7 had no such action);
+* Dr. Avery at 80% beside a `contract_teleradiology` start, refused as
+  `mixed_batch` with the Slice 4 message, the allocation `batch_rejected`;
+* Dr. Blake at 70% from Oct 30, accepted.
+
+It is there because 0.2.0-dev.8 makes `contract_teleradiology` a real
+action. Records of 0.2.0-dev.5 to dev.7 replay with Slice 4's action set,
+in which the type is unknown, as they recorded it. This one replays in
+batch mode `v0.2_dev7` with every digest verified
+(`earlier_build_exact`), and continues with the file embedded as the new
+record's prefix (`internal/session/dev7_test.go`). Before 0.2.0-dev.7 was
+registered this build refused it as an engine mismatch. Replayed with this
+build's action set, it fails at its first batch, where the start is now
+refused as `invalid_schema` (it has no plan).

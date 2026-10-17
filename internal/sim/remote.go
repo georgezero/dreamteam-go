@@ -9,10 +9,9 @@ import (
 )
 
 // Remote reading: the teleradiology engine (V0.2_DESIGN §8.2–8.3, §10;
-// Slice 5A, 0.2.0-dev.7). The player action that creates contracts
-// (contract_teleradiology) and their economics arrive in Slice 5B; until
-// then a contract exists only through addTeleContract, which no action
-// reaches.
+// Slice 5A, 0.2.0-dev.7). The player action that creates and ends
+// contracts (contract_teleradiology) and their economics are Slice 5B's
+// (telecontract.go, 0.2.0-dev.8).
 //
 //   - Lanes. The practice has exactly two remote lanes, 0 then 1, for all
 //     of its contracts together. They are persistent state, outside the
@@ -41,9 +40,10 @@ import (
 //   - Finalization is the shared path (finalize): one final report, one
 //     revenue recognition, turnaround and breach once.
 //
-// The claim keeps what 5B's settlement needs at the locked terms: the
-// contract, lane, claim and read-start times and the night classification
-// (claimed at ≥ 22:00 or < 08:00 local).
+// The claim locks its price: the contract's fee for the study's modality
+// and, claimed at ≥ 22:00 or < 08:00 local, the night surcharge. A later
+// contract change never reprices it; the fee is recognized once, at its
+// report's final (telecontract.go).
 
 const (
 	teleLanes   = 2
@@ -77,6 +77,18 @@ type teleContract struct {
 	windows     teleWindows
 	scope       teleScope
 	from, until int64
+	// The accepted terms (Slice 5B), frozen at acceptance: the plan, the
+	// request that made the contract and its canonical content, monthly
+	// retainers of the selected windows (catalog order; 0 unselected),
+	// fees per read by catalog modality (teleMods) and the night
+	// surcharge; the accepting and cancelling actions (−1: none).
+	plan       string
+	req, canon string
+	retainer   [3]int64
+	fees       [len(teleMods)]int64
+	nightBP    int64
+	action     int
+	endAction  int
 }
 
 // teleLane is a remote lane: the claim it holds (−1 idle) and the
@@ -93,6 +105,7 @@ type teleClaim struct {
 	claimedAt             simtime.Time // handoff starts
 	readAt                simtime.Time // handoff done, read starts (0 before)
 	night                 bool         // claimed at ≥ 22:00 or < 08:00 local
+	fee, surcharge        int64        // locked at claim: base fee and night surcharge (cents)
 }
 
 // teleState is the practice's remote reading. It exists from the first
@@ -102,6 +115,11 @@ type teleState struct {
 	lanes     [teleLanes]teleLane
 	claims    []teleClaim
 	edgeGen   uint32 // the pending coverage-edge wake
+	// Slice 5B: the contract log (every accepted start and cancel, in
+	// order), and the vendor totals: retainers and read fees recognized,
+	// and what the A/P payments have paid of them.
+	log                   []teleEntry
+	retainer, reads, paid int64
 }
 
 func teleID(c int) string { return pubID('T', int64(c+1), 5) }
@@ -170,7 +188,8 @@ func (st *state) teleCovering(t simtime.Time) int {
 // teleEligible reports whether contract c may claim study si: its scope
 // on the study's original priority.
 func (st *state) teleEligible(c, si int) bool {
-	return st.tele.contracts[c].scope == teleScopeAll || st.dem.studies[si].priority == Urgent
+	s := &st.dem.studies[si]
+	return (st.tele.contracts[c].scope == teleScopeAll || s.priority == Urgent) && st.teleMod(s.exam) >= 0
 }
 
 // nextTeleEdge is the first instant after t at which the covering contract
@@ -227,12 +246,15 @@ func (st *state) teleEdge(e *Engine, c int) {
 	st.scheduleTeleEdge(e)
 }
 
-// addTeleContract records a contract's coverage terms (Slice 5B's
-// contract_teleradiology validates notice, plan and economics before it):
-// at least one window, an activation after today, an end (if fixed) after
-// the activation, and no overlap with any other contract, which must
+// addTeleContract records a contract on standard-v1 terms without the
+// action's notice and term rules (tests only: TeleContractForTest; the
+// action is contract_teleradiology, telecontract.go): at least one
+// window, an activation after today, an end (if fixed) after the
+// activation, and no overlap with any other contract, which must
 // therefore end at or before this one starts. Lanes are never added.
 func (st *state) addTeleContract(e *Engine, k teleContract) (int, error) {
+	k = withTerms(k, &telePlans[0])
+	k.action, k.endAction = -1, -1
 	today := st.cal.DayIndex(e.Now())
 	switch {
 	case k.windows == 0 || k.windows&^teleAllWindows != 0:
@@ -328,16 +350,24 @@ func (st *state) teleClaim(e *Engine, l, si, c int) {
 	t := st.tele
 	s := &st.dem.studies[si]
 	x := &st.cfg.Catalog[s.exam]
+	k := &t.contracts[c]
 	clock := simtime.ClockOf(e.Now())
+	cl := teleClaim{study: si, contract: c, lane: l, claimedAt: e.Now(), night: teleNight(clock), fee: k.fees[st.teleMod(s.exam)]}
+	if cl.night {
+		cl.surcharge = cl.fee * k.nightBP / 10_000
+	}
 	rc := len(t.claims)
-	t.claims = append(t.claims, teleClaim{study: si, contract: c, lane: l, claimedAt: e.Now(),
-		night: clock >= 22*simtime.Hour || clock < 8*simtime.Hour})
+	t.claims = append(t.claims, cl)
 	ln := &t.lanes[l]
 	ln.claim = rc
 	ln.gen++
 	s.state, s.claimedAt, s.by = studyReading, e.Now(), remoteReader(rc)
-	st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s %s %s (%s) sent to teleradiology: %s, %s · handoff %s",
-		studyID(si), x.Modality, x.Name, s.priority, teleID(c), laneName(l), teleHandoff))
+	fee := "fee " + rate(cl.fee+cl.surcharge)
+	if cl.night {
+		fee += " (night +" + pct(k.nightBP) + ")"
+	}
+	st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s %s %s (%s) sent to teleradiology: %s, %s · handoff %s · %s",
+		studyID(si), x.Modality, x.Name, s.priority, teleID(c), laneName(l), teleHandoff, fee))
 	e.Push(Event{At: e.Now().Add(teleHandoff), Class: ClassCompletion, Kind: kindTeleHandoff, Gen: ln.gen, A: int64(l)})
 }
 
@@ -353,13 +383,16 @@ func (st *state) teleHandoffEnd(e *Engine, l int) {
 	e.Push(Event{At: e.Now().Add(max(1, dur)), Class: ClassCompletion, Kind: kindTeleReadEnd, Gen: ln.gen, A: int64(l)})
 }
 
-// teleReadEnd releases lane l and finalizes its study's report.
+// teleReadEnd releases lane l, finalizes its study's report and
+// recognizes the claim's locked fee.
 func (st *state) teleReadEnd(e *Engine, l int) {
 	ln := &st.tele.lanes[l]
-	si := st.tele.claims[ln.claim].study
+	rc := ln.claim
+	si := st.tele.claims[rc].study
 	ln.claim = -1
 	ln.gen++
 	st.finalize(e, si)
+	st.recognizeRemoteRead(e, rc)
 }
 
 // checkTele verifies remote ownership: each occupied lane holds a claim on

@@ -243,7 +243,8 @@ type LineInfo struct {
 var entryKindNames = map[entryKind]string{entOpening: "opening", entRevenue: "revenue", entStudyCost: "study_cost",
 	entPayment: "payment", entSettle: "settle", entWages: "wages", entSalary: "salary", entFixed: "fixed",
 	entPayroll: "payroll", entPayAP: "pay_ap", entReversal: "reversal", entGuarantee: "guarantee",
-	entRecruiting: "recruiting", entSeverance: "severance", entSeverancePay: "severance_pay"}
+	entRecruiting: "recruiting", entSeverance: "severance", entSeverancePay: "severance_pay",
+	entRetainer: "retainer", entRemoteRead: "remote_read"}
 
 // OpenGuarantee is the guaranteed pay provisioned this week and not yet
 // final (wages and benefits).
