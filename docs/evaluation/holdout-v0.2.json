@@ -1,0 +1,20 @@
+{
+ "schema": "dreamteam.holdout/v1",
+ "id": "v0.2-holdout-1",
+ "method": "seed i (i = 0, 1, …) is lo + (first 8 bytes of SHA-256(label + \"/\" + i), big-endian) mod (hi − lo + 1); skip repeats and excluded sets; stop at count",
+ "label": "dreamteam/v0.2/eval-holdout-1",
+ "count": 40,
+ "lo": 100000,
+ "hi": 999999,
+ "excludedSets": ["1-100", "901-910", "1001-1020"],
+ "seedsSHA256": "ef2c61f81e2dc178442cc3f06efc6d67be2bb6ec0814369e23f7b3cc1815d210",
+ "sealed": true,
+ "protocol": [
+  "The seeds are not listed anywhere in the repository; they are regenerated from this method and must match seedsSHA256.",
+  "No harness runs a holdout seed until docs/evaluation/holdout-unseal.json is committed, naming this holdout, the policy's SHA-256 and the SHA-256 of the frozen strategy set, with the owner's approval. eval.GuardSeeds enforces it.",
+  "Before unsealing: the strategies are frozen from development seeds 901-910 only (1001-1020 are exposed and reference-only), the policy is confirmed by the owner and audited, and the strategy set's files are committed.",
+  "The holdout is run once, every frozen strategy and the no-action baseline on all 40 seeds, and evaluated with the frozen policy. The report and records are committed as they come out.",
+  "A rerun is allowed only to reproduce the same bytes (same engine, policy, strategies). Any change to a strategy, the policy or the engine after unsealing makes the holdout exposed: its results become reference-only, and a new holdout must be generated with a new label."
+ ],
+ "unsealRecord": "docs/evaluation/holdout-unseal.json"
+}

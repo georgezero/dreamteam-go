@@ -7,6 +7,153 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.0 — frozen evaluation framework (0.2.0-dev.9)
+
+The owner accepted Slice 5B. This step freezes how V0.2 strategies will be
+judged, before any staffing, reading-allocation or teleradiology strategy
+is compared. It is a preregistration and measurement milestone: no
+strategy was run, selected or tuned. No demand, reimbursement, staffing or
+allocation economics, teleradiology price, read duration or action
+semantics changed, and no simulation production code changed. Rules,
+rationale and open decisions: `docs/evaluation/README.md`; design summary:
+`docs/V0.2_DESIGN.md` §13.4.
+
+* **Policy.** `docs/evaluation/policy-v0.2.json` (`dreamteam.evalpolicy/v1`,
+  decoded strictly) holds every threshold, window, minimum and verdict rule.
+  Reports carry its SHA-256.
+* **Evaluator.** `internal/eval` is a pure package with no simulation
+  dependency.
+  * `Measure` turns a per-seed record into cohorts, access, remote, money
+    and backlog measures, and cross-checks its sources: samples against
+    studies, remote fees against the ledger, the cash bridge.
+  * `Evaluate` applies the policy. It gives per-seed gates, pooled results
+    with Wilson intervals and the worst seed, paired t 95% comparisons
+    against the baseline (or between candidates), accrual and cash
+    payback, and the verdict.
+* **Recorder.** `World.NewEvalRecorder` (test-only,
+  `internal/sim/export_eval_test.go`) samples a run daily and captures it
+  at each horizon. It reads state only: a recorded run's state digest
+  equals an unrecorded one's.
+* **Service.** The owner's gates are unchanged: urgent ≤ 12%, soon ≤ 32%,
+  routine ≤ 6%.
+  * They are measured per seed and per priority, in T90 and in the
+    frozen-policy tail.
+  * A study breaches if it is not final at its due time, observed
+    through a 24-hour closure.
+  * Empty or thin cohorts are insufficient, never a pass. The minimums are
+    urgent 43, soon 88 and routine 23, from a 5-point standard error at
+    the gate.
+  * At most 10% of seeds may fail or lack evidence, and the pooled rate
+    must pass.
+* **Cohorts.** All studies acquired in each window, finished or not:
+  * completion;
+  * completed-only TAT (never gating);
+  * unfinished ages;
+  * overdue count and study-minutes;
+  * breaches and their denominators;
+  * the historical as-of-end rate beside the gated one.
+
+  Inherited backlog and orders are a separate population.
+* **Backlog.** The single-sample day-90/day-180 rule, which plan D failed
+  on a Monday-to-Sunday comparison, is replaced. The new rule compares
+  28-day blocks aligned to the rota (week-A Mondays), and growth may be at
+  most max(10%, 2 studies). Stages, ages, overdue fraction, flow and slope
+  are reported. The old rule is reported as legacy, and the historical
+  reports are untouched.
+* **Money.**
+  * T90 is primary, T30 feedback, D31–90 operating and T180 validation.
+  * Solvency is the posting-level minimum cash, which may not fall below
+    zero on any seed through the tail.
+  * An obligation bridge (payables, payroll, severance, earned unposted
+    wages, remote in-flight fees, contract minimums) is listed beside the
+    P&L, never in it. Unbilled work is not cash, and there is no
+    borrowing.
+* **Payback.** Sustained break-even, accrual and cash, right-censored. A
+  median is given only with at least half the seeds repaid.
+* **Remote reading.** Local and remote reports, claims, handoff wait,
+  turnaround by reader, retainer and read-fee expense from the ledger,
+  and cost per remote report.
+  * Faster reporting, additional reports and additional recognized
+    revenue are kept apart.
+  * The worst-seed breach rate by priority is set against cash drain,
+    the owner's question for teleradiology.
+  * A teleradiology-only variant must book identically.
+* **Access and case selection.** Due-demand served fraction by priority
+  and modality, per seed and pooled, plus acquisitions, lost referrals
+  and walk-in abandonment, all against the paired baseline. A plan cannot
+  pass the breach gates by declining cases.
+* **Seeds.** Development is 901–910. 1001–1020 are exposed and
+  reference-only.
+  * A new **locked holdout** `v0.2-holdout-1` has 40 seeds from a
+    published SHA-256 method, with no overlap with earlier sets. Its
+    digest is recorded, and the seeds are listed nowhere.
+  * Every calibration harness refuses its seeds (`eval.GuardRepo`) until
+    an approved unseal record names the policy and a frozen strategy set.
+  * It is run once.
+* **Verdicts.**
+  * INVALID: an integrity check fails.
+  * NO GO: a hard gate fails or lacks evidence.
+  * GO: a significant T90 benefit, T180 validation and no funding gap.
+  * CONDITIONAL GO: a positive mean without every GO condition, or
+    service restored at a stated cost.
+
+  There is no weighted score.
+* **Version.** 0.2.0-dev.9 registers 0.2.0-dev.8 (batch mode
+  `v0.2_dev8`, the current action set and rules). The fixture
+  `testdata/sessions/mini-seed29-dev8` was made by the dev.8 binary. It
+  holds an accepted contract, an overlap refusal and a cancellation, and
+  replays exactly and continues. MIGRATIONS.json lists the bump; every
+  reference is unchanged.
+* **Tests.** 19 evaluator tests on synthetic fixtures cover:
+  * empty strata;
+  * insufficient and undecided cohorts;
+  * unfinished overdue studies;
+  * rota-aligned backlog;
+  * midnight and window boundaries;
+  * inherited backlog;
+  * remote and local reconciliation;
+  * vendor cost;
+  * transaction-level minimum cash;
+  * payback censoring and the median rule;
+  * case selection;
+  * historical file hashes;
+  * deterministic output;
+  * the verdict rules;
+  * booking invariance;
+  * the frozen policy and holdout;
+  * the repository guard;
+  * the statistics.
+
+  Alongside them: an integration test on real mini runs with and without
+  a contract, and two dev.8 replay tests.
+* **Fail-before-fix.** 21 targeted mutations were run:
+  * 20 are caught by the intended tests;
+  * one, the dev.8 replay calling `Session.Apply` instead of
+    `World.Apply`, is equivalent (`Session.Apply` is `World.Apply`). The
+    redundant case was removed.
+* **Verification.**
+  * Full uncached suite on the Pi passes in 11 min 31 s (sim 668 s,
+    session 169 s, cmd 95 s, tui 29 s, eval 13 s). Goldens pass with no
+    reference changed, and every session file replays as
+    `earlier_build_exact`, the new dev.8 fixture included.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * On the Cortex-A76, plan A–D validation (55 s) and evaluation (197 s)
+    under dev.9 match the committed archive in every field but the
+    engine name. The 180-day session replay check passes (163 s).
+* **Not done (by design).** No strategy comparison was run, no strategy
+  was chosen, and the holdout is sealed. Acceptance (`-tags acceptance`)
+  was not rerun: it exercises only the simulation engine, whose
+  production code is unchanged.
+* **Open decisions** (owner, before unsealing): breach decided at due
+  time; the evidence minimums (the urgent tail cohort is close to its
+  minimum on low-volume seeds); the 10% seed limit; the case-selection
+  tolerances; the backlog rule; zero-tolerance solvency and funding gap;
+  the GO conditions; the holdout's size and protocol; and the §13.3
+  `DELTA_*` tolerances, which stay informational.
+
+---
+
 ## V0.2 Slice 5B — teleradiology contract action and economics (0.2.0-dev.8)
 
 The owner accepted Slice 5A. This step exposes the remote reading engine

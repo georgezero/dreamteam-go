@@ -44,8 +44,14 @@ no player action yet. Slice 5B, `contract_teleradiology` (0.2.0-dev.8, design
 §5.13), is built: the `standard-v1` catalog, start and cancel with notice,
 minimum term and successor rules, daily prorated retainers, read fees locked
 at claim, first-of-month vendor settlement, previews, the TUI and replay of
-earlier records. Next: Slice 5C, the evaluation, with its service, solvency
-and holdout rules frozen before any strategy is chosen.
+earlier records. Slice 5C.0 (0.2.0-dev.9, design §13.4) froze the
+evaluation before any strategy is compared: per-seed service gates with
+evidence minimums, fixed acquisition cohorts, a rota-aligned backlog rule,
+transaction-level solvency, censored payback, case-selection guards, a
+40-seed sealed holdout and explicit verdict rules (`docs/evaluation`).
+Next: an independent audit of the frozen rules and the owner's confirmation
+of the proposed ones, then Slice 5C.1, strategy development on the
+development seeds.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

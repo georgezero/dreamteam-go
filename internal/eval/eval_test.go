@@ -1,0 +1,667 @@
+package eval
+
+import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"math"
+	"os"
+	"slices"
+	"strings"
+	"testing"
+
+	"github.com/georgezero/dreamteam-go/internal/simtime"
+)
+
+func gate(t *testing.T, pr *PlanReport, g, w, s string) GateSummary {
+	t.Helper()
+	for _, x := range pr.ServiceGates {
+		if x.Gate == g && x.Window == w && x.Stratum == s {
+			return x
+		}
+	}
+	t.Fatalf("%s: no gate %s %s %s", pr.Plan, g, w, s)
+	return GateSummary{}
+}
+
+func comparison(t *testing.T, rep *Report, cand string) Comparison {
+	t.Helper()
+	for _, c := range rep.Comparisons {
+		if c.Candidate == cand && c.Against == rep.Baseline {
+			return c
+		}
+	}
+	t.Fatalf("no comparison for %s", cand)
+	return Comparison{}
+}
+
+func plan(rep *Report, name string) *PlanReport {
+	for i := range rep.Plans {
+		if rep.Plans[i].Plan == name {
+			return &rep.Plans[i]
+		}
+	}
+	return nil
+}
+
+// The synthetic baseline checks out: no integrity failure, every gate
+// decided, and its measured rates are the fixture's.
+func TestSyntheticRecordChecksOut(t *testing.T) {
+	p, d := testPolicy(t)
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) })}})
+	pr := plan(rep, "A")
+	if !pr.Valid || len(pr.Integrity) != 0 || !pr.Eligible {
+		t.Fatalf("%v %v", pr.Integrity, pr.Eligible)
+	}
+	g := gate(t, pr, "breach_rate", "T90", "urgent")
+	if g.Status != Pass || g.Pooled.Den != 900 || math.Abs(g.Pooled.Value-0.1) > 0.02 {
+		t.Fatalf("%+v", g)
+	}
+}
+
+// 1. An empty priority is not a 0% breach rate: it lacks evidence, the
+// seed does not pass, the pooled rate is undefined, and the plan cannot
+// be GO.
+func TestEmptyStratumDoesNotPass(t *testing.T) {
+	p, d := testPolicy(t)
+	cand := func(s int64) synth {
+		x := base("B", s)
+		x.perDay["urgent"] = 0
+		x.profitPD = 30_000
+		return x
+	}
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{
+		"A": records(10, func(s int64) synth { return base("A", s) }), "B": records(10, cand)}})
+	pr := plan(rep, "B")
+	g := gate(t, pr, "breach_rate", "T90", "urgent")
+	if g.Status != Insufficient || g.Pooled.Defined || g.InsufficientSeeds != 10 || g.Passing != 0 {
+		t.Fatalf("%+v", g)
+	}
+	if pr.PerSeed[0].Service != Insufficient || pr.ServiceStatus != Insufficient || pr.Eligible {
+		t.Fatalf("seed %s, plan %s, eligible %v", pr.PerSeed[0].Service, pr.ServiceStatus, pr.Eligible)
+	}
+	if c := comparison(t, rep, "B"); c.Verdict != NOGO {
+		t.Fatalf("%s %v", c.Verdict, c.Reasons)
+	}
+}
+
+// 2. Too few acquisitions, or studies still undecided when observation
+// ends, are identified as insufficient evidence, with the reason.
+func TestInsufficientCohortsIdentified(t *testing.T) {
+	p, _ := testPolicy(t)
+	if p.Service.MinCohort["urgent"] != 43 {
+		t.Fatalf("minimum urgent cohort %d", p.Service.MinCohort["urgent"])
+	}
+	thin := base("A", 901)
+	thin.perDay["urgent"] = 0
+	r := thin.record()
+	// 40 urgent studies in the first 90 days: three short of the minimum.
+	for k := range 40 {
+		acq := t0 + int64(k)*2*daySec + hour
+		r.Studies = append(r.Studies, Study{Priority: "urgent", Modality: "MR", AcquiredSec: acq, EnteredSec: acq, ClaimedSec: acq, ReadStartSec: acq, FinalSec: acq + 1800})
+	}
+	r.Samples = nil
+	for dd := 1; int64(dd)*daySec <= r.ObservedUntilSec-t0; dd++ {
+		at := t0 + int64(dd)*daySec
+		r.Samples = append(r.Samples, thin.sample(&r, dd, at, thin.money(at)))
+	}
+	m := Measure(p, &r)
+	if len(m.Integrity) != 0 {
+		t.Fatal(m.Integrity)
+	}
+	gs := serviceGates(p, m)
+	var g SeedGate
+	for _, x := range gs {
+		if x.Window == WinT90 && x.Stratum == "urgent" {
+			g = x
+		}
+	}
+	if g.Status != Insufficient || !strings.Contains(g.Reason, "40 acquired, fewer than 43") || g.Value != 0 {
+		t.Fatalf("%+v", g)
+	}
+	// Observation stopping before the tail cohort closes leaves studies
+	// undecided: insufficient, never a pass, and it is an integrity failure.
+	short := base("A", 902)
+	short.observeShort = 30*daySec + 20*hour
+	sr := short.record()
+	sr.Studies = append(sr.Studies, Study{Priority: "routine", Modality: "XR", AcquiredSec: short.tailEnd() - hour})
+	m = Measure(p, &sr)
+	c := m.Windows[WinTail].Cohorts["routine"]
+	if c.Unresolved == 0 || c.BreachRate.Defined || !hasPrefix(m.Integrity, "window tail: observed to") {
+		t.Fatalf("%+v %v", c, m.Integrity)
+	}
+}
+
+func ptr(r Record) *Record { return &r }
+
+func hasPrefix(xs []string, p string) bool {
+	return slices.ContainsFunc(xs, func(s string) bool { return strings.HasPrefix(s, p) })
+}
+
+// 3. An unfinished study counts as a breach once it is past its target,
+// is reported as overdue at the window's end with its overdue minutes, and
+// a study acquired just before the end that is reported within target
+// after it is not a breach (the historical as-of-end rule differs).
+func TestUnfinishedOverdueCounted(t *testing.T) {
+	r := &Record{TATTargetMin: testTargets, ObservedUntilSec: t0 + 10*daySec}
+	b := t0 + 5*daySec
+	xs := []*Study{
+		{Priority: "soon", AcquiredSec: b - 10*hour},                      // never final: overdue 6 h at b
+		{Priority: "soon", AcquiredSec: b - 1*hour, FinalSec: b + 2*hour}, // final after b within 4 h: met
+		{Priority: "soon", AcquiredSec: b - 3*hour, FinalSec: b + 2*hour}, // final 5 h after: breach, decided after b
+		{Priority: "soon", AcquiredSec: b - 8*hour, FinalSec: b - 5*hour}, // final in 3 h: met
+		{Priority: "soon", AcquiredSec: r.ObservedUntilSec - 3*hour},      // due after observation: undecided
+	}
+	c := cohort(r, xs[:4], b)
+	if c.Acquired != 4 || c.Finalized != 1 || c.Unfinished != 3 || c.Breaches != 2 || c.OverdueUnfinished != 1 {
+		t.Fatalf("%+v", c)
+	}
+	// Overdue minutes within the window: 6 h for the first; the third is
+	// due at b + 1 h, after the window's end.
+	if c.OverdueStudyMin != 6*60 || c.UnfinishedAgeMin.Max != 10*60 || !c.BreachRate.Defined || c.BreachRate.Value != 0.5 {
+		t.Fatalf("%+v", c)
+	}
+	// As of b, the legacy rule sees one breach (the overdue one).
+	if c.LegacyBreaches != 1 {
+		t.Fatalf("legacy %d", c.LegacyBreaches)
+	}
+	if c := cohort(r, xs, b+10*hour); c.Unresolved != 1 || c.BreachRate.Defined {
+		t.Fatalf("%+v", c)
+	}
+}
+
+// 4. Backlog stability compares whole 28-day blocks that start on a rota
+// cycle boundary (week-A Monday): a backlog with a two-week pattern is
+// stable, though single samples on different weekdays (the historical
+// rule) see growth; real growth is unstable.
+func TestBacklogTrendRotaAligned(t *testing.T) {
+	p, _ := testPolicy(t)
+	anchor, _ := simtime.ParseDate(p.Scenario.RotaWeekA)
+	mk := func(level func(d int) int) *Record {
+		r := &Record{TakeoverSec: t0}
+		date, _ := simtime.ParseDate(t0Date)
+		for d := 1; d <= 181; d++ {
+			x := date.AddDays(int64(d))
+			r.Samples = append(r.Samples, Sample{Day: d, AtSec: t0 + int64(d)*daySec, Date: x.String(), Unread: level(d)})
+		}
+		return r
+	}
+	cycle := func(d int) int {
+		x, _ := simtime.ParseDate(t0Date)
+		k := mod(x.AddDays(int64(d)).Ordinal()-anchor.Ordinal(), 14)
+		return 10 + int(k)*3 // 10 on week-A Mondays … 49 on week-B Sundays
+	}
+	bm := measureBacklog(p, mk(cycle), t0+90*daySec, t0+150*daySec)
+	if bm.Status != "stable" || bm.Growth != 0 {
+		t.Fatalf("%+v", bm)
+	}
+	for _, b := range []Block{bm.Reference, bm.Final} {
+		x, _ := simtime.ParseDate(b.FirstDate)
+		if mod(x.Ordinal()-anchor.Ordinal(), 14) != 0 || b.LastDay-b.FirstDay != 27 {
+			t.Fatalf("block %+v not rota-aligned", b)
+		}
+	}
+	if bm.Reference.LastDay > 90 || bm.Final.LastDay > 150 || bm.Final.FirstDay <= bm.Reference.LastDay {
+		t.Fatalf("blocks %+v %+v", bm.Reference, bm.Final)
+	}
+	// Day 90 is a week-B Monday (level 31), day 180 a week-B Sunday (49):
+	// the single-sample rule reports growth that is only the rota.
+	if !bm.LegacyDefined || bm.LegacyHolds {
+		t.Fatalf("legacy %d → %d holds %v", bm.LegacyDay90, bm.LegacyDay180, bm.LegacyHolds)
+	}
+	grow := func(d int) int { return cycle(d) + d/10 }
+	if bm := measureBacklog(p, mk(grow), t0+90*daySec, t0+150*daySec); bm.Status != "unstable" || bm.SlopePerDay <= 0 {
+		t.Fatalf("%+v", bm)
+	}
+	// Within tolerance: max(10%, 2 studies) of the reference mean.
+	small := func(d int) int {
+		if d > 100 {
+			return cycle(d) + 2
+		}
+		return cycle(d)
+	}
+	if bm := measureBacklog(p, mk(small), t0+90*daySec, t0+150*daySec); bm.Status != "stable" || bm.Growth != 2 {
+		t.Fatalf("%+v", bm)
+	}
+}
+
+// 5. Window boundaries are (a, b]: a study acquired exactly at the window's
+// end is in it, one at its start is not; a report exactly at its due time
+// meets the target, a second later breaches; turnaround spans midnight.
+func TestMidnightBoundaries(t *testing.T) {
+	r := &Record{TATTargetMin: testTargets, ObservedUntilSec: t0 + 3*daySec}
+	a, b := t0, t0+daySec
+	xs := []Study{
+		{Priority: "urgent", AcquiredSec: a, FinalSec: a + 1800},                        // at the start: excluded
+		{Priority: "urgent", AcquiredSec: b, FinalSec: b + 3600},                        // at the end, final exactly at due: met
+		{Priority: "urgent", AcquiredSec: a + 18*hour - 60, FinalSec: a + 19*hour},      // 23:59 to 01:00: 61 min, breach
+		{Priority: "urgent", AcquiredSec: a + 18*hour - 30, FinalSec: a + 18*hour + 30}, // 23:59:30 to 00:00:30
+	}
+	r.Studies = xs
+	w := measureWindow(r, a, b, nil, &Capture{})
+	c := w.Cohorts["urgent"]
+	if c.Acquired != 3 || c.Breaches != 1 || c.Finalized != 2 {
+		t.Fatalf("%+v", c)
+	}
+	if c.CompletedTATMin.Max != 61 || c.CompletedTATMin.P50 != 1 {
+		t.Fatalf("%+v", c.CompletedTATMin)
+	}
+}
+
+// 6. Studies imaged before the takeover and orders received before it are
+// the inherited cohort: never in a new-demand window.
+func TestInheritedBacklogSeparate(t *testing.T) {
+	p, _ := testPolicy(t)
+	x := base("A", 901)
+	x.inherited = 7
+	r := x.record()
+	m := Measure(p, &r)
+	if len(m.Integrity) != 0 {
+		t.Fatal(m.Integrity)
+	}
+	plain := Measure(p, ptr(base("A", 901).record()))
+	if m.Windows[WinT90].Cohorts["routine"].Acquired != plain.Windows[WinT90].Cohorts["routine"].Acquired ||
+		m.Windows[WinT90].Access.Received != plain.Windows[WinT90].Access.Received {
+		t.Fatal("inherited work counted as new")
+	}
+	if m.Inherited.Studies["routine"].Acquired != 7 || m.Inherited.Orders != 7 || m.Inherited.UnfinishedAtT90 != 0 {
+		t.Fatalf("%+v", m.Inherited)
+	}
+	// They are in the backlog until reported (the samples include them).
+	if pr := base("A", 901).record(); r.Samples[0].Backlog() != pr.Samples[0].Backlog()+7 {
+		t.Fatal("no inherited backlog in the samples")
+	}
+}
+
+// 7. Local and remote reports add up to every report, and each remote
+// report's locked fee sums to the ledger's read-fee expense; a record
+// whose ledger disagrees is invalid.
+func TestRemoteAndLocalReconcile(t *testing.T) {
+	p, d := testPolicy(t)
+	tele := func(s int64) synth {
+		x := base("T", s)
+		x.remotePM, x.fee, x.retainerPD = 300, 1_200, 4_000
+		return x
+	}
+	r := tele(901).record()
+	m := Measure(p, &r)
+	if len(m.Integrity) != 0 {
+		t.Fatal(m.Integrity)
+	}
+	w := m.Windows[WinT90]
+	var finals int64
+	for _, s := range r.Studies {
+		if s.FinalSec > t0 && s.FinalSec <= t0+90*daySec {
+			finals++
+		}
+	}
+	rm := w.Remote
+	if rm.RemoteReports == 0 || rm.LocalReports+rm.RemoteReports != finals || rm.ReadFeeCents != rm.RemoteReports*1_200 {
+		t.Fatalf("%+v (%d finals)", rm, finals)
+	}
+	// 8. Vendor cost: retainer and read fees from the ledger, per report.
+	if rm.RetainerCents != 90*4_000 || rm.TotalCostCents != rm.RetainerCents+rm.ReadFeeCents ||
+		rm.CostPerRemoteCent.Value != float64(rm.TotalCostCents)/float64(rm.RemoteReports) || rm.HandoffWaitMin.P50 != 10 {
+		t.Fatalf("%+v", rm)
+	}
+	if tw := m.Windows[WinTail].Remote; tw.RetainerCents != 60*4_000 {
+		t.Fatalf("tail retainer %d", tw.RetainerCents)
+	}
+	recs := records(10, tele)
+	recs[3].Captures[1].Money.RemoteReadsCents += 1
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) }), "T": recs}})
+	if c := comparison(t, rep, "T"); c.Verdict != INVALID || !strings.Contains(strings.Join(c.Reasons, " "), "") {
+		t.Fatalf("%s", c.Verdict)
+	}
+	if pr := plan(rep, "T"); pr.Valid || !hasPrefix(pr.Integrity, "seed 904: window T90: remote reports' fees") {
+		t.Fatal(pr.Integrity)
+	}
+}
+
+// 9. Solvency uses the lowest cash after any posting (every transaction),
+// not the daily samples: a dip between samples fails it.
+func TestTransactionLevelCashMinimum(t *testing.T) {
+	p, d := testPolicy(t)
+	dip := func(s int64) synth {
+		x := base("B", s)
+		x.profitPD = 30_000
+		if s == 905 {
+			x.minCash, x.minCashSet = -1, true // one cent below zero, between samples
+		}
+		return x
+	}
+	recs := records(10, dip)
+	for _, smp := range recs[4].Samples {
+		if smp.CashCents < 0 {
+			t.Fatal("the fixture's samples must stay positive")
+		}
+	}
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) }), "B": recs}})
+	pr := plan(rep, "B")
+	if pr.SolvencyStatus != Fail || !slices.Equal(pr.InsolventSeeds, []int64{905}) || pr.WorstMinCash != -1 {
+		t.Fatalf("%s %v %d", pr.SolvencyStatus, pr.InsolventSeeds, pr.WorstMinCash)
+	}
+	if c := comparison(t, rep, "B"); c.Verdict != NOGO {
+		t.Fatalf("%s", c.Verdict)
+	}
+}
+
+// 10. Payback is the sustained break-even: a later dip below zero resets
+// it, a seed below zero at the horizon is censored, and the median is
+// reported only when at least half the seeds have repaid.
+func TestPaybackCensoring(t *testing.T) {
+	p, _ := testPolicy(t)
+	mk := func(seed int64, inc func(d int) int64) (Record, Record) {
+		a := Record{Seed: seed}
+		b := Record{Seed: seed}
+		for d := 1; d <= 90; d++ {
+			a.Samples = append(a.Samples, Sample{Day: d, ProfitCents: inc(d)})
+			b.Samples = append(b.Samples, Sample{Day: d})
+		}
+		return a, b
+	}
+	cases := []func(d int) int64{
+		func(d int) int64 { return int64(d - 30) },                          // repaid day 30
+		func(d int) int64 { return int64(d - 50) },                          // day 50
+		func(d int) int64 { return []int64{1, -1}[(d/40)%2] * int64(d-10) }, // dips at 40–79, repaid at 80
+		func(d int) int64 { return int64(d - 120) },                         // censored
+		func(d int) int64 { return -5 },                                     // censored
+	}
+	var cr []Record
+	ri := map[int64]*Record{}
+	for i, f := range cases {
+		a, b := mk(int64(i+1), f)
+		cr = append(cr, a)
+		ri[a.Seed] = &b
+	}
+	pb := payback(p, 90, cr, ri, func(s Sample) int64 { return s.ProfitCents })
+	if !slices.Equal(pb.Days, []int{30, 50, 80, 0, 0}) || pb.Repaid != 3 || pb.Censored != 2 || !pb.MedianDefined || pb.Median != 80 {
+		t.Fatalf("%+v", pb)
+	}
+	// Two of four: exactly half have repaid, by day 80.
+	pb = payback(p, 90, cr[1:], ri, func(s Sample) int64 { return s.ProfitCents })
+	if !pb.MedianDefined || pb.Median != 80 || pb.Repaid != 2 || pb.Earliest != 50 || pb.Latest != 80 {
+		t.Fatalf("%+v", pb)
+	}
+	// One of three: fewer than half, no median.
+	pb = payback(p, 90, cr[2:], ri, func(s Sample) int64 { return s.ProfitCents })
+	if pb.MedianDefined || pb.Median != 0 || pb.Repaid != 1 || pb.Censored != 2 {
+		t.Fatalf("%+v", pb)
+	}
+	// A seed without samples through the horizon is left out, not repaid.
+	if pb := payback(p, 180, cr, ri, func(s Sample) int64 { return s.ProfitCents }); len(pb.Days) != 0 || pb.MedianDefined {
+		t.Fatalf("%+v", pb)
+	}
+}
+
+// 11. A plan cannot pass the service gates by declining cases: dropping
+// routine demand (or hard urgent cases) shows in the case-selection
+// gates and the plan is NO GO, whatever its profit and breach rates.
+func TestCaseSelectionCannotBeBypassed(t *testing.T) {
+	p, d := testPolicy(t)
+	baseA := func(s int64) synth { return base("A", s) }
+	declineRoutine := func(s int64) synth {
+		x := base("B", s)
+		x.declinePM["routine"] = 60
+		x.breachPM = map[string]int{"urgent": 50, "soon": 100, "routine": 10}
+		x.profitPD = 50_000
+		return x
+	}
+	dropUrgent := func(s int64) synth {
+		x := base("C", s)
+		x.declinePM["urgent"] = 200
+		x.profitPD = 50_000
+		return x
+	}
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, baseA), "B": records(10, declineRoutine), "C": records(10, dropUrgent)}})
+	for _, name := range []string{"B", "C"} {
+		c := comparison(t, rep, name)
+		pr := plan(rep, name)
+		if pr.ServiceStatus != Pass {
+			t.Fatalf("%s: the breach gates should pass on their own (%s)", name, pr.ServiceStatus)
+		}
+		if c.CaseSelectionStatus != Fail || c.Verdict != NOGO || !strings.Contains(strings.Join(c.Reasons, "\n"), "case selection") {
+			t.Fatalf("%s: %s %s %v", name, c.CaseSelectionStatus, c.Verdict, c.Reasons)
+		}
+	}
+	// Walk-ins turned away likewise.
+	leave := func(s int64) synth {
+		x := base("D", s)
+		x.walkIns, x.walkLeft, x.profitPD = 2, 100, 50_000
+		return x
+	}
+	walk := func(s int64) synth {
+		x := base("A", s)
+		x.walkIns = 2
+		return x
+	}
+	rep = Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, walk), "D": records(10, leave)}})
+	if c := comparison(t, rep, "D"); c.CaseSelectionStatus != Fail || c.Verdict != NOGO {
+		t.Fatalf("%s %s", c.CaseSelectionStatus, c.Verdict)
+	}
+}
+
+// 12. The historical results the evaluation must not touch are byte for
+// byte as recorded in the policy.
+func TestHistoricalReferencesUnchanged(t *testing.T) {
+	p, _ := testPolicy(t)
+	if len(p.Historical) < 30 {
+		t.Fatalf("%d references", len(p.Historical))
+	}
+	for _, h := range p.Historical {
+		raw, err := os.ReadFile("../../" + h.Path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		sum := sha256.Sum256(raw)
+		if hex.EncodeToString(sum[:]) != h.SHA256 {
+			t.Errorf("%s changed", h.Path)
+		}
+	}
+}
+
+// 13. The output depends only on the policy and records: the same input,
+// in any order, gives the same bytes.
+func TestEvaluationDeterministic(t *testing.T) {
+	p, d := testPolicy(t)
+	mk := func() Input {
+		return Input{Baseline: "A", Pairs: [][2]string{{"T", "B"}}, Plans: map[string][]Record{
+			"A": records(10, func(s int64) synth { return base("A", s) }),
+			"B": records(10, func(s int64) synth { x := base("B", s); x.profitPD = 20_000; x.profitNoise = 900; return x }),
+			"T": records(10, func(s int64) synth {
+				x := base("T", s)
+				x.remotePM, x.fee, x.retainerPD, x.breachPM["soon"] = 300, 1_200, 4_000, 100
+				return x
+			})}}
+	}
+	a, _ := json.Marshal(Evaluate(p, d, mk()))
+	in := mk()
+	for k := range in.Plans {
+		slices.Reverse(in.Plans[k])
+	}
+	b, _ := json.Marshal(Evaluate(p, d, in))
+	if !bytes.Equal(a, b) || len(a) < 1000 {
+		t.Fatal("evaluation output differs between runs")
+	}
+}
+
+// The verdict rules (policy "verdict"): GO, the two CONDITIONAL GOs, NO GO
+// without benefit, and INVALID for an action at the primary endpoint.
+func TestVerdictRules(t *testing.T) {
+	p, d := testPolicy(t)
+	failingBase := func(s int64) synth {
+		x := base("A", s)
+		x.breachPM["soon"] = 400 // 40% > 32%: the baseline fails service
+		return x
+	}
+	good := func(name string, pd, noise int64) func(int64) synth {
+		return func(s int64) synth {
+			x := base(name, s)
+			x.profitPD, x.profitNoise = pd, noise
+			return x
+		}
+	}
+	late := func(s int64) synth {
+		x := base("L", s)
+		x.lastAction = 90 * daySec
+		return x
+	}
+	effect := func(s int64) synth {
+		x := base("E", s)
+		x.lastAction, x.effect = 20*daySec, 140*daySec // the tail runs to day 170
+		x.profitPD = 30_000
+		return x
+	}
+	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{
+		"A": records(10, failingBase), "G": records(10, good("G", 30_000, 0)), "N": records(10, good("N", 10_500, 4_000)),
+		"S": records(10, good("S", 4_000, 0)), "L": records(10, late), "E": records(10, effect)}})
+	want := map[string]string{"G": GO, "N": CONDITIONAL, "S": CONDITIONAL, "L": INVALID, "E": GO}
+	for n, v := range want {
+		if c := comparison(t, rep, n); c.Verdict != v {
+			t.Errorf("%s: %s, want %s (%v)", n, c.Verdict, v, c.Reasons)
+		}
+	}
+	if pr := plan(rep, "E"); pr.PerSeed[0].Measures.TailEnd != t0+170*daySec {
+		t.Fatalf("tail end %d", pr.PerSeed[0].Measures.TailEnd-t0)
+	}
+	// A passing baseline: a costlier plan with no benefit is NO GO.
+	rep = Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{
+		"A": records(10, func(s int64) synth { return base("A", s) }), "S": records(10, good("S", 4_000, 0))}})
+	if c := comparison(t, rep, "S"); c.Verdict != NOGO {
+		t.Fatalf("%s %v", c.Verdict, c.Reasons)
+	}
+}
+
+// A teleradiology-only variant must book exactly what its plan books.
+func TestTeleOnlyBookingInvariance(t *testing.T) {
+	p, d := testPolicy(t)
+	tele := func(sha string) func(int64) synth {
+		return func(s int64) synth {
+			x := base("T", s)
+			x.teleOnlyOf, x.apptSHA = "A", sha
+			if s == 907 && sha == "" {
+				x.apptSHA = "other"
+			} else {
+				x.apptSHA = "same"
+			}
+			return x
+		}
+	}
+	for _, broken := range []bool{false, true} {
+		sha := "same"
+		if broken {
+			sha = ""
+		}
+		rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) }), "T": records(10, tele(sha))}})
+		pr := plan(rep, "T")
+		if pr.BookingInvariant == broken || pr.Valid == broken || (comparison(t, rep, "T").Verdict == INVALID) != broken {
+			t.Fatalf("broken %v: invariant %v valid %v %v", broken, pr.BookingInvariant, pr.Valid, pr.Integrity)
+		}
+	}
+}
+
+// The frozen policy: the owner's gates unchanged, the evidence minimums
+// from their arithmetic (binomial standard error at the gate ≤ 5 points),
+// and the closure covering the longest target.
+func TestPolicyFrozen(t *testing.T) {
+	p, _ := testPolicy(t)
+	want := map[string]float64{"urgent": 0.12, "soon": 0.32, "routine": 0.06}
+	for q, g := range want {
+		if p.Service.BreachGate[q] != g {
+			t.Fatalf("%s gate %v", q, p.Service.BreachGate[q])
+		}
+		if n := int64(math.Ceil(g * (1 - g) / (0.05 * 0.05))); p.Service.MinCohort[q] != n {
+			t.Fatalf("%s minimum %d, the rule gives %d", q, p.Service.MinCohort[q], n)
+		}
+	}
+	if p.Horizons.ClosureMin != 1440 || !slices.Equal(p.Service.Gated, []string{"T90", "tail"}) || p.Finance.MinCashFloorCents != 0 {
+		t.Fatalf("%+v", p.Horizons)
+	}
+	raw, _ := os.ReadFile("../../docs/evaluation/policy-v0.2.json")
+	bad := bytes.Replace(raw, []byte(`"closureMin": 1440`), []byte(`"closureMin": 1440, "extra": 1`), 1)
+	if _, err := DecodePolicy(bad); err == nil {
+		t.Fatal("an unknown field is accepted")
+	}
+}
+
+// The locked holdout: regenerated from its method it matches the
+// manifest's digest, has its fixed size, overlaps no earlier seed set,
+// and every harness is refused its seeds until an unseal record names
+// the policy and a strategy set.
+func TestHoldoutSealed(t *testing.T) {
+	_, d := testPolicy(t)
+	h, seeds, err := LoadHoldout("../../docs/evaluation/holdout-v0.2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(seeds) != 40 || h.Count != 40 || !h.Sealed {
+		t.Fatalf("%d seeds", len(seeds))
+	}
+	seen := map[int64]bool{}
+	for _, s := range seeds {
+		if s < 100_000 || (s >= 901 && s <= 910) || (s >= 1001 && s <= 1020) || seen[s] {
+			t.Fatalf("seed %d overlaps an earlier set or repeats", s)
+		}
+		seen[s] = true
+	}
+	if _, err := os.Stat("../../" + h.Unseal); !errors.Is(err, os.ErrNotExist) {
+		t.Fatalf("the holdout has an unseal record: %v", err)
+	}
+	dev := []int64{901, 902, 903}
+	if err := GuardSeeds(dev, h, seeds, nil, d); err != nil {
+		t.Fatal(err)
+	}
+	mixed := append(slices.Clone(dev), seeds[7])
+	if err := GuardSeeds(mixed, h, seeds, nil, d); !errors.Is(err, ErrSealed) {
+		t.Fatalf("a holdout seed ran: %v", err)
+	}
+	u := &Unseal{Holdout: h.ID, PolicyDigest: "stale", StrategiesSHA256: "x", Approved: "owner"}
+	if err := GuardSeeds(mixed, h, seeds, u, d); !errors.Is(err, ErrSealed) {
+		t.Fatal("an unseal record for another policy opened it")
+	}
+	u.PolicyDigest = d
+	if err := GuardSeeds(mixed, h, seeds, u, d); err != nil {
+		t.Fatal(err)
+	}
+	// The manifest commits to the method: another label is other seeds.
+	other, _ := HoldoutSeeds(h.Label+"x", h.Count, h.Lo, h.Hi, h.Excluded)
+	if seedsDigest(other) == h.SeedsSHA256 {
+		t.Fatal("digest does not bind the label")
+	}
+}
+
+// The statistics against known values.
+func TestStatistics(t *testing.T) {
+	for df, want := range map[int]float64{1: 12.706, 9: 2.262, 19: 2.093, 39: 2.023, 1000: 1.962} {
+		if got := tQuantile975(df); math.Abs(got-want) > 0.001 {
+			t.Errorf("t(0.975, %d) = %.4f, want %.3f", df, got, want)
+		}
+	}
+	w := wilson(4, 40)
+	if math.Abs(w.Lo-0.0396) > 0.001 || math.Abs(w.Hi-0.2305) > 0.001 {
+		t.Errorf("wilson %+v", w)
+	}
+	if r := ratio(0, 0); r.Defined {
+		t.Error("0/0 defined")
+	}
+	if d := dist([]int64{5, 1, 4, 2, 3, 6, 7, 8, 9, 10}); d.P50 != 5 || d.P90 != 9 || d.Max != 10 {
+		t.Errorf("%+v", d)
+	}
+}
+
+// The repository guard every calibration harness calls: development
+// seeds run; a holdout seed is refused while no unseal record exists.
+func TestGuardRepo(t *testing.T) {
+	_, seeds, err := LoadHoldout("../../" + HoldoutPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := GuardRepo("../..", []int64{901, 1001}); err != nil {
+		t.Fatal(err)
+	}
+	if err := GuardRepo("../..", []int64{901, seeds[0]}); !errors.Is(err, ErrSealed) {
+		t.Fatalf("%v", err)
+	}
+}

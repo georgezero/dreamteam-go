@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/eval"
 	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/sim"
@@ -176,6 +177,10 @@ func parseSeeds(spec string) []int64 {
 		for s := lo; s <= hi; s++ {
 			out = append(out, s)
 		}
+	}
+	// The sealed holdout (docs/evaluation) never runs from a harness.
+	if err := eval.GuardRepo("../..", out); err != nil {
+		panic(err)
 	}
 	return out
 }

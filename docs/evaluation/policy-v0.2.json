@@ -1,0 +1,102 @@
+{
+ "schema": "dreamteam.evalpolicy/v1",
+ "id": "v0.2-eval-1",
+ "status": "frozen 2026-10-17 (Slice 5C.0), pending owner confirmation of the proposed rules and an independent audit before the holdout is unsealed",
+ "notes": [
+  "Rationale for every value: docs/evaluation/README.md. Rules marked proposed there fill a gap the design left open; they were set from the gates' arithmetic and the measurement units, never from a candidate strategy's results.",
+  "The breach gates are the owner's provisional T90 gates of 2026-10-15, unchanged. No threshold is a weighted score: profit never offsets a failed gate."
+ ],
+ "scenario": {
+  "fingerprint": "e8718dbd1031feb326b4934d291f81eb14fd867d4a8fa6acc1673a75b55b76f8",
+  "tatTargetMin": {"urgent": 60, "soon": 240, "routine": 1440},
+  "rotaWeekA": "2026-10-12"
+ },
+ "horizons": {
+  "feedbackDays": 30,
+  "primaryDays": 90,
+  "operatingFromDay": 30,
+  "validationDays": 180,
+  "tail": {"minDaysAfterPrimary": 60, "daysAfterLatestEffect": 30},
+  "closureMin": 1440
+ },
+ "service": {
+  "breachGate": {"urgent": 0.12, "soon": 0.32, "routine": 0.06},
+  "gatedWindows": ["T90", "tail"],
+  "validationWindows": ["T180"],
+  "infoWindows": ["T30", "D31-90"],
+  "minCohort": {"urgent": 43, "soon": 88, "routine": 23},
+  "maxFailingSeedFraction": 0.10
+ },
+ "caseSelection": {
+  "minStratumDue": 30,
+  "perSeedMaxServedDrop": 0.05,
+  "pooledMaxServedDrop": 0.02,
+  "maxAcquiredDrop": 0.02,
+  "maxLossRateIncrease": 0.02
+ },
+ "backlog": {
+  "blockDays": 28,
+  "rotaCycleDays": 14,
+  "growthFraction": 0.10,
+  "growthStudies": 2,
+  "maxUnstableSeedFraction": 0.10,
+  "legacyRule": "historical (plan D README): mean backlog at the day-180 sample at most 1.1 times the mean at the day-90 sample; single samples on different weekdays. Reported for comparison, never gated."
+ },
+ "finance": {
+  "minCashFloorCents": 0,
+  "maxInsolventSeeds": 0,
+  "maxPastDueCents": 0
+ },
+ "payback": {
+  "horizonDays": [90, 180],
+  "medianMinRepaidFraction": 0.5
+ },
+ "seeds": {
+  "development": "901-910",
+  "reference": "1001-1020",
+  "holdoutManifest": "docs/evaluation/holdout-v0.2.json"
+ },
+ "verdict": [
+  "INVALID: any record or comparison integrity check fails (schema, scenario, TAT targets, an action at or after T90, the tail rule, observation through closure, cash bridge, sample-to-study reconciliation, remote fees to ledger, seed sets, teleradiology-only booking invariance). An invalid evaluation is not evidence; fix and rerun.",
+  "NO GO: any hard gate fails or lacks evidence: service breach gates in every gated window (per seed and pooled), case selection, backlog stability, solvency.",
+  "GO: every hard gate passes; the T90 paired 95% interval of incremental operating profit is above zero; T180 validation holds (its service gates pass and its mean incremental profit is positive); and no seed's obligations exceed its cash at the tail's end.",
+  "CONDITIONAL GO: every hard gate passes and either the mean T90 increment is positive without every GO condition, or the increment is not positive but the baseline fails a hard gate the candidate passes (service restored at a stated cost).",
+  "NO GO otherwise: every hard gate passes but there is no T90 profit while the baseline already passes every gate."
+ ],
+ "historicalReferences": [
+  {"path": "docs/calibration/dynamic-staffing/results/dev/A-no-action.json", "sha256": "a7285526e81632221b4312398137b3726d4e895976c12528bf32123e6705f21d"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/B1-mr-evening.json", "sha256": "7d313133d50e7f212888fa39a8976d1de098223b35b4186edb32a2b022515811"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/B2-float.json", "sha256": "ed316cd46cc34c47fa1f3ee4455d990ccdba33d8de5aabbbc8aaac41ff0e985c"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/B3-float-mr-evening.json", "sha256": "50c47de0f6885579c9aea53abbe78648440ba97d570a38d9b6535d3f57e4a735"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/C-full-reorganization.json", "sha256": "55f5247e9d9de081694bb9e7bcfdf40c0317a8d870e5281b19d6ce96b3059d01"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/report.md", "sha256": "40d73a49f69ac5a00dd815fefec3a2f4f34857690dc85aece74b90bc313b1047"},
+  {"path": "docs/calibration/dynamic-staffing/results/dev/trajectory.csv", "sha256": "f1ee11fe0d351012680df794c9fc1c99004ca37a2e3d3230b4483e5323d6b6ba"},
+  {"path": "docs/calibration/dynamic-staffing/results/eval/A-no-action.json", "sha256": "e292e1369523df98df69e5db2fd536348532ca466a3568d0353f7344830e23ec"},
+  {"path": "docs/calibration/dynamic-staffing/results/eval/B-partial.json", "sha256": "7794da84845aef5bd77d0c139b2ccf4181e9ad36ca49787e3cd186ac5fffef0c"},
+  {"path": "docs/calibration/dynamic-staffing/results/eval/C-full-reorganization.json", "sha256": "043142d120775194479c8ff0183789a3a91d364fc1adb69836638a4b021e8be8"},
+  {"path": "docs/calibration/dynamic-staffing/results/eval/report.md", "sha256": "73cb7ecec7d1d319577c84e87262603927e66b3d34558d4890122a4c8bfa2d71"},
+  {"path": "docs/calibration/dynamic-staffing/results/eval/trajectory.csv", "sha256": "ad68d487ff943669ca23aa63c7a544de84bacc704f995ddfd603fa734c3e35d0"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/A-no-action.json", "sha256": "01649089776e1778556eab097b70b32eec02c65bbba252504915b3b62e7167ab"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/C-full-reorganization.json", "sha256": "f5f340f1deb85cd23ffc752ab91e4e9a6663d60d4abac4b35ce46903444548f3"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/D-full-reading.json", "sha256": "0e3fc9f76cc7257c200509258aa6daa647ea61e346a748d7a3992ac3e3aa3674"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/reading.md", "sha256": "a702e0491c289a06643491dc34c0be6aad5dfb8c8e078c035243e6fe4ed56144"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/report.md", "sha256": "39178bf587b7a0e518314449d0df4651420f71f719ea8b0d66865b66f8d1733f"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-dev/trajectory.csv", "sha256": "df9eba7eb7df8fcea2ef8b33b767177bef41439e9079a654f9372cb4802b86c3"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/A-no-action.json", "sha256": "013f0534e7c9056cb0ee8cd6da843db64ff4a6bfdde65be104f9f4d3fb9c7c3c"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/B-partial.json", "sha256": "58b197bb1b7e1b77fa257a8e9ff6d9fa4a24a1f909c40a3b0b0d3958f819146e"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/C-full-reorganization.json", "sha256": "fec7ae9a5d5f682103ca440629877ebc65614b00b40a2170497dd12ac94a7e3f"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/D-full-reading.json", "sha256": "15dc838465e8f86d976d42f01a403f3a26035c93fc89e2735e29e0679142dc3c"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/reading.md", "sha256": "9743e7a28e6ba3a317c4d08f397ce80161c1461c293a748b82654c521d8ead05"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/report.md", "sha256": "7d6a3209804d26007733ef2bb801fe676f81c9594c8b64203d44cf3695e990f2"},
+  {"path": "docs/calibration/dynamic-staffing/results/reading-eval/trajectory.csv", "sha256": "1282e27c9f7557efd0dc0108db626a4b8e61df312ab0b177b1a1b245d0b5b7be"},
+  {"path": "docs/calibration/dynamic-staffing/benchmark.json", "sha256": "dbf4c0ea424485a4483241dae560e2fbdb2012272e334efaa6af639bef4b5a62"},
+  {"path": "docs/calibration/dynamic-staffing/plans/A-no-action.json", "sha256": "8cb36a89e1afe9003e86c2753d2f43da81a0498cc61b9a8383a33fe466aae004"},
+  {"path": "docs/calibration/dynamic-staffing/plans/B1-mr-evening.json", "sha256": "dd3a8b740c3cb24e3a5d44b1e008cb2693cef9c4df98090bce26602e5368555f"},
+  {"path": "docs/calibration/dynamic-staffing/plans/B2-float.json", "sha256": "4ea7ea402c56c794881b49345ee1d76ca38a1d6cc9ee4ed594e953b598ca6fb2"},
+  {"path": "docs/calibration/dynamic-staffing/plans/B3-float-mr-evening.json", "sha256": "8d97a97d493d69ef1e03cadfac1dc378a9433d64bb414660435352f5042f75d6"},
+  {"path": "docs/calibration/dynamic-staffing/plans/B-partial.json", "sha256": "e5939ab6f5cccd964694a64fc4472838f66c432ef0bc3ee6300acc5e54fb47f2"},
+  {"path": "docs/calibration/dynamic-staffing/plans/C-full-reorganization.json", "sha256": "19a032ad28ee41d95e99a218d02d9e3ec4a91c0974c6c7b4aa8844169160bf01"},
+  {"path": "docs/calibration/dynamic-staffing/plans/D-full-reading.json", "sha256": "1257cfec2c7d109f73fd460f466af98c45c934217b3a524c14d08f53603f78ad"},
+  {"path": "docs/calibration/teleradiology-5b/results/functional-dev.json", "sha256": "75de712774da65f7fcd25a043ddad9057334034b202784876141fb33213b21ef"}
+ ]
+}

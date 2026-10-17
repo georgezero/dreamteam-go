@@ -412,3 +412,20 @@ engine name.
 The benchmark results under 0.2.0-dev.8 match the committed archive
 (`results/reading-dev`, `results/reading-eval`) in every field but the
 engine name.
+
+
+## 2026-10-17 — V0.2 Slice 5C.0: frozen evaluation framework (Pi 4 at ≈77 °C, load average ≈3.4; Cortex-A76 "joofi", load average ≈0.4–1.6)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 11 min 31 s (sim 668 s, session 169 s, cmd 95 s, tui 29 s, eval 13 s) |
+| Evaluator tests, Pi | `go test ./internal/eval -count=1` | 3–13 s (19 tests on synthetic 10-seed × 181-day fixtures) |
+| Recorder integration, Pi | `go test ./internal/sim -run EvalRecordOnRealRuns` | 4.9 s (five mini runs of 41 days) |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 55 s |
+| Evaluation, 4 plans × 20 reference seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 3` | 197 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` | 163 s |
+
+The simulation's production code is unchanged, so the engine benchmarks
+were not rerun. The benchmark results under 0.2.0-dev.9 match the
+committed archive in every field but the engine name.
+

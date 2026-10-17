@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/eval"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -71,6 +72,9 @@ func TestDynamicPlansReplay(t *testing.T) {
 			} `json:"batches"`
 		}
 		readDyn(t, path, &p)
+		if err := eval.GuardRepo("../..", seeds); err != nil {
+			t.Fatal(err)
+		}
 		for _, seed := range seeds {
 			s, err := FromFile(f, seed)
 			if err != nil {

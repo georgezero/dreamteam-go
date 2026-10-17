@@ -87,7 +87,7 @@ type LegacyPrefix struct {
 	Schema     string          `json:"schema"`    // dreamteam.session/v1, or v2 of an earlier V0.2 build
 	Engine     string          `json:"engine"`    // the build that wrote it
 	Checksum   string          `json:"checksum"`  // its own checksum
-	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only), v0.2_slice3 (with set_roster, before set_reading_allocation) v0.2_slice4 (0.2.0-dev.5: with set_reading_allocation, dev.5's rules), v0.2_dev6 (0.2.0-dev.6) or v0.2_dev7 (0.2.0-dev.7): Slice 4's action set, before contract_teleradiology, under this build's rules
+	BatchMode  string          `json:"batchMode"` // legacy_sequential (v1), v0.2_slice2 (hire and terminate only), v0.2_slice3 (with set_roster, before set_reading_allocation) v0.2_slice4 (0.2.0-dev.5: with set_reading_allocation, dev.5's rules), v0.2_dev6 (0.2.0-dev.6) or v0.2_dev7 (0.2.0-dev.7): Slice 4's action set, before contract_teleradiology, under this build's rules; v0.2_dev8 (0.2.0-dev.8): this build's action set and rules
 	LastBatch  int64           `json:"lastBatch"` // its last batch number (0: none)
 	UntilSec   int64           `json:"untilSec"`
 	Outcome    string          `json:"outcomeCompatibility"` // verified (outcomes) or exact (every digest)
@@ -107,6 +107,7 @@ const (
 	batchModeSlice4     = "v0.2_slice4"
 	batchModeDev6       = "v0.2_dev6"
 	batchModeDev7       = "v0.2_dev7"
+	batchModeDev8       = "v0.2_dev8"
 	batchModeCurrent    = ""
 )
 
@@ -408,14 +409,14 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
 func dev5Rules(mode string) bool {
-	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8
 }
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1
@@ -816,7 +817,7 @@ func applyBatches(s *Session, batches []Batch, opts ReplayOptions, rep *Report, 
 			got = s.w.ApplySlice4(b.Actions) // under dev.5's rules
 		case batchModeDev6, batchModeDev7:
 			got = s.w.ApplySlice4(b.Actions) // under this build's rules
-		default:
+		default: // this build's action set (v0.2_dev8 too)
 			got = s.Apply(b.Actions...)
 		}
 		rep.Actions += len(got)
