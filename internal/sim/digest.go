@@ -69,6 +69,7 @@ var skipFields = map[string]bool{
 	"state.cfg": true, "state.log": true, "state.drawMemo": true, "state.staffBuf": true,
 	"state.dropOrder": true, "state.forceNoShow": true, "state.lossProbe": true, "state.actions": true,
 	"state.now":            true, // the time of the last transaction: when processing happened, not what
+	"state.dev5":           true, // replay configuration (SetDev5Rules), not state
 	"metricsState.done":    true,
 	"finState.forceDenied": true,
 	"ledger.keys":          true, "ledger.verified": true, "ledger.shadow": true, "ledger.cal": true,

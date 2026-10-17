@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.golden-migration/v1",
- "engine": "0.2.0-dev.5",
+ "engine": "0.2.0-dev.6",
  "stateSchema": "dreamteam.state/v3",
  "explanation": [
   "V0.2 Slice 1 (employee contracts): the state digest's encoding became dreamteam.state/v2. It added the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
@@ -9,7 +9,8 @@
   "The references stay byte-for-byte as their engine wrote them; this manifest records each changed field's old (historical) and new (this build's) value, and a comparison under it requires both exactly.",
   "V0.2 Slice 3 (set_roster) keeps dreamteam.state/v3: roster versions are encoded only when an employee has one, so every state above encodes as before. One observable message changed: a batch mixing a V0.1 action with V0.2 staffing actions is refused (mixed_batch) with a message naming the V0.2 actions, now 'hire, terminate, set_roster'. established-staffing.actions.json has such a batch, so in established-seed1-60d-staffing.json (written by 0.2.0-dev.2) the action record's digest, and the run digest derived from it, differ; the log, ledger and state digests and every outcome are identical. Replaying a 0.2.0-dev.2 session file applies its batches with that build's action set and reproduces its message and every digest exactly.",
   "0.2.0-dev.4 (the dynamic staffing benchmark) changes no engine behaviour: established-seed1-60d-roster.json (written by 0.2.0-dev.3) is reproduced in every field, digests included, so it is listed with no changed field. A 0.2.0-dev.3 session file replays with every digest verified (batch mode v0.2_slice3).",
-  "0.2.0-dev.5 (V0.2 Slice 4, set_reading_allocation) changes no outcome without the new action: a radiologist's allocation versions are encoded only when present, so every reference is reproduced as under 0.2.0-dev.4, and the refusal of a batch mixing a V0.1 action with V0.2 actions keeps its recorded message unless the batch holds a set_reading_allocation. 0.2.0-dev.3 and 0.2.0-dev.4 session files replay with every digest verified (batch mode v0.2_slice3)."
+  "0.2.0-dev.5 (V0.2 Slice 4, set_reading_allocation) changes no outcome without the new action: a radiologist's allocation versions are encoded only when present, so every reference is reproduced as under 0.2.0-dev.4, and the refusal of a batch mixing a V0.1 action with V0.2 actions keeps its recorded message unless the batch holds a set_reading_allocation. 0.2.0-dev.3 and 0.2.0-dev.4 session files replay with every digest verified (batch mode v0.2_slice3).",
+  "0.2.0-dev.6 (pre-Slice 5 remediation) changes outcomes only where its fixes apply: a radiologist's reading blocks that touch (allocation 100%) no longer end reading at the first boundary, a read running through other duties into the next block owes the borrowed time, and a reading allocation stays in force at least 14 days before the next change. No reference reaches any of these (their allocations leave other-duty time longer than any read, and their allocation changes are at least 14 days apart), so every reference, established-seed1-60d-allocation.json (written by 0.2.0-dev.5) included, is reproduced in every field and listed with no changed field. Because the fixes do change outcomes elsewhere, a 0.2.0-dev.5 session file replays in batch mode v0.2_slice4: this build's action set under dev.5's reading and allocation rules, with every digest verified; earlier builds' files replay under those rules too."
  ],
  "references": {
   "established-seed1-7d.json": {
@@ -86,6 +87,7 @@
     "new": "a2adfe9304bb7a22662a02daf191bd75982fb333e7513f057a3860c668b92236"
    }
   },
-  "established-seed1-60d-roster.json": {}
+  "established-seed1-60d-roster.json": {},
+  "established-seed1-60d-allocation.json": {}
  }
 }

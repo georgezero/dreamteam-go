@@ -31,10 +31,15 @@ import (
 // displaces no booking.
 
 // Allocation bounds (§17.2 [proposed]): the published 30% floor to the
-// radiologist's whole paid time.
+// radiologist's whole paid time. MinCommitDays (0.2.0-dev.6): an
+// allocation, once in force, stays in force at least this many calendar
+// days before the next change, so salary cannot be cut for the days a
+// radiologist does not work (a Sunday at 30%, back on Monday) while every
+// shift keeps its reading.
 const (
-	MinSiteBP = 3_000
-	MaxSiteBP = 10_000
+	MinSiteBP     = 3_000
+	MaxSiteBP     = 10_000
+	MinCommitDays = 14
 )
 
 // allocVersion is one dated allocation in force from From.
@@ -218,6 +223,69 @@ func (st *state) checkSetAllocation(a api.Action, p *proposal) staffOutcome {
 	as := &allocSpec{emp: i, from: from, op: rosterSet, bp: a.SiteAllocationBP, was: cur, then: a.SiteAllocationBP}
 	p.addAlloc(st, as)
 	return staffOutcome{ok: true, code: api.ActionAccepted, alloc: as, effective: date.String(), msg: st.allocText(as, false)}
+}
+
+// checkAllocCommit checks the minimum commitment (MinCommitDays) on the
+// allocation timelines as the whole batch leaves them: every two
+// consecutive versions at least MinCommitDays apart (the scenario
+// allocation, in force since before the takeover, counts as the first).
+// Only pairs the batch makes are checked: a pair already in the timeline
+// (an earlier build's, which had no such rule) stays as it was. It
+// returns the refused item (the first of the batch's items on that
+// radiologist that makes the pair) and its outcome, or -1.
+func (st *state) checkAllocCommit(p *proposal, out []staffOutcome) (int, staffOutcome) {
+	emps := make([]int, 0, len(p.aversions))
+	for i := range p.aversions {
+		emps = append(emps, i)
+	}
+	slices.Sort(emps)
+	type pair struct{ a, b int64 }
+	pairs := func(vs []allocVersion) []pair {
+		var out []pair
+		for k := 1; k < len(vs); k++ {
+			out = append(out, pair{vs[k-1].From, vs[k].From})
+		}
+		return out
+	}
+	for _, i := range emps {
+		before := pairs(st.staff[i].Allocs)
+		final := p.aversions[i]
+		for k := 1; k < len(final); k++ {
+			a, b := final[k-1], final[k]
+			if b.From-a.From >= MinCommitDays || slices.Contains(before, pair{a.From, b.From}) {
+				continue
+			}
+			// The item that makes the pair: a version set on either date,
+			// or a version between them withdrawn.
+			at := -1
+			for j := range out {
+				as := out[j].alloc
+				if as == nil || as.emp != i {
+					continue
+				}
+				if as.from == a.From || as.from == b.From || (as.op == rosterRemove && a.From < as.from && as.from < b.From) {
+					at = j
+					break
+				}
+			}
+			if at < 0 { // cannot happen: a new pair needs one of those items
+				at = slices.IndexFunc(out, func(o staffOutcome) bool { return o.alloc != nil && o.alloc.emp == i })
+			}
+			label, days := st.staffLabel(i), b.From-a.From
+			unit := "days"
+			if days == 1 {
+				unit = "day"
+			}
+			msg := fmt.Sprintf("An allocation stays in force at least %d days: %s's %s from %s would be followed by %s from %s after %d %s (the earliest next change is %s).",
+				MinCommitDays, label, pct(a.BP), st.dayLabel(a.From), pct(b.BP), st.dayLabel(b.From), days, unit, st.dayLabel(a.From+MinCommitDays))
+			if as := out[at].alloc; as.op == rosterRemove {
+				msg = fmt.Sprintf("Withdrawing %s's change effective %s would leave %s from %s in force %d %s before %s from %s: an allocation stays in force at least %d days.",
+					label, st.dayLabel(as.from), pct(a.BP), st.dayLabel(a.From), days, unit, pct(b.BP), st.dayLabel(b.From), MinCommitDays)
+			}
+			return at, staffOutcome{code: "commitment_too_short", msg: msg}
+		}
+	}
+	return -1, staffOutcome{}
 }
 
 func (p *proposal) addAlloc(st *state, as *allocSpec) {

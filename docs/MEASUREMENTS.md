@@ -363,3 +363,18 @@ and C under 0.2.0-dev.5 reproduce the 0.2.0-dev.4 evaluation results in
 every field but the engine name. Their seed-1001 sessions also reach the
 same run digests.
 
+
+## 2026-10-16 — V0.2 dev.6 pre-Slice 5 remediation (Pi 4 at ≈82 °C; Cortex-A76 "joofi" at ≈84 °C, shared, load average ≈1.5–18)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Engine benchmarks, 0.2.0-dev.5 against 0.2.0-dev.6, interleaved in both orders (7 samples each), Cortex-A76 | `./sim-devN.test -test.bench 'EstablishedPlay90\|Mini180' -test.run '^$' -test.benchmem` | Mini180: median 917 ms/op (dev.5) vs 937 ms/op (dev.6). EstablishedPlay90: 376 vs 386 ms/op. Run-to-run spread ≈15%, so no measurable difference. Bytes and allocations per op identical (183.7 MB, 3.73M allocs; 78.6 MB, 1.24M allocs) |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 54 s (dev.5: 70 s, shared) |
+| Evaluation, 4 plans × 20 held-out seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 4` | 194 s (dev.5: 176 s; load ≈18 from other work) |
+| Session replay check, 7 plans × 2 seeds × 180 days, whole and in 13-hour chunks, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` (`DT_DYN_DAYS=180 DT_DYN_SEEDS=901,1001`) | 171 s |
+| Acceptance (`-tags acceptance`), Cortex-A76 | `./acc.test -test.v` | Staffing and roster invariants, turnover and churn: 2 h 0 min while shared. The run hit its 120-minute limit during the V0.1 criteria, which then passed alone in 42 min (`-test.run 'TestAcceptance(Invariants|Chunking)$'`; chunking 20.2 s). Set `-test.timeout 240m` |
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | sim 544 s (9 min 5 s wall alone), session 111 s, cmd 87 s, tui 24 s |
+
+The benchmark results under 0.2.0-dev.6 match the 0.2.0-dev.5 archive
+(`results/reading-dev`, `results/reading-eval`) in every field but the
+engine name.

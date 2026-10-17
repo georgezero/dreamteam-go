@@ -166,7 +166,7 @@ func (st *state) staffEvent(e *Engine, ev Event) {
 	case kindBlockStart:
 		st.blockStart(i, int(ev.B))
 	case kindBlockEnd:
-		st.blockEnd(i)
+		st.blockEnd(i, int(ev.B))
 	}
 }
 

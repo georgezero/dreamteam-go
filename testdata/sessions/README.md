@@ -8,6 +8,8 @@ wrote them, to test that this build replays them authoritatively.
 | `mini-seed21-slice2.session.json` | 0.2.0-dev.2 (V0.2 Slice 2, commit 2da900d) | mini, seed 21, 9 days, with `mini-seed21-slice2.actions.json` |
 | `mini-seed22-slice3.session.json` | 0.2.0-dev.3 (V0.2 Slice 3, commit 5fdfb95) | mini, seed 22, 9 days, with `mini-seed22-slice3.actions.json` |
 | `mini-seed23-dev4.session.json` | 0.2.0-dev.4 (dynamic staffing benchmark, commit af475fd) | mini, seed 23, 9 days, with `mini-seed23-dev4.actions.json` |
+| `mini-seed24-dev5.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 24, 30 days, with `mini-seed24-dev5.actions.json` |
+| `mini-seed25-dev5-reading.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 25, 20 days, with `mini-seed25-dev5-reading.actions.json` |
 
 Each was made with its build's binary, from a clean worktree of that commit:
 
@@ -54,3 +56,25 @@ the file embedded as the new record's prefix
 this build refused it as an engine mismatch. The benchmark's session files
 in `docs/calibration/dynamic-staffing/sessions/` are also dev.4 records,
 and `dreamteam verify` replays them the same way.
+
+The two 0.2.0-dev.5 files were made the same way from 13987e6, with
+`-seed 24 -days 30` and `-seed 25 -days 20`. They are there because
+0.2.0-dev.6 changed outcomes, not only an encoding (V0.2_DESIGN §5.11):
+
+* `mini-seed24-dev5` sets Dr. Avery to 100% and Dr. Blake to 95% from
+  Oct 27, Dr. Blake to 30% from Sat Oct 31 and back on Mon Nov 2, Dr.
+  Avery to 30% from Sat Nov 7 and back to 100% on Mon Nov 9, then
+  withdraws Dr. Blake's Oct 31 change. dev.5 accepted every action;
+  dev.6 refuses the short versions (`commitment_too_short`) and would
+  read differently at 100% and 95%.
+* `mini-seed25-dev5-reading` has only the 100%/95% batch, which both
+  builds accept; its log and run digests reproduce only under dev.5's
+  reading rules.
+
+Both replay in batch mode `v0.2_slice4` (this build's action set under
+dev.5's rules) with every digest verified (`earlier_build_exact`), and
+the first continues under this build's rules with the file embedded as
+the new record's prefix (`internal/session/dev5_test.go`). Before
+0.2.0-dev.5 was registered, this build refused both as an engine
+mismatch; registered without dev.5's rules, the first is refused at its
+second batch.

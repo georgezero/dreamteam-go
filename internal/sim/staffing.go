@@ -143,6 +143,11 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 			out[k], fail = o, k
 		}
 	}
+	if fail < 0 && len(p.allocs) > 0 && !st.dev5 {
+		if k, o := st.checkAllocCommit(p, out); k >= 0 {
+			out[k], fail = o, k
+		}
+	}
 	if fail >= 0 {
 		for k := range out {
 			if k != fail {

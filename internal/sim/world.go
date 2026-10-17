@@ -61,6 +61,13 @@ type state struct {
 	drawMemo map[drawKey][4]uint64
 	mods     []string // room modalities in room order: the ledger's modality dimension
 
+	// dev5 selects the semantics of 0.2.0-dev.5 and earlier builds while
+	// their records replay (SetDev5Rules): reading-block boundaries and
+	// overrun debt as built through Slice 4, and no allocation commitment.
+	// It is replay configuration, not state: a session is in this build's
+	// rules except while an earlier build's batches replay.
+	dev5 bool
+
 	// dropOrder, if set (tests only), suppresses exogenous orders that
 	// would arrive at or after a time: a change to future hidden demand.
 	dropOrder func(at simtime.Time) bool
@@ -110,6 +117,16 @@ func (w *World) Engine() *Engine { return w.eng }
 
 // Calendar returns the practice calendar.
 func (w *World) Calendar() simtime.Calendar { return w.st.cal }
+
+// SetDev5Rules selects (on) or leaves (off) the semantics of 0.2.0-dev.5
+// and earlier builds, for replaying their records (session.Replay): the
+// reading scheduler as built through Slice 4 (a block ending where the
+// next starts ended reading; a read running through other duties into the
+// next block owed nothing) and allocation changes without the minimum
+// commitment. The switch is replay configuration: it changes no state and
+// no digest, and a session leaves it once the earlier batches are
+// replayed.
+func (w *World) SetDev5Rules(on bool) { w.st.dev5 = on }
 
 // StartTime returns when play begins: the start date at the start clock.
 func (w *World) StartTime() simtime.Time {

@@ -209,8 +209,18 @@ func (st *state) readEnd(e *Engine, si int) {
 	st.dem.finals = append(st.dem.finals, si)
 	o := &st.dem.orders[s.order]
 	o.state = orderReported
-	if !emp.reading {
+	switch {
+	case !emp.reading:
+		// Finished during other duties: the time since the last block
+		// ended was borrowed.
 		emp.readDebt += e.Now().Sub(emp.blockEndAt)
+	case !st.dev5 && emp.readDebt > 0:
+		// Finished inside a block while owing (a read that ran on through
+		// other duties into this block, blockStart): the debt is repaid
+		// from now, out of this block's remaining time.
+		end := st.blockRunEnd(i)
+		emp.readFrom = e.Now().Add(emp.readDebt)
+		emp.readDebt -= min(emp.readDebt, max(0, end.Sub(e.Now())))
 	}
 	emp.status, emp.task, emp.taskVisit, emp.taskStudy = available, taskNone, -1, -1
 	tat := s.finalAt.Sub(s.acquiredAt)
@@ -230,19 +240,56 @@ func (st *state) readEnd(e *Engine, si int) {
 		studyID(si), x.Modality, x.Name, emp.cfg.Name, tat, money(rev)))
 }
 
-// blockStart opens a site reading block, after any overrun owed.
+// blockStart opens site reading block k, after any overrun owed: claims
+// start once the debt is repaid out of the block's time.
+//
+// A read still running when the block opens ran on through the other-duty
+// interval before it: that whole interval was borrowed, and it is owed
+// now, whether or not the read has finished (0.2.0-dev.5 and earlier
+// charged only reads that finished outside a block, so such a read's
+// borrowed time was lost). Its repayment starts when the read ends
+// (readEnd): the block's time until then is site reading.
 func (st *state) blockStart(i, k int) {
 	emp := &st.emps[i]
 	b := st.plan.Reading[i][k]
+	if !st.dev5 && emp.task == taskRead {
+		if !emp.reading {
+			emp.readDebt += st.now.Sub(emp.blockEndAt)
+		}
+		emp.reading = true
+		return
+	}
 	emp.reading = true
 	emp.readFrom = st.now.Add(emp.readDebt)
 	emp.readDebt = max(0, emp.readDebt-(b.To-b.From))
 }
 
-func (st *state) blockEnd(i int) {
+// blockEnd closes site reading block k. Where the next block starts at
+// this block's end (allocation 100%: the cycle has no other-duty time),
+// that block has already opened at this instant (its start is a class-1
+// event, this end class 5) and reading continues: closing here would end
+// every block after the first (as 0.2.0-dev.5 and earlier did).
+func (st *state) blockEnd(i, k int) {
 	emp := &st.emps[i]
+	if bs := st.plan.Reading[i]; !st.dev5 && k+1 < len(bs) && bs[k+1].From == bs[k].To {
+		return
+	}
 	emp.reading = false
 	emp.blockEndAt = st.now
+}
+
+// blockRunEnd is when radiologist i's site reading next stops: the end of
+// the block in progress and of any block starting where it ends (now if
+// no block is in progress).
+func (st *state) blockRunEnd(i int) simtime.Time {
+	end := st.now
+	for _, b := range st.plan.Reading[i] {
+		from, to := st.cal.At(st.day, b.From), st.cal.At(st.day, b.To)
+		if from <= end && end < to {
+			end = to
+		}
+	}
+	return end
 }
 
 // checkReading verifies study invariants: one study per imaged visit and

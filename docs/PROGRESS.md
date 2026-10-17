@@ -7,6 +7,137 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 dev.6 — pre-Slice 5 remediation (0.2.0-dev.6)
+
+An independent read-only audit of 13987e6 (0.2.0-dev.5) returned
+CONDITIONAL GO, with two verified scheduler defects and an allocation
+arbitrage that would distort Slice 5's comparison of internal reading
+against outsourced reading. This step fixes those three and nothing else:
+`contract_teleradiology` is not built, and demand, reimbursement, wages,
+recruiting, read durations, service gates and the frozen plans are
+unchanged. Design and as-built notes: `docs/V0.2_DESIGN.md` §5.11.
+
+* **Fix 1: touching reading blocks.** At 100% the cycle's blocks touch.
+  The next block's start (class 1) ran before the previous block's end
+  (class 5) at the same instant, so the end closed reading and the
+  radiologist claimed nothing for the rest of the shift.
+  * `blockEnd` now continues reading when the day's next block starts
+    exactly where this one ends.
+  * The blocks, their sum and their boundaries are unchanged, so no
+    capacity is added.
+  * Reads stay nonpreemptive. Worklist order and the shift-end claim rule
+    are unchanged.
+* **Fix 2: overrun debt from time actually spent outside blocks.** dev.5
+  charged the overrun only if a read ended outside a block, so a read
+  running through a whole other-duty gap owed nothing. This affected
+  allocations above 75%; the scenario and plan D allocations were not
+  affected.
+  * When a block opens while its radiologist is still reading, the gap
+    since the last block ended is owed at once.
+  * Repayment starts when the read ends, out of block time. What the
+    block cannot cover carries forward as before, and debt lapses at the
+    shift's end as since V0.1.
+* **Fix 3: minimum allocation commitment (the Sunday arbitrage).** A
+  version at 30% from a Sunday, restored on Monday, kept every shift's
+  reading and cut the Sunday salary by $328.77 for Dr. Blake (about $904
+  a Sunday for both radiologists at plan D's shares).
+  * An allocation now stays in force at least 14 calendar days
+    (`MinCommitDays`) before the next change for that radiologist.
+  * The check runs on the timeline the whole batch leaves, after every
+    item's own checks, so item order doesn't matter.
+  * The refusal is `commitment_too_short` on the first item that makes
+    the short pair; the rest of the batch is `batch_rejected` and nothing
+    changes. Previews agree.
+  * Replacing a pending version's value passes. Under this rule a
+    withdrawal can only lengthen a pair.
+  * Pairs already on an earlier build's timeline are grandfathered, but a
+    withdrawal that would create a new short pair is refused.
+  * Notice, effective dates, horizon, bounds, history, no-op rules and
+    atomic mixed batches are unchanged. No new charge or account.
+* **Tests (fail-before-fix).** All seven new tests fail with the fixes
+  disabled and the tests unchanged.
+  * `TestTouchingBlocksReadContinuously`: 4 and 5 claims instead of 18,
+    for 30- and 20-minute reads.
+  * `TestOverrunThroughOtherDutiesIsOwed` (95%, a read claimed at cycle
+    minute 94 crossing 95–100, reads ending exactly on a block start or
+    end): failed at the dev.5 claim minutes.
+  * `TestOverrunThroughSeveralGapsIsRepaidLater` (30%, a 205-minute read
+    crossing two gaps): next claim at 11:25 instead of 18:25.
+  * `TestReadingTimeConservation`: 12, 12, 17 and 428 claims while
+    owing.
+  * The three tests in `allocation_commit_test.go`: the arbitrage, 13-
+    against 14-day spacing and the earlier-timeline rules were all
+    accepted.
+
+  The micro fixture is `internal/sim/testdata/micro-blocks.json`: a
+  saturated worklist across seven boundaries.
+* **Conservation.** `TestReadingTimeConservation` keeps an independent
+  account of every radiologist-day, built from the studies' claim and
+  final times and the day's plan. It requires:
+  * every minute outside a block borrowed once;
+  * repayment, in order, only from later block time spent not reading;
+  * no claim while time is owed or outside a block;
+  * what is still owed at the shift's end lapses.
+
+  Six weeks of the established practice at 100%/95%: 303,438 s borrowed
+  = 297,557 repaid + 5,881 lapsed, with no claim while owing. Under
+  dev.5's rules there were 428 claims while 2,790 minutes were owed.
+* **Compatibility.** The fixes change outcomes, so this is not a digest
+  migration.
+  * Every record from an earlier build replays under that build's rules
+    (`SetDev5Rules`, set by `session.Replay` until the record's end).
+  * 0.2.0-dev.5 is registered as batch mode `v0.2_slice4`, with every
+    digest verified.
+  * There are two genuine dev.5 records from a clean 13987e6 build
+    (`testdata/sessions/mini-seed24-dev5`, `mini-seed25-dev5-reading`).
+    Unregistered, both were refused. Registered without dev.5's rules,
+    the first fails at batch 2, and the second's log and run digests
+    differ.
+  * Both replay whole and chunked, and continue as a verbatim prefix
+    under this build's rules.
+  * A record claiming dev.5 but needing dev.6 rules is refused.
+  * Unknown actions, v1 and v2 records, and dev.2–dev.4 records behave
+    as before.
+  * One existing session test moved a change from Nov 9 to Nov 10, from
+    13 days apart to 14.
+* **Neutrality.**
+  * All seven golden references reproduce. MIGRATIONS.json lists the
+    Slice 4 reference, now historical, with no changed field.
+  * Plans A–D rerun under dev.6 reproduce `results/reading-dev` and
+    `results/reading-eval` in every field but the engine name.
+  * All nine session files (the benchmark's dev.4 and dev.5 files and
+    the testdata records) verify as `earlier_build_exact`.
+  * No plan was retuned and no seed was used to choose anything.
+* **Verification.**
+  * Full uncached suite on the Pi passes: sim 544 s, session 111 s, cmd
+    87 s, tui 24 s.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * Plan session replay, A–D × seeds 901 and 1001 × 180 days, whole and
+    in 13-hour chunks: 171 s on joofi.
+  * Acceptance on joofi passes: staffing and roster invariants (50 seeds
+    × 90 days each, after every transaction), turnover, churn, V0.1
+    invariants and 1,000 chunkings. The first run hit a 120-minute
+    timeout I had set (Slice 3 needed 128 min), during the V0.1 criteria;
+    those were then rerun alone and passed in 42 min.
+  * Performance (dev.5 against dev.6, interleaved, joofi): Mini180 917
+    against 937 ms/op and EstablishedPlay90 376 against 386 ms/op
+    (medians), inside a ≈15% spread. Allocations are identical. Details
+    are in MEASUREMENTS.
+* **Limitations.**
+  * Debt still lapses at shift end, as in V0.1, now measured: 98 minutes
+    in six weeks at 100%/95%.
+  * The commitment is per radiologist only and does not price early
+    exit.
+  * The service-gate, backlog-rule and turnaround audit findings (Medium
+    and below) are open, for Slice 5's pre-registration.
+* **Next: Slice 5, `contract_teleradiology`.** This needs persistent
+  remote reading ownership, service and solvency rules set before any
+  strategy, liquidity as an independent constraint, and a fresh locked
+  holdout. Seeds 1001–1020 stay as reference data.
+
+---
+
 ## V0.2 Slice 4 — reading allocation (0.2.0-dev.5)
 
 The owner approved `set_reading_allocation` after the dynamic staffing

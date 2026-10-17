@@ -34,8 +34,10 @@ turnaround without reading actions: CONDITIONAL GO. Slice 4,
 `set_reading_allocation`, is built (design §5.10). Rerunning the frozen
 plans with the full reorganization plus the lead's 62.5/52.5% allocation
 (plan D) returned reporting within the provisional gates on average, at
-about the allocation's own salary cost: CONDITIONAL GO. Next: Slice 5
-(`contract_teleradiology`).
+about the allocation's own salary cost: CONDITIONAL GO. 0.2.0-dev.6 fixed
+the audit's touching-block and overrun-debt scheduler defects and added a
+14-day minimum allocation commitment (design §5.11), with every frozen
+result reproduced. Next: Slice 5 (`contract_teleradiology`).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

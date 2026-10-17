@@ -23,7 +23,8 @@ func allocAct(id, effective string, bp int64) api.Action {
 
 // allocPlay: on day 0 two allocation changes (Oct 27 and Nov 2); on day 3
 // Blake's is withdrawn and set again for Nov 3; on day 4 a mixed
-// staffing and allocation batch (a hire, Avery back to 60% from Nov 9).
+// staffing and allocation batch (a hire, Avery back to 60% from Nov 10,
+// the 14-day minimum commitment after Oct 27; 0.2.0-dev.6).
 func allocPlay(t *testing.T, s *Session) {
 	t.Helper()
 	at(t, s, 0, "13:30")
@@ -42,7 +43,7 @@ func allocPlay(t *testing.T, s *Session) {
 	at(t, s, 4, "11:00")
 	if res := s.Apply(api.Action{Type: api.ActHire, RequestID: "ct-eve", Role: "technologist", Skills: []string{"CT"}, RateCents: 4000,
 		ContractedWeeklyMinutes: 2250, Roster: rosterPtr(eveningRoster("Mon", "Tue", "Wed", "Thu", "Fri")), StartDate: "2026-11-16"},
-		allocAct("E07", "2026-11-09", 6000)); !res[0].OK || !res[1].OK {
+		allocAct("E07", "2026-11-10", 6000)); !res[0].OK || !res[1].OK {
 		t.Fatalf("%+v", res)
 	}
 }
@@ -55,7 +56,7 @@ func rosterPtr(r api.Roster) *api.Roster { return &r }
 func TestAllocationSaveReplayAcrossEffectiveDates(t *testing.T) {
 	s := openFile(t, "mini", 41, nil)
 	allocPlay(t, s)
-	for _, d := range []int64{9, 13, 14, 20, 21, 26, 27} {
+	for _, d := range []int64{9, 13, 14, 20, 21, 26, 27, 28} {
 		at(t, s, d, "21:00")
 		p := saveTemp(t, s)
 		l, rep, err := Load(p, ReplayOptions{})
