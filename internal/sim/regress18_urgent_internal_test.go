@@ -40,9 +40,9 @@ func TestRegress18UrgentLongStudyVsShortRoutine(t *testing.T) {
 		for st.now = day(8); st.now < day(16); {
 			// Arrivals up to now, in time order.
 			for next <= st.now || urgentAt <= st.now {
-				s := study{exam: xr, priority: Routine, acquiredAt: next, enteredAt: next, by: -1, claim: -1}
+				s := study{exam: xr, priority: Routine, acquiredAt: next, enteredAt: next, by: noReader, claim: -1}
 				if urgentAt <= next {
-					s = study{exam: mr, priority: Urgent, acquiredAt: urgentAt, enteredAt: urgentAt, by: -1, claim: -1}
+					s = study{exam: mr, priority: Urgent, acquiredAt: urgentAt, enteredAt: urgentAt, by: noReader, claim: -1}
 					urgentAt = simtime.Time(1 << 62)
 				} else {
 					next = next.Add(140 * simtime.Second)
@@ -120,7 +120,7 @@ func TestRegress18WorklistUrgentFirst(t *testing.T) {
 			at := simtime.Time(8*simtime.Hour + x.acquired*simtime.Minute)
 			en := simtime.Time(8*simtime.Hour + x.entered*simtime.Minute)
 			st.dem.studies = append(st.dem.studies, study{exam: x.exam, priority: x.pri, acquiredAt: at, enteredAt: en,
-				state: studyUnread, by: -1, claim: -1})
+				state: studyUnread, by: noReader, claim: -1})
 			st.dem.worklist = append(st.dem.worklist, len(st.dem.studies)-1)
 		}
 		return st.worklistOrder()

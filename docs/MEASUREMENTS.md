@@ -378,3 +378,20 @@ same run digests.
 The benchmark results under 0.2.0-dev.6 match the 0.2.0-dev.5 archive
 (`results/reading-dev`, `results/reading-eval`) in every field but the
 engine name.
+
+
+## 2026-10-16 — V0.2 Slice 5A: remote reading engine (Pi 4 at ≈81 °C, load average ≈4–5; Cortex-A76 "joofi", shared, load average ≈2–5)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Engine benchmarks, 0.2.0-dev.6 against 0.2.0-dev.7, interleaved in both orders (6 samples each), Cortex-A76 | `./sim-devN.test -test.bench 'EstablishedPlay90\|Mini180' -test.run '^$' -test.benchmem` | Mini180: median 947 ms/op (dev.6) vs 959 ms/op (dev.7). EstablishedPlay90: 392 vs 388 ms/op. Run-to-run spread ≈7%, so no measurable difference. Bytes and allocations per op identical (183.5 MB, 3.73M allocs; 78.6 MB, 1.24M allocs) |
+| Engine benchmarks, same, Pi (3 samples each) | same | Mini180: 2.66–3.69 s/op (dev.6) vs 2.61–3.34 s/op (dev.7). EstablishedPlay90: 1.15–1.69 vs 1.35–1.63 s/op. Spread ≈±25% under load; no measurable difference; allocations identical |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 55 s |
+| Evaluation, 4 plans × 20 held-out seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 4` | 171 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, whole and in 13-hour chunks, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` (`DT_DYN_DAYS=180 DT_DYN_SEEDS=901,1001`) | 165 s |
+| Acceptance (`-tags acceptance`), Cortex-A76 | `./acc.test -test.v -test.timeout 240m` | 2 h 11 min while shared, 369 subtests passed |
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 10 min 11 s (sim 589 s, session 138 s, cmd 113 s, tui 36 s); sim alone 544 s |
+
+The benchmark results under 0.2.0-dev.7 match the committed archive
+(`results/reading-dev`, `results/reading-eval`) in every field but the
+engine name.

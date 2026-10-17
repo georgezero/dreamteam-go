@@ -37,7 +37,11 @@ plans with the full reorganization plus the lead's 62.5/52.5% allocation
 about the allocation's own salary cost: CONDITIONAL GO. 0.2.0-dev.6 fixed
 the audit's touching-block and overrun-debt scheduler defects and added a
 14-day minimum allocation commitment (design §5.11), with every frozen
-result reproduced. Next: Slice 5 (`contract_teleradiology`).
+result reproduced. Slice 5A, the remote reading engine (0.2.0-dev.7, design
+§5.12), is built: tagged reader ownership, two persistent teleradiology
+lanes, half-open coverage windows and a common finalization path, with
+no player action yet. Next: Slice 5B (`contract_teleradiology` economics,
+action and accounting).
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

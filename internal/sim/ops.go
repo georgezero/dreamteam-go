@@ -16,7 +16,9 @@ import (
 // not depend on how the run is chunked or how fast it is shown.
 
 // Dispatch matches people to work, then settles hold-overs, rooms, the
-// closing phase and eligibility wakes.
+// closing phase and eligibility wakes. Remote reading lanes claim last,
+// after the whole on-site pass (V0.2_DESIGN §10.1), so its order is
+// unchanged and employed radiologists claim first.
 func (st *state) Dispatch(e *Engine) {
 	st.now = e.Now()
 	st.holdNeeded(e)
@@ -33,6 +35,7 @@ func (st *state) Dispatch(e *Engine) {
 		st.fin.openingDue = false
 		st.openingAdjust(e)
 	}
+	st.matchRemote(e)
 }
 
 // --- registration ---------------------------------------------------------

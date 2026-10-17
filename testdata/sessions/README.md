@@ -10,6 +10,7 @@ wrote them, to test that this build replays them authoritatively.
 | `mini-seed23-dev4.session.json` | 0.2.0-dev.4 (dynamic staffing benchmark, commit af475fd) | mini, seed 23, 9 days, with `mini-seed23-dev4.actions.json` |
 | `mini-seed24-dev5.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 24, 30 days, with `mini-seed24-dev5.actions.json` |
 | `mini-seed25-dev5-reading.session.json` | 0.2.0-dev.5 (V0.2 Slice 4, commit 13987e6) | mini, seed 25, 20 days, with `mini-seed25-dev5-reading.actions.json` |
+| `mini-seed26-dev6.session.json` | 0.2.0-dev.6 (pre-Slice 5 remediation, commit 3c71669) | mini, seed 26, 25 days, with `mini-seed26-dev6.actions.json` |
 
 Each was made with its build's binary, from a clean worktree of that commit:
 
@@ -78,3 +79,20 @@ the new record's prefix (`internal/session/dev5_test.go`). Before
 0.2.0-dev.5 was registered, this build refused both as an engine
 mismatch; registered without dev.5's rules, the first is refused at its
 second batch.
+
+The 0.2.0-dev.6 file was made the same way from 3c71669, with `-seed 26
+-days 25`. Its batches are:
+
+* Dr. Avery at 100% and Dr. Blake at 95% from Oct 27, accepted;
+* Dr. Blake at 30% from Sun Nov 1 and back on Mon Nov 2, refused as
+  `commitment_too_short`, with the rest of the batch `batch_rejected`;
+* Dr. Avery back to 60% from Nov 10, accepted.
+
+It is there because 0.2.0-dev.7 changed no outcome but must replay dev.6
+records under dev.6's rules, not dev.5's as every earlier mode does. It
+replays in batch mode `v0.2_dev6` (this build's action set and rules) with
+every digest verified (`earlier_build_exact`), and continues with the file
+embedded as the new record's prefix (`internal/session/dev6_test.go`).
+Before 0.2.0-dev.6 was registered, this build refused it as an engine
+mismatch. Registered under dev.5's rules, it fails at its second batch,
+which dev.5's allocation validation accepts.

@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"reflect"
+	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
@@ -192,6 +193,7 @@ type StudyInfo struct {
 	State                             string
 	Acquired, Entered, Claimed, Final simtime.Time
 	By                                string
+	Remote                            bool             // read by a teleradiology lane
 	ReadTime                          simtime.Duration // final − claimed, once final
 }
 
@@ -204,9 +206,8 @@ func (w *World) Studies() []StudyInfo {
 		x := StudyInfo{ID: studyID(i), Visit: visitID(s.visit), Exam: w.st.cfg.Catalog[s.exam].Code,
 			Priority: s.priority.String(), State: studyStateNames[s.state], Acquired: s.acquiredAt,
 			Entered: s.enteredAt, Claimed: s.claimedAt, Final: s.finalAt}
-		if s.by >= 0 {
-			x.By = w.st.emps[s.by].cfg.Name
-		}
+		x.By = w.st.readerName(s.by)
+		_, x.Remote = s.by.remote()
 		if s.state == studyFinal {
 			x.ReadTime = s.finalAt.Sub(s.claimedAt)
 		}
@@ -461,3 +462,117 @@ func (w *World) SupervisionOn(day int64) []Span {
 
 // DaysBuilt is the number of days whose booking slots exist.
 func (w *World) DaysBuilt() int64 { return int64(len(w.st.dem.days)) }
+
+// --- remote reading (Slice 5A: no action reaches a contract yet) ---------
+
+// TeleContractForTest starts a teleradiology contract's coverage (windows
+// from weeknights, saturday, sunday; scope "all" or "urgent") from date
+// from to the exclusive end date until ("" for none), through the
+// engine's own validation. It returns the contract's ID.
+func (w *World) TeleContractForTest(windows []string, scope, from, until string) (string, error) {
+	k := teleContract{until: -1}
+	for _, n := range windows {
+		i := slices.Index(teleWindowNames[:], n)
+		if i < 0 {
+			return "", fmt.Errorf("window %q", n)
+		}
+		k.windows |= 1 << i
+	}
+	switch scope {
+	case "all":
+	case "urgent":
+		k.scope = teleScopeUrgent
+	default:
+		return "", fmt.Errorf("scope %q", scope)
+	}
+	var err error
+	if k.from, err = w.dayIndex(from); err != nil {
+		return "", err
+	}
+	if until != "" {
+		if k.until, err = w.dayIndex(until); err != nil {
+			return "", err
+		}
+	}
+	c, err := w.st.addTeleContract(w.eng, k)
+	if err != nil {
+		return "", err
+	}
+	return teleID(c), nil
+}
+
+// EndTeleContractForTest fixes a contract's exclusive end date.
+func (w *World) EndTeleContractForTest(id, until string) error {
+	d, err := w.dayIndex(until)
+	if err != nil {
+		return err
+	}
+	c := -1
+	if w.st.tele != nil {
+		for k := range w.st.tele.contracts {
+			if teleID(k) == id {
+				c = k
+			}
+		}
+	}
+	return w.st.endTeleContract(w.eng, c, d)
+}
+
+func (w *World) dayIndex(date string) (int64, error) {
+	d, err := simtime.ParseDate(date)
+	if err != nil {
+		return 0, err
+	}
+	return w.st.cal.DayIndex(w.st.cal.StartOfDate(d)), nil
+}
+
+// TeleCovering is the contract covering instant t ("" for none).
+func (w *World) TeleCovering(t simtime.Time) string {
+	if c := w.st.teleCovering(t); c >= 0 {
+		return teleID(c)
+	}
+	return ""
+}
+
+// TeleLanes lists what each remote lane holds: "" when idle, else the
+// study and "handoff" or "reading".
+func (w *World) TeleLanes() [][2]string {
+	var out [][2]string
+	if w.st.tele == nil {
+		return make([][2]string, teleLanes)
+	}
+	for _, ln := range w.st.tele.lanes {
+		if ln.claim < 0 {
+			out = append(out, [2]string{})
+			continue
+		}
+		cl := w.st.tele.claims[ln.claim]
+		phase := "handoff"
+		if cl.readAt != 0 {
+			phase = "reading"
+		}
+		out = append(out, [2]string{studyID(cl.study), phase})
+	}
+	return out
+}
+
+// TeleClaimInfo is one remote read claim.
+type TeleClaimInfo struct {
+	Study, Contract string
+	Lane            int
+	Claimed, ReadAt simtime.Time
+	Night           bool
+}
+
+// TeleClaims lists the remote read claims in claim order.
+func (w *World) TeleClaims() []TeleClaimInfo {
+	if w.st.tele == nil {
+		return nil
+	}
+	var out []TeleClaimInfo
+	for _, cl := range w.st.tele.claims {
+		out = append(out, TeleClaimInfo{Study: studyID(cl.study), Contract: teleID(cl.contract), Lane: cl.lane,
+			Claimed: cl.claimedAt, ReadAt: cl.readAt, Night: cl.night})
+	}
+	return out
+}

@@ -24,6 +24,10 @@ import (
 // compatible with reading; a remote radiologist reads but never supervises.
 // The read time of a case is drawn by its origin key (domain "read", lane
 // 0), so worklist order, staffing and speed never change it.
+//
+// A study's reader is an employed radiologist or a teleradiology claim on
+// one of the two remote lanes (remote.go, V0.2_DESIGN §8.3): one owner from
+// claim to final, and one shared finalization (finalize).
 
 type studyState uint8
 
@@ -34,6 +38,25 @@ const (
 	studyFinal                      // report finalized
 )
 
+// reader is a study's owner: none, an employed radiologist (an employee
+// index) or a remote read claim (an index into teleState.claims). It is
+// encoded as one integer (none −1, employed i ≥ 0, remote claim c as −2−c),
+// so a study read on site encodes exactly as before the tag existed; the
+// value is unexported, so it can only be read through employee and remote.
+type reader struct{ v int }
+
+var noReader = reader{-1}
+
+func employedReader(i int) reader { return reader{i} }
+
+func remoteReader(c int) reader { return reader{-2 - c} }
+
+// employee returns the employed radiologist's index.
+func (r reader) employee() (int, bool) { return r.v, r.v >= 0 }
+
+// remote returns the remote read claim's index.
+func (r reader) remote() (int, bool) { return -2 - r.v, r.v <= -2 }
+
 type study struct {
 	order, visit, exam int
 	priority           Priority
@@ -41,7 +64,7 @@ type study struct {
 	enteredAt          simtime.Time // documentation done: on the worklist
 	claimedAt          simtime.Time
 	finalAt            simtime.Time
-	by                 int // radiologist; -1 until claimed
+	by                 reader // noReader until claimed
 	state              studyState
 	breached           bool // its TAT target passed before it was final
 	claim              int  // claim opened at final; -1 before
@@ -56,7 +79,7 @@ func (st *state) acquireStudy(e *Engine, vi int) {
 	o := &st.dem.orders[v.order]
 	si := len(st.dem.studies)
 	st.dem.studies = append(st.dem.studies, study{order: v.order, visit: vi, exam: o.exam, priority: o.priority,
-		acquiredAt: e.Now(), by: -1, claim: -1})
+		acquiredAt: e.Now(), by: noReader, claim: -1})
 	v.study = si
 	ds := st.dem.days[st.day]
 	ds.studies = append(ds.studies, si)
@@ -89,7 +112,7 @@ func (st *state) tatBreach(e *Engine, si int) {
 	x := &st.cfg.Catalog[s.exam]
 	what := "unread"
 	if s.state == studyReading {
-		what = "being read by " + st.emps[s.by].cfg.Name
+		what = "being read by " + st.readerName(s.by)
 	}
 	st.emit(e.Now(), api.Warn, "reading", fmt.Sprintf("%s %s report overdue: %s %s not final after %s (%s)",
 		studyID(si), s.priority, x.Modality, x.Name, st.cfg.Policies.TATTarget[s.priority], what))
@@ -189,7 +212,7 @@ func (st *state) claim(e *Engine, i, si int) {
 	emp := &st.emps[i]
 	o := &st.dem.orders[s.order]
 	x := &st.cfg.Catalog[s.exam]
-	s.state, s.claimedAt, s.by = studyReading, e.Now(), i
+	s.state, s.claimedAt, s.by = studyReading, e.Now(), employedReader(i)
 	emp.status, emp.task, emp.taskVisit, emp.taskStudy = busy, taskRead, s.visit, si
 	dur := simtime.Duration(x.ReadTime.Sample(st.hash("read", o.key.keys()...).Lane(0)))
 	if s.priority == Urgent {
@@ -198,17 +221,12 @@ func (st *state) claim(e *Engine, i, si int) {
 	e.Push(Event{At: e.Now().Add(max(1, dur)), Class: ClassCompletion, Kind: kindReadEnd, A: int64(si)})
 }
 
-// readEnd finalizes the report. A read that ran past its block's end
-// (overrun rule, §6.7) delays the radiologist's next block by the overrun.
+// readEnd ends radiologist i's read of study si: the radiologist is
+// released (overrun debt, §6.7) and the report finalized. A read that ran
+// past its block's end delays the radiologist's next block by the overrun.
 func (st *state) readEnd(e *Engine, si int) {
-	s := &st.dem.studies[si]
-	i := s.by
+	i, _ := st.dem.studies[si].by.employee()
 	emp := &st.emps[i]
-	s.state, s.finalAt = studyFinal, e.Now()
-	st.dem.worklist = slices.DeleteFunc(st.dem.worklist, func(x int) bool { return x == si })
-	st.dem.finals = append(st.dem.finals, si)
-	o := &st.dem.orders[s.order]
-	o.state = orderReported
 	switch {
 	case !emp.reading:
 		// Finished during other duties: the time since the last block
@@ -223,6 +241,23 @@ func (st *state) readEnd(e *Engine, si int) {
 		emp.readDebt -= min(emp.readDebt, max(0, end.Sub(e.Now())))
 	}
 	emp.status, emp.task, emp.taskVisit, emp.taskStudy = available, taskNone, -1, -1
+	st.finalize(e, si)
+}
+
+// finalize makes study si's report final, whoever read it: worklist,
+// order, turnaround, breach, revenue and the log, once per study. The
+// reader's own release (an employee's debt and status, a remote lane) is
+// the caller's.
+func (st *state) finalize(e *Engine, si int) {
+	s := &st.dem.studies[si]
+	if s.state != studyReading {
+		fail("%s finalized in state %d", studyID(si), s.state)
+	}
+	s.state, s.finalAt = studyFinal, e.Now()
+	st.dem.worklist = slices.DeleteFunc(st.dem.worklist, func(x int) bool { return x == si })
+	st.dem.finals = append(st.dem.finals, si)
+	o := &st.dem.orders[s.order]
+	o.state = orderReported
 	tat := s.finalAt.Sub(s.acquiredAt)
 	late := tat > st.cfg.Policies.TATTarget[s.priority]
 	for _, f := range []*flowCounts{&st.dem.flowToday, &st.dem.flowTotal} {
@@ -237,7 +272,18 @@ func (st *state) readEnd(e *Engine, si int) {
 	x := &st.cfg.Catalog[s.exam]
 	rev := st.recognize(si)
 	st.emit(e.Now(), api.Info, "reading", fmt.Sprintf("%s %s %s report final (%s) · TAT %s · revenue %s",
-		studyID(si), x.Modality, x.Name, emp.cfg.Name, tat, money(rev)))
+		studyID(si), x.Modality, x.Name, st.readerName(s.by), tat, money(rev)))
+}
+
+// readerName names a study's reader in the log and observations.
+func (st *state) readerName(r reader) string {
+	if i, ok := r.employee(); ok {
+		return st.emps[i].cfg.Name
+	}
+	if c, ok := r.remote(); ok {
+		return laneName(st.tele.claims[c].lane)
+	}
+	return ""
 }
 
 // blockStart opens site reading block k, after any overrun owed: claims
@@ -319,10 +365,16 @@ func (st *state) checkReading() error {
 			s.state == studyFinal && s.finalAt < s.claimedAt:
 			return fmt.Errorf("%s timestamps out of order", studyID(si))
 		case s.state == studyReading:
-			r := &st.emps[s.by]
-			if r.status != busy || r.task != taskRead || r.taskStudy != si {
-				return fmt.Errorf("%s reading but %s is not reading it", studyID(si), r.cfg.Name)
+			if i, ok := s.by.employee(); ok {
+				r := &st.emps[i]
+				if r.status != busy || r.task != taskRead || r.taskStudy != si {
+					return fmt.Errorf("%s reading but %s is not reading it", studyID(si), r.cfg.Name)
+				}
+			} else if _, ok := s.by.remote(); !ok {
+				return fmt.Errorf("%s reading with no reader", studyID(si))
 			}
+		case s.by != noReader && s.state < studyReading:
+			return fmt.Errorf("%s has a reader before it was claimed", studyID(si))
 		}
 	}
 	if listed != len(d.worklist) {
@@ -331,11 +383,11 @@ func (st *state) checkReading() error {
 	for i := range st.emps {
 		emp := &st.emps[i]
 		if emp.task == taskRead && (emp.cfg.Role != Radiologist || d.studies[emp.taskStudy].state != studyReading ||
-			d.studies[emp.taskStudy].by != i) {
+			d.studies[emp.taskStudy].by != employedReader(i)) {
 			return fmt.Errorf("%s reading task inconsistent", emp.cfg.Name)
 		}
 	}
-	return nil
+	return st.checkTele()
 }
 
 // --- observable projections -------------------------------------------------
@@ -358,10 +410,10 @@ func (st *state) studyItem(si int, now simtime.Time) api.WorklistItem {
 	case studyUnread:
 		it.State = api.StudyUnread
 	case studyReading:
-		it.State, it.Radiologist = api.StudyReading, st.emps[s.by].cfg.Name
+		it.State, it.Radiologist = api.StudyReading, st.readerName(s.by)
 		it.ReadingMin = int64(now.Sub(s.claimedAt) / simtime.Minute)
 	case studyFinal:
-		it.State, it.Radiologist = api.StudyFinal, st.emps[s.by].cfg.Name
+		it.State, it.Radiologist = api.StudyFinal, st.readerName(s.by)
 		end = s.finalAt
 		it.TATMin = int64(end.Sub(s.acquiredAt) / simtime.Minute)
 	}

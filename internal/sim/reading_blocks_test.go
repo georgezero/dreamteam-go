@@ -245,7 +245,7 @@ func readingAccount(t *testing.T, w *sim.World, end simtime.Time) account {
 	type iv struct{ from, to simtime.Time }
 	reads := map[[2]int64][]iv{} // (employee, day) → reads in claim order
 	for _, s := range w.Studies() {
-		if s.State != "final" || s.Final > end {
+		if s.State != "final" || s.Final > end || s.Remote {
 			continue
 		}
 		i := slices.IndexFunc(staff, func(x sim.StaffInfo) bool { return x.Name == s.By })

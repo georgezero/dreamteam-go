@@ -195,6 +195,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.3": batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
 	"0.2.0-dev.4": batchModeSlice3, // the dynamic staffing benchmark: Slice 3's action set
 	"0.2.0-dev.5": batchModeSlice4, // V0.2 Slice 4: this action set, dev.5's reading and allocation rules
+	"0.2.0-dev.6": batchModeDev6,   // pre-Slice 5 remediation: this action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

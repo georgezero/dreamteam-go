@@ -41,8 +41,12 @@ type state struct {
 	rooms []room
 	emps  []employee
 	staff []employment // employment registry, parallel to emps (employment.go)
-	dem   demandState
-	fin   finState
+	// tele is the practice's remote reading: teleradiology contracts, the
+	// two persistent lanes and every remote claim (remote.go); nil until
+	// the first contract, and then never reset.
+	tele *teleState
+	dem  demandState
+	fin  finState
 	// met measures the practice (metrics.go); alerts watch it from the
 	// takeover (alerts.go); eval is the evaluation window (evaluation.go).
 	// pol holds the operating policies in force: the scenario's, changed
@@ -192,6 +196,11 @@ const (
 	// Passive kinds (Observer): they change no simulation state.
 	kindAlertWake // a time-based alert condition changes (alerts.go)
 	kindEvalEnd   // the evaluation window's endpoint (evaluation.go)
+	// Remote reading (remote.go): teleradiology coverage changes, a remote
+	// lane's handoff ends, a remote lane's read ends.
+	kindTeleEdge
+	kindTeleHandoff
+	kindTeleReadEnd
 )
 
 // Passive reports whether ev only observes (no dispatch follows it).
@@ -245,6 +254,10 @@ func (st *state) IsStale(ev Event) bool {
 		return s != visitArrived && s != visitWaiting
 	case kindNoShowRebook:
 		return st.dem.orders[ev.A].state != orderNoShow
+	case kindTeleEdge:
+		return ev.Gen != st.tele.edgeGen
+	case kindTeleHandoff, kindTeleReadEnd:
+		return ev.Gen != st.tele.lanes[ev.A].gen
 	}
 	return false
 }
@@ -292,6 +305,12 @@ func (st *state) Handle(e *Engine, ev Event) {
 		st.readEnd(e, int(ev.A))
 	case kindTATBreach:
 		st.tatBreach(e, int(ev.A))
+	case kindTeleEdge:
+		st.teleEdge(e, int(ev.B))
+	case kindTeleHandoff:
+		st.teleHandoffEnd(e, int(ev.A))
+	case kindTeleReadEnd:
+		st.teleReadEnd(e, int(ev.A))
 	case kindSubmitClaims:
 		st.submitClaims(e)
 	case kindAdjudicate:

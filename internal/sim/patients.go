@@ -376,10 +376,10 @@ func (st *state) studySteps(si int, now simtime.Time) []api.JourneyStep {
 			Detail: fmt.Sprintf("%s since imaging", now.Sub(s.acquiredAt))})
 	case studyReading:
 		out = append(out, api.JourneyStep{Time: iso(s.claimedAt), Label: "Being read", Done: true,
-			Detail: fmt.Sprintf("%s · %s so far", st.emps[s.by].cfg.Name, now.Sub(s.claimedAt))})
+			Detail: fmt.Sprintf("%s · %s so far", st.readerName(s.by), now.Sub(s.claimedAt))})
 	case studyFinal:
 		out = append(out, api.JourneyStep{Time: iso(s.claimedAt), Label: "Read", Done: true,
-			Detail: fmt.Sprintf("%s · waited %s on the worklist · read %s", st.emps[s.by].cfg.Name,
+			Detail: fmt.Sprintf("%s · waited %s on the worklist · read %s", st.readerName(s.by),
 				s.claimedAt.Sub(s.enteredAt), s.finalAt.Sub(s.claimedAt))})
 		tat := s.finalAt.Sub(s.acquiredAt)
 		d := fmt.Sprintf("TAT %s (imaging complete → final)", tat)

@@ -7,6 +7,121 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5A — remote reading engine (0.2.0-dev.7)
+
+The owner accepted dev.6 and authorized Slice 5 in three stages with a
+checkpoint after each: 5A, the remote reading engine; 5B, contract
+economics and the `contract_teleradiology` action; 5C, the evaluation,
+with service and solvency rules frozen before any strategy and a new
+locked holdout. This step is 5A only. No player action exists, and no
+price, retainer, fee or account is added. Demand, reimbursement, wages,
+allocations, read durations and service thresholds are unchanged. Local
+read debt still lapses at shift end, now documented as a deliberate
+limitation. Design and as-built notes: `docs/V0.2_DESIGN.md` §5.12.
+
+* **Ownership.** A study's reader is a tagged, unexported value: none,
+  an employed radiologist, or a remote read claim.
+  * It encodes as one integer, exactly as before for on-site reads.
+  * It is read only through `employee()` and `remote()`, so stale
+    employee-index lookups no longer compile.
+  * One owner from claim to final, through a shared finalization
+    (`finalize`): one report, one revenue posting and one payer claim,
+    whoever reads.
+  * Employee debt and status stay on the employee; lanes have neither.
+* **Two persistent lanes** (`internal/sim/remote.go`) serve every
+  contract together.
+  * Day start, closes and contract expiry never reset them. A lane is
+    released only by its read's end.
+  * A claim holds its lane for the ten-minute handoff and the study's own
+    keyed read duration. Both ends are generation-checked completions.
+  * The claim records its contract, lane, claim time, read-start time and
+    night flag, for 5B's settlement.
+* **Coverage** is a pure function of time.
+  * It is the union of half-open windows (weeknights, saturday, sunday),
+    intersected with the contract's dates. Exact starts are in and exact
+    ends out.
+  * Friday's night runs to Saturday 08:00. Saturday 08:00–14:00 and
+    Monday 00:00–08:00 are gaps. Saturday and Sunday join at midnight.
+  * Contracts can't overlap, so touching windows add no capacity.
+  * Edge wakes fire only where coverage changes. They claim nothing;
+    the dispatch after them may.
+  * Remote coverage never touches booking.
+* **Claiming** is dispatch's last pass, after the unchanged on-site pass
+  and employed reading.
+  * Idle lanes, in lane order, take the first eligible unread study in
+    worklist order.
+  * Urgent-only scope checks the original priority, not the overdue
+    promotion.
+  * There is no shift-end rule for lanes.
+  * Reads finish after window end, contract expiry and midnight. The
+    report belongs to its finalization date.
+  * A successor contract uses only idle lanes.
+* **Contracts before 5B.** Contracts have coverage terms and structural
+  checks only: windows, a future activation, no overlap and ordered ends.
+  Tests reach them only through `export_test.go`.
+* **Compatibility.**
+  * 0.2.0-dev.6 is registered as batch mode `v0.2_dev6`: this build's
+    action set and rules, every digest verified. Earlier modes keep
+    dev.5's rules.
+  * Genuine dev.6 record `testdata/sessions/mini-seed26-dev6`, from a
+    clean 3c71669 build: 100%/95%, a Sunday reduction refused as
+    `commitment_too_short`, and a later change.
+  * Before registration, the record was refused as an engine mismatch.
+    Registered under dev.5's rules, it failed at batch 2.
+  * It now replays whole and chunked, and continues as a verbatim prefix.
+  * The remote state is encoded only when a contract exists, so every
+    golden reproduces in every field.
+* **Tests.** 14 in `internal/sim/remote_test.go`, 3 in
+  `internal/session/dev6_test.go`. Fixtures are
+  `internal/sim/testdata/micro-tele{,-local}.json`. They cover:
+  * both lanes busy, a third study waiting, and the handoff holding a
+    lane through a mid-handoff dispatch;
+  * expiry during handoff and during a read, midnight, past a window's
+    end, and the exact end with free lanes;
+  * a successor sharing the lanes; adjacent windows and exact edges;
+  * urgent-only by original priority;
+  * local/remote exclusivity, with the employed reader first at a shared
+    instant;
+  * one report, revenue entry and payer claim per study;
+  * save/reload as replay at a mid-handoff and a mid-read instant, across
+    chunkings and event-budget stops;
+  * booking invariance; §5.11's local debt conservation with lanes
+    reading; edge dispatch neutrality.
+* **Fail-before-fix (by mutation).** The 14 guards, from remote-first
+  dispatch to an inclusive contract end, were each broken in turn with
+  the tests unchanged, and each broken build failed its test (list in
+  §5.12).
+* **Verification.**
+  * The full uncached suite passes on the Pi in 10 min 11 s (sim 589 s,
+    session 138 s, cmd 113 s, tui 36 s), with `-timeout 60m`. All ten
+    session fixtures, the new dev.6 one included, verify
+    `earlier_build_exact`.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * Acceptance (`-tags acceptance`) passes on the Cortex-A76 in 2 h 11 min
+    while shared (369 subtests).
+  * The frozen plans A–D benchmark (`reading-dev`, `reading-eval`)
+    reproduces the committed results in every field but the engine name,
+    and the 180-day session replay check passes: no remote capacity
+    without a contract.
+  * Engine benchmarks, dev.6 against dev.7 interleaved: on the
+    Cortex-A76, Mini180 has a median of 947 vs 959 ms/op and
+    EstablishedPlay90 392 vs 388 ms/op, within the ≈7% run-to-run spread.
+    The Pi results are noisier, with no measurable difference. Bytes and
+    allocations per op are identical.
+* **Limitations.**
+  * No player can create a contract, and no session file can hold one,
+    until 5B.
+  * Observation names a remote reader only by lane. Remote share,
+    coverage waits and turnaround by reader kind are 5B/5C reporting.
+  * Worklist alerts describe employed readers only.
+* **Next: Slice 5B**, contract economics and `contract_teleradiology`.
+  Mode `v0.2_dev6` must then refuse the new type, as dev.6 did. Freeze
+  the 5C evaluation rules before choosing any strategy. The owner plans
+  an Astra review after 5B.
+
+---
+
 ## V0.2 dev.6 — pre-Slice 5 remediation (0.2.0-dev.6)
 
 An independent read-only audit of 13987e6 (0.2.0-dev.5) returned

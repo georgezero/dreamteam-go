@@ -51,13 +51,18 @@ import (
 // when non-empty, introduced by a tag no length prefix can equal, so a
 // state without them encodes exactly as Slice 2's did (omitEmpty). Slice
 // 4 adds a radiologist's allocation versions and log
-// (set_reading_allocation) the same way.
+// (set_reading_allocation) the same way, and Slice 5A (0.2.0-dev.7) the
+// remote reading state (contracts, lanes and claims, state.tele), a
+// pointer encoded only when non-nil: without a teleradiology contract a
+// state encodes exactly as before. A study's reader keeps its single
+// integer encoding (reading.go).
 const StateSchema = "dreamteam.state/v3"
 
-// omitEmpty names slice fields, by "Type.field", that are encoded only
-// when non-empty, after omitTag: fields added to the v3 encoding.
+// omitEmpty names slice and pointer fields, by "Type.field", that are
+// encoded only when non-empty (non-nil), after omitTag: fields added to
+// the v3 encoding.
 var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true,
-	"employment.Allocs": true, "employment.AllocLog": true}
+	"employment.Allocs": true, "employment.AllocLog": true, "state.tele": true}
 
 // omitTag introduces a present omitEmpty field. It has the top bit set,
 // which no length prefix (string, slice or map) can.
@@ -187,7 +192,7 @@ func (d *stateHasher) value(v reflect.Value) {
 		for _, f := range fieldsOf(v.Type()) {
 			x := v.Field(f.i)
 			if f.omit {
-				if x.Len() == 0 {
+				if x.Kind() == reflect.Pointer && x.IsNil() || x.Kind() != reflect.Pointer && x.Len() == 0 {
 					continue
 				}
 				d.u64(omitTag)
