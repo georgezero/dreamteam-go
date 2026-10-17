@@ -126,40 +126,28 @@ func LoadHoldout(path string) (*Holdout, []int64, error) {
 	return &h, seeds, nil
 }
 
-// Unseal is the one-time record that opens the holdout: the frozen
-// policy and the frozen strategy set it will be run with.
-type Unseal struct {
-	Holdout          string `json:"holdout"`
-	PolicyDigest     string `json:"policyDigest"`
-	StrategiesSHA256 string `json:"strategiesSHA256"`
-	Approved         string `json:"approvedBy"`
-	Date             string `json:"date"`
-}
-
-// ErrSealed refuses a run that would touch the sealed holdout.
+// ErrSealed refuses a run that would touch the holdout outside the
+// canonical runner.
 var ErrSealed = errors.New("the holdout is sealed")
 
-// GuardSeeds refuses any holdout seed unless an unseal record names this
-// holdout, the current policy and a strategy set. Harnesses call it
-// before running anything.
-func GuardSeeds(seeds []int64, h *Holdout, holdout []int64, u *Unseal, policyDigest string) error {
+// GuardSeeds refuses any holdout seed. Sealed or not, a holdout seed runs
+// only through the canonical runner, which holds an authorized Protocol
+// (Authorize); every other harness calls this before running anything.
+func GuardSeeds(seeds []int64, h *Holdout, holdout []int64) error {
 	in := map[int64]bool{}
 	for _, s := range holdout {
 		in[s] = true
 	}
-	var hit []int64
+	n := 0
 	for _, s := range seeds {
 		if in[s] {
-			hit = append(hit, s)
+			n++
 		}
 	}
-	switch {
-	case len(hit) == 0:
-		return nil
-	case u == nil:
-		return fmt.Errorf("%w: seeds %v are in %s", ErrSealed, hit, h.ID)
-	case u.Holdout != h.ID || u.PolicyDigest != policyDigest || u.StrategiesSHA256 == "" || u.Approved == "":
-		return fmt.Errorf("%w: the unseal record does not name %s, policy %s and an approved strategy set", ErrSealed, h.ID, policyDigest)
+	if n > 0 {
+		// The seeds themselves are not named: the manifest commits to them
+		// by digest only.
+		return fmt.Errorf("%w: %d of the seeds are in %s, which runs only through the canonical holdout runner", ErrSealed, n, h.ID)
 	}
 	return nil
 }
@@ -172,29 +160,12 @@ const (
 	HoldoutPath  = "docs/evaluation/holdout-v0.2.json"
 )
 
-// GuardRepo is GuardSeeds with the repository's holdout, policy and
-// unseal record (if committed), from the repository root.
+// GuardRepo is GuardSeeds with the repository's holdout, from the
+// repository root.
 func GuardRepo(root string, seeds []int64) error {
-	_, digest, err := LoadPolicy(root + "/" + PolicyPath)
-	if err != nil {
-		return err
-	}
 	h, hs, err := LoadHoldout(root + "/" + HoldoutPath)
 	if err != nil {
 		return err
 	}
-	var u *Unseal
-	raw, err := os.ReadFile(root + "/" + h.Unseal)
-	switch {
-	case err == nil:
-		u = &Unseal{}
-		dec := json.NewDecoder(bytes.NewReader(raw))
-		dec.DisallowUnknownFields()
-		if err := dec.Decode(u); err != nil {
-			return fmt.Errorf("%s: %w", h.Unseal, err)
-		}
-	case !errors.Is(err, os.ErrNotExist):
-		return err
-	}
-	return GuardSeeds(seeds, h, hs, u, digest)
+	return GuardSeeds(seeds, h, hs)
 }

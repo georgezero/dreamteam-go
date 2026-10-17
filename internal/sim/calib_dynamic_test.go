@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/eval"
 	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/sim"
@@ -324,6 +325,9 @@ func manifestConfig(t *testing.T, m manifest) (*sim.Config, string, string, stri
 // action required to be accepted; a sample every day at the takeover's
 // clock time; full measurements at the endpoints.
 func runDynamic(t *testing.T, cfg *sim.Config, seed int64, days int, endpoints []int, p dynPlan) dynSeed {
+	if err := eval.GuardRepo("../..", []int64{seed}); err != nil {
+		t.Fatal(err) // the sealed holdout never runs from a harness
+	}
 	w := sim.New(cfg, rng.SeedFromInt(seed))
 	if os.Getenv("DT_DYN_CHECK") != "" {
 		w.Engine().CheckInvariants = true

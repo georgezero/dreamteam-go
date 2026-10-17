@@ -7,6 +7,118 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.0b — canonical holdout runner (0.2.0-dev.11)
+
+This step closes the audit's remaining high finding, H6: holdout
+protection was a cooperative convention, not an enforced one-time
+protocol. The holdout stays sealed and untouched. No strategy was run,
+and the policy (v0.2-eval-2) and simulation are unchanged. Design §13.6;
+rules in `docs/evaluation/README.md` §9.
+
+* **One path to a holdout seed.**
+  * `eval.GuardRepo` now refuses holdout seeds whether or not the
+    holdout is unsealed.
+  * Its refusal no longer names them. v0.2-eval-1's printed the
+    offending seeds, which would have leaked them into a log.
+  * Every harness calls it: `parseSeeds`, the session replay check, and
+    newly the dynamic-staffing runner per seed and the evaluation
+    recorder itself.
+  * The only recorder for a holdout seed is `World.NewHoldoutRecorder`.
+    It needs an `eval.Protocol` from `eval.Authorize`, which cannot be
+    constructed outside the package.
+* **The artifact contract** (`internal/eval/protocol.go`):
+  * strategy files (`dreamteam.strategy/v1`), each optionally declaring
+    a teleradiology-only parent;
+  * a strategy set (`dreamteam.strategyset/v1`) pinning each file by
+    digest and naming the scenario manifest and the action-free
+    baseline;
+  * the unseal record (`dreamteam.holdout-unseal/v1`), pinning:
+    * the holdout manifest's bytes, the policy and the strategy set;
+    * the exact engine;
+    * the one primary strategy;
+    * the approver, date and statement.
+* **Authorize** validates every field and digest, decoding strictly. It
+  requires every file committed with no change (`GitRepo`, through
+  `git`), and the unseal record committed by its approver.
+* **The runner** (`internal/sim` `TestHoldoutRun`, run with
+  `DT_HOLDOUT_RUN=1`):
+  * it computes the common horizon from the strategies' accepted
+    actions before running, and the records confirm it on every seed;
+  * it runs every strategy, the baseline included, on all 40 seeds;
+  * it refuses a batch at or after T90;
+  * it evaluates with the complete seed set and the pinned digests
+    required (`eval.Input` `Seeds`, `PlanSHA`), one digest per plan;
+  * it names the primary, and every other candidate is reported
+    exploratory;
+  * it writes `run.json` (every record's digest, the horizon and the
+    artifacts) and `report.json` once, read-only, into
+    `docs/evaluation/holdout-runs/<holdout>/`.
+
+  A rerun must reproduce both byte for byte, or it fails and writes
+  nothing. Without an unseal record the test skips as sealed.
+* **The holdout manifest's protocol text** now describes this; its
+  method, label and seed digest are unchanged.
+* **Version.** 0.2.0-dev.11 registers 0.2.0-dev.10 (batch mode
+  `v0.2_dev10`). The fixture `testdata/sessions/mini-seed33-dev10` was
+  written by the dev.10 binary from a clean 5f9cb94 worktree. It holds an
+  accepted contract, an overlap refusal and an accepted cancellation, and
+  replays exactly and continues. MIGRATIONS.json lists the bump; every
+  reference is unchanged.
+* **Tests.** The protocol runs end to end on a synthetic two-seed
+  holdout with its own label and range: the mini practice, the short
+  policy, a baseline and a teleradiology-only strategy.
+  * Authorization refuses in 14 ways:
+    * a missing record;
+    * an edited strategy, strategy set, policy or manifest;
+    * a primary that is the baseline or unknown;
+    * a bad date;
+    * no statement;
+    * a wrong schema;
+    * an unknown field;
+    * another committer;
+    * uncommitted files;
+    * another engine.
+  * The run is written and then reproduced. A tampered report fails
+    with nothing written, and a directory with other files is not
+    written over.
+  * A T90 batch, an incomplete matrix, a foreign strategy digest and an
+    unauthorized protocol are refused.
+  * Holdout seeds are refused by both recorders.
+  * The evaluator's matrix rules and roles are tested.
+  * `GitRepo` is tested on a scratch repository: committed, changed,
+    untracked, nonexistent, first author.
+  * The repository's holdout authorizes as sealed.
+  * Two dev.10 replay tests.
+* **Fail-before-fix.** 29 targeted mutations, each removing one check,
+  were all caught. Two first survived and exposed weak tests:
+  * the forged-protocol test passed on a nil-pointer panic, not the
+    guard; it now has a complete forged protocol and checks the refusal
+    message;
+  * no test gave a nonexistent path to `Committed`; one does now.
+
+  The dev.10 replay tests fail without the registration.
+* **Verification.**
+  * The full uncached suite on the Pi passes in 11 min 10 s (sim 639 s,
+    session 206 s, cmd 134 s, eval 64 s, tui 37 s). Goldens pass with no
+    reference changed, and every session file replays as
+    `earlier_build_exact`, the new dev.10 fixture included.
+  * `go vet` is clean for the default, `acceptance` and `calibration`
+    tags; gofmt is clean.
+  * On the Cortex-A76, with the guarded harness, plan A–D validation
+    (56 s) and evaluation (195 s) match the committed archive in every
+    field but the engine name. The 180-day session replay check passes
+    (165 s).
+* **Not done (by design).** No strategy set is frozen and no unseal
+  record exists: both are 5C.1's and the owner's. The canonical run has
+  never been executed on the holdout. Acceptance was not rerun: it
+  exercises only the simulation engine, whose production code is
+  unchanged.
+* **Remaining before unsealing.** One independent review of the whole
+  corrected framework, the frozen strategy set, and the owner's unseal
+  record. Open policy decisions are in `docs/evaluation/README.md`.
+
+---
+
 ## V0.2 Slice 5C.0a — evaluation policy correctness and anti-gaming (0.2.0-dev.10)
 
 An independent read-only Astra High audit of v0.2-eval-1

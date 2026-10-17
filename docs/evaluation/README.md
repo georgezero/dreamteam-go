@@ -359,24 +359,93 @@ passing just because it is missing.
 
 ## 9. Seeds and the holdout
 
-Unchanged from v0.2-eval-1, and the manifest is untouched:
+The seed sets are unchanged from v0.2-eval-1:
 
 * development seeds 901–910;
 * reference seeds 1001–1020 (exposed);
-* holdout `v0.2-holdout-1`: 40 seeds, sealed; only its digest is
-  recorded.
+* holdout `v0.2-holdout-1`: 40 seeds, sealed. Only its digest is
+  recorded; its method, label and digest are untouched.
 
-`eval.GuardRepo` now checks against this policy's digest, so an unseal
-record must name v0.2-eval-2.
+**The canonical runner** (Slice 5C.0b) is the only path that runs a
+holdout seed.
 
-The protocol is not yet enforced by a canonical runner. That is Slice
-5C.0b:
-* binding the strategy files, engine and approval;
-* the complete seed and strategy matrix;
-* immutable first-run outputs;
-* reproduction-only reruns.
+* **Sealed for every harness.** `eval.GuardRepo` refuses holdout seeds
+  whether or not the holdout is unsealed, and its refusal does not name
+  them. Every calibration harness calls it:
+  * `parseSeeds`;
+  * the dynamic-staffing runner for each seed;
+  * the session replay check;
+  * the evaluation recorder itself (`World.NewEvalRecorder`).
+* **The runner** is `internal/sim` `TestHoldoutRun`. It is the only
+  caller of `World.NewHoldoutRecorder`, which needs a protocol from
+  `eval.Authorize`; one cannot be constructed outside the package.
+* **Other paths.** A run by any other path, the CLI included, produces no
+  evaluation record and is not holdout evidence.
 
-Holdout unsealing stays NO GO until then.
+**The artifact contract.** Every file is pinned by SHA-256.
+
+| File | Schema | What it pins |
+|---|---|---|
+| A strategy file (`docs/evaluation/strategies/<name>.json`) | `dreamteam.strategy/v1` | Name, description, its dated batches of actions, and optionally `teleOnlyOf` (the plan it differs from only by teleradiology) |
+| The strategy set | `dreamteam.strategyset/v1` | The scenario manifest, the baseline (a strategy with no batches), and every strategy file's path and digest |
+| `holdout-unseal.json` | `dreamteam.holdout-unseal/v1` | Fields listed below |
+| `holdout-runs/v0.2-holdout-1/run.json` | `dreamteam.holdoutrun/v1` | The unseal record's digest, the artifacts, the common horizon, every plan × seed record's digest, and the report's digest |
+| `holdout-runs/v0.2-holdout-1/report.json` | `dreamteam.evalreport/v2` | The evaluation |
+
+The unseal record names:
+
+* the holdout and its manifest's digest;
+* the policy and its digest;
+* the strategy set and its digest;
+* the exact engine;
+* the one **primary** strategy;
+* the approver;
+* the approval date;
+* a statement.
+
+**`eval.Authorize`** refuses (as sealed) unless all of the following hold:
+
+* the manifest regenerates to its digest;
+* the unseal record exists, decodes strictly, and is complete;
+* every digest it names matches the file;
+* every strategy file matches its pin and decodes strictly;
+* the baseline takes no action;
+* the primary is a candidate, not the baseline;
+* `teleOnlyOf` names another strategy;
+* the engine is this build;
+* every one of these files is committed with no change (`git`);
+* the **unseal record was committed by its approver** (the author of
+  the commit that added it).
+
+**The run** works through these steps:
+
+1. **Common horizon.** The runner computes the horizon from each
+   strategy's accepted actions before running. The records confirm it
+   on every seed; if a later seed reaches further, every plan runs again
+   with the longer horizon.
+2. **Every plan on every holdout seed**, the baseline included. A batch
+   at or after T90 is refused.
+3. **Evaluation** with the frozen policy, requiring:
+   * the complete seed set;
+   * every record at its pinned strategy digest, with one digest a plan;
+   * the primary named. Every other candidate is reported
+     **exploratory**.
+4. **Commit, once.**
+   * The first run writes `run.json` and `report.json`, read-only, into
+     an empty directory.
+   * A rerun must reproduce both byte for byte. Otherwise it fails and
+     writes nothing: the holdout is then exposed and reference-only, and
+     a new one is generated under a new label.
+   * The records themselves are not committed. Their digests are, and a
+     rerun regenerates them.
+
+The test suite drives the whole protocol on a synthetic two-seed
+holdout of its own label, the mini practice and the short policy:
+* authorization and the 14 ways it refuses;
+* the written run, its reproduction, and a tampered output;
+* refused recorders.
+
+The repository's holdout is checked to authorize as sealed.
 
 ## 10. Verdicts and classifications
 
@@ -448,7 +517,8 @@ A record is `dreamteam.evalrecord/v2`. Beyond v1 it adds:
 * each capture's employee commitment and posting-level minimum-cash
   time.
 
-A 5C.1 harness proceeds as follows:
+A harness (5C.1 on development seeds, or the canonical runner) proceeds
+as follows:
 
 1. Compute H with `TailEnd` over every plan before running.
 2. Run every plan to `ObservationEnd`.
@@ -530,8 +600,9 @@ Still open:
 3. **Development-seed verdicts** (10 seeds) have 6.9% false rejection at
    8% urgent even under independence. They are exploratory, not
    selection evidence on their own.
-4. **Slice 5C.0b**: the canonical holdout runner and its artifact
-   contract, then one independent review of the whole corrected
-   framework before unsealing.
+4. **Before unsealing**: one independent review of the whole corrected
+   framework (v0.2-eval-2 and the canonical runner, built in Slice
+   5C.0b), then the frozen strategy set and the owner's committed unseal
+   record.
 5. **Not modelled**: remote read quality. Remote and local reports are
    assumed equivalent beyond turnaround, cost and coverage.

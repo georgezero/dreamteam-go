@@ -54,10 +54,13 @@ corrected it as policy v0.2-eval-2: joint seed reliability, an urgent
 evidence window chosen by operating characteristics, common paired
 horizons, access followed to resolution, backlog aging safeguards, exact
 case selection, absolute profit for GO and service-purchase
-classification. Next: Slice 5C.0b (the canonical holdout runner) and one
-independent review of the corrected framework before unsealing; Slice
-5C.1 strategy development proceeds on the development seeds, with ranking
-provisional until then.
+classification. Slice 5C.0b (0.2.0-dev.11, design §13.6) built the
+canonical holdout runner: holdout seeds refused by every other path, an
+artifact contract pinning strategies, policy, engine and the owner's
+approval by digest, the complete seed and strategy matrix, and a
+one-time run that may afterwards only be reproduced byte for byte. Next:
+Slice 5C.1 strategy development on the development seeds, and one
+independent review of the whole corrected framework before unsealing.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

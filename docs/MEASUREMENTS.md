@@ -448,3 +448,21 @@ were not rerun. The benchmark results under 0.2.0-dev.10 match the
 committed archive in every field but the engine name. The slower joofi
 times reflect its shared load.
 
+
+## 2026-10-17 — V0.2 Slice 5C.0b: canonical holdout runner (Pi 4 at ≈80 °C, load average ≈4.5; Cortex-A76 "joofi", load average ≈0.2–1.9)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Full uncached suite, Pi | `go test ./... -count=1 -timeout 60m` | 11 min 10 s (sim 639 s, session 206 s, cmd 134 s, eval 64 s, tui 37 s) |
+| Protocol and runner tests, Pi | `go test ./internal/sim -run Holdout` | 10–11 s (the synthetic run: 2 strategies × 2 seeds, written, reproduced, tampered) |
+| Targeted mutations, Pi | 29 mutations, each with its tests | about 6 min in all |
+| Plan D validation, 4 plans × 10 development seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-dev ./calib.test -test.run 'DynamicStaffing$' -test.parallel 3` | 56 s |
+| Evaluation, 4 plans × 20 reference seeds × 180 days, Cortex-A76 | `DT_DYN_SET=reading-eval ./calib.test … -test.parallel 3` | 195 s |
+| Session replay check, 7 plans × 2 seeds × 180 days, Cortex-A76 | `./sesscalib.test -test.run DynamicPlansReplay` | 165 s |
+
+The simulation's production code is unchanged, so the engine benchmarks
+were not rerun. The benchmark results under 0.2.0-dev.11, through the
+newly guarded harness, match the committed archive in every field but
+the engine name. The canonical holdout run was not executed: the
+holdout is sealed.
+

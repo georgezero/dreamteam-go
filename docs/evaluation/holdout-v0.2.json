@@ -11,10 +11,11 @@
  "sealed": true,
  "protocol": [
   "The seeds are not listed anywhere in the repository; they are regenerated from this method and must match seedsSHA256.",
-  "No harness runs a holdout seed until docs/evaluation/holdout-unseal.json is committed, naming this holdout, the policy's SHA-256 and the SHA-256 of the frozen strategy set, with the owner's approval. eval.GuardSeeds enforces it.",
-  "Before unsealing: the strategies are frozen from development seeds 901-910 only (1001-1020 are exposed and reference-only), the policy is confirmed by the owner and audited, and the strategy set's files are committed.",
-  "The holdout is run once, every frozen strategy and the no-action baseline on all 40 seeds, and evaluated with the frozen policy. The report and records are committed as they come out.",
-  "A rerun is allowed only to reproduce the same bytes (same engine, policy, strategies). Any change to a strategy, the policy or the engine after unsealing makes the holdout exposed: its results become reference-only, and a new holdout must be generated with a new label."
+  "No harness runs a holdout seed: eval.GuardRepo refuses them, sealed or not, without naming them. Only the canonical runner (internal/sim TestHoldoutRun) runs them, with a protocol authorized by eval.Authorize.",
+  "eval.Authorize needs docs/evaluation/holdout-unseal.json (dreamteam.holdout-unseal/v1), committed by the owner named as its approver, naming this holdout and this manifest's SHA-256, the policy and its digest, the strategy set and its digest (which pins every strategy file's), the exact engine, the one primary strategy and the approval date; every one of those files committed with no change.",
+  "Before unsealing: the strategies are frozen from development seeds 901-910 only (1001-1020 are exposed and reference-only), the policy is confirmed by the owner, the whole corrected framework has had one independent review, and the strategy set's files are committed.",
+  "The runner runs every strategy of the set, the no-action baseline included, on all 40 seeds to one common horizon, evaluates them with the frozen policy, and commits run.json (every record's digest) and report.json to docs/evaluation/holdout-runs/v0.2-holdout-1/, once.",
+  "A rerun is allowed only to reproduce the same bytes (same engine, policy, strategies); one that differs fails and writes nothing. Any change to a strategy, the policy or the engine after unsealing makes the holdout exposed: its results become reference-only, and a new holdout must be generated with a new label."
  ],
  "unsealRecord": "docs/evaluation/holdout-unseal.json"
 }

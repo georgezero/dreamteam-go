@@ -207,6 +207,7 @@ type Comparison struct {
 	CashPayback         []Payback                            `json:"cashPayback"`
 	CaseSelection       []GateSummary                        `json:"caseSelection"`
 	CaseSelectionStatus string                               `json:"caseSelectionStatus"`
+	Role                string                               `json:"role,omitempty"` // primary or exploratory, when the evaluation names a primary
 	Verdict             string                               `json:"verdict,omitempty"`
 	Classification      string                               `json:"classification,omitempty"`
 	Reasons             []string                             `json:"reasons,omitempty"`
@@ -218,6 +219,7 @@ type Report struct {
 	PolicyID      string       `json:"policyId"`
 	PolicyDigest  string       `json:"policyDigest"`
 	Baseline      string       `json:"baseline"`
+	Primary       string       `json:"primary,omitempty"`
 	HorizonEndSec int64        `json:"horizonEndSec"`
 	Integrity     []string     `json:"integrity"` // evaluation-wide: every comparison is invalid if any
 	Plans         []PlanReport `json:"plans"`
@@ -231,16 +233,56 @@ type Input struct {
 	Baseline string
 	Plans    map[string][]Record
 	Pairs    [][2]string
+	// Seeds, when set, is the complete seed set every plan must have (a
+	// holdout run's matrix); PlanSHA, when set, the strategy digest every
+	// record of each plan must carry; Primary, when set, the one
+	// prespecified strategy the evaluation confirms: every other
+	// candidate's comparison is exploratory.
+	Seeds   []int64
+	PlanSHA map[string]string
+	Primary string
 }
 
 // Evaluate applies the policy. The output depends only on its arguments.
 func Evaluate(p *Policy, digest string, in Input) *Report {
-	rep := &Report{Schema: ReportSchema, PolicyID: p.ID, PolicyDigest: digest, Baseline: in.Baseline, Integrity: []string{}}
+	rep := &Report{Schema: ReportSchema, PolicyID: p.ID, PolicyDigest: digest, Baseline: in.Baseline, Primary: in.Primary, Integrity: []string{}}
 	names := make([]string, 0, len(in.Plans))
 	for n := range in.Plans {
 		names = append(names, n)
 	}
 	sort.Strings(names)
+	want := slices.Sorted(slices.Values(in.Seeds))
+	for _, n := range names {
+		var seeds []int64
+		shas := map[string]bool{}
+		for _, r := range in.Plans[n] {
+			seeds = append(seeds, r.Seed)
+			shas[r.PlanSHA256] = true
+			if s, ok := in.PlanSHA[n]; ok && r.PlanSHA256 != s {
+				rep.Integrity = append(rep.Integrity, fmt.Sprintf("plan %s seed %d: strategy digest %q, the set pins %q", n, r.Seed, r.PlanSHA256, s))
+			}
+		}
+		if len(shas) > 1 {
+			rep.Integrity = append(rep.Integrity, fmt.Sprintf("plan %s: its records carry %d strategy digests", n, len(shas)))
+		}
+		if in.PlanSHA != nil {
+			if _, ok := in.PlanSHA[n]; !ok {
+				rep.Integrity = append(rep.Integrity, fmt.Sprintf("plan %s is not in the strategy set", n))
+			}
+		}
+		if len(want) > 0 && !slices.Equal(slices.Sorted(slices.Values(seeds)), want) {
+			rep.Integrity = append(rep.Integrity, fmt.Sprintf("plan %s: %d seeds, not the required %d", n, len(seeds), len(want)))
+		}
+	}
+	for n := range in.PlanSHA {
+		if _, ok := in.Plans[n]; !ok {
+			rep.Integrity = append(rep.Integrity, fmt.Sprintf("strategy %s has no records", n))
+		}
+	}
+	if in.Primary != "" && (in.Primary == in.Baseline || in.Plans[in.Primary] == nil) {
+		rep.Integrity = append(rep.Integrity, fmt.Sprintf("primary %q is not a candidate", in.Primary))
+	}
+	slices.Sort(rep.Integrity)
 	// One horizon and one observation end for every record (H2).
 	type bounds struct{ h, obs int64 }
 	seen := map[bounds][]string{}
@@ -277,6 +319,13 @@ func Evaluate(p *Policy, digest string, in Input) *Report {
 		}
 		c := compare(p, plans[n], base, in.Plans[n], in.Plans[in.Baseline], rep.Integrity)
 		verdict(p, &c, plans[n], base)
+		switch {
+		case in.Primary == "":
+		case n == in.Primary:
+			c.Role = "primary"
+		default:
+			c.Role = "exploratory"
+		}
 		rep.Comparisons = append(rep.Comparisons, c)
 	}
 	for _, pair := range in.Pairs {

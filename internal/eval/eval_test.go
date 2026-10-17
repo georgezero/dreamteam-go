@@ -8,7 +8,10 @@ import (
 	"errors"
 	"math"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -629,11 +632,11 @@ func TestPolicyFrozen(t *testing.T) {
 
 // The locked holdout: regenerated from its method it matches the
 // manifest's digest, has its fixed size, overlaps no earlier seed set,
-// and every harness is refused its seeds until an unseal record names
-// the policy and a strategy set.
+// has no unseal record, and every harness is refused its seeds — sealed
+// or not, they run only through the canonical runner — without the
+// refusal naming them.
 func TestHoldoutSealed(t *testing.T) {
-	_, d := testPolicy(t)
-	h, seeds, err := LoadHoldout("../../docs/evaluation/holdout-v0.2.json")
+	h, seeds, err := LoadHoldout("../../" + HoldoutPath)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -643,28 +646,26 @@ func TestHoldoutSealed(t *testing.T) {
 	seen := map[int64]bool{}
 	for _, s := range seeds {
 		if s < 100_000 || (s >= 901 && s <= 910) || (s >= 1001 && s <= 1020) || seen[s] {
-			t.Fatalf("seed %d overlaps an earlier set or repeats", s)
+			t.Fatal("a seed overlaps an earlier set or repeats")
 		}
 		seen[s] = true
 	}
-	if _, err := os.Stat("../../" + h.Unseal); !errors.Is(err, os.ErrNotExist) {
+	if _, err := os.Stat("../../" + RepoPaths.Unseal); !errors.Is(err, os.ErrNotExist) {
 		t.Fatalf("the holdout has an unseal record: %v", err)
 	}
+	if h.Unseal != RepoPaths.Unseal {
+		t.Fatalf("the manifest names %s", h.Unseal)
+	}
 	dev := []int64{901, 902, 903}
-	if err := GuardSeeds(dev, h, seeds, nil, d); err != nil {
+	if err := GuardSeeds(dev, h, seeds); err != nil {
 		t.Fatal(err)
 	}
-	mixed := append(slices.Clone(dev), seeds[7])
-	if err := GuardSeeds(mixed, h, seeds, nil, d); !errors.Is(err, ErrSealed) {
+	err = GuardSeeds(append(slices.Clone(dev), seeds[7]), h, seeds)
+	if !errors.Is(err, ErrSealed) {
 		t.Fatalf("a holdout seed ran: %v", err)
 	}
-	u := &Unseal{Holdout: h.ID, PolicyDigest: "stale", StrategiesSHA256: "x", Approved: "owner"}
-	if err := GuardSeeds(mixed, h, seeds, u, d); !errors.Is(err, ErrSealed) {
-		t.Fatal("an unseal record for another policy opened it")
-	}
-	u.PolicyDigest = d
-	if err := GuardSeeds(mixed, h, seeds, u, d); err != nil {
-		t.Fatal(err)
+	if strings.Contains(err.Error(), strconv.FormatInt(seeds[7], 10)) {
+		t.Fatal("the refusal names a holdout seed")
 	}
 	// The manifest commits to the method: another label is other seeds.
 	other, _ := HoldoutSeeds(h.Label+"x", h.Count, h.Lo, h.Hi, h.Excluded)
@@ -693,7 +694,7 @@ func TestStatistics(t *testing.T) {
 }
 
 // The repository guard every calibration harness calls: development
-// seeds run; a holdout seed is refused while no unseal record exists.
+// seeds run; a holdout seed is refused.
 func TestGuardRepo(t *testing.T) {
 	_, seeds, err := LoadHoldout("../../" + HoldoutPath)
 	if err != nil {
@@ -704,5 +705,96 @@ func TestGuardRepo(t *testing.T) {
 	}
 	if err := GuardRepo("../..", []int64{901, seeds[0]}); !errors.Is(err, ErrSealed) {
 		t.Fatalf("%v", err)
+	}
+}
+
+// A holdout evaluation's matrix: every plan on exactly the required
+// seeds, every record at its pinned strategy digest, one digest a plan,
+// and the primary named; other candidates are exploratory.
+func TestEvaluateMatrix(t *testing.T) {
+	p, d := testPolicy(t)
+	mk := func(name string, pd int64) []Record {
+		recs := records(10, func(s int64) synth { x := base(name, s); x.profitPD = pd; return x })
+		for i := range recs {
+			recs[i].PlanSHA256 = "sha-" + name
+		}
+		return recs
+	}
+	seeds := []int64{901, 902, 903, 904, 905, 906, 907, 908, 909, 910}
+	pins := map[string]string{"A": "sha-A", "B": "sha-B", "C": "sha-C"}
+	in := func() Input {
+		return Input{Baseline: "A", Plans: map[string][]Record{"A": mk("A", 10_000), "B": mk("B", 30_000), "C": mk("C", 20_000)},
+			Seeds: seeds, PlanSHA: pins, Primary: "B"}
+	}
+	rep := Evaluate(p, d, in())
+	if len(rep.Integrity) != 0 || comparison(t, rep, "B").Role != "primary" || comparison(t, rep, "C").Role != "exploratory" {
+		t.Fatalf("%v", rep.Integrity)
+	}
+	cases := map[string]func(x *Input){
+		"seeds, not the required": func(x *Input) { x.Plans["C"] = x.Plans["C"][1:] },
+		"the set pins":            func(x *Input) { x.Plans["B"][3].PlanSHA256 = "sha-B2" },
+		"strategy digests":        func(x *Input) { x.PlanSHA = nil; x.Plans["B"][3].PlanSHA256 = "sha-B2" },
+		"has no records":          func(x *Input) { delete(x.Plans, "C") },
+		"not in the strategy set": func(x *Input) { delete(x.PlanSHA, "C") },
+		"is not a candidate":      func(x *Input) { x.Primary = "A" },
+	}
+	for want, f := range cases {
+		x := in()
+		f(&x)
+		rep := Evaluate(p, d, x)
+		if !strings.Contains(strings.Join(rep.Integrity, "\n"), want) {
+			t.Errorf("%s: %v", want, rep.Integrity)
+		}
+		for _, c := range rep.Comparisons {
+			if c.Verdict != INVALID {
+				t.Errorf("%s: %s is %s", want, c.Candidate, c.Verdict)
+			}
+		}
+	}
+}
+
+// The repository's holdout, through the canonical path: sealed (no unseal
+// record). And GitRepo answers the protocol's questions, on a scratch
+// repository: committed and unchanged, changed, untracked, first author.
+func TestRepositoryProtocol(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("no git")
+	}
+	if _, err := os.Stat("../../" + RepoPaths.Unseal); errors.Is(err, os.ErrNotExist) {
+		if p, err := Authorize("../..", RepoPaths, GitRepo{Root: "../.."}, "any"); p != nil || !errors.Is(err, ErrSealed) {
+			t.Fatalf("%v", err)
+		}
+	}
+	dir := t.TempDir()
+	g := GitRepo{Root: dir}
+	run := func(args ...string) {
+		t.Helper()
+		if out, err := g.git(args...); err != nil {
+			t.Fatalf("git %v: %s %v", args, out, err)
+		}
+	}
+	run("init", "-q")
+	os.WriteFile(filepath.Join(dir, "a.json"), []byte("{}\n"), 0o644)
+	run("add", "a.json")
+	run("-c", "user.name=Tester", "-c", "user.email=t@example.invalid", "commit", "-q", "-m", "a")
+	if err := g.Committed("a.json"); err != nil {
+		t.Fatal(err)
+	}
+	if a, err := g.FirstAuthor("a.json"); err != nil || a != "Tester" {
+		t.Fatalf("%q %v", a, err)
+	}
+	os.WriteFile(filepath.Join(dir, "b.json"), []byte("{}\n"), 0o644)
+	if err := g.Committed("a.json", "b.json"); err == nil {
+		t.Fatal("an untracked file is committed")
+	}
+	if err := g.Committed("a.json", "missing.json"); err == nil {
+		t.Fatal("a file that does not exist is committed")
+	}
+	if _, err := g.FirstAuthor("b.json"); err == nil {
+		t.Fatal("an untracked file has an author")
+	}
+	os.WriteFile(filepath.Join(dir, "a.json"), []byte("{\"x\": 1}\n"), 0o644)
+	if err := g.Committed("a.json"); err == nil {
+		t.Fatal("a changed file is committed")
 	}
 }

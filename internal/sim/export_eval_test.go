@@ -33,8 +33,25 @@ type EvalRecorder struct {
 
 // NewEvalRecorder starts recording at the takeover instant; the world must
 // be exactly there, with an open-ended evaluation window. commitmentDays
-// is the policy's finance.employeeCommitmentDays.
+// is the policy's finance.employeeCommitmentDays. A holdout seed is
+// refused (eval.GuardRepo): it is recorded only by NewHoldoutRecorder.
 func (w *World) NewEvalRecorder(plan, planSHA256, fingerprint string, seed int64, commitmentDays int) *EvalRecorder {
+	if err := eval.GuardRepo("../..", []int64{seed}); err != nil {
+		panic(err)
+	}
+	return w.newEvalRecorder(plan, planSHA256, fingerprint, seed, commitmentDays)
+}
+
+// NewHoldoutRecorder is NewEvalRecorder for the canonical holdout runner:
+// the seed must be one of an authorized protocol's (eval.Authorize).
+func (w *World) NewHoldoutRecorder(p *eval.Protocol, plan, planSHA256, fingerprint string, seed int64) *EvalRecorder {
+	if !p.Covers(seed) {
+		panic("sim: the holdout recorder needs an authorized protocol covering the seed")
+	}
+	return w.newEvalRecorder(plan, planSHA256, fingerprint, seed, p.Policy.Finance.EmployeeCommitmentDays)
+}
+
+func (w *World) newEvalRecorder(plan, planSHA256, fingerprint string, seed int64, commitmentDays int) *EvalRecorder {
 	st := w.st
 	if !st.eval.on || st.eval.endAt != 0 || w.eng.Now() != w.StartTime() {
 		panic("sim: the evaluation recorder starts at the takeover of an open-ended window")
@@ -272,6 +289,41 @@ func (st *state) earnedUnposted(now simtime.Time) int64 {
 		total += w + roundDiv(w*st.cfg.Finance.BenefitsBP, 10_000)
 	}
 	return total
+}
+
+// LatestEffect is the start of the day of the latest effect of the
+// actions accepted so far: a hire's first productive day, an employment's
+// end, a roster or reading-allocation version, a teleradiology contract's
+// start or fixed end. 0 with none. (V0.1 controls take effect when
+// accepted or on their own day, before T90.)
+func (w *World) LatestEffect() int64 {
+	st := w.st
+	d := int64(-1)
+	for i := range st.staff {
+		r := &st.staff[i]
+		if r.Hire != nil {
+			d = max(d, r.Productive)
+		}
+		if r.Exit != nil {
+			d = max(d, r.Until)
+		}
+		for _, v := range r.Rosters {
+			d = max(d, v.From)
+		}
+		for _, v := range r.Allocs {
+			d = max(d, v.From)
+		}
+	}
+	if st.tele != nil {
+		for c := range st.tele.contracts {
+			k := &st.tele.contracts[c]
+			d = max(d, k.from, k.until)
+		}
+	}
+	if d < 0 {
+		return 0
+	}
+	return int64(st.cal.StartOfDay(d))
 }
 
 // LatestCommitment is the latest end of a minimum obligation accepted by

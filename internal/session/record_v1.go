@@ -192,14 +192,15 @@ var legacyEngines = []struct {
 // their own action set (a later action type was an unknown V0.1-path
 // action then), and a session continuing one embeds it as its prefix.
 var earlierV2Engines = map[string]string{
-	"0.2.0-dev.2": batchModeSlice2, // V0.2 Slice 2: hire, terminate
-	"0.2.0-dev.3": batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
-	"0.2.0-dev.4": batchModeSlice3, // the dynamic staffing benchmark: Slice 3's action set
-	"0.2.0-dev.5": batchModeSlice4, // V0.2 Slice 4: this action set, dev.5's reading and allocation rules
-	"0.2.0-dev.6": batchModeDev6,   // pre-Slice 5 remediation: Slice 4's action set, this build's rules
-	"0.2.0-dev.7": batchModeDev7,   // V0.2 Slice 5A (remote reading engine): Slice 4's action set, this build's rules
-	"0.2.0-dev.8": batchModeDev8,   // V0.2 Slice 5B (contract_teleradiology): this build's action set and rules
-	"0.2.0-dev.9": batchModeDev9,   // V0.2 Slice 5C.0 (frozen evaluation): this build's action set and rules
+	"0.2.0-dev.2":  batchModeSlice2, // V0.2 Slice 2: hire, terminate
+	"0.2.0-dev.3":  batchModeSlice3, // V0.2 Slice 3: hire, terminate, set_roster
+	"0.2.0-dev.4":  batchModeSlice3, // the dynamic staffing benchmark: Slice 3's action set
+	"0.2.0-dev.5":  batchModeSlice4, // V0.2 Slice 4: this action set, dev.5's reading and allocation rules
+	"0.2.0-dev.6":  batchModeDev6,   // pre-Slice 5 remediation: Slice 4's action set, this build's rules
+	"0.2.0-dev.7":  batchModeDev7,   // V0.2 Slice 5A (remote reading engine): Slice 4's action set, this build's rules
+	"0.2.0-dev.8":  batchModeDev8,   // V0.2 Slice 5B (contract_teleradiology): this build's action set and rules
+	"0.2.0-dev.9":  batchModeDev9,   // V0.2 Slice 5C.0 (frozen evaluation): this build's action set and rules
+	"0.2.0-dev.10": batchModeDev10,  // V0.2 Slice 5C.0a (evaluation policy v0.2-eval-2): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.
