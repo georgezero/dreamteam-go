@@ -537,6 +537,7 @@ was run.
 |---|---|---|
 | Full suite `go test ./... -count=1` | Pi 4 | 702 s wall (sim 675, session 258, cmd 124, eval 89, tui 28) |
 | `go test ./internal/eval -count=1` (rerun after the containment allowlist fix) | Pi 4 | 39 s |
+| Full suite `go test ./... -count=1` at 7734b9f (clean tree, after the fix) | Pi 4 | 664 s wall; all packages pass (sim 657, session 236, cmd 97, eval 68, tui 25) |
 | Audit witnesses (`TestAudit*`, disposable copy of 7707dbd) | Pi 4 | 4.8 s |
 | `TestHoldoutContainment` (parses every Go file in the repository) | Pi 4 | 0.3–1.1 s |
 | 6 targeted mutations (each a focused test run) | Pi 4 | about 3 min |
