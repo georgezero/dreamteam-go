@@ -7,6 +7,152 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.2 — policy feasibility, seasonal backlog and cluster-aware service (0.2.0-dev.13)
+
+The owner's corrections to the rules Slice 5C.1 showed to be infeasible
+or statistically misleading, frozen as **policy v0.2-eval-3**
+(`docs/evaluation/policy-v0.2-eval-3.json`).
+
+Unchanged:
+
+* the breach gates (12% / 32% / 6%), the joint seed rule and its 10%
+  allowance;
+* case selection, solvency, and T90 as the primary financial endpoint;
+* the simulation, staffing economics, demand, pricing and TAT targets;
+* the holdout, which stays sealed. The reference seeds were not run.
+
+v0.2-eval-2 (digest 5dbab462…) and its README are kept byte for byte,
+and its 5C.1 reports are unchanged. No primary strategy is chosen.
+Design §13.8; rules in `docs/evaluation/README.md`; diagnostics and the
+re-evaluation in `docs/calibration/policy-5c2`.
+
+* **Funding: a dated settlement test** (§5). It replaces "cash ≥ the
+  whole bridge, 14 days of future wages included, at every instant",
+  which the no-action practice failed on 76% of samples while paying
+  every bill on time. A seed is funded when:
+  * cash after every posting is at or above the floor, and nothing is
+    past due (solvency, unchanged);
+  * observation runs at least 31 days past the horizon (the longest
+    payment cycle: payables on the 1st), so every obligation recognized
+    by the horizon is seen paid from actual collections;
+  * at the end, cash covers the committed liabilities outside the cycle
+    (severance payable, contract minimums, fees in flight).
+
+  Receivables are never forecast. The bridge is reported split by kind,
+  with the old 14-day coverage as a liquidity-risk indicator.
+* **Backlog: workload-adjusted** (§4). The mean, peak, overdue and
+  exposure checks compare a block with the reference scaled by its own
+  acquisitions (Little's law), exactly. Stale and persistent work stays
+  absolute. Rota alignment, the covering block and every check are kept.
+* **Cluster-aware service** (§2). Every gate reports:
+  * day (weekday-adjusted) and week design effects;
+  * a seed-cluster-robust pooled interval;
+  * for the joint rule, the empirical pass fraction and the exact upper
+    bound on the population failing-seed fraction.
+
+  The operating characteristics cover independent, variable-volume,
+  day-clustered and week-clustered models, with power at unacceptable
+  rates. The allowance is read prospectively: a pass is empirical, not
+  a confidence statement.
+* **Transition, not yet repaid** (§10): CONDITIONAL GO for a plan passing
+  every hard gate whose T90 increment is not positive but whose days
+  31–90 increment is.
+  * T180 is never promoted to financial GO.
+  * Every comparison reports its financial evidence: T90, operating
+    window and T180, each absolute and incremental, plus transition
+    obligations at T90.
+  * Service restoration is stated as a fact, whatever the verdict.
+* **Development storage.** New runs commit `run.json`, which pins the
+  records, report and trajectory by digest, and the generated
+  `report.md`. The detailed report and trajectory go to an ignored
+  `detail/` directory and are checked against `run.json`.
+
+**Re-evaluation** (set `p5-eval3`: A–H, D2, E2, E3, strategy files
+unchanged; `docs/calibration/policy-5c2/reevaluation.md`):
+
+| | v0.2-eval-2 | v0.2-eval-3 |
+|---|---|---|
+| Funding-gap seeds, every plan | 10 of 10 | 0 |
+| Service joint rule | as before | unchanged (by design) |
+| Backlog-stable seeds | A 0, D2 2, E2/E3 1 | A 1, D2 2, E2/E3 1 |
+| Verdicts | NO GO | NO GO |
+
+* D2, E2 and E3 now fail **only the backlog gate**.
+* F, G and H fail solvency.
+* A, B, C, D and E also fail service.
+* If backlog passed (a counterfactual): D2 would be CONDITIONAL GO, a
+  transition restoring service; E2 and E3 CONDITIONAL GO service
+  purchases.
+
+**What the operating characteristics show** (`oc-v0.2-eval-3.json`):
+
+* **The backlog rule is too noisy for a stable queue.**
+  * A synthetic queue at utilization 0.85 is unstable on 64% of seeds
+    with stationary demand and 88% seasonal (v0.2-eval-2: 61% and 93%).
+  * The peak check alone fails half of the stable seeds; without it,
+    13% and 61%.
+  * Alternatives are tabulated, none adopted: the tolerances are an open
+    owner decision.
+* **Service under clustering.** At the planning rates the frozen design's
+  40-seed false rejection is:
+  * 0.022 independent;
+  * 0.34 at week ICC 0.02;
+  * 0.96 across the development range.
+
+  Power at the gates is 1.00 in every model.
+* **D2 against E3 without independence.** A week-block bootstrap
+  (exploratory): D2 fails a seed 13.7% of the time, almost all urgent,
+  so it passes the 40-seed rule in 33% of replicates; E3 and E2 pass
+  every one.
+
+**Tests.**
+
+* `TestDatedFunding` (deferral cannot conceal insolvency):
+  * a past-due payment with ample cash;
+  * negative cash between positive samples;
+  * observation short of the settlement window (INVALID), and the
+    window binding at a day-175 horizon;
+  * severance, contract minimums or fees in flight above end cash;
+  * exact coverage passes, and the indicator alone does not gate.
+* `TestSeasonalBacklog`:
+  * seasonal-stable passes, and fails v0.2-eval-2;
+  * deterioration (flat demand, and beyond the workload) fails;
+  * a backlog that does not fall when demand falls fails;
+  * persistent work, a growing and a proportional stale burden fail;
+  * a spike and late-tail deterioration fail;
+  * with no workload recorded, the comparison is unscaled.
+* `TestClusterStatistics`: design effects, weekday adjustment, robust
+  intervals, Clopper–Pearson bounds.
+* `TestTransitionClassification`: transition with and without
+  restoration, service purchase, no benefit, restoration under NO GO,
+  no T180 promotion.
+* `TestPolicyFrozen`: v1 and v2 kept and refused; every backlog check
+  adjusted or absolute exactly once.
+* The operating-characteristics checks.
+* `internal/session` `TestDev12Record*`.
+
+**Fail-before-fix.** 20 targeted mutations of the new rules, all caught.
+Two survived first and their tests were strengthened:
+
+* the settlement window, invisible at a day-150 horizon;
+* scaling stale, invisible below the 2-study floor.
+
+Registers 0.2.0-dev.12 (batch mode `v0.2_dev12`, fixture
+`mini-seed37-dev12` from the dev.12 binary).
+
+**Limitations.**
+
+* The backlog tolerances, and the dependence trade-off against the
+  planning target, are unresolved owner decisions. Strategy selection
+  is NO GO.
+* The operating characteristics' models are synthetic. Their dependence
+  range comes from 10 development seeds, and the queue is a simple
+  hourly model.
+* The bootstrap resamples weeks independently and has only 10 seeds of
+  between-seed variation.
+
+---
+
 ## V0.2 Slice 5C.1 — development-seed strategy comparison (0.2.0-dev.12)
 
 Strategy development on the development seeds 901–910 only, under policy

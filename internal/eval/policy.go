@@ -17,11 +17,13 @@ import (
 )
 
 const (
-	PolicySchema = "dreamteam.evalpolicy/v2"
-	// The superseded schema: v0.2-eval-1 (Slice 5C.0) is kept byte for byte
-	// and named by digest in every later policy's supersedes; no evaluation
-	// was ever run under it, so nothing was decided by it.
+	PolicySchema = "dreamteam.evalpolicy/v3"
+	// The superseded schemas, kept byte for byte and named by digest in the
+	// next policy's supersedes: v0.2-eval-1 (Slice 5C.0), under which no
+	// evaluation was run, and v0.2-eval-2 (Slice 5C.0a), under which only
+	// the Slice 5C.1 development runs were evaluated.
 	policyV1Schema = "dreamteam.evalpolicy/v1"
+	policyV2Schema = "dreamteam.evalpolicy/v2"
 )
 
 // Priorities in report order.
@@ -86,6 +88,12 @@ type Policy struct {
 		PlanningRate map[string]float64 `json:"planningRate"`
 		// OperatingCharacteristics: the analysis behind the design.
 		OperatingCharacteristics string `json:"operatingCharacteristics"`
+		// ClusterLevels: the time clusters whose design effects every gate
+		// reports (day, weekday-adjusted; rota week). Reported, never gated.
+		ClusterLevels []string `json:"clusterLevels"`
+		// ReliabilityConfidence: the one-sided confidence of the reported
+		// upper bound on the population failing-seed fraction.
+		ReliabilityConfidence float64 `json:"reliabilityConfidence"`
 	} `json:"service"`
 	CaseSelection struct {
 		MinStratumDue        int64   `json:"minStratumDue"`
@@ -113,15 +121,27 @@ type Policy struct {
 		PersistentAfterDueDays int     `json:"persistentAfterDueDays"`
 		MaxUnstableSeedFrac    float64 `json:"maxUnstableSeedFraction"`
 		LegacyRuleDescription  string  `json:"legacyRule"`
+		// WorkloadAdjustedChecks compare a block with the reference scaled by
+		// the block's workload (its acquisitions over the reference's);
+		// AbsoluteChecks never scale. Together they are every check.
+		WorkloadAdjustedChecks []string `json:"workloadAdjustedChecks"`
+		AbsoluteChecks         []string `json:"absoluteChecks"`
 	} `json:"backlog"`
 	Finance struct {
 		MinCashFloorCents int64 `json:"minCashFloorCents"`
 		MaxInsolventSeeds int   `json:"maxInsolventSeeds"`
 		MaxPastDueCents   int64 `json:"maxPastDueCents"`
-		// EmployeeCommitmentDays: the forward contracted pay counted as an
-		// unavoidable commitment (the notice an employer must give).
+		// SettlementDays: observation runs at least this long after the
+		// horizon, so every obligation recognized by then falls due and is
+		// paid inside the observed run (the longest recurring payment cycle).
+		SettlementDays int `json:"settlementDays"`
+		// EmployeeCommitmentDays: the forward contracted pay reported as a
+		// liquidity-risk indicator (the notice an employer must give); not
+		// a gate.
 		EmployeeCommitmentDays int `json:"employeeCommitmentDays"`
-		MaxFundingGapSeeds     int `json:"maxFundingGapSeeds"`
+		// MaxFundingGapSeeds: seeds whose cash at the end of observation is
+		// below their committed liabilities outside the payment cycle.
+		MaxFundingGapSeeds int `json:"maxFundingGapSeeds"`
 	} `json:"finance"`
 	Payback struct {
 		Horizons            []int   `json:"horizonDays"`
@@ -168,6 +188,13 @@ func LoadPolicy(path string) (*Policy, string, error) {
 
 // DecodePolicy decodes strictly and checks the policy is complete.
 func DecodePolicy(raw []byte) (*Policy, error) {
+	var head struct {
+		Schema string `json:"schema"`
+		ID     string `json:"id"`
+	}
+	if err := json.Unmarshal(raw, &head); err == nil && (head.Schema == policyV1Schema || head.Schema == policyV2Schema) {
+		return nil, fmt.Errorf("policy %s is superseded (schema %s): evaluate under %s", head.ID, head.Schema, PolicyPath)
+	}
 	var p Policy
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.DisallowUnknownFields()
@@ -179,8 +206,6 @@ func DecodePolicy(raw []byte) (*Policy, error) {
 
 func (p *Policy) validate() error {
 	switch {
-	case p.Schema == policyV1Schema:
-		return fmt.Errorf("policy %s is superseded (schema %s): evaluate under %s", p.ID, p.Schema, PolicyPath)
 	case p.Schema != PolicySchema:
 		return fmt.Errorf("schema %q, want %q", p.Schema, PolicySchema)
 	case p.Horizons.PrimaryDays <= p.Horizons.FeedbackDays || p.Horizons.OperatingFrom >= p.Horizons.PrimaryDays:
@@ -193,11 +218,26 @@ func (p *Policy) validate() error {
 		return fmt.Errorf("backlog stale and persistent limits must be positive")
 	case p.Finance.EmployeeCommitmentDays <= 0:
 		return fmt.Errorf("employeeCommitmentDays must be positive")
+	case p.Finance.SettlementDays <= 0:
+		return fmt.Errorf("settlementDays must be positive")
+	case p.Service.ReliabilityConfidence <= 0 || p.Service.ReliabilityConfidence >= 1:
+		return fmt.Errorf("reliabilityConfidence must be in (0, 1)")
+	}
+	checks := append(slices.Clone(p.Backlog.WorkloadAdjustedChecks), p.Backlog.AbsoluteChecks...)
+	slices.Sort(checks)
+	if !slices.Equal(checks, backlogChecks) {
+		return fmt.Errorf("backlog checks %v: every one of %v exactly once, adjusted or absolute", checks, backlogChecks)
+	}
+	for _, l := range p.Service.ClusterLevels {
+		if l != "day" && l != "week" {
+			return fmt.Errorf("unknown cluster level %q", l)
+		}
 	}
 	fracs := map[string]float64{"maxFailingSeedFraction": p.Service.MaxFailingSeedFraction,
 		"perSeedMaxServedDrop": p.CaseSelection.PerSeedMaxServedDrop, "pooledMaxServedDrop": p.CaseSelection.PooledMaxServedDrop,
 		"maxAcquiredDrop": p.CaseSelection.MaxAcquiredDrop, "maxLossRateIncrease": p.CaseSelection.MaxLossRateIncrease,
-		"growthFraction": p.Backlog.Growth, "maxUnstableSeedFraction": p.Backlog.MaxUnstableSeedFrac}
+		"growthFraction": p.Backlog.Growth, "maxUnstableSeedFraction": p.Backlog.MaxUnstableSeedFrac,
+		"reliabilityConfidence": p.Service.ReliabilityConfidence}
 	for _, q := range Priorities {
 		fracs["breachGate."+q] = p.Service.BreachGate[q]
 	}
@@ -239,6 +279,14 @@ func (p *Policy) validate() error {
 		}
 	}
 	return nil
+}
+
+// backlogChecks are the backlog rule's checks, sorted.
+var backlogChecks = []string{"exposure", "max", "mean", "overdue", "persistent", "stale"}
+
+// adjusted reports whether backlog check name scales with workload.
+func (p *Policy) adjusted(name string) bool {
+	return slices.Contains(p.Backlog.WorkloadAdjustedChecks, name)
 }
 
 // Window names.

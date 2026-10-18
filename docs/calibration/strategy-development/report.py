@@ -6,7 +6,9 @@ verdict and classification is the evaluation's own.
 
     python3 docs/calibration/strategy-development/report.py SET [SET...]
 
-writes results/<set>/report.md.
+writes results/<set>/report.md. From Slice 5C.2 a run's report.json and
+trajectory.csv are kept outside the repository (detail/<set>/, pinned by
+run.json); this reads them there when results/<set>/ does not hold them.
 """
 import csv
 import json
@@ -55,10 +57,23 @@ def gates_failed(sr):
     return out
 
 
+def detail(sid, name):
+    for base in ("results", "detail"):
+        path = os.path.join(HERE, base, sid, name)
+        if os.path.exists(path):
+            return path
+    raise SystemExit("%s: no %s (rerun the set to regenerate it)" % (sid, name))
+
+
 def main(sid):
     d = os.path.join(HERE, "results", sid)
-    rep = json.load(open(os.path.join(d, "report.json")))
+    raw = open(detail(sid, "report.json"), "rb").read()
+    rep = json.loads(raw)
     run = json.load(open(os.path.join(d, "run.json")))
+    import hashlib
+    if hashlib.sha256(raw).hexdigest() != run["reportSHA256"]:
+        raise SystemExit("%s: report.json is not the one run.json pins" % sid)
+    v3 = rep["schema"] == "dreamteam.evalreport/v3"
     plans = {p["plan"]: p for p in rep["plans"]}
     base = rep["baseline"]
     comps = {c["candidate"]: c for c in rep["comparisons"] if c["against"] == base}
@@ -79,7 +94,7 @@ def main(sid):
     w("")
     w("## Verdicts")
     w("")
-    w("| Plan | Valid | Service (joint: failing / insufficient seeds, limit) | Pooled + joint | Backlog stable | Solvent | Funding gap seeds | Case selection | Verdict | Classification |")
+    w("| Plan | Valid | Service (joint: failing / insufficient seeds, limit) | Pooled + joint | Backlog stable | Solvent | Funding gap seeds%s | Case selection | Verdict | Classification |" % (" (dated settlement)" if v3 else ""))
     w("|---|---|---|---|---|---|---|---|---|---|")
     for n in names:
         p = plans[n]
@@ -284,7 +299,105 @@ def main(sid):
             return " / ".join(iv(c["breachRateDelta"].get(win, {}).get(q), 0.01) for q in qs)
         w("| %s | %s | %s | %s |" % (short(n), bd("T90"), bd("tail"), bd("gated", ["urgent"])))
     w("")
+    if v3:
+        v3_sections(w, rep, plans, names, comps, base, seeds)
     open(os.path.join(d, "report.md"), "w").write("\n".join(o))
+
+
+def v3_sections(w, rep, plans, names, comps, base, seeds):
+    w("## Liquidity (v0.2-eval-3)")
+    w("")
+    w("At the end of observation, $k, mean over seeds. The dated settlement test fails a seed when cash is below *committed* (severance payable, contract minimums, remote fees in flight) plus anything past due; every obligation recognized by the horizon has fallen due and been paid inside the observation (solvency). The 14-day commitment coverage (accrued + committed + future wages above cash at any capture or sample) is reported, never gated.")
+    w("")
+    w("| Plan | Cash | Accrued (in cycle) | Committed | Past due | Future wages (14 d) | Receivables | Funding gap seeds | Commitment-gap seeds | Instants in commitment gap | Worst commitment gap |")
+    w("|---|---|---|---|---|---|---|---|---|---|---|")
+    for n in names:
+        p = plans[n]
+        ls = [sr["measures"]["liquidity"]["end"] for sr in p["perSeed"]]
+        mean = lambda f: sum(x[f] for x in ls) / len(ls)
+        cg = p["commitmentGapInstantFraction"]
+        w("| %s | %s | %s | %s | %s | %s | %s | %s | %d / %d | %s | %s |" % (
+            short(n), k(mean("cashCents")), k(mean("accruedCents")), k(mean("committedCents")), k(mean("payableNowCents")),
+            k(mean("futureWagesCents")), k(mean("receivablesCents")), ",".join(str(x) for x in p["fundingGapSeeds"]) or "none",
+            len(p["commitmentGapSeeds"]), len(p["seeds"]), pct(cg) + "%", k(p["worstCommitmentGapCents"])))
+    w("")
+    w("## Cluster-aware service (v0.2-eval-3)")
+    w("")
+    w("Gated windows: pooled rate with the seed-cluster-robust 95% interval (seeds as the independent units), mean day (weekday-adjusted) and week design effects. Joint rule: empirical pass fraction and the exact one-sided upper bound on the population failing-seed fraction.")
+    w("")
+    w("| Plan | Window | Priority | Pooled % [robust 95%] | Day DE | Week DE |")
+    w("|---|---|---|---|---|---|")
+    for n in names:
+        for g in plans[n]["serviceGates"]:
+            if g["window"] not in ("gated", "T90", "tail") or (g["window"] == "gated" and g["stratum"] != "urgent"):
+                continue
+            if g["window"] != "gated" and g["stratum"] == "urgent":
+                continue
+            r = g.get("clusterRobustPooled", {})
+            ci = "%.1f [%.1f, %.1f]" % (100 * r["mean"], 100 * r["lo"], 100 * r["hi"]) if r.get("defined") else pct(g["pooled"])
+            w("| %s | %s | %s | %s | %.2f | %.2f |" % (short(n), g["window"], g["stratum"], ci, g["meanDayDesignEffect"], g["meanWeekDesignEffect"]))
+    w("")
+    w("| Plan | Seeds passing | Pass fraction | Failing fraction, 95% upper bound |")
+    w("|---|---|---|---|")
+    for n in names:
+        j = plans[n]["serviceJoint"]
+        w("| %s | %d / %d | %.0f%% | %.1f%% |" % (short(n), j["seeds"] - len(j["failingSeeds"]) - len(j["insufficientSeeds"]), j["seeds"],
+                                                  100 * j["passFraction"], 100 * j["failingFractionUpperBound"]))
+    w("")
+    w("## Backlog checks (v0.2-eval-3)")
+    w("")
+    w("Seeds failing each check (workload-adjusted: mean, max, overdue, exposure; absolute: stale, persistent), and the mean workload ratio of the later blocks.")
+    w("")
+    w("| Plan | Stable | mean | max | overdue | stale | exposure | persistent | Unstable on the peak alone | Workload ratio |")
+    w("|---|---|---|---|---|---|---|---|---|---|")
+    for n in names:
+        cnt = {c: 0 for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")}
+        peak_only, ratio, nr = 0, 0.0, 0
+        for sr in plans[n]["perSeed"]:
+            b = sr["measures"]["backlog"]
+            failed = {c["check"] for c in b["checks"] if not c["pass"]}
+            if b["persistentStudies"] > 0:
+                failed.add("persistent")
+            for c in failed:
+                cnt[c] += 1
+            if failed == {"max"}:
+                peak_only += 1
+            for c in b["checks"]:
+                if c["check"] == "mean":
+                    ratio, nr = ratio + c["workloadRatio"], nr + 1
+        w("| %s | %d / %d | %s | %d | %.3f |" % (short(n), plans[n]["backlogStableSeeds"], len(seeds),
+                                               " | ".join(str(cnt[c]) for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")),
+                                               peak_only, ratio / max(nr, 1)))
+    w("")
+    w("## Financial classification (v0.2-eval-3)")
+    w("")
+    w("$k, mean [95%% t]: the candidate's own profit and its paired increment against %s, T90 (primary), days 31-90 (operating window), T180 (validation); transition obligations outstanding at T90 (severance payable and contract minimums)." % base)
+    w("")
+    w("*If backlog were the only failure* is a counterfactual, not a verdict: the class the frozen verdict order (README §10) gives a plan whose only failed hard gate is backlog, from its own figures.")
+    w("")
+    w("| Plan | T90 own | T90 Δ | D31-90 own | D31-90 Δ | T180 own | T180 Δ | Transition obligations T90 | Restores baseline service | Verdict | Classification | If backlog were the only failure |")
+    w("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    for n in names:
+        c = comps.get(n)
+        if not c:
+            continue
+        f = c["financial"]
+        cf = "—"
+        if c["verdict"] == "NO GO" and c.get("reasons") and all(r.startswith("backlog") for r in c["reasons"]):
+            t90, ops = f["t90IncrementCents"], f["operatingWindowIncrementCents"]
+            if t90.get("mean", 0) > 0:
+                cf = "CONDITIONAL GO (relative improvement) or better"
+            elif ops.get("defined") and ops["mean"] > 0:
+                cf = "CONDITIONAL GO (transition, not yet repaid)" + (", restoring service" if c["serviceRestored"] else "")
+            elif c["serviceRestored"]:
+                cf = "CONDITIONAL GO (service purchase)"
+            else:
+                cf = "NO GO (no benefit)"
+        w("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |" % (
+            short(n), iv(f["t90AbsoluteCents"]), iv(f["t90IncrementCents"]), iv(f["operatingWindowAbsoluteCents"]),
+            iv(f["operatingWindowIncrementCents"]), iv(f["t180AbsoluteCents"]), iv(f["t180IncrementCents"]),
+            iv(f["transitionObligationsT90Cents"]), "yes" if c["serviceRestored"] else "no", c["verdict"], c["classification"], cf))
+    w("")
 
 
 if __name__ == "__main__":

@@ -37,6 +37,9 @@ type devRun struct {
 	HorizonEndSec int64            `json:"horizonEndSec"`
 	Records       []eval.RunRecord `json:"records"`
 	ReportSHA256  string           `json:"reportSHA256"`
+	// TrajectorySHA256: the daily samples' digest (dreamteam.devrun/v2,
+	// whose report and trajectory are kept outside the repository).
+	TrajectorySHA256 string `json:"trajectorySHA256,omitempty"`
 }
 
 // devRunStrategy is runStrategy (the canonical runner's) with the

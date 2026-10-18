@@ -122,6 +122,11 @@ SETS = {
     "p3-refine": ["A-no-action", "D-full-reading", "E-urgent-tele", "F-broad-tele", "E2-urgent-tele-alloc65", "H-weeknight-tele"],
     # Phase 8, refinements R3 and R4, with their parent E2.
     "p4-refine": ["A-no-action", "E2-urgent-tele-alloc65", "E3-urgent-weeknights-alloc65", "D2-full-reading-alloc65"],
+    # Slice 5C.2: every committed strategy, unchanged, re-evaluated under
+    # v0.2-eval-3 in one evaluation.
+    "p5-eval3": ["A-no-action", "B-partial", "C-full-reorganization", "D-full-reading", "E-urgent-tele", "F-broad-tele",
+                 "G-partial-broad-tele", "H-weeknight-tele", "E2-urgent-tele-alloc65", "E3-urgent-weeknights-alloc65",
+                 "D2-full-reading-alloc65"],
 }
 
 

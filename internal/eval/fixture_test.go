@@ -40,6 +40,7 @@ type synth struct {
 	// Money: cumulative profit and cash on day d (fractional days pro rata).
 	profitPD, cashPD, cash0 int64
 	profitNoise             int64 // added per seed: (seed % 7 − 3) × noise a day
+	upfront                 int64 // a one-off accrued cost from day 10 (profit only)
 	minCash                 int64 // the posting-level minimum since the takeover
 	minCashSet              bool
 	lastAction, effect      int64 // seconds after t0 (0: none)
@@ -125,6 +126,9 @@ func (s synth) money(at int64) Money {
 	pd := s.profitPD + (s.seed%7-3)*s.profitNoise
 	m := Money{OperatingProfitCents: int64(float64(pd) * d), NetRevenueCents: int64(float64(4*s.profitPD) * d),
 		CashCents: s.cash0 + int64(float64(s.cashPD)*d), CashBridgeReconciles: true}
+	if at >= t0+10*daySec {
+		m.OperatingProfitCents -= s.upfront
+	}
 	m.OperatingExpenseCents = m.NetRevenueCents - m.OperatingProfitCents
 	m.MinCashCents, m.MinCashSec = min(s.cash0, m.CashCents), t0
 	if m.CashCents < s.cash0 {
@@ -320,13 +324,13 @@ func records(n int, mk func(seed int64) synth) []Record {
 
 func testPolicy(t *testing.T) (*Policy, string) {
 	t.Helper()
-	p, d := policyV2(t)
+	p, d := policyNow(t)
 	p.Scenario.Fingerprint = "fp" // the synthetic scenario
 	return p, d
 }
 
-// policyV2 is the policy in force, as committed.
-func policyV2(t *testing.T) (*Policy, string) {
+// policyNow is the policy in force, as committed.
+func policyNow(t *testing.T) (*Policy, string) {
 	t.Helper()
 	p, d, err := LoadPolicy("../../" + PolicyPath)
 	if err != nil {

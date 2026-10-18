@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"maps"
 	"math"
 	"slices"
 )
@@ -171,4 +172,151 @@ func betaCF(a, b, x float64) float64 {
 		}
 	}
 	return h
+}
+
+// clusterGroup is one cluster of binary outcomes: its size, its count of
+// ones and the value its mean is measured from (0, or the weekday's mean
+// rate for a weekday-adjusted day).
+type clusterGroup struct {
+	n, ones int64
+	centre  float64
+}
+
+// designEffect is 1 + (m̄ − 1)·ρ, with ρ the one-way ANOVA intra-cluster
+// correlation of binary outcomes over the groups and m̄ the mean group
+// size: the variance of the overall rate over the binomial variance its
+// count implies. 0 when undefined (fewer than two groups, or no
+// variation).
+func designEffect(gs []clusterGroup) float64 {
+	var k, n, ss2 int64
+	var sumResid float64
+	for _, g := range gs {
+		if g.n == 0 {
+			continue
+		}
+		k, n, ss2 = k+1, n+g.n, ss2+g.n*g.n
+		sumResid += float64(g.ones) - float64(g.n)*g.centre
+	}
+	if k < 2 || n <= k {
+		return 0
+	}
+	mean := sumResid / float64(n)
+	var ssb, ssw float64
+	for _, g := range gs {
+		if g.n == 0 {
+			continue
+		}
+		p := float64(g.ones) / float64(g.n)
+		d := p - g.centre - mean
+		ssb += float64(g.n) * d * d
+		ssw += float64(g.n) * p * (1 - p)
+	}
+	msb, msw := ssb/float64(k-1), ssw/float64(n-k)
+	n0 := (float64(n) - float64(ss2)/float64(n)) / float64(k-1)
+	if msb+(n0-1)*msw <= 0 {
+		return 0
+	}
+	rho := (msb - msw) / (msb + (n0-1)*msw)
+	return 1 + (float64(n)/float64(k)-1)*rho
+}
+
+// clusterEffects are a cohort's design effects by practice-local day (the
+// weekday's mean rate removed: a fixed weekday pattern adds no variance
+// across seeds) and by Monday-based week. Undecided studies are left out.
+func clusterEffects(xs []*Study, breach func(*Study) (bool, bool)) (day, week float64) {
+	days := map[int64]*clusterGroup{}
+	weeks := map[int64]*clusterGroup{}
+	var wdN, wdOnes [7]int64
+	for _, s := range xs {
+		b, decided := breach(s)
+		if !decided {
+			continue
+		}
+		ord := s.AcquiredSec / daySec // Time 0 is 00:00 on the epoch: local days are whole multiples
+		one := int64(0)
+		if b {
+			one = 1
+		}
+		for _, m := range []struct {
+			to map[int64]*clusterGroup
+			k  int64
+		}{{days, ord}, {weeks, floorDiv(ord+3, 7)}} {
+			g := m.to[m.k]
+			if g == nil {
+				g = &clusterGroup{}
+				m.to[m.k] = g
+			}
+			g.n, g.ones = g.n+1, g.ones+one
+		}
+		wd := (ord%7 + 7) % 7
+		wdN[wd], wdOnes[wd] = wdN[wd]+1, wdOnes[wd]+one
+	}
+	collect := func(m map[int64]*clusterGroup, adj bool) []clusterGroup {
+		keys := slices.Sorted(maps.Keys(m))
+		out := make([]clusterGroup, 0, len(keys))
+		for _, k := range keys {
+			g := *m[k]
+			if wd := (k%7 + 7) % 7; adj && wdN[wd] > 0 {
+				g.centre = float64(wdOnes[wd]) / float64(wdN[wd])
+			}
+			out = append(out, g)
+		}
+		return out
+	}
+	return designEffect(collect(days, true)), designEffect(collect(weeks, false))
+}
+
+func floorDiv(a, b int64) int64 {
+	q := a / b
+	if (a%b != 0) && ((a < 0) != (b < 0)) {
+		q--
+	}
+	return q
+}
+
+// clusterRobustRate is the pooled rate Σones / Σn over independent
+// clusters (seeds) with its t 95% interval from the linearized (ratio
+// estimator) variance: no assumption about the dependence inside a
+// cluster.
+func clusterRobustRate(ones, ns []int64) Interval {
+	k := len(ns)
+	var so, sn int64
+	for i := range ns {
+		so, sn = so+ones[i], sn+ns[i]
+	}
+	if k == 0 || sn == 0 {
+		return Interval{}
+	}
+	r := float64(so) / float64(sn)
+	if k < 2 {
+		return Interval{N: k, Mean: r, Lo: r, Hi: r}
+	}
+	var ss float64
+	for i := range ns {
+		e := float64(ones[i]) - r*float64(ns[i])
+		ss += e * e
+	}
+	se := math.Sqrt(float64(k)/float64(k-1)*ss) / float64(sn)
+	h := tQuantile975(k-1) * se
+	return Interval{N: k, Mean: r, Lo: max(0, r-h), Hi: min(1, r+h), Defined: true}
+}
+
+// binomUpper is the exact (Clopper–Pearson) one-sided upper confidence
+// bound, at confidence c, on a proportion with x of n: the u for which
+// P(X ≤ x | n, u) = 1 − c (1 when x = n).
+func binomUpper(x, n int, c float64) float64 {
+	if n == 0 || x >= n {
+		return 1
+	}
+	lo, hi := float64(x)/float64(n), 1.0
+	for range 200 {
+		mid := (lo + hi) / 2
+		// P(X ≤ x) = 1 − I_mid(x+1, n−x)
+		if 1-betaInc(float64(x+1), float64(n-x), mid) > 1-c {
+			lo = mid
+		} else {
+			hi = mid
+		}
+	}
+	return (lo + hi) / 2
 }

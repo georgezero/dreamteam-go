@@ -30,6 +30,12 @@ type Cohort struct {
 	// of b, completed over target plus unfinished past it, ÷ acquired.
 	LegacyBreaches   int64 `json:"legacyBreaches"`
 	LegacyBreachRate Ratio `json:"legacyBreachRate"`
+	// Design effects of the breach indicator by practice-local day (the
+	// weekday pattern removed) and by Monday-based week (0: undefined):
+	// how far clustering inflates the variance of this cohort's rate over
+	// the binomial. Reported, never gated.
+	DayDesignEffect  float64 `json:"dayDesignEffect"`
+	WeekDesignEffect float64 `json:"weekDesignEffect"`
 }
 
 // Access is a window's demand, every order followed to its outcome at the
@@ -162,12 +168,16 @@ type Block struct {
 
 // BlockCheck is one backlog check of a later block against the reference.
 type BlockCheck struct {
-	FirstDay  int     `json:"firstDay"`
-	Check     string  `json:"check"` // mean, max, overdue, stale, exposure
-	Value     float64 `json:"value"` // the block's
-	Reference float64 `json:"reference"`
-	Tolerance float64 `json:"tolerance"`
-	Pass      bool    `json:"pass"`
+	FirstDay int     `json:"firstDay"`
+	Check    string  `json:"check"` // mean, max, overdue, stale, exposure
+	Value    float64 `json:"value"` // the block's
+	// Reference: the reference block's value, scaled by the workload ratio
+	// for a workload-adjusted check (1 for an absolute one, or when either
+	// block acquired nothing).
+	Reference     float64 `json:"reference"`
+	WorkloadRatio float64 `json:"workloadRatio"`
+	Tolerance     float64 `json:"tolerance"`
+	Pass          bool    `json:"pass"`
 }
 
 // BacklogMeasures is the backlog test of one seed (README §4): every whole
@@ -205,11 +215,50 @@ type SeedMeasures struct {
 	MinCash   int64                      `json:"minCashCents"` // through the end of observation
 	MinCashAt int64                      `json:"minCashSec"`
 	PastDue   int64                      `json:"pastDueCents"` // the most at any capture
-	// FundingGap: the largest excess of obligations over cash at any
-	// capture or daily sample through the end of observation, and when.
-	FundingGap   int64    `json:"fundingGapCents"`
-	FundingGapAt int64    `json:"fundingGapSec"`
-	Integrity    []string `json:"integrity"` // failed checks: the record is not evidence
+	// Liquidity at the horizon and at the end of observation: the
+	// obligation bridge split by kind (README §5).
+	Liquidity map[string]Liquidity `json:"liquidity"`
+	// FundingGap: at the end of observation, the excess of the committed
+	// liabilities outside the recurring payment cycle over cash (the
+	// dated settlement test's terminal part; 0 when covered).
+	FundingGap int64 `json:"fundingGapCents"`
+	// CommitmentGap: the largest excess of the full obligation bridge,
+	// with the forward employee commitment, over cash at any capture or
+	// daily sample, when, and at how many of them: a liquidity-risk
+	// indicator, never a gate.
+	CommitmentGap        int64    `json:"commitmentGapCents"`
+	CommitmentGapAt      int64    `json:"commitmentGapSec"`
+	CommitmentGapInstant int      `json:"commitmentGapInstants"`
+	CommitmentInstants   int      `json:"commitmentInstants"`
+	Integrity            []string `json:"integrity"` // failed checks: the record is not evidence
+}
+
+// Liquidity is the obligation bridge at one capture, by kind. Cash is
+// the only resource: receivables and unbilled work are listed, never set
+// against anything.
+type Liquidity struct {
+	CashCents int64 `json:"cashCents"`
+	// PayableNow: obligations past their due date (0 in V0.2: every
+	// payment is made on its date).
+	PayableNow int64 `json:"payableNowCents"`
+	// Accrued: liabilities recognized and settled in the recurring payment
+	// cycle (payables, accrued payroll, earned unposted wages).
+	Accrued int64 `json:"accruedCents"`
+	// Committed: liabilities outside the recurring cycle that no future
+	// operation avoids (severance payable, contract minimum retainers,
+	// remote fees locked by claims in flight).
+	Committed int64 `json:"committedCents"`
+	// FutureWages: the contracted pay of the employee-commitment days
+	// after the instant, not yet earned (the indicator's addition).
+	FutureWages int64 `json:"futureWagesCents"`
+	Receivables int64 `json:"receivablesCents"`
+}
+
+func liquidity(m Money) Liquidity {
+	return Liquidity{CashCents: m.CashCents, PayableNow: m.PastDueCents,
+		Accrued:     m.PayablesCents + m.AccruedPayrollCents + m.EarnedUnpostedWagesCents,
+		Committed:   m.SeverancePayableCents + m.ContractMinimumCents + m.RemoteInFlightCents,
+		FutureWages: m.EmployeeCommitmentCents, Receivables: m.ReceivablesCents}
 }
 
 // TailEnd is a plan's own tail end (V0.2_DESIGN §13.1, policy
@@ -265,11 +314,14 @@ func captureName(w string) string {
 }
 
 // observationNeeded is how far a record must be observed: every cohort
-// closed (the horizon and T180, plus the closure) and the backlog block
-// covering the horizon sampled.
+// closed (the horizon and T180, plus the closure), the settlement window
+// after the horizon, and the backlog block covering the horizon sampled.
 func observationNeeded(p *Policy, r *Record) int64 {
 	t180 := r.TakeoverSec + int64(p.Horizons.ValidationDays)*daySec
 	need := max(r.HorizonEndSec, t180) + p.Horizons.ClosureMin*60
+	// The dated settlement test: every obligation recognized by the
+	// horizon falls due within settlementDays and must be seen paid.
+	need = max(need, r.HorizonEndSec+int64(p.Finance.SettlementDays)*daySec)
 	if day, ok := coverDay(p, r); ok {
 		need = max(need, r.TakeoverSec+int64(day)*daySec)
 	}
@@ -314,13 +366,25 @@ func Measure(p *Policy, r *Record) *SeedMeasures {
 		}
 	}
 	gap := func(at, owed, cash int64) {
-		if g := owed - cash; g > m.FundingGap {
-			m.FundingGap, m.FundingGapAt = g, at
+		m.CommitmentInstants++
+		if g := owed - cash; g > 0 {
+			m.CommitmentGapInstant++
+			if g > m.CommitmentGap {
+				m.CommitmentGap, m.CommitmentGapAt = g, at
+			}
 		}
 	}
+	m.Liquidity = map[string]Liquidity{}
 	for _, c := range r.Captures {
 		m.PastDue = max(m.PastDue, c.Money.PastDueCents)
 		gap(c.AtSec, c.Money.Obligations(), c.Money.CashCents)
+		if c.Name == "tailEnd" || c.Name == "end" {
+			m.Liquidity[c.Name] = liquidity(c.Money)
+		}
+		if c.Name == "end" {
+			l := liquidity(c.Money)
+			m.FundingGap = max(0, l.Committed+l.PayableNow-l.CashCents)
+		}
 		if caps["end"] != nil && c.Money.CashCents < m.MinCash {
 			bad("capture %s: cash %d below the recorded minimum %d", c.Name, c.Money.CashCents, m.MinCash)
 		}
@@ -521,6 +585,16 @@ func cohort(r *Record, xs []*Study, b int64) *Cohort {
 		c.BreachRate = Ratio{Num: c.Breaches, Den: c.Acquired}
 	}
 	c.LegacyBreachRate = ratio(c.LegacyBreaches, c.Acquired)
+	c.DayDesignEffect, c.WeekDesignEffect = clusterEffects(xs, func(s *Study) (bool, bool) {
+		due := s.AcquiredSec + target(r, s.Priority)
+		switch {
+		case s.FinalSec != 0 && s.FinalSec <= due:
+			return false, true
+		case s.FinalSec != 0 || due <= r.ObservedUntilSec:
+			return true, true
+		}
+		return false, false
+	})
 	return c
 }
 
@@ -791,7 +865,9 @@ func samplePastDue(p *Policy, r *Record, at int64) pastDue {
 // primary endpoint; every later block, through the first that ends on or
 // after the horizon's day, must stay within tolerance of it in its mean
 // and peak backlog, its mean overdue and stale counts and its overdue
-// exposure; and no study may be persistent at any sample through then.
+// exposure (the workload-adjusted checks against the reference scaled by
+// the block's workload, the absolute ones unscaled); and no study may be
+// persistent at any sample through then.
 func measureBacklog(p *Policy, r *Record, t90 int64) BacklogMeasures {
 	bm := BacklogMeasures{Status: "insufficient"}
 	starts, ok := blockStarts(p, r)
@@ -819,13 +895,22 @@ func measureBacklog(p *Policy, r *Record, t90 int64) BacklogMeasures {
 	bm.Reference, bm.Later = ref, blocks[1:]
 	bm.Status = "stable"
 	fr, fl := bp(p.Backlog.Growth), p.Backlog.GrowthStudies
+	// A workload-adjusted check compares the block with the reference
+	// scaled by w = the block's acquisitions over the reference's (Little's
+	// law: at a stable time in system the backlog is proportional to the
+	// workload), exactly: sum·A_ref against rsum·A_block.
 	check := func(b Block, name string, sum, rsum, floor int64, nn int64) {
-		c := BlockCheck{FirstDay: b.FirstDay, Check: name, Value: float64(sum) / float64(nn), Reference: float64(rsum) / float64(nn),
-			Tolerance: max(float64(fr)*float64(rsum)/10_000/float64(nn), float64(floor)), Pass: !growthAbove(sum, rsum, nn, fr, floor)}
+		ab, ar := int64(1), int64(1)
+		if p.adjusted(name) && b.Acquired > 0 && ref.Acquired > 0 {
+			ab, ar = b.Acquired, ref.Acquired
+		}
+		w := float64(ab) / float64(ar)
+		c := BlockCheck{FirstDay: b.FirstDay, Check: name, Value: float64(sum) / float64(nn), Reference: w * float64(rsum) / float64(nn), WorkloadRatio: w,
+			Tolerance: max(float64(fr)*w*float64(rsum)/10_000/float64(nn), float64(floor)), Pass: !growthAbove(sum*ar, rsum*ab, nn*ar, fr, floor)}
 		bm.Checks = append(bm.Checks, c)
 		if !c.Pass {
 			bm.Status = "unstable"
-			bm.Reasons = append(bm.Reasons, fmt.Sprintf("block from day %d: %s %.2f against %.2f, tolerance %.2f", b.FirstDay, name, c.Value, c.Reference, c.Tolerance))
+			bm.Reasons = append(bm.Reasons, fmt.Sprintf("block from day %d: %s %.2f against %.2f (workload ×%.3f), tolerance %.2f", b.FirstDay, name, c.Value, c.Reference, w, c.Tolerance))
 		}
 	}
 	for _, b := range bm.Later {

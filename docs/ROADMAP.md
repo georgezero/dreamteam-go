@@ -72,10 +72,18 @@ and four documented refinements on the development seeds
   service purchase at T90.
 * **All-priority teleradiology** restores service but is insolvent.
 
-Next: the owner's decisions on the funding and backlog rules (and the
-urgent and soon dependence), one independent review of the whole
-corrected framework, then the frozen strategy set and the unseal
-record.
+Slice 5C.2 (0.2.0-dev.13, design §13.8) froze policy v0.2-eval-3:
+* funding as a dated settlement test;
+* workload-adjusted backlog checks;
+* cluster-aware service reporting;
+* a CONDITIONAL GO class for unrepaid transitions.
+
+Re-evaluated on the development seeds, funding no longer fails any plan,
+and D2, E2 and E3 fail only the backlog gate. That gate's operating
+characteristics show it is too noisy for a stable queue (mostly the peak
+check), and its tolerances are an open owner decision. Next: the owner's
+backlog and dependence decisions, one independent review of the whole
+corrected framework, then the frozen strategy set and the unseal record.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

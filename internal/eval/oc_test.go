@@ -20,7 +20,7 @@ import (
 // to-seed variation and week-level clustering of breaches). Regenerate
 // with DT_OC=1 go test -run OperatingCharacteristics ./internal/eval.
 
-const ocPath = "../../docs/evaluation/oc-v0.2-eval-2.json"
+const ocPath = "../../docs/evaluation/oc-v0.2-eval-3.json"
 
 // Daily volumes per seed, the range of the no-action development results'
 // T90 acquisitions (README §2): read once for feasibility, never tuned.
@@ -81,6 +81,13 @@ type ocFile struct {
 	Limit    float64               `json:"maxFailingSeedFraction"`
 	Exact    []ocRow               `json:"exact"`
 	MC       []ocMC                `json:"monteCarlo"`
+	// Slice 5C.2: the service rule under the run's day and week structure,
+	// and the backlog rule on a synthetic queue.
+	ClusterModel []string       `json:"clusterModel"`
+	Models       []ocModel      `json:"clusterModels"`
+	Cluster      []ocClusterRow `json:"cluster"`
+	BacklogModel []string       `json:"backlogModel"`
+	Backlog      []ocBacklogRow `json:"backlog"`
 }
 
 func lpmf(n, k int, p float64) float64 {
@@ -301,7 +308,7 @@ func round6(x float64) float64 { return math.Round(x*1e6) / 1e6 }
 // v0.2-eval-1's did not, and the committed analysis is what this code
 // computes.
 func TestOperatingCharacteristics(t *testing.T) {
-	p, _ := policyV2(t)
+	p, _ := policyNow(t)
 	rows := ocExactRows(p)
 	find := func(prefix string, S int, pu float64) ocRow {
 		for _, r := range rows {
@@ -319,7 +326,7 @@ func TestOperatingCharacteristics(t *testing.T) {
 		t.Fatalf("eval-1 rejection %.4f: the defect it fixes is not shown", r.Reject)
 	}
 	if os.Getenv("DT_OC") != "" {
-		f := ocFile{Schema: "dreamteam.evaloc/v1", Policy: p.ID, Gates: p.Service.BreachGate, Planning: p.Service.PlanningRate,
+		f := ocFile{Schema: "dreamteam.evaloc/v2", Policy: p.ID, Gates: p.Service.BreachGate, Planning: p.Service.PlanningRate,
 			Volume: ocVolume, MinCount: p.Service.MinCohort, Limit: p.Service.MaxFailingSeedFraction, Exact: rows,
 			Model: []string{
 				"A seed fails if any per-seed breach gate of the design fails or lacks evidence (fewer acquisitions than the minimum); a plan is rejected if more than floor(10% × seeds) seeds fail.",
@@ -337,6 +344,24 @@ func TestOperatingCharacteristics(t *testing.T) {
 				}
 			}
 		}
+		f.ClusterModel = []string{
+			"Per seed, a 150-day gated period (T90 = days 1-90, tail = days 91-150), each priority's daily volume Poisson at a rate drawn uniformly from dailyVolume, times the weekday profile (Mon 1.1, Tue-Fri 1, Sat 0.25, Sun 0, scaled to a mean of 1) and a gamma day factor (dailyVolumeCV) where the model says so.",
+			"Breach probability: each Monday-based week's rate beta-distributed around the setting's rate with intra-week correlation weekICC; each day's around the week's with intra-day correlation dayICC.",
+			"The per-seed gates exactly as the policy (urgent over the gated period; soon and routine in T90 and the tail; evidence minimums). Seeds are independent and alike, so an evaluation's rejection is P(Binomial(seeds, perSeedFailure) > floor(10% x seeds)).",
+			"The dependence range is bounded by the development diagnostics (docs/calibration/policy-5c2/clustering.md); no threshold, window or allowance was chosen from them. Deterministic PCG streams; regenerate with DT_OC=1.",
+		}
+		f.Models = ocModels()
+		for mi, m := range f.Models {
+			for si, s := range ocRateSettings(p) {
+				f.Cluster = append(f.Cluster, ocClusterCompute(p, m, s, 4000, uint64(mi*100+si)))
+			}
+		}
+		f.BacklogModel = []string{
+			"A reading queue simulated hour by hour from the takeover (Tue 2026-10-13 06:00) for 181 days: 52 acquisitions a day (Poisson; the weekday profile; 08:00-20:00), 2% urgent, 12% soon, 86% routine; reading Mon-Fri 07:30-20:00 and Sat 10:00-14:00 at a utilization of 0.85 of the season-1 demand (the dynamic benchmark's reading utilization), urgent first, then soon, then routine, first in first out.",
+			"Seasonal scenarios multiply demand by the scenario's monthly season factor (seasonFactorBP); capacity-loss scenarios reduce reading capacity from day 100.",
+			"Each seed is judged by the backlog rule of each variant; a plan is rejected if more than floor(10% x seeds) seeds are unstable. Variants marked not adopted are alternatives for the owner's open decision on the backlog numbers, not rules.",
+		}
+		f.Backlog = ocBacklogRows(p, 300)
 		raw, _ := json.MarshalIndent(f, "", " ")
 		if err := os.WriteFile(ocPath, append(raw, '\n'), 0o644); err != nil {
 			t.Fatal(err)
@@ -354,7 +379,33 @@ func TestOperatingCharacteristics(t *testing.T) {
 	}
 	got, _ := json.Marshal(rows)
 	want, _ := json.Marshal(f.Exact)
-	if !bytes.Equal(got, want) || f.Policy != p.ID || len(f.MC) == 0 {
+	if !bytes.Equal(got, want) || f.Policy != p.ID || len(f.MC) == 0 || len(f.Cluster) != len(ocModels())*len(ocRateSettings(p)) ||
+		len(f.Backlog) == 0 {
 		t.Fatal("the committed operating characteristics are not what the code computes; regenerate with DT_OC=1")
+	}
+	// What the committed analysis shows, checked so a regeneration that
+	// contradicts it fails: at the planning rates, rejection does not fall
+	// as the weekly correlation rises; the workload adjustment never makes
+	// a seasonal stable queue less stable; capacity loss is more often
+	// unstable than stability.
+	rej := map[string]float64{}
+	for _, r := range f.Cluster {
+		if r.Setting == "planning rates (false rejection)" {
+			rej[r.Model] = r.Reject["40"]
+		}
+	}
+	if !(rej["week-clustered, ICC 0.02"] <= rej["week-clustered, ICC 0.05"] && rej["week-clustered, ICC 0.05"] <= rej["week-clustered, ICC 0.10"]) {
+		t.Fatalf("rejection by weekly correlation %v", rej)
+	}
+	bk := map[string]ocBacklogRow{}
+	for _, r := range f.Backlog {
+		bk[r.Scenario] = r
+	}
+	frozen, old := ocBacklogVariants[1], ocBacklogVariants[0]
+	if s := bk["scenario seasonality, stable capacity"]; s.Unstable[frozen] > s.Unstable[old] {
+		t.Fatalf("seasonal: %v", s.Unstable)
+	}
+	if bk["scenario seasonality, capacity 10% lower from day 100"].Unstable[frozen] < bk["scenario seasonality, stable capacity"].Unstable[frozen] {
+		t.Fatal("capacity loss is less often unstable than a stable queue")
 	}
 }

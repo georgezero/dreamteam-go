@@ -612,21 +612,44 @@ func TestPolicyFrozen(t *testing.T) {
 	if _, err := DecodePolicy(frac); err == nil || !strings.Contains(err.Error(), "basis points") {
 		t.Fatalf("a fractional basis point is accepted: %v", err)
 	}
-	// The superseded policy is kept byte for byte, named by digest, and
-	// refused as a policy to evaluate under.
+	// The superseded policies are kept byte for byte, each named by digest
+	// by its successor, and refused as policies to evaluate under.
+	v2, err := os.ReadFile("../../" + PolicyV2Path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sum := sha256.Sum256(v2)
+	if hex.EncodeToString(sum[:]) != p.Supersedes.SHA256 || p.Supersedes.Path != PolicyV2Path ||
+		p.Supersedes.SHA256 != "5dbab4626bea560c2e3e96e49085730cb53998c806e0e35a1bdf2db10d595ef9" {
+		t.Fatal("the superseded policy changed")
+	}
+	var v2p struct {
+		Supersedes struct{ Path, SHA256 string }
+	}
+	json.Unmarshal(v2, &v2p)
 	v1, err := os.ReadFile("../../" + PolicyV1Path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	sum := sha256.Sum256(v1)
-	if hex.EncodeToString(sum[:]) != p.Supersedes.SHA256 || p.Supersedes.Path != PolicyV1Path {
-		t.Fatal("the superseded policy changed")
+	sum = sha256.Sum256(v1)
+	if hex.EncodeToString(sum[:]) != v2p.Supersedes.SHA256 || v2p.Supersedes.Path != PolicyV1Path {
+		t.Fatal("v0.2-eval-1 changed")
 	}
-	if _, err := DecodePolicy(v1); err == nil || !strings.Contains(err.Error(), "superseded") {
-		t.Fatalf("v1 decodes: %v", err)
+	for _, old := range [][]byte{v1, v2} {
+		if _, err := DecodePolicy(old); err == nil || !strings.Contains(err.Error(), "superseded") {
+			t.Fatalf("a superseded policy decodes: %v", err)
+		}
 	}
-	if len(p.Changes) < 10 || len(p.Deferred) == 0 {
+	if len(p.Changes) < 4 || len(p.Deferred) == 0 || p.Finance.SettlementDays != 31 || len(p.Backlog.AbsoluteChecks) != 2 {
 		t.Fatalf("%d changes, %d deferred", len(p.Changes), len(p.Deferred))
+	}
+	// Every backlog check is adjusted or absolute, exactly once.
+	dup := bytes.Replace(raw, []byte(`"absoluteChecks": [
+   "stale",`), []byte(`"absoluteChecks": [
+   "mean",
+   "stale",`), 1)
+	if _, err := DecodePolicy(dup); err == nil || !strings.Contains(err.Error(), "exactly once") {
+		t.Fatalf("a check both adjusted and absolute is accepted: %v", err)
 	}
 }
 

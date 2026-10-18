@@ -1,0 +1,3349 @@
+{
+ "schema": "dreamteam.evaloc/v2",
+ "policy": "v0.2-eval-3",
+ "model": [
+  "A seed fails if any per-seed breach gate of the design fails or lacks evidence (fewer acquisitions than the minimum); a plan is rejected if more than floor(10% × seeds) seeds fail.",
+  "Exact: independent studies; each seed's volume is Poisson at a daily rate spread evenly over the range; every seed at the planning rates (urgent as given).",
+  "Monte Carlo: 40 seeds; each seed's underlying rate is beta-distributed around the planning rate with SD seedSD (scaled by rate ÷ urgent planning rate for soon and routine); each week's rate is beta-distributed around the seed's with intra-week correlation weeklyICC; volumes Poisson per week at a rate drawn uniformly from the range. Deterministic PCG streams.",
+  "Pooled gates are not modelled: with 40 seeds their counts are far larger and pass at the planning rates."
+ ],
+ "gates": {
+  "routine": 0.06,
+  "soon": 0.32,
+  "urgent": 0.12
+ },
+ "planningRates": {
+  "routine": 0.04,
+  "soon": 0.21,
+  "urgent": 0.08
+ },
+ "dailyVolume": {
+  "routine": [
+   43,
+   45
+  ],
+  "soon": [
+   5.3,
+   6.5
+  ],
+  "urgent": [
+   0.79,
+   1.19
+  ]
+ },
+ "minCohort": {
+  "routine": 23,
+  "soon": 88,
+  "urgent": 43
+ },
+ "maxFailingSeedFraction": 0.1,
+ "exact": [
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.102028,
+   "rejection": 0.269328
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.247746,
+   "rejection": 0.755913
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.495517,
+   "rejection": 0.988834
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.742208,
+   "rejection": 0.999962
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899804,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.097702,
+   "rejection": 0.308054
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.244288,
+   "rejection": 0.902531
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.493265,
+   "rejection": 0.999764
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.740998,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899294,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.095726,
+   "rejection": 0.333927
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.242709,
+   "rejection": 0.980714
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.492238,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.740448,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899063,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003386,
+   "rejection": 0.000492
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.04418,
+   "rejection": 0.06916
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.204727,
+   "rejection": 0.638459
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485106,
+   "rejection": 0.986351
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751007,
+   "rejection": 0.999972
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003342,
+   "rejection": 0.000039
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.044064,
+   "rejection": 0.055496
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.204661,
+   "rejection": 0.808052
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485113,
+   "rejection": 0.999677
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751083,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003322,
+   "rejection": 0
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.044011,
+   "rejection": 0.030028
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.20463,
+   "rejection": 0.933542
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485117,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751119,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032857,
+   "rejection": 0.040442
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.171062,
+   "rejection": 0.531104
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.44478,
+   "rejection": 0.974988
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730303,
+   "rejection": 0.999943
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905859,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032676,
+   "rejection": 0.025994
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.170882,
+   "rejection": 0.689559
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.444729,
+   "rejection": 0.998927
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730318,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905917,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032593,
+   "rejection": 0.009237
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.170801,
+   "rejection": 0.836963
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.444707,
+   "rejection": 0.999997
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730326,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905945,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001584,
+   "rejection": 0.000108
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.03161,
+   "rejection": 0.037783
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.185005,
+   "rejection": 0.577399
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486412,
+   "rejection": 0.98663
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.77306,
+   "rejection": 0.999988
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001556,
+   "rejection": 0.000004
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.031498,
+   "rejection": 0.023711
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.18493,
+   "rejection": 0.743659
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486419,
+   "rejection": 0.99969
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.773144,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001544,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.031447,
+   "rejection": 0.008022
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.184895,
+   "rejection": 0.885686
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486422,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.773183,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000754,
+   "rejection": 0.000024
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022814,
+   "rejection": 0.020579
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167843,
+   "rejection": 0.51973
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487422,
+   "rejection": 0.986843
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792183,
+   "rejection": 0.999994
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000737,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022711,
+   "rejection": 0.009907
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167761,
+   "rejection": 0.676188
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487429,
+   "rejection": 0.999699
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792273,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000729,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022664,
+   "rejection": 0.002004
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167722,
+   "rejection": 0.824061
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487433,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792315,
+   "rejection": 1
+  }
+ ],
+ "monteCarlo": [
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.02925,
+   "standardError": 0.0026643215599848305
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.374,
+   "standardError": 0.007650555535384343
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.96175,
+   "standardError": 0.00303261180750191
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.10725,
+   "standardError": 0.004892530978440505
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.67775,
+   "standardError": 0.00738926480612246
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.9905,
+   "standardError": 0.0015337657904647595
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.8985,
+   "standardError": 0.004774875652831182
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.992,
+   "standardError": 0.0014085453489327212
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99975,
+   "standardError": 0.00024996874804661704
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.009,
+   "standardError": 0.001493234743769378
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.1395,
+   "standardError": 0.005478132665425328
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.866,
+   "standardError": 0.005386186034663118
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.0475,
+   "standardError": 0.003363173724326473
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.472,
+   "standardError": 0.007893288288159757
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.95425,
+   "standardError": 0.003303669834441691
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.845,
+   "standardError": 0.005722215480039178
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.985,
+   "standardError": 0.0019219131093782577
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99925,
+   "standardError": 0.00043285029167138965
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.00175,
+   "standardError": 0.0006608588162383854
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.04375,
+   "standardError": 0.0032340353082488137
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.7275,
+   "standardError": 0.00703995294728594
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.02825,
+   "standardError": 0.0026197298286273723
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.3205,
+   "standardError": 0.007378681284619901
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.89975,
+   "standardError": 0.004748682383040583
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.81975,
+   "standardError": 0.006077827274199227
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.97325,
+   "standardError": 0.0025511976354253727
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99825,
+   "standardError": 0.0006608588162383908
+  }
+ ],
+ "clusterModel": [
+  "Per seed, a 150-day gated period (T90 = days 1-90, tail = days 91-150), each priority's daily volume Poisson at a rate drawn uniformly from dailyVolume, times the weekday profile (Mon 1.1, Tue-Fri 1, Sat 0.25, Sun 0, scaled to a mean of 1) and a gamma day factor (dailyVolumeCV) where the model says so.",
+  "Breach probability: each Monday-based week's rate beta-distributed around the setting's rate with intra-week correlation weekICC; each day's around the week's with intra-day correlation dayICC.",
+  "The per-seed gates exactly as the policy (urgent over the gated period; soon and routine in T90 and the tail; evidence minimums). Seeds are independent and alike, so an evaluation's rejection is P(Binomial(seeds, perSeedFailure) \u003e floor(10% x seeds)).",
+  "The dependence range is bounded by the development diagnostics (docs/calibration/policy-5c2/clustering.md); no threshold, window or allowance was chosen from them. Deterministic PCG streams; regenerate with DT_OC=1."
+ ],
+ "clusterModels": [
+  {
+   "name": "independent",
+   "weekdayProfile": false,
+   "dailyVolumeCV": 0,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "variable volume (weekday profile, day CV 0.25)",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "day-clustered, ICC 0.05",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.05,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "day-clustered, ICC 0.15",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.15,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.02",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.02,
+    "soon": 0.02,
+    "urgent": 0.02
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.05",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.05,
+    "soon": 0.05,
+    "urgent": 0.05
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.10",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.1,
+    "soon": 0.1,
+    "urgent": 0.1
+   }
+  },
+  {
+   "name": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.15,
+   "weekICCByPriority": {
+    "routine": 0.012,
+    "soon": 0.11,
+    "urgent": 0.03
+   }
+  }
+ ],
+ "cluster": [
+  {
+   "model": "independent",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0405,
+   "perSeedFailureSE": 0.003117,
+   "rejectionBySeeds": {
+    "10": 0.059458,
+    "40": 0.022047
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0005,
+   "perSeedFailureSE": 0.000353,
+   "rejectionBySeeds": {
+    "10": 0.000011,
+    "40": 0
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.00525,
+   "perSeedFailureSE": 0.001143,
+   "rejectionBySeeds": {
+    "10": 0.001206,
+    "40": 0.000002
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01875,
+   "perSeedFailureSE": 0.002145,
+   "rejectionBySeeds": {
+    "10": 0.014314,
+    "40": 0.000883
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09975,
+   "perSeedFailureSE": 0.004738,
+   "rejectionBySeeds": {
+    "10": 0.262933,
+    "40": 0.368924
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.20175,
+   "perSeedFailureSE": 0.006345,
+   "rejectionBySeeds": {
+    "10": 0.629452,
+    "40": 0.927746
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.488,
+   "perSeedFailureSE": 0.007903,
+   "rejectionBySeeds": {
+    "10": 0.986963,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75525,
+   "perSeedFailureSE": 0.006798,
+   "rejectionBySeeds": {
+    "10": 0.999975,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04175,
+   "perSeedFailureSE": 0.003163,
+   "rejectionBySeeds": {
+    "10": 0.062764,
+    "40": 0.024753
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0425,
+   "perSeedFailureSE": 0.00319,
+   "rejectionBySeeds": {
+    "10": 0.064779,
+    "40": 0.026476
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0385,
+   "perSeedFailureSE": 0.003042,
+   "rejectionBySeeds": {
+    "10": 0.054307,
+    "40": 0.018138
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.06725,
+   "perSeedFailureSE": 0.00396,
+   "rejectionBySeeds": {
+    "10": 0.142113,
+    "40": 0.128705
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.746,
+   "perSeedFailureSE": 0.006883,
+   "rejectionBySeeds": {
+    "10": 0.999966,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99825,
+   "perSeedFailureSE": 0.000661,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05175,
+   "perSeedFailureSE": 0.003503,
+   "rejectionBySeeds": {
+    "10": 0.091415,
+    "40": 0.054231
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0525,
+   "perSeedFailureSE": 0.003526,
+   "rejectionBySeeds": {
+    "10": 0.093708,
+    "40": 0.057028
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75125,
+   "perSeedFailureSE": 0.006835,
+   "rejectionBySeeds": {
+    "10": 0.999972,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99975,
+   "perSeedFailureSE": 0.00025,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04775,
+   "perSeedFailureSE": 0.003372,
+   "rejectionBySeeds": {
+    "10": 0.07951,
+    "40": 0.040716
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0,
+   "perSeedFailureSE": 0,
+   "rejectionBySeeds": {
+    "10": 0,
+    "40": 0
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.00225,
+   "perSeedFailureSE": 0.000749,
+   "rejectionBySeeds": {
+    "10": 0.000225,
+    "40": 0
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01175,
+   "perSeedFailureSE": 0.001704,
+   "rejectionBySeeds": {
+    "10": 0.005835,
+    "40": 0.000105
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.10725,
+   "perSeedFailureSE": 0.004893,
+   "rejectionBySeeds": {
+    "10": 0.292076,
+    "40": 0.430705
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.21375,
+   "perSeedFailureSE": 0.006482,
+   "rejectionBySeeds": {
+    "10": 0.664273,
+    "40": 0.949025
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.4935,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.988062,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75075,
+   "perSeedFailureSE": 0.00684,
+   "rejectionBySeeds": {
+    "10": 0.999971,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04575,
+   "perSeedFailureSE": 0.003304,
+   "rejectionBySeeds": {
+    "10": 0.073773,
+    "40": 0.034832
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0455,
+   "perSeedFailureSE": 0.003295,
+   "rejectionBySeeds": {
+    "10": 0.073067,
+    "40": 0.034137
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04625,
+   "perSeedFailureSE": 0.003321,
+   "rejectionBySeeds": {
+    "10": 0.075193,
+    "40": 0.036249
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05875,
+   "perSeedFailureSE": 0.003718,
+   "rejectionBySeeds": {
+    "10": 0.113495,
+    "40": 0.083583
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75925,
+   "perSeedFailureSE": 0.00676,
+   "rejectionBySeeds": {
+    "10": 0.999979,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9995,
+   "perSeedFailureSE": 0.000353,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0415,
+   "perSeedFailureSE": 0.003153,
+   "rejectionBySeeds": {
+    "10": 0.062097,
+    "40": 0.024195
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.058,
+   "perSeedFailureSE": 0.003696,
+   "rejectionBySeeds": {
+    "10": 0.111059,
+    "40": 0.080092
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75775,
+   "perSeedFailureSE": 0.006774,
+   "rejectionBySeeds": {
+    "10": 0.999978,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99975,
+   "perSeedFailureSE": 0.00025,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05,
+   "perSeedFailureSE": 0.003446,
+   "rejectionBySeeds": {
+    "10": 0.086138,
+    "40": 0.048028
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01175,
+   "perSeedFailureSE": 0.001704,
+   "rejectionBySeeds": {
+    "10": 0.005835,
+    "40": 0.000105
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.015,
+   "perSeedFailureSE": 0.001922,
+   "rejectionBySeeds": {
+    "10": 0.009346,
+    "40": 0.000323
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.03025,
+   "perSeedFailureSE": 0.002708,
+   "rejectionBySeeds": {
+    "10": 0.035037,
+    "40": 0.006902
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.12125,
+   "perSeedFailureSE": 0.005161,
+   "rejectionBySeeds": {
+    "10": 0.346578,
+    "40": 0.542771
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2125,
+   "perSeedFailureSE": 0.006468,
+   "rejectionBySeeds": {
+    "10": 0.660749,
+    "40": 0.947096
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.494,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.988158,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75675,
+   "perSeedFailureSE": 0.006784,
+   "rejectionBySeeds": {
+    "10": 0.999977,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0585,
+   "perSeedFailureSE": 0.003711,
+   "rejectionBySeeds": {
+    "10": 0.112681,
+    "40": 0.08241
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05725,
+   "perSeedFailureSE": 0.003673,
+   "rejectionBySeeds": {
+    "10": 0.10864,
+    "40": 0.076684
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0625,
+   "perSeedFailureSE": 0.003827,
+   "rejectionBySeeds": {
+    "10": 0.125899,
+    "40": 0.102252
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.114,
+   "perSeedFailureSE": 0.005025,
+   "rejectionBySeeds": {
+    "10": 0.318379,
+    "40": 0.485608
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75925,
+   "perSeedFailureSE": 0.00676,
+   "rejectionBySeeds": {
+    "10": 0.999979,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9945,
+   "perSeedFailureSE": 0.001169,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.047,
+   "perSeedFailureSE": 0.003346,
+   "rejectionBySeeds": {
+    "10": 0.077341,
+    "40": 0.038442
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.23325,
+   "perSeedFailureSE": 0.006687,
+   "rejectionBySeeds": {
+    "10": 0.716116,
+    "40": 0.972114
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.74325,
+   "perSeedFailureSE": 0.006907,
+   "rejectionBySeeds": {
+    "10": 0.999963,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.98925,
+   "perSeedFailureSE": 0.001631,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1525,
+   "perSeedFailureSE": 0.005684,
+   "rejectionBySeeds": {
+    "10": 0.464865,
+    "40": 0.750523
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.086,
+   "perSeedFailureSE": 0.004433,
+   "rejectionBySeeds": {
+    "10": 0.210287,
+    "40": 0.258316
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09875,
+   "perSeedFailureSE": 0.004717,
+   "rejectionBySeeds": {
+    "10": 0.259062,
+    "40": 0.360696
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1145,
+   "perSeedFailureSE": 0.005035,
+   "rejectionBySeeds": {
+    "10": 0.320327,
+    "40": 0.489621
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.20225,
+   "perSeedFailureSE": 0.006351,
+   "rejectionBySeeds": {
+    "10": 0.630947,
+    "40": 0.928763
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.297,
+   "perSeedFailureSE": 0.007225,
+   "rejectionBySeeds": {
+    "10": 0.845965,
+    "40": 0.997119
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.535,
+   "perSeedFailureSE": 0.007886,
+   "rejectionBySeeds": {
+    "10": 0.994089,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75575,
+   "perSeedFailureSE": 0.006793,
+   "rejectionBySeeds": {
+    "10": 0.999976,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.141,
+   "perSeedFailureSE": 0.005503,
+   "rejectionBySeeds": {
+    "10": 0.422206,
+    "40": 0.682637
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.14625,
+   "perSeedFailureSE": 0.005587,
+   "rejectionBySeeds": {
+    "10": 0.441836,
+    "40": 0.714958
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1655,
+   "perSeedFailureSE": 0.005876,
+   "rejectionBySeeds": {
+    "10": 0.511405,
+    "40": 0.814317
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.24425,
+   "perSeedFailureSE": 0.006793,
+   "rejectionBySeeds": {
+    "10": 0.742773,
+    "40": 0.980536
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.78,
+   "perSeedFailureSE": 0.00655,
+   "rejectionBySeeds": {
+    "10": 0.99999,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.98675,
+   "perSeedFailureSE": 0.001808,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0565,
+   "perSeedFailureSE": 0.003651,
+   "rejectionBySeeds": {
+    "10": 0.106237,
+    "40": 0.073358
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.38325,
+   "perSeedFailureSE": 0.007687,
+   "rejectionBySeeds": {
+    "10": 0.942553,
+    "40": 0.999934
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.73525,
+   "perSeedFailureSE": 0.006976,
+   "rejectionBySeeds": {
+    "10": 0.999951,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.93725,
+   "perSeedFailureSE": 0.003834,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.096,
+   "perSeedFailureSE": 0.004658,
+   "rejectionBySeeds": {
+    "10": 0.248443,
+    "40": 0.338153
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.057,
+   "perSeedFailureSE": 0.003666,
+   "rejectionBySeeds": {
+    "10": 0.107837,
+    "40": 0.075566
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.052,
+   "perSeedFailureSE": 0.003511,
+   "rejectionBySeeds": {
+    "10": 0.092177,
+    "40": 0.055154
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.068,
+   "perSeedFailureSE": 0.00398,
+   "rejectionBySeeds": {
+    "10": 0.14472,
+    "40": 0.133155
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.164,
+   "perSeedFailureSE": 0.005855,
+   "rejectionBySeeds": {
+    "10": 0.506136,
+    "40": 0.807646
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.25575,
+   "perSeedFailureSE": 0.006898,
+   "rejectionBySeeds": {
+    "10": 0.76868,
+    "40": 0.986827
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.50825,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.990627,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.754,
+   "perSeedFailureSE": 0.00681,
+   "rejectionBySeeds": {
+    "10": 0.999974,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09575,
+   "perSeedFailureSE": 0.004652,
+   "rejectionBySeeds": {
+    "10": 0.24748,
+    "40": 0.336111
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1005,
+   "perSeedFailureSE": 0.004754,
+   "rejectionBySeeds": {
+    "10": 0.265839,
+    "40": 0.375101
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.113,
+   "perSeedFailureSE": 0.005006,
+   "rejectionBySeeds": {
+    "10": 0.314483,
+    "40": 0.477555
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.187,
+   "perSeedFailureSE": 0.006165,
+   "rejectionBySeeds": {
+    "10": 0.583672,
+    "40": 0.891718
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77525,
+   "perSeedFailureSE": 0.0066,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9905,
+   "perSeedFailureSE": 0.001534,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05375,
+   "perSeedFailureSE": 0.003566,
+   "rejectionBySeeds": {
+    "10": 0.09757,
+    "40": 0.061876
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.35475,
+   "perSeedFailureSE": 0.007565,
+   "rejectionBySeeds": {
+    "10": 0.918707,
+    "40": 0.999749
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75,
+   "perSeedFailureSE": 0.006847,
+   "rejectionBySeeds": {
+    "10": 0.99997,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.95975,
+   "perSeedFailureSE": 0.003108,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.23275,
+   "perSeedFailureSE": 0.006682,
+   "rejectionBySeeds": {
+    "10": 0.71486,
+    "40": 0.971664
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1695,
+   "perSeedFailureSE": 0.005932,
+   "rejectionBySeeds": {
+    "10": 0.525317,
+    "40": 0.831253
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.17675,
+   "perSeedFailureSE": 0.006031,
+   "rejectionBySeeds": {
+    "10": 0.550001,
+    "40": 0.858894
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.18775,
+   "perSeedFailureSE": 0.006175,
+   "rejectionBySeeds": {
+    "10": 0.586077,
+    "40": 0.893853
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.278,
+   "perSeedFailureSE": 0.007084,
+   "rejectionBySeeds": {
+    "10": 0.813297,
+    "40": 0.994062
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36175,
+   "perSeedFailureSE": 0.007597,
+   "rejectionBySeeds": {
+    "10": 0.925201,
+    "40": 0.999818
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.5665,
+   "perSeedFailureSE": 0.007835,
+   "rejectionBySeeds": {
+    "10": 0.996703,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77425,
+   "perSeedFailureSE": 0.00661,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2145,
+   "perSeedFailureSE": 0.00649,
+   "rejectionBySeeds": {
+    "10": 0.666376,
+    "40": 0.950153
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.22175,
+   "perSeedFailureSE": 0.006568,
+   "rejectionBySeeds": {
+    "10": 0.686254,
+    "40": 0.959986
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2615,
+   "perSeedFailureSE": 0.006948,
+   "rejectionBySeeds": {
+    "10": 0.780895,
+    "40": 0.989223
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.361,
+   "perSeedFailureSE": 0.007594,
+   "rejectionBySeeds": {
+    "10": 0.924527,
+    "40": 0.999811
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.8005,
+   "perSeedFailureSE": 0.006319,
+   "rejectionBySeeds": {
+    "10": 0.999996,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.97725,
+   "perSeedFailureSE": 0.002358,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0805,
+   "perSeedFailureSE": 0.004302,
+   "rejectionBySeeds": {
+    "10": 0.189732,
+    "40": 0.216859
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.47025,
+   "perSeedFailureSE": 0.007892,
+   "rejectionBySeeds": {
+    "10": 0.982808,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.7435,
+   "perSeedFailureSE": 0.006905,
+   "rejectionBySeeds": {
+    "10": 0.999963,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9135,
+   "perSeedFailureSE": 0.004445,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36475,
+   "perSeedFailureSE": 0.007611,
+   "rejectionBySeeds": {
+    "10": 0.927852,
+    "40": 0.999841
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.28825,
+   "perSeedFailureSE": 0.007162,
+   "rejectionBySeeds": {
+    "10": 0.831517,
+    "40": 0.995961
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.31275,
+   "perSeedFailureSE": 0.00733,
+   "rejectionBySeeds": {
+    "10": 0.869534,
+    "40": 0.998464
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3195,
+   "perSeedFailureSE": 0.007373,
+   "rejectionBySeeds": {
+    "10": 0.878722,
+    "40": 0.998837
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.40675,
+   "perSeedFailureSE": 0.007767,
+   "rejectionBySeeds": {
+    "10": 0.957578,
+    "40": 0.99998
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.458,
+   "perSeedFailureSE": 0.007878,
+   "rejectionBySeeds": {
+    "10": 0.979326,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.62875,
+   "perSeedFailureSE": 0.007639,
+   "rejectionBySeeds": {
+    "10": 0.999108,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77925,
+   "perSeedFailureSE": 0.006558,
+   "rejectionBySeeds": {
+    "10": 0.99999,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.34075,
+   "perSeedFailureSE": 0.007494,
+   "rejectionBySeeds": {
+    "10": 0.904347,
+    "40": 0.999531
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.35525,
+   "perSeedFailureSE": 0.007567,
+   "rejectionBySeeds": {
+    "10": 0.919186,
+    "40": 0.999755
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3855,
+   "perSeedFailureSE": 0.007696,
+   "rejectionBySeeds": {
+    "10": 0.944159,
+    "40": 0.999941
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.51975,
+   "perSeedFailureSE": 0.0079,
+   "rejectionBySeeds": {
+    "10": 0.992284,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.8375,
+   "perSeedFailureSE": 0.005833,
+   "rejectionBySeeds": {
+    "10": 0.999999,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.96425,
+   "perSeedFailureSE": 0.002936,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.13775,
+   "perSeedFailureSE": 0.005449,
+   "rejectionBySeeds": {
+    "10": 0.409937,
+    "40": 0.661537
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.53375,
+   "perSeedFailureSE": 0.007888,
+   "rejectionBySeeds": {
+    "10": 0.993957,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.73575,
+   "perSeedFailureSE": 0.006972,
+   "rejectionBySeeds": {
+    "10": 0.999952,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.867,
+   "perSeedFailureSE": 0.005369,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.225,
+   "perSeedFailureSE": 0.006603,
+   "rejectionBySeeds": {
+    "10": 0.694901,
+    "40": 0.963812
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.17525,
+   "perSeedFailureSE": 0.006011,
+   "rejectionBySeeds": {
+    "10": 0.544952,
+    "40": 0.853489
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.18075,
+   "perSeedFailureSE": 0.006084,
+   "rejectionBySeeds": {
+    "10": 0.563316,
+    "40": 0.872538
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.208,
+   "perSeedFailureSE": 0.006417,
+   "rejectionBySeeds": {
+    "10": 0.647863,
+    "40": 0.939619
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.291,
+   "perSeedFailureSE": 0.007182,
+   "rejectionBySeeds": {
+    "10": 0.836166,
+    "40": 0.996364
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36475,
+   "perSeedFailureSE": 0.007611,
+   "rejectionBySeeds": {
+    "10": 0.927852,
+    "40": 0.999841
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.56025,
+   "perSeedFailureSE": 0.007848,
+   "rejectionBySeeds": {
+    "10": 0.996284,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.7755,
+   "perSeedFailureSE": 0.006597,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.19475,
+   "perSeedFailureSE": 0.006261,
+   "rejectionBySeeds": {
+    "10": 0.608129,
+    "40": 0.912155
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.21725,
+   "perSeedFailureSE": 0.00652,
+   "rejectionBySeeds": {
+    "10": 0.674012,
+    "40": 0.954105
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3005,
+   "perSeedFailureSE": 0.007249,
+   "rejectionBySeeds": {
+    "10": 0.851468,
+    "40": 0.997489
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.46025,
+   "perSeedFailureSE": 0.007881,
+   "rejectionBySeeds": {
+    "10": 0.980007,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.78325,
+   "perSeedFailureSE": 0.006515,
+   "rejectionBySeeds": {
+    "10": 0.999992,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.946,
+   "perSeedFailureSE": 0.003574,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1175,
+   "perSeedFailureSE": 0.005092,
+   "rejectionBySeeds": {
+    "10": 0.332006,
+    "40": 0.513496
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.487,
+   "perSeedFailureSE": 0.007903,
+   "rejectionBySeeds": {
+    "10": 0.986754,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.74525,
+   "perSeedFailureSE": 0.006889,
+   "rejectionBySeeds": {
+    "10": 0.999965,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.93275,
+   "perSeedFailureSE": 0.00396,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  }
+ ],
+ "backlogModel": [
+  "A reading queue simulated hour by hour from the takeover (Tue 2026-10-13 06:00) for 181 days: 52 acquisitions a day (Poisson; the weekday profile; 08:00-20:00), 2% urgent, 12% soon, 86% routine; reading Mon-Fri 07:30-20:00 and Sat 10:00-14:00 at a utilization of 0.85 of the season-1 demand (the dynamic benchmark's reading utilization), urgent first, then soon, then routine, first in first out.",
+  "Seasonal scenarios multiply demand by the scenario's monthly season factor (seasonFactorBP); capacity-loss scenarios reduce reading capacity from day 100.",
+  "Each seed is judged by the backlog rule of each variant; a plan is rejected if more than floor(10% x seeds) seeds are unstable. Variants marked not adopted are alternatives for the owner's open decision on the backlog numbers, not rules."
+ ],
+ "backlog": [
+  {
+   "scenario": "stationary demand, stable capacity (utilization 0.85)",
+   "simulatedSeeds": 300,
+   "unstableSeedFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.51,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.133333,
+    "not adopted: v0.2-eval-3 without the peak check": 0.133333,
+    "v0.2-eval-2 (unadjusted)": 0.613333,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.636667
+   },
+   "rejectionAt40Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.631574,
+    "not adopted: v0.2-eval-3 without the peak check": 0.631574,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt10Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.990897,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.393136,
+    "not adopted: v0.2-eval-3 without the peak check": 0.393136,
+    "v0.2-eval-2 (unadjusted)": 0.99874,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.999257
+   },
+   "unstableOnPeakAloneFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.376667,
+    "v0.2-eval-2 (unadjusted)": 0.396667,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.503333
+   },
+   "meanLaterBlockWorkloadRatio": 1.001627
+  },
+  {
+   "scenario": "scenario seasonality, stable capacity",
+   "simulatedSeeds": 300,
+   "unstableSeedFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.823333,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.606667,
+    "not adopted: v0.2-eval-3 without the peak check": 0.606667,
+    "v0.2-eval-2 (unadjusted)": 0.933333,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.876667
+   },
+   "rejectionAt40Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt10Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.999999,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.998544,
+    "not adopted: v0.2-eval-3 without the peak check": 0.998544,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "unstableOnPeakAloneFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.216667,
+    "v0.2-eval-2 (unadjusted)": 0.14,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.27
+   },
+   "meanLaterBlockWorkloadRatio": 1.086871
+  },
+  {
+   "scenario": "stationary demand, capacity 5% lower from day 100",
+   "simulatedSeeds": 300,
+   "unstableSeedFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.753333,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.513333,
+    "not adopted: v0.2-eval-3 without the peak check": 0.52,
+    "v0.2-eval-2 (unadjusted)": 0.806667,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.813333
+   },
+   "rejectionAt40Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt10Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.999974,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.991394,
+    "not adopted: v0.2-eval-3 without the peak check": 0.992317,
+    "v0.2-eval-2 (unadjusted)": 0.999997,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.999998
+   },
+   "unstableOnPeakAloneFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.24,
+    "v0.2-eval-2 (unadjusted)": 0.263333,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.293333
+   },
+   "meanLaterBlockWorkloadRatio": 0.997219
+  },
+  {
+   "scenario": "scenario seasonality, capacity 5% lower from day 100",
+   "simulatedSeeds": 300,
+   "unstableSeedFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.953333,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.86,
+    "not adopted: v0.2-eval-3 without the peak check": 0.87,
+    "v0.2-eval-2 (unadjusted)": 0.99,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.973333
+   },
+   "rejectionAt40Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt10Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "unstableOnPeakAloneFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.093333,
+    "v0.2-eval-2 (unadjusted)": 0.053333,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.103333
+   },
+   "meanLaterBlockWorkloadRatio": 1.084333
+  },
+  {
+   "scenario": "scenario seasonality, capacity 10% lower from day 100",
+   "simulatedSeeds": 300,
+   "unstableSeedFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.996667,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 0.993333,
+    "not adopted: v0.2-eval-3 without the peak check": 0.993333,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt40Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "rejectionAt10Seeds": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 1,
+    "not adopted: v0.2-eval-3 with 20% growth tolerance, without the peak check": 1,
+    "not adopted: v0.2-eval-3 without the peak check": 1,
+    "v0.2-eval-2 (unadjusted)": 1,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 1
+   },
+   "unstableOnPeakAloneFraction": {
+    "not adopted: v0.2-eval-3 with 20% growth tolerance": 0.003333,
+    "v0.2-eval-2 (unadjusted)": 0.003333,
+    "v0.2-eval-3 (workload-adjusted, frozen)": 0.006667
+   },
+   "meanLaterBlockWorkloadRatio": 1.087364
+  }
+ ]
+}

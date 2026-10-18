@@ -129,6 +129,15 @@ func compare(p *Policy, cand, ag *PlanReport, cr, ar []Record, global []string) 
 			}
 		}
 	}
+	var obl []float64
+	for _, x := range pairs {
+		if wm := x.a.Measures.Windows[WinT90]; wm != nil {
+			obl = append(obl, float64(wm.Money.End.SeverancePayableCents+wm.Money.End.ContractMinimumCents))
+		}
+	}
+	c.Financial = Financial{T90Absolute: cand.OperatingProfit[WinT90], T90Increment: c.Profit[WinT90],
+		OperatingAbsolute: cand.OperatingProfit[WinOps], OperatingIncrement: c.Profit[WinOps],
+		T180Absolute: cand.OperatingProfit[WinT180], T180Increment: c.Profit[WinT180], TransitionObligationsT90: pairedT(obl)}
 	c.CaseSelection, c.CaseSelectionStatus = caseSelection(p, cand, ag)
 	slices.Sort(c.Integrity)
 	c.Integrity = slices.Compact(c.Integrity)
@@ -432,6 +441,9 @@ func caseSelection(p *Policy, cand, ag *PlanReport) ([]GateSummary, string) {
 // compensates for a failed gate.
 func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	c.Classification = ClassNotJudged
+	// A fact about the pair, whatever the verdict: the baseline fails the
+	// service gates the candidate passes.
+	c.ServiceRestored = base.Valid && base.ServiceStatus != Pass && cand.ServiceStatus == Pass
 	if !c.Valid {
 		c.Verdict, c.Reasons = INVALID, append([]string{}, c.Integrity...)
 		return
@@ -462,7 +474,7 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 		why = append(why, fmt.Sprintf("solvency: cash below the floor on seeds %v", cand.InsolventSeeds))
 	}
 	if cand.FundingStatus != Pass {
-		why = append(why, fmt.Sprintf("funding: obligations exceed cash on seeds %v", cand.FundingGapSeeds))
+		why = append(why, fmt.Sprintf("funding: committed liabilities exceed cash at the end of observation on seeds %v", cand.FundingGapSeeds))
 	}
 	if len(why) > 0 {
 		c.Verdict, c.Reasons = NOGO, why
@@ -477,6 +489,8 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	validated := cand.ValidationPass && t180.N > 0 && t180.Mean > 0
 	profitable := a90.N > 0 && a90.Mean > 0 && a180.N > 0 && a180.Mean > 0
 	restored := base.Valid && base.ServiceStatus != Pass
+	ops := c.Profit[WinOps]
+	transition := ops.N > 0 && ops.Mean > 0
 	switch {
 	case benefit && validated && profitable:
 		c.Verdict, c.Classification = GO, ClassFinancial
@@ -490,6 +504,18 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 		}
 		if !profitable {
 			why = append(why, fmt.Sprintf("not profitable itself: mean operating profit %.0f cents at T90, %.0f at T180", a90.Mean, a180.Mean))
+		}
+	case transition:
+		// Not repaid by T90, ahead after the transition: an unrepaid
+		// investment, never financial GO whatever T180 shows.
+		c.Verdict, c.Classification = CONDITIONAL, ClassTransition
+		why = append(why, fmt.Sprintf("transition not yet repaid: T90 increment %.0f cents, days %d–%d increment %.0f [%.0f, %.0f] cents; T180 increment %.0f cents (reported, not promoted)",
+			t90.Mean, p.Horizons.OperatingFrom+1, p.Horizons.PrimaryDays, ops.Mean, ops.Lo, ops.Hi, t180.Mean))
+		if restored {
+			why = append(why, fmt.Sprintf(reasonServiceRestored, c.Against, base.ServiceStatus, -t90.Mean, -t90.Hi, -t90.Lo))
+		}
+		if !validated {
+			why = append(why, "T180 validation not met (service or incremental profit)")
 		}
 	case restored:
 		c.Verdict, c.Classification = CONDITIONAL, ClassServicePurchase

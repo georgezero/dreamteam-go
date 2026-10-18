@@ -311,8 +311,23 @@ seed gets the same actions, and no strategy has a rule of its own.
   reads records written with `DT_STRAT_RECORDS`; the records themselves
   are not committed.
 
-Reproduce (about 7 minutes per 40 runs on a Raspberry Pi 4). Each run's
-outputs already exist, so a rerun checks them byte for byte:
+**Since Slice 5C.2** the policy in force is v0.2-eval-3, and these
+results are kept as written.
+
+* `p1`–`p4` were evaluated under v0.2-eval-2 by engine 0.2.0-dev.12
+  (commit 4e9e175), and reproduce there. This build evaluates under
+  v0.2-eval-3, so a rerun here refuses to overwrite them.
+* Their re-evaluation under v0.2-eval-3 is set `p5-eval3`
+  (`docs/calibration/policy-5c2`).
+* New runs commit only `run.json` and the generated tables.
+  * `run.json` pins every record, the report and the trajectory by
+    digest.
+  * The detailed report and trajectory are written to `detail/` (not
+    committed) and checked against it.
+
+Reproduce under 0.2.0-dev.12 (about 7 minutes per 40 runs on a Raspberry
+Pi 4). Each run's outputs already exist, so a rerun checks them byte for
+byte:
 
     python3 docs/calibration/strategy-development/strategies.py
     DT_STRAT_SET=p1-historical go test -tags calibration ./internal/sim -run 'StrategyDevelopment$' -v -timeout 600m

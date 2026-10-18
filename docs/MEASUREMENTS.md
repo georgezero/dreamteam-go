@@ -489,3 +489,21 @@ and the evaluation recorder.
 * Committed outputs: about 19 MB, mostly `report.json` (3–5 MB a set,
   per-seed measures included).
 
+
+## 2026-10-18 — V0.2 Slice 5C.2, policy v0.2-eval-3 (0.2.0-dev.13)
+
+Raspberry Pi 4 (4 cores, about 84 °C, soft-throttled) and joofi
+(Cortex-A76, 4 cores, shared, load 5–7 at the time).
+
+| Run | Machine | Time |
+|---|---|---|
+| `p5-eval3` (11 plans × 10 seeds, three at a time) | joofi | 314 s, then 348 s (rerun after the restoration-flag fix) |
+| `p5-eval3` reproduction (three at a time) | Pi 4 | 771 s; `run.json` and the detailed report byte-identical to joofi's |
+| Operating characteristics `DT_OC=1` (exact, Monte Carlo, 144 cluster rows × 4,000 seeds, 5 backlog scenarios × 300 queues × 3 rules) | Pi 4, one core | 1,085 s |
+| 20 targeted mutations of the eval package (each a full `go test ./internal/eval`) | Pi 4 | about 15 min |
+| Full suite `go test ./... -count=1` | Pi 4 | 745 s (sim 682, session 245, cmd 135, eval 93, tui 26) |
+
+* The synthetic reading queue (181 days hour by hour, about 9,200
+  studies) with three backlog evaluations takes about 0.2 s.
+* The service seed simulation (150 days, three priorities) takes about
+  0.25 ms.

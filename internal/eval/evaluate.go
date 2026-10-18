@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-const ReportSchema = "dreamteam.evalreport/v2"
+const ReportSchema = "dreamteam.evalreport/v3"
 
 // Verdicts.
 const (
@@ -19,9 +19,10 @@ const (
 // Financial classifications of a comparison that passes every hard gate
 // (README §10): what kind of result it is, beside the verdict.
 const (
-	ClassFinancial        = "financial superiority" // profitable, and better than the baseline with statistical support
-	ClassRelative         = "relative improvement"  // better than the baseline, without every GO condition
-	ClassServicePurchase  = "service purchase"      // restores service the baseline lacks, at a cost
+	ClassFinancial        = "financial superiority"      // profitable, and better than the baseline with statistical support
+	ClassRelative         = "relative improvement"       // better than the baseline, without every GO condition
+	ClassTransition       = "transition, not yet repaid" // eligible and solvent, ahead after the transition, not yet at T90
+	ClassServicePurchase  = "service purchase"           // restores service the baseline lacks, at a cost
 	ClassNoBenefit        = "no benefit"
 	ClassNotJudged        = "not judged" // invalid, or a hard gate failed
 	reasonServiceRestored = "restores service %s lacks (%s), at a T90 cost of %.0f [%.0f, %.0f] cents"
@@ -52,6 +53,9 @@ type SeedGate struct {
 	// perSeedWindows, or a validation window); otherwise it is pooled only.
 	PerSeed   bool `json:"perSeed"`
 	Undecided bool `json:"undecided,omitempty"` // missing or unresolved: the pool is undefined
+	// The cohort's day and week design effects (0: undefined).
+	DayDesignEffect  float64 `json:"dayDesignEffect"`
+	WeekDesignEffect float64 `json:"weekDesignEffect"`
 }
 
 func (g SeedGate) defined() bool { return g.Den > 0 && !g.Undecided }
@@ -106,6 +110,13 @@ type GateSummary struct {
 	// breaches). Reported to check the operating characteristics'
 	// independence assumption, never gated.
 	Dispersion float64 `json:"dispersion"`
+	// ClusterRobust: the pooled rate with a 95% interval that treats the
+	// seeds as the independent units (ratio estimator): valid whatever the
+	// dependence inside a seed. DayDesignEffect and WeekDesignEffect are
+	// the defined seeds' means. Reported, never gated.
+	ClusterRobust    Interval `json:"clusterRobustPooled"`
+	DayDesignEffect  float64  `json:"meanDayDesignEffect"`
+	WeekDesignEffect float64  `json:"meanWeekDesignEffect"`
 	// Case selection only: whether this gate's lack of evidence blocks
 	// eligibility, and its per-seed failure limit.
 	Blocking  bool `json:"blocking,omitempty"`
@@ -124,6 +135,15 @@ type JointGate struct {
 	FailLimit         int      `json:"failLimit"`
 	SeedFraction      Interval `json:"failingOrInsufficientSeedFraction"` // Wilson 95% of the seed fraction (seeds, not studies)
 	Status            string   `json:"status"`
+	// The prospective reading of the allowance (README §2): PassFraction
+	// is the empirical share of seeds passing every per-seed gate; Upper,
+	// the exact one-sided upper bound (at the policy's reliability
+	// confidence) on the population share of failing seeds. Passing the
+	// rule is an empirical statement: it does not establish that the
+	// population share is within the allowance unless Upper is.
+	PassFraction float64 `json:"passFraction"`
+	Upper        float64 `json:"failingFractionUpperBound"`
+	Confidence   float64 `json:"confidence"`
 }
 
 // PlanReport is one plan alone: its own gates, no comparison.
@@ -139,16 +159,25 @@ type PlanReport struct {
 	ServiceStatus string        `json:"serviceStatus"` // the joint seed rule and every gated pooled rate
 	// ValidationPass: the validation windows' joint seed rule and pooled
 	// rates both pass.
-	ValidationPass  bool    `json:"validationServicePass"`
-	BacklogStable   int     `json:"backlogStableSeeds"`
-	BacklogStatus   string  `json:"backlogStatus"`
-	LegacyBacklog   string  `json:"legacyBacklogRule"` // the historical rule on the seed means, for comparison only
-	InsolventSeeds  []int64 `json:"insolventSeeds"`
-	WorstMinCash    int64   `json:"worstMinCashCents"`
-	WorstMinCashAt  int64   `json:"worstMinCashSeed"`
-	SolvencyStatus  string  `json:"solvencyStatus"`
-	FundingGapSeeds []int64 `json:"fundingGapSeeds"` // a gap at any capture or sample through the end of observation
+	ValidationPass bool    `json:"validationServicePass"`
+	BacklogStable  int     `json:"backlogStableSeeds"`
+	BacklogStatus  string  `json:"backlogStatus"`
+	LegacyBacklog  string  `json:"legacyBacklogRule"` // the historical rule on the seed means, for comparison only
+	InsolventSeeds []int64 `json:"insolventSeeds"`
+	WorstMinCash   int64   `json:"worstMinCashCents"`
+	WorstMinCashAt int64   `json:"worstMinCashSeed"`
+	SolvencyStatus string  `json:"solvencyStatus"`
+	// FundingGapSeeds: the dated settlement test fails (committed
+	// liabilities outside the payment cycle above cash at the end of
+	// observation). The paid-when-due part is solvency's.
+	FundingGapSeeds []int64 `json:"fundingGapSeeds"`
 	FundingStatus   string  `json:"fundingStatus"`
+	// The 14-day commitment coverage, reported only: the seeds whose full
+	// bridge (future wages included) exceeded cash at some capture or
+	// sample, the largest such gap, and the share of instants in gap.
+	CommitmentGapSeeds    []int64 `json:"commitmentGapSeeds"`
+	WorstCommitmentGap    int64   `json:"worstCommitmentGapCents"`
+	CommitmentGapFraction Ratio   `json:"commitmentGapInstantFraction"`
 	// OperatingProfit: the plan's own (absolute) evaluation operating
 	// profit per window, mean and t 95% interval over seeds.
 	OperatingProfit map[string]Interval `json:"operatingProfitCents"`
@@ -207,10 +236,33 @@ type Comparison struct {
 	CashPayback         []Payback                            `json:"cashPayback"`
 	CaseSelection       []GateSummary                        `json:"caseSelection"`
 	CaseSelectionStatus string                               `json:"caseSelectionStatus"`
-	Role                string                               `json:"role,omitempty"` // primary or exploratory, when the evaluation names a primary
-	Verdict             string                               `json:"verdict,omitempty"`
-	Classification      string                               `json:"classification,omitempty"`
-	Reasons             []string                             `json:"reasons,omitempty"`
+	// Financial: the classification's evidence, kept apart (README §10).
+	Financial Financial `json:"financial"`
+	// ServiceRestored: the baseline fails the service gates the candidate
+	// passes (whatever the verdict); a CONDITIONAL GO restores it at the
+	// T90 increment's cost.
+	ServiceRestored bool     `json:"serviceRestored"`
+	Role            string   `json:"role,omitempty"` // primary or exploratory, when the evaluation names a primary
+	Verdict         string   `json:"verdict,omitempty"`
+	Classification  string   `json:"classification,omitempty"`
+	Reasons         []string `json:"reasons,omitempty"`
+}
+
+// Financial is a comparison's money, kept apart: the candidate's own
+// (absolute) operating profit and its paired increment at T90 (primary),
+// over the operating window (days 31–90) and at T180 (validation), and
+// the transition obligations still outstanding at T90. Payback is in the
+// comparison's accrual and cash paybacks.
+type Financial struct {
+	T90Absolute        Interval `json:"t90AbsoluteCents"`
+	T90Increment       Interval `json:"t90IncrementCents"`
+	OperatingAbsolute  Interval `json:"operatingWindowAbsoluteCents"`
+	OperatingIncrement Interval `json:"operatingWindowIncrementCents"`
+	T180Absolute       Interval `json:"t180AbsoluteCents"`
+	T180Increment      Interval `json:"t180IncrementCents"`
+	// TransitionObligationsT90: severance payable and contract minimum
+	// retainers owed at T90 (the candidate's, mean over seeds).
+	TransitionObligationsT90 Interval `json:"transitionObligationsT90Cents"`
 }
 
 // Report is a whole evaluation.
@@ -380,7 +432,9 @@ func role(p *Policy, w string) string {
 }
 
 func planReport(p *Policy, name string, recs []Record) *PlanReport {
-	pr := &PlanReport{Plan: name, Valid: true, Integrity: []string{}, InsolventSeeds: []int64{}, FundingGapSeeds: []int64{}, OperatingProfit: map[string]Interval{}}
+	pr := &PlanReport{Plan: name, Valid: true, Integrity: []string{}, InsolventSeeds: []int64{}, FundingGapSeeds: []int64{},
+		CommitmentGapSeeds: []int64{}, OperatingProfit: map[string]Interval{}}
+	var gapInstants, instants int64
 	recs = slices.Clone(recs)
 	sort.SliceStable(recs, func(i, j int) bool { return recs[i].Seed < recs[j].Seed })
 	seen := map[int64]bool{}
@@ -408,6 +462,11 @@ func planReport(p *Policy, name string, recs []Record) *PlanReport {
 		if !sr.Funded {
 			pr.FundingGapSeeds = append(pr.FundingGapSeeds, r.Seed)
 		}
+		if m.CommitmentGap > 0 {
+			pr.CommitmentGapSeeds = append(pr.CommitmentGapSeeds, r.Seed)
+			pr.WorstCommitmentGap = max(pr.WorstCommitmentGap, m.CommitmentGap)
+		}
+		gapInstants, instants = gapInstants+int64(m.CommitmentGapInstant), instants+int64(m.CommitmentInstants)
 		if len(pr.PerSeed) == 0 || m.MinCash < pr.WorstMinCash {
 			pr.WorstMinCash, pr.WorstMinCashAt = m.MinCash, r.Seed
 		}
@@ -457,6 +516,7 @@ func planReport(p *Policy, name string, recs []Record) *PlanReport {
 	if len(pr.InsolventSeeds) > p.Finance.MaxInsolventSeeds {
 		pr.SolvencyStatus = Fail
 	}
+	pr.CommitmentGapFraction = ratio(gapInstants, instants)
 	pr.FundingStatus = Pass
 	if len(pr.FundingGapSeeds) > p.Finance.MaxFundingGapSeeds {
 		pr.FundingStatus = Fail
@@ -498,6 +558,7 @@ func serviceGates(p *Policy, m *SeedMeasures) []SeedGate {
 			}
 			c := wm.Cohorts[q]
 			g.Num, g.Den, g.Value = c.Breaches, c.Acquired, c.BreachRate.Value
+			g.DayDesignEffect, g.WeekDesignEffect = c.DayDesignEffect, c.WeekDesignEffect
 			switch {
 			case c.Unresolved > 0:
 				g.Status, g.Reason, g.Undecided = Insufficient, fmt.Sprintf("%d studies undecided when observation ended", c.Unresolved), true
@@ -559,6 +620,11 @@ func joint(p *Policy, seeds []SeedResult, rl string) JointGate {
 	}
 	bad := len(j.FailingSeeds) + len(j.InsufficientSeeds)
 	j.SeedFraction = wilson(bad, len(seeds))
+	if len(seeds) > 0 {
+		j.PassFraction = float64(len(seeds)-bad) / float64(len(seeds))
+		j.Confidence = p.Service.ReliabilityConfidence
+		j.Upper = binomUpper(bad, len(seeds), j.Confidence)
+	}
 	switch {
 	case len(seeds) == 0 || j.Gates == 0 || len(j.InsufficientSeeds) > j.FailLimit:
 		j.Status = Insufficient
@@ -604,10 +670,19 @@ func summarize(p *Policy, seeds []SeedResult) []GateSummary {
 	for _, k := range order {
 		gs := by[k]
 		s := GateSummary{Gate: k.g, Window: k.w, Stratum: k.s, Role: role(p, k.w), PerSeed: gs[0].PerSeed, Seeds: len(gs), Threshold: gs[0].Threshold}
-		var sum float64
+		var sum, dde, wde float64
 		var num, den int64
+		var nd, nw int
+		var ones, ns []int64
 		pooled := true
 		for i, g := range gs {
+			ones, ns = append(ones, g.Num), append(ns, g.Den)
+			if g.DayDesignEffect > 0 {
+				dde, nd = dde+g.DayDesignEffect, nd+1
+			}
+			if g.WeekDesignEffect > 0 {
+				wde, nw = wde+g.WeekDesignEffect, nw+1
+			}
 			switch g.Status {
 			case Pass:
 				s.Passing++
@@ -632,6 +707,13 @@ func summarize(p *Policy, seeds []SeedResult) []GateSummary {
 		s.Dispersion = dispersion(gs)
 		if pooled {
 			s.Pooled = ratio(num, den)
+			s.ClusterRobust = clusterRobustRate(ones, ns)
+		}
+		if nd > 0 {
+			s.DayDesignEffect = dde / float64(nd)
+		}
+		if nw > 0 {
+			s.WeekDesignEffect = wde / float64(nw)
 		}
 		switch {
 		case k.w == WinGated:

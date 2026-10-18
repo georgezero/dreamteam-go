@@ -31,6 +31,15 @@ import (
 //	                       (every teleOnlyOf pair is always compared)
 //	DT_STRAT_RECORDS=dir   also write every record (gzip) there, for diagnostics
 //	DT_STRAT_PARALLEL=n    runs at once (default 3)
+//	DT_STRAT_DETAIL=dir    where report.json and trajectory.csv go (default
+//	                       detail/<id>, not committed); run.json pins both
+//
+// Since Slice 5C.2 only run.json (every record's, the report's and the
+// trajectory's digest) is committed with the generated tables; the
+// detailed report and trajectory are rewritten on every run and checked
+// against run.json. The Slice 5C.1 sets (p1–p4) committed theirs and were
+// evaluated under v0.2-eval-2: they are kept as written and do not
+// reproduce under a later policy.
 
 const stratDir = "docs/calibration/strategy-development"
 
@@ -56,7 +65,7 @@ func TestStrategyDevelopment(t *testing.T) {
 	parallel := 3
 	fmt.Sscan(envOr("DT_STRAT_PARALLEL", "3"), &parallel)
 	recDir := os.Getenv("DT_STRAT_RECORDS")
-	run := devRun{Schema: "dreamteam.devrun/v1", Set: setPath, SetSHA256: setSHA, PolicyDigest: digest, Engine: version.Number, Seeds: seeds}
+	run := devRun{Schema: "dreamteam.devrun/v2", Set: setPath, SetSHA256: setSHA, PolicyDigest: digest, Engine: version.Number, Seeds: seeds}
 	var traj bytes.Buffer
 	traj.WriteString("plan,seed,day,profitCents,cashCents,obligationsCents,backlog,overdue,acquiredCum,finalCum\n")
 	records, horizon := devMatrix(t, p, parallel, func(r eval.Record) {
@@ -97,11 +106,20 @@ func TestStrategyDevelopment(t *testing.T) {
 		t.Fatal(err)
 	}
 	report = append(report, '\n')
-	run.ReportSHA256 = sha256Hex(report)
+	run.ReportSHA256, run.TrajectorySHA256 = sha256Hex(report), sha256Hex(traj.Bytes())
 	manifest, _ := json.MarshalIndent(run, "", " ")
 	manifest = append(manifest, '\n')
+	detail := envOr("DT_STRAT_DETAIL", filepath.Join(root, stratDir, "detail", id))
+	if err := os.MkdirAll(detail, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for name, raw := range map[string][]byte{"report.json": report, "trajectory.csv": traj.Bytes()} {
+		if err := os.WriteFile(filepath.Join(detail, name), raw, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
 	out := filepath.Join(root, stratDir, "results", id)
-	mode, err := writeOnce(out, map[string][]byte{"run.json": manifest, "report.json": report, "trajectory.csv": traj.Bytes()})
+	mode, err := writeOnce(out, map[string][]byte{"run.json": manifest})
 	if err != nil {
 		t.Fatal(err)
 	}

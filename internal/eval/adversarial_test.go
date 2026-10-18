@@ -2,6 +2,8 @@ package eval
 
 import (
 	"math"
+	"math/rand/v2"
+	"slices"
 	"strings"
 	"testing"
 
@@ -195,15 +197,163 @@ func TestInheritedOrdersGuarded(t *testing.T) {
 	}
 }
 
-// backlogRecord is a record of constant daily samples (backlog level) and
-// the given studies, observed to day 181 with a day-150 horizon.
+// backlogRecord is a record of daily samples (backlog level, and a
+// constant workload of 40 acquisitions a day) and the given studies,
+// observed to day 181 with a day-150 horizon.
 func backlogRecord(level func(d int) int, studies []Study) *Record {
+	return workloadRecord(level, func(int) int { return 40 }, studies)
+}
+
+// workloadRecord is backlogRecord with the daily acquisitions given.
+func workloadRecord(level, acq func(d int) int, studies []Study) *Record {
 	r := &Record{TakeoverSec: t0, TakeoverDate: t0Date, HorizonEndSec: t0 + 150*daySec, TATTargetMin: testTargets, Studies: studies}
 	date, _ := simtime.ParseDate(t0Date)
+	cum := 0
 	for d := 1; d <= 181; d++ {
-		r.Samples = append(r.Samples, Sample{Day: d, AtSec: t0 + int64(d)*daySec, Date: date.AddDays(int64(d)).String(), Unread: level(d)})
+		cum += acq(d)
+		r.Samples = append(r.Samples, Sample{Day: d, AtSec: t0 + int64(d)*daySec, Date: date.AddDays(int64(d)).String(), Unread: level(d), AcquiredCum: cum})
 	}
 	return r
+}
+
+// 5C.2: the backlog checks scale with the block's own workload (Little's
+// law), so a seasonal rise in demand that a stable queue follows in
+// proportion is not instability; stale and persistent work never scales,
+// and growth beyond the workload, spikes, late-tail deterioration and a
+// backlog that does not fall with demand still fail. Each case beside the
+// unadjusted (v0.2-eval-2) rule, for contrast.
+func TestSeasonalBacklog(t *testing.T) {
+	p, _ := testPolicy(t)
+	v2 := *p
+	v2.Backlog.WorkloadAdjustedChecks, v2.Backlog.AbsoluteChecks = nil, slices.Clone(backlogChecks)
+	t90 := t0 + 90*daySec
+	// Demand 40 a day through the reference block (days 55–82), then 50
+	// (+25%, the order of the scenario's December-to-January rise).
+	rising := func(d int) int {
+		if d <= 82 {
+			return 40
+		}
+		return 50
+	}
+	follows := func(lo, hi int) func(int) int {
+		return func(d int) int {
+			if d <= 82 {
+				return lo
+			}
+			return hi
+		}
+	}
+	run := func(pol *Policy, level, acq func(int) int, studies []Study) BacklogMeasures {
+		return measureBacklog(pol, workloadRecord(level, acq, studies), t90)
+	}
+	// Stable service under rising seasonal demand: 20 → 25 with the
+	// workload.
+	if bm := run(p, follows(20, 25), rising, nil); bm.Status != "stable" {
+		t.Fatalf("seasonal: %v", bm.Reasons)
+	}
+	if bm := run(&v2, follows(20, 25), rising, nil); bm.Status != "unstable" || !checkFailed(bm, "mean") {
+		t.Fatalf("seasonal under v0.2-eval-2: %v", bm.Reasons)
+	}
+	// Genuine capacity deterioration: flat demand, 20 → 25; and rising
+	// demand, 20 → 32 (+60% against +25%).
+	if bm := run(p, follows(20, 25), func(int) int { return 40 }, nil); bm.Status != "unstable" || !checkFailed(bm, "mean") {
+		t.Fatalf("deterioration: %v", bm.Reasons)
+	}
+	if bm := run(p, follows(20, 32), rising, nil); bm.Status != "unstable" || !checkFailed(bm, "mean") || !checkFailed(bm, "max") {
+		t.Fatalf("deterioration beyond the workload: %v", bm.Reasons)
+	}
+	// A backlog that does not fall when demand falls (40 → 30): the
+	// scaled reference is 15.
+	if bm := run(p, follows(20, 20), follows(40, 30), nil); bm.Status != "unstable" || !checkFailed(bm, "mean") {
+		t.Fatalf("falling demand: %v", bm.Reasons)
+	}
+	// Persistent old backlog: proportional growth, three inherited studies
+	// never reported.
+	var old []Study
+	for k := range 3 {
+		acq := t0 - 2*hour + int64(k)*60
+		old = append(old, Study{ID: "I", Priority: "routine", AcquiredSec: acq, EnteredSec: acq})
+	}
+	if bm := run(p, follows(20, 25), rising, old); bm.Status != "unstable" || bm.Persistent != 3 {
+		t.Fatalf("persistent: %+v", bm.Reasons)
+	}
+	// A growing stale burden under rising demand: from day 115 ten routine
+	// studies wait a week. Stale never scales with the workload.
+	var stale []Study
+	for k := range 10 {
+		acq := t0 + 113*daySec + int64(k)*60
+		stale = append(stale, Study{ID: "S", Priority: "routine", AcquiredSec: acq, EnteredSec: acq, ClaimedSec: acq + 7*daySec,
+			ReadStartSec: acq + 7*daySec, FinalSec: acq + 8*daySec})
+	}
+	if bm := run(p, follows(20, 25), rising, stale); bm.Status != "unstable" || !checkFailed(bm, "stale") || bm.Persistent != 0 {
+		t.Fatalf("stale: %v", bm.Reasons)
+	}
+	// Stale work never scales: a stale burden present in the reference
+	// that grows with the workload (14 studies a week waiting a week in the
+	// reference, 18 later: a stale mean of about 10, then 12.9) fails the
+	// absolute stale check; scaled by the workload it would pass.
+	var burden []Study
+	for start := 55; start < 167; start += 7 {
+		n := 14
+		if start > 82 {
+			n = 18
+		}
+		for k := range n {
+			acq := t0 + int64(start)*daySec + int64(k)*60
+			burden = append(burden, Study{ID: "B", Priority: "routine", AcquiredSec: acq, EnteredSec: acq, ClaimedSec: acq + 7*daySec,
+				ReadStartSec: acq + 7*daySec, FinalSec: acq + 7*daySec + hour})
+		}
+	}
+	if bm := run(p, follows(20, 25), rising, burden); bm.Status != "unstable" || !checkFailed(bm, "stale") {
+		t.Fatalf("proportional stale burden: %v", bm.Reasons)
+	}
+	// No recorded workload: compared unscaled, never waved through.
+	if bm := run(p, follows(20, 25), func(int) int { return 0 }, nil); bm.Status != "unstable" || !checkFailed(bm, "mean") {
+		t.Fatalf("no workload: %v", bm.Reasons)
+	}
+	// A temporary spike: three days at 31 against a scaled peak of 25.
+	spike := func(d int) int {
+		switch {
+		case d <= 82:
+			return 20
+		case d >= 97 && d <= 99:
+			return 31
+		}
+		return 25
+	}
+	if bm := run(p, spike, rising, nil); bm.Status != "unstable" || !checkFailed(bm, "max") || checkFailed(bm, "mean") {
+		t.Fatalf("spike: %v", bm.Reasons)
+	}
+	// Late-tail deterioration in the covering block (139–166) alone.
+	late := func(d int) int {
+		switch {
+		case d <= 82:
+			return 20
+		case d >= 139:
+			return 33
+		}
+		return 25
+	}
+	bm := run(p, late, rising, nil)
+	if bm.Status != "unstable" || !checkFailed(bm, "mean") {
+		t.Fatalf("late tail: %v", bm.Reasons)
+	}
+	for _, c := range bm.Checks {
+		if !c.Pass && c.FirstDay != 139 {
+			t.Fatalf("late tail: block %d failed %s", c.FirstDay, c.Check)
+		}
+	}
+	// The scaled reference is reported with its ratio; an absolute check
+	// keeps ratio 1.
+	for _, c := range run(p, follows(20, 25), rising, nil).Checks {
+		want := 1.25
+		if c.Check == "stale" {
+			want = 1
+		}
+		if c.WorkloadRatio != want {
+			t.Fatalf("%s ratio %v", c.Check, c.WorkloadRatio)
+		}
+	}
 }
 
 func checkFailed(bm BacklogMeasures, name string) bool {
@@ -464,6 +614,70 @@ func TestLossMakingImprovement(t *testing.T) {
 // H7: an insolvent baseline whose service passes is not a service
 // restoration: a costlier candidate is NO GO, not CONDITIONAL (v0.2-eval-1
 // gave CONDITIONAL GO to any candidate of an ineligible baseline).
+// 5C.2: a solvent, clinically eligible plan that has not repaid its
+// transition cost by T90 but is ahead over the operating window is
+// CONDITIONAL GO (transition, not yet repaid), whatever T180 shows; a
+// standing cost is a service purchase (when the baseline fails service)
+// or no benefit. Nothing here is financial GO.
+func TestTransitionClassification(t *testing.T) {
+	p, d := testPolicy(t)
+	baseline := func(soonPM int) func(int64) synth {
+		return func(s int64) synth { x := base("A", s); x.breachPM["soon"] = soonPM; return x }
+	}
+	cand := func(pd, upfront int64) func(int64) synth {
+		return func(s int64) synth {
+			x := base("B", s)
+			x.profitPD, x.upfront, x.profitNoise = pd, upfront, 100
+			return x
+		}
+	}
+	eval := func(a, b func(int64) synth) Comparison {
+		rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, a), "B": records(10, b)}})
+		return comparison(t, rep, "B")
+	}
+	// +$20 a day after a $3,000 transition: T90 −1,200 dollars, days 31–90
+	// +1,200, T180 +600.
+	invest := cand(12_000, 300_000)
+	c := eval(baseline(200), invest)
+	if c.Verdict != CONDITIONAL || c.Classification != ClassTransition || c.ServiceRestored ||
+		!strings.Contains(reasons(c), "transition not yet repaid") || c.Financial.T90Increment.Mean >= 0 ||
+		c.Financial.OperatingIncrement.Mean <= 0 || c.Financial.T180Increment.Mean <= 0 {
+		t.Fatalf("transition: %s (%s) %v %+v", c.Verdict, c.Classification, c.Reasons, c.Financial)
+	}
+	if !c.Financial.T90Absolute.Defined || !c.Financial.T180Absolute.Defined || !c.Financial.TransitionObligationsT90.Defined {
+		t.Fatalf("financial summary %+v", c.Financial)
+	}
+	// The same against a baseline failing service: still a transition, the
+	// restoration stated beside it.
+	c = eval(baseline(400), invest)
+	if c.Classification != ClassTransition || !c.ServiceRestored || !strings.Contains(reasons(c), "restores service") {
+		t.Fatalf("transition restoring service: %s %v", c.Classification, c.Reasons)
+	}
+	// A standing cost (behind in every window): a service purchase when the
+	// baseline fails service, no benefit when it passes.
+	costly := cand(8_000, 0)
+	if c = eval(baseline(400), costly); c.Verdict != CONDITIONAL || c.Classification != ClassServicePurchase {
+		t.Fatalf("service purchase: %s (%s)", c.Verdict, c.Classification)
+	}
+	if c = eval(baseline(200), costly); c.Verdict != NOGO || c.Classification != ClassNoBenefit {
+		t.Fatalf("no benefit: %s (%s)", c.Verdict, c.Classification)
+	}
+	// The restoration is a fact about the pair whatever the verdict: an
+	// insolvent candidate is NO GO, and still passes the service the
+	// baseline fails.
+	broke := func(s int64) synth { x := cand(8_000, 0)(s); x.minCash, x.minCashSet = -1, true; return x }
+	if c = eval(baseline(400), broke); c.Verdict != NOGO || !c.ServiceRestored {
+		t.Fatalf("restoration under NO GO: %s %v", c.Verdict, c.ServiceRestored)
+	}
+	if c = eval(baseline(200), broke); c.ServiceRestored {
+		t.Fatal("a baseline that passes service is not restored")
+	}
+	// A large T180 gain never makes an unrepaid T90 financial GO.
+	if c = eval(baseline(200), cand(30_000, 2_000_000)); c.Verdict == GO || c.Financial.T180Increment.Lo <= 0 || c.Financial.T90Increment.Mean >= 0 {
+		t.Fatalf("T180 promoted: %s (%s) %+v", c.Verdict, c.Classification, c.Financial)
+	}
+}
+
 func TestInsolventBaselineNotRestoration(t *testing.T) {
 	p, d := testPolicy(t)
 	broke := func(s int64) synth {
@@ -481,27 +695,100 @@ func TestInsolventBaselineNotRestoration(t *testing.T) {
 	}
 }
 
-// M3: a funding gap anywhere in the observation is a hard gate, not only
-// at the tail's end: obligations above cash for the first weeks (cash
-// growing past them later) is NO GO.
-func TestFundingGapThroughHorizon(t *testing.T) {
+// 5C.2: funding is a dated settlement test. Obligations above cash at an
+// instant, the forward employee commitment included, are a reported
+// indicator; what fails is a payment not made on its date (past due),
+// cash below the floor at any posting, observation stopping before the
+// horizon's obligations fall due, or committed liabilities outside the
+// payment cycle that cash at the end does not cover.
+func TestDatedFunding(t *testing.T) {
 	p, d := testPolicy(t)
+	eval := func(mk func(int64) synth, edit func(*Record)) (*PlanReport, Comparison) {
+		t.Helper()
+		recs := records(10, mk)
+		for i := range recs {
+			if edit != nil {
+				edit(&recs[i])
+			}
+		}
+		rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) }), "B": recs}})
+		return plan(rep, "B"), comparison(t, rep, "B")
+	}
+	atEnd := func(f func(*Money)) func(*Record) {
+		return func(r *Record) {
+			for i := range r.Captures {
+				if r.Captures[i].Name == "end" {
+					f(&r.Captures[i].Money)
+				}
+			}
+		}
+	}
+	// Obligations above cash for the first weeks (cash grows past them
+	// later), every payment made on its date: the indicator reports the
+	// gap; funding passes.
 	tight := func(s int64) synth {
 		x := base("B", s)
-		x.profitPD, x.cash0, x.payables = 30_000, 100_000, 200_000 // cash passes the payables on day 20
+		x.profitPD, x.cash0, x.payables = 30_000, 100_000, 200_000
 		return x
 	}
-	rep := Evaluate(p, d, Input{Baseline: "A", Plans: map[string][]Record{"A": records(10, func(s int64) synth { return base("A", s) }), "B": records(10, tight)}})
-	pr := plan(rep, "B")
+	pr, c := eval(tight, nil)
 	m := pr.PerSeed[0].Measures
-	if tw := m.Windows[WinTail]; tw.Money.FundingGapCents != 0 {
-		t.Fatalf("no gap at the tail's end expected: %d", tw.Money.FundingGapCents)
+	if pr.FundingStatus != Pass || m.FundingGap != 0 || m.CommitmentGap != 100_000-5_000 || m.CommitmentGapAt != t0+daySec ||
+		len(pr.CommitmentGapSeeds) != 10 || !pr.CommitmentGapFraction.Defined || pr.CommitmentGapFraction.Num == 0 {
+		t.Fatalf("indicator: %s gap %d, commitment %d at %d, %v %+v", pr.FundingStatus, m.FundingGap, m.CommitmentGap, m.CommitmentGapAt-t0,
+			pr.CommitmentGapSeeds, pr.CommitmentGapFraction)
 	}
-	if m.FundingGap != 100_000-5_000 || m.FundingGapAt != t0+daySec || pr.FundingStatus != Fail || len(pr.FundingGapSeeds) != 10 {
-		t.Fatalf("gap %d at %d, %s %v", m.FundingGap, m.FundingGapAt-t0, pr.FundingStatus, pr.FundingGapSeeds)
+	if strings.Contains(reasons(c), "funding") {
+		t.Fatalf("the indicator gates: %v", c.Reasons)
 	}
-	if c := comparison(t, rep, "B"); c.Verdict != NOGO || !strings.Contains(reasons(c), "funding") {
-		t.Fatalf("%s %v", c.Verdict, c.Reasons)
+	// A deferred payment (past due at a capture) cannot hide behind cash.
+	pr, c = eval(func(s int64) synth { return base("B", s) }, func(r *Record) { r.Captures[1].Money.PastDueCents = 1 })
+	if pr.SolvencyStatus != Fail || c.Verdict != NOGO || !strings.Contains(reasons(c), "solvency") {
+		t.Fatalf("past due: %s %s %v", pr.SolvencyStatus, c.Verdict, c.Reasons)
+	}
+	// Cash below zero at one posting between samples, every sample and
+	// capture positive: insolvent.
+	pr, c = eval(func(s int64) synth { x := base("B", s); x.minCash, x.minCashSet = -1, true; return x }, nil)
+	if pr.SolvencyStatus != Fail || c.Verdict != NOGO {
+		t.Fatalf("negative posting: %s %s", pr.SolvencyStatus, c.Verdict)
+	}
+	// Observation stopping before the horizon's obligations fall due:
+	// the record is not evidence.
+	pr, c = eval(func(s int64) synth { x := base("B", s); x.observeShort = daySec; return x }, nil)
+	if pr.Valid || c.Verdict != INVALID {
+		t.Fatalf("truncated: valid %v %s", pr.Valid, c.Verdict)
+	}
+	// A late horizon (day 175): the cohorts' closure and the covering
+	// backlog block end by day 194, the settlement window at day 206.
+	late := Record{TakeoverSec: t0, TakeoverDate: t0Date, HorizonEndSec: t0 + 175*daySec}
+	if got := observationNeeded(p, &late); got != late.HorizonEndSec+int64(p.Finance.SettlementDays)*daySec {
+		t.Fatalf("observation to day %d does not end with the settlement window", (got-t0)/daySec)
+	}
+	// Committed liabilities outside the cycle above cash at the end:
+	// severance payable, a contract's minimum retainers, fees in flight.
+	for _, k := range []struct {
+		name string
+		set  func(*Money)
+	}{
+		{"severance", func(m *Money) { m.SeverancePayableCents = m.CashCents + 1 }},
+		{"contract minimum", func(m *Money) { m.ContractMinimumCents = m.CashCents + 1 }},
+		{"fees in flight", func(m *Money) { m.RemoteInFlightCents = m.CashCents/2 + 1; m.ContractMinimumCents = m.CashCents / 2 }},
+	} {
+		pr, c = eval(func(s int64) synth { return base("B", s) }, atEnd(k.set))
+		if pr.FundingStatus != Fail || pr.PerSeed[0].Measures.FundingGap != 1 || c.Verdict != NOGO || !strings.Contains(reasons(c), "funding") {
+			t.Fatalf("%s: %s gap %d %s", k.name, pr.FundingStatus, pr.PerSeed[0].Measures.FundingGap, c.Verdict)
+		}
+	}
+	// Exactly covered passes; the recurring cycle's accrued liabilities
+	// are never part of the terminal test.
+	pr, _ = eval(func(s int64) synth { return base("B", s) }, atEnd(func(m *Money) {
+		m.SeverancePayableCents, m.PayablesCents, m.AccruedPayrollCents = m.CashCents, 5*m.CashCents, m.CashCents
+	}))
+	if pr.FundingStatus != Pass {
+		t.Fatalf("covered: %s %v", pr.FundingStatus, pr.FundingGapSeeds)
+	}
+	if l := pr.PerSeed[0].Measures.Liquidity["end"]; l.Committed != l.CashCents || l.Accrued != 6*l.CashCents {
+		t.Fatalf("liquidity split %+v", l)
 	}
 }
 
@@ -614,5 +901,82 @@ func TestDispersion(t *testing.T) {
 	spread := []SeedGate{{Num: 0, Den: 100}, {Num: 20, Den: 100}, {Num: 10, Den: 100}, {Num: 10, Den: 100}}
 	if d := dispersion(spread); d < 5 {
 		t.Fatalf("dispersion %v", d)
+	}
+}
+
+// 5C.2: the cluster statistics. A design effect is about 1 for
+// independent outcomes and the cluster size for perfectly clustered ones;
+// a fixed weekday pattern adds nothing at the day level once removed; the
+// cluster-robust pooled interval widens with seed-level variation; the
+// exact upper bound on a failing-seed fraction is the Clopper–Pearson one.
+func TestClusterStatistics(t *testing.T) {
+	var indep, clustered []clusterGroup
+	rng := rand.New(rand.NewPCG(5, 2))
+	for g := range 200 {
+		ones := int64(0)
+		for range 20 {
+			if rng.Float64() < 0.1 {
+				ones++
+			}
+		}
+		indep = append(indep, clusterGroup{n: 20, ones: ones})
+		c := int64(0)
+		if g%10 == 0 {
+			c = 20
+		}
+		clustered = append(clustered, clusterGroup{n: 20, ones: c})
+	}
+	if de := designEffect(indep); de < 0.5 || de > 1.6 {
+		t.Fatalf("independent design effect %v", de)
+	}
+	if de := designEffect(clustered); de < 19 || de > 20.01 {
+		t.Fatalf("clustered design effect %v", de)
+	}
+	if designEffect(indep[:1]) != 0 {
+		t.Fatal("one group has no design effect")
+	}
+	// Every Saturday breaches, no other day: a fixed weekday pattern, no
+	// random day effect.
+	var xs []*Study
+	for d := int64(0); d < 70; d++ {
+		for i := range int64(10) {
+			acq := t0 + d*daySec + 9*hour + i*60
+			fin := acq + 10*60
+			if ((acq/daySec)+4)%7 == 6 { // Saturday
+				fin = acq + 2*hour
+			}
+			xs = append(xs, &Study{Priority: "urgent", AcquiredSec: acq, EnteredSec: acq, ClaimedSec: acq, ReadStartSec: acq, FinalSec: fin})
+		}
+	}
+	breach := func(s *Study) (bool, bool) { return s.FinalSec > s.AcquiredSec+3600, true }
+	day, week := clusterEffects(xs, breach)
+	if day != 0 && day > 1.01 {
+		t.Fatalf("weekday pattern counted as day clustering: %v", day)
+	}
+	if week > 1.01 && week != 0 {
+		t.Fatalf("a pattern repeating every week clusters by week: %v", week)
+	}
+	// Seeds alike against seeds scattered, same pooled rate.
+	alike := clusterRobustRate([]int64{10, 10, 10, 10}, []int64{100, 100, 100, 100})
+	spread := clusterRobustRate([]int64{0, 20, 0, 20}, []int64{100, 100, 100, 100})
+	if alike.Mean != 0.1 || spread.Mean != 0.1 || alike.Hi-alike.Lo > 1e-12 || spread.Hi-spread.Lo < 0.2 {
+		t.Fatalf("robust intervals %+v %+v", alike, spread)
+	}
+	for _, k := range []struct {
+		x, n int
+		want float64
+	}{{0, 10, 1 - math.Pow(0.05, 0.1)}, {0, 40, 1 - math.Pow(0.05, 1.0/40)}, {10, 10, 1}} {
+		if got := binomUpper(k.x, k.n, 0.95); math.Abs(got-k.want) > 1e-9 {
+			t.Fatalf("upper bound %d of %d: %v, want %v", k.x, k.n, got, k.want)
+		}
+	}
+	// At the bound, P(X ≤ x) is 5%.
+	u := binomUpper(4, 40, 0.95)
+	var cdf float64
+	for k := range 5 {
+		cdf += math.Exp(lpmf(40, k, u))
+	}
+	if math.Abs(cdf-0.05) > 1e-9 || u < 0.2 || u > 0.23 {
+		t.Fatalf("upper bound 4 of 40: %v (cdf %v)", u, cdf)
 	}
 }
