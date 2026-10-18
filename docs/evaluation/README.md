@@ -1,24 +1,36 @@
-# V0.2 evaluation framework (v0.2-eval-3, Slice 5C.2)
+# V0.2 evaluation framework (v0.2-eval-4, Slice 5C.3)
 
 This directory freezes how V0.2 strategies are judged. It is a
 preregistration: the rules come from the owner's decisions, the design
 (`V0.2_DESIGN.md` §13), the arithmetic of the gates and synthetic
 operating characteristics. No candidate strategy was run to set them.
 
-**v0.2-eval-3** (Slice 5C.2) supersedes v0.2-eval-2. It corrects four
-rules that the Slice 5C.1 development runs showed to be infeasible or
-statistically misleading, applying the owner's decisions on them (§12):
+**v0.2-eval-4** (Slice 5C.3) supersedes v0.2-eval-3. It recalibrates
+only the backlog gate (§4, §12), from the owner's decisions and a
+prespecified protocol on synthetic queues
+(`docs/calibration/backlog-5c3/protocol.md`):
 
-* funding becomes a dated settlement test;
-* the backlog checks are workload-adjusted;
-* service reliability is reported cluster-aware;
-* a solvent, clinically eligible transition that has not repaid by T90
-  is CONDITIONAL GO.
+* the individual 28-day peak is reported, never gated;
+* the level check keeps the workload-adjusted 28-day mean, with its own
+  tolerance;
+* the overdue, stale and exposure checks judge block medians;
+* an absolute stale cap holds in every block from the reference on.
 
-Every gate threshold, the joint seed rule and T90 as the primary
-financial endpoint are unchanged. v0.2-eval-2 and its README
-(`README-v0.2-eval-2.md`) are kept byte for byte, and its development
-reports are unchanged.
+It also states how the service rule's 10% allowance is to be read under
+clustering (§2). Every other rule of v0.2-eval-3 is unchanged:
+* the breach gates and the joint seed rule;
+* case selection, solvency and the dated funding test;
+* T90 as the primary financial endpoint.
+
+v0.2-eval-3 and its README (`README-v0.2-eval-3.md`) are kept byte for
+byte, and its development report is unchanged.
+
+**v0.2-eval-3** (Slice 5C.2) superseded v0.2-eval-2. It made four
+corrections:
+* funding became a dated settlement test;
+* the backlog checks became workload-adjusted;
+* service reliability became reported cluster-aware;
+* an unrepaid transition became CONDITIONAL GO.
 
 **v0.2-eval-2** superseded v0.2-eval-1 (Slice 5C.0). It corrected the
 loopholes found by the independent audit of v0.2-eval-1
@@ -27,8 +39,9 @@ run under v0.2-eval-1.
 
 | File | What it is |
 |---|---|
-| `policy-v0.2-eval-3.json` | The policy in force (`dreamteam.evalpolicy/v3`), decoded strictly by `internal/eval`. Its SHA-256 is the policy digest every report carries. Its `changes` list every rule changed from v0.2-eval-2, with the finding, rationale and expected impact. |
-| `oc-v0.2-eval-3.json` | The operating characteristics (§2, §4): the exact independent design, the service rule under day and week clustering, and the backlog rule on a synthetic queue. `TestOperatingCharacteristics` recomputes its exact part and checks the rest. |
+| `policy-v0.2-eval-4.json` | The policy in force (`dreamteam.evalpolicy/v4`), decoded strictly by `internal/eval`. Its SHA-256 is the policy digest every report carries. Its `changes` list every rule changed from v0.2-eval-3, with the finding, the old and new definitions, the rationale and the expected impact. |
+| `oc-v0.2-eval-4.json` | The operating characteristics (§2, §4): the exact independent design, the service rule under day and week clustering, and the backlog family on synthetic queues with the protocol's selection. `TestOperatingCharacteristics` recomputes its exact part and checks the rest, including that the frozen backlog rule is the selected candidate. |
+| `policy-v0.2-eval-3.json`, `oc-v0.2-eval-3.json`, `README-v0.2-eval-3.md` | v0.2-eval-3, superseded and unchanged. `LoadPolicy` refuses it. |
 | `policy-v0.2-eval-2.json`, `oc-v0.2-eval-2.json`, `README-v0.2-eval-2.md` | v0.2-eval-2, superseded and unchanged. `LoadPolicy` refuses it. |
 | `policy-v0.2.json`, `README-v0.2-eval-1.md` | v0.2-eval-1, superseded and unchanged. `LoadPolicy` refuses it. |
 | `holdout-v0.2.json` | The locked holdout manifest: method and digest, not the seeds. Unchanged. |
@@ -116,7 +129,7 @@ cohort is missing or undecided.
 **Urgent decided per seed over the whole gated period** [owner design,
 proposed window, H1]. The 12% gate is unchanged. The evidence window
 was redesigned and chosen by its operating characteristics
-(`oc-v0.2-eval-3.json`, `exact`, as in v0.2-eval-2), never by results:
+(`oc-v0.2-eval-4.json`, `exact`, as in v0.2-eval-2), never by results:
 
 * **Model.** Synthetic only:
   * the planning target is the owner's: urgent 8% underlying;
@@ -173,6 +186,33 @@ was redesigned and chosen by its operating characteristics
   gated, so that the development seeds show whether the independence
   assumption holds.
 
+**How the holdout result is to be read** [owner, 5C.3]. The
+thresholds are kept: urgent ≤ 12%, soon ≤ 32%, routine ≤ 6%, and at
+most 10% of seeds failing jointly. Four quantities are kept apart, and
+no report may substitute one for another:
+
+| Quantity | What it is | Where it is reported |
+|---|---|---|
+| **Empirical acceptance** | The prespecified rule's verdict on these seeds: at most 4 of 40 fail. This, and only this, is what passes or fails. | `serviceJoint.status`, `passFraction` |
+| **Population reliability** | What the passing fraction shows about all seeds the plan could meet: the exact one-sided 95% upper bound on the failing share. Passing with 4 of 40 failing bounds it at 21.4%, not 10%. | `failingFractionUpperBound` |
+| **False-rejection probability** | The chance that a plan whose true rates are acceptable fails the rule. It depends on how breaches cluster, not only on the rates. | `oc-v0.2-eval-4.json`, `cluster` |
+| **Statistical power** | The chance that a plan at or beyond a gate fails the rule: 1.00 at every gate under every dependence model studied. | the same |
+
+* The holdout is a **strict empirical acceptance test**. It is not a
+  95%-confidence demonstration that a plan's population failing share is
+  below 10%. The choice favours clinical reliability over statistical
+  power, and the risk of rejecting an acceptable strategy is explicit
+  (the tables below).
+* **Independent patient breaches do not model the run.** The
+  development runs cluster breaches by week (soon design effect
+  1.7–5.9). The independent-breach operating characteristics, and the
+  statement that the planning rates (urgent 8%, soon 21%, routine 4%)
+  are rejected at most 5% of the time on 40 seeds, are kept only as a
+  lower bound on false rejection under independence. They are not a
+  guarantee of reliable passage. Under the clustering observed, a plan
+  at the planning rates is rejected most of the time; a plan needs
+  margin well below them.
+
 **Cluster-aware evaluation** [owner, 5C.2]. The development runs showed
 breaches clustered in time (`docs/calibration/policy-5c2/clustering.md`):
 
@@ -208,7 +248,7 @@ therefore reports, never gates:
 * A GO is an empirical pass of a prespecified rule, not a confidence
   statement.
 
-**Operating characteristics under dependence** (`oc-v0.2-eval-3.json`,
+**Operating characteristics under dependence** (`oc-v0.2-eval-4.json`,
 `cluster`). The frozen per-seed rule is simulated day by day over the
 150-day gated period. The figures are the probability of rejecting a
 plan whose underlying rates are the planning rates (urgent 8%, soon 21%,
@@ -308,17 +348,30 @@ number of studies acquired in it.
   important delays whatever the demand, so they stay absolute
   (`absoluteChecks`).
 
-The checks:
+**v0.2-eval-4** [owner, 5C.3]. The owner decided that the peak is
+reported only and that every sustained safeguard stays hard. The
+tolerances and statistics were then selected by a prespecified protocol
+on synthetic queues (`docs/calibration/backlog-5c3/protocol.md`, below).
 
-| Check | Per block, against the reference | Scaling | Tolerance |
-|---|---|---|---|
-| Mean backlog | Mean of the daily unfinished counts | × w | max(10% of the scaled reference, 2 studies) |
-| Peak backlog | Largest daily count. Whole rota blocks hold the full rota pattern, so peaks are comparable. | × w | max(10%, 2 studies) |
-| Overdue | Mean daily count of unfinished studies past their due time | × w | max(10%, 2 studies) |
-| Stale | Mean daily count of unfinished studies more than 1,440 minutes past due | absolute | max(10%, 2 studies) |
-| Overdue exposure | Mean daily Σ minutes past due of the unfinished | × w | max(10%, 2,880 study-minutes) |
-| **Persistent** | Any study unfinished at a sample **more than 14 days past its due time** | absolute | **none**, on any sample from day 1 through the covering block |
+The checks of each later block against the reference:
 
+| Check | Statistic of the block's daily 06:00 samples | Scaling | Tolerance | Role |
+|---|---|---|---|---|
+| **Level** | Mean unfinished count | × w | max(**150%** of the scaled reference, 2 studies) | hard |
+| **Overdue** | **Median** count of unfinished studies past their due time | × w | max(10%, 2 studies) | hard |
+| **Stale** | **Median** count more than 1,440 minutes past due | absolute | max(10%, 2 studies) | hard |
+| **Overdue exposure** | **Median** Σ minutes past due of the unfinished | × w | max(10%, 2,880 study-minutes) | hard |
+| **Stale cap** | Median stale count, in **every block from the reference on**, the reference included | absolute | at most **3 studies** | hard |
+| **Persistent** (maximum overdue age) | Any study unfinished at a sample **more than 14 days past its due time** | absolute | none, on any sample from day 1 through the covering block | hard |
+| Mean (the v0.2-eval-3 mean check) | Mean unfinished count | × w | max(10%, 2 studies) | reported |
+| Peak | Largest daily count | × w | max(10%, 2 studies) | reported |
+| Recovery | Days from the block's peak to the first sample at or below the scaled reference mean (−1: not recovered through the covering block) | — | — | reported |
+
+* **Seeds.** A seed is *stable* when every hard check passes. The plan's
+  backlog gate passes if at most 10% of seeds are unstable.
+* **Never normalized:** stale studies, the cap and the age limit
+  (`DecodePolicy` refuses a policy that scales them, or that makes the
+  age limit informational).
 * **No new clinical deadline is invented.** Every check counts lateness
   from each study's own due time (its priority's TAT target).
   * *Stale* uses the closure, the evaluation's own decision horizon: a
@@ -328,69 +381,107 @@ The checks:
     cycle has not been delayed by the rota phase.
 * **Inherited and carried-over studies are in every sample and every
   check.**
-* **Seeds.** A seed is *stable* only if every check passes. The plan's
-  backlog gate passes if at most 10% of seeds are unstable.
-* **What each check closes.**
-  * A persistent group of old studies fails, even with zero growth in
-    every block.
-  * Old work replacing fresh work, at the same count, fails the stale
-    and exposure checks.
-  * A spike that recovers within a block fails the peak.
-  * Deterioration after the last block ending by H fails in the
-    covering block.
-  * An inflated reference still allows only 10% growth, and no
-    persistent study.
+* **A record missing its workload or its overdue-age data is never
+  evidence.** That covers:
+  * a missing daily sample;
+  * samples that omit acquisitions;
+  * a missing TAT target;
+  * a study without a priority or an acquisition time.
+
+  Each is an integrity failure: the comparison is INVALID. A block with
+  no recorded acquisitions is compared unscaled.
+
+**Why each choice.**
+
+* *Peak informational.* The maximum of 28 samples measures one burst.
+  Under v0.2-eval-3 it alone made about half of stable stationary queues
+  unstable.
+* *Level: the mean, with a wide tolerance.* The level is the leading
+  indicator of a queue that cannot clear. When demand exceeds capacity
+  the backlog grows without bound and passes any fixed multiple of the
+  reference.
+  * A stable queue's level rises faster than its workload as
+    utilization rises. This takeover's December reference (season 0.93)
+    and January block (1.05), at utilization 0.85, put ρ/(1−ρ) 2.1 times
+    apart for a workload only 1.1 times apart.
+  * The 10% / 2-study tolerance therefore failed 59% of stable seasonal
+    queues, and most stationary failures came from its 2-study floor.
+  * The mean detects late-tail deterioration more often than the median
+    does.
+* *Late work: medians.* A median of 28 daily samples moves only when late
+  work is present on most mornings of a block: sustained, not a burst.
+  Block means of late work failed 5–15% of stable bursty queues.
+* *Stale cap.* Every relative check compares with the reference, so an
+  inflated reference licenses the same stale burden later. The cap does
+  not.
+
+**Operating characteristics** (`oc-v0.2-eval-4.json`, `backlog`; 1000
+synthetic seeds a scenario; the queue of 5C.2 with the stated
+departures). Each figure is the share of seeds unstable:
+
+| Scenario | Role | v0.2-eval-3 | v0.2-eval-3 without the peak | **v0.2-eval-4** |
+|---|---|---|---|---|
+| A stable stationary | stable | 60.5% | 14.2% | **0.0%** |
+| B stable seasonal | stable | 88.9% | 59.9% | **0.1%** |
+| C stable, bursty days (CV 0.15) | stable | 69.5% | 44.4% | **0.5%** |
+| Cs stable seasonal, bursty days | stable | 92.2% | 83.9% | **3.8%** |
+| D capacity 20% lower from day 100 | deteriorating | 100% | 100% | **100%** |
+| E 10 inherited studies unread to day 120 | deteriorating | 100% | 100% | **100%** |
+| F one study a weekday held 12 days | deteriorating | 100% | 100% | **100%** |
+| G capacity 25% lower, days 90–117, then recovery | deteriorating | 100% | 100% | **100%** |
+| H capacity 20% lower from day 140 (late tail) | deteriorating | 100% | 100% | **98.5%** |
+| I reference inflated, then 20% lower from day 111 | deteriorating | 88.7% | 88.7% | **97.6%** |
+| L5 capacity 5% lower (still stable) | ladder | 96.7% | 87.0% | 0.2% |
+| L10 capacity 10% lower (still stable) | ladder | 99.9% | 99.6% | 22.8% |
+| L15 capacity 15% lower (utilization 1.0) | sensitivity | 100% | 100% | 96.6% |
+| K capacity eroding 0.2% a day from day 83 | sensitivity | 99.9% | 99.7% | 45.9% |
+| A92 stationary, utilization 0.92 | sensitivity | 71.0% | 47.8% | 0.2% |
+| B92 seasonal, utilization 0.92 | sensitivity | 98.2% | 95.9% | 12.4% |
+| Cx seasonal, bursty days (CV 0.30) | sensitivity | 93.2% | 91.3% | 36.7% |
+
+**What the rejection probabilities mean.**
+* **Stable queues pass the holdout.** The worst stable scenario is
+  rejected at 40 seeds with probability **0.017** (Cs; the target is ≤
+  0.05).
+* **Every deteriorating scenario is detected.** Each is unstable on at
+  least 97.6% of seeds (target ≥ 90%), so it is rejected with
+  probability 1.00.
+* **The trade-off is explicit.**
+  * A step change that leaves a queue stable at a higher utilization is
+    mostly not unstable: 0.2% of seeds at 5% capacity lost, 22.8% at
+    10%.
+  * Slow erosion is detected on 46% of seeds by the horizon, because
+    late work and growth appear only near its end.
+  * A seasonal queue already at utilization 0.92 is unstable on 12.4% of
+    seeds, a 40-seed rejection of 0.56. That is outside the targets
+    (sensitivity), and it is the main false-rejection risk.
+
+**v0.2-eval-3's false failures, attributed** (the 5C.2 streams, 300
+seeds; reproduced exactly):
+
+| | Unstable | Peak alone | Peak and mean | Mean alone |
+|---|---|---|---|---|
+| Stationary | 63.7% | 50.3% | 12.7% | 0.7% |
+| Seasonal | 87.7% | 27.0% | 57.0% | 3.7% |
+
+No other check failed a stable unbursty queue. With bursty days, overdue
+and exposure also failed 4–12% of seeds, in intermediate blocks more
+than in the covering one (`attributionEval3`).
+
+**Tests.**
+* `TestBacklogStability` (v0.2-eval-4) covers each case of the protocol,
+  beside v0.2-eval-3 where they differ:
+  * bursty workload and seasonal rises pass;
+  * temporary spikes pass, the peak and recovery reported;
+  * growth without bound, persistent and aging old work, late-tail
+    growth and an inflated reference fail;
+  * a record missing its workload or overdue-age data is INVALID.
+* `TestBacklogSafeguards` and `TestSeasonalBacklog` keep the earlier
+  rules' cases under v0.2-eval-3's rule.
 * **Legacy.** The historical single-sample rule (day 180 ≤ 1.1 × day 90)
-  is still reported, labelled legacy, never gated.
-* **Also reported:** stage means, ages, rolling 28-day means, slope and
-  flow.
-
-The adversarial fixtures (`TestBacklogSafeguards`) show that each case
-passes the v0.2-eval-1 rule and fails this one.
-
-`TestSeasonalBacklog` covers the workload adjustment:
-
-* stable service under a 25% seasonal rise passes. It fails v0.2-eval-2.
-* These still fail:
-  * deterioration with flat demand, or growth beyond the workload;
-  * a backlog that does not fall when demand falls;
-  * persistent old work and a growing stale burden under rising
-    demand;
-  * a temporary spike;
-  * late-tail deterioration in the covering block.
-
-**Operating characteristics of the backlog rule** (`oc-v0.2-eval-3.json`,
-`backlog`). A synthetic reading queue (52 studies a day, utilization
-0.85, the scenario's hours, priority order and season factors) is scored
-by the frozen rules and by alternatives that are **not adopted**:
-
-| Scenario | Unstable seeds, v0.2-eval-2 | v0.2-eval-3 (frozen) | Not adopted: without the peak check | Not adopted: 20% tolerance | Not adopted: 20%, without the peak check |
-|---|---|---|---|---|---|
-| Stationary demand, stable capacity | 61% | 64% | 13% | 51% | 13% |
-| Scenario seasonality, stable capacity | 93% | 88% | 61% | 82% | 61% |
-| Stationary demand, capacity −5% from day 100 | 81% | 81% | 52% | 75% | 51% |
-| Seasonality, capacity −5% from day 100 | 99% | 97% | 87% | 95% | 86% |
-| Seasonality, capacity −10% from day 100 | 100% | 100% | 99% | 100% | 99% |
-
-With more than 10% of seeds unstable, every frozen row rejects a 40-seed
-plan with probability about 1. Two findings follow:
-
-* **The peak check dominates false alarms.**
-  * It compares each later block's single-day maximum with the
-    reference block's, within max(10%, 2 studies).
-  * Under stationarity the blocks are exchangeable, so the reference's
-    peak is exceeded by one of three later blocks about 3 times in 4,
-    whatever the queue model.
-  * It alone fails 50% of stable seeds.
-* **Workload adjustment removes the proportional seasonal effect**
-  (93% → 88% with the peak check; 61% without it). It does not remove
-  the queueing one. A queue near capacity grows faster than its
-  workload when demand rises, so the mean check still fails 61% of
-  stable seasonal seeds without the peak check.
-
-The backlog numbers (tolerance, floor, peak) are an open owner decision
-(*Open decisions*). The alternatives above are evidence for it, not
-rules.
+  is still reported, never gated.
+* **Also reported:** stage means and medians, ages, rolling 28-day
+  means, slope and flow.
 
 ## 5. Financial eligibility
 
@@ -759,7 +850,28 @@ as follows:
    end.
 4. Call `Finish` with H.
 
-## 12. Changes from v0.2-eval-2 (Slice 5C.2)
+## 12. Changes from v0.2-eval-3 (Slice 5C.3)
+
+The owner's backlog decisions on the Slice 5C.2 findings, and the
+calibration protocol (`docs/calibration/backlog-5c3/`). Every change is
+listed in the policy's `changes`, with its old and new definitions.
+
+| Finding | Rule | Expected impact |
+|---|---|---|
+| The peak alone made 50% of stable stationary synthetic queues unstable | The peak reported, never gated; recovery reported (§4) | Temporary spikes never fail a seed |
+| The mean at max(10%, 2 studies) failed 15–59% of stable queues; a stable queue's level rises faster than its workload | The level check keeps the workload-adjusted mean, with max(150%, 2 studies) | Stable seasonal and bursty queues pass; growth without bound fails |
+| Block means of late work failed stable bursty queues | Overdue, stale and exposure on block medians | Bursts of late work that clear pass; sustained late work fails |
+| An inflated reference licenses a stale burden | An absolute stale cap of 3 in every block from the reference on | Reference inflation fails |
+
+Holdout reading (§2): the holdout is a strict empirical acceptance test,
+and the independent-breach operating characteristics are a lower bound
+on false rejection, not a guarantee. The thresholds and the allowance
+are unchanged.
+
+Adversarial tests: `TestBacklogStability`. Fail-before-fix evidence:
+16 targeted mutations, every one caught (`docs/PROGRESS.md`).
+
+## 12a. Changes from v0.2-eval-2 (Slice 5C.2)
 
 The owner's decisions on the Slice 5C.1 development findings
 (`docs/calibration/strategy-development/README.md`, *Policy
@@ -776,7 +888,7 @@ Adversarial tests: `TestDatedFunding`, `TestSeasonalBacklog`,
 `TestTransitionClassification`, `TestClusterStatistics`. Fail-before-fix
 evidence is targeted mutations of each rule (`docs/PROGRESS.md`).
 
-## 12a. Changes in v0.2-eval-2 (from v0.2-eval-1)
+## 12b. Changes in v0.2-eval-2 (from v0.2-eval-1)
 
 | Finding | Rule | Expected impact on eligibility |
 |---|---|---|
@@ -798,7 +910,7 @@ every one caught.
 
 ## 13. Deferred measures
 
-These design measures are **not measured** by v0.2-eval-3. They are
+These design measures are **not measured** by v0.2-eval-4. They are
 listed in the policy's `deferredMeasures`, so that nothing implies they
 are:
 
@@ -833,7 +945,13 @@ Decided by the owner on 2026-10-17 and frozen here:
 
 Decided by the owner on 2026-10-18 and frozen in v0.2-eval-3: the dated
 funding test, the workload-adjusted backlog, cluster-aware reporting and
-the transition classification (§12).
+the transition classification (§12a).
+
+Decided by the owner on 2026-10-18 and frozen in v0.2-eval-4: the peak
+informational and the backlog safeguards kept; the thresholds, the joint
+rule and its allowance kept, with the holdout read as a strict empirical
+acceptance test (§2). The backlog tolerances are the protocol's
+selection (§4).
 
 Still open:
 
@@ -856,20 +974,23 @@ Still open:
    8% urgent even under independence. They are exploratory, not
    selection evidence on their own.
 4. **Before unsealing**: one independent review of the whole corrected
-   framework (v0.2-eval-3 and the canonical runner, built in Slice
+   framework (v0.2-eval-4 and the canonical runner, built in Slice
    5C.0b), then the frozen strategy set and the owner's committed unseal
    record.
 5. **Not modelled**: remote read quality. Remote and local reports are
    assumed equivalent beyond turnaround, cost and coverage.
-6. **Backlog tolerances** (§4). The operating characteristics show the
-   frozen rule rejects a stable synthetic queue's 40-seed plan with
-   probability about 1, mostly through the peak check. Alternatives are
-   tabulated, none adopted:
-   * the peak's form;
-   * the tolerance;
-   * a test on time in system or aging instead of counts.
+6. **Backlog trade-off** (§4). The selected rule meets the protocol's
+   targets. What it does not detect is explicit:
+   * a step change that leaves the queue stable at a higher level;
+   * slow erosion before it produces growth or late work (46%);
+   * a seasonal queue already at utilization 0.92 is rejected at 40
+     seeds with probability 0.56.
+
+   Whether that balance is right is the owner's to confirm before the
+   independent review.
 7. **Dependence and the planning target** (§2). Under the development
-   range of clustering, the frozen service design rejects a plan at the
-   planning rates with probability 0.96. Either the planning target is
-   understood as needing that margin, or one of the options of 1
-   applies.
+   range of clustering, the service design rejects a plan at the
+   planning rates with probability 0.96. In v0.2-eval-4 the planning
+   rates are no longer a guarantee of passage: a plan needs margin below
+   them (owner, 5C.3). Option 1 remains available only through a new
+   policy version.

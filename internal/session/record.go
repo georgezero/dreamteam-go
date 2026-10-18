@@ -112,6 +112,7 @@ const (
 	batchModeDev10      = "v0.2_dev10"
 	batchModeDev11      = "v0.2_dev11"
 	batchModeDev12      = "v0.2_dev12"
+	batchModeDev13      = "v0.2_dev13"
 	batchModeCurrent    = ""
 )
 
@@ -413,14 +414,14 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
 func dev5Rules(mode string) bool {
-	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13
 }
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1

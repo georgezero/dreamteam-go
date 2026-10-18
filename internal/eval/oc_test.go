@@ -7,6 +7,7 @@ import (
 	"math"
 	"math/rand/v2"
 	"os"
+	"slices"
 	"testing"
 )
 
@@ -20,7 +21,10 @@ import (
 // to-seed variation and week-level clustering of breaches). Regenerate
 // with DT_OC=1 go test -run OperatingCharacteristics ./internal/eval.
 
-const ocPath = "../../docs/evaluation/oc-v0.2-eval-3.json"
+const ocPath = "../../docs/evaluation/oc-v0.2-eval-4.json"
+
+// ocV3Path is Slice 5C.2's analysis, kept as written.
+const ocV3Path = "../../docs/evaluation/oc-v0.2-eval-3.json"
 
 // Daily volumes per seed, the range of the no-action development results'
 // T90 acquisitions (README §2): read once for feasibility, never tuned.
@@ -81,13 +85,12 @@ type ocFile struct {
 	Limit    float64               `json:"maxFailingSeedFraction"`
 	Exact    []ocRow               `json:"exact"`
 	MC       []ocMC                `json:"monteCarlo"`
-	// Slice 5C.2: the service rule under the run's day and week structure,
-	// and the backlog rule on a synthetic queue.
+	// Slice 5C.2: the service rule under the run's day and week structure.
 	ClusterModel []string       `json:"clusterModel"`
 	Models       []ocModel      `json:"clusterModels"`
 	Cluster      []ocClusterRow `json:"cluster"`
-	BacklogModel []string       `json:"backlogModel"`
-	Backlog      []ocBacklogRow `json:"backlog"`
+	// Slice 5C.3: the backlog rule's family on synthetic queues.
+	Backlog ocBacklogStudy `json:"backlog"`
 }
 
 func lpmf(n, k int, p float64) float64 {
@@ -326,7 +329,7 @@ func TestOperatingCharacteristics(t *testing.T) {
 		t.Fatalf("eval-1 rejection %.4f: the defect it fixes is not shown", r.Reject)
 	}
 	if os.Getenv("DT_OC") != "" {
-		f := ocFile{Schema: "dreamteam.evaloc/v2", Policy: p.ID, Gates: p.Service.BreachGate, Planning: p.Service.PlanningRate,
+		f := ocFile{Schema: "dreamteam.evaloc/v3", Policy: p.ID, Gates: p.Service.BreachGate, Planning: p.Service.PlanningRate,
 			Volume: ocVolume, MinCount: p.Service.MinCohort, Limit: p.Service.MaxFailingSeedFraction, Exact: rows,
 			Model: []string{
 				"A seed fails if any per-seed breach gate of the design fails or lacks evidence (fewer acquisitions than the minimum); a plan is rejected if more than floor(10% × seeds) seeds fail.",
@@ -356,12 +359,7 @@ func TestOperatingCharacteristics(t *testing.T) {
 				f.Cluster = append(f.Cluster, ocClusterCompute(p, m, s, 4000, uint64(mi*100+si)))
 			}
 		}
-		f.BacklogModel = []string{
-			"A reading queue simulated hour by hour from the takeover (Tue 2026-10-13 06:00) for 181 days: 52 acquisitions a day (Poisson; the weekday profile; 08:00-20:00), 2% urgent, 12% soon, 86% routine; reading Mon-Fri 07:30-20:00 and Sat 10:00-14:00 at a utilization of 0.85 of the season-1 demand (the dynamic benchmark's reading utilization), urgent first, then soon, then routine, first in first out.",
-			"Seasonal scenarios multiply demand by the scenario's monthly season factor (seasonFactorBP); capacity-loss scenarios reduce reading capacity from day 100.",
-			"Each seed is judged by the backlog rule of each variant; a plan is rejected if more than floor(10% x seeds) seeds are unstable. Variants marked not adopted are alternatives for the owner's open decision on the backlog numbers, not rules.",
-		}
-		f.Backlog = ocBacklogRows(p, 300)
+		f.Backlog = ocBacklogCompute(p, ocBacklogSeeds)
 		raw, _ := json.MarshalIndent(f, "", " ")
 		if err := os.WriteFile(ocPath, append(raw, '\n'), 0o644); err != nil {
 			t.Fatal(err)
@@ -380,7 +378,7 @@ func TestOperatingCharacteristics(t *testing.T) {
 	got, _ := json.Marshal(rows)
 	want, _ := json.Marshal(f.Exact)
 	if !bytes.Equal(got, want) || f.Policy != p.ID || len(f.MC) == 0 || len(f.Cluster) != len(ocModels())*len(ocRateSettings(p)) ||
-		len(f.Backlog) == 0 {
+		len(f.Backlog.Candidates) != len(ocFamily()) {
 		t.Fatal("the committed operating characteristics are not what the code computes; regenerate with DT_OC=1")
 	}
 	// What the committed analysis shows, checked so a regeneration that
@@ -397,15 +395,41 @@ func TestOperatingCharacteristics(t *testing.T) {
 	if !(rej["week-clustered, ICC 0.02"] <= rej["week-clustered, ICC 0.05"] && rej["week-clustered, ICC 0.05"] <= rej["week-clustered, ICC 0.10"]) {
 		t.Fatalf("rejection by weekly correlation %v", rej)
 	}
-	bk := map[string]ocBacklogRow{}
-	for _, r := range f.Backlog {
-		bk[r.Scenario] = r
+	// DT_OC_BACKLOG=1 recomputes the backlog analysis alone (about 40
+	// minutes) and requires the committed one byte for byte.
+	if os.Getenv("DT_OC_BACKLOG") != "" {
+		got, _ := json.Marshal(ocBacklogCompute(p, ocBacklogSeeds))
+		want, _ := json.Marshal(f.Backlog)
+		if !bytes.Equal(got, want) {
+			t.Fatal("the backlog analysis does not reproduce")
+		}
 	}
-	frozen, old := ocBacklogVariants[1], ocBacklogVariants[0]
-	if s := bk["scenario seasonality, stable capacity"]; s.Unstable[frozen] > s.Unstable[old] {
-		t.Fatalf("seasonal: %v", s.Unstable)
+	// The backlog analysis: v0.2-eval-3 reproduces Slice 5C.2's committed
+	// stable-queue result on its streams; the frozen policy is the
+	// candidate the protocol selects, and it meets both targets.
+	raw3, err := os.ReadFile(ocV3Path)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if bk["scenario seasonality, capacity 10% lower from day 100"].Unstable[frozen] < bk["scenario seasonality, stable capacity"].Unstable[frozen] {
-		t.Fatal("capacity loss is less often unstable than a stable queue")
+	var v3 struct {
+		Backlog []struct {
+			Scenario string             `json:"scenario"`
+			Unstable map[string]float64 `json:"unstableSeedFraction"`
+		} `json:"backlog"`
+	}
+	json.Unmarshal(raw3, &v3)
+	for i, r := range f.Backlog.Reproduction {
+		if old := v3.Backlog[i]; old.Scenario != r.Scenario || old.Unstable["v0.2-eval-3 (workload-adjusted, frozen)"] != r.Unstable {
+			t.Fatalf("v0.2-eval-3 on the 5C.2 streams: %s %v, committed %s %v", r.Scenario, r.Unstable, old.Scenario, old.Unstable)
+		}
+	}
+	c, ok := ocCandidateOf(p)
+	if !ok || f.Backlog.Selected == "" {
+		t.Fatalf("the policy's backlog rule is not a candidate of the family, or none was selected (%q)", f.Backlog.Selected)
+	}
+	sel := f.Backlog.SelectedRule
+	if sel == nil || sel.Name != f.Backlog.Selected || !slices.Contains(f.Backlog.Candidates, sel.row()) || sel.LevelStat != c.LevelStat || sel.LevelGrowth != c.LevelGrowth || sel.LevelFloor != c.LevelFloor ||
+		sel.LateStat != c.LateStat || sel.LateGrowth != c.LateGrowth || sel.Cap != c.Cap || !sel.T1 || !sel.T2 {
+		t.Fatalf("the frozen backlog rule %+v is not the selected candidate %+v", c, sel)
 	}
 }

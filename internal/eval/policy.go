@@ -17,13 +17,15 @@ import (
 )
 
 const (
-	PolicySchema = "dreamteam.evalpolicy/v3"
+	PolicySchema = "dreamteam.evalpolicy/v4"
 	// The superseded schemas, kept byte for byte and named by digest in the
 	// next policy's supersedes: v0.2-eval-1 (Slice 5C.0), under which no
-	// evaluation was run, and v0.2-eval-2 (Slice 5C.0a), under which only
-	// the Slice 5C.1 development runs were evaluated.
+	// evaluation was run, v0.2-eval-2 (Slice 5C.0a), under which only the
+	// Slice 5C.1 development runs were evaluated, and v0.2-eval-3 (Slice
+	// 5C.2), under which only the Slice 5C.2 development run was.
 	policyV1Schema = "dreamteam.evalpolicy/v1"
 	policyV2Schema = "dreamteam.evalpolicy/v2"
+	policyV3Schema = "dreamteam.evalpolicy/v3"
 )
 
 // Priorities in report order.
@@ -126,6 +128,23 @@ type Policy struct {
 		// AbsoluteChecks never scale. Together they are every check.
 		WorkloadAdjustedChecks []string `json:"workloadAdjustedChecks"`
 		AbsoluteChecks         []string `json:"absoluteChecks"`
+		// InformationalChecks are measured and reported like the others but
+		// never make a seed unstable.
+		InformationalChecks []string `json:"informationalChecks"`
+		// LevelStatistic: the block statistic of the daily backlog the level
+		// check compares; LateStatistic: that of the daily overdue, stale
+		// and exposure values (and the stale cap). Each "mean" or "median".
+		LevelStatistic string `json:"levelStatistic"`
+		LateStatistic  string `json:"lateWorkStatistic"`
+		// The level check's own tolerance: max(LevelGrowth of the scaled
+		// reference, LevelGrowthStudies); the other later-block checks use
+		// growthFraction and growthStudies.
+		LevelGrowth        float64 `json:"levelGrowthFraction"`
+		LevelGrowthStudies int64   `json:"levelGrowthStudies"`
+		// StaleCapStudies: no block from the reference through the one
+		// covering the horizon may average more stale studies a sample
+		// than this, whatever the reference's.
+		StaleCapStudies int64 `json:"staleCapStudies"`
 	} `json:"backlog"`
 	Finance struct {
 		MinCashFloorCents int64 `json:"minCashFloorCents"`
@@ -192,7 +211,7 @@ func DecodePolicy(raw []byte) (*Policy, error) {
 		Schema string `json:"schema"`
 		ID     string `json:"id"`
 	}
-	if err := json.Unmarshal(raw, &head); err == nil && (head.Schema == policyV1Schema || head.Schema == policyV2Schema) {
+	if err := json.Unmarshal(raw, &head); err == nil && slices.Contains([]string{policyV1Schema, policyV2Schema, policyV3Schema}, head.Schema) {
 		return nil, fmt.Errorf("policy %s is superseded (schema %s): evaluate under %s", head.ID, head.Schema, PolicyPath)
 	}
 	var p Policy
@@ -228,6 +247,24 @@ func (p *Policy) validate() error {
 	if !slices.Equal(checks, backlogChecks) {
 		return fmt.Errorf("backlog checks %v: every one of %v exactly once, adjusted or absolute", checks, backlogChecks)
 	}
+	// Old and persistent work is never normalized, and the age limit is
+	// never only reported.
+	for _, c := range []string{"stale", "staleCap", "persistent"} {
+		if p.adjusted(c) {
+			return fmt.Errorf("backlog check %s must be absolute", c)
+		}
+	}
+	for _, c := range p.Backlog.InformationalChecks {
+		if !slices.Contains(backlogChecks, c) || c == "persistent" {
+			return fmt.Errorf("backlog check %q cannot be informational", c)
+		}
+	}
+	switch {
+	case !slices.Contains([]string{"mean", "median"}, p.Backlog.LevelStatistic) || !slices.Contains([]string{"mean", "median"}, p.Backlog.LateStatistic):
+		return fmt.Errorf("backlog statistics %q, %q: mean or median", p.Backlog.LevelStatistic, p.Backlog.LateStatistic)
+	case p.Backlog.LevelGrowth < 0 || p.Backlog.LevelGrowthStudies < 0 || p.Backlog.GrowthStudies < 0 || p.Backlog.StaleCapStudies < 0:
+		return fmt.Errorf("backlog tolerances must not be negative")
+	}
 	for _, l := range p.Service.ClusterLevels {
 		if l != "day" && l != "week" {
 			return fmt.Errorf("unknown cluster level %q", l)
@@ -236,7 +273,7 @@ func (p *Policy) validate() error {
 	fracs := map[string]float64{"maxFailingSeedFraction": p.Service.MaxFailingSeedFraction,
 		"perSeedMaxServedDrop": p.CaseSelection.PerSeedMaxServedDrop, "pooledMaxServedDrop": p.CaseSelection.PooledMaxServedDrop,
 		"maxAcquiredDrop": p.CaseSelection.MaxAcquiredDrop, "maxLossRateIncrease": p.CaseSelection.MaxLossRateIncrease,
-		"growthFraction": p.Backlog.Growth, "maxUnstableSeedFraction": p.Backlog.MaxUnstableSeedFrac,
+		"growthFraction": p.Backlog.Growth, "levelGrowthFraction": p.Backlog.LevelGrowth, "maxUnstableSeedFraction": p.Backlog.MaxUnstableSeedFrac,
 		"reliabilityConfidence": p.Service.ReliabilityConfidence}
 	for _, q := range Priorities {
 		fracs["breachGate."+q] = p.Service.BreachGate[q]
@@ -282,11 +319,16 @@ func (p *Policy) validate() error {
 }
 
 // backlogChecks are the backlog rule's checks, sorted.
-var backlogChecks = []string{"exposure", "max", "mean", "overdue", "persistent", "stale"}
+var backlogChecks = []string{"exposure", "level", "max", "mean", "overdue", "persistent", "stale", "staleCap"}
 
 // adjusted reports whether backlog check name scales with workload.
 func (p *Policy) adjusted(name string) bool {
 	return slices.Contains(p.Backlog.WorkloadAdjustedChecks, name)
+}
+
+// informational reports whether backlog check name is reported only.
+func (p *Policy) informational(name string) bool {
+	return slices.Contains(p.Backlog.InformationalChecks, name)
 }
 
 // Window names.

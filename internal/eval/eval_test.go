@@ -225,8 +225,18 @@ func TestBacklogTrendRotaAligned(t *testing.T) {
 	if !bm.LegacyDefined || bm.LegacyHolds {
 		t.Fatalf("legacy %d → %d holds %v", bm.LegacyDay90, bm.LegacyDay180, bm.LegacyHolds)
 	}
+	// Slow growth: unstable under v0.2-eval-3's mean (10% / 2 studies); under
+	// v0.2-eval-4 within the level tolerance, its mean check and slope
+	// reported. Growth without bound fails the level.
 	grow := func(d int) int { return cycle(d) + d/10 }
-	if bm := measureBacklog(p, mk(grow), t0+90*daySec); bm.Status != "unstable" || bm.SlopePerDay <= 0 {
+	if bm := measureBacklog(ocEval3(p, true), mk(grow), t0+90*daySec); bm.Status != "unstable" || bm.SlopePerDay <= 0 {
+		t.Fatalf("%+v", bm)
+	}
+	if bm := measureBacklog(p, mk(grow), t0+90*daySec); bm.Status != "stable" || !checkFailed(bm, "mean") || bm.SlopePerDay <= 0 {
+		t.Fatalf("%+v", bm)
+	}
+	fast := func(d int) int { return cycle(d) + max(0, d-82) }
+	if bm := measureBacklog(p, mk(fast), t0+90*daySec); bm.Status != "unstable" || !checkFailed(bm, "level") {
 		t.Fatalf("%+v", bm)
 	}
 	// Within tolerance: max(10%, 2 studies) of the reference mean.
@@ -614,39 +624,64 @@ func TestPolicyFrozen(t *testing.T) {
 	}
 	// The superseded policies are kept byte for byte, each named by digest
 	// by its successor, and refused as policies to evaluate under.
-	v2, err := os.ReadFile("../../" + PolicyV2Path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sum := sha256.Sum256(v2)
-	if hex.EncodeToString(sum[:]) != p.Supersedes.SHA256 || p.Supersedes.Path != PolicyV2Path ||
-		p.Supersedes.SHA256 != "5dbab4626bea560c2e3e96e49085730cb53998c806e0e35a1bdf2db10d595ef9" {
-		t.Fatal("the superseded policy changed")
-	}
-	var v2p struct {
+	type sup struct {
 		Supersedes struct{ Path, SHA256 string }
 	}
-	json.Unmarshal(v2, &v2p)
-	v1, err := os.ReadFile("../../" + PolicyV1Path)
-	if err != nil {
-		t.Fatal(err)
+	chain := []string{PolicyV3Path, PolicyV2Path, PolicyV1Path}
+	next := sup{}
+	next.Supersedes.Path, next.Supersedes.SHA256 = p.Supersedes.Path, p.Supersedes.SHA256
+	if p.Supersedes.SHA256 != "0cf4884f216170c7bba4d869039a86ba8fba70d76f31c2e36aebf58620213915" {
+		t.Fatal("v0.2-eval-3 changed")
 	}
-	sum = sha256.Sum256(v1)
-	if hex.EncodeToString(sum[:]) != v2p.Supersedes.SHA256 || v2p.Supersedes.Path != PolicyV1Path {
-		t.Fatal("v0.2-eval-1 changed")
-	}
-	for _, old := range [][]byte{v1, v2} {
+	for _, path := range chain {
+		old, err := os.ReadFile("../../" + path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		sum := sha256.Sum256(old)
+		if next.Supersedes.Path != path || hex.EncodeToString(sum[:]) != next.Supersedes.SHA256 {
+			t.Fatalf("%s is not the policy its successor supersedes (%s %s)", path, next.Supersedes.Path, next.Supersedes.SHA256)
+		}
 		if _, err := DecodePolicy(old); err == nil || !strings.Contains(err.Error(), "superseded") {
-			t.Fatalf("a superseded policy decodes: %v", err)
+			t.Fatalf("superseded %s decodes: %v", path, err)
+		}
+		next = sup{}
+		json.Unmarshal(old, &next)
+	}
+	if len(p.Changes) != 4 || len(p.Deferred) == 0 || p.Finance.SettlementDays != 31 || p.Backlog.LateStatistic != "median" ||
+		!slices.Equal(p.Backlog.InformationalChecks, []string{"mean", "max"}) {
+		t.Fatalf("%d changes, %d deferred, %+v", len(p.Changes), len(p.Deferred), p.Backlog)
+	}
+	// Old and persistent work cannot be normalized, nor the age limit made
+	// informational.
+	for _, x := range [][2]string{
+		{`"absoluteChecks": [
+   "stale",`, `"absoluteChecks": [`},
+		{`"informationalChecks": [
+   "mean",`, `"informationalChecks": [
+   "persistent",
+   "mean",`},
+	} {
+		bad := bytes.Replace(raw, []byte(x[0]), []byte(x[1]), 1)
+		if bytes.Equal(bad, raw) {
+			t.Fatalf("no %q in the policy", x[0])
+		}
+		if x[1] == `"absoluteChecks": [` {
+			bad = bytes.Replace(bad, []byte(`"workloadAdjustedChecks": [`), []byte(`"workloadAdjustedChecks": [
+   "stale",`), 1)
+		}
+		if _, err := DecodePolicy(bad); err == nil {
+			t.Fatalf("accepted: %s → %s", x[0], x[1])
 		}
 	}
-	if len(p.Changes) < 4 || len(p.Deferred) == 0 || p.Finance.SettlementDays != 31 || len(p.Backlog.AbsoluteChecks) != 2 {
-		t.Fatalf("%d changes, %d deferred", len(p.Changes), len(p.Deferred))
+	// A block statistic is the mean or the median.
+	if _, err := DecodePolicy(bytes.Replace(raw, []byte(`"lateWorkStatistic": "median"`), []byte(`"lateWorkStatistic": "mode"`), 1)); err == nil {
+		t.Fatal("an unknown block statistic is accepted")
 	}
 	// Every backlog check is adjusted or absolute, exactly once.
 	dup := bytes.Replace(raw, []byte(`"absoluteChecks": [
    "stale",`), []byte(`"absoluteChecks": [
-   "mean",
+   "overdue",
    "stale",`), 1)
 	if _, err := DecodePolicy(dup); err == nil || !strings.Contains(err.Error(), "exactly once") {
 		t.Fatalf("a check both adjusted and absolute is accepted: %v", err)

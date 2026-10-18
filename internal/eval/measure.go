@@ -162,8 +162,21 @@ type Block struct {
 	AgeMaxMin       int64   `json:"ageMaxMin"`
 	Acquired        int64   `json:"acquired"`
 	Finalized       int64   `json:"finalized"`
+	// RecoveryDays: from the block's peak sample (the first at its
+	// maximum) to the first sample at or below the scaled reference mean
+	// (-1: not through the covering block). Reported, never gated.
+	RecoveryDays int `json:"recoveryDays"`
+
+	// Medians of the daily samples (the mean of the two central ones).
+	MedianBacklog     float64 `json:"medianBacklog"`
+	OverdueMedian     float64 `json:"overdueMedian"`
+	StaleMedian       float64 `json:"staleMedian"`
+	ExposureMedianMin float64 `json:"overdueExposureMedianMin"`
 
 	n, sum, overdue, stale, exposure int64
+	peakDay                          int
+	// Twice each median, so that tolerances compare exactly.
+	med2, overdueMed2, staleMed2, exposureMed2 int64
 }
 
 // BlockCheck is one backlog check of a later block against the reference.
@@ -178,6 +191,8 @@ type BlockCheck struct {
 	WorkloadRatio float64 `json:"workloadRatio"`
 	Tolerance     float64 `json:"tolerance"`
 	Pass          bool    `json:"pass"`
+	// Informational: reported, never part of the stability decision.
+	Informational bool `json:"informational,omitempty"`
 }
 
 // BacklogMeasures is the backlog test of one seed (README §4): every whole
@@ -863,23 +878,32 @@ func samplePastDue(p *Policy, r *Record, at int64) pastDue {
 // BlockDays daily samples, each starting on a rota cycle boundary (a
 // week-A Monday). The reference block is the last one ending by the
 // primary endpoint; every later block, through the first that ends on or
-// after the horizon's day, must stay within tolerance of it in its mean
-// and peak backlog, its mean overdue and stale counts and its overdue
-// exposure (the workload-adjusted checks against the reference scaled by
-// the block's workload, the absolute ones unscaled); and no study may be
-// persistent at any sample through then.
+// after the horizon's day, is compared with it (judgeBacklog), no block
+// from the reference on may carry more than the stale cap, and no study
+// may be persistent at any sample through then.
 func measureBacklog(p *Policy, r *Record, t90 int64) BacklogMeasures {
+	bm, ok := backlogBlocks(p, r)
+	if !ok {
+		return bm
+	}
+	judgeBacklog(p, &bm)
+	return bm
+}
+
+// backlogBlocks measures the blocks, the persistent studies, recovery,
+// the trend and the legacy rule: everything but the judgement.
+func backlogBlocks(p *Policy, r *Record) (BacklogMeasures, bool) {
 	bm := BacklogMeasures{Status: "insufficient"}
 	starts, ok := blockStarts(p, r)
 	if !ok {
 		bm.Reasons = []string{"no whole rota-aligned reference block"}
-		return bm
+		return bm, false
 	}
 	n := p.Backlog.BlockDays
 	last := starts[len(starts)-1] + n - 1
 	if last > len(r.Samples) {
 		bm.Reasons = []string{fmt.Sprintf("samples end before day %d, the end of the block covering the horizon", last)}
-		return bm
+		return bm, false
 	}
 	pd := make([]pastDue, last+1)
 	for d := 1; d <= last; d++ {
@@ -893,36 +917,22 @@ func measureBacklog(p *Policy, r *Record, t90 int64) BacklogMeasures {
 	}
 	ref := blocks[0]
 	bm.Reference, bm.Later = ref, blocks[1:]
-	bm.Status = "stable"
-	fr, fl := bp(p.Backlog.Growth), p.Backlog.GrowthStudies
-	// A workload-adjusted check compares the block with the reference
-	// scaled by w = the block's acquisitions over the reference's (Little's
-	// law: at a stable time in system the backlog is proportional to the
-	// workload), exactly: sum·A_ref against rsum·A_block.
-	check := func(b Block, name string, sum, rsum, floor int64, nn int64) {
-		ab, ar := int64(1), int64(1)
-		if p.adjusted(name) && b.Acquired > 0 && ref.Acquired > 0 {
-			ab, ar = b.Acquired, ref.Acquired
+	// Recovery (reported only): from each later block's peak sample, the
+	// days until the backlog is back at or below the block's
+	// workload-scaled reference mean, through the end of the covering block.
+	for i := range bm.Later {
+		b := &bm.Later[i]
+		w := 1.0
+		if b.Acquired > 0 && ref.Acquired > 0 {
+			w = float64(b.Acquired) / float64(ref.Acquired)
 		}
-		w := float64(ab) / float64(ar)
-		c := BlockCheck{FirstDay: b.FirstDay, Check: name, Value: float64(sum) / float64(nn), Reference: w * float64(rsum) / float64(nn), WorkloadRatio: w,
-			Tolerance: max(float64(fr)*w*float64(rsum)/10_000/float64(nn), float64(floor)), Pass: !growthAbove(sum*ar, rsum*ab, nn*ar, fr, floor)}
-		bm.Checks = append(bm.Checks, c)
-		if !c.Pass {
-			bm.Status = "unstable"
-			bm.Reasons = append(bm.Reasons, fmt.Sprintf("block from day %d: %s %.2f against %.2f (workload ×%.3f), tolerance %.2f", b.FirstDay, name, c.Value, c.Reference, w, c.Tolerance))
+		b.RecoveryDays = -1
+		for d := b.peakDay; d <= last; d++ {
+			if float64(r.Samples[d-1].Backlog()) <= w*ref.Mean {
+				b.RecoveryDays = d - b.peakDay
+				break
+			}
 		}
-	}
-	for _, b := range bm.Later {
-		check(b, "mean", b.sum, ref.sum, fl, b.n)
-		check(b, "max", b.Max, ref.Max, fl, 1)
-		check(b, "overdue", b.overdue, ref.overdue, fl, b.n)
-		check(b, "stale", b.stale, ref.stale, fl, b.n)
-		check(b, "exposure", b.exposure, ref.exposure, p.Backlog.ExposureFloorMin, b.n)
-	}
-	if bm.Persistent > 0 {
-		bm.Status = "unstable"
-		bm.Reasons = append(bm.Reasons, fmt.Sprintf("%d studies unfinished more than %d days past due (worst %.1f h)", bm.Persistent, p.Backlog.PersistentAfterDueDays, bm.WorstPastDueHr))
 	}
 	var xs, ys []float64
 	for _, s := range r.Samples[starts[0]-1 : last] {
@@ -951,7 +961,83 @@ func measureBacklog(p *Policy, r *Record, t90 int64) BacklogMeasures {
 		}
 	}
 	bm.LegacyHolds = bm.LegacyDefined && float64(bm.LegacyDay180) <= 1.1*float64(bm.LegacyDay90)
-	return bm
+	return bm, true
+}
+
+// judgeBacklog compares every later block with the reference and applies
+// the stale cap and the persistence limit. Each check compares a block
+// statistic: level the policy's level statistic of the daily backlog,
+// overdue, stale and exposure its late-work statistic of theirs (each the
+// mean or the median), mean always the mean, max the block's peak. A workload-adjusted check compares the block with the
+// reference scaled by w = the block's acquisitions over the reference's
+// (Little's law: at a stable time in system the backlog is proportional
+// to the workload), exactly: value·A_ref against reference·A_block. An
+// informational check is reported and never makes a seed unstable.
+func judgeBacklog(p *Policy, bm *BacklogMeasures) {
+	ref := bm.Reference
+	bm.Status, bm.Reasons, bm.Checks = "stable", nil, nil
+	fr, fl := bp(p.Backlog.Growth), p.Backlog.GrowthStudies
+	check := func(b Block, name string, sum, rsum, fr, floor int64, nn int64) {
+		ab, ar := int64(1), int64(1)
+		if p.adjusted(name) && b.Acquired > 0 && ref.Acquired > 0 {
+			ab, ar = b.Acquired, ref.Acquired
+		}
+		w := float64(ab) / float64(ar)
+		c := BlockCheck{FirstDay: b.FirstDay, Check: name, Value: float64(sum) / float64(nn), Reference: w * float64(rsum) / float64(nn), WorkloadRatio: w,
+			Tolerance: max(float64(fr)*w*float64(rsum)/10_000/float64(nn), float64(floor)), Pass: !growthAbove(sum*ar, rsum*ab, nn*ar, fr, floor),
+			Informational: p.informational(name)}
+		bm.Checks = append(bm.Checks, c)
+		if !c.Pass && !c.Informational {
+			bm.Status = "unstable"
+			bm.Reasons = append(bm.Reasons, fmt.Sprintf("block from day %d: %s %.2f against %.2f (workload ×%.3f), tolerance %.2f", b.FirstDay, name, c.Value, c.Reference, w, c.Tolerance))
+		}
+	}
+	// stat is a block's statistic of the daily samples, as a sum over nn
+	// (the median is twice itself over 2).
+	stat := func(median bool) func(b Block, sum, med2 int64) (int64, int64) {
+		return func(b Block, sum, med2 int64) (int64, int64) {
+			if median {
+				return med2, 2
+			}
+			return sum, b.n
+		}
+	}
+	level, late := stat(p.Backlog.LevelStatistic == "median"), stat(p.Backlog.LateStatistic == "median")
+	for _, b := range bm.Later {
+		v, nn := level(b, b.sum, b.med2)
+		rv, _ := level(ref, ref.sum, ref.med2)
+		check(b, "level", v, rv, bp(p.Backlog.LevelGrowth), p.Backlog.LevelGrowthStudies, nn)
+		check(b, "mean", b.sum, ref.sum, fr, fl, b.n)
+		check(b, "max", b.Max, ref.Max, fr, fl, 1)
+		v, nn = late(b, b.overdue, b.overdueMed2)
+		rv, _ = late(ref, ref.overdue, ref.overdueMed2)
+		check(b, "overdue", v, rv, fr, fl, nn)
+		v, nn = late(b, b.stale, b.staleMed2)
+		rv, _ = late(ref, ref.stale, ref.staleMed2)
+		check(b, "stale", v, rv, fr, fl, nn)
+		v, nn = late(b, b.exposure, b.exposureMed2)
+		rv, _ = late(ref, ref.exposure, ref.exposureMed2)
+		check(b, "exposure", v, rv, fr, p.Backlog.ExposureFloorMin, nn)
+	}
+	// The stale cap holds in every block from the reference on, whatever
+	// the reference's own stale burden: an inflated reference cannot
+	// license old work later.
+	if lim := p.Backlog.StaleCapStudies; lim > 0 {
+		for _, b := range append([]Block{ref}, bm.Later...) {
+			v, nn := late(b, b.stale, b.staleMed2)
+			c := BlockCheck{FirstDay: b.FirstDay, Check: "staleCap", Value: float64(v) / float64(nn), Reference: float64(lim), WorkloadRatio: 1,
+				Pass: v <= lim*nn, Informational: p.informational("staleCap")}
+			bm.Checks = append(bm.Checks, c)
+			if !c.Pass && !c.Informational {
+				bm.Status = "unstable"
+				bm.Reasons = append(bm.Reasons, fmt.Sprintf("block from day %d: %.2f stale studies (%s of the samples), the cap is %d", b.FirstDay, c.Value, p.Backlog.LateStatistic, lim))
+			}
+		}
+	}
+	if bm.Persistent > 0 {
+		bm.Status = "unstable"
+		bm.Reasons = append(bm.Reasons, fmt.Sprintf("%d studies unfinished more than %d days past due (worst %.1f h)", bm.Persistent, p.Backlog.PersistentAfterDueDays, bm.WorstPastDueHr))
+	}
 }
 
 func block(r *Record, ss []Sample, pd []pastDue) Block {
@@ -959,7 +1045,9 @@ func block(r *Record, ss []Sample, pd []pastDue) Block {
 	n := float64(len(ss))
 	for i, s := range ss {
 		b.sum += int64(s.Backlog())
-		b.Max = max(b.Max, int64(s.Backlog()))
+		if int64(s.Backlog()) > b.Max || i == 0 {
+			b.Max, b.peakDay = int64(s.Backlog()), s.Day
+		}
 		b.StageMeans.AwaitingDoc += float64(s.AwaitingDoc) / n
 		b.StageMeans.Unread += float64(s.Unread) / n
 		b.StageMeans.RemoteHandoff += float64(s.RemoteHandoff) / n
@@ -973,6 +1061,26 @@ func block(r *Record, ss []Sample, pd []pastDue) Block {
 		b.exposure += pd[i].exposureMin
 		b.PersistentMax = max(b.PersistentMax, pd[i].persistent)
 	}
+	// Twice the median of the daily values: the sum of the two central
+	// ones (twice the central one of an odd count).
+	med2 := func(f func(i int) int64) int64 {
+		xs := make([]int64, len(ss))
+		for i := range ss {
+			xs[i] = f(i)
+		}
+		slices.Sort(xs)
+		k := len(xs) / 2
+		if len(xs)%2 == 1 {
+			return 2 * xs[k]
+		}
+		return xs[k-1] + xs[k]
+	}
+	b.med2 = med2(func(i int) int64 { return int64(ss[i].Backlog()) })
+	b.overdueMed2 = med2(func(i int) int64 { return pd[i].overdue })
+	b.staleMed2 = med2(func(i int) int64 { return pd[i].stale })
+	b.exposureMed2 = med2(func(i int) int64 { return pd[i].exposureMin })
+	b.MedianBacklog, b.OverdueMedian = float64(b.med2)/2, float64(b.overdueMed2)/2
+	b.StaleMedian, b.ExposureMedianMin = float64(b.staleMed2)/2, float64(b.exposureMed2)/2
 	b.Mean, b.OverdueMean = float64(b.sum)/n, float64(b.overdue)/n
 	b.StaleMean, b.ExposureMeanMin = float64(b.stale)/n, float64(b.exposure)/n
 	b.OverdueFraction = ratio(b.overdue, b.sum)

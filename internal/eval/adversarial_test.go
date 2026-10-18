@@ -216,14 +216,17 @@ func workloadRecord(level, acq func(d int) int, studies []Study) *Record {
 	return r
 }
 
-// 5C.2: the backlog checks scale with the block's own workload (Little's
-// law), so a seasonal rise in demand that a stable queue follows in
-// proportion is not instability; stale and persistent work never scales,
-// and growth beyond the workload, spikes, late-tail deterioration and a
-// backlog that does not fall with demand still fail. Each case beside the
-// unadjusted (v0.2-eval-2) rule, for contrast.
+// 5C.2, under v0.2-eval-3's rule (ocEval3: the mean and peak hard at 10% /
+// 2 studies, late work by block means): the backlog checks scale with the
+// block's own workload (Little's law), so a seasonal rise in demand that a
+// stable queue follows in proportion is not instability; stale and
+// persistent work never scales, and growth beyond the workload, spikes,
+// late-tail deterioration and a backlog that does not fall with demand
+// fail. Each case beside the unadjusted (v0.2-eval-2) rule, for contrast.
+// TestBacklogStability is v0.2-eval-4's.
 func TestSeasonalBacklog(t *testing.T) {
-	p, _ := testPolicy(t)
+	p0, _ := testPolicy(t)
+	p := ocEval3(p0, true)
 	v2 := *p
 	v2.Backlog.WorkloadAdjustedChecks, v2.Backlog.AbsoluteChecks = nil, slices.Clone(backlogChecks)
 	t90 := t0 + 90*daySec
@@ -366,9 +369,11 @@ func checkFailed(bm BacklogMeasures, name string) bool {
 }
 
 // H4: each way old or growing work escaped the single final-versus-
-// reference comparison of v0.2-eval-1.
+// reference comparison of v0.2-eval-1, under v0.2-eval-3's rule (ocEval3)
+// and, where it differs, v0.2-eval-4's (v4).
 func TestBacklogSafeguards(t *testing.T) {
-	p, _ := testPolicy(t)
+	v4, _ := testPolicy(t)
+	p := ocEval3(v4, true)
 	t90 := t0 + 90*daySec
 	flat := func(int) int { return 20 }
 	// The rule of v0.2-eval-1, for contrast: the last whole block ending by
@@ -408,12 +413,17 @@ func TestBacklogSafeguards(t *testing.T) {
 	}
 	bm = measureBacklog(p, backlogRecord(flat, stream), t90)
 	for _, c := range bm.Checks {
-		if !c.Pass {
+		if !c.Pass && !c.Informational {
 			t.Fatalf("stream: only the persistent rule should fail: %+v", c)
 		}
 	}
 	if bm.Status != "unstable" || bm.Persistent == 0 || !legacyStable(bm) {
 		t.Fatalf("stream: %+v", bm)
+	}
+	// v0.2-eval-4: the stream is also above the stale cap in every block,
+	// the reference included.
+	if bm := measureBacklog(v4, backlogRecord(flat, stream), t90); bm.Status != "unstable" || !checkFailed(bm, "staleCap") || checkFailed(bm, "stale") {
+		t.Fatalf("stream under v4: %v", bm.Reasons)
 	}
 
 	// A spike that recovers within a block: +12 for three days (days
@@ -428,6 +438,10 @@ func TestBacklogSafeguards(t *testing.T) {
 	if bm.Status != "unstable" || !checkFailed(bm, "max") || checkFailed(bm, "mean") || !legacyStable(bm) {
 		t.Fatalf("spike: %+v", bm)
 	}
+	// v0.2-eval-4: the peak is reported, never gated.
+	if bm := measureBacklog(v4, backlogRecord(spike, nil), t90); bm.Status != "stable" || !checkFailed(bm, "max") {
+		t.Fatalf("spike under v4: %v", bm.Reasons)
+	}
 
 	// Late-tail deterioration after the last block ending by the horizon:
 	// days 139–150 (and on) are in the covering block 139–166.
@@ -440,6 +454,12 @@ func TestBacklogSafeguards(t *testing.T) {
 	bm = measureBacklog(p, backlogRecord(late, nil), t90)
 	if bm.Status != "unstable" || !checkFailed(bm, "mean") || !legacyStable(bm) {
 		t.Fatalf("late tail: %+v", bm)
+	}
+	// v0.2-eval-4: a step to a higher level with no late work is within
+	// the level tolerance; growth without bound in the same block is not
+	// (TestBacklogStability).
+	if bm := measureBacklog(v4, backlogRecord(late, nil), t90); bm.Status != "stable" || !checkFailed(bm, "mean") {
+		t.Fatalf("late step under v4: %v", bm.Reasons)
 	}
 
 	// Old work replacing fresh work: the same count, but from day 115 ten
@@ -454,6 +474,12 @@ func TestBacklogSafeguards(t *testing.T) {
 	if bm.Status != "unstable" || !checkFailed(bm, "stale") || !checkFailed(bm, "exposure") || bm.Persistent != 0 || !legacyStable(bm) {
 		t.Fatalf("stale: %+v", bm)
 	}
+	// v0.2-eval-4: ten studies a week past due on every sample of days
+	// 115–122 are a minority of the block's mornings: the medians do not
+	// move. Late work on most mornings does (TestBacklogStability).
+	if bm := measureBacklog(v4, backlogRecord(flat, stale), t90); bm.Status != "stable" {
+		t.Fatalf("stale week under v4: %v", bm.Reasons)
+	}
 
 	// An inflated reference does not license unbounded later growth: the
 	// tolerance is 10% of the reference, and old work is persistent
@@ -466,6 +492,12 @@ func TestBacklogSafeguards(t *testing.T) {
 	}
 	if bm := measureBacklog(p, backlogRecord(inflated, nil), t90); bm.Status != "unstable" {
 		t.Fatalf("inflated: %+v", bm)
+	}
+	// v0.2-eval-4: a level within the tolerance passes whatever the
+	// reference; old work in an inflated reference is capped
+	// (TestBacklogStability).
+	if bm := measureBacklog(v4, backlogRecord(inflated, nil), t90); bm.Status != "stable" {
+		t.Fatalf("inflated under v4: %v", bm.Reasons)
 	}
 }
 

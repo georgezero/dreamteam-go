@@ -1,0 +1,5282 @@
+{
+ "schema": "dreamteam.evaloc/v3",
+ "policy": "v0.2-eval-4",
+ "model": [
+  "A seed fails if any per-seed breach gate of the design fails or lacks evidence (fewer acquisitions than the minimum); a plan is rejected if more than floor(10% × seeds) seeds fail.",
+  "Exact: independent studies; each seed's volume is Poisson at a daily rate spread evenly over the range; every seed at the planning rates (urgent as given).",
+  "Monte Carlo: 40 seeds; each seed's underlying rate is beta-distributed around the planning rate with SD seedSD (scaled by rate ÷ urgent planning rate for soon and routine); each week's rate is beta-distributed around the seed's with intra-week correlation weeklyICC; volumes Poisson per week at a rate drawn uniformly from the range. Deterministic PCG streams.",
+  "Pooled gates are not modelled: with 40 seeds their counts are far larger and pass at the planning rates."
+ ],
+ "gates": {
+  "routine": 0.06,
+  "soon": 0.32,
+  "urgent": 0.12
+ },
+ "planningRates": {
+  "routine": 0.04,
+  "soon": 0.21,
+  "urgent": 0.08
+ },
+ "dailyVolume": {
+  "routine": [
+   43,
+   45
+  ],
+  "soon": [
+   5.3,
+   6.5
+  ],
+  "urgent": [
+   0.79,
+   1.19
+  ]
+ },
+ "minCohort": {
+  "routine": 23,
+  "soon": 88,
+  "urgent": 43
+ },
+ "maxFailingSeedFraction": 0.1,
+ "exact": [
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.102028,
+   "rejection": 0.269328
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.247746,
+   "rejection": 0.755913
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.495517,
+   "rejection": 0.988834
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.742208,
+   "rejection": 0.999962
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899804,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.097702,
+   "rejection": 0.308054
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.244288,
+   "rejection": 0.902531
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.493265,
+   "rejection": 0.999764
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.740998,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899294,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.095726,
+   "rejection": 0.333927
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.242709,
+   "rejection": 0.980714
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.492238,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.740448,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-1: every priority per seed in T90 and the tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.899063,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003386,
+   "rejection": 0.000492
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.04418,
+   "rejection": 0.06916
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.204727,
+   "rejection": 0.638459
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485106,
+   "rejection": 0.986351
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751007,
+   "rejection": 0.999972
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003342,
+   "rejection": 0.000039
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.044064,
+   "rejection": 0.055496
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.204661,
+   "rejection": 0.808052
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485113,
+   "rejection": 0.999677
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751083,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.003322,
+   "rejection": 0
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.044011,
+   "rejection": 0.030028
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.20463,
+   "rejection": 0.933542
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.485117,
+   "rejection": 1
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.751119,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032857,
+   "rejection": 0.040442
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.171062,
+   "rejection": 0.531104
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.44478,
+   "rejection": 0.974988
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730303,
+   "rejection": 0.999943
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905859,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032676,
+   "rejection": 0.025994
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.170882,
+   "rejection": 0.689559
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.444729,
+   "rejection": 0.998927
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730318,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905917,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.032593,
+   "rejection": 0.009237
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.170801,
+   "rejection": 0.836963
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.444707,
+   "rejection": 0.999997
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.730326,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: separate windows, 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.905945,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001584,
+   "rejection": 0.000108
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.03161,
+   "rejection": 0.037783
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.185005,
+   "rejection": 0.577399
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486412,
+   "rejection": 0.98663
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.77306,
+   "rejection": 0.999988
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001556,
+   "rejection": 0.000004
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.031498,
+   "rejection": 0.023711
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.18493,
+   "rejection": 0.743659
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486419,
+   "rejection": 0.99969
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.773144,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.001544,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.031447,
+   "rejection": 0.008022
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.184895,
+   "rejection": 0.885686
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.486422,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.773183,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000754,
+   "rejection": 0.000024
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022814,
+   "rejection": 0.020579
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167843,
+   "rejection": 0.51973
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487422,
+   "rejection": 0.986843
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 10,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792183,
+   "rejection": 0.999994
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000737,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022711,
+   "rejection": 0.009907
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167761,
+   "rejection": 0.676188
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487429,
+   "rejection": 0.999699
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 20,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792273,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.06,
+   "meanPerSeedFailure": 0.000729,
+   "rejection": 0
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.08,
+   "meanPerSeedFailure": 0.022664,
+   "rejection": 0.002004
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.1,
+   "meanPerSeedFailure": 0.167722,
+   "rejection": 0.824061
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.12,
+   "meanPerSeedFailure": 0.487433,
+   "rejection": 1
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seeds": 40,
+   "urgentRate": 0.14,
+   "meanPerSeedFailure": 0.792315,
+   "rejection": 1
+  }
+ ],
+ "monteCarlo": [
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.02925,
+   "standardError": 0.0026643215599848305
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.374,
+   "standardError": 0.007650555535384343
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.96175,
+   "standardError": 0.00303261180750191
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.10725,
+   "standardError": 0.004892530978440505
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.67775,
+   "standardError": 0.00738926480612246
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.9905,
+   "standardError": 0.0015337657904647595
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.8985,
+   "standardError": 0.004774875652831182
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.992,
+   "standardError": 0.0014085453489327212
+  },
+  {
+   "design": "v0.2-eval-2: urgent per seed over (t0, tailEnd]",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99975,
+   "standardError": 0.00024996874804661704
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.009,
+   "standardError": 0.001493234743769378
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.1395,
+   "standardError": 0.005478132665425328
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.866,
+   "standardError": 0.005386186034663118
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.0475,
+   "standardError": 0.003363173724326473
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.472,
+   "standardError": 0.007893288288159757
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.95425,
+   "standardError": 0.003303669834441691
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.845,
+   "standardError": 0.005722215480039178
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.985,
+   "standardError": 0.0019219131093782577
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 90-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99925,
+   "standardError": 0.00043285029167138965
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.00175,
+   "standardError": 0.0006608588162383854
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.04375,
+   "standardError": 0.0032340353082488137
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.7275,
+   "standardError": 0.00703995294728594
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.02825,
+   "standardError": 0.0026197298286273723
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.3205,
+   "standardError": 0.007378681284619901
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.01,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.89975,
+   "standardError": 0.004748682383040583
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0,
+   "trials": 4000,
+   "rejection": 0.81975,
+   "standardError": 0.006077827274199227
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.02,
+   "trials": 4000,
+   "rejection": 0.97325,
+   "standardError": 0.0025511976354253727
+  },
+  {
+   "design": "alternative: urgent over (t0, tailEnd], 120-day tail",
+   "seedSD": 0.02,
+   "weeklyICC": 0.05,
+   "trials": 4000,
+   "rejection": 0.99825,
+   "standardError": 0.0006608588162383908
+  }
+ ],
+ "clusterModel": [
+  "Per seed, a 150-day gated period (T90 = days 1-90, tail = days 91-150), each priority's daily volume Poisson at a rate drawn uniformly from dailyVolume, times the weekday profile (Mon 1.1, Tue-Fri 1, Sat 0.25, Sun 0, scaled to a mean of 1) and a gamma day factor (dailyVolumeCV) where the model says so.",
+  "Breach probability: each Monday-based week's rate beta-distributed around the setting's rate with intra-week correlation weekICC; each day's around the week's with intra-day correlation dayICC.",
+  "The per-seed gates exactly as the policy (urgent over the gated period; soon and routine in T90 and the tail; evidence minimums). Seeds are independent and alike, so an evaluation's rejection is P(Binomial(seeds, perSeedFailure) \u003e floor(10% x seeds)).",
+  "The dependence range is bounded by the development diagnostics (docs/calibration/policy-5c2/clustering.md); no threshold, window or allowance was chosen from them. Deterministic PCG streams; regenerate with DT_OC=1."
+ ],
+ "clusterModels": [
+  {
+   "name": "independent",
+   "weekdayProfile": false,
+   "dailyVolumeCV": 0,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "variable volume (weekday profile, day CV 0.25)",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "day-clustered, ICC 0.05",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.05,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "day-clustered, ICC 0.15",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.15,
+   "weekICCByPriority": {
+    "routine": 0,
+    "soon": 0,
+    "urgent": 0
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.02",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.02,
+    "soon": 0.02,
+    "urgent": 0.02
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.05",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.05,
+    "soon": 0.05,
+    "urgent": 0.05
+   }
+  },
+  {
+   "name": "week-clustered, ICC 0.10",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0,
+   "weekICCByPriority": {
+    "routine": 0.1,
+    "soon": 0.1,
+    "urgent": 0.1
+   }
+  },
+  {
+   "name": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "weekdayProfile": true,
+   "dailyVolumeCV": 0.25,
+   "dayICC": 0.15,
+   "weekICCByPriority": {
+    "routine": 0.012,
+    "soon": 0.11,
+    "urgent": 0.03
+   }
+  }
+ ],
+ "cluster": [
+  {
+   "model": "independent",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0405,
+   "perSeedFailureSE": 0.003117,
+   "rejectionBySeeds": {
+    "10": 0.059458,
+    "40": 0.022047
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0005,
+   "perSeedFailureSE": 0.000353,
+   "rejectionBySeeds": {
+    "10": 0.000011,
+    "40": 0
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.00525,
+   "perSeedFailureSE": 0.001143,
+   "rejectionBySeeds": {
+    "10": 0.001206,
+    "40": 0.000002
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01875,
+   "perSeedFailureSE": 0.002145,
+   "rejectionBySeeds": {
+    "10": 0.014314,
+    "40": 0.000883
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09975,
+   "perSeedFailureSE": 0.004738,
+   "rejectionBySeeds": {
+    "10": 0.262933,
+    "40": 0.368924
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.20175,
+   "perSeedFailureSE": 0.006345,
+   "rejectionBySeeds": {
+    "10": 0.629452,
+    "40": 0.927746
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.488,
+   "perSeedFailureSE": 0.007903,
+   "rejectionBySeeds": {
+    "10": 0.986963,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75525,
+   "perSeedFailureSE": 0.006798,
+   "rejectionBySeeds": {
+    "10": 0.999975,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04175,
+   "perSeedFailureSE": 0.003163,
+   "rejectionBySeeds": {
+    "10": 0.062764,
+    "40": 0.024753
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0425,
+   "perSeedFailureSE": 0.00319,
+   "rejectionBySeeds": {
+    "10": 0.064779,
+    "40": 0.026476
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0385,
+   "perSeedFailureSE": 0.003042,
+   "rejectionBySeeds": {
+    "10": 0.054307,
+    "40": 0.018138
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.06725,
+   "perSeedFailureSE": 0.00396,
+   "rejectionBySeeds": {
+    "10": 0.142113,
+    "40": 0.128705
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.746,
+   "perSeedFailureSE": 0.006883,
+   "rejectionBySeeds": {
+    "10": 0.999966,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99825,
+   "perSeedFailureSE": 0.000661,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05175,
+   "perSeedFailureSE": 0.003503,
+   "rejectionBySeeds": {
+    "10": 0.091415,
+    "40": 0.054231
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0525,
+   "perSeedFailureSE": 0.003526,
+   "rejectionBySeeds": {
+    "10": 0.093708,
+    "40": 0.057028
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75125,
+   "perSeedFailureSE": 0.006835,
+   "rejectionBySeeds": {
+    "10": 0.999972,
+    "40": 1
+   }
+  },
+  {
+   "model": "independent",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99975,
+   "perSeedFailureSE": 0.00025,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04775,
+   "perSeedFailureSE": 0.003372,
+   "rejectionBySeeds": {
+    "10": 0.07951,
+    "40": 0.040716
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0,
+   "perSeedFailureSE": 0,
+   "rejectionBySeeds": {
+    "10": 0,
+    "40": 0
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.00225,
+   "perSeedFailureSE": 0.000749,
+   "rejectionBySeeds": {
+    "10": 0.000225,
+    "40": 0
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01175,
+   "perSeedFailureSE": 0.001704,
+   "rejectionBySeeds": {
+    "10": 0.005835,
+    "40": 0.000105
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.10725,
+   "perSeedFailureSE": 0.004893,
+   "rejectionBySeeds": {
+    "10": 0.292076,
+    "40": 0.430705
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.21375,
+   "perSeedFailureSE": 0.006482,
+   "rejectionBySeeds": {
+    "10": 0.664273,
+    "40": 0.949025
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.4935,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.988062,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75075,
+   "perSeedFailureSE": 0.00684,
+   "rejectionBySeeds": {
+    "10": 0.999971,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04575,
+   "perSeedFailureSE": 0.003304,
+   "rejectionBySeeds": {
+    "10": 0.073773,
+    "40": 0.034832
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0455,
+   "perSeedFailureSE": 0.003295,
+   "rejectionBySeeds": {
+    "10": 0.073067,
+    "40": 0.034137
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.04625,
+   "perSeedFailureSE": 0.003321,
+   "rejectionBySeeds": {
+    "10": 0.075193,
+    "40": 0.036249
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05875,
+   "perSeedFailureSE": 0.003718,
+   "rejectionBySeeds": {
+    "10": 0.113495,
+    "40": 0.083583
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75925,
+   "perSeedFailureSE": 0.00676,
+   "rejectionBySeeds": {
+    "10": 0.999979,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9995,
+   "perSeedFailureSE": 0.000353,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0415,
+   "perSeedFailureSE": 0.003153,
+   "rejectionBySeeds": {
+    "10": 0.062097,
+    "40": 0.024195
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.058,
+   "perSeedFailureSE": 0.003696,
+   "rejectionBySeeds": {
+    "10": 0.111059,
+    "40": 0.080092
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75775,
+   "perSeedFailureSE": 0.006774,
+   "rejectionBySeeds": {
+    "10": 0.999978,
+    "40": 1
+   }
+  },
+  {
+   "model": "variable volume (weekday profile, day CV 0.25)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.99975,
+   "perSeedFailureSE": 0.00025,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05,
+   "perSeedFailureSE": 0.003446,
+   "rejectionBySeeds": {
+    "10": 0.086138,
+    "40": 0.048028
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.01175,
+   "perSeedFailureSE": 0.001704,
+   "rejectionBySeeds": {
+    "10": 0.005835,
+    "40": 0.000105
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.015,
+   "perSeedFailureSE": 0.001922,
+   "rejectionBySeeds": {
+    "10": 0.009346,
+    "40": 0.000323
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.03025,
+   "perSeedFailureSE": 0.002708,
+   "rejectionBySeeds": {
+    "10": 0.035037,
+    "40": 0.006902
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.12125,
+   "perSeedFailureSE": 0.005161,
+   "rejectionBySeeds": {
+    "10": 0.346578,
+    "40": 0.542771
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2125,
+   "perSeedFailureSE": 0.006468,
+   "rejectionBySeeds": {
+    "10": 0.660749,
+    "40": 0.947096
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.494,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.988158,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75675,
+   "perSeedFailureSE": 0.006784,
+   "rejectionBySeeds": {
+    "10": 0.999977,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0585,
+   "perSeedFailureSE": 0.003711,
+   "rejectionBySeeds": {
+    "10": 0.112681,
+    "40": 0.08241
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05725,
+   "perSeedFailureSE": 0.003673,
+   "rejectionBySeeds": {
+    "10": 0.10864,
+    "40": 0.076684
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0625,
+   "perSeedFailureSE": 0.003827,
+   "rejectionBySeeds": {
+    "10": 0.125899,
+    "40": 0.102252
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.114,
+   "perSeedFailureSE": 0.005025,
+   "rejectionBySeeds": {
+    "10": 0.318379,
+    "40": 0.485608
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75925,
+   "perSeedFailureSE": 0.00676,
+   "rejectionBySeeds": {
+    "10": 0.999979,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9945,
+   "perSeedFailureSE": 0.001169,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.047,
+   "perSeedFailureSE": 0.003346,
+   "rejectionBySeeds": {
+    "10": 0.077341,
+    "40": 0.038442
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.23325,
+   "perSeedFailureSE": 0.006687,
+   "rejectionBySeeds": {
+    "10": 0.716116,
+    "40": 0.972114
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.74325,
+   "perSeedFailureSE": 0.006907,
+   "rejectionBySeeds": {
+    "10": 0.999963,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.98925,
+   "perSeedFailureSE": 0.001631,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1525,
+   "perSeedFailureSE": 0.005684,
+   "rejectionBySeeds": {
+    "10": 0.464865,
+    "40": 0.750523
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.086,
+   "perSeedFailureSE": 0.004433,
+   "rejectionBySeeds": {
+    "10": 0.210287,
+    "40": 0.258316
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09875,
+   "perSeedFailureSE": 0.004717,
+   "rejectionBySeeds": {
+    "10": 0.259062,
+    "40": 0.360696
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1145,
+   "perSeedFailureSE": 0.005035,
+   "rejectionBySeeds": {
+    "10": 0.320327,
+    "40": 0.489621
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.20225,
+   "perSeedFailureSE": 0.006351,
+   "rejectionBySeeds": {
+    "10": 0.630947,
+    "40": 0.928763
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.297,
+   "perSeedFailureSE": 0.007225,
+   "rejectionBySeeds": {
+    "10": 0.845965,
+    "40": 0.997119
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.535,
+   "perSeedFailureSE": 0.007886,
+   "rejectionBySeeds": {
+    "10": 0.994089,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75575,
+   "perSeedFailureSE": 0.006793,
+   "rejectionBySeeds": {
+    "10": 0.999976,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.141,
+   "perSeedFailureSE": 0.005503,
+   "rejectionBySeeds": {
+    "10": 0.422206,
+    "40": 0.682637
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.14625,
+   "perSeedFailureSE": 0.005587,
+   "rejectionBySeeds": {
+    "10": 0.441836,
+    "40": 0.714958
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1655,
+   "perSeedFailureSE": 0.005876,
+   "rejectionBySeeds": {
+    "10": 0.511405,
+    "40": 0.814317
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.24425,
+   "perSeedFailureSE": 0.006793,
+   "rejectionBySeeds": {
+    "10": 0.742773,
+    "40": 0.980536
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.78,
+   "perSeedFailureSE": 0.00655,
+   "rejectionBySeeds": {
+    "10": 0.99999,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.98675,
+   "perSeedFailureSE": 0.001808,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0565,
+   "perSeedFailureSE": 0.003651,
+   "rejectionBySeeds": {
+    "10": 0.106237,
+    "40": 0.073358
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.38325,
+   "perSeedFailureSE": 0.007687,
+   "rejectionBySeeds": {
+    "10": 0.942553,
+    "40": 0.999934
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.73525,
+   "perSeedFailureSE": 0.006976,
+   "rejectionBySeeds": {
+    "10": 0.999951,
+    "40": 1
+   }
+  },
+  {
+   "model": "day-clustered, ICC 0.15",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.93725,
+   "perSeedFailureSE": 0.003834,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.096,
+   "perSeedFailureSE": 0.004658,
+   "rejectionBySeeds": {
+    "10": 0.248443,
+    "40": 0.338153
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.057,
+   "perSeedFailureSE": 0.003666,
+   "rejectionBySeeds": {
+    "10": 0.107837,
+    "40": 0.075566
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.052,
+   "perSeedFailureSE": 0.003511,
+   "rejectionBySeeds": {
+    "10": 0.092177,
+    "40": 0.055154
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.068,
+   "perSeedFailureSE": 0.00398,
+   "rejectionBySeeds": {
+    "10": 0.14472,
+    "40": 0.133155
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.164,
+   "perSeedFailureSE": 0.005855,
+   "rejectionBySeeds": {
+    "10": 0.506136,
+    "40": 0.807646
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.25575,
+   "perSeedFailureSE": 0.006898,
+   "rejectionBySeeds": {
+    "10": 0.76868,
+    "40": 0.986827
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.50825,
+   "perSeedFailureSE": 0.007905,
+   "rejectionBySeeds": {
+    "10": 0.990627,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.754,
+   "perSeedFailureSE": 0.00681,
+   "rejectionBySeeds": {
+    "10": 0.999974,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.09575,
+   "perSeedFailureSE": 0.004652,
+   "rejectionBySeeds": {
+    "10": 0.24748,
+    "40": 0.336111
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1005,
+   "perSeedFailureSE": 0.004754,
+   "rejectionBySeeds": {
+    "10": 0.265839,
+    "40": 0.375101
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.113,
+   "perSeedFailureSE": 0.005006,
+   "rejectionBySeeds": {
+    "10": 0.314483,
+    "40": 0.477555
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.187,
+   "perSeedFailureSE": 0.006165,
+   "rejectionBySeeds": {
+    "10": 0.583672,
+    "40": 0.891718
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77525,
+   "perSeedFailureSE": 0.0066,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9905,
+   "perSeedFailureSE": 0.001534,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.05375,
+   "perSeedFailureSE": 0.003566,
+   "rejectionBySeeds": {
+    "10": 0.09757,
+    "40": 0.061876
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.35475,
+   "perSeedFailureSE": 0.007565,
+   "rejectionBySeeds": {
+    "10": 0.918707,
+    "40": 0.999749
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.75,
+   "perSeedFailureSE": 0.006847,
+   "rejectionBySeeds": {
+    "10": 0.99997,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.02",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.95975,
+   "perSeedFailureSE": 0.003108,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.23275,
+   "perSeedFailureSE": 0.006682,
+   "rejectionBySeeds": {
+    "10": 0.71486,
+    "40": 0.971664
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1695,
+   "perSeedFailureSE": 0.005932,
+   "rejectionBySeeds": {
+    "10": 0.525317,
+    "40": 0.831253
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.17675,
+   "perSeedFailureSE": 0.006031,
+   "rejectionBySeeds": {
+    "10": 0.550001,
+    "40": 0.858894
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.18775,
+   "perSeedFailureSE": 0.006175,
+   "rejectionBySeeds": {
+    "10": 0.586077,
+    "40": 0.893853
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.278,
+   "perSeedFailureSE": 0.007084,
+   "rejectionBySeeds": {
+    "10": 0.813297,
+    "40": 0.994062
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36175,
+   "perSeedFailureSE": 0.007597,
+   "rejectionBySeeds": {
+    "10": 0.925201,
+    "40": 0.999818
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.5665,
+   "perSeedFailureSE": 0.007835,
+   "rejectionBySeeds": {
+    "10": 0.996703,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77425,
+   "perSeedFailureSE": 0.00661,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2145,
+   "perSeedFailureSE": 0.00649,
+   "rejectionBySeeds": {
+    "10": 0.666376,
+    "40": 0.950153
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.22175,
+   "perSeedFailureSE": 0.006568,
+   "rejectionBySeeds": {
+    "10": 0.686254,
+    "40": 0.959986
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.2615,
+   "perSeedFailureSE": 0.006948,
+   "rejectionBySeeds": {
+    "10": 0.780895,
+    "40": 0.989223
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.361,
+   "perSeedFailureSE": 0.007594,
+   "rejectionBySeeds": {
+    "10": 0.924527,
+    "40": 0.999811
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.8005,
+   "perSeedFailureSE": 0.006319,
+   "rejectionBySeeds": {
+    "10": 0.999996,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.97725,
+   "perSeedFailureSE": 0.002358,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.0805,
+   "perSeedFailureSE": 0.004302,
+   "rejectionBySeeds": {
+    "10": 0.189732,
+    "40": 0.216859
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.47025,
+   "perSeedFailureSE": 0.007892,
+   "rejectionBySeeds": {
+    "10": 0.982808,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.7435,
+   "perSeedFailureSE": 0.006905,
+   "rejectionBySeeds": {
+    "10": 0.999963,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.05",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.9135,
+   "perSeedFailureSE": 0.004445,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36475,
+   "perSeedFailureSE": 0.007611,
+   "rejectionBySeeds": {
+    "10": 0.927852,
+    "40": 0.999841
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.28825,
+   "perSeedFailureSE": 0.007162,
+   "rejectionBySeeds": {
+    "10": 0.831517,
+    "40": 0.995961
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.31275,
+   "perSeedFailureSE": 0.00733,
+   "rejectionBySeeds": {
+    "10": 0.869534,
+    "40": 0.998464
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3195,
+   "perSeedFailureSE": 0.007373,
+   "rejectionBySeeds": {
+    "10": 0.878722,
+    "40": 0.998837
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.40675,
+   "perSeedFailureSE": 0.007767,
+   "rejectionBySeeds": {
+    "10": 0.957578,
+    "40": 0.99998
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.458,
+   "perSeedFailureSE": 0.007878,
+   "rejectionBySeeds": {
+    "10": 0.979326,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.62875,
+   "perSeedFailureSE": 0.007639,
+   "rejectionBySeeds": {
+    "10": 0.999108,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.77925,
+   "perSeedFailureSE": 0.006558,
+   "rejectionBySeeds": {
+    "10": 0.99999,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.34075,
+   "perSeedFailureSE": 0.007494,
+   "rejectionBySeeds": {
+    "10": 0.904347,
+    "40": 0.999531
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.35525,
+   "perSeedFailureSE": 0.007567,
+   "rejectionBySeeds": {
+    "10": 0.919186,
+    "40": 0.999755
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3855,
+   "perSeedFailureSE": 0.007696,
+   "rejectionBySeeds": {
+    "10": 0.944159,
+    "40": 0.999941
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.51975,
+   "perSeedFailureSE": 0.0079,
+   "rejectionBySeeds": {
+    "10": 0.992284,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.8375,
+   "perSeedFailureSE": 0.005833,
+   "rejectionBySeeds": {
+    "10": 0.999999,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.96425,
+   "perSeedFailureSE": 0.002936,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.13775,
+   "perSeedFailureSE": 0.005449,
+   "rejectionBySeeds": {
+    "10": 0.409937,
+    "40": 0.661537
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.53375,
+   "perSeedFailureSE": 0.007888,
+   "rejectionBySeeds": {
+    "10": 0.993957,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.73575,
+   "perSeedFailureSE": 0.006972,
+   "rejectionBySeeds": {
+    "10": 0.999952,
+    "40": 1
+   }
+  },
+  {
+   "model": "week-clustered, ICC 0.10",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.867,
+   "perSeedFailureSE": 0.005369,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "planning rates (false rejection)",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.225,
+   "perSeedFailureSE": 0.006603,
+   "rejectionBySeeds": {
+    "10": 0.694901,
+    "40": 0.963812
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.05
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.17525,
+   "perSeedFailureSE": 0.006011,
+   "rejectionBySeeds": {
+    "10": 0.544952,
+    "40": 0.853489
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.06
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.18075,
+   "perSeedFailureSE": 0.006084,
+   "rejectionBySeeds": {
+    "10": 0.563316,
+    "40": 0.872538
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.07
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.208,
+   "perSeedFailureSE": 0.006417,
+   "rejectionBySeeds": {
+    "10": 0.647863,
+    "40": 0.939619
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.09
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.291,
+   "perSeedFailureSE": 0.007182,
+   "rejectionBySeeds": {
+    "10": 0.836166,
+    "40": 0.996364
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.1
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.36475,
+   "perSeedFailureSE": 0.007611,
+   "rejectionBySeeds": {
+    "10": 0.927852,
+    "40": 0.999841
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.12
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.56025,
+   "perSeedFailureSE": 0.007848,
+   "rejectionBySeeds": {
+    "10": 0.996284,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "urgent",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.21,
+    "urgent": 0.14
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.7755,
+   "perSeedFailureSE": 0.006597,
+   "rejectionBySeeds": {
+    "10": 0.999988,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.15,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.19475,
+   "perSeedFailureSE": 0.006261,
+   "rejectionBySeeds": {
+    "10": 0.608129,
+    "40": 0.912155
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.18,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.21725,
+   "perSeedFailureSE": 0.00652,
+   "rejectionBySeeds": {
+    "10": 0.674012,
+    "40": 0.954105
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.24,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.3005,
+   "perSeedFailureSE": 0.007249,
+   "rejectionBySeeds": {
+    "10": 0.851468,
+    "40": 0.997489
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.27,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.46025,
+   "perSeedFailureSE": 0.007881,
+   "rejectionBySeeds": {
+    "10": 0.980007,
+    "40": 0.999999
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.32,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.78325,
+   "perSeedFailureSE": 0.006515,
+   "rejectionBySeeds": {
+    "10": 0.999992,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "soon",
+   "rates": {
+    "routine": 0.04,
+    "soon": 0.36,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.946,
+   "perSeedFailureSE": 0.003574,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.02,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.1175,
+   "perSeedFailureSE": 0.005092,
+   "rejectionBySeeds": {
+    "10": 0.332006,
+    "40": 0.513496
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.05,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.487,
+   "perSeedFailureSE": 0.007903,
+   "rejectionBySeeds": {
+    "10": 0.986754,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.06,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.74525,
+   "perSeedFailureSE": 0.006889,
+   "rejectionBySeeds": {
+    "10": 0.999965,
+    "40": 1
+   }
+  },
+  {
+   "model": "development range (day 0.15; week urgent 0.03, soon 0.11, routine 0.012)",
+   "setting": "routine",
+   "rates": {
+    "routine": 0.07,
+    "soon": 0.21,
+    "urgent": 0.08
+   },
+   "simulatedSeeds": 4000,
+   "perSeedFailure": 0.93275,
+   "perSeedFailureSE": 0.00396,
+   "rejectionBySeeds": {
+    "10": 1,
+    "40": 1
+   }
+  }
+ ],
+ "backlog": {
+  "protocol": "docs/calibration/backlog-5c3/protocol.md",
+  "model": [
+   "A reading queue simulated hour by hour from the takeover (Tue 2026-10-13 06:00) for 181 days (internal/eval/oc_queue_test.go): 52 acquisitions a day (Poisson; the weekday profile; 08:00-20:00), 2% urgent, 12% soon, 86% routine; reading Mon-Fri 07:30-20:00 and Sat 10:00-14:00 at a utilization of 0.85 of the season-1 demand, urgent first, then soon, then routine, first in first out. Daily samples at 06:00; the record's horizon is day 150, so the reference block is days 55-82 and the later blocks 83-110, 111-138 and 139-166 (covering).",
+   "Seasonal scenarios multiply demand by the scenario's monthly season factor; bursty ones by a gamma day factor of the stated CV; capacity scenarios multiply reading capacity on the stated days; inherited work is acquired before the takeover and not read until the stated day; held-back work joins the queue the stated days after its acquisition.",
+   "Each seed is judged by judgeBacklog under each rule. A rule's rejection at S seeds is P(Binomial(S, unstable fraction) \u003e floor(10% x S)).",
+   "T1: every stable scenario's rejection at 40 seeds at most 0.05. T2: every deteriorating scenario's unstable fraction at least 0.90. Selection among the candidates meeting both: the highest mean unstable fraction on the ladder (L5, L10), then the protocol's tie-break order (the family's order). Ladder and sensitivity scenarios are reported, not targets."
+  ],
+  "seedsPerScenario": 1000,
+  "streams": "PCG(20261019, scenario index)",
+  "scenarios": [
+   {
+    "id": "A",
+    "name": "stable stationary queue (utilization 0.85)",
+    "role": "stable",
+    "queue": {
+     "seasonal": false,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "B",
+    "name": "stable seasonal queue",
+    "role": "stable",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "C",
+    "name": "stable queue with bursty days (day CV 0.15)",
+    "role": "stable",
+    "queue": {
+     "seasonal": false,
+     "utilization": 0,
+     "dailyArrivalCV": 0.15,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "Cs",
+    "name": "stable seasonal queue with bursty days (day CV 0.15)",
+    "role": "stable",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0.15,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "D",
+    "name": "sustained capacity deterioration (20% lower from day 100)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 100,
+       "factor": 0.8
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "E",
+    "name": "persistent inherited overdue work (10 studies unread to day 120)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 10,
+     "inheritedParkedToDay": 120
+    }
+   },
+   {
+    "id": "F",
+    "name": "rising age without count growth (one study a weekday held 12 days from day 100)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0,
+     "parkFromDay": 100,
+     "parkToDay": 181,
+     "parkDays": 12
+    }
+   },
+   {
+    "id": "G",
+    "name": "intermediate deterioration then recovery (25% lower, days 90-117)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 90,
+       "toDay": 118,
+       "factor": 0.75
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "H",
+    "name": "late-tail deterioration (20% lower from day 140)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 140,
+       "factor": 0.8
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "I",
+    "name": "reference inflation (30% lower in the reference block, then 20% lower from day 111)",
+    "role": "deteriorating",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 55,
+       "toDay": 83,
+       "factor": 0.7
+      },
+      {
+       "fromDay": 111,
+       "factor": 0.8
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "L5",
+    "name": "capacity 5% lower from day 100 (still stable)",
+    "role": "ladder",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 100,
+       "factor": 0.95
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "L10",
+    "name": "capacity 10% lower from day 100 (still stable)",
+    "role": "ladder",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 100,
+       "factor": 0.9
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "L15",
+    "name": "capacity 15% lower from day 100 (utilization 1.0)",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "capacity": [
+      {
+       "fromDay": 100,
+       "factor": 0.85
+      }
+     ],
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "A75",
+    "name": "stable stationary queue, utilization 0.75",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": false,
+     "utilization": 0.75,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "A92",
+    "name": "stable stationary queue, utilization 0.92",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": false,
+     "utilization": 0.92,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "B92",
+    "name": "stable seasonal queue, utilization 0.92",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0.92,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "Cx",
+    "name": "stable seasonal queue with very bursty days (day CV 0.30)",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0.3,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0
+    }
+   },
+   {
+    "id": "K",
+    "name": "slow erosion: capacity 0.2% lower each day from day 83 (utilization 1.0 by day 158)",
+    "role": "sensitivity",
+    "queue": {
+     "seasonal": true,
+     "utilization": 0,
+     "dailyArrivalCV": 0,
+     "inheritedParked": 0,
+     "inheritedParkedToDay": 0,
+     "erodeFromDay": 83,
+     "erodePerDay": 0.002
+    }
+   }
+  ],
+  "targets": {
+   "t1MaxRejectionAt40Seeds": 0.05,
+   "t1PerSeedUnstableLimit": 0.05057,
+   "t2MinPerSeedDetection": 0.9
+  },
+  "reproduction5C2": [
+   {
+    "scenario": "stationary demand, stable capacity (utilization 0.85)",
+    "streams": "PCG(20261018, 1000+k) (Slice 5C.2)",
+    "seeds": 300,
+    "unstableSeedFraction": 0.636667,
+    "failingSeedFractionByCheck": {
+     "max": {
+      "any": 0.63,
+      "covering": 0.35,
+      "intermediate": 0.513333
+     },
+     "mean": {
+      "any": 0.133333,
+      "covering": 0.05,
+      "intermediate": 0.106667
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "max": 0.503333,
+     "max+mean": 0.126667,
+     "mean": 0.006667
+    }
+   },
+   {
+    "scenario": "scenario seasonality, stable capacity",
+    "streams": "PCG(20261018, 1000+k) (Slice 5C.2)",
+    "seeds": 300,
+    "unstableSeedFraction": 0.876667,
+    "failingSeedFractionByCheck": {
+     "max": {
+      "any": 0.84,
+      "covering": 0.5,
+      "intermediate": 0.783333
+     },
+     "mean": {
+      "any": 0.606667,
+      "covering": 0.17,
+      "intermediate": 0.573333
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "max": 0.27,
+     "max+mean": 0.57,
+     "mean": 0.036667
+    }
+   }
+  ],
+  "attributionEval3": [
+   {
+    "scenario": "A",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.605,
+    "failingSeedFractionByCheck": {
+     "max": {
+      "any": 0.591,
+      "covering": 0.333,
+      "intermediate": 0.49
+     },
+     "mean": {
+      "any": 0.142,
+      "covering": 0.062,
+      "intermediate": 0.093
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "max": 0.463,
+     "max+mean": 0.128,
+     "mean": 0.014
+    }
+   },
+   {
+    "scenario": "B",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.889,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.001,
+      "intermediate": 0.001
+     },
+     "max": {
+      "any": 0.834,
+      "covering": 0.476,
+      "intermediate": 0.789
+     },
+     "mean": {
+      "any": 0.599,
+      "covering": 0.178,
+      "intermediate": 0.555
+     },
+     "overdue": {
+      "any": 0.002,
+      "intermediate": 0.002
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue": 0.001,
+     "max": 0.29,
+     "max+mean": 0.542,
+     "max+mean+overdue": 0.001,
+     "mean": 0.055
+    }
+   },
+   {
+    "scenario": "C",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.695,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.037,
+      "covering": 0.012,
+      "intermediate": 0.025
+     },
+     "max": {
+      "any": 0.646,
+      "covering": 0.393,
+      "intermediate": 0.551
+     },
+     "mean": {
+      "any": 0.442,
+      "covering": 0.207,
+      "intermediate": 0.345
+     },
+     "overdue": {
+      "any": 0.046,
+      "covering": 0.018,
+      "intermediate": 0.028
+     },
+     "stale": {
+      "any": 0.002,
+      "covering": 0.001,
+      "intermediate": 0.001
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure": 0.001,
+     "exposure+max": 0.001,
+     "exposure+max+mean": 0.004,
+     "exposure+max+mean+overdue": 0.029,
+     "exposure+max+mean+overdue+stale": 0.002,
+     "max": 0.251,
+     "max+mean": 0.346,
+     "max+mean+overdue": 0.013,
+     "mean": 0.046,
+     "mean+overdue": 0.002
+    }
+   },
+   {
+    "scenario": "Cs",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.922,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.119,
+      "covering": 0.022,
+      "intermediate": 0.098
+     },
+     "max": {
+      "any": 0.842,
+      "covering": 0.577,
+      "intermediate": 0.801
+     },
+     "mean": {
+      "any": 0.839,
+      "covering": 0.393,
+      "intermediate": 0.783
+     },
+     "overdue": {
+      "any": 0.124,
+      "covering": 0.021,
+      "intermediate": 0.105
+     },
+     "stale": {
+      "any": 0.016,
+      "covering": 0.003,
+      "intermediate": 0.013
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.009,
+     "exposure+max+mean+overdue": 0.092,
+     "exposure+max+mean+overdue+stale": 0.015,
+     "exposure+mean+overdue": 0.002,
+     "exposure+mean+overdue+stale": 0.001,
+     "max": 0.083,
+     "max+mean": 0.629,
+     "max+mean+overdue": 0.014,
+     "mean": 0.077
+    }
+   },
+   {
+    "scenario": "D",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 0.999
+     },
+     "max": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     },
+     "mean": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     },
+     "overdue": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 0.999
+     },
+     "stale": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 0.997
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue+stale": 1
+    }
+   },
+   {
+    "scenario": "E",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 1,
+      "intermediate": 1
+     },
+     "max": {
+      "any": 0.588,
+      "covering": 0.027,
+      "intermediate": 0.581
+     },
+     "mean": {
+      "any": 0.215,
+      "intermediate": 0.215
+     },
+     "persistent": {
+      "any": 1
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+persistent": 0.192,
+     "exposure+max+persistent": 0.396,
+     "exposure+mean+persistent": 0.023,
+     "exposure+persistent": 0.389
+    }
+   },
+   {
+    "scenario": "F",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     },
+     "max": {
+      "any": 0.982,
+      "covering": 0.947,
+      "intermediate": 0.963
+     },
+     "mean": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     },
+     "overdue": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     },
+     "stale": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 1
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue+stale": 0.982,
+     "exposure+mean+overdue+stale": 0.018
+    }
+   },
+   {
+    "scenario": "G",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 1,
+      "covering": 0.445,
+      "intermediate": 1
+     },
+     "max": {
+      "any": 1,
+      "covering": 0.825,
+      "intermediate": 1
+     },
+     "mean": {
+      "any": 1,
+      "covering": 0.668,
+      "intermediate": 1
+     },
+     "overdue": {
+      "any": 1,
+      "covering": 0.334,
+      "intermediate": 1
+     },
+     "stale": {
+      "any": 1,
+      "covering": 0.302,
+      "intermediate": 1
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue+stale": 1
+    }
+   },
+   {
+    "scenario": "H",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.967,
+      "covering": 0.967,
+      "intermediate": 0.001
+     },
+     "max": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 0.785
+     },
+     "mean": {
+      "any": 1,
+      "covering": 1,
+      "intermediate": 0.553
+     },
+     "overdue": {
+      "any": 0.978,
+      "covering": 0.978,
+      "intermediate": 0.001
+     },
+     "stale": {
+      "any": 0.803,
+      "covering": 0.803
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue": 0.164,
+     "exposure+max+mean+overdue+stale": 0.803,
+     "max+mean": 0.022,
+     "max+mean+overdue": 0.011
+    }
+   },
+   {
+    "scenario": "I",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.887,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.86,
+      "covering": 0.83,
+      "intermediate": 0.363
+     },
+     "max": {
+      "any": 0.497,
+      "covering": 0.497,
+      "intermediate": 0.035
+     },
+     "mean": {
+      "any": 0.86,
+      "covering": 0.854,
+      "intermediate": 0.217
+     },
+     "overdue": {
+      "any": 0.865,
+      "covering": 0.855,
+      "intermediate": 0.239
+     },
+     "stale": {
+      "any": 0.87,
+      "covering": 0.835,
+      "intermediate": 0.43
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean+overdue+stale": 0.496,
+     "exposure+max+stale": 0.001,
+     "exposure+mean+overdue": 0.001,
+     "exposure+mean+overdue+stale": 0.346,
+     "exposure+mean+stale": 0.001,
+     "exposure+overdue+stale": 0.004,
+     "exposure+stale": 0.011,
+     "mean": 0.002,
+     "mean+overdue": 0.012,
+     "mean+overdue+stale": 0.002,
+     "overdue": 0.002,
+     "overdue+stale": 0.002,
+     "stale": 0.007
+    }
+   },
+   {
+    "scenario": "L5",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.967,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.008,
+      "covering": 0.002,
+      "intermediate": 0.006
+     },
+     "max": {
+      "any": 0.916,
+      "covering": 0.703,
+      "intermediate": 0.882
+     },
+     "mean": {
+      "any": 0.87,
+      "covering": 0.499,
+      "intermediate": 0.808
+     },
+     "overdue": {
+      "any": 0.01,
+      "covering": 0.003,
+      "intermediate": 0.007
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.003,
+     "exposure+max+mean+overdue": 0.005,
+     "max": 0.097,
+     "max+mean": 0.806,
+     "max+mean+overdue": 0.005,
+     "mean": 0.051
+    }
+   },
+   {
+    "scenario": "L10",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.999,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.244,
+      "covering": 0.082,
+      "intermediate": 0.191
+     },
+     "max": {
+      "any": 0.989,
+      "covering": 0.92,
+      "intermediate": 0.966
+     },
+     "mean": {
+      "any": 0.996,
+      "covering": 0.929,
+      "intermediate": 0.983
+     },
+     "overdue": {
+      "any": 0.256,
+      "covering": 0.093,
+      "intermediate": 0.199
+     },
+     "stale": {
+      "any": 0.081,
+      "covering": 0.022,
+      "intermediate": 0.062
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.01,
+     "exposure+max+mean+overdue": 0.153,
+     "exposure+max+mean+overdue+stale": 0.081,
+     "max": 0.003,
+     "max+mean": 0.721,
+     "max+mean+overdue": 0.021,
+     "mean": 0.009,
+     "mean+overdue": 0.001
+    }
+   },
+   {
+    "scenario": "L15",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 1,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.957,
+      "covering": 0.872,
+      "intermediate": 0.857
+     },
+     "max": {
+      "any": 1,
+      "covering": 0.999,
+      "intermediate": 1
+     },
+     "mean": {
+      "any": 1,
+      "covering": 0.999,
+      "intermediate": 1
+     },
+     "overdue": {
+      "any": 0.963,
+      "covering": 0.879,
+      "intermediate": 0.873
+     },
+     "stale": {
+      "any": 0.832,
+      "covering": 0.714,
+      "intermediate": 0.646
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.003,
+     "exposure+max+mean+overdue": 0.122,
+     "exposure+max+mean+overdue+stale": 0.832,
+     "max+mean": 0.034,
+     "max+mean+overdue": 0.009
+    }
+   },
+   {
+    "scenario": "A75",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.547,
+    "failingSeedFractionByCheck": {
+     "max": {
+      "any": 0.535,
+      "covering": 0.286,
+      "intermediate": 0.447
+     },
+     "mean": {
+      "any": 0.061,
+      "covering": 0.026,
+      "intermediate": 0.044
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "max": 0.486,
+     "max+mean": 0.049,
+     "mean": 0.012
+    }
+   },
+   {
+    "scenario": "A92",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.71,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.023,
+      "covering": 0.007,
+      "intermediate": 0.016
+     },
+     "max": {
+      "any": 0.657,
+      "covering": 0.381,
+      "intermediate": 0.56
+     },
+     "mean": {
+      "any": 0.478,
+      "covering": 0.236,
+      "intermediate": 0.357
+     },
+     "overdue": {
+      "any": 0.028,
+      "covering": 0.008,
+      "intermediate": 0.02
+     },
+     "stale": {
+      "any": 0.001,
+      "intermediate": 0.001
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.001,
+     "exposure+max+mean+overdue": 0.02,
+     "exposure+max+mean+overdue+stale": 0.001,
+     "exposure+mean+overdue": 0.001,
+     "max": 0.232,
+     "max+mean": 0.397,
+     "max+mean+overdue": 0.006,
+     "mean": 0.052
+    }
+   },
+   {
+    "scenario": "B92",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.982,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.199,
+      "covering": 0.014,
+      "intermediate": 0.185
+     },
+     "max": {
+      "any": 0.938,
+      "covering": 0.646,
+      "intermediate": 0.908
+     },
+     "mean": {
+      "any": 0.959,
+      "covering": 0.526,
+      "intermediate": 0.938
+     },
+     "overdue": {
+      "any": 0.219,
+      "covering": 0.015,
+      "intermediate": 0.208
+     },
+     "stale": {
+      "any": 0.046,
+      "covering": 0.001,
+      "intermediate": 0.045
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.012,
+     "exposure+max+mean+overdue": 0.141,
+     "exposure+max+mean+overdue+stale": 0.046,
+     "max": 0.023,
+     "max+mean": 0.685,
+     "max+mean+overdue": 0.031,
+     "mean": 0.043,
+     "mean+overdue": 0.001
+    }
+   },
+   {
+    "scenario": "Cx",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.932,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.698,
+      "covering": 0.305,
+      "intermediate": 0.591
+     },
+     "max": {
+      "any": 0.82,
+      "covering": 0.577,
+      "intermediate": 0.768
+     },
+     "mean": {
+      "any": 0.905,
+      "covering": 0.595,
+      "intermediate": 0.852
+     },
+     "overdue": {
+      "any": 0.703,
+      "covering": 0.319,
+      "intermediate": 0.606
+     },
+     "stale": {
+      "any": 0.438,
+      "covering": 0.136,
+      "intermediate": 0.353
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure": 0.002,
+     "exposure+max+mean": 0.012,
+     "exposure+max+mean+overdue": 0.215,
+     "exposure+max+mean+overdue+stale": 0.405,
+     "exposure+max+overdue": 0.001,
+     "exposure+mean": 0.004,
+     "exposure+mean+overdue": 0.024,
+     "exposure+mean+overdue+stale": 0.03,
+     "exposure+mean+stale": 0.001,
+     "exposure+overdue": 0.003,
+     "exposure+overdue+stale": 0.001,
+     "max": 0.019,
+     "max+mean": 0.147,
+     "max+mean+overdue": 0.021,
+     "mean": 0.043,
+     "mean+overdue": 0.003,
+     "stale": 0.001
+    }
+   },
+   {
+    "scenario": "K",
+    "streams": "PCG(20261019, scenario index)",
+    "seeds": 1000,
+    "unstableSeedFraction": 0.999,
+    "failingSeedFractionByCheck": {
+     "exposure": {
+      "any": 0.351,
+      "covering": 0.341,
+      "intermediate": 0.015
+     },
+     "max": {
+      "any": 0.993,
+      "covering": 0.978,
+      "intermediate": 0.931
+     },
+     "mean": {
+      "any": 0.997,
+      "covering": 0.992,
+      "intermediate": 0.934
+     },
+     "overdue": {
+      "any": 0.424,
+      "covering": 0.407,
+      "intermediate": 0.024
+     },
+     "stale": {
+      "any": 0.069,
+      "covering": 0.069
+     }
+    },
+    "failingSeedFractionByCheckSet": {
+     "exposure+max+mean": 0.002,
+     "exposure+max+mean+overdue": 0.28,
+     "exposure+max+mean+overdue+stale": 0.069,
+     "max": 0.002,
+     "max+mean": 0.565,
+     "max+mean+overdue": 0.075,
+     "mean": 0.006
+    }
+   }
+  ],
+  "rules": [
+   {
+    "rule": "v0.2-eval-3",
+    "unstableSeedFraction": {
+     "A": 0.605,
+     "A75": 0.547,
+     "A92": 0.71,
+     "B": 0.889,
+     "B92": 0.982,
+     "C": 0.695,
+     "Cs": 0.922,
+     "Cx": 0.932,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 0.887,
+     "K": 0.999,
+     "L10": 0.999,
+     "L15": 1,
+     "L5": 0.967
+    },
+    "unstableLower95": {
+     "A": 0.573928,
+     "A75": 0.515547,
+     "A92": 0.680787,
+     "B": 0.867874,
+     "B92": 0.971701,
+     "C": 0.66542,
+     "Cs": 0.903606,
+     "Cx": 0.914587,
+     "D": 0.996318,
+     "E": 0.996318,
+     "F": 0.996318,
+     "G": 0.996318,
+     "H": 0.996318,
+     "I": 0.865728,
+     "K": 0.994441,
+     "L10": 0.994441,
+     "L15": 0.996318,
+     "L5": 0.953966
+    },
+    "unstableUpper95": {
+     "A": 0.635451,
+     "A75": 0.578175,
+     "A92": 0.737971,
+     "B": 0.907802,
+     "B92": 0.989298,
+     "C": 0.723427,
+     "Cs": 0.937859,
+     "Cx": 0.946812,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 0.90596,
+     "K": 0.999975,
+     "L10": 0.999975,
+     "L15": 1,
+     "L5": 0.977178
+    },
+    "rejectionAt40Seeds": {
+     "A": 1,
+     "A75": 1,
+     "A92": 1,
+     "B": 1,
+     "B92": 1,
+     "C": 1,
+     "Cs": 1,
+     "Cx": 1,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 1,
+     "L10": 1,
+     "L15": 1,
+     "L5": 1
+    },
+    "rejectionAt10Seeds": {
+     "A": 0.998491,
+     "A75": 0.995242,
+     "A92": 0.999893,
+     "B": 1,
+     "B92": 1,
+     "C": 0.999834,
+     "Cs": 1,
+     "Cx": 1,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 1,
+     "L10": 1,
+     "L15": 1,
+     "L5": 1
+    }
+   },
+   {
+    "rule": "v0.2-eval-3 without the peak check",
+    "unstableSeedFraction": {
+     "A": 0.142,
+     "A75": 0.061,
+     "A92": 0.478,
+     "B": 0.599,
+     "B92": 0.959,
+     "C": 0.444,
+     "Cs": 0.839,
+     "Cx": 0.913,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 0.887,
+     "K": 0.997,
+     "L10": 0.996,
+     "L15": 1,
+     "L5": 0.87
+    },
+    "unstableLower95": {
+     "A": 0.120945,
+     "A75": 0.046978,
+     "A92": 0.446644,
+     "B": 0.567869,
+     "B92": 0.944788,
+     "C": 0.412909,
+     "Cs": 0.814729,
+     "Cx": 0.893792,
+     "D": 0.996318,
+     "E": 0.996318,
+     "F": 0.996318,
+     "G": 0.996318,
+     "H": 0.996318,
+     "I": 0.865728,
+     "K": 0.991258,
+     "L10": 0.98979,
+     "L15": 0.996318,
+     "L5": 0.847564
+    },
+    "unstableUpper95": {
+     "A": 0.165187,
+     "A75": 0.077671,
+     "A92": 0.509486,
+     "B": 0.629547,
+     "B92": 0.97042,
+     "C": 0.475422,
+     "Cs": 0.861255,
+     "Cx": 0.929732,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 0.90596,
+     "K": 0.999381,
+     "L10": 0.998909,
+     "L15": 1,
+     "L5": 0.890231
+    },
+    "rejectionAt40Seeds": {
+     "A": 0.688964,
+     "A75": 0.094543,
+     "A92": 1,
+     "B": 1,
+     "B92": 1,
+     "C": 0.999997,
+     "Cs": 1,
+     "Cx": 1,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 1,
+     "L10": 1,
+     "L15": 1,
+     "L5": 1
+    },
+    "rejectionAt10Seeds": {
+     "A": 0.425964,
+     "A75": 0.120893,
+     "A92": 0.984743,
+     "B": 0.998287,
+     "B92": 1,
+     "C": 0.974631,
+     "Cs": 0.999999,
+     "Cx": 1,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 1,
+     "L10": 1,
+     "L15": 1,
+     "L5": 1
+    }
+   },
+   {
+    "rule": "selected: level mean +150%/2, late median +10%, cap 3",
+    "unstableSeedFraction": {
+     "A": 0,
+     "A75": 0,
+     "A92": 0.002,
+     "B": 0.001,
+     "B92": 0.124,
+     "C": 0.005,
+     "Cs": 0.038,
+     "Cx": 0.367,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 0.985,
+     "I": 0.976,
+     "K": 0.459,
+     "L10": 0.228,
+     "L15": 0.966,
+     "L5": 0.002
+    },
+    "unstableLower95": {
+     "A": 0,
+     "A75": 0,
+     "A92": 0.000242,
+     "B": 0.000025,
+     "B92": 0.104203,
+     "C": 0.001625,
+     "Cs": 0.027029,
+     "Cx": 0.337056,
+     "D": 0.996318,
+     "E": 0.996318,
+     "F": 0.996318,
+     "G": 0.996318,
+     "H": 0.97538,
+     "I": 0.964499,
+     "K": 0.427774,
+     "L10": 0.202329,
+     "L15": 0.952811,
+     "L5": 0.000242
+    },
+    "unstableUpper95": {
+     "A": 0.003682,
+     "A75": 0.003682,
+     "A92": 0.007206,
+     "B": 0.005559,
+     "B92": 0.14604,
+     "C": 0.011629,
+     "Cs": 0.051787,
+     "Cx": 0.39773,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 0.991581,
+     "I": 0.984564,
+     "K": 0.490468,
+     "L10": 0.255283,
+     "L15": 0.976341,
+     "L5": 0.007206
+    },
+    "rejectionAt40Seeds": {
+     "A": 0,
+     "A75": 0,
+     "A92": 0,
+     "B": 0,
+     "B92": 0.563774,
+     "C": 0.000002,
+     "Cs": 0.017238,
+     "Cx": 0.999857,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 0.999999,
+     "L10": 0.967054,
+     "L15": 1,
+     "L5": 0
+    },
+    "rejectionAt10Seeds": {
+     "A": 0,
+     "A75": 0,
+     "A92": 0.000178,
+     "B": 0.000045,
+     "B92": 0.357234,
+     "C": 0.001095,
+     "Cs": 0.053048,
+     "Cx": 0.929789,
+     "D": 1,
+     "E": 1,
+     "F": 1,
+     "G": 1,
+     "H": 1,
+     "I": 1,
+     "K": 0.979631,
+     "L10": 0.702737,
+     "L15": 1,
+     "L5": 0.000178
+    }
+   }
+  ],
+  "candidateFormat": "levelStatistic,levelGrowthFraction,levelGrowthStudies,lateWorkStatistic,growthFraction,staleCapStudies | unstable seeds by scenario (scenario order) | meets T1 | meets T2 | ladder detection",
+  "candidates": [
+   "mean,0.10,2,mean,0.10,0 | 142 599 444 839 1000 1000 1000 1000 1000 887 870 996 1000 61 478 959 913 997 | false | false | 0.933000",
+   "mean,0.10,2,mean,0.10,3 | 142 599 444 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 478 959 923 997 | false | true | 0.933000",
+   "mean,0.10,2,mean,0.10,2 | 142 599 445 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 480 959 934 997 | false | true | 0.933000",
+   "mean,0.10,2,mean,0.25,0 | 142 599 444 839 1000 1000 1000 1000 1000 872 870 996 1000 61 478 959 913 997 | false | false | 0.933000",
+   "mean,0.10,2,mean,0.25,3 | 142 599 444 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 478 959 923 997 | false | true | 0.933000",
+   "mean,0.10,2,mean,0.25,2 | 142 599 445 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 480 959 934 997 | false | true | 0.933000",
+   "mean,0.10,2,mean,0.50,0 | 142 599 444 839 1000 1000 1000 1000 1000 860 870 996 1000 61 478 959 913 997 | false | false | 0.933000",
+   "mean,0.10,2,mean,0.50,3 | 142 599 444 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 478 959 923 997 | false | true | 0.933000",
+   "mean,0.10,2,mean,0.50,2 | 142 599 445 839 1000 1000 1000 1000 1000 1000 870 996 1000 61 480 959 934 997 | false | true | 0.933000",
+   "mean,0.10,5,mean,0.10,0 | 0 72 153 457 1000 1000 1000 1000 999 887 246 859 1000 0 148 720 859 947 | false | false | 0.552500",
+   "mean,0.10,5,mean,0.10,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 869 947 | false | true | 0.552500",
+   "mean,0.10,5,mean,0.10,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.10,5,mean,0.25,0 | 0 72 153 457 1000 1000 1000 1000 999 872 246 859 1000 0 148 720 859 947 | false | false | 0.552500",
+   "mean,0.10,5,mean,0.25,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 869 947 | false | true | 0.552500",
+   "mean,0.10,5,mean,0.25,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.10,5,mean,0.50,0 | 0 72 153 457 1000 1000 1000 1000 999 860 246 859 1000 0 148 720 859 947 | false | false | 0.552500",
+   "mean,0.10,5,mean,0.50,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 869 947 | false | true | 0.552500",
+   "mean,0.10,5,mean,0.50,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.25,2,mean,0.10,0 | 115 527 354 777 1000 1000 1000 1000 1000 885 823 991 1000 61 350 920 885 997 | false | false | 0.907000",
+   "mean,0.25,2,mean,0.10,3 | 115 527 354 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 350 920 896 997 | false | true | 0.907000",
+   "mean,0.25,2,mean,0.10,2 | 115 527 355 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 352 920 912 997 | false | true | 0.907000",
+   "mean,0.25,2,mean,0.25,0 | 115 527 354 777 1000 1000 1000 1000 1000 838 823 991 1000 61 350 920 885 997 | false | false | 0.907000",
+   "mean,0.25,2,mean,0.25,3 | 115 527 354 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 350 920 896 997 | false | true | 0.907000",
+   "mean,0.25,2,mean,0.25,2 | 115 527 355 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 352 920 912 997 | false | true | 0.907000",
+   "mean,0.25,2,mean,0.50,0 | 115 527 354 777 1000 1000 1000 1000 1000 784 823 991 1000 61 350 920 882 997 | false | false | 0.907000",
+   "mean,0.25,2,mean,0.50,3 | 115 527 354 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 350 920 895 997 | false | true | 0.907000",
+   "mean,0.25,2,mean,0.50,2 | 115 527 355 777 1000 1000 1000 1000 1000 1000 823 991 1000 61 352 920 912 997 | false | true | 0.907000",
+   "mean,0.25,5,mean,0.10,0 | 0 72 153 457 1000 1000 1000 1000 999 885 246 859 1000 0 148 720 857 947 | false | false | 0.552500",
+   "mean,0.25,5,mean,0.10,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 868 947 | false | true | 0.552500",
+   "mean,0.25,5,mean,0.10,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.25,5,mean,0.25,0 | 0 72 153 457 1000 1000 1000 1000 999 838 246 859 1000 0 148 720 857 947 | false | false | 0.552500",
+   "mean,0.25,5,mean,0.25,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 868 947 | false | true | 0.552500",
+   "mean,0.25,5,mean,0.25,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.25,5,mean,0.50,0 | 0 72 153 457 1000 1000 1000 1000 999 784 246 859 1000 0 148 720 854 947 | false | false | 0.552500",
+   "mean,0.25,5,mean,0.50,3 | 0 72 153 457 1000 1000 1000 1000 999 1000 246 859 1000 0 148 720 867 947 | false | true | 0.552500",
+   "mean,0.25,5,mean,0.50,2 | 0 72 154 457 1000 1000 1000 1000 999 1000 246 859 1000 0 150 720 884 947 | false | true | 0.552500",
+   "mean,0.50,2,mean,0.10,0 | 2 125 157 483 1000 1000 1000 1000 1000 885 348 904 1000 3 110 704 818 964 | false | false | 0.626000",
+   "mean,0.50,2,mean,0.10,3 | 2 125 157 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 110 704 830 964 | false | true | 0.626000",
+   "mean,0.50,2,mean,0.10,2 | 2 125 158 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 112 704 850 964 | false | true | 0.626000",
+   "mean,0.50,2,mean,0.25,0 | 2 125 157 483 1000 1000 1000 1000 1000 838 348 904 1000 3 110 704 818 964 | false | false | 0.626000",
+   "mean,0.50,2,mean,0.25,3 | 2 125 157 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 110 704 830 964 | false | true | 0.626000",
+   "mean,0.50,2,mean,0.25,2 | 2 125 158 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 112 704 850 964 | false | true | 0.626000",
+   "mean,0.50,2,mean,0.50,0 | 2 125 157 483 1000 1000 1000 1000 1000 767 348 904 1000 3 110 704 814 964 | false | false | 0.626000",
+   "mean,0.50,2,mean,0.50,3 | 2 125 157 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 110 704 829 964 | false | true | 0.626000",
+   "mean,0.50,2,mean,0.50,2 | 2 125 158 483 1000 1000 1000 1000 1000 1000 348 904 1000 3 112 704 850 964 | false | true | 0.626000",
+   "mean,0.50,5,mean,0.10,0 | 0 72 140 438 1000 1000 1000 1000 999 885 245 859 1000 0 109 696 818 947 | false | false | 0.552000",
+   "mean,0.50,5,mean,0.10,3 | 0 72 140 438 1000 1000 1000 1000 999 1000 245 859 1000 0 109 696 830 947 | false | true | 0.552000",
+   "mean,0.50,5,mean,0.10,2 | 0 72 141 438 1000 1000 1000 1000 999 1000 245 859 1000 0 111 696 850 947 | false | true | 0.552000",
+   "mean,0.50,5,mean,0.25,0 | 0 72 140 438 1000 1000 1000 1000 999 838 245 859 1000 0 109 696 818 947 | false | false | 0.552000",
+   "mean,0.50,5,mean,0.25,3 | 0 72 140 438 1000 1000 1000 1000 999 1000 245 859 1000 0 109 696 830 947 | false | true | 0.552000",
+   "mean,0.50,5,mean,0.25,2 | 0 72 141 438 1000 1000 1000 1000 999 1000 245 859 1000 0 111 696 850 947 | false | true | 0.552000",
+   "mean,0.50,5,mean,0.50,0 | 0 72 140 438 1000 1000 1000 1000 999 767 245 859 1000 0 109 696 814 947 | false | false | 0.552000",
+   "mean,0.50,5,mean,0.50,3 | 0 72 140 438 1000 1000 1000 1000 999 1000 245 859 1000 0 109 696 829 947 | false | true | 0.552000",
+   "mean,0.50,5,mean,0.50,2 | 0 72 141 438 1000 1000 1000 1000 999 1000 245 859 1000 0 111 696 850 947 | false | true | 0.552000",
+   "mean,1.00,2,mean,0.10,0 | 0 5 56 180 1000 1000 1000 1000 996 885 39 511 990 0 30 330 739 728 | false | false | 0.275000",
+   "mean,1.00,2,mean,0.10,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 751 728 | false | true | 0.275000",
+   "mean,1.00,2,mean,0.10,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.00,2,mean,0.25,0 | 0 5 56 180 1000 1000 1000 1000 996 838 39 511 990 0 30 330 739 728 | false | false | 0.275000",
+   "mean,1.00,2,mean,0.25,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 751 728 | false | true | 0.275000",
+   "mean,1.00,2,mean,0.25,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.00,2,mean,0.50,0 | 0 5 56 180 1000 1000 1000 1000 996 767 39 511 990 0 30 330 735 728 | false | false | 0.275000",
+   "mean,1.00,2,mean,0.50,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 750 728 | false | true | 0.275000",
+   "mean,1.00,2,mean,0.50,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.10,0 | 0 5 56 180 1000 1000 1000 1000 996 885 39 511 990 0 30 330 739 728 | false | false | 0.275000",
+   "mean,1.00,5,mean,0.10,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 751 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.10,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.25,0 | 0 5 56 180 1000 1000 1000 1000 996 838 39 511 990 0 30 330 739 728 | false | false | 0.275000",
+   "mean,1.00,5,mean,0.25,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 751 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.25,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.50,0 | 0 5 56 180 1000 1000 1000 1000 996 767 39 511 990 0 30 330 735 728 | false | false | 0.275000",
+   "mean,1.00,5,mean,0.50,3 | 0 5 56 180 1000 1000 1000 1000 996 1000 39 511 990 0 30 330 750 728 | false | true | 0.275000",
+   "mean,1.00,5,mean,0.50,2 | 0 5 57 180 1000 1000 1000 1000 996 1000 39 511 990 0 32 330 777 728 | false | true | 0.275000",
+   "mean,1.25,2,mean,0.10,0 | 0 2 54 152 1000 1000 1000 1000 992 885 23 364 986 0 30 256 729 591 | false | false | 0.193500",
+   "mean,1.25,2,mean,0.10,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 741 591 | false | true | 0.193500",
+   "mean,1.25,2,mean,0.10,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.25,2,mean,0.25,0 | 0 2 54 152 1000 1000 1000 1000 992 838 23 364 986 0 30 256 729 591 | false | false | 0.193500",
+   "mean,1.25,2,mean,0.25,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 741 591 | false | true | 0.193500",
+   "mean,1.25,2,mean,0.25,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.25,2,mean,0.50,0 | 0 2 54 152 1000 1000 1000 1000 992 767 23 364 986 0 30 256 725 591 | false | false | 0.193500",
+   "mean,1.25,2,mean,0.50,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 740 591 | false | true | 0.193500",
+   "mean,1.25,2,mean,0.50,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.10,0 | 0 2 54 152 1000 1000 1000 1000 992 885 23 364 986 0 30 256 729 591 | false | false | 0.193500",
+   "mean,1.25,5,mean,0.10,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 741 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.10,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.25,0 | 0 2 54 152 1000 1000 1000 1000 992 838 23 364 986 0 30 256 729 591 | false | false | 0.193500",
+   "mean,1.25,5,mean,0.25,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 741 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.25,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.50,0 | 0 2 54 152 1000 1000 1000 1000 992 767 23 364 986 0 30 256 725 591 | false | false | 0.193500",
+   "mean,1.25,5,mean,0.50,3 | 0 2 54 152 1000 1000 1000 1000 992 1000 23 364 986 0 30 256 740 591 | false | true | 0.193500",
+   "mean,1.25,5,mean,0.50,2 | 0 2 55 152 1000 1000 1000 1000 992 1000 23 364 986 0 32 256 767 591 | false | true | 0.193500",
+   "mean,1.50,2,mean,0.10,0 | 0 2 53 136 1000 1000 1000 1000 987 885 13 289 979 0 29 236 725 501 | false | false | 0.151000",
+   "mean,1.50,2,mean,0.10,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 737 501 | false | true | 0.151000",
+   "mean,1.50,2,mean,0.10,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.50,2,mean,0.25,0 | 0 2 53 136 1000 1000 1000 1000 987 838 13 289 979 0 29 236 725 501 | false | false | 0.151000",
+   "mean,1.50,2,mean,0.25,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 737 501 | false | true | 0.151000",
+   "mean,1.50,2,mean,0.25,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.50,2,mean,0.50,0 | 0 2 53 136 1000 1000 1000 1000 987 767 13 289 979 0 29 236 721 501 | false | false | 0.151000",
+   "mean,1.50,2,mean,0.50,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 736 501 | false | true | 0.151000",
+   "mean,1.50,2,mean,0.50,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.10,0 | 0 2 53 136 1000 1000 1000 1000 987 885 13 289 979 0 29 236 725 501 | false | false | 0.151000",
+   "mean,1.50,5,mean,0.10,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 737 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.10,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.25,0 | 0 2 53 136 1000 1000 1000 1000 987 838 13 289 979 0 29 236 725 501 | false | false | 0.151000",
+   "mean,1.50,5,mean,0.25,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 737 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.25,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.50,0 | 0 2 53 136 1000 1000 1000 1000 987 767 13 289 979 0 29 236 721 501 | false | false | 0.151000",
+   "mean,1.50,5,mean,0.50,3 | 0 2 53 136 1000 1000 1000 1000 987 1000 13 289 979 0 29 236 736 501 | false | true | 0.151000",
+   "mean,1.50,5,mean,0.50,2 | 0 2 54 136 1000 1000 1000 1000 987 1000 13 289 979 0 31 236 763 501 | false | true | 0.151000",
+   "mean,1.75,2,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 273 974 0 29 231 724 460 | false | false | 0.143000",
+   "mean,1.75,2,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 736 460 | false | true | 0.143000",
+   "mean,1.75,2,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,1.75,2,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 273 974 0 29 231 724 460 | false | false | 0.143000",
+   "mean,1.75,2,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 736 460 | false | true | 0.143000",
+   "mean,1.75,2,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,1.75,2,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 273 974 0 29 231 720 460 | false | false | 0.143000",
+   "mean,1.75,2,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 735 460 | false | true | 0.143000",
+   "mean,1.75,2,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 273 974 0 29 231 724 460 | false | false | 0.143000",
+   "mean,1.75,5,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 736 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 273 974 0 29 231 724 460 | false | false | 0.143000",
+   "mean,1.75,5,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 736 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 273 974 0 29 231 720 460 | false | false | 0.143000",
+   "mean,1.75,5,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 273 974 0 29 231 735 460 | false | true | 0.143000",
+   "mean,1.75,5,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 273 974 0 31 231 762 460 | false | true | 0.143000",
+   "mean,2.00,2,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 268 968 0 29 231 723 439 | false | false | 0.140500",
+   "mean,2.00,2,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 735 439 | false | true | 0.140500",
+   "mean,2.00,2,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.00,2,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 268 968 0 29 231 723 439 | false | false | 0.140500",
+   "mean,2.00,2,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 735 439 | false | true | 0.140500",
+   "mean,2.00,2,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.00,2,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 268 968 0 29 231 719 439 | false | false | 0.140500",
+   "mean,2.00,2,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 734 439 | false | true | 0.140500",
+   "mean,2.00,2,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 268 968 0 29 231 723 439 | false | false | 0.140500",
+   "mean,2.00,5,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 735 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 268 968 0 29 231 723 439 | false | false | 0.140500",
+   "mean,2.00,5,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 735 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 268 968 0 29 231 719 439 | false | false | 0.140500",
+   "mean,2.00,5,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 268 968 0 29 231 734 439 | false | true | 0.140500",
+   "mean,2.00,5,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 268 968 0 31 231 761 439 | false | true | 0.140500",
+   "mean,2.50,2,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,2.50,2,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,2.50,2,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,2.50,2,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,2.50,2,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,2.50,2,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,2.50,2,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 719 426 | false | false | 0.139500",
+   "mean,2.50,2,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 734 426 | false | true | 0.139500",
+   "mean,2.50,2,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,2.50,5,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,2.50,5,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 719 426 | false | false | 0.139500",
+   "mean,2.50,5,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 734 426 | false | true | 0.139500",
+   "mean,2.50,5,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,3.00,2,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,3.00,2,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 719 426 | false | false | 0.139500",
+   "mean,3.00,2,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 734 426 | false | true | 0.139500",
+   "mean,3.00,2,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,3.00,5,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 723 426 | false | false | 0.139500",
+   "mean,3.00,5,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 719 426 | false | false | 0.139500",
+   "mean,3.00,5,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 734 426 | false | true | 0.139500",
+   "mean,3.00,5,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 426 | false | true | 0.139500",
+   "mean,0.10,2,median,0.10,0 | 142 599 442 839 1000 1000 1000 1000 1000 889 870 996 1000 61 478 959 905 997 | false | false | 0.933000",
+   "mean,0.10,2,median,0.10,3 | 142 599 442 839 1000 1000 1000 1000 1000 977 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,2,median,0.10,2 | 142 599 442 839 1000 1000 1000 1000 1000 979 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,2,median,0.25,0 | 142 599 442 839 1000 1000 1000 1000 1000 878 870 996 1000 61 478 959 905 997 | false | false | 0.933000",
+   "mean,0.10,2,median,0.25,3 | 142 599 442 839 1000 1000 1000 1000 1000 973 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,2,median,0.25,2 | 142 599 442 839 1000 1000 1000 1000 1000 975 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,2,median,0.50,0 | 142 599 442 839 1000 1000 1000 1000 1000 869 870 996 1000 61 478 959 905 997 | false | false | 0.933000",
+   "mean,0.10,2,median,0.50,3 | 142 599 442 839 1000 1000 1000 1000 1000 971 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,2,median,0.50,2 | 142 599 442 839 1000 1000 1000 1000 1000 973 870 996 1000 61 478 959 905 997 | false | true | 0.933000",
+   "mean,0.10,5,median,0.10,0 | 0 72 140 453 1000 1000 1000 1000 999 889 245 859 1000 0 146 720 835 947 | false | false | 0.552000",
+   "mean,0.10,5,median,0.10,3 | 0 72 140 453 1000 1000 1000 1000 999 977 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.10,5,median,0.10,2 | 0 72 140 453 1000 1000 1000 1000 999 979 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.10,5,median,0.25,0 | 0 72 140 453 1000 1000 1000 1000 999 878 245 859 1000 0 146 720 835 947 | false | false | 0.552000",
+   "mean,0.10,5,median,0.25,3 | 0 72 140 453 1000 1000 1000 1000 999 973 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.10,5,median,0.25,2 | 0 72 140 453 1000 1000 1000 1000 999 975 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.10,5,median,0.50,0 | 0 72 140 453 1000 1000 1000 1000 999 869 245 859 1000 0 146 720 835 947 | false | false | 0.552000",
+   "mean,0.10,5,median,0.50,3 | 0 72 140 453 1000 1000 1000 1000 999 971 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.10,5,median,0.50,2 | 0 72 140 453 1000 1000 1000 1000 999 973 245 859 1000 0 146 720 835 947 | false | true | 0.552000",
+   "mean,0.25,2,median,0.10,0 | 115 527 347 777 1000 1000 1000 1000 1000 884 823 991 1000 61 349 920 864 997 | false | false | 0.907000",
+   "mean,0.25,2,median,0.10,3 | 115 527 347 777 1000 1000 1000 1000 1000 976 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,2,median,0.10,2 | 115 527 347 777 1000 1000 1000 1000 1000 978 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,2,median,0.25,0 | 115 527 347 777 1000 1000 1000 1000 1000 867 823 991 1000 61 349 920 864 997 | false | false | 0.907000",
+   "mean,0.25,2,median,0.25,3 | 115 527 347 777 1000 1000 1000 1000 1000 972 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,2,median,0.25,2 | 115 527 347 777 1000 1000 1000 1000 1000 974 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,2,median,0.50,0 | 115 527 347 777 1000 1000 1000 1000 1000 842 823 991 1000 61 349 920 864 997 | false | false | 0.907000",
+   "mean,0.25,2,median,0.50,3 | 115 527 347 777 1000 1000 1000 1000 1000 968 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,2,median,0.50,2 | 115 527 347 777 1000 1000 1000 1000 1000 971 823 991 1000 61 349 920 864 997 | false | true | 0.907000",
+   "mean,0.25,5,median,0.10,0 | 0 72 140 453 1000 1000 1000 1000 999 884 245 859 1000 0 146 720 830 947 | false | false | 0.552000",
+   "mean,0.25,5,median,0.10,3 | 0 72 140 453 1000 1000 1000 1000 999 976 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.25,5,median,0.10,2 | 0 72 140 453 1000 1000 1000 1000 999 978 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.25,5,median,0.25,0 | 0 72 140 453 1000 1000 1000 1000 999 867 245 859 1000 0 146 720 830 947 | false | false | 0.552000",
+   "mean,0.25,5,median,0.25,3 | 0 72 140 453 1000 1000 1000 1000 999 972 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.25,5,median,0.25,2 | 0 72 140 453 1000 1000 1000 1000 999 974 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.25,5,median,0.50,0 | 0 72 140 453 1000 1000 1000 1000 999 842 245 859 1000 0 146 720 830 947 | false | false | 0.552000",
+   "mean,0.25,5,median,0.50,3 | 0 72 140 453 1000 1000 1000 1000 999 968 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.25,5,median,0.50,2 | 0 72 140 453 1000 1000 1000 1000 999 971 245 859 1000 0 146 720 830 947 | false | true | 0.552000",
+   "mean,0.50,2,median,0.10,0 | 2 125 142 478 1000 1000 1000 1000 1000 884 348 904 1000 3 108 704 762 964 | false | false | 0.626000",
+   "mean,0.50,2,median,0.10,3 | 2 125 142 478 1000 1000 1000 1000 1000 976 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,2,median,0.10,2 | 2 125 142 478 1000 1000 1000 1000 1000 978 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,2,median,0.25,0 | 2 125 142 478 1000 1000 1000 1000 1000 867 348 904 1000 3 108 704 762 964 | false | false | 0.626000",
+   "mean,0.50,2,median,0.25,3 | 2 125 142 478 1000 1000 1000 1000 1000 972 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,2,median,0.25,2 | 2 125 142 478 1000 1000 1000 1000 1000 974 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,2,median,0.50,0 | 2 125 142 478 1000 1000 1000 1000 1000 837 348 904 1000 3 108 704 762 964 | false | false | 0.626000",
+   "mean,0.50,2,median,0.50,3 | 2 125 142 478 1000 1000 1000 1000 1000 968 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,2,median,0.50,2 | 2 125 142 478 1000 1000 1000 1000 1000 971 348 904 1000 3 108 704 762 964 | false | true | 0.626000",
+   "mean,0.50,5,median,0.10,0 | 0 72 125 433 1000 1000 1000 1000 999 884 244 859 1000 0 107 696 762 947 | false | false | 0.551500",
+   "mean,0.50,5,median,0.10,3 | 0 72 125 433 1000 1000 1000 1000 999 976 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,0.50,5,median,0.10,2 | 0 72 125 433 1000 1000 1000 1000 999 978 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,0.50,5,median,0.25,0 | 0 72 125 433 1000 1000 1000 1000 999 867 244 859 1000 0 107 696 762 947 | false | false | 0.551500",
+   "mean,0.50,5,median,0.25,3 | 0 72 125 433 1000 1000 1000 1000 999 972 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,0.50,5,median,0.25,2 | 0 72 125 433 1000 1000 1000 1000 999 974 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,0.50,5,median,0.50,0 | 0 72 125 433 1000 1000 1000 1000 999 837 244 859 1000 0 107 696 762 947 | false | false | 0.551500",
+   "mean,0.50,5,median,0.50,3 | 0 72 125 433 1000 1000 1000 1000 999 968 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,0.50,5,median,0.50,2 | 0 72 125 433 1000 1000 1000 1000 999 971 244 859 1000 0 107 696 762 947 | false | true | 0.551500",
+   "mean,1.00,2,median,0.10,0 | 0 5 19 129 1000 1000 1000 1000 996 884 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,2,median,0.10,3 | 0 5 19 129 1000 1000 1000 1000 996 976 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,2,median,0.10,2 | 0 5 19 129 1000 1000 1000 1000 996 978 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,2,median,0.25,0 | 0 5 19 129 1000 1000 1000 1000 996 867 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,2,median,0.25,3 | 0 5 19 129 1000 1000 1000 1000 996 972 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,2,median,0.25,2 | 0 5 19 129 1000 1000 1000 1000 996 974 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,2,median,0.50,0 | 0 5 19 129 1000 1000 1000 1000 996 837 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,2,median,0.50,3 | 0 5 19 129 1000 1000 1000 1000 996 968 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,2,median,0.50,2 | 0 5 19 129 1000 1000 1000 1000 996 971 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.10,0 | 0 5 19 129 1000 1000 1000 1000 996 884 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,5,median,0.10,3 | 0 5 19 129 1000 1000 1000 1000 996 976 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.10,2 | 0 5 19 129 1000 1000 1000 1000 996 978 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.25,0 | 0 5 19 129 1000 1000 1000 1000 996 867 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,5,median,0.25,3 | 0 5 19 129 1000 1000 1000 1000 996 972 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.25,2 | 0 5 19 129 1000 1000 1000 1000 996 974 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.50,0 | 0 5 19 129 1000 1000 1000 1000 996 837 36 507 990 0 11 308 521 727 | false | false | 0.271500",
+   "mean,1.00,5,median,0.50,3 | 0 5 19 129 1000 1000 1000 1000 996 968 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.00,5,median,0.50,2 | 0 5 19 129 1000 1000 1000 1000 996 971 36 507 990 0 11 308 521 727 | false | true | 0.271500",
+   "mean,1.25,2,median,0.10,0 | 0 1 10 74 1000 1000 1000 1000 992 884 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,2,median,0.10,3 | 0 1 10 74 1000 1000 1000 1000 992 976 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,2,median,0.10,2 | 0 1 10 74 1000 1000 1000 1000 992 978 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,2,median,0.25,0 | 0 1 10 74 1000 1000 1000 1000 992 867 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,2,median,0.25,3 | 0 1 10 74 1000 1000 1000 1000 992 972 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,2,median,0.25,2 | 0 1 10 74 1000 1000 1000 1000 992 974 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,2,median,0.50,0 | 0 1 10 74 1000 1000 1000 1000 992 837 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,2,median,0.50,3 | 0 1 10 74 1000 1000 1000 1000 992 968 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,2,median,0.50,2 | 0 1 10 74 1000 1000 1000 1000 992 971 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.10,0 | 0 1 10 74 1000 1000 1000 1000 992 884 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,5,median,0.10,3 | 0 1 10 74 1000 1000 1000 1000 992 976 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.10,2 | 0 1 10 74 1000 1000 1000 1000 992 978 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.25,0 | 0 1 10 74 1000 1000 1000 1000 992 867 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,5,median,0.25,3 | 0 1 10 74 1000 1000 1000 1000 992 972 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.25,2 | 0 1 10 74 1000 1000 1000 1000 992 974 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.50,0 | 0 1 10 74 1000 1000 1000 1000 992 837 17 340 982 0 6 192 440 580 | false | false | 0.178500",
+   "mean,1.25,5,median,0.50,3 | 0 1 10 74 1000 1000 1000 1000 992 968 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.25,5,median,0.50,2 | 0 1 10 74 1000 1000 1000 1000 992 971 17 340 982 0 6 192 440 580 | false | true | 0.178500",
+   "mean,1.50,2,median,0.10,0 | 0 1 5 38 1000 1000 1000 1000 985 884 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,2,median,0.10,3 | 0 1 5 38 1000 1000 1000 1000 985 976 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,2,median,0.10,2 | 0 1 5 38 1000 1000 1000 1000 985 978 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,2,median,0.25,0 | 0 1 5 38 1000 1000 1000 1000 985 867 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,2,median,0.25,3 | 0 1 5 38 1000 1000 1000 1000 985 972 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,2,median,0.25,2 | 0 1 5 38 1000 1000 1000 1000 985 974 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,2,median,0.50,0 | 0 1 5 38 1000 1000 1000 1000 985 837 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,2,median,0.50,3 | 0 1 5 38 1000 1000 1000 1000 985 968 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,2,median,0.50,2 | 0 1 5 38 1000 1000 1000 1000 985 971 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.10,0 | 0 1 5 38 1000 1000 1000 1000 985 884 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,5,median,0.10,3 | 0 1 5 38 1000 1000 1000 1000 985 976 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.10,2 | 0 1 5 38 1000 1000 1000 1000 985 978 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.25,0 | 0 1 5 38 1000 1000 1000 1000 985 867 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,5,median,0.25,3 | 0 1 5 38 1000 1000 1000 1000 985 972 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.25,2 | 0 1 5 38 1000 1000 1000 1000 985 974 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.50,0 | 0 1 5 38 1000 1000 1000 1000 985 837 2 228 966 0 2 124 367 459 | true | false | 0.115000",
+   "mean,1.50,5,median,0.50,3 | 0 1 5 38 1000 1000 1000 1000 985 968 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.50,5,median,0.50,2 | 0 1 5 38 1000 1000 1000 1000 985 971 2 228 966 0 2 124 367 459 | true | true | 0.115000",
+   "mean,1.75,2,median,0.10,0 | 0 1 2 21 1000 1000 1000 1000 969 884 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,2,median,0.10,3 | 0 1 2 21 1000 1000 1000 1000 969 976 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,2,median,0.10,2 | 0 1 2 21 1000 1000 1000 1000 969 978 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,2,median,0.25,0 | 0 1 2 21 1000 1000 1000 1000 969 867 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,2,median,0.25,3 | 0 1 2 21 1000 1000 1000 1000 969 972 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,2,median,0.25,2 | 0 1 2 21 1000 1000 1000 1000 969 974 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,2,median,0.50,0 | 0 1 2 21 1000 1000 1000 1000 969 837 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,2,median,0.50,3 | 0 1 2 21 1000 1000 1000 1000 969 968 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,2,median,0.50,2 | 0 1 2 21 1000 1000 1000 1000 969 971 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.10,0 | 0 1 2 21 1000 1000 1000 1000 969 884 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,5,median,0.10,3 | 0 1 2 21 1000 1000 1000 1000 969 976 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.10,2 | 0 1 2 21 1000 1000 1000 1000 969 978 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.25,0 | 0 1 2 21 1000 1000 1000 1000 969 867 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,5,median,0.25,3 | 0 1 2 21 1000 1000 1000 1000 969 972 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.25,2 | 0 1 2 21 1000 1000 1000 1000 969 974 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.50,0 | 0 1 2 21 1000 1000 1000 1000 969 837 1 167 945 0 1 83 308 370 | true | false | 0.084000",
+   "mean,1.75,5,median,0.50,3 | 0 1 2 21 1000 1000 1000 1000 969 968 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,1.75,5,median,0.50,2 | 0 1 2 21 1000 1000 1000 1000 969 971 1 167 945 0 1 83 308 370 | true | true | 0.084000",
+   "mean,2.00,2,median,0.10,0 | 0 1 2 12 1000 1000 1000 1000 954 884 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,2,median,0.10,3 | 0 1 2 12 1000 1000 1000 1000 954 976 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,2,median,0.10,2 | 0 1 2 12 1000 1000 1000 1000 954 978 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,2,median,0.25,0 | 0 1 2 12 1000 1000 1000 1000 954 867 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,2,median,0.25,3 | 0 1 2 12 1000 1000 1000 1000 954 972 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,2,median,0.25,2 | 0 1 2 12 1000 1000 1000 1000 954 974 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,2,median,0.50,0 | 0 1 2 12 1000 1000 1000 1000 954 837 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,2,median,0.50,3 | 0 1 2 12 1000 1000 1000 1000 954 968 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,2,median,0.50,2 | 0 1 2 12 1000 1000 1000 1000 954 971 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.10,0 | 0 1 2 12 1000 1000 1000 1000 954 884 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,5,median,0.10,3 | 0 1 2 12 1000 1000 1000 1000 954 976 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.10,2 | 0 1 2 12 1000 1000 1000 1000 954 978 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.25,0 | 0 1 2 12 1000 1000 1000 1000 954 867 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,5,median,0.25,3 | 0 1 2 12 1000 1000 1000 1000 954 972 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.25,2 | 0 1 2 12 1000 1000 1000 1000 954 974 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.50,0 | 0 1 2 12 1000 1000 1000 1000 954 837 1 123 921 0 0 48 258 297 | true | false | 0.062000",
+   "mean,2.00,5,median,0.50,3 | 0 1 2 12 1000 1000 1000 1000 954 968 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.00,5,median,0.50,2 | 0 1 2 12 1000 1000 1000 1000 954 971 1 123 921 0 0 48 258 297 | true | true | 0.062000",
+   "mean,2.50,2,median,0.10,0 | 0 0 1 6 1000 1000 1000 1000 911 884 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,2,median,0.10,3 | 0 0 1 6 1000 1000 1000 1000 911 976 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,2,median,0.10,2 | 0 0 1 6 1000 1000 1000 1000 911 978 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,2,median,0.25,0 | 0 0 1 6 1000 1000 1000 1000 911 867 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,2,median,0.25,3 | 0 0 1 6 1000 1000 1000 1000 911 972 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,2,median,0.25,2 | 0 0 1 6 1000 1000 1000 1000 911 974 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,2,median,0.50,0 | 0 0 1 6 1000 1000 1000 1000 911 837 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,2,median,0.50,3 | 0 0 1 6 1000 1000 1000 1000 911 968 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,2,median,0.50,2 | 0 0 1 6 1000 1000 1000 1000 911 971 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.10,0 | 0 0 1 6 1000 1000 1000 1000 911 884 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,5,median,0.10,3 | 0 0 1 6 1000 1000 1000 1000 911 976 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.10,2 | 0 0 1 6 1000 1000 1000 1000 911 978 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.25,0 | 0 0 1 6 1000 1000 1000 1000 911 867 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,5,median,0.25,3 | 0 0 1 6 1000 1000 1000 1000 911 972 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.25,2 | 0 0 1 6 1000 1000 1000 1000 911 974 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.50,0 | 0 0 1 6 1000 1000 1000 1000 911 837 0 72 865 0 0 23 186 162 | true | false | 0.036000",
+   "mean,2.50,5,median,0.50,3 | 0 0 1 6 1000 1000 1000 1000 911 968 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,2.50,5,median,0.50,2 | 0 0 1 6 1000 1000 1000 1000 911 971 0 72 865 0 0 23 186 162 | true | true | 0.036000",
+   "mean,3.00,2,median,0.10,0 | 0 0 1 1 1000 1000 1000 1000 858 884 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.10,3 | 0 0 1 1 1000 1000 1000 1000 858 976 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.10,2 | 0 0 1 1 1000 1000 1000 1000 858 978 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.25,0 | 0 0 1 1 1000 1000 1000 1000 858 867 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.25,3 | 0 0 1 1 1000 1000 1000 1000 858 972 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.25,2 | 0 0 1 1 1000 1000 1000 1000 858 974 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.50,0 | 0 0 1 1 1000 1000 1000 1000 858 837 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.50,3 | 0 0 1 1 1000 1000 1000 1000 858 968 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,2,median,0.50,2 | 0 0 1 1 1000 1000 1000 1000 858 971 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.10,0 | 0 0 1 1 1000 1000 1000 1000 858 884 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.10,3 | 0 0 1 1 1000 1000 1000 1000 858 976 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.10,2 | 0 0 1 1 1000 1000 1000 1000 858 978 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.25,0 | 0 0 1 1 1000 1000 1000 1000 858 867 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.25,3 | 0 0 1 1 1000 1000 1000 1000 858 972 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.25,2 | 0 0 1 1 1000 1000 1000 1000 858 974 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.50,0 | 0 0 1 1 1000 1000 1000 1000 858 837 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.50,3 | 0 0 1 1 1000 1000 1000 1000 858 968 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "mean,3.00,5,median,0.50,2 | 0 0 1 1 1000 1000 1000 1000 858 971 0 44 814 0 0 17 166 77 | true | false | 0.022000",
+   "median,0.10,2,mean,0.10,0 | 213 550 381 712 1000 1000 1000 1000 999 902 781 986 1000 166 450 920 905 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.10,3 | 213 550 381 712 1000 1000 1000 1000 999 1000 781 986 1000 166 450 920 912 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.10,2 | 213 550 382 712 1000 1000 1000 1000 999 1000 781 986 1000 166 452 920 920 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.25,0 | 213 550 381 712 1000 1000 1000 1000 999 886 781 986 1000 166 450 920 905 992 | false | false | 0.883500",
+   "median,0.10,2,mean,0.25,3 | 213 550 381 712 1000 1000 1000 1000 999 1000 781 986 1000 166 450 920 912 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.25,2 | 213 550 382 712 1000 1000 1000 1000 999 1000 781 986 1000 166 452 920 920 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.50,0 | 213 550 381 712 1000 1000 1000 1000 999 873 781 986 1000 166 450 920 904 992 | false | false | 0.883500",
+   "median,0.10,2,mean,0.50,3 | 213 550 381 712 1000 1000 1000 1000 999 1000 781 986 1000 166 450 920 912 992 | false | true | 0.883500",
+   "median,0.10,2,mean,0.50,2 | 213 550 382 712 1000 1000 1000 1000 999 1000 781 986 1000 166 452 920 920 992 | false | true | 0.883500",
+   "median,0.10,5,mean,0.10,0 | 1 54 98 291 1000 1000 1000 1000 997 902 147 759 1000 0 121 649 821 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.10,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.10,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.25,0 | 1 54 98 291 1000 1000 1000 1000 997 886 147 759 1000 0 121 649 821 879 | false | false | 0.453000",
+   "median,0.10,5,mean,0.25,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.25,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.50,0 | 1 54 98 291 1000 1000 1000 1000 997 873 147 759 1000 0 121 649 820 879 | false | false | 0.453000",
+   "median,0.10,5,mean,0.50,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.10,5,mean,0.50,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.25,2,mean,0.10,0 | 182 510 331 668 1000 1000 1000 1000 999 887 749 977 1000 166 343 887 889 989 | false | false | 0.863000",
+   "median,0.25,2,mean,0.10,3 | 182 510 331 668 1000 1000 1000 1000 999 1000 749 977 1000 166 343 887 898 989 | false | true | 0.863000",
+   "median,0.25,2,mean,0.10,2 | 182 510 332 668 1000 1000 1000 1000 999 1000 749 977 1000 166 345 887 908 989 | false | true | 0.863000",
+   "median,0.25,2,mean,0.25,0 | 182 510 331 668 1000 1000 1000 1000 999 854 749 977 1000 166 343 887 889 989 | false | false | 0.863000",
+   "median,0.25,2,mean,0.25,3 | 182 510 331 668 1000 1000 1000 1000 999 1000 749 977 1000 166 343 887 898 989 | false | true | 0.863000",
+   "median,0.25,2,mean,0.25,2 | 182 510 332 668 1000 1000 1000 1000 999 1000 749 977 1000 166 345 887 908 989 | false | true | 0.863000",
+   "median,0.25,2,mean,0.50,0 | 182 510 331 668 1000 1000 1000 1000 999 820 749 977 1000 166 343 887 888 989 | false | false | 0.863000",
+   "median,0.25,2,mean,0.50,3 | 182 510 331 668 1000 1000 1000 1000 999 1000 749 977 1000 166 343 887 898 989 | false | true | 0.863000",
+   "median,0.25,2,mean,0.50,2 | 182 510 332 668 1000 1000 1000 1000 999 1000 749 977 1000 166 345 887 908 989 | false | true | 0.863000",
+   "median,0.25,5,mean,0.10,0 | 1 54 98 291 1000 1000 1000 1000 997 887 147 759 1000 0 121 649 821 879 | false | false | 0.453000",
+   "median,0.25,5,mean,0.10,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.25,5,mean,0.10,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.25,5,mean,0.25,0 | 1 54 98 291 1000 1000 1000 1000 997 854 147 759 1000 0 121 649 821 879 | false | false | 0.453000",
+   "median,0.25,5,mean,0.25,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.25,5,mean,0.25,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.25,5,mean,0.50,0 | 1 54 98 291 1000 1000 1000 1000 997 820 147 759 1000 0 121 649 820 879 | false | false | 0.453000",
+   "median,0.25,5,mean,0.50,3 | 1 54 98 291 1000 1000 1000 1000 997 1000 147 759 1000 0 121 649 830 879 | false | true | 0.453000",
+   "median,0.25,5,mean,0.50,2 | 1 54 99 291 1000 1000 1000 1000 997 1000 147 759 1000 0 123 649 842 879 | false | true | 0.453000",
+   "median,0.50,2,mean,0.10,0 | 15 182 126 393 1000 1000 1000 1000 997 885 322 844 1000 31 121 674 827 914 | false | false | 0.583000",
+   "median,0.50,2,mean,0.10,3 | 15 182 126 393 1000 1000 1000 1000 997 1000 322 844 1000 31 121 674 837 914 | false | true | 0.583000",
+   "median,0.50,2,mean,0.10,2 | 15 182 127 393 1000 1000 1000 1000 997 1000 322 844 1000 31 123 674 850 914 | false | true | 0.583000",
+   "median,0.50,2,mean,0.25,0 | 15 182 126 393 1000 1000 1000 1000 997 840 322 844 1000 31 121 674 827 914 | false | false | 0.583000",
+   "median,0.50,2,mean,0.25,3 | 15 182 126 393 1000 1000 1000 1000 997 1000 322 844 1000 31 121 674 837 914 | false | true | 0.583000",
+   "median,0.50,2,mean,0.25,2 | 15 182 127 393 1000 1000 1000 1000 997 1000 322 844 1000 31 123 674 850 914 | false | true | 0.583000",
+   "median,0.50,2,mean,0.50,0 | 15 182 126 393 1000 1000 1000 1000 997 774 322 844 1000 31 121 674 826 914 | false | false | 0.583000",
+   "median,0.50,2,mean,0.50,3 | 15 182 126 393 1000 1000 1000 1000 997 1000 322 844 1000 31 121 674 837 914 | false | true | 0.583000",
+   "median,0.50,2,mean,0.50,2 | 15 182 127 393 1000 1000 1000 1000 997 1000 322 844 1000 31 123 674 850 914 | false | true | 0.583000",
+   "median,0.50,5,mean,0.10,0 | 1 54 97 290 1000 1000 1000 1000 997 885 147 759 1000 0 108 636 814 878 | false | false | 0.453000",
+   "median,0.50,5,mean,0.10,3 | 1 54 97 290 1000 1000 1000 1000 997 1000 147 759 1000 0 108 636 824 878 | false | true | 0.453000",
+   "median,0.50,5,mean,0.10,2 | 1 54 98 290 1000 1000 1000 1000 997 1000 147 759 1000 0 110 636 837 878 | false | true | 0.453000",
+   "median,0.50,5,mean,0.25,0 | 1 54 97 290 1000 1000 1000 1000 997 840 147 759 1000 0 108 636 814 878 | false | false | 0.453000",
+   "median,0.50,5,mean,0.25,3 | 1 54 97 290 1000 1000 1000 1000 997 1000 147 759 1000 0 108 636 824 878 | false | true | 0.453000",
+   "median,0.50,5,mean,0.25,2 | 1 54 98 290 1000 1000 1000 1000 997 1000 147 759 1000 0 110 636 837 878 | false | true | 0.453000",
+   "median,0.50,5,mean,0.50,0 | 1 54 97 290 1000 1000 1000 1000 997 774 147 759 1000 0 108 636 813 878 | false | false | 0.453000",
+   "median,0.50,5,mean,0.50,3 | 1 54 97 290 1000 1000 1000 1000 997 1000 147 759 1000 0 108 636 824 878 | false | true | 0.453000",
+   "median,0.50,5,mean,0.50,2 | 1 54 98 290 1000 1000 1000 1000 997 1000 147 759 1000 0 110 636 837 878 | false | true | 0.453000",
+   "median,1.00,2,mean,0.10,0 | 0 6 57 173 1000 1000 1000 1000 994 885 40 455 994 0 42 349 760 659 | false | false | 0.247500",
+   "median,1.00,2,mean,0.10,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 770 659 | false | true | 0.247500",
+   "median,1.00,2,mean,0.10,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.00,2,mean,0.25,0 | 0 6 57 173 1000 1000 1000 1000 994 838 40 455 994 0 42 349 760 659 | false | false | 0.247500",
+   "median,1.00,2,mean,0.25,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 770 659 | false | true | 0.247500",
+   "median,1.00,2,mean,0.25,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.00,2,mean,0.50,0 | 0 6 57 173 1000 1000 1000 1000 994 767 40 455 994 0 42 349 757 659 | false | false | 0.247500",
+   "median,1.00,2,mean,0.50,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 769 659 | false | true | 0.247500",
+   "median,1.00,2,mean,0.50,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.10,0 | 0 6 57 173 1000 1000 1000 1000 994 885 40 455 994 0 42 349 760 659 | false | false | 0.247500",
+   "median,1.00,5,mean,0.10,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 770 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.10,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.25,0 | 0 6 57 173 1000 1000 1000 1000 994 838 40 455 994 0 42 349 760 659 | false | false | 0.247500",
+   "median,1.00,5,mean,0.25,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 770 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.25,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.50,0 | 0 6 57 173 1000 1000 1000 1000 994 767 40 455 994 0 42 349 757 659 | false | false | 0.247500",
+   "median,1.00,5,mean,0.50,3 | 0 6 57 173 1000 1000 1000 1000 994 1000 40 455 994 0 42 349 769 659 | false | true | 0.247500",
+   "median,1.00,5,mean,0.50,2 | 0 6 58 173 1000 1000 1000 1000 994 1000 40 455 994 0 44 349 790 659 | false | true | 0.247500",
+   "median,1.25,2,mean,0.10,0 | 0 3 52 150 1000 1000 1000 1000 992 885 21 366 986 0 31 285 745 564 | false | false | 0.193500",
+   "median,1.25,2,mean,0.10,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 755 564 | false | true | 0.193500",
+   "median,1.25,2,mean,0.10,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.25,2,mean,0.25,0 | 0 3 52 150 1000 1000 1000 1000 992 838 21 366 986 0 31 285 745 564 | false | false | 0.193500",
+   "median,1.25,2,mean,0.25,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 755 564 | false | true | 0.193500",
+   "median,1.25,2,mean,0.25,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.25,2,mean,0.50,0 | 0 3 52 150 1000 1000 1000 1000 992 767 21 366 986 0 31 285 742 564 | false | false | 0.193500",
+   "median,1.25,2,mean,0.50,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 754 564 | false | true | 0.193500",
+   "median,1.25,2,mean,0.50,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.10,0 | 0 3 52 150 1000 1000 1000 1000 992 885 21 366 986 0 31 285 745 564 | false | false | 0.193500",
+   "median,1.25,5,mean,0.10,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 755 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.10,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.25,0 | 0 3 52 150 1000 1000 1000 1000 992 838 21 366 986 0 31 285 745 564 | false | false | 0.193500",
+   "median,1.25,5,mean,0.25,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 755 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.25,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.50,0 | 0 3 52 150 1000 1000 1000 1000 992 767 21 366 986 0 31 285 742 564 | false | false | 0.193500",
+   "median,1.25,5,mean,0.50,3 | 0 3 52 150 1000 1000 1000 1000 992 1000 21 366 986 0 31 285 754 564 | false | true | 0.193500",
+   "median,1.25,5,mean,0.50,2 | 0 3 53 150 1000 1000 1000 1000 992 1000 21 366 986 0 33 285 777 564 | false | true | 0.193500",
+   "median,1.50,2,mean,0.10,0 | 0 2 52 140 1000 1000 1000 1000 985 885 15 314 981 0 29 247 738 519 | false | false | 0.164500",
+   "median,1.50,2,mean,0.10,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 749 519 | false | true | 0.164500",
+   "median,1.50,2,mean,0.10,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.50,2,mean,0.25,0 | 0 2 52 140 1000 1000 1000 1000 985 838 15 314 981 0 29 247 738 519 | false | false | 0.164500",
+   "median,1.50,2,mean,0.25,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 749 519 | false | true | 0.164500",
+   "median,1.50,2,mean,0.25,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.50,2,mean,0.50,0 | 0 2 52 140 1000 1000 1000 1000 985 767 15 314 981 0 29 247 735 519 | false | false | 0.164500",
+   "median,1.50,2,mean,0.50,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 748 519 | false | true | 0.164500",
+   "median,1.50,2,mean,0.50,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.10,0 | 0 2 52 140 1000 1000 1000 1000 985 885 15 314 981 0 29 247 738 519 | false | false | 0.164500",
+   "median,1.50,5,mean,0.10,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 749 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.10,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.25,0 | 0 2 52 140 1000 1000 1000 1000 985 838 15 314 981 0 29 247 738 519 | false | false | 0.164500",
+   "median,1.50,5,mean,0.25,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 749 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.25,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.50,0 | 0 2 52 140 1000 1000 1000 1000 985 767 15 314 981 0 29 247 735 519 | false | false | 0.164500",
+   "median,1.50,5,mean,0.50,3 | 0 2 52 140 1000 1000 1000 1000 985 1000 15 314 981 0 29 247 748 519 | false | true | 0.164500",
+   "median,1.50,5,mean,0.50,2 | 0 2 53 140 1000 1000 1000 1000 985 1000 15 314 981 0 31 247 771 519 | false | true | 0.164500",
+   "median,1.75,2,mean,0.10,0 | 0 2 52 137 1000 1000 1000 1000 980 885 14 287 977 0 29 237 728 476 | false | false | 0.150500",
+   "median,1.75,2,mean,0.10,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 739 476 | false | true | 0.150500",
+   "median,1.75,2,mean,0.10,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,1.75,2,mean,0.25,0 | 0 2 52 137 1000 1000 1000 1000 980 838 14 287 977 0 29 237 728 476 | false | false | 0.150500",
+   "median,1.75,2,mean,0.25,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 739 476 | false | true | 0.150500",
+   "median,1.75,2,mean,0.25,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,1.75,2,mean,0.50,0 | 0 2 52 137 1000 1000 1000 1000 980 767 14 287 977 0 29 237 724 476 | false | false | 0.150500",
+   "median,1.75,2,mean,0.50,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 738 476 | false | true | 0.150500",
+   "median,1.75,2,mean,0.50,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.10,0 | 0 2 52 137 1000 1000 1000 1000 980 885 14 287 977 0 29 237 728 476 | false | false | 0.150500",
+   "median,1.75,5,mean,0.10,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 739 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.10,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.25,0 | 0 2 52 137 1000 1000 1000 1000 980 838 14 287 977 0 29 237 728 476 | false | false | 0.150500",
+   "median,1.75,5,mean,0.25,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 739 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.25,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.50,0 | 0 2 52 137 1000 1000 1000 1000 980 767 14 287 977 0 29 237 724 476 | false | false | 0.150500",
+   "median,1.75,5,mean,0.50,3 | 0 2 52 137 1000 1000 1000 1000 980 1000 14 287 977 0 29 237 738 476 | false | true | 0.150500",
+   "median,1.75,5,mean,0.50,2 | 0 2 53 137 1000 1000 1000 1000 980 1000 14 287 977 0 31 237 763 476 | false | true | 0.150500",
+   "median,2.00,2,mean,0.10,0 | 0 2 52 135 1000 1000 1000 1000 979 885 13 271 969 0 29 232 726 453 | false | false | 0.142000",
+   "median,2.00,2,mean,0.10,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 737 453 | false | true | 0.142000",
+   "median,2.00,2,mean,0.10,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.00,2,mean,0.25,0 | 0 2 52 135 1000 1000 1000 1000 979 838 13 271 969 0 29 232 726 453 | false | false | 0.142000",
+   "median,2.00,2,mean,0.25,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 737 453 | false | true | 0.142000",
+   "median,2.00,2,mean,0.25,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.00,2,mean,0.50,0 | 0 2 52 135 1000 1000 1000 1000 979 767 13 271 969 0 29 232 722 453 | false | false | 0.142000",
+   "median,2.00,2,mean,0.50,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 736 453 | false | true | 0.142000",
+   "median,2.00,2,mean,0.50,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.10,0 | 0 2 52 135 1000 1000 1000 1000 979 885 13 271 969 0 29 232 726 453 | false | false | 0.142000",
+   "median,2.00,5,mean,0.10,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 737 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.10,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.25,0 | 0 2 52 135 1000 1000 1000 1000 979 838 13 271 969 0 29 232 726 453 | false | false | 0.142000",
+   "median,2.00,5,mean,0.25,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 737 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.25,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.50,0 | 0 2 52 135 1000 1000 1000 1000 979 767 13 271 969 0 29 232 722 453 | false | false | 0.142000",
+   "median,2.00,5,mean,0.50,3 | 0 2 52 135 1000 1000 1000 1000 979 1000 13 271 969 0 29 232 736 453 | false | true | 0.142000",
+   "median,2.00,5,mean,0.50,2 | 0 2 53 135 1000 1000 1000 1000 979 1000 13 271 969 0 31 232 761 453 | false | true | 0.142000",
+   "median,2.50,2,mean,0.10,0 | 0 2 52 134 1000 1000 1000 1000 978 885 13 266 966 0 29 231 724 432 | false | false | 0.139500",
+   "median,2.50,2,mean,0.10,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 432 | false | true | 0.139500",
+   "median,2.50,2,mean,0.10,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,2.50,2,mean,0.25,0 | 0 2 52 134 1000 1000 1000 1000 978 838 13 266 966 0 29 231 724 432 | false | false | 0.139500",
+   "median,2.50,2,mean,0.25,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 432 | false | true | 0.139500",
+   "median,2.50,2,mean,0.25,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,2.50,2,mean,0.50,0 | 0 2 52 134 1000 1000 1000 1000 978 767 13 266 966 0 29 231 720 432 | false | false | 0.139500",
+   "median,2.50,2,mean,0.50,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 432 | false | true | 0.139500",
+   "median,2.50,2,mean,0.50,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.10,0 | 0 2 52 134 1000 1000 1000 1000 978 885 13 266 966 0 29 231 724 432 | false | false | 0.139500",
+   "median,2.50,5,mean,0.10,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.10,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.25,0 | 0 2 52 134 1000 1000 1000 1000 978 838 13 266 966 0 29 231 724 432 | false | false | 0.139500",
+   "median,2.50,5,mean,0.25,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.25,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.50,0 | 0 2 52 134 1000 1000 1000 1000 978 767 13 266 966 0 29 231 720 432 | false | false | 0.139500",
+   "median,2.50,5,mean,0.50,3 | 0 2 52 134 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 432 | false | true | 0.139500",
+   "median,2.50,5,mean,0.50,2 | 0 2 53 134 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 432 | false | true | 0.139500",
+   "median,3.00,2,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 724 427 | false | false | 0.139500",
+   "median,3.00,2,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 427 | false | true | 0.139500",
+   "median,3.00,2,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,3.00,2,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 724 427 | false | false | 0.139500",
+   "median,3.00,2,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 427 | false | true | 0.139500",
+   "median,3.00,2,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,3.00,2,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 720 427 | false | false | 0.139500",
+   "median,3.00,2,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 427 | false | true | 0.139500",
+   "median,3.00,2,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.10,0 | 0 2 52 133 1000 1000 1000 1000 978 885 13 266 966 0 29 231 724 427 | false | false | 0.139500",
+   "median,3.00,5,mean,0.10,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.10,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.25,0 | 0 2 52 133 1000 1000 1000 1000 978 838 13 266 966 0 29 231 724 427 | false | false | 0.139500",
+   "median,3.00,5,mean,0.25,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 736 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.25,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.50,0 | 0 2 52 133 1000 1000 1000 1000 978 767 13 266 966 0 29 231 720 427 | false | false | 0.139500",
+   "median,3.00,5,mean,0.50,3 | 0 2 52 133 1000 1000 1000 1000 978 1000 13 266 966 0 29 231 735 427 | false | true | 0.139500",
+   "median,3.00,5,mean,0.50,2 | 0 2 53 133 1000 1000 1000 1000 978 1000 13 266 966 0 31 231 761 427 | false | true | 0.139500",
+   "median,0.10,2,median,0.10,0 | 213 550 367 702 1000 1000 1000 1000 999 898 781 986 1000 166 448 920 875 991 | false | false | 0.883500",
+   "median,0.10,2,median,0.10,3 | 213 550 367 702 1000 1000 1000 1000 999 981 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,2,median,0.10,2 | 213 550 367 702 1000 1000 1000 1000 999 983 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,2,median,0.25,0 | 213 550 367 702 1000 1000 1000 1000 999 889 781 986 1000 166 448 920 875 991 | false | false | 0.883500",
+   "median,0.10,2,median,0.25,3 | 213 550 367 702 1000 1000 1000 1000 999 979 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,2,median,0.25,2 | 213 550 367 702 1000 1000 1000 1000 999 981 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,2,median,0.50,0 | 213 550 367 702 1000 1000 1000 1000 999 882 781 986 1000 166 448 920 875 991 | false | false | 0.883500",
+   "median,0.10,2,median,0.50,3 | 213 550 367 702 1000 1000 1000 1000 999 979 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,2,median,0.50,2 | 213 550 367 702 1000 1000 1000 1000 999 981 781 986 1000 166 448 920 875 991 | false | true | 0.883500",
+   "median,0.10,5,median,0.10,0 | 1 54 65 247 1000 1000 1000 1000 997 898 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.10,5,median,0.10,3 | 1 54 65 247 1000 1000 1000 1000 997 981 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.10,5,median,0.10,2 | 1 54 65 247 1000 1000 1000 1000 997 983 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.10,5,median,0.25,0 | 1 54 65 247 1000 1000 1000 1000 997 889 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.10,5,median,0.25,3 | 1 54 65 247 1000 1000 1000 1000 997 979 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.10,5,median,0.25,2 | 1 54 65 247 1000 1000 1000 1000 997 981 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.10,5,median,0.50,0 | 1 54 65 247 1000 1000 1000 1000 997 882 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.10,5,median,0.50,3 | 1 54 65 247 1000 1000 1000 1000 997 979 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.10,5,median,0.50,2 | 1 54 65 247 1000 1000 1000 1000 997 981 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,2,median,0.10,0 | 182 510 316 656 1000 1000 1000 1000 999 884 749 977 1000 166 341 887 852 988 | false | false | 0.863000",
+   "median,0.25,2,median,0.10,3 | 182 510 316 656 1000 1000 1000 1000 999 976 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,2,median,0.10,2 | 182 510 316 656 1000 1000 1000 1000 999 978 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,2,median,0.25,0 | 182 510 316 656 1000 1000 1000 1000 999 868 749 977 1000 166 341 887 852 988 | false | false | 0.863000",
+   "median,0.25,2,median,0.25,3 | 182 510 316 656 1000 1000 1000 1000 999 973 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,2,median,0.25,2 | 182 510 316 656 1000 1000 1000 1000 999 975 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,2,median,0.50,0 | 182 510 316 656 1000 1000 1000 1000 999 849 749 977 1000 166 341 887 852 988 | false | false | 0.863000",
+   "median,0.25,2,median,0.50,3 | 182 510 316 656 1000 1000 1000 1000 999 973 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,2,median,0.50,2 | 182 510 316 656 1000 1000 1000 1000 999 975 749 977 1000 166 341 887 852 988 | false | true | 0.863000",
+   "median,0.25,5,median,0.10,0 | 1 54 65 247 1000 1000 1000 1000 997 884 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.25,5,median,0.10,3 | 1 54 65 247 1000 1000 1000 1000 997 976 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,5,median,0.10,2 | 1 54 65 247 1000 1000 1000 1000 997 978 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,5,median,0.25,0 | 1 54 65 247 1000 1000 1000 1000 997 868 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.25,5,median,0.25,3 | 1 54 65 247 1000 1000 1000 1000 997 973 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,5,median,0.25,2 | 1 54 65 247 1000 1000 1000 1000 997 975 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,5,median,0.50,0 | 1 54 65 247 1000 1000 1000 1000 997 849 143 755 1000 0 115 641 721 876 | false | false | 0.449000",
+   "median,0.25,5,median,0.50,3 | 1 54 65 247 1000 1000 1000 1000 997 973 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.25,5,median,0.50,2 | 1 54 65 247 1000 1000 1000 1000 997 975 143 755 1000 0 115 641 721 876 | false | true | 0.449000",
+   "median,0.50,2,median,0.10,0 | 15 182 96 359 1000 1000 1000 1000 997 884 320 841 1000 31 114 666 731 911 | false | false | 0.580500",
+   "median,0.50,2,median,0.10,3 | 15 182 96 359 1000 1000 1000 1000 997 976 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,2,median,0.10,2 | 15 182 96 359 1000 1000 1000 1000 997 978 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,2,median,0.25,0 | 15 182 96 359 1000 1000 1000 1000 997 867 320 841 1000 31 114 666 731 911 | false | false | 0.580500",
+   "median,0.50,2,median,0.25,3 | 15 182 96 359 1000 1000 1000 1000 997 972 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,2,median,0.25,2 | 15 182 96 359 1000 1000 1000 1000 997 974 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,2,median,0.50,0 | 15 182 96 359 1000 1000 1000 1000 997 837 320 841 1000 31 114 666 731 911 | false | false | 0.580500",
+   "median,0.50,2,median,0.50,3 | 15 182 96 359 1000 1000 1000 1000 997 968 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,2,median,0.50,2 | 15 182 96 359 1000 1000 1000 1000 997 971 320 841 1000 31 114 666 731 911 | false | true | 0.580500",
+   "median,0.50,5,median,0.10,0 | 1 54 63 245 1000 1000 1000 1000 997 884 143 755 1000 0 100 628 704 875 | false | false | 0.449000",
+   "median,0.50,5,median,0.10,3 | 1 54 63 245 1000 1000 1000 1000 997 976 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,0.50,5,median,0.10,2 | 1 54 63 245 1000 1000 1000 1000 997 978 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,0.50,5,median,0.25,0 | 1 54 63 245 1000 1000 1000 1000 997 867 143 755 1000 0 100 628 704 875 | false | false | 0.449000",
+   "median,0.50,5,median,0.25,3 | 1 54 63 245 1000 1000 1000 1000 997 972 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,0.50,5,median,0.25,2 | 1 54 63 245 1000 1000 1000 1000 997 974 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,0.50,5,median,0.50,0 | 1 54 63 245 1000 1000 1000 1000 997 837 143 755 1000 0 100 628 704 875 | false | false | 0.449000",
+   "median,0.50,5,median,0.50,3 | 1 54 63 245 1000 1000 1000 1000 997 968 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,0.50,5,median,0.50,2 | 1 54 63 245 1000 1000 1000 1000 997 971 143 755 1000 0 100 628 704 875 | false | true | 0.449000",
+   "median,1.00,2,median,0.10,0 | 0 6 16 92 1000 1000 1000 1000 991 884 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,2,median,0.10,3 | 0 6 16 92 1000 1000 1000 1000 991 976 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,2,median,0.10,2 | 0 6 16 92 1000 1000 1000 1000 991 978 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,2,median,0.25,0 | 0 6 16 92 1000 1000 1000 1000 991 867 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,2,median,0.25,3 | 0 6 16 92 1000 1000 1000 1000 991 972 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,2,median,0.25,2 | 0 6 16 92 1000 1000 1000 1000 991 974 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,2,median,0.50,0 | 0 6 16 92 1000 1000 1000 1000 991 837 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,2,median,0.50,3 | 0 6 16 92 1000 1000 1000 1000 991 968 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,2,median,0.50,2 | 0 6 16 92 1000 1000 1000 1000 991 971 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.10,0 | 0 6 16 92 1000 1000 1000 1000 991 884 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,5,median,0.10,3 | 0 6 16 92 1000 1000 1000 1000 991 976 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.10,2 | 0 6 16 92 1000 1000 1000 1000 991 978 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.25,0 | 0 6 16 92 1000 1000 1000 1000 991 867 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,5,median,0.25,3 | 0 6 16 92 1000 1000 1000 1000 991 972 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.25,2 | 0 6 16 92 1000 1000 1000 1000 991 974 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.50,0 | 0 6 16 92 1000 1000 1000 1000 991 837 31 428 993 0 25 313 530 628 | false | false | 0.229500",
+   "median,1.00,5,median,0.50,3 | 0 6 16 92 1000 1000 1000 1000 991 968 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.00,5,median,0.50,2 | 0 6 16 92 1000 1000 1000 1000 991 971 31 428 993 0 25 313 530 628 | false | true | 0.229500",
+   "median,1.25,2,median,0.10,0 | 0 3 8 56 1000 1000 1000 1000 983 884 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,2,median,0.10,3 | 0 3 8 56 1000 1000 1000 1000 983 976 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,2,median,0.10,2 | 0 3 8 56 1000 1000 1000 1000 983 978 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,2,median,0.25,0 | 0 3 8 56 1000 1000 1000 1000 983 867 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,2,median,0.25,3 | 0 3 8 56 1000 1000 1000 1000 983 972 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,2,median,0.25,2 | 0 3 8 56 1000 1000 1000 1000 983 974 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,2,median,0.50,0 | 0 3 8 56 1000 1000 1000 1000 983 837 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,2,median,0.50,3 | 0 3 8 56 1000 1000 1000 1000 983 968 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,2,median,0.50,2 | 0 3 8 56 1000 1000 1000 1000 983 971 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.10,0 | 0 3 8 56 1000 1000 1000 1000 983 884 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,5,median,0.10,3 | 0 3 8 56 1000 1000 1000 1000 983 976 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.10,2 | 0 3 8 56 1000 1000 1000 1000 983 978 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.25,0 | 0 3 8 56 1000 1000 1000 1000 983 867 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,5,median,0.25,3 | 0 3 8 56 1000 1000 1000 1000 983 972 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.25,2 | 0 3 8 56 1000 1000 1000 1000 983 974 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.50,0 | 0 3 8 56 1000 1000 1000 1000 983 837 11 305 978 0 10 216 449 504 | false | false | 0.158000",
+   "median,1.25,5,median,0.50,3 | 0 3 8 56 1000 1000 1000 1000 983 968 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.25,5,median,0.50,2 | 0 3 8 56 1000 1000 1000 1000 983 971 11 305 978 0 10 216 449 504 | false | true | 0.158000",
+   "median,1.50,2,median,0.10,0 | 0 0 4 33 1000 1000 1000 1000 967 884 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,2,median,0.10,3 | 0 0 4 33 1000 1000 1000 1000 967 976 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,2,median,0.10,2 | 0 0 4 33 1000 1000 1000 1000 967 978 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,2,median,0.25,0 | 0 0 4 33 1000 1000 1000 1000 967 867 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,2,median,0.25,3 | 0 0 4 33 1000 1000 1000 1000 967 972 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,2,median,0.25,2 | 0 0 4 33 1000 1000 1000 1000 967 974 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,2,median,0.50,0 | 0 0 4 33 1000 1000 1000 1000 967 837 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,2,median,0.50,3 | 0 0 4 33 1000 1000 1000 1000 967 968 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,2,median,0.50,2 | 0 0 4 33 1000 1000 1000 1000 967 971 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.10,0 | 0 0 4 33 1000 1000 1000 1000 967 884 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,5,median,0.10,3 | 0 0 4 33 1000 1000 1000 1000 967 976 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.10,2 | 0 0 4 33 1000 1000 1000 1000 967 978 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.25,0 | 0 0 4 33 1000 1000 1000 1000 967 867 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,5,median,0.25,3 | 0 0 4 33 1000 1000 1000 1000 967 972 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.25,2 | 0 0 4 33 1000 1000 1000 1000 967 974 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.50,0 | 0 0 4 33 1000 1000 1000 1000 967 837 4 225 963 0 3 138 399 428 | true | false | 0.114500",
+   "median,1.50,5,median,0.50,3 | 0 0 4 33 1000 1000 1000 1000 967 968 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.50,5,median,0.50,2 | 0 0 4 33 1000 1000 1000 1000 967 971 4 225 963 0 3 138 399 428 | true | true | 0.114500",
+   "median,1.75,2,median,0.10,0 | 0 0 2 23 1000 1000 1000 1000 948 884 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,2,median,0.10,3 | 0 0 2 23 1000 1000 1000 1000 948 976 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,2,median,0.10,2 | 0 0 2 23 1000 1000 1000 1000 948 978 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,2,median,0.25,0 | 0 0 2 23 1000 1000 1000 1000 948 867 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,2,median,0.25,3 | 0 0 2 23 1000 1000 1000 1000 948 972 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,2,median,0.25,2 | 0 0 2 23 1000 1000 1000 1000 948 974 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,2,median,0.50,0 | 0 0 2 23 1000 1000 1000 1000 948 837 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,2,median,0.50,3 | 0 0 2 23 1000 1000 1000 1000 948 968 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,2,median,0.50,2 | 0 0 2 23 1000 1000 1000 1000 948 971 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.10,0 | 0 0 2 23 1000 1000 1000 1000 948 884 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,5,median,0.10,3 | 0 0 2 23 1000 1000 1000 1000 948 976 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.10,2 | 0 0 2 23 1000 1000 1000 1000 948 978 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.25,0 | 0 0 2 23 1000 1000 1000 1000 948 867 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,5,median,0.25,3 | 0 0 2 23 1000 1000 1000 1000 948 972 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.25,2 | 0 0 2 23 1000 1000 1000 1000 948 974 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.50,0 | 0 0 2 23 1000 1000 1000 1000 948 837 3 166 949 0 3 106 352 347 | true | false | 0.084500",
+   "median,1.75,5,median,0.50,3 | 0 0 2 23 1000 1000 1000 1000 948 968 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,1.75,5,median,0.50,2 | 0 0 2 23 1000 1000 1000 1000 948 971 3 166 949 0 3 106 352 347 | true | true | 0.084500",
+   "median,2.00,2,median,0.10,0 | 0 0 2 15 1000 1000 1000 1000 934 884 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,2,median,0.10,3 | 0 0 2 15 1000 1000 1000 1000 934 976 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,2,median,0.10,2 | 0 0 2 15 1000 1000 1000 1000 934 978 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,2,median,0.25,0 | 0 0 2 15 1000 1000 1000 1000 934 867 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,2,median,0.25,3 | 0 0 2 15 1000 1000 1000 1000 934 972 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,2,median,0.25,2 | 0 0 2 15 1000 1000 1000 1000 934 974 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,2,median,0.50,0 | 0 0 2 15 1000 1000 1000 1000 934 837 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,2,median,0.50,3 | 0 0 2 15 1000 1000 1000 1000 934 968 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,2,median,0.50,2 | 0 0 2 15 1000 1000 1000 1000 934 971 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.10,0 | 0 0 2 15 1000 1000 1000 1000 934 884 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,5,median,0.10,3 | 0 0 2 15 1000 1000 1000 1000 934 976 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.10,2 | 0 0 2 15 1000 1000 1000 1000 934 978 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.25,0 | 0 0 2 15 1000 1000 1000 1000 934 867 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,5,median,0.25,3 | 0 0 2 15 1000 1000 1000 1000 934 972 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.25,2 | 0 0 2 15 1000 1000 1000 1000 934 974 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.50,0 | 0 0 2 15 1000 1000 1000 1000 934 837 2 121 913 0 2 71 315 278 | true | false | 0.061500",
+   "median,2.00,5,median,0.50,3 | 0 0 2 15 1000 1000 1000 1000 934 968 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.00,5,median,0.50,2 | 0 0 2 15 1000 1000 1000 1000 934 971 2 121 913 0 2 71 315 278 | true | true | 0.061500",
+   "median,2.50,2,median,0.10,0 | 0 0 2 9 1000 1000 1000 999 876 884 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.10,3 | 0 0 2 9 1000 1000 1000 999 876 976 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.10,2 | 0 0 2 9 1000 1000 1000 999 876 978 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.25,0 | 0 0 2 9 1000 1000 1000 999 876 867 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.25,3 | 0 0 2 9 1000 1000 1000 999 876 972 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.25,2 | 0 0 2 9 1000 1000 1000 999 876 974 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.50,0 | 0 0 2 9 1000 1000 1000 999 876 837 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.50,3 | 0 0 2 9 1000 1000 1000 999 876 968 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,2,median,0.50,2 | 0 0 2 9 1000 1000 1000 999 876 971 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.10,0 | 0 0 2 9 1000 1000 1000 999 876 884 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.10,3 | 0 0 2 9 1000 1000 1000 999 876 976 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.10,2 | 0 0 2 9 1000 1000 1000 999 876 978 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.25,0 | 0 0 2 9 1000 1000 1000 999 876 867 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.25,3 | 0 0 2 9 1000 1000 1000 999 876 972 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.25,2 | 0 0 2 9 1000 1000 1000 999 876 974 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.50,0 | 0 0 2 9 1000 1000 1000 999 876 837 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.50,3 | 0 0 2 9 1000 1000 1000 999 876 968 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,2.50,5,median,0.50,2 | 0 0 2 9 1000 1000 1000 999 876 971 0 67 872 0 0 35 253 185 | true | false | 0.033500",
+   "median,3.00,2,median,0.10,0 | 0 0 2 3 1000 1000 1000 999 825 884 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.10,3 | 0 0 2 3 1000 1000 1000 999 825 976 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.10,2 | 0 0 2 3 1000 1000 1000 999 825 978 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.25,0 | 0 0 2 3 1000 1000 1000 999 825 867 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.25,3 | 0 0 2 3 1000 1000 1000 999 825 972 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.25,2 | 0 0 2 3 1000 1000 1000 999 825 974 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.50,0 | 0 0 2 3 1000 1000 1000 999 825 837 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.50,3 | 0 0 2 3 1000 1000 1000 999 825 968 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,2,median,0.50,2 | 0 0 2 3 1000 1000 1000 999 825 971 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.10,0 | 0 0 2 3 1000 1000 1000 999 825 884 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.10,3 | 0 0 2 3 1000 1000 1000 999 825 976 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.10,2 | 0 0 2 3 1000 1000 1000 999 825 978 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.25,0 | 0 0 2 3 1000 1000 1000 999 825 867 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.25,3 | 0 0 2 3 1000 1000 1000 999 825 972 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.25,2 | 0 0 2 3 1000 1000 1000 999 825 974 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.50,0 | 0 0 2 3 1000 1000 1000 999 825 837 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.50,3 | 0 0 2 3 1000 1000 1000 999 825 968 0 52 828 0 0 24 207 111 | true | false | 0.026000",
+   "median,3.00,5,median,0.50,2 | 0 0 2 3 1000 1000 1000 999 825 971 0 52 828 0 0 24 207 111 | true | false | 0.026000"
+  ],
+  "eligibleCandidates": 84,
+  "selected": "level mean +150%/2, late median +10%, cap 3",
+  "selectedCandidate": {
+   "name": "level mean +150%/2, late median +10%, cap 3",
+   "levelStatistic": "mean",
+   "levelGrowthFraction": 1.5,
+   "levelGrowthStudies": 2,
+   "lateWorkStatistic": "median",
+   "growthFraction": 0.1,
+   "staleCapStudies": 3,
+   "unstableSeeds": [
+    0,
+    1,
+    5,
+    38,
+    1000,
+    1000,
+    1000,
+    1000,
+    985,
+    976,
+    2,
+    228,
+    966,
+    0,
+    2,
+    124,
+    367,
+    459
+   ],
+   "meetsT1": true,
+   "meetsT2": true,
+   "ladderDetection": 0.115
+  }
+ }
+}

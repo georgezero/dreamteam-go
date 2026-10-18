@@ -17,6 +17,7 @@ wrote them, to test that this build replays them authoritatively.
 | `mini-seed33-dev10.session.json` | 0.2.0-dev.10 (V0.2 Slice 5C.0a, commit 5f9cb94) | mini, seed 33, 45 days, with `mini-seed33-dev10.actions.json` |
 | `mini-seed35-dev11.session.json` | 0.2.0-dev.11 (V0.2 Slice 5C.0b, commit d66208c) | mini, seed 35, 45 days, with `mini-seed35-dev11.actions.json` |
 | `mini-seed37-dev12.session.json` | 0.2.0-dev.12 (V0.2 Slice 5C.1, commit 4e9e175) | mini, seed 37, 45 days, with `mini-seed37-dev12.actions.json` |
+| `mini-seed39-dev13.session.json` | 0.2.0-dev.13 (V0.2 Slice 5C.2, commit dc1c043) | mini, seed 39, 45 days, with `mini-seed39-dev13.actions.json` |
 
 Each was made with its build's binary, from a clean worktree of that commit:
 
@@ -195,4 +196,20 @@ batches are:
 batch mode `v0.2_dev12` with every digest verified
 (`earlier_build_exact`). It continues with the file embedded as the new
 record's prefix (`internal/session/dev12_test.go`). Before 0.2.0-dev.12
+was registered this build refused it as an engine mismatch.
+
+The Slice 5C.2 file was made from dc1c043 with `-scenario mini -seed 39
+-days 45 -actions testdata/sessions/mini-seed39-dev13.actions.json`. Its
+batches are:
+
+* a weekend teleradiology contract for all studies from Oct 31
+  (accepted, `T00001`);
+* an urgent Sunday contract from Nov 8 that overlaps it (refused,
+  `contract_overlap`);
+* `T00001` cancelled on Nov 3 with end Dec 12 (accepted).
+
+0.2.0-dev.14 has the same action set and rules, so the file replays in
+batch mode `v0.2_dev13` with every digest verified
+(`earlier_build_exact`). It continues with the file embedded as the new
+record's prefix (`internal/session/dev13_test.go`). Before 0.2.0-dev.13
 was registered this build refused it as an engine mismatch.

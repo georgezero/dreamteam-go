@@ -73,7 +73,8 @@ def main(sid):
     import hashlib
     if hashlib.sha256(raw).hexdigest() != run["reportSHA256"]:
         raise SystemExit("%s: report.json is not the one run.json pins" % sid)
-    v3 = rep["schema"] == "dreamteam.evalreport/v3"
+    v3 = rep["schema"] in ("dreamteam.evalreport/v3", "dreamteam.evalreport/v4")
+    v4 = rep["schema"] == "dreamteam.evalreport/v4"
     plans = {p["plan"]: p for p in rep["plans"]}
     base = rep["baseline"]
     comps = {c["candidate"]: c for c in rep["comparisons"] if c["against"] == base}
@@ -299,13 +300,66 @@ def main(sid):
             return " / ".join(iv(c["breachRateDelta"].get(win, {}).get(q), 0.01) for q in qs)
         w("| %s | %s | %s | %s |" % (short(n), bd("T90"), bd("tail"), bd("gated", ["urgent"])))
     w("")
+    if v4:
+        v4_summary(w, plans, names, comps, seeds)
     if v3:
-        v3_sections(w, rep, plans, names, comps, base, seeds)
+        v3_sections(w, rep, plans, names, comps, base, seeds, v4)
     open(os.path.join(d, "report.md"), "w").write("\n".join(o))
 
 
-def v3_sections(w, rep, plans, names, comps, base, seeds):
-    w("## Liquidity (v0.2-eval-3)")
+def backlog_v4(w, plans, names, seeds):
+    w("## Backlog checks (v0.2-eval-4)")
+    w("")
+    w("Seeds failing each hard check (workload-adjusted: level (block mean), overdue and exposure (block medians); absolute: stale (median), the stale cap in every block from the reference, persistent), seeds failing the reported-only checks (the v0.2-eval-3 mean at 10% / 2 studies, the peak), the median recovery time after a later block's peak, and the mean workload ratio of the later blocks.")
+    w("")
+    hard = ("level", "overdue", "stale", "exposure", "staleCap", "persistent")
+    w("| Plan | Stable | %s | Reported: mean | Reported: peak | Recovery days (median) | Workload ratio |" % " | ".join(hard))
+    w("|---|---|%s---|---|---|---|" % ("---|" * len(hard)))
+    for n in names:
+        cnt = {c: 0 for c in hard + ("mean", "max")}
+        rec, ratio, nr = [], 0.0, 0
+        for sr in plans[n]["perSeed"]:
+            b = sr["measures"]["backlog"]
+            failed = {c["check"] for c in b["checks"] if not c["pass"]}
+            if b["persistentStudies"] > 0:
+                failed.add("persistent")
+            for c in failed:
+                cnt[c] += 1
+            for lb in b["later"]:
+                rec.append(lb["recoveryDays"] if lb["recoveryDays"] >= 0 else 999)
+            for c in b["checks"]:
+                if c["check"] == "level":
+                    ratio, nr = ratio + c["workloadRatio"], nr + 1
+        rec.sort()
+        m = rec[len(rec) // 2] if rec else None
+        w("| %s | %d / %d | %s | %d | %d | %s | %.3f |" % (short(n), plans[n]["backlogStableSeeds"], len(seeds),
+                                                       " | ".join(str(cnt[c]) for c in hard), cnt["mean"], cnt["max"],
+                                                       "—" if m is None else ("not recovered" if m == 999 else str(m)), ratio / max(nr, 1)))
+    w("")
+
+
+def v4_summary(w, plans, names, comps, seeds):
+    w("## Gates, reported separately (v0.2-eval-4)")
+    w("")
+    w("Each hard gate on its own, then the plan's own T90 operating profit (absolute) and its paired increment against the baseline, $k mean [95% t]. The verdict is the evaluation's.")
+    w("")
+    w("| Plan | Joint clinical service (seeds passing) | Backlog stable seeds | Funding | Solvency | T90 profit | T90 Δ | Verdict | Classification |")
+    w("|---|---|---|---|---|---|---|---|---|")
+    for n in names:
+        p, c = plans[n], comps.get(n)
+        j = p["serviceJoint"]
+        f = c["financial"] if c else None
+        w("| %s | %s (%d / %d) | %d / %d (%s) | %s | %s | %s | %s | %s | %s |" % (
+            short(n), p["serviceStatus"], j["seeds"] - len(j["failingSeeds"]) - len(j["insufficientSeeds"]), j["seeds"],
+            p["backlogStableSeeds"], len(seeds), p["backlogStatus"], p["fundingStatus"], p["solvencyStatus"],
+            iv(f["t90AbsoluteCents"]) if f else "—", iv(f["t90IncrementCents"]) if f else "—",
+            c["verdict"] if c else "(baseline)", c["classification"] if c else "—"))
+    w("")
+
+
+def v3_sections(w, rep, plans, names, comps, base, seeds, v4=False):
+    tag = "since v0.2-eval-3" if v4 else "v0.2-eval-3"
+    w("## Liquidity (%s)" % tag)
     w("")
     w("At the end of observation, $k, mean over seeds. The dated settlement test fails a seed when cash is below *committed* (severance payable, contract minimums, remote fees in flight) plus anything past due; every obligation recognized by the horizon has fallen due and been paid inside the observation (solvency). The 14-day commitment coverage (accrued + committed + future wages above cash at any capture or sample) is reported, never gated.")
     w("")
@@ -321,7 +375,7 @@ def v3_sections(w, rep, plans, names, comps, base, seeds):
             k(mean("futureWagesCents")), k(mean("receivablesCents")), ",".join(str(x) for x in p["fundingGapSeeds"]) or "none",
             len(p["commitmentGapSeeds"]), len(p["seeds"]), pct(cg) + "%", k(p["worstCommitmentGapCents"])))
     w("")
-    w("## Cluster-aware service (v0.2-eval-3)")
+    w("## Cluster-aware service (%s)" % tag)
     w("")
     w("Gated windows: pooled rate with the seed-cluster-robust 95% interval (seeds as the independent units), mean day (weekday-adjusted) and week design effects. Joint rule: empirical pass fraction and the exact one-sided upper bound on the population failing-seed fraction.")
     w("")
@@ -344,32 +398,35 @@ def v3_sections(w, rep, plans, names, comps, base, seeds):
         w("| %s | %d / %d | %.0f%% | %.1f%% |" % (short(n), j["seeds"] - len(j["failingSeeds"]) - len(j["insufficientSeeds"]), j["seeds"],
                                                   100 * j["passFraction"], 100 * j["failingFractionUpperBound"]))
     w("")
-    w("## Backlog checks (v0.2-eval-3)")
-    w("")
-    w("Seeds failing each check (workload-adjusted: mean, max, overdue, exposure; absolute: stale, persistent), and the mean workload ratio of the later blocks.")
-    w("")
-    w("| Plan | Stable | mean | max | overdue | stale | exposure | persistent | Unstable on the peak alone | Workload ratio |")
-    w("|---|---|---|---|---|---|---|---|---|---|")
-    for n in names:
-        cnt = {c: 0 for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")}
-        peak_only, ratio, nr = 0, 0.0, 0
-        for sr in plans[n]["perSeed"]:
-            b = sr["measures"]["backlog"]
-            failed = {c["check"] for c in b["checks"] if not c["pass"]}
-            if b["persistentStudies"] > 0:
-                failed.add("persistent")
-            for c in failed:
-                cnt[c] += 1
-            if failed == {"max"}:
-                peak_only += 1
-            for c in b["checks"]:
-                if c["check"] == "mean":
-                    ratio, nr = ratio + c["workloadRatio"], nr + 1
-        w("| %s | %d / %d | %s | %d | %.3f |" % (short(n), plans[n]["backlogStableSeeds"], len(seeds),
-                                               " | ".join(str(cnt[c]) for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")),
-                                               peak_only, ratio / max(nr, 1)))
-    w("")
-    w("## Financial classification (v0.2-eval-3)")
+    if v4:
+        backlog_v4(w, plans, names, seeds)
+    else:
+        w("## Backlog checks (v0.2-eval-3)")
+        w("")
+        w("Seeds failing each check (workload-adjusted: mean, max, overdue, exposure; absolute: stale, persistent), and the mean workload ratio of the later blocks.")
+        w("")
+        w("| Plan | Stable | mean | max | overdue | stale | exposure | persistent | Unstable on the peak alone | Workload ratio |")
+        w("|---|---|---|---|---|---|---|---|---|---|")
+        for n in names:
+            cnt = {c: 0 for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")}
+            peak_only, ratio, nr = 0, 0.0, 0
+            for sr in plans[n]["perSeed"]:
+                b = sr["measures"]["backlog"]
+                failed = {c["check"] for c in b["checks"] if not c["pass"]}
+                if b["persistentStudies"] > 0:
+                    failed.add("persistent")
+                for c in failed:
+                    cnt[c] += 1
+                if failed == {"max"}:
+                    peak_only += 1
+                for c in b["checks"]:
+                    if c["check"] == "mean":
+                        ratio, nr = ratio + c["workloadRatio"], nr + 1
+            w("| %s | %d / %d | %s | %d | %.3f |" % (short(n), plans[n]["backlogStableSeeds"], len(seeds),
+                                                   " | ".join(str(cnt[c]) for c in ("mean", "max", "overdue", "stale", "exposure", "persistent")),
+                                                   peak_only, ratio / max(nr, 1)))
+        w("")
+    w("## Financial classification (%s)" % tag)
     w("")
     w("$k, mean [95%% t]: the candidate's own profit and its paired increment against %s, T90 (primary), days 31-90 (operating window), T180 (validation); transition obligations outstanding at T90 (severance payable and contract minimums)." % base)
     w("")

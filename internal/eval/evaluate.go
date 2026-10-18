@@ -6,7 +6,7 @@ import (
 	"sort"
 )
 
-const ReportSchema = "dreamteam.evalreport/v3"
+const ReportSchema = "dreamteam.evalreport/v4"
 
 // Verdicts.
 const (

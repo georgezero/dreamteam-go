@@ -127,6 +127,11 @@ SETS = {
     "p5-eval3": ["A-no-action", "B-partial", "C-full-reorganization", "D-full-reading", "E-urgent-tele", "F-broad-tele",
                  "G-partial-broad-tele", "H-weeknight-tele", "E2-urgent-tele-alloc65", "E3-urgent-weeknights-alloc65",
                  "D2-full-reading-alloc65"],
+    # Slice 5C.3: the same strategies, unchanged, re-evaluated under
+    # v0.2-eval-4.
+    "p6-eval4": ["A-no-action", "B-partial", "C-full-reorganization", "D-full-reading", "E-urgent-tele", "F-broad-tele",
+                 "G-partial-broad-tele", "H-weeknight-tele", "E2-urgent-tele-alloc65", "E3-urgent-weeknights-alloc65",
+                 "D2-full-reading-alloc65"],
 }
 
 

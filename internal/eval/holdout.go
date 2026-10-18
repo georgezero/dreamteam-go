@@ -155,7 +155,8 @@ func GuardSeeds(seeds []int64, h *Holdout, holdout []int64) error {
 // Repository paths of the frozen evaluation: the policy in force, the
 // superseded ones (kept byte for byte) and the holdout manifest.
 const (
-	PolicyPath   = "docs/evaluation/policy-v0.2-eval-3.json"
+	PolicyPath   = "docs/evaluation/policy-v0.2-eval-4.json"
+	PolicyV3Path = "docs/evaluation/policy-v0.2-eval-3.json"
 	PolicyV2Path = "docs/evaluation/policy-v0.2-eval-2.json"
 	PolicyV1Path = "docs/evaluation/policy-v0.2.json"
 	HoldoutPath  = "docs/evaluation/holdout-v0.2.json"

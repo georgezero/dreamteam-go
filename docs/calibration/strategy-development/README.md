@@ -318,7 +318,10 @@ results are kept as written.
   (commit 4e9e175), and reproduce there. This build evaluates under
   v0.2-eval-3, so a rerun here refuses to overwrite them.
 * Their re-evaluation under v0.2-eval-3 is set `p5-eval3`
-  (`docs/calibration/policy-5c2`).
+  (`docs/calibration/policy-5c2`). It was evaluated by engine
+  0.2.0-dev.13 (commit dc1c043) and is kept as written.
+* **Since Slice 5C.3** the policy is v0.2-eval-4. The same strategies,
+  unchanged, are set `p6-eval4` (`docs/calibration/backlog-5c3`).
 * New runs commit only `run.json` and the generated tables.
   * `run.json` pins every record, the report and the trajectory by
     digest.

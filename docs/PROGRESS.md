@@ -7,6 +7,122 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.3 — backlog-gate operating characteristics (0.2.0-dev.14)
+
+The owner's backlog decisions on the Slice 5C.2 findings, and a backlog
+rule selected by a prespecified protocol on synthetic queues. Both are
+frozen as **policy v0.2-eval-4** (`docs/evaluation/policy-v0.2-eval-4.json`, SHA-256
+4e277c72…b58ffb6fb3). Design §13.9; rules in
+`docs/evaluation/README.md` §4; protocol, findings and re-evaluation in
+`docs/calibration/backlog-5c3`.
+
+Unchanged:
+
+* the breach gates (12% / 32% / 6%), the joint seed rule and its 10%
+  allowance;
+* case selection, solvency, the dated funding test, and T90 as the
+  primary endpoint;
+* the simulation, staffing, demand, economics and TAT targets;
+* the holdout, which stays sealed. No reference seed was run, and there
+  is no unseal record.
+
+v0.2-eval-3 (digest 0cf4884f…), its README, its operating
+characteristics and its development report are kept byte for byte. No
+primary strategy is chosen.
+
+* **Diagnosis.** v0.2-eval-3 reproduces 5C.2's stable-queue result
+  exactly (191 and 263 of 300). Its false failures are the peak alone
+  (50% stationary, 27% seasonal) and the peak with the mean (13%, 57%).
+  With bursty days, the late-work means also fail.
+* **The rule.**
+  * level: the workload-adjusted block mean, within max(150%, 2
+    studies);
+  * overdue, stale and exposure: block medians, at their old
+    tolerances;
+  * stale cap: 3 studies, in every block from the reference on;
+  * age: 14 days past due, unchanged;
+  * reported only: the peak, recovery time and the old mean check.
+* **How it was selected.**
+  * 720 candidates were scored by the production judge (`judgeBacklog`)
+    on 18 synthetic scenarios, 1000 fresh-stream seeds each.
+  * 84 met T1 (every stable queue's 40-seed rejection ≤ 5%) and T2
+    (every deterioration detected on ≥ 90% of seeds).
+  * The protocol's ladder and tie-break order chose one.
+  * `TestOperatingCharacteristics` checks that the frozen policy is that
+    candidate.
+* **Operating characteristics.**
+  * Stable queues: 0–3.8% of seeds unstable (v0.2-eval-3: 61–92%). The
+    worst 40-seed rejection is 0.017.
+  * Deterioration scenarios: 97.6–100% unstable.
+  * Not detected: a capacity step that leaves the queue stable (10%
+    lost: 23%), and slow erosion (46%). A seasonal queue at utilization
+    0.92 is rejected at 40 seeds with probability 0.56 (sensitivity).
+* **Clustering interpretation** (README §2).
+  * Empirical acceptance, population reliability, false-rejection
+    probability and power are reported apart.
+  * The holdout is a strict empirical acceptance test.
+  * The independent-breach figures are a lower bound on false
+    rejection, not a guarantee.
+* **Development re-evaluation** (`p6-eval4`, seeds 901–910, strategies,
+  records and horizon unchanged):
+  * D2 is CONDITIONAL GO (transition, not yet repaid, restoring service);
+  * E2 and E3 are CONDITIONAL GO (service purchase);
+  * F, G and H are NO GO on solvency; B–E are NO GO on service;
+  * the no-action plan now fails backlog on its overdue median (3 of 10
+    seeds);
+  * service, funding and solvency are identical to v0.2-eval-3.
+* **D2 against E3.**
+
+  | | D2 | E3 |
+  |---|---|---|
+  | Pooled urgent | 9.0% | 2.8% |
+  | Worst seed urgent | 11.6% | 3.7% |
+  | T90 Δ | −$18.8k | −$23.2k |
+
+  Both are backlog-stable on 10 of 10 seeds.
+* **Registration.** 0.2.0-dev.13 is registered (batch mode `v0.2_dev13`).
+  Its fixture is `testdata/sessions/mini-seed39-dev13.*`, recorded by
+  the dev.13 binary from a clean worktree of dc1c043.
+
+**Tests.**
+* `TestBacklogStability` covers each protocol case; `TestPolicyFrozen`
+  checks the v4 → v3 → v2 → v1 chain.
+* `TestSeasonalBacklog`, `TestBacklogSafeguards` and
+  `TestBacklogTrendRotaAligned` keep the earlier rules' cases under
+  v0.2-eval-3 and assert v0.2-eval-4's outcomes beside them.
+* **Fail-before-fix:** 16 targeted mutations, each breaking one new rule
+  (informational counted as hard, statistics, the cap and its
+  reference, level tolerance and scaling, the median, recovery,
+  persistence, policy validation, the superseded schema, the covering
+  block). All 16 are caught. "Level statistic ignored" survived the
+  first pass and is caught after a mean-versus-median surge case was
+  added.
+
+**Verification.**
+* `p6-eval4` ran on joofi and reproduced on the Pi byte for byte:
+  `run.json`, report and trajectory.
+* The operating characteristics were generated on the Pi (old candidate
+  format) and on joofi; every number is identical. The backlog part,
+  recomputed on the Pi (`DT_OC_BACKLOG=1`), equals joofi's committed
+  file byte for byte.
+* The full uncached suite passes (12:39); `go vet` is clean for every
+  tag (none, calibration, acceptance), and gofmt is clean.
+* The dev.13 tests fail without the registration.
+* Holdout sealed (no `holdout-unseal.json`); historical references and
+  v0.2-eval-3 files unchanged.
+
+**Limitations.**
+* The calibration rests on a simple hourly synthetic queue.
+* The candidate family was shaped by exploratory sweeps, though the
+  targets were fixed before them and the confirmatory run used fresh
+  streams.
+* One protocol line was corrected after the run: the per-seed limit is
+  5.06%, not the hand estimate of 3.4%. The selected rule's worst stable
+  scenario (3.8%) meets the actual criterion.
+* Development verdicts rest on 10 seeds and are exploratory.
+
+---
+
 ## V0.2 Slice 5C.2 — policy feasibility, seasonal backlog and cluster-aware service (0.2.0-dev.13)
 
 The owner's corrections to the rules Slice 5C.1 showed to be infeasible

@@ -490,6 +490,26 @@ and the evaluation recorder.
   per-seed measures included).
 
 
+## 2026-10-18 — V0.2 Slice 5C.3, policy v0.2-eval-4 (0.2.0-dev.14)
+
+Raspberry Pi 4 (4 cores, 82–84 °C, soft-throttled) and joofi
+(Cortex-A76, 4 cores, shared).
+
+| Run | Machine | Time |
+|---|---|---|
+| Operating characteristics `DT_OC=1` (exact, Monte Carlo, 144 cluster rows × 4,000 seeds; backlog: 18 scenarios × 1,000 queues × 722 rules, plus 2 × 300 for the 5C.2 reproduction) | Pi 4 | 3,087 s (160% CPU) |
+| The same | joofi | 586 s; every number identical to the Pi's |
+| `DT_OC_BACKLOG=1` (the backlog part recomputed, compared byte for byte with joofi's committed file) | Pi 4 | 2,472 s; identical |
+| `p6-eval4` (11 plans × 10 seeds) | joofi | 213 s |
+| `p6-eval4` reproduction | Pi 4 | 844 s; `run.json`, report and trajectory byte-identical |
+| 16 targeted mutations (each `go test ./internal/eval`) | Pi 4 | about 12 min |
+| Full suite `go test ./... -count=1` | Pi 4 | 759 s (sim 735, session 275, cmd 129, eval 91, tui 30) |
+| Exploratory sweeps (200–300 seeds, 15–17 scenarios, 50–110 rules) | Pi 4 | 5–12 min each |
+
+* One synthetic queue (181 days hour by hour, about 9,400 studies) with
+  its blocks measured takes about 0.08 s.
+* Judging all 722 rules on it takes far less than generating it.
+
 ## 2026-10-18 — V0.2 Slice 5C.2, policy v0.2-eval-3 (0.2.0-dev.13)
 
 Raspberry Pi 4 (4 cores, about 84 °C, soft-throttled) and joofi

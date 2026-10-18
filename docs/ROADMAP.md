@@ -79,11 +79,20 @@ Slice 5C.2 (0.2.0-dev.13, design §13.8) froze policy v0.2-eval-3:
 * a CONDITIONAL GO class for unrepaid transitions.
 
 Re-evaluated on the development seeds, funding no longer fails any plan,
-and D2, E2 and E3 fail only the backlog gate. That gate's operating
-characteristics show it is too noisy for a stable queue (mostly the peak
-check), and its tolerances are an open owner decision. Next: the owner's
-backlog and dependence decisions, one independent review of the whole
-corrected framework, then the frozen strategy set and the unseal record.
+and D2, E2 and E3 failed only the backlog gate.
+
+Slice 5C.3 (0.2.0-dev.14, design §13.9) froze policy v0.2-eval-4:
+* the peak is informational;
+* the workload-adjusted mean has a calibrated tolerance;
+* late work is judged on block medians;
+* a stale cap holds in every block from the reference on;
+* everything was selected by a prespecified protocol on synthetic
+  queues.
+
+On the development seeds D2 is CONDITIONAL GO (transition, not yet
+repaid), and E2 and E3 are CONDITIONAL GO (service purchase). Next: one
+independent review of the whole corrected framework, then the frozen
+strategy set and the unseal record.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 
