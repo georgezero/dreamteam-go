@@ -70,7 +70,16 @@ func profileConfig(t *testing.T) *sim.Config {
 // recordBaseline runs seed with no action to the policy's observation
 // end, recorded as the evaluation records a plan.
 func recordBaseline(p *eval.Policy, cfg *sim.Config, seed int64) eval.Record {
+	return recordBaselineWith(p, cfg, seed, nil)
+}
+
+// recordBaselineWith is recordBaseline with observe called on the new
+// world before it runs (an observer that does not change the run).
+func recordBaselineWith(p *eval.Policy, cfg *sim.Config, seed int64, observe func(*sim.World)) eval.Record {
 	w := sim.NewEvalWorld(cfg, seed)
+	if observe != nil {
+		observe(w)
+	}
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
 	rec := w.NewEvalRecorder("baseline", "", "", seed, p.Finance.EmployeeCommitmentDays)

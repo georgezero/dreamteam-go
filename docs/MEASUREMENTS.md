@@ -590,3 +590,11 @@ was run.
 | Fidelity subset A85, Wg85, M (4,500 seeds) | Pi 4 | 1,970 s test; identical to joofi's entries |
 | Full suite `go test ./... -count=1` at 18b21d6 | Pi 4 | 768 s wall; every package passes (sim 760, session 327, eval 280, cmd 110, tui 32) |
 | 13 targeted mutations of the fidelity model | Pi 4 | about 5 min |
+
+### Acceptance-design closure (478fcbb + this slice's tests)
+
+| Run | Machine | Time |
+|---|---|---|
+| No-action access validation, development seeds 901–910 (`DT_SIM_ACCESS`) | Pi 4 | 84–125 s (three runs; the second byte-identical to the first, the third adds the reporting measures) |
+| Acceptance witnesses W1–W12 (`TestWitness*`, `TestCandidatePolicyFile`) | Pi 4 | about 30 s; 5 of 5 mutations of the access rules caught |
+| Full suite `go test ./... -count=1` | Pi 4 | 756 s wall; every package passes (sim 751, session 325, eval 309, cmd 104, tui 29) |

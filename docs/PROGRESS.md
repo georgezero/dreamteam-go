@@ -7,6 +7,66 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4b closure — clinical acceptance design (0.2.0-dev.16)
+
+The final specification step before v0.2-eval-5
+(`docs/calibration/clinical-5c4b/acceptance-design.md`).
+
+* **Not frozen, and blocked on an owner decision:** urgent access
+  cannot be justified as specified.
+* **No version change:** only tests, test data, a candidate policy
+  outside `docs/evaluation` and documents changed.
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream. The simulator ran with no action on
+  the development seeds.
+
+* **Order lifecycle** (`order-lifecycle.md`): every state, its
+  initiator, and what the evaluation record carries and omits.
+  * The order and acquisition mixes reconcile through loss: **65% of
+    urgent orders are lost at the first offer**. 75% of urgent orders
+    tolerate only the same day, and booking reserves nothing for urgent
+    work.
+  * About two thirds of urgent losses are staffing, the rest booking
+    structure. No plan action changes the booking structure.
+* **Access denominators** (`access-denominators.md`): rules A–J as
+  built, with no survivorship.
+  * Lost and left orders are untimely. Open orders are untimely past
+    the deadline, undecided before it, and insufficient is not a pass.
+  * A patient outcome before the deadline is withdrawn, after it
+    untimely.
+  * The wanted time is fixed.
+  * Inherited orders are timed from the takeover.
+  * **The calendar clock is recommended.** The open-hours clock would
+    hide weekend delay.
+* **No-action simulator access, every eligible order:** urgent 48 h
+  **0.33**, soon 7 days 0.58, routine 30 days 0.83. Of served urgent
+  orders, 99% are within 48 h.
+  * A 90% or 95% urgent threshold rejects every plan.
+  * Options A (as built), B (timeliness of served and open orders, plus
+    a per-priority loss gate against the baseline: recommended) and C
+    are set out for the owner.
+* **Reporting limits on the no-action records** (utilization 0.95, no
+  weekend reading):
+  * urgent 24 h fails 8 of 10 seeds (the weekend gap, as intended);
+  * soon 48 h and routine 14 days hold;
+  * the weekly count of 5 fails every seed for routine (20–37 in the
+    worst week): owner decision.
+* **Candidate policy** (`candidate-policy-v5.json`): v0.2-eval-4 plus
+  the clinical section, a proposal and not in force.
+  `TestCandidatePolicyFile` checks that it changes no v4 rule.
+* **Witnesses W1–W12** (`clinical_witness_test.go`): the audit's
+  delays, lost, cancelled, open and rescheduled urgent orders, the
+  Saturday order, observation boundaries, contradictory data and
+  manipulation. Each has its expected classification, denominator,
+  numerator and outcome, and all pass.
+* **Reserved-stream protocol** (`reserved-validation-protocol.md`): a
+  draft, not runnable until the owner's decisions.
+  * PCG(20261201, ·), verified never used.
+  * It needs one model correction first: the synthetic records'
+    evaluator weeks start on Wednesday.
+
+---
+
 ## V0.2 Slice 5C.4b, concluded — simulator-fidelity calibration (0.2.0-dev.16)
 
 The owner's final calibration correction before choosing the

@@ -24,6 +24,12 @@ implementation decisions in §J).
 | `../../../internal/eval/testdata/sim-profile-5c4b.json` | The measured simulator profile the fidelity model reads. |
 | `../../evaluation/oc-v0.2-eval-5-exploratory-fidelity.json` | The fidelity run's output (joofi; A85, Wg85 and M reproduced identically on the Pi). |
 | `findings-fidelity.md` | What the fidelity run shows: weekday and mix, readers, utilization, warm start, weekend comparison, delay tails, full bundles, the mirror against the simulator, limitations, and the owner's provisional values. |
+| `acceptance-design.md` | The acceptance-design closure: the provisional policy, the stopping point (urgent access cannot be justified as specified), the simulator check of the reporting limits, the witnesses, external validity and the owner decision table. |
+| `candidate-policy-v5.json` | The candidate v5 policy: a proposal, not in force, not frozen. |
+| `order-lifecycle.md` | The simulator's order lifecycle and the reconciliation of orders with acquisitions. |
+| `access-denominators.md` | Access rules A–J, gaming, the calendar and service-opportunity clocks, no-action access. |
+| `sim-access-5c4b.json` | The no-action access validation (development seeds; `internal/sim/clinical_access_test.go`). |
+| `reserved-validation-protocol.md` | The reserved-stream confirmatory protocol: a draft, not runnable until the owner's decisions. |
 
 Code:
 
@@ -50,3 +56,4 @@ Reproduce the runs:
     DT_OC_CORRECTED=1 go test ./internal/eval -run 'TestClinicalOCCorrected$' -v -timeout 600m
     DT_SIM_PROFILE=<file> go test ./internal/sim -run 'TestSimulatorClinicalProfile$' -timeout 60m
     DT_OC_FIDELITY=1 go test ./internal/eval -run 'TestClinicalOCFidelity$' -v -timeout 600m
+    DT_SIM_ACCESS=<file> go test ./internal/sim -run 'TestSimulatorAccessValidation$' -timeout 60m
