@@ -7,6 +7,67 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4b, concluded — simulator-fidelity calibration (0.2.0-dev.16)
+
+The owner's final calibration correction before choosing the
+v0.2-eval-5 values (`docs/calibration/clinical-5c4b/fidelity-protocol.md`,
+committed before any result on its streams; findings in
+`findings-fidelity.md`). There is no version change: only test code,
+test data and documents changed.
+
+* **No v5 policy and no value chosen.**
+* **The simulator was measured, not a strategy.** The evaluation
+  scenario's own practice ran with no action on the development seeds,
+  through the holdout guard. No reference or holdout seed was touched.
+  The profile is `internal/eval/testdata/sim-profile-5c4b.json`.
+* **What the profile shows:**
+  * 51.7 acquisitions a day, Saturday 5.9%;
+  * acquisition mix 1.9 / 11.6 / 86.5% (the order mix is 4.4 / 14.9 /
+    80.7%, most urgent orders being lost);
+  * reading utilization 0.952;
+  * soon breach 0.36;
+  * worst delays about 40–45 h.
+* **The fidelity model:**
+  * the simulator's demand, mix, weekday distribution and acquisition
+    hours (slot-timed);
+  * its two radiologists in their reading blocks, with stochastic read
+    times by modality, the shift-end rule, overrun debt and
+    urgent_then_fifo;
+  * urgent weeknight lanes and a weekend reader;
+  * regimes on the core reading capacity;
+  * a 181-day warm start.
+  * The earlier models and results are unchanged.
+* **Results, 24 scenarios and 36,000 seeds.**
+  * **Calibration:** core load 0.85 and 0.92 achieved. Queues are
+    stable; takeover backlogs are 1 study at p50.
+  * **At 0.85:**
+    * no severe delay;
+    * lenient and moderate bundles reject nothing, every failure being
+      v4's backlog rule;
+    * urgent 24 h, soon 48 h and routine absolute limits are admissible
+      at zero tolerance.
+  * **At 0.92:** 0.2–0.4% of seeds violate urgent 24 h.
+  * **Weekend gap:** worst urgent about 40 h at equal staffing and at
+    equal utilization. A 24–36 h urgent limit violates about 70% of
+    E3-like seeds; 48 h almost none.
+  * **Urgent access within 1 day at 95%** fails every stable seed
+    (Sunday closure). Within 2 days it fails 2–3%.
+  * **Detection:** harmful reading losses are caught by the clinical
+    gates; L10 at 0.85 only by v4's soon gate (clinically mild); imaging
+    losses are absorbed.
+* **The mirror against the simulator.** At the simulator's own load the
+  mirror's breach and severe shares are 1.5–3× the simulator's. The
+  protocol's validity criterion fails, and no simulator-level validity
+  is claimed.
+* **Tests:**
+  * `TestSimProfileDerived`, `TestOCReaders`, `TestOCReaderRules`,
+    `TestOCFidelityCalibration` and
+    `TestClinicalOCFidelityAgreesWithEvaluate`;
+  * 13 of 13 mutations caught;
+  * the full uncached suite, `go vet` and gofmt pass at 18b21d6.
+
+---
+
 ## V0.2 Slice 5C.4b, continued — calibration correction (0.2.0-dev.16)
 
 The exploratory operating characteristics were run and reproduced. The

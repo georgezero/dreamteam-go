@@ -22,6 +22,8 @@ implementation decisions in §J).
 | `findings-corrected.md` | What the corrected run shows: utilization 0.85 and 0.92 as measured, false rejection, the weekend comparison at equal utilization, deterioration with its consequence, the full bundle, and the remaining limitations. |
 | `fidelity-protocol.md` | The final calibration correction: the simulator profile (no action, development seeds), demand, mix and hours from it, individual readers in the simulator's blocks, regimes on core capacity, the mirror's validation; committed before any fidelity result. |
 | `../../../internal/eval/testdata/sim-profile-5c4b.json` | The measured simulator profile the fidelity model reads. |
+| `../../evaluation/oc-v0.2-eval-5-exploratory-fidelity.json` | The fidelity run's output (joofi; A85, Wg85 and M reproduced identically on the Pi). |
+| `findings-fidelity.md` | What the fidelity run shows: weekday and mix, readers, utilization, warm start, weekend comparison, delay tails, full bundles, the mirror against the simulator, limitations, and the owner's provisional values. |
 
 Code:
 
@@ -46,3 +48,5 @@ Reproduce the runs:
 
     DT_OC_CLINICAL=1 go test ./internal/eval -run 'TestClinicalOperatingCharacteristics$' -v -timeout 600m
     DT_OC_CORRECTED=1 go test ./internal/eval -run 'TestClinicalOCCorrected$' -v -timeout 600m
+    DT_SIM_PROFILE=<file> go test ./internal/sim -run 'TestSimulatorClinicalProfile$' -timeout 60m
+    DT_OC_FIDELITY=1 go test ./internal/eval -run 'TestClinicalOCFidelity$' -v -timeout 600m

@@ -580,3 +580,13 @@ was run.
 | The original exploratory run from d11964f | joofi | 18.6 min; byte-identical to the committed output |
 | Corrected subset A85, Wg85, L10-92 (4,500 seeds) | Pi 4 | 1,447 s test; identical to joofi's entries |
 | 10 targeted mutations of the corrected model | Pi 4 | about 4 min |
+
+### Simulator-fidelity calibration (18b21d6)
+
+| Run | Machine | Time |
+|---|---|---|
+| Simulator profile: no action, development seeds 901–910, evaluation scenario | Pi 4 | 67–74 s (four runs during development; the last two byte-identical) |
+| `DT_OC_FIDELITY=1 … TestClinicalOCFidelity` (24 scenarios, 36,000 seeds, individual readers, 181-day warm-up) | joofi, compiled binary | 67.5 min |
+| Fidelity subset A85, Wg85, M (4,500 seeds) | Pi 4 | 1,970 s test; identical to joofi's entries |
+| Full suite `go test ./... -count=1` at 18b21d6 | Pi 4 | 768 s wall; every package passes (sim 760, session 327, eval 280, cmd 110, tui 32) |
+| 13 targeted mutations of the fidelity model | Pi 4 | about 5 min |
