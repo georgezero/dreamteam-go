@@ -45,7 +45,7 @@ type devRun struct {
 // devRunStrategy is runStrategy (the canonical runner's) with the
 // development recorder.
 func devRunStrategy(p *eval.Protocol, cfg *sim.Config, fp string, st eval.Strategy, seed, horizon int64) (eval.Record, error) {
-	w := sim.New(cfg, rng.SeedFromInt(seed))
+	w := sim.NewEvalWorld(cfg, seed)
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
 	rec := w.NewEvalRecorder(st.Name, p.StrategySHA[st.Name], fp, seed, p.Policy.Finance.EmployeeCommitmentDays)

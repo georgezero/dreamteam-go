@@ -9,7 +9,6 @@ import (
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 	"github.com/georgezero/dreamteam-go/internal/eval"
-	"github.com/georgezero/dreamteam-go/internal/rng"
 	"github.com/georgezero/dreamteam-go/internal/sim"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
@@ -49,7 +48,7 @@ func miniWorld(t *testing.T, seed int64, tele bool, before func(*sim.World)) (w 
 	t.Helper()
 	cfg := *miniConfig(t)
 	cfg.EvaluationDays = 0
-	w = sim.New(&cfg, rng.SeedFromInt(seed))
+	w = sim.NewEvalWorld(&cfg, seed)
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
 	if before != nil {

@@ -7,6 +7,97 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4a — audit record, holdout containment, clinical policy proposal (0.2.0-dev.15)
+
+The independent audit of v0.2-eval-4 at 7707dbd gave **NO GO** for the
+confirmatory run. This slice preserves the audit, contains the ordinary
+tests' use of holdout seeds, and specifies, without activating, the
+clinical acceptance rules for a successor policy. Design §13.10.
+
+Unchanged:
+
+* v0.2-eval-4, which stays in force byte for byte, with every earlier
+  policy;
+* the simulation, scenarios, demand, staffing, economics and TAT
+  targets;
+* every strategy file and development result.
+
+Nothing was run on a strategy, a reference seed or a holdout seed. There
+is no unseal record, and no primary strategy is chosen.
+
+* **The audit** is committed separately (e54cdca), as
+  `docs/audits/slice-5c3-eval4-framework-audit.md`.
+  * The auditor's read-only findings are kept as delivered.
+  * A separate maintainer appendix records the four executed witnesses:
+    six urgent reports 8 days late, 30 urgent acquisitions 30 days late,
+    a report 348 h past due seen as 334 h, and an insufficient baseline
+    counted as restored. Each got the verdict the audit predicted. It
+    also records code checks of H3 and H6.
+* **Exposure**, recorded in `docs/evaluation/holdout-exposure-5c4a.md`.
+  * From Slice 5C.0b, `TestHoldoutRecordersGuarded` built a
+    mini-scenario world on the first real holdout seed, ran it to the
+    takeover only, and checked that the recorders refuse it.
+  * Guard tests also regenerated the seeds in memory.
+  * There was seed use, but no outcome was disclosed and no
+    confirmatory run took place. The holdout is kept (owner decision).
+* **Containment.**
+  * The guard tests use synthetic holdout manifests.
+  * `NewEvalWorld` refuses a holdout seed before any world is built.
+    The development runner and the recorder tests use it.
+  * `Authorize` refuses a sealed holdout before regenerating seeds.
+  * `TestHoldoutContainment` reads all Go source and fails on any
+    unreviewed site that names the manifest, regenerates its seeds or
+    authorizes with the repository's paths.
+* **Clinical policy proposal**, in
+  `docs/evaluation/proposals/v5-clinical-acceptance.md`. It is not
+  active.
+  * Exact-timestamp severe-delay rules: the age limit made zero
+    tolerance, priority maximums, and the incidence and weekly
+    concentration of severe delays.
+  * Wanted-to-acquisition access, with no survivorship: a timely
+    fraction and a maximum wait.
+  * One shared four-seed clinical allowance, with absolute limits kept
+    apart.
+  * v0.2-eval-4's backlog rule kept; its 150% allowance documented as a
+    ceiling of 250% of the adjusted reference.
+  * Every numerical limit is an owner decision. The proposal states the
+    scenario's structural weekend delay (urgent up to about 40.5 h past
+    due without weekend reading). It also states the cost of the shared
+    allowance: under independence the stable seasonal-bursty queue's
+    40-seed false rejection rises from about 0.05 to 0.22.
+  * A 15-case synthetic acceptance test plan is set out for 5C.4b.
+* **README.** v0.2-eval-4's README states the 250% ceiling and that the
+  age limit is sampled, and records the audit and the proposal.
+* **Session replay.** 0.2.0-dev.14 is registered: batch mode
+  `v0.2_dev14`, with fixture `mini-seed41-dev14` recorded by the 7707dbd
+  binary.
+
+**Tests.**
+
+* New: `TestHoldoutContainment`, `TestGuardSeeds`,
+  `TestAuthorizeSealedFirst`, and `TestDev14RecordReplays` and
+  `TestDev14RecordContinues`.
+* Rewritten on synthetic fixtures: `TestHoldoutRecordersGuarded` and
+  `TestGuardRepo`.
+* `TestHoldoutSealed` keeps only the integrity checks of the real
+  manifest.
+* Six mutations are each caught:
+  * the guard removed from `NewEvalWorld`;
+  * a new manifest-path reference;
+  * a non-synthetic `HoldoutSeeds` label;
+  * a new `Authorize(RepoPaths)` site;
+  * the old real-manifest guard test restored;
+  * the dev.14 registration removed.
+* The pre-fix `Authorize` order fails `TestAuthorizeSealedFirst`.
+
+**Limitations.**
+
+* The guards still regenerate the real seeds in memory in order to
+  refuse them.
+* The manifest lets anyone with the repository regenerate the seeds.
+* The containment test checks names, not data flow.
+* Custody, approval binding and run-once are Slice 5C.4c's.
+
 ## V0.2 Slice 5C.3 — backlog-gate operating characteristics (0.2.0-dev.14)
 
 The owner's backlog decisions on the Slice 5C.2 findings, and a backlog

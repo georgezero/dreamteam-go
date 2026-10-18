@@ -25,6 +25,19 @@ clustering (§2). Every other rule of v0.2-eval-3 is unchanged:
 v0.2-eval-3 and its README (`README-v0.2-eval-3.md`) are kept byte for
 byte, and its development report is unchanged.
 
+**Independent audit and the proposed successor** (Slice 5C.4a).
+* **Audit.** The read-only audit of this framework at 7707dbd
+  ([`../audits/slice-5c3-eval4-framework-audit.md`](../audits/slice-5c3-eval4-framework-audit.md))
+  found it **NO GO for the confirmatory run**. Executed witnesses show
+  that severe reporting delays (H1) and delayed access (H2) can pass
+  every clinical gate.
+* **Proposal.** A successor, v0.2-eval-5, is proposed in
+  [`proposals/v5-clinical-acceptance.md`](proposals/v5-clinical-acceptance.md).
+  It is **not active**.
+* **v0.2-eval-4 stays in force.** It is unchanged, byte for byte.
+* **Exposure.** The limited use of holdout seeds by ordinary tests is
+  recorded in [`holdout-exposure-5c4a.md`](holdout-exposure-5c4a.md).
+
 **v0.2-eval-3** (Slice 5C.2) superseded v0.2-eval-2. It made four
 corrections:
 * funding became a dated settlement test;
@@ -367,6 +380,18 @@ The checks of each later block against the reference:
 | Peak | Largest daily count | × w | max(10%, 2 studies) | reported |
 | Recovery | Days from the block's peak to the first sample at or below the scaled reference mean (−1: not recovered through the covering block) | — | — | reported |
 
+* **The level allowance in full** [audit H1, Slice 5C.4a].
+  * The check passes when B_later ≤ w·B_ref + max(1.5·w·B_ref, 2 studies).
+  * So "150%" is the allowance *above* the workload-adjusted reference.
+    The ceiling is **250% of it** (2.5 × w·B_ref), or the reference plus
+    2 studies, whichever is larger.
+  * A block mean may therefore reach two and a half times the adjusted
+    reference and still pass.
+* **The age limit is sampled.** It is checked at the daily 06:00
+  samples through the covering block, not from each study's timestamps.
+  A study finished between samples can exceed 14 days past due by up to
+  a day without being seen (audit H1; executed witness: 348 hours past
+  due, 334 observed).
 * **Seeds.** A seed is *stable* when every hard check passes. The plan's
   backlog gate passes if at most 10% of seeds are unstable.
 * **Never normalized:** stale studies, the cap and the age limit
@@ -977,6 +1002,11 @@ Still open:
    framework (v0.2-eval-4 and the canonical runner, built in Slice
    5C.0b), then the frozen strategy set and the owner's committed unseal
    record.
+   * **Reviewed 2026-10-18 at 7707dbd: NO GO.** See
+     `../audits/slice-5c3-eval4-framework-audit.md`.
+   * Remediation is in three slices: 5C.4a, exposure containment and
+     the clinical policy specification; 5C.4b, the clinical evaluator
+     and its calibration; 5C.4c, holdout integrity.
 5. **Not modelled**: remote read quality. Remote and local reports are
    assumed equivalent beyond turnaround, cost and coverage.
 6. **Backlog trade-off** (§4). The selected rule meets the protocol's
@@ -988,6 +1018,16 @@ Still open:
 
    Whether that balance is right is the owner's to confirm before the
    independent review.
+7. **Clinical acceptance** (audit H1, H2).
+   * **Decided by the owner on 2026-10-18** (recorded in
+     `proposals/v5-clinical-acceptance.md`):
+     * hard severity limits by priority;
+     * a gated wanted-to-acquisition access measure;
+     * one shared four-seed clinical allowance;
+     * zero tolerance for absolute age-limit violations;
+     * the 92% utilization case as an out-of-calibration stress domain.
+   * **Still open:** the numerical limits, which that proposal lists as
+     owner decisions.
 7. **Dependence and the planning target** (§2). Under the development
    range of clustering, the service design rejects a plan at the
    planning rates with probability 0.96. In v0.2-eval-4 the planning

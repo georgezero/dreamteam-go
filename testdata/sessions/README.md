@@ -213,3 +213,19 @@ batch mode `v0.2_dev13` with every digest verified
 (`earlier_build_exact`). It continues with the file embedded as the new
 record's prefix (`internal/session/dev13_test.go`). Before 0.2.0-dev.13
 was registered this build refused it as an engine mismatch.
+
+The Slice 5C.3 file was made from 7707dbd with `-scenario mini -seed 41
+-days 45 -actions testdata/sessions/mini-seed41-dev14.actions.json`. Its
+batches are:
+
+* an urgent-only weeknight teleradiology contract from Oct 29 (accepted,
+  `T00001`);
+* a Saturday contract for all studies from Nov 7 that overlaps it
+  (refused, `contract_overlap`);
+* `T00001` cancelled on Nov 10 with end Dec 19 (accepted).
+
+0.2.0-dev.15 has the same action set and rules, so the file replays in
+batch mode `v0.2_dev14` with every digest verified
+(`earlier_build_exact`). It continues with the file embedded as the new
+record's prefix (`internal/session/dev14_test.go`). Before 0.2.0-dev.14
+was registered this build refused it as an engine mismatch.

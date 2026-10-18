@@ -689,10 +689,10 @@ func TestPolicyFrozen(t *testing.T) {
 }
 
 // The locked holdout: regenerated from its method it matches the
-// manifest's digest, has its fixed size, overlaps no earlier seed set,
-// has no unseal record, and every harness is refused its seeds — sealed
-// or not, they run only through the canonical runner — without the
-// refusal naming them.
+// manifest's digest, has its fixed size, overlaps no earlier seed set and
+// has no unseal record. Its seeds exist here only in memory, for these
+// checks; none is passed on, printed or run (Slice 5C.4a). The guard's
+// behaviour is shown on a synthetic holdout (TestGuardSeeds).
 func TestHoldoutSealed(t *testing.T) {
 	h, seeds, err := LoadHoldout("../../" + HoldoutPath)
 	if err != nil {
@@ -714,18 +714,54 @@ func TestHoldoutSealed(t *testing.T) {
 	if h.Unseal != RepoPaths.Unseal {
 		t.Fatalf("the manifest names %s", h.Unseal)
 	}
+	if err := GuardSeeds([]int64{901, 902, 903, 1001}, h, seeds); err != nil {
+		t.Fatal(err)
+	}
+}
+
+// synthHoldout writes a synthetic holdout manifest (its own label and
+// range, not the repository's) at HoldoutPath under a new root.
+func synthHoldout(t *testing.T) (root string, h *Holdout, seeds []int64) {
+	t.Helper()
+	root = t.TempDir()
+	x := Holdout{Schema: HoldoutSchema, ID: "test-holdout", Method: "as v0.2-holdout-1", Label: "dreamteam/test/guard", Count: 8,
+		Lo: 500000, Hi: 599999, Excluded: []string{}, Sealed: true, Protocol: []string{"test"}, Unseal: RepoPaths.Unseal}
+	s, err := HoldoutSeeds(x.Label, x.Count, x.Lo, x.Hi, x.Excluded)
+	if err != nil {
+		t.Fatal(err)
+	}
+	x.SeedsSHA256 = seedsDigest(s)
+	raw, _ := json.Marshal(x)
+	path := filepath.Join(root, filepath.FromSlash(HoldoutPath))
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(path, raw, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	h, seeds, err = LoadHoldout(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return root, h, seeds
+}
+
+// The guard, on a synthetic holdout: every harness is refused its seeds,
+// sealed or not (they run only through the canonical runner), without the
+// refusal naming them; the manifest commits to its label.
+func TestGuardSeeds(t *testing.T) {
+	_, h, seeds := synthHoldout(t)
 	dev := []int64{901, 902, 903}
 	if err := GuardSeeds(dev, h, seeds); err != nil {
 		t.Fatal(err)
 	}
-	err = GuardSeeds(append(slices.Clone(dev), seeds[7]), h, seeds)
+	err := GuardSeeds(append(slices.Clone(dev), seeds[7]), h, seeds)
 	if !errors.Is(err, ErrSealed) {
 		t.Fatalf("a holdout seed ran: %v", err)
 	}
 	if strings.Contains(err.Error(), strconv.FormatInt(seeds[7], 10)) {
 		t.Fatal("the refusal names a holdout seed")
 	}
-	// The manifest commits to the method: another label is other seeds.
 	other, _ := HoldoutSeeds(h.Label+"x", h.Count, h.Lo, h.Hi, h.Excluded)
 	if seedsDigest(other) == h.SeedsSHA256 {
 		t.Fatal("digest does not bind the label")
@@ -751,17 +787,31 @@ func TestStatistics(t *testing.T) {
 	}
 }
 
-// The repository guard every calibration harness calls: development
-// seeds run; a holdout seed is refused.
+// The repository guard every calibration harness calls: development and
+// reference seeds run; a holdout seed is refused (on a synthetic holdout:
+// the repository's is checked only against seeds outside it).
 func TestGuardRepo(t *testing.T) {
-	_, seeds, err := LoadHoldout("../../" + HoldoutPath)
-	if err != nil {
+	root, _, seeds := synthHoldout(t)
+	if err := GuardRepo(root, []int64{901, 1001}); err != nil {
 		t.Fatal(err)
+	}
+	if err := GuardRepo(root, []int64{901, seeds[0]}); !errors.Is(err, ErrSealed) {
+		t.Fatalf("%v", err)
 	}
 	if err := GuardRepo("../..", []int64{901, 1001}); err != nil {
 		t.Fatal(err)
 	}
-	if err := GuardRepo("../..", []int64{901, seeds[0]}); !errors.Is(err, ErrSealed) {
+}
+
+// Sealed, Authorize refuses before regenerating any seed: a manifest
+// whose seeds would not even regenerate to its digest gives ErrSealed,
+// not the digest error, while no unseal record exists.
+func TestAuthorizeSealedFirst(t *testing.T) {
+	root, h, _ := synthHoldout(t)
+	h.SeedsSHA256 = strings.Repeat("0", 64)
+	raw, _ := json.Marshal(h)
+	os.WriteFile(filepath.Join(root, filepath.FromSlash(HoldoutPath)), raw, 0o644)
+	if p, err := Authorize(root, RepoPaths, GitRepo{Root: root}, "any"); p != nil || !errors.Is(err, ErrSealed) || strings.Contains(err.Error(), "digest") {
 		t.Fatalf("%v", err)
 	}
 }

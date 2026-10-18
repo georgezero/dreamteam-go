@@ -278,10 +278,14 @@ func TestHoldoutRunnerOneTime(t *testing.T) {
 	}
 }
 
-// Outside the runner, no recorder takes a holdout seed; the runner's own
-// recorder needs an authorized protocol.
+// Outside the runner, no harness builds a world on a holdout seed and no
+// recorder takes one; the runner's own recorder needs an authorized
+// protocol. Shown on the synthetic holdout of the fixture (sealed: its
+// unseal record removed), never the repository's.
 func TestHoldoutRecordersGuarded(t *testing.T) {
-	_, seeds, err := eval.LoadHoldout("../../" + eval.HoldoutPath)
+	f := newProtoFixture(t)
+	os.Remove(f.path(eval.RepoPaths.Unseal))
+	_, seeds, err := eval.LoadHoldout(f.path(eval.RepoPaths.Holdout))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -296,11 +300,17 @@ func TestHoldoutRecordersGuarded(t *testing.T) {
 	}
 	cfg := *miniConfig(t)
 	cfg.EvaluationDays = 0
+	panics("a holdout seed through NewEvalWorld", "canonical holdout runner", func() { sim.NewEvalWorldAt(f.root, &cfg, seeds[0]) })
+	// A world built some other way is still refused a recorder.
 	w := sim.New(&cfg, rng.SeedFromInt(seeds[0]))
 	w.Engine().RunUntil(w.StartTime(), nil)
-	panics("a holdout seed through NewEvalRecorder", "canonical holdout runner", func() { w.NewEvalRecorder("A", "", "", seeds[0], 14) })
+	panics("a holdout seed through NewEvalRecorder", "canonical holdout runner", func() { w.NewEvalRecorderAt(f.root, "A", "", "", seeds[0], 14) })
 	// A protocol not made by Authorize, otherwise complete, is refused.
 	pol, _ := shortPolicy(t, &cfg)
 	forged := &eval.Protocol{Seeds: seeds, Policy: pol, StrategySHA: map[string]string{}}
 	panics("an unauthorized protocol", "authorized protocol", func() { w.NewHoldoutRecorder(forged, "A", "", "", seeds[0]) })
+	// A seed outside the holdout builds and records.
+	w = sim.NewEvalWorldAt(f.root, &cfg, 901)
+	w.Engine().RunUntil(w.StartTime(), nil)
+	w.NewEvalRecorderAt(f.root, "A", "", "", 901, 14)
 }

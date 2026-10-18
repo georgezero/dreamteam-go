@@ -93,6 +93,22 @@ On the development seeds D2 is CONDITIONAL GO (transition, not yet
 repaid), and E2 and E3 are CONDITIONAL GO (service purchase). Next: one
 independent review of the whole corrected framework, then the frozen
 strategy set and the unseal record.
+
+That review (2026-10-18, at 7707dbd) gave NO GO for the confirmatory
+run: severe reporting delays and delayed access could pass every
+clinical gate, and the holdout safeguards relied on cooperation.
+Remediation is in three slices:
+
+* **5C.4a** (0.2.0-dev.15, design §13.10): the audit is preserved, the
+  ordinary tests' holdout exposure is contained and recorded, and the
+  clinical acceptance rules for v0.2-eval-5 are specified, not
+  activated.
+* **5C.4b:** the clinical evaluator and its combined synthetic
+  calibration.
+* **5C.4c:** holdout integrity, meaning refused-action semantics,
+  executable identity, authenticated approval and durable run-once.
+
+D2 and E3 are not rerun until v0.2-eval-5 is validated.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 

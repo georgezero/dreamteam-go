@@ -153,7 +153,8 @@ func decodeStrict(raw []byte, v any) error {
 // strategy file at its own), this exact engine, a primary strategy that is
 // not the baseline and an approval date; every one of these files is
 // committed with no change; and the unseal record was committed by its
-// approver. A missing unseal record is ErrSealed.
+// approver. A missing unseal record is ErrSealed, decided before the
+// seeds are regenerated.
 func Authorize(root string, paths Paths, repo Repo, engine string) (*Protocol, error) {
 	p := &Protocol{Root: root, Strategies: map[string]Strategy{}, StrategySHA: map[string]string{}, unsealPath: paths.Unseal, holdoutPath: paths.Holdout}
 	at := func(rel string) string { return filepath.Join(root, filepath.FromSlash(rel)) }
@@ -161,14 +162,15 @@ func Authorize(root string, paths Paths, repo Repo, engine string) (*Protocol, e
 	if err != nil {
 		return nil, err
 	}
-	if p.Holdout, p.Seeds, err = LoadHoldout(at(paths.Holdout)); err != nil {
-		return nil, err
-	}
+	// Sealed: refused before the seeds are regenerated (Slice 5C.4a).
 	uraw, err := os.ReadFile(at(paths.Unseal))
 	switch {
 	case errors.Is(err, os.ErrNotExist):
 		return nil, fmt.Errorf("%w: no unseal record %s", ErrSealed, paths.Unseal)
 	case err != nil:
+		return nil, err
+	}
+	if p.Holdout, p.Seeds, err = LoadHoldout(at(paths.Holdout)); err != nil {
 		return nil, err
 	}
 	u := &p.Unseal
