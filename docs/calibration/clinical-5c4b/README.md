@@ -15,7 +15,8 @@ implementation decisions in §J).
 | File | What it is |
 |---|---|
 | `protocol.md` | The combined operating-characteristics protocol: the model, scenarios, streams, value grids, bundles and targets. It was committed before any combined result. |
-| `../../evaluation/oc-v0.2-eval-5-exploratory.json` | The exploratory run's output, added by its own commit once the run is done. |
+| `../../evaluation/oc-v0.2-eval-5-exploratory.json` | The exploratory run's output, joofi and the Pi byte-identical. |
+| `findings.md` | What the exploratory run shows, with its erratum (§7): the stable practice read at about 0.67–0.74, not 0.85. |
 
 Code:
 

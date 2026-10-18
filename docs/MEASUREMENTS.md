@@ -562,3 +562,11 @@ was run.
 * One synthetic practice record (181 days, about 8,000 studies and
   9,400 orders), measured under the base candidate plus two extra
   access limits, takes about 0.4 s.
+
+### Exploratory clinical operating characteristics (0.2.0-dev.16, cb3bb31)
+
+| Run | Machine | Time |
+|---|---|---|
+| `DT_OC_CLINICAL=1 … TestClinicalOperatingCharacteristics` (13 scenarios, 22,000 seeds) | joofi, compiled binary | 866 s |
+| The same, reproduction | Pi 4 | 4,346 s test (72 min wall); output byte-identical to joofi's |
+| Measured utilization of the original practices (13 × 200 seeds) | Pi 4 | 134 s |
