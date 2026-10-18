@@ -381,6 +381,13 @@ holdout seed.
   `eval.Authorize`; one cannot be constructed outside the package.
 * **Other paths.** A run by any other path, the CLI included, produces no
   evaluation record and is not holdout evidence.
+* **Development.** Slice 5C.1's runner (`TestStrategyDevelopment`,
+  `docs/calibration/strategy-development`) loads a strategy set through
+  `eval.Development`.
+  * It accepts only the policy's development seeds.
+  * Its protocol is never authorized.
+  * It records with `World.NewEvalRecorder`, and its records are
+    byte-identical to the canonical runner's.
 
 **The artifact contract.** Every file is pinned by SHA-256.
 
@@ -581,7 +588,9 @@ Decided by the owner on 2026-10-17 and frozen here:
 * one confirmatory strategy;
 * informational metrics.
 
-Still open:
+Still open (Slice 5C.1's development results bear on 1, 2 and the new
+6–7; `docs/calibration/strategy-development/README.md`, *Policy
+limitations*):
 
 1. **Urgent dependence trade-off** (§2). The frozen design meets ≤ 5% at
    8% only if breaches are close to independent. The dispersion index on
@@ -606,3 +615,13 @@ Still open:
    record.
 5. **Not modelled**: remote read quality. Remote and local reports are
    assumed equivalent beyond turnaround, cost and coverage.
+6. **Funding gate feasibility.** On the development seeds, every plan,
+   no action included, has a funding gap on every seed, from day 1.
+   * The 14-day employee commitment alone, about $53k, exceeds the
+     baseline's cash headroom.
+   * As frozen, no comparison can pass this gate.
+7. **Backlog reference seasonality.** The reference block (days 55–82)
+   falls in the December demand low (season factor 0.93, against 1.05 in
+   January), so later blocks compare higher-demand months against it.
+   * No action is unstable on 10 of 10 development seeds.
+   * The backlog rule has no operating characteristics.

@@ -201,6 +201,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.8":  batchModeDev8,   // V0.2 Slice 5B (contract_teleradiology): this build's action set and rules
 	"0.2.0-dev.9":  batchModeDev9,   // V0.2 Slice 5C.0 (frozen evaluation): this build's action set and rules
 	"0.2.0-dev.10": batchModeDev10,  // V0.2 Slice 5C.0a (evaluation policy v0.2-eval-2): this build's action set and rules
+	"0.2.0-dev.11": batchModeDev11,  // V0.2 Slice 5C.0b (canonical holdout runner): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

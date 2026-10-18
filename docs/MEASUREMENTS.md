@@ -466,3 +466,26 @@ newly guarded harness, match the committed archive in every field but
 the engine name. The canonical holdout run was not executed: the
 holdout is sealed.
 
+## 2026-10-17 — V0.2 Slice 5C.1, development-seed strategy comparison (0.2.0-dev.12)
+
+Raspberry Pi 4 (4 cores) at about 84 °C and soft-throttled, three runs at
+a time; joofi (Cortex-A76, 4 cores, shared, idle at the time) four at a
+time. Each run is one plan on one seed, to day 181 with daily samples
+and the evaluation recorder.
+
+| Run | Plans × seeds | Pi 4 | joofi (reproduction) |
+|---|---|---|---|
+| `p1-historical` | 4 × 10 | 352 s | 77 s |
+| `p2-family` | 7 × 10 | 545 s | 143 s |
+| `p3-refine` | 6 × 10 | 426 s | 112 s |
+| `p4-refine` | 4 × 10 | 291 s | 78 s |
+| Full suite `go test ./... -count=1` | — | 698 s (sim 689, session 249, cmd 123, eval 63, tui 29) | — |
+
+* About 9 s of a Pi core per plan-seed run, about 2.3 s on joofi.
+* The joofi reproductions are byte-identical to the Pi's outputs in
+  every `run.json`, `report.json` and `trajectory.csv`.
+* The dev.11 and dev.12 runs of `p1` and `p2` give identical reports and
+  trajectories.
+* Committed outputs: about 19 MB, mostly `report.json` (3–5 MB a set,
+  per-seed measures included).
+

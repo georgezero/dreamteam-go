@@ -7,6 +7,124 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.1 — development-seed strategy comparison (0.2.0-dev.12)
+
+Strategy development on the development seeds 901–910 only, under policy
+v0.2-eval-2 unchanged. The holdout is sealed and untouched. The
+reference seeds 1001–1020 were not used. Simulation, economics, demand,
+durations, thresholds, the policy, the holdout manifest and the holdout
+runner are unchanged. Design §13.7; the full record is in
+`docs/calibration/strategy-development/README.md`.
+
+* **Harness.**
+  * `eval.Development` loads a strategy set in the holdout contract's
+    formats: strict decoding, every pin checked, the baseline and
+    `teleOnlyOf` validated.
+  * It accepts only the policy's development seeds, and its protocol is
+    never authorized.
+  * `TestStrategyDevelopment` (tag `calibration`) runs the canonical
+    runner's loop with the development recorder: the common horizon
+    computed first and confirmed, the complete matrix, and the frozen
+    evaluation.
+  * It writes `run.json`, `report.json` and `trajectory.csv` once; a
+    rerun must reproduce them byte for byte.
+  * `report.py`, `reconcile.py` and `breach_timing.py` generate every
+    table.
+* **Phase 1.** A–D reproduce every archived development-seed daily
+  sample exactly: 10,800 samples across engines dev.4 and dev.5, in
+  profit, cash, reports and backlog. Their T90 breach rates are the same
+  under all three rules.
+  * D's historical CONDITIONAL GO becomes NO GO under v0.2-eval-2, from
+    the rules alone:
+    * the joint per-seed rule: soon fails on 6 seeds, urgent on 3;
+    * the block backlog rule;
+    * the funding gate.
+* **Family (fixed before any teleradiology run, from D's breach
+  timing):**
+  * E: D plus urgent-only teleradiology on weeknights and Saturdays;
+  * F: D plus all-priority teleradiology on every window;
+  * G: B plus F's contract.
+
+  All are open-ended from the earliest date, Oct 27, with no
+  cancellation during the evaluation.
+* **Four refinements**, each with a hypothesis written before its run:
+  * R1 E2: E at a 65/55% allocation. Kept: it passes the joint service
+    rule on all 10 seeds.
+  * R2 H: D plus all-priority on weeknights only. Rejected: insolvent
+    on 8 seeds.
+  * R3 E3: E2 on weeknights only. Kept: the same gates, $2.0k cheaper
+    per 90 days.
+  * R4 D2: E2 without the contract. Kept: it passes service alone; its
+    urgent margin is thin (worst seed 11.6% against 12%).
+* **Result: no strategy passes, and none can as the policy is frozen.**
+  Every plan, no action included, fails two hard gates on every seed:
+  * funding: the 14-day employee commitment, about $53k, exceeds the
+    cash headroom from day 1;
+  * backlog: the reference block, Dec 7 – Jan 3, falls in the December
+    demand low.
+
+  These are policy limitations for the owner. The policy was not
+  changed.
+* **What passes the other hard gates.** D2, E3 and E2 pass service,
+  pooled rates, case selection and solvency on all 10 seeds. They lose
+  $18.8k, $23.2k and $25.2k at T90 against no action: a service purchase
+  at best.
+* **Teleradiology's marginal value.**
+  * Urgent-only: urgent about 10% → 2–3%, for $4.4–6.5k per 90 days.
+    It adds no reports and no revenue.
+  * All-priority: every gate passes, for $27–36k per 90 days. It adds
+    at most 23 reports and $3.0k of revenue, and is insolvent on 7–10
+    seeds.
+* **Recommendation.** No primary strategy under v0.2-eval-2 as frozen.
+  * If the funding and backlog rules are revised, the prespecified
+    ranking picks D2.
+  * E3 is the robust alternative: D2 fails the 40-seed joint rule about
+    9% of the time under independence, E3 essentially never.
+  * The strategy set is not frozen, and no unseal record exists.
+* **Registers 0.2.0-dev.11.** Batch mode `v0.2_dev11`, with a genuine
+  fixture from the dev.11 binary (`mini-seed35-dev11`): an urgent
+  contract, a `minimum_term` refusal and a cancellation. Without the
+  registration the dev.11 tests fail as an engine mismatch.
+
+**Tests.**
+
+* `TestDevelopmentRunnerMatchesCanonical`: on the synthetic protocol,
+  the development and canonical runners give byte-identical records and
+  the same horizon, including a batch at a sample instant.
+* `TestDevelopmentSet`: development seeds only; refuses a reference
+  seed, an unpinned strategy, an acting baseline, another schema and an
+  invalid `teleOnlyOf`; never authorized.
+* `TestDevelopmentSetsCommitted`: every committed set loads strictly,
+  and every batch is in [takeover, T90).
+* `TestWriteOnce`.
+* `internal/session` `TestDev11Record*`.
+
+**Mutations.** 11 targeted mutations, all caught:
+
+* the seed range, pin, schema, baseline and `teleOnlyOf` checks;
+* batch-before-sample order, commitment days, horizon and capture
+  equivalence;
+* `writeOnce`'s two guards.
+
+The batch-order mutation first survived, because the fixture had no
+batch at a sample instant; the test now has one.
+
+**Limitations.**
+
+* Ten seeds: a single seed decides the development verdict. The
+  results identify mechanisms and credible strategies, not 40-seed pass
+  rates.
+* Soon breaches are clustered (dispersion 2–9), so the per-seed soon
+  gate's operating characteristics are optimistic.
+* Every reorganization has a negative T90 increment, so under the frozen
+  verdict order the best attainable outcome is CONDITIONAL GO, service
+  purchase.
+* `eval.Development` calls `GuardRepo` as defence in depth. It is
+  redundant with the development-seed check, so no mutation can show it
+  necessary.
+
+---
+
 ## V0.2 Slice 5C.0b — canonical holdout runner (0.2.0-dev.11)
 
 This step closes the audit's remaining high finding, H6: holdout

@@ -58,9 +58,24 @@ classification. Slice 5C.0b (0.2.0-dev.11, design §13.6) built the
 canonical holdout runner: holdout seeds refused by every other path, an
 artifact contract pinning strategies, policy, engine and the owner's
 approval by digest, the complete seed and strategy matrix, and a
-one-time run that may afterwards only be reproduced byte for byte. Next:
-Slice 5C.1 strategy development on the development seeds, and one
-independent review of the whole corrected framework before unsealing.
+one-time run that may afterwards only be reproduced byte for byte. Slice
+5C.1 (0.2.0-dev.12, design §13.7) compared a prespecified strategy family
+and four documented refinements on the development seeds
+(`docs/calibration/strategy-development`).
+* **No strategy passes v0.2-eval-2.** The funding gate (with its 14-day
+  employee commitment) and the backlog rule (a reference block in the
+  December demand low) fail on every seed for every plan, no action
+  included.
+* **Three plans pass every other hard gate on all 10 seeds:** D's
+  staffing at a 65/55% reading allocation (D2), alone or with an
+  urgent-only weeknight teleradiology contract (E3, E2). Each is a
+  service purchase at T90.
+* **All-priority teleradiology** restores service but is insolvent.
+
+Next: the owner's decisions on the funding and backlog rules (and the
+urgent and soon dependence), one independent review of the whole
+corrected framework, then the frozen strategy set and the unseal
+record.
 See [V0.2_DESIGN.md](V0.2_DESIGN.md) for the binding owner decisions and detailed
 contracts. V0.1 scope and acceptance history below remain unchanged.
 
