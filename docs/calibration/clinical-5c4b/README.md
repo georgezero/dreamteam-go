@@ -17,6 +17,7 @@ implementation decisions in §J).
 | `protocol.md` | The combined operating-characteristics protocol: the model, scenarios, streams, value grids, bundles and targets. It was committed before any combined result. |
 | `../../evaluation/oc-v0.2-eval-5-exploratory.json` | The exploratory run's output, joofi and the Pi byte-identical. |
 | `findings.md` | What the exploratory run shows, with its erratum (§7): the stable practice read at about 0.67–0.74, not 0.85. |
+| `correction-protocol.md` | The calibration correction: measured utilization, practices at 0.85 and 0.92, a steady state at the takeover, the simulator's worklist; its scenarios, streams and reporting. Committed before any corrected result. |
 
 Code:
 
@@ -32,6 +33,10 @@ Code:
 * **`internal/eval/oc_clinical_test.go`:** the synthetic practice
   (imaging and reading), the tabulation, and its exact agreement with
   the production evaluator.
+* **`internal/eval/oc_correction_test.go`:** the correction: measured
+  utilization, the corrected scenarios, the consequence measures and
+  bundle components, the Monte Carlo intervals, and the tests of the
+  calibration and of the simulator's worklist rule.
 
 Reproduce the run:
 

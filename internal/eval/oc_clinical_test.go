@@ -36,6 +36,81 @@ type ocPractice struct {
 	// Coverage: the reading hours (readingHours). "" is the stable
 	// practice's, which covers its imaging.
 	Coverage string `json:"readingCoverage,omitempty"`
+	// The calibration correction (docs/calibration/clinical-5c4b/
+	// correction-protocol.md); each zero value is the original model.
+	//   - EffUtil: the reading rate is set so that the expected acquisition
+	//     workload (ocWorkload) fills this share of the general reading
+	//     hours (generalHours), rather than ReadUtil of 66.5 hours.
+	//   - RateHours: the general hours a week that rate is set over (0: the
+	//     coverage's own), for a practice keeping another's team rate.
+	//   - Warmup: days the practice runs before the takeover, so that it
+	//     is in its steady state then; the record inherits the orders and
+	//     studies still open at the takeover.
+	//   - Worklist "sim": the simulator's urgent_then_fifo (simPick).
+	EffUtil   float64 `json:"effectiveReadingUtilization,omitempty"`
+	RateHours float64 `json:"rateHours,omitempty"`
+	Warmup    int     `json:"warmupDays,omitempty"`
+	Worklist  string  `json:"worklist,omitempty"`
+}
+
+// ocWorkload is the expected weekly acquisition workload at season-1
+// demand: 52 orders a day less the routine cancellations (86% × 5%).
+// Orders lost at imaging utilization 0.80 are negligible (measured:
+// utilization).
+const ocWorkload = 52.0 * 7 * (1 - 0.86*0.05)
+
+// generalHours are the reading hours a week open to every priority, at
+// the team's rate (readingHours; urgent-only hours excluded).
+func generalHours(coverage string) float64 {
+	h := 0.0
+	for wd := range 7 {
+		for clock := range 24 {
+			if s, u := readingHours(coverage, wd, clock); !u {
+				h += s
+			}
+		}
+	}
+	return h
+}
+
+// readRate is the team's reading rate, studies an hour.
+func (q ocPractice) readRate() float64 {
+	if q.EffUtil == 0 {
+		return 52.0 * 7 / 66.5 / cmpOr(q.ReadUtil, 0.85)
+	}
+	return ocWorkload / cmpOr(q.RateHours, generalHours(q.Coverage)) / q.EffUtil
+}
+
+// slots is day d's imaging slot capacity (wd its weekday).
+func (q ocPractice) slots(d, wd int) int {
+	o, c := imagingHours(wd)
+	return int(math.Floor(float64(c-o)*(52.0*7/68/cmpOr(q.ImgUtil, 0.80))*capFactor(d, q.ImgCap, q.ImgErode) + 0.5))
+}
+
+// simPick is the simulator's default worklist, urgent_then_fifo
+// (internal/sim/reading.go): urgent studies and studies past their
+// target first, then the rest, each in entry order. An urgent-only
+// reader takes studies of urgent priority only. open is in entry order;
+// it returns the index of the study to read at fin, or -1.
+func simPick(rec *Record, open []int, fin int64, urgentOnly bool) int {
+	first := -1
+	for j, i := range open {
+		s := &rec.Studies[i]
+		if s.EnteredSec >= fin {
+			break
+		}
+		urgent := s.Priority == "urgent"
+		if urgentOnly && !urgent {
+			continue
+		}
+		if urgent || fin-s.EnteredSec > target(rec, s.Priority) {
+			return j
+		}
+		if first < 0 {
+			first = j
+		}
+	}
+	return first
 }
 
 // readingHours is the reading capacity in an hour (wd Monday 0, clock the
@@ -119,7 +194,6 @@ func imagingHours(wd int) (int, int) {
 // horizon day 150 and observation end).
 func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 	const perDay = 52.0
-	readUtil, imgUtil := cmpOr(q.ReadUtil, 0.85), cmpOr(q.ImgUtil, 0.80)
 	start := t0
 	date, _ := simtime.ParseDate(t0Date)
 	rec := &Record{Schema: RecordSchema, Plan: "P", Engine: "oc", ScenarioFingerprint: "fp", TATTargetMin: testTargets,
@@ -127,17 +201,16 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 	rec.ObservedUntilSec = observationNeeded(p, rec)
 	E := rec.ObservedUntilSec
 	days := int((E - start) / daySec)
+	w := q.Warmup // days before the takeover; indices into capOf and booked are d + w
 	midnight := func(d int) int64 { return start - 6*hour + int64(d)*daySec }
 	weekday := func(d int) int { return (int(date.AddDays(int64(d)).Weekday()) + 6) % 7 }
 	// Imaging capacity by day.
-	imgPerHour := perDay * 7 / 68 / imgUtil
-	capOf := make([]int, days+300)
-	for d := range capOf {
-		o, c := imagingHours(weekday(d))
-		capOf[d] = int(math.Floor(float64(c-o)*imgPerHour*capFactor(d, q.ImgCap, q.ImgErode) + 0.5))
+	capOf := make([]int, w+days+300)
+	for i := range capOf {
+		capOf[i] = q.slots(i-w, weekday(i-w))
 	}
 	booked := make([]int, len(capOf))
-	routineCap := func(d int) int { return int(math.Floor(0.85 * float64(capOf[d]))) }
+	routineCap := func(d int) int { return int(math.Floor(0.85 * float64(capOf[d+w]))) }
 	type acq struct {
 		at int64
 		k  int
@@ -146,10 +219,10 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 	var resolved []int64
 	var outs []string
 	dayFactor := 1.0
-	for h := 0; h < days*24; h++ {
+	for h := -w * 24; h < days*24; h++ {
 		at := start + int64(h)*hour
-		clock := (6 + h) % 24
-		day := (6 + h) / 24
+		day := int(floorDiv(int64(6+h), 24))
+		clock := 6 + h - 24*day
 		dt := date.AddDays(int64(day))
 		wd := weekday(day)
 		if clock == 0 && q.DayCV > 0 {
@@ -186,26 +259,26 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 			o := Order{ID: "o", Priority: pri, Modality: "XR", ReceivedSec: recv, WantedSec: wanted}
 			// Book the first day at or after the wanted day with a free slot
 			// and time left after the wanted time.
-			bookDay := -1
-			for d := wantDay; d <= wantDay+ocTolerance[pri] && d < len(capOf); d++ {
+			bookDay, found := 0, false
+			for d := wantDay; d <= wantDay+ocTolerance[pri] && d+w < len(capOf); d++ {
 				_, cl := imagingHours(weekday(d))
 				if cl == 0 || midnight(d)+int64(cl)*hour <= wanted {
 					continue
 				}
-				limit := capOf[d]
+				limit := capOf[d+w]
 				if k == 2 {
 					limit = routineCap(d)
 				}
-				if booked[d] < limit {
-					bookDay = d
+				if booked[d+w] < limit {
+					bookDay, found = d, true
 					break
 				}
 			}
 			out, res := OutOpen, int64(0)
-			if bookDay < 0 {
+			if !found {
 				out, res = OutLost, recv
 			} else {
-				booked[bookDay]++
+				booked[bookDay+w]++
 				op, cl := imagingHours(weekday(bookDay))
 				lo := max(wanted, midnight(bookDay)+int64(op)*hour)
 				hi := midnight(bookDay) + int64(cl)*hour
@@ -230,23 +303,39 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 	for i := range rec.Orders {
 		rec.Orders[i].ResolvedSec = resolved[i]
 	}
+	if w > 0 {
+		// Inherited: only the orders still open at the takeover.
+		var os []Order
+		var oo []string
+		for i, o := range rec.Orders {
+			if o.ReceivedSec > start || o.ResolvedSec == 0 || o.ResolvedSec > start {
+				os, oo = append(os, o), append(oo, outs[i])
+			}
+		}
+		rec.Orders, outs = os, oo
+	}
 	// Reading (the 5C.3 model; arrivals in acquisition order).
 	slices.SortStableFunc(acqs, func(a, b acq) int { return int(a.at - b.at) })
 	for _, a := range acqs {
 		rec.Studies = append(rec.Studies, Study{ID: "s", Priority: Priorities[a.k], Modality: "XR", AcquiredSec: a.at, EnteredSec: a.at})
 	}
-	readPerHour := perDay * 7 / 66.5 / readUtil
+	readPerHour := q.readRate()
 	var queue [3][]int
+	var open []int // the "sim" worklist, in entry order
 	next := 0
 	carry := 0.0
-	for h := 0; h < days*24; h++ {
+	for h := -w * 24; h < days*24; h++ {
 		at := start + int64(h)*hour
-		clock := (6 + h) % 24
-		day := (6 + h) / 24
+		day := int(floorDiv(int64(6+h), 24))
+		clock := 6 + h - 24*day
 		wd := weekday(day)
 		for next < len(rec.Studies) && rec.Studies[next].AcquiredSec < at+hour {
-			k := slices.Index(Priorities, rec.Studies[next].Priority)
-			queue[k] = append(queue[k], next)
+			if q.Worklist == "sim" {
+				open = append(open, next)
+			} else {
+				k := slices.Index(Priorities, rec.Studies[next].Priority)
+				queue[k] = append(queue[k], next)
+			}
 			next++
 		}
 		share, urgentOnly := readingHours(q.Coverage, wd, clock)
@@ -257,16 +346,27 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 		carry += c
 		for carry >= 1 {
 			fin := at + hour - int64(carry/c*3600)
-			k := 0
-			for k < 3 && (len(queue[k]) == 0 || rec.Studies[queue[k][0]].AcquiredSec >= fin || (urgentOnly && k > 0)) {
-				k++
+			var s *Study
+			if q.Worklist == "sim" {
+				j := simPick(rec, open, fin, urgentOnly)
+				if j < 0 {
+					carry = min(carry, 1)
+					break
+				}
+				s = &rec.Studies[open[j]]
+				open = slices.Delete(open, j, j+1)
+			} else {
+				k := 0
+				for k < 3 && (len(queue[k]) == 0 || rec.Studies[queue[k][0]].AcquiredSec >= fin || (urgentOnly && k > 0)) {
+					k++
+				}
+				if k == 3 {
+					carry = min(carry, 1)
+					break
+				}
+				s = &rec.Studies[queue[k][0]]
+				queue[k] = queue[k][1:]
 			}
-			if k == 3 {
-				carry = min(carry, 1)
-				break
-			}
-			s := &rec.Studies[queue[k][0]]
-			queue[k] = queue[k][1:]
 			st := max(fin-60, s.EnteredSec)
 			s.ClaimedSec, s.ReadStartSec, s.FinalSec = st, st, max(fin, st)
 			carry--
@@ -276,6 +376,12 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 		if s := &rec.Studies[i]; s.FinalSec > E {
 			s.ClaimedSec, s.ReadStartSec, s.FinalSec = 0, 0, 0
 		}
+	}
+	if w > 0 {
+		// Inherited: only the studies unread at the takeover.
+		rec.Studies = slices.DeleteFunc(rec.Studies, func(s Study) bool {
+			return s.AcquiredSec <= start && s.FinalSec != 0 && s.FinalSec <= start
+		})
 	}
 	// Samples and captures.
 	m := Money{CashCents: 1_000_000, MinCashCents: 1_000_000, MinCashSec: start, CashBridgeReconciles: true}
@@ -287,9 +393,13 @@ func (q ocPractice) record(r ocRNG, p *Policy) *Record {
 			if x.AcquiredSec > at {
 				break
 			}
-			s.AcquiredCum++
+			if x.AcquiredSec > start {
+				s.AcquiredCum++
+			}
 			if x.FinalSec != 0 && x.FinalSec <= at {
-				s.FinalCum++
+				if x.FinalSec > start {
+					s.FinalCum++
+				}
 				continue
 			}
 			s.Unread++
