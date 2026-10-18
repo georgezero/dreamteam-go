@@ -7,6 +7,73 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4b, continued — calibration correction (0.2.0-dev.16)
+
+The exploratory operating characteristics were run and reproduced. The
+owner then asked to hold the threshold choice and correct their
+calibration first. No version change: only test code and documents
+changed, and the binary is the same.
+
+* **No v5 policy, no threshold chosen.** Nothing else was run: no
+  strategy, development, reference or holdout run, and the confirmatory
+  streams are untouched.
+* **The original run** (`oc-v0.2-eval-5-exploratory.json`) is committed
+  as generated, with joofi and the Pi byte-identical.
+  * Its findings carry an erratum. The stable practice measured 0.67
+    (0.74 over the last 30 days), not the intended 0.85.
+  * Its rate was sized over 66.5 reading hours but it read 70.5,
+    cancellations were not counted, and it started empty.
+* **The correction** (`docs/calibration/clinical-5c4b/correction-protocol.md`,
+  committed before any corrected result):
+  * utilization is measured per seed, and the rate is set from the
+    target over the practice's own hours;
+  * the practice runs 181 days before the takeover and inherits the
+    work open then;
+  * it reads in the simulator's urgent_then_fifo order;
+  * regimes at 0.85 and 0.92, on new streams PCG(20261102, ·).
+  * Each change is a field whose zero value is the original model. The
+    original run still reproduces byte for byte.
+* **Results** (`findings-corrected.md`):
+  * **Utilization** measured 0.845–0.849 and 0.914–0.919.
+  * **At 0.85:**
+    * no v5 clinical gate value fails a stable seed;
+    * the bundles' 40-seed rejection is at most 0.002, from v4's own
+      gates;
+    * urgent absolute limits of 24 h or more, and soon of 48 h or more,
+      are admissible at zero tolerance. Soon 24 h is not: one seed of
+      2,500 reached 34.9 h.
+  * **At 0.92:** v4's 4-hour soon breach gate rejects 85–89% of
+    seeds, with severe delays below 0.1%.
+  * **Weekend, at equal utilization:** no weekend reading moves the
+    worst urgent delay from 14 h to 42–44 h. An urgent limit of 36 h or
+    less makes it a violation; 48 h does not at 0.85.
+  * **Deterioration:**
+    * reading losses that harm (L20, D, K, L10 at 0.92) are caught by
+      the clinical components under every bundle;
+    * L10 at 0.85 is clinically mild (severe below 0.05%) but rejected
+      by v4's soon turnaround gate;
+    * imaging losses are absorbed.
+* **Against the simulator** (read, not run):
+  * **Matched:** the worklist rule, imaging hours, demand weekdays,
+    targets, and the warm start.
+  * **Not matched:** individual readers and read times, modalities,
+    booking, and the Saturday load (12.8% of acquisitions against about
+    5%).
+  * No simulator-level validity is claimed.
+* **Tests.**
+  * `TestSimPick` checks the simulator's worklist rule.
+  * `TestOCCorrectedCalibration` checks utilization and inherited work
+    on the debug stream.
+  * `TestClinicalOCCorrectedAgreesWithEvaluate` checks exact agreement
+    with the production evaluator.
+  * 10 of 10 mutations were caught. One of them is a sentinel bug
+    (day −1 as "no slot"), found and fixed before the protocol was
+    committed.
+  * The full uncached suite passes at d11964f, `TestEvaluateMatrix`
+    included, as do `go vet` and gofmt.
+
+---
+
 ## V0.2 Slice 5C.4b — the v0.2-eval-5 clinical evaluator (0.2.0-dev.16)
 
 This slice implements the clinical acceptance rules specified in 5C.4a

@@ -18,6 +18,8 @@ implementation decisions in §J).
 | `../../evaluation/oc-v0.2-eval-5-exploratory.json` | The exploratory run's output, joofi and the Pi byte-identical. |
 | `findings.md` | What the exploratory run shows, with its erratum (§7): the stable practice read at about 0.67–0.74, not 0.85. |
 | `correction-protocol.md` | The calibration correction: measured utilization, practices at 0.85 and 0.92, a steady state at the takeover, the simulator's worklist; its scenarios, streams and reporting. Committed before any corrected result. |
+| `../../evaluation/oc-v0.2-eval-5-exploratory-corrected.json` | The corrected run's output (joofi; A85, Wg85 and L10-92 reproduced identically on the Pi). |
+| `findings-corrected.md` | What the corrected run shows: utilization 0.85 and 0.92 as measured, false rejection, the weekend comparison at equal utilization, deterioration with its consequence, the full bundle, and the remaining limitations. |
 
 Code:
 
@@ -38,6 +40,7 @@ Code:
   bundle components, the Monte Carlo intervals, and the tests of the
   calibration and of the simulator's worklist rule.
 
-Reproduce the run:
+Reproduce the runs:
 
     DT_OC_CLINICAL=1 go test ./internal/eval -run 'TestClinicalOperatingCharacteristics$' -v -timeout 600m
+    DT_OC_CORRECTED=1 go test ./internal/eval -run 'TestClinicalOCCorrected$' -v -timeout 600m

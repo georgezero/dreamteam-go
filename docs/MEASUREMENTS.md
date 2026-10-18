@@ -570,3 +570,13 @@ was run.
 | `DT_OC_CLINICAL=1 … TestClinicalOperatingCharacteristics` (13 scenarios, 22,000 seeds) | joofi, compiled binary | 866 s |
 | The same, reproduction | Pi 4 | 4,346 s test (72 min wall); output byte-identical to joofi's |
 | Measured utilization of the original practices (13 × 200 seeds) | Pi 4 | 134 s |
+
+### Calibration correction (d11964f)
+
+| Run | Machine | Time |
+|---|---|---|
+| Full suite `go test ./... -count=1` at d11964f | Pi 4 | 729 s wall; every package passes (sim 725, session 312, eval 238, cmd 109, tui 26) |
+| `DT_OC_CORRECTED=1 … TestClinicalOCCorrected` (25 scenarios, 37,000 seeds, 181-day warm-up) | joofi, compiled binary | 58.7 min, run twice (the first output was lost in cleanup; the rerun's is committed) |
+| The original exploratory run from d11964f | joofi | 18.6 min; byte-identical to the committed output |
+| Corrected subset A85, Wg85, L10-92 (4,500 seeds) | Pi 4 | 1,447 s test; identical to joofi's entries |
+| 10 targeted mutations of the corrected model | Pi 4 | about 4 min |
