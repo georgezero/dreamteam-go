@@ -444,17 +444,28 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	// A fact about the pair, whatever the verdict: the baseline fails the
 	// service gates the candidate passes.
 	c.ServiceRestored = base.Valid && base.ServiceStatus != Pass && cand.ServiceStatus == Pass
+	v5 := p.Clinical != nil
+	if v5 {
+		// v0.2-eval-5 (audit M3): only a demonstrated failure is restored,
+		// never a baseline that merely lacks evidence; and the candidate
+		// must pass the whole clinical rule.
+		c.ServiceRestored = base.Valid && base.ServiceStatus == Fail && cand.ClinicalStatus == Pass &&
+			cand.ClinicalSafety != nil && cand.ClinicalSafety.Status == Pass
+	}
 	if !c.Valid {
 		c.Verdict, c.Reasons = INVALID, append([]string{}, c.Integrity...)
 		return
 	}
 	var why []string
-	if j := cand.ServiceJoint; j.Status != Pass {
+	if v5 {
+		why = clinicalReasons(cand)
+	}
+	if j := cand.ServiceJoint; !v5 && j.Status != Pass {
 		why = append(why, fmt.Sprintf("service seed reliability: %s (%d failing %v and %d insufficient %v of %d seeds, limit %d)",
 			j.Status, len(j.FailingSeeds), j.FailingSeeds, len(j.InsufficientSeeds), j.InsufficientSeeds, j.Seeds, j.FailLimit))
 	}
 	for _, g := range cand.ServiceGates {
-		if g.Role == "gated" && (g.Status == Fail || g.Status == Insufficient) {
+		if !v5 && g.Role == "gated" && (g.Status == Fail || g.Status == Insufficient) {
 			why = append(why, fmt.Sprintf("service %s %s %s pooled: %s (%d/%d)", g.Gate, g.Window, g.Stratum, g.Status, g.Pooled.Num, g.Pooled.Den))
 		}
 	}
@@ -467,7 +478,7 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 			notJudged = append(notJudged, g.Window+" "+g.Stratum)
 		}
 	}
-	if cand.BacklogStatus != Pass {
+	if !v5 && cand.BacklogStatus != Pass {
 		why = append(why, fmt.Sprintf("backlog: %d of %d seeds stable", cand.BacklogStable, len(cand.PerSeed)))
 	}
 	if cand.SolvencyStatus != Pass {
@@ -489,6 +500,9 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	validated := cand.ValidationPass && t180.N > 0 && t180.Mean > 0
 	profitable := a90.N > 0 && a90.Mean > 0 && a180.N > 0 && a180.Mean > 0
 	restored := base.Valid && base.ServiceStatus != Pass
+	if v5 {
+		restored = base.Valid && base.ServiceStatus == Fail
+	}
 	ops := c.Profit[WinOps]
 	transition := ops.N > 0 && ops.Mean > 0
 	switch {
@@ -523,6 +537,9 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 		if !validated {
 			why = append(why, "T180 validation not met (service or incremental profit)")
 		}
+	case v5 && base.Valid && base.ServiceStatus == Insufficient:
+		c.Verdict, c.Classification = NOGO, ClassNoBenefit
+		why = append(why, fmt.Sprintf("no T90 profit over %s (%.0f cents), whose service is not shown to fail (insufficient evidence): no restoration is claimed", c.Against, t90.Mean))
 	default:
 		c.Verdict, c.Classification = NOGO, ClassNoBenefit
 		why = append(why, fmt.Sprintf("no T90 profit over %s (%.0f cents), whose service already passes", c.Against, t90.Mean))

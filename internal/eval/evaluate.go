@@ -8,6 +8,9 @@ import (
 
 const ReportSchema = "dreamteam.evalreport/v4"
 
+// ReportSchemaV5 is a report under a v0.2-eval-5 (clinical) policy.
+const ReportSchemaV5 = "dreamteam.evalreport/v5"
+
 // Verdicts.
 const (
 	GO          = "GO"
@@ -70,6 +73,10 @@ type SeedResult struct {
 	Funded     bool          `json:"funded"` // no funding gap through the end of observation
 	Gates      []SeedGate    `json:"gates"`
 	Measures   *SeedMeasures `json:"measures"`
+	// v0.2-eval-5: the clinical seed-level gates, and the seed's shared
+	// clinical status (service, those gates and backlog together).
+	ClinicalGates []SeedGate `json:"clinicalGates,omitempty"`
+	Clinical      string     `json:"clinical,omitempty"`
 }
 
 // WorstSeed is an extreme value and the seed it was on.
@@ -188,6 +195,15 @@ type PlanReport struct {
 	BookingInvariantWith string       `json:"bookingInvariantWith,omitempty"`
 	BookingInvariant     bool         `json:"bookingInvariant,omitempty"`
 	PerSeed              []SeedResult `json:"perSeed"`
+	// v0.2-eval-5: the clinical gates' summaries, the shared seed
+	// allowance over every seed-level clinical gate, its status with every
+	// gated pooled rate, and the absolute limits. Eligibility then rests on
+	// these, solvency and funding; the separate service and backlog
+	// statuses above stay reported.
+	ClinicalGates  []GateSummary `json:"clinicalGates,omitempty"`
+	ClinicalJoint  *JointGate    `json:"clinicalJoint,omitempty"`
+	ClinicalStatus string        `json:"clinicalStatus,omitempty"`
+	ClinicalSafety *Safety       `json:"clinicalSafety,omitempty"`
 }
 
 // Payback is the sustained break-even of a paired increment: the first
@@ -298,6 +314,9 @@ type Input struct {
 // Evaluate applies the policy. The output depends only on its arguments.
 func Evaluate(p *Policy, digest string, in Input) *Report {
 	rep := &Report{Schema: ReportSchema, PolicyID: p.ID, PolicyDigest: digest, Baseline: in.Baseline, Primary: in.Primary, Integrity: []string{}}
+	if p.Clinical != nil {
+		rep.Schema = ReportSchemaV5
+	}
 	names := make([]string, 0, len(in.Plans))
 	for n := range in.Plans {
 		names = append(names, n)
@@ -456,6 +475,10 @@ func planReport(p *Policy, name string, recs []Record) *PlanReport {
 		sr.Funded = m.FundingGap <= 0
 		sr.Gates = serviceGates(p, m)
 		sr.Service, sr.Validation = seedStatus(p, sr.Gates, "gated"), seedStatus(p, sr.Gates, "validation")
+		if p.Clinical != nil {
+			sr.ClinicalGates = clinicalGates(p, m)
+			sr.Clinical = clinicalSeed(&sr)
+		}
 		if !sr.Solvent {
 			pr.InsolventSeeds = append(pr.InsolventSeeds, r.Seed)
 		}
@@ -533,6 +556,9 @@ func planReport(p *Policy, name string, recs []Record) *PlanReport {
 		}
 	}
 	pr.Eligible = pr.Valid && pr.ServiceStatus == Pass && pr.BacklogStatus == Pass && pr.SolvencyStatus == Pass && pr.FundingStatus == Pass
+	if p.Clinical != nil {
+		clinicalPlan(p, pr)
+	}
 	return pr
 }
 
@@ -597,8 +623,12 @@ func seedStatus(p *Policy, gs []SeedGate, rl string) string {
 // together (H5): the seeds failing or lacking evidence on any of them, at
 // most floor(fraction × seeds).
 func joint(p *Policy, seeds []SeedResult, rl string) JointGate {
-	j := JointGate{Role: rl, Seeds: len(seeds), FailingSeeds: []int64{}, InsufficientSeeds: []int64{}}
-	j.FailLimit = failLimit(bp(p.Service.MaxFailingSeedFraction), len(seeds))
+	j := jointOf(p, seeds, rl, bp(p.Service.MaxFailingSeedFraction), func(s *SeedResult) string {
+		if rl == "validation" {
+			return s.Validation
+		}
+		return s.Service
+	})
 	if len(seeds) > 0 {
 		for _, g := range seeds[0].Gates {
 			if g.PerSeed && role(p, g.Window) == rl {
@@ -606,12 +636,21 @@ func joint(p *Policy, seeds []SeedResult, rl string) JointGate {
 			}
 		}
 	}
-	for _, s := range seeds {
-		st := s.Service
-		if rl == "validation" {
-			st = s.Validation
-		}
-		switch st {
+	if len(seeds) > 0 && j.Gates == 0 {
+		j.Status = Insufficient
+	}
+	return j
+}
+
+// jointOf is the seed rule over each seed's status (status): the seeds
+// failing or lacking evidence, at most floor(fraction × seeds) of them.
+// The caller counts the gates per seed.
+func jointOf(p *Policy, seeds []SeedResult, rl string, fracBP int64, status func(*SeedResult) string) JointGate {
+	j := JointGate{Role: rl, Seeds: len(seeds), FailingSeeds: []int64{}, InsufficientSeeds: []int64{}}
+	j.FailLimit = failLimit(fracBP, len(seeds))
+	for i := range seeds {
+		s := &seeds[i]
+		switch status(s) {
 		case Fail:
 			j.FailingSeeds = append(j.FailingSeeds, s.Seed)
 		case Insufficient:
@@ -626,7 +665,7 @@ func joint(p *Policy, seeds []SeedResult, rl string) JointGate {
 		j.Upper = binomUpper(bad, len(seeds), j.Confidence)
 	}
 	switch {
-	case len(seeds) == 0 || j.Gates == 0 || len(j.InsufficientSeeds) > j.FailLimit:
+	case len(seeds) == 0 || len(j.InsufficientSeeds) > j.FailLimit:
 		j.Status = Insufficient
 	case bad > j.FailLimit:
 		j.Status = Fail
@@ -652,12 +691,22 @@ func windowOrder(p *Policy) []string {
 // undefined if any seed's cohort is missing or undecided, or all are
 // empty); the whole-period urgent gate decides seeds only.
 func summarize(p *Policy, seeds []SeedResult) []GateSummary {
+	return summarizeGates(p, seeds, func(s *SeedResult) []SeedGate { return s.Gates })
+}
+
+// summarizeGates is summarize over the gates gates returns of each seed.
+// A minimum fraction (timely access) fails below its threshold, and its
+// worst seed is the lowest; a gate of counts or maxima (severe delays in
+// a week, the maximum wait) or one of the whole gated period is judged
+// per seed only.
+func summarizeGates(p *Policy, seeds []SeedResult, gates func(*SeedResult) []SeedGate) []GateSummary {
 	type key struct{ g, w, s string }
 	var order []key
 	by := map[key][]SeedGate{}
 	seedOf := map[key][]int64{}
-	for _, sr := range seeds {
-		for _, g := range sr.Gates {
+	for i := range seeds {
+		sr := &seeds[i]
+		for _, g := range gates(sr) {
 			k := key{g.Gate, g.Window, g.Stratum}
 			if _, ok := by[k]; !ok {
 				order = append(order, k)
@@ -698,7 +747,7 @@ func summarize(p *Policy, seeds []SeedResult) []GateSummary {
 			if g.defined() {
 				s.DefinedSeeds++
 				sum += g.Value
-				s.Worst.note(g.Value, seedOf[k][i], true)
+				s.Worst.note(g.Value, seedOf[k][i], k.g != GateTimelyAccess)
 			}
 		}
 		if s.DefinedSeeds > 0 {
@@ -716,11 +765,13 @@ func summarize(p *Policy, seeds []SeedResult) []GateSummary {
 			s.WeekDesignEffect = wde / float64(nw)
 		}
 		switch {
-		case k.w == WinGated:
+		case k.w == WinGated || k.g == GateSevereRate || k.g == GateSevereWeek || k.g == GateMaxWait:
 			s.Status = "per-seed" // judged in the joint seed rule only
 		case !s.Pooled.Defined:
 			s.Status = Insufficient
-		case rateAbove(s.Pooled.Num, s.Pooled.Den, bp(s.Threshold)):
+		case k.g == GateTimelyAccess && rateBelow(s.Pooled.Num, s.Pooled.Den, bp(s.Threshold)):
+			s.Status = Fail
+		case k.g != GateTimelyAccess && rateAbove(s.Pooled.Num, s.Pooled.Den, bp(s.Threshold)):
 			s.Status = Fail
 		default:
 			s.Status = Pass

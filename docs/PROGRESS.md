@@ -7,6 +7,94 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4b — the v0.2-eval-5 clinical evaluator (0.2.0-dev.16)
+
+This slice implements the clinical acceptance rules specified in 5C.4a
+(`docs/evaluation/proposals/v5-clinical-acceptance.md`, implementation
+decisions in its §J). It also fixes the protocol for the combined
+synthetic operating characteristics
+(`docs/calibration/clinical-5c4b/protocol.md`), committed before any
+combined result. Design §13.11.
+
+* **No v5 policy is frozen.** The owner chooses the values from those
+  operating characteristics (owner decision: build first, values
+  later; the weekend question after the operating characteristics).
+* **Unchanged:** v0.2-eval-4, the simulation and every strategy.
+* **Nothing else was run:** no strategy, development, reference or
+  holdout run.
+
+* **Rules.** These are reached only by a policy of schema
+  `dreamteam.evalpolicy/v5` (`internal/eval/clinical.go`):
+  * absolute past-due limits by priority, from exact timestamps, with
+    unfinished studies censored at the end of observation, at zero
+    tolerance;
+  * the severe-delay rate and severe delays per Monday week;
+  * the timely-acquisition fraction from the wanted time, with open,
+    lost and abandoned orders untimely, a patient's withdrawal before
+    the limit excluded, and a rebooking never resetting the clock;
+  * the maximum wait;
+  * inherited work timed from the takeover or from its own due time;
+  * one shared seed allowance over service, severity, access and
+    backlog, each seed counted once, with the absolute limits kept
+    apart (NO GO, clinical safety);
+  * the sampled age limit reported only;
+  * the M3 fix (an insufficient baseline is not restored);
+  * the G10 integrity check (an order imaged before its wanted time).
+* **v0.2-eval-4 neutrality.** `TestV4Neutrality` pins the evaluation of
+  a varied synthetic input. It covers GO, NO GO, service, backlog and
+  case-selection paths, with a digest recorded before any evaluator
+  change. The digest is unchanged.
+* **Acceptance cases G1–G6 and G10–G14** on synthetic records. Each
+  harmful case has its acceptable counterpart and exact boundaries.
+  * The audit's witnesses (six urgent reports eight days late; a report
+    348 h past due; thirty urgent acquisitions thirty days late) now
+    fail under v5 and still pass under v0.2-eval-4.
+  * Four seeds failing service plus four others failing backlog pass
+    v0.2-eval-4's separate allowances and fail v5's shared one.
+* **The combined synthetic practice** (`oc_clinical_test.go`).
+  * It adds an imaging and booking stage to the 5C.3 reading queue:
+    wanted times, a patient-tolerance loss, cancellations, and
+    acquisitions sorted in time (the M1 fix; the 5C.3 queue itself is
+    unchanged).
+  * It produces complete records, which the production evaluator
+    judges.
+  * Its tabulation agrees exactly with `planReport` on sampled seeds of
+    a stable, a structural and a harmful scenario.
+  * The stable practice's reading hours cover its imaging. The
+    scenario's own rota failed v0.2-eval-4's service gates on a debug
+    stream, so it is kept as a structural variant. Both are recorded in
+    the protocol.
+* **Session replay.** 0.2.0-dev.15 is registered: batch mode
+  `v0.2_dev15`, with fixture `mini-seed43-dev15` recorded by the
+  31a2573 binary.
+
+**Tests.**
+
+* New: `TestV4Neutrality`, eleven `TestClinical*` tests,
+  `TestClinicalOCAgreesWithEvaluate`, and `TestDev15RecordReplays` and
+  `TestDev15RecordContinues`.
+* Sixteen targeted mutations of the new rules are each caught. Four
+  survived the first pass and were closed with stronger tests and one
+  shared severity helper.
+* Removing the dev.15 registration fails the replay tests.
+* **An existing intermittent failure, fixed.**
+  * Since 5C.0b, `TestEvaluateMatrix` shared one strategy-pin map
+    across its cases.
+  * One case deleted a pin, so in some random map orders another case
+    failed. It failed in the first full run of this slice.
+  * Each case now gets its own copy: 20 of 20 runs pass, where before
+    20 runs gave several failures.
+
+**Limitations.**
+
+* **Values.** The values are not chosen; the exploratory run follows
+  in its own commit.
+* **Synthetic model.** It is simplified: one modality pool, day-level
+  booking, and constant finance.
+* **Saturday routine bookings.** In the practice without weekend
+  reading, Saturday routine bookings follow the wanted day uniformly,
+  which may overstate its routine breach rate.
+
 ## V0.2 Slice 5C.4a — audit record, holdout containment, clinical policy proposal (0.2.0-dev.15)
 
 The independent audit of v0.2-eval-4 at 7707dbd gave **NO GO** for the

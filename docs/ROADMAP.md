@@ -103,8 +103,11 @@ Remediation is in three slices:
   ordinary tests' holdout exposure is contained and recorded, and the
   clinical acceptance rules for v0.2-eval-5 are specified, not
   activated.
-* **5C.4b:** the clinical evaluator and its combined synthetic
-  calibration.
+* **5C.4b** (0.2.0-dev.16, design §13.11): the v0.2-eval-5 clinical
+  evaluator. Its acceptance tests are in place, v0.2-eval-4 is pinned
+  neutral, and the combined synthetic protocol is fixed. The
+  exploratory run informs the owner's values, and a confirmatory run
+  validates them before v0.2-eval-5 is frozen.
 * **5C.4c:** holdout integrity, meaning refused-action semantics,
   executable identity, authenticated approval and durable run-once.
 

@@ -2,6 +2,17 @@
 
 **Status: proposal, not active.**
 
+* **Slice 5C.4b** implements every rule below in `internal/eval`
+  (`clinical.go`), reached only by a policy of schema
+  `dreamteam.evalpolicy/v5`.
+* **No v5 policy file exists yet**: the values are the owner's to set,
+  after the combined synthetic operating characteristics
+  (`docs/calibration/clinical-5c4b`).
+* **Unchanged:** v0.2-eval-4 stays in force, and its evaluations are
+  byte-identical (`TestV4Neutrality`).
+* **Settled by the implementation:** §J lists where the code makes
+  precise a point this proposal left open.
+
 * **What is in force.** v0.2-eval-4 (`../policy-v0.2-eval-4.json`)
   stays in force, unchanged. No evaluator code implements anything here.
 * **Where it goes next.** Slice 5C.4b implements this specification
@@ -448,3 +459,43 @@ are not adjusted after it to make a scenario pass.
 * **Not in 5C.4b.** Refused-action semantics, approval binding,
   authenticated approval, custody and durable run-once are Slice
   5C.4c's.
+
+## J. Implementation decisions (Slice 5C.4b)
+
+Each of these is a point the sections above left open, made precise in
+code and tests. Every one can be changed when the owner freezes v5.
+
+* **Absolute limits (A.1, A.2).**
+  * They are one per-priority limit, `absoluteMaxPastDueMin`; routine
+    is A.1's age limit.
+  * They apply to every study acquired by the horizon, inherited ones
+    included, judged at the end of observation.
+  * A study's delay is its finish minus its due time, or, if
+    unfinished, the end of observation minus its due time.
+* **Severe delay (A.3, A.4).**
+  * The severe-delay rate is gated per seed only, in the priority's
+    per-seed windows. Its pooled rate is reported, never gated.
+  * The weekly count uses Monday weeks of the gated period, by
+    acquisition.
+* **Maximum wait (B.2).**
+  * It covers served and open orders only. A lost or abandoned order is
+    untimely in B.1, and its loss is case selection's; it has no wait
+    to measure.
+  * It is measured over the gated period's new orders and the inherited
+    orders wanted by the horizon.
+* **Inherited orders (B.3).** They are subject to the maximum wait,
+    never to a timely-access rate, because they are not new demand.
+* **Per-seed windows.** The severity and access gates are per seed
+  exactly where the priority's breach gate is (`perSeedWindows`). In
+  T180 they are reported only; validation stays the breach rule's.
+* **Backlog in v5.**
+  * The sampled age limit (`persistent`) must be informational, and is
+    reported only.
+  * A v4 policy that makes it informational is refused, as before.
+* **Restoration (M3).** Under v5, service is restored only when the
+  baseline's breach service demonstrably fails. An insufficient
+  baseline gives "no benefit" with that reason stated.
+* **Record integrity (G10).** A v5 record is invalid if any order was
+  imaged before its wanted time.
+* **Report.** Schema `dreamteam.evalreport/v5`. The v4 statuses stay
+  reported beside the clinical ones.

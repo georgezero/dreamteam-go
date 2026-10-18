@@ -246,6 +246,8 @@ type SeedMeasures struct {
 	CommitmentGapInstant int      `json:"commitmentGapInstants"`
 	CommitmentInstants   int      `json:"commitmentInstants"`
 	Integrity            []string `json:"integrity"` // failed checks: the record is not evidence
+	// Clinical: v0.2-eval-5's clinical measures (a v5 policy only).
+	Clinical *ClinicalMeasures `json:"clinical,omitempty"`
 }
 
 // Liquidity is the obligation bridge at one capture, by kind. Cash is
@@ -434,6 +436,12 @@ func Measure(p *Policy, r *Record) *SeedMeasures {
 		m.Inherited = measureInherited(r, t90, caps["T90"], end)
 	}
 	m.Backlog = measureBacklog(p, r, t90)
+	if p.Clinical != nil {
+		checkClinicalRecord(r, end, bad)
+		if end != nil {
+			m.Clinical = measureClinical(p, r, ws, end)
+		}
+	}
 	reconcile(r, m, bad)
 	slices.Sort(m.Integrity)
 	return m
@@ -1034,7 +1042,9 @@ func judgeBacklog(p *Policy, bm *BacklogMeasures) {
 			}
 		}
 	}
-	if bm.Persistent > 0 {
+	// Under v0.2-eval-5 the sampled age limit is reported only: the exact
+	// one is a clinical absolute limit.
+	if bm.Persistent > 0 && !p.informational("persistent") {
 		bm.Status = "unstable"
 		bm.Reasons = append(bm.Reasons, fmt.Sprintf("%d studies unfinished more than %d days past due (worst %.1f h)", bm.Persistent, p.Backlog.PersistentAfterDueDays, bm.WorstPastDueHr))
 	}

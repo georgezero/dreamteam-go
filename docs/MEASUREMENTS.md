@@ -545,3 +545,20 @@ was run.
 * The full run's one failure was `TestHoldoutContainment`: it flagged
   `TestAuthorizeSealedFirst`, which was written after the allowlist.
   That test uses a synthetic root and was added to the reviewed sites.
+
+## 2026-10-18 — V0.2 Slice 5C.4b, the v0.2-eval-5 clinical evaluator (0.2.0-dev.16)
+
+Raspberry Pi 4 (4 cores). No strategy, reference seed or holdout seed
+was run.
+
+| Run | Machine | Time |
+|---|---|---|
+| Full suite `go test ./... -count=1` | Pi 4 | 706 s wall; every package passes except the existing `TestEvaluateMatrix` flake (sim 688, session 282, eval 205, cmd ≈130, tui 27) |
+| `go test ./internal/eval -count=1` after that fix | Pi 4 | 101 s; passes |
+| `TestEvaluateMatrix -count=20`, fixed / unfixed | Pi 4 | 94 s, all pass / several failures |
+| 16 targeted mutations of the clinical rules (each `go test ./internal/eval -run TestClinical`) | Pi 4 | about 9 min |
+| `TestClinicalOCAgreesWithEvaluate` (9 synthetic practices × 3 bundles) | Pi 4 | 11 s |
+
+* One synthetic practice record (181 days, about 8,000 studies and
+  9,400 orders), measured under the base candidate plus two extra
+  access limits, takes about 0.4 s.

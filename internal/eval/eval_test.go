@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
+	"maps"
 	"math"
 	"os"
 	"os/exec"
@@ -832,7 +833,7 @@ func TestEvaluateMatrix(t *testing.T) {
 	pins := map[string]string{"A": "sha-A", "B": "sha-B", "C": "sha-C"}
 	in := func() Input {
 		return Input{Baseline: "A", Plans: map[string][]Record{"A": mk("A", 10_000), "B": mk("B", 30_000), "C": mk("C", 20_000)},
-			Seeds: seeds, PlanSHA: pins, Primary: "B"}
+			Seeds: seeds, PlanSHA: maps.Clone(pins), Primary: "B"} // a case may change its own copy
 	}
 	rep := Evaluate(p, d, in())
 	if len(rep.Integrity) != 0 || comparison(t, rep, "B").Role != "primary" || comparison(t, rep, "C").Role != "exploratory" {

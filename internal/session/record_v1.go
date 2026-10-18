@@ -205,6 +205,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.12": batchModeDev12,  // V0.2 Slice 5C.1 (development strategy comparison): this build's action set and rules
 	"0.2.0-dev.13": batchModeDev13,  // V0.2 Slice 5C.2 (evaluation policy v0.2-eval-3): this build's action set and rules
 	"0.2.0-dev.14": batchModeDev14,  // V0.2 Slice 5C.3 (evaluation policy v0.2-eval-4): this build's action set and rules
+	"0.2.0-dev.15": batchModeDev15,  // V0.2 Slice 5C.4a (holdout containment): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

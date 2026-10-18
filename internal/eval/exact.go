@@ -35,6 +35,10 @@ func mul(xs ...int64) *big.Int {
 // rateAbove reports num/den > t (basis points), den > 0.
 func rateAbove(num, den, t int64) bool { return mul(num, 10_000).Cmp(mul(t, den)) > 0 }
 
+// rateBelow reports num/den < t (basis points), den > 0: a minimum
+// fraction's failure.
+func rateBelow(num, den, t int64) bool { return mul(num, 10_000).Cmp(mul(t, den)) < 0 }
+
 // dropAbove reports nb/db − na/da > t (basis points), da, db > 0: the
 // fall from b to a exceeds the tolerance.
 func dropAbove(nb, db, na, da, t int64) bool {

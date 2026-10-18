@@ -26,6 +26,11 @@ const (
 	policyV1Schema = "dreamteam.evalpolicy/v1"
 	policyV2Schema = "dreamteam.evalpolicy/v2"
 	policyV3Schema = "dreamteam.evalpolicy/v3"
+	// PolicyV5Schema: a v0.2-eval-5 candidate (Slice 5C.4b), with the
+	// clinical acceptance rules (docs/evaluation/proposals/
+	// v5-clinical-acceptance.md). Evaluated only for the combined synthetic
+	// validation until one is frozen; the policy in force stays v4.
+	PolicyV5Schema = "dreamteam.evalpolicy/v5"
 )
 
 // Priorities in report order.
@@ -188,6 +193,47 @@ type Policy struct {
 		Path   string `json:"path"`
 		SHA256 string `json:"sha256"`
 	} `json:"historicalReferences"`
+	// Clinical: the v0.2-eval-5 clinical acceptance rules; present exactly
+	// when the schema is v5. A v4 evaluation never reads it.
+	Clinical *Clinical `json:"clinical,omitempty"`
+}
+
+// Clinical is v0.2-eval-5's clinical acceptance (proposal §A–§C). Every
+// time is minutes; every rate is exact in basis points. Each map has one
+// entry per priority.
+type Clinical struct {
+	// Absolute limits (zero tolerance): no study acquired by the horizon
+	// may finish (or, unfinished, be observed) more than this past its due
+	// time (A.1, A.2). Urgent ≤ soon ≤ routine.
+	AbsoluteMaxPastDueMin map[string]int64 `json:"absoluteMaxPastDueMin"`
+	// A study is severely delayed when it is more than this past due (A.3).
+	SevereAfterDueMin map[string]int64 `json:"severeAfterDueMin"`
+	// Per seed, in the service per-seed windows: severely delayed ÷
+	// acquired at most this (A.3) …
+	MaxSevereRate map[string]float64 `json:"maxSevereRate"`
+	// … and at most this many severely delayed studies acquired in any one
+	// Monday-based week of the gated period (A.4).
+	MaxSeverePerWeek map[string]int64 `json:"maxSeverePerWeek"`
+	// Access (B): an order is timely when imaged within AccessLimitMin of
+	// its wanted time. Per seed, in the service per-seed windows, timely ÷
+	// decided at least MinTimelyFraction, with at least MinAccessCohort
+	// decided orders; pooled the same in every gated window.
+	AccessLimitMin    map[string]int64   `json:"accessLimitMin"`
+	MinTimelyFraction map[string]float64 `json:"minTimelyFraction"`
+	MinAccessCohort   map[string]int64   `json:"minAccessCohort"`
+	// MaxWaitMin: no served or open order of the gated period may wait
+	// longer from its wanted time (B.2): a seed-level gate, or absolute
+	// when MaxWaitAbsolute.
+	MaxWaitMin      map[string]int64 `json:"maxWaitMin"`
+	MaxWaitAbsolute bool             `json:"maxWaitAbsolute"`
+	// InheritedFrom: how inherited work's absolute limits and waits are
+	// timed (A.5, B.3): "takeover", from max(due or wanted, takeover); or
+	// "own", from its own due or wanted time.
+	InheritedFrom string `json:"inheritedFrom"`
+	// MaxFailingSeedFraction: the shared allowance (C.1): seeds failing or
+	// lacking evidence on any seed-level clinical gate (service, severe
+	// delay, access, backlog), each counted once.
+	MaxFailingSeedFraction float64 `json:"maxFailingSeedFraction"`
 }
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -225,8 +271,10 @@ func DecodePolicy(raw []byte) (*Policy, error) {
 
 func (p *Policy) validate() error {
 	switch {
-	case p.Schema != PolicySchema:
+	case p.Schema != PolicySchema && p.Schema != PolicyV5Schema:
 		return fmt.Errorf("schema %q, want %q", p.Schema, PolicySchema)
+	case (p.Schema == PolicyV5Schema) != (p.Clinical != nil):
+		return fmt.Errorf("the clinical rules are v0.2-eval-5's: schema %q with clinical %v", p.Schema, p.Clinical != nil)
 	case p.Horizons.PrimaryDays <= p.Horizons.FeedbackDays || p.Horizons.OperatingFrom >= p.Horizons.PrimaryDays:
 		return fmt.Errorf("horizons out of order")
 	case p.Horizons.ClosureMin <= 0:
@@ -254,8 +302,14 @@ func (p *Policy) validate() error {
 			return fmt.Errorf("backlog check %s must be absolute", c)
 		}
 	}
+	// v0.2-eval-5 moves the age limit out of the backlog blocks into the
+	// clinical absolute limits (exact timestamps, zero tolerance): there
+	// the sampled check is reported only, and must be.
+	if v5 := p.Clinical != nil; v5 != p.informational("persistent") {
+		return fmt.Errorf("backlog check persistent: informational exactly when the clinical age limit holds (v5 %v)", v5)
+	}
 	for _, c := range p.Backlog.InformationalChecks {
-		if !slices.Contains(backlogChecks, c) || c == "persistent" {
+		if !slices.Contains(backlogChecks, c) {
 			return fmt.Errorf("backlog check %q cannot be informational", c)
 		}
 	}
@@ -315,7 +369,47 @@ func (p *Policy) validate() error {
 			return fmt.Errorf("unknown window %q", w)
 		}
 	}
+	if p.Clinical != nil {
+		return p.Clinical.validate(p)
+	}
 	return nil
+}
+
+func (c *Clinical) validate(p *Policy) error {
+	// Every limit must be decided inside the observation: it runs at least
+	// settlementDays past the horizon, so a study due or an order wanted by
+	// the horizon is decided against any limit no longer than that.
+	decided := int64(p.Finance.SettlementDays) * 1440
+	for _, q := range Priorities {
+		for name, v := range map[string]int64{"absoluteMaxPastDueMin": c.AbsoluteMaxPastDueMin[q], "severeAfterDueMin": c.SevereAfterDueMin[q],
+			"accessLimitMin": c.AccessLimitMin[q], "maxWaitMin": c.MaxWaitMin[q]} {
+			if v <= 0 || v > decided {
+				return fmt.Errorf("clinical %s.%s %d: positive and at most the %d minutes observed past the horizon", name, q, v, decided)
+			}
+		}
+		if c.MaxSeverePerWeek[q] < 0 || c.MinAccessCohort[q] <= 0 {
+			return fmt.Errorf("clinical %s: maxSeverePerWeek must not be negative, minAccessCohort must be positive", q)
+		}
+		for name, f := range map[string]float64{"maxSevereRate": c.MaxSevereRate[q], "minTimelyFraction": c.MinTimelyFraction[q]} {
+			if err := wholeBP("clinical "+name+"."+q, f); err != nil {
+				return err
+			}
+			if f < 0 || f > 1 {
+				return fmt.Errorf("clinical %s.%s %v: a fraction", name, q, f)
+			}
+		}
+		if c.SevereAfterDueMin[q] > c.AbsoluteMaxPastDueMin[q] || c.AccessLimitMin[q] > c.MaxWaitMin[q] {
+			return fmt.Errorf("clinical %s: a severe delay must come before the absolute limit, timely access before the maximum wait", q)
+		}
+	}
+	a := c.AbsoluteMaxPastDueMin
+	if a["urgent"] > a["soon"] || a["soon"] > a["routine"] {
+		return fmt.Errorf("clinical absolute limits must not allow a more urgent priority a longer delay: %v", a)
+	}
+	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
+		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)
+	}
+	return wholeBP("clinical maxFailingSeedFraction", c.MaxFailingSeedFraction)
 }
 
 // backlogChecks are the backlog rule's checks, sorted.
