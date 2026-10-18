@@ -20,6 +20,8 @@ implementation decisions in §J).
 | `correction-protocol.md` | The calibration correction: measured utilization, practices at 0.85 and 0.92, a steady state at the takeover, the simulator's worklist; its scenarios, streams and reporting. Committed before any corrected result. |
 | `../../evaluation/oc-v0.2-eval-5-exploratory-corrected.json` | The corrected run's output (joofi; A85, Wg85 and L10-92 reproduced identically on the Pi). |
 | `findings-corrected.md` | What the corrected run shows: utilization 0.85 and 0.92 as measured, false rejection, the weekend comparison at equal utilization, deterioration with its consequence, the full bundle, and the remaining limitations. |
+| `fidelity-protocol.md` | The final calibration correction: the simulator profile (no action, development seeds), demand, mix and hours from it, individual readers in the simulator's blocks, regimes on core capacity, the mirror's validation; committed before any fidelity result. |
+| `../../../internal/eval/testdata/sim-profile-5c4b.json` | The measured simulator profile the fidelity model reads. |
 
 Code:
 
