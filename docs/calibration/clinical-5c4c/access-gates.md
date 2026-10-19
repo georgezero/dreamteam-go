@@ -1,5 +1,12 @@
 # Slice 5C.4c: clinical access and weekly severity gates
 
+> **Superseded in part (Slice 5C.4e, 2026-10-19):** §2's lost-demand
+> comparison is now the empirical benchmark acceptance rule with a
+> per-seed safeguard, and §3's pooled weekly blocks are now fixed
+> Monday–Sunday calendar weeks; see
+> `../clinical-5c4e/empirical-acceptance.md`. Gate A (§1) is unchanged
+> and its values approved.
+
 This slice implements the owner's modified option B (2026-10-18) and
 the volume-normalized weekly severity.
 

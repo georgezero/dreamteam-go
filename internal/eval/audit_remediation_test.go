@@ -202,10 +202,13 @@ func TestWeeklyPartitionSensitivity(t *testing.T) {
 // the favourable verdict states "Access non-deterioration only; absolute
 // access adequacy not established.", and the access statement shows the
 // 65% unimaged for both, the timeliness and the bound, adequacy never
-// established. Under the candidate's betting bound Gate B is insufficient
-// and the verdict NO GO, with the access statement still shown.
+// established. Under the 5C.4d candidate's betting bound Gate B is
+// insufficient and the verdict NO GO, with the access statement still
+// shown.
 func TestAccessVerdictLimitation(t *testing.T) {
-	p, d := candidatePolicy(t)
+	// The pooled weekly blocks: the fixture's seven urgent a week can
+	// never meet the calendar minimum (empirical_acceptance_test.go).
+	p, d := empiricalPolicy(t)
 	lose := func(b synth, r *Record) {
 		for k, i := range urgentOrders(r, 0, 150) {
 			if k%20 < 13 { // 65%, spread over the period
@@ -231,7 +234,8 @@ func TestAccessVerdictLimitation(t *testing.T) {
 			t.Fatalf("urgent: %+v", a)
 		}
 	}
-	_, c = clinicalCaseAB(t, p, d, lose, lose)
+	lp, _ := legacyCandidatePolicy(t)
+	_, c = clinicalCaseAB(t, lp, d, lose, lose)
 	if c.Verdict != NOGO || c.AccessLimitation != "" || len(c.Access) != 3 || c.Access[0].LostDemandStatus != Insufficient {
 		t.Fatalf("betting: %s %q %+v", c.Verdict, c.AccessLimitation, c.Access)
 	}

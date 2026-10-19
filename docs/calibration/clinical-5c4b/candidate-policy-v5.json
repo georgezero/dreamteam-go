@@ -1,7 +1,7 @@
 {
  "schema": "dreamteam.evalpolicy/v5",
  "id": "v0.2-eval-5-candidate",
- "status": "PROPOSAL, not in force and not frozen (Slice 5C.4d, 2026-10-18): the owner's modified option B with the seed-level lost-demand gate (docs/calibration/clinical-5c4d/gate-b-statistics.md) and the volume-normalized weekly severity, for the independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
+ "status": "PROPOSAL, not in force and not frozen (Slice 5C.4e, 2026-10-19): the owner's modified option B with Gate B as an empirical benchmark acceptance rule without a population-confidence claim, its per-seed safeguard, and the weekly severity over fixed calendar weeks (docs/calibration/clinical-5c4e/), for the independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
  "effective": "none: v0.2-eval-4 stays in force",
  "notes": [
   "Candidate only. The clinical section implements docs/evaluation/proposals/v5-clinical-acceptance.md with the values of docs/calibration/clinical-5c4b/acceptance-design.md; every other rule is v0.2-eval-4 unchanged, except the sampled persistent age check, reported only (v5 replaces it with the exact absolute limits)."
@@ -158,7 +158,7 @@
    "rule": "clinical (new)",
    "finding": "audit docs/audits/slice-5c3-eval4-framework-audit.md: severe report delays, a report 348 h past due, thirty urgent patients a month late and separate allowances all passed v0.2-eval-4",
    "was": "none",
-   "now": "absolute past-due limits at zero tolerance; the severe-delay rate and the volume-normalized weekly severe rate; timely access over served, open and late-cancelled eligible orders from the original wanted time; lost, left and patient-ended demand against the paired baseline; the maximum wait reported; one shared seed allowance"
+   "now": "absolute past-due limits at zero tolerance; the severe-delay rate and the weekly severe rate in each fixed calendar week; timely access over served, open and late-cancelled eligible orders from the original wanted time; lost, left and patient-ended demand against the paired baseline as an empirical benchmark acceptance (no population-confidence claim) with a per-seed safeguard; the maximum wait reported; one shared seed allowance"
   },
   {
    "rule": "backlog.informationalChecks (persistent)",
@@ -386,6 +386,7 @@
    "soon": 0.05,
    "routine": 0.05
   },
+  "weeklyPartition": "calendar",
   "maxWeeklySevereRate": {
    "urgent": 0.05,
    "soon": 0.05,
@@ -415,14 +416,20 @@
   "inheritedFrom": "takeover",
   "maxFailingSeedFraction": 0.1,
   "lostDemand": {
+   "rule": "empirical",
    "maxIncrease": {
     "urgent": 0.02,
     "soon": 0.02,
     "routine": 0.02
    },
+   "maxSeedIncrease": {
+    "urgent": 0.1,
+    "soon": 0.06,
+    "routine": 0.05
+   },
    "confidence": 0.95,
    "method": "betting",
-   "minSeeds": 20,
+   "minSeeds": 40,
    "minSeedOrders": {
     "urgent": 20,
     "soon": 40,

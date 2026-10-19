@@ -54,13 +54,14 @@ func hasReason(c Comparison, sub string) bool {
 	return slices.ContainsFunc(c.Reasons, func(s string) bool { return strings.Contains(s, sub) })
 }
 
-// withMethod is p with Gate B's bound method replaced (the t method is
-// under owner decision: it exercises the pass and fail logic here).
+// withMethod is p with Gate B under the 5C.4d confidence rule and the
+// bound method m (the t method is not for clinical acceptance: it
+// exercises the confidence rule's pass and fail logic here).
 func withMethod(p *Policy, m string) *Policy {
 	q := *p
 	c := *p.Clinical
 	ld := *c.LostDemand
-	ld.Method = m
+	ld.Rule, ld.MaxSeedIncrease, ld.Method = "", nil, m
 	c.LostDemand = &ld
 	q.Clinical = &c
 	return &q
@@ -75,7 +76,7 @@ func withMethod(p *Policy, m string) *Policy {
 // variance, bound 0); 2 or 3 lost by seed (mean 1.67 points) passes; 3 or
 // 4 (mean 2.33) fails. Lost orders stay apart from timeliness.
 func TestGateLostUrgentOrders(t *testing.T) {
-	p, d := candidatePolicy(t)
+	p, d := legacyCandidatePolicy(t)
 	pt := withMethod(p, BoundT)
 	lose := func(k func(seed int64) int) func(b synth, r *Record) {
 		return func(b synth, r *Record) {
@@ -88,7 +89,7 @@ func TestGateLostUrgentOrders(t *testing.T) {
 	pr, c := clinicalCaseAB(t, p, d, nil, thirty)
 	g := lostDemandOf(c, "urgent")
 	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Pass || g.Status != Insufficient || !strings.Contains(g.Reason, "cannot establish") ||
-		g.Increase < 0.199 || len(g.Seeds) != 40 || g.ZeroIncreaseUpper < 0.2 || c.Verdict != NOGO || !hasReason(c, "lost demand urgent: insufficient") {
+		g.Increase < 0.199 || len(g.Seeds) != 40 || *g.ZeroIncreaseUpper < 0.2 || c.Verdict != NOGO || !hasReason(c, "lost demand urgent: insufficient") {
 		t.Fatalf("30 lost, betting: %+v, verdict %s %v", g, c.Verdict, c.Reasons)
 	}
 	_, c = clinicalCaseAB(t, p, d, nil, nil)
@@ -234,7 +235,9 @@ func TestGateHorizonCensoring(t *testing.T) {
 // passes. With a minimum above the whole period's acquisitions the gate
 // lacks evidence: insufficient, not a pass.
 func TestGateLowVolumeWeeks(t *testing.T) {
-	p, d := candidatePolicy(t)
+	// The pooled weekly blocks: the fixture's seven urgent a week can
+	// never meet the calendar minimum (empirical_acceptance_test.go).
+	p, d := empiricalPolicy(t)
 	late := func(n int) func(b synth, r *Record) {
 		return func(b synth, r *Record) {
 			for _, i := range studiesOf(r, "urgent", 60, 61+int64(n)-1) {
@@ -268,7 +271,9 @@ func TestGateLowVolumeWeeks(t *testing.T) {
 // the allowance of 4 of 40. A fifth seed failing timeliness alone: five,
 // NO GO.
 func TestGateOverlappingFailures(t *testing.T) {
-	p, d := candidatePolicy(t)
+	// The pooled weekly blocks: the fixture's seven urgent a week can
+	// never meet the calendar minimum (empirical_acceptance_test.go).
+	p, d := empiricalPolicy(t)
 	bad := func(seeds ...int64) func(b synth, r *Record) {
 		return func(b synth, r *Record) {
 			if !slices.Contains(seeds, r.Seed) {

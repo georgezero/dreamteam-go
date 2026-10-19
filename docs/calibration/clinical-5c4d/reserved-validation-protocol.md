@@ -3,6 +3,10 @@
 The one confirmatory clinical calibration before v0.2-eval-5 is frozen.
 It supersedes `../clinical-5c4c/reserved-validation-protocol.md`.
 
+**Superseded** by `../clinical-5c4e/reserved-validation-protocol.md`
+(2026-10-19): the owner chose the empirical rule and fixed calendar
+weeks. Kept as written.
+
 **Status: NOT RUNNABLE.** Two owner decisions are open:
 
 * **Gate B's statistical method** (`gate-b-statistics.md` §7). With

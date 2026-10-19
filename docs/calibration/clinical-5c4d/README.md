@@ -5,7 +5,9 @@ The remediation of the independent 5C.4c audit
 maintainer's response is `../../audits/slice-5c4c-access-gates-audit-response.md`),
 under the owner's decisions of 2026-10-18 (0.2.0-dev.18).
 
-* **Not frozen.** The candidate policy remains a proposal.
+* **Not frozen.** The candidate policy remains a proposal; its Gate B
+  method and weekly partition were decided in Slice 5C.4e
+  (`../clinical-5c4e/`).
 * **Nothing else was run:** no strategy, reference or holdout seed,
   unseal record or reserved stream.
 
@@ -15,4 +17,4 @@ under the owner's decisions of 2026-10-18 (0.2.0-dev.18).
 | `gate-b-statistics.md` | Gate B's estimand, assumptions, the impossibility at 40 seeds, the two procedures, the coverage evidence, the owner's alternatives. |
 | `gate-b-coverage.json` | The coverage table (`TestGateBCoverage` with `DT_GATEB_COVERAGE`). |
 | `sim-access-5c4d.json` | The no-action access validation under the current candidate (development seeds), with the weekly partitions. |
-| `reserved-validation-protocol.md` | The updated confirmatory protocol: not runnable until the owner's two decisions. |
+| `reserved-validation-protocol.md` | The confirmatory protocol of 5C.4d, superseded by `../clinical-5c4e/reserved-validation-protocol.md` after the owner's decisions. |

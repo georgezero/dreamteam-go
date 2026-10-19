@@ -17,3 +17,20 @@ owner's decisions of 2026-10-18).
 | F7 (Medium): weekly severity's meaning and partition effects | **Owner decision recorded:** a strict local 5% ceiling, forward pooling kept provisionally. **Partition sensitivity measured** (synthetic witnesses; one of ten no-action simulator seeds for urgent) and recorded as a **freeze blocker**. | `remediation.md` §5; `TestWeeklyPartitionSensitivity`, `TestWeeklyBoundaries` |
 | F8 (Medium): allowance above one | **Fixed** (every clinical fraction finite, in [0, 1], whole basis points). | `clinicalFraction`; `TestCandidateValidation` |
 | F9 (Low): sparse-week spans; reporting | **Fixed** (calendar weeks, occupied weeks, dates). | `WeeklySevere`; `TestAuditF9WeeklySpans` |
+
+## Slice 5C.4e addendum (2026-10-19)
+
+* **F4 / F5 (Gate B inference).** The owner decided against both a
+  wider margin and the approximate `t` method. Gate B is now an
+  empirical benchmark acceptance rule on the evaluated paired seeds,
+  explicitly without a population-confidence claim; the finite-sample
+  `betting` bound is kept as a labelled research diagnostic. A per-seed
+  safeguard (prospective thresholds from development-only evidence)
+  flags materially worse seeds through the shared allowance, so a large
+  improvement elsewhere cannot hide concentrated harm
+  (`docs/calibration/clinical-5c4e/`).
+* **F7 (weekly partition).** Fixed Monday–Sunday calendar weeks replace
+  forward pooling; a complete week below its minimum is INSUFFICIENT,
+  a partial boundary week below it is NOT_JUDGED, never PASS. On the
+  development seeds this makes the urgent rule unevaluable (reported
+  for the owner's decision, the minimums unchanged).

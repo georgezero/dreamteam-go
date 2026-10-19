@@ -278,3 +278,19 @@ batch mode `v0.2_dev17` with every digest verified
 (`earlier_build_exact`). It continues with the file embedded as the new
 record's prefix (`internal/session/dev17_test.go`). Before 0.2.0-dev.17
 was registered this build refused it as an engine mismatch.
+
+The Slice 5C.4d file was made from d833ff0 with `-scenario mini -seed 48
+-days 45 -actions testdata/sessions/mini-seed48-dev18.actions.json`. Its
+batches are:
+
+* a Sunday teleradiology contract for all priorities from Nov 1
+  (accepted, `T00001`);
+* the cancellation of a contract that does not exist (refused,
+  `unknown_contract`);
+* `T00001` cancelled on Nov 4 with end Jan 31 (accepted).
+
+0.2.0-dev.19 has the same action set and rules, so the file replays in
+batch mode `v0.2_dev18` with every digest verified
+(`earlier_build_exact`). It continues with the file embedded as the new
+record's prefix (`internal/session/dev18_test.go`). Before 0.2.0-dev.18
+was registered this build refused it as an engine mismatch.

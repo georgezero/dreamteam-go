@@ -623,3 +623,11 @@ stream was run.
 | No-action access validation with the weekly partitions (development seeds) | Pi 4 | 129 s |
 | 14 targeted mutations, then 4 reruns | Pi 4 | about 40 min; all caught (four after adding tests) |
 | Full suite `go test ./... -count=1` | Pi 4 | 807 s wall; every package passes (sim 798, eval 432, session 352, cmd 104, tui 30) |
+
+## 2026-10-19 — V0.2 Slice 5C.4e (same machine)
+
+| Measurement | Command | Result |
+|---|---|---|
+| No-action simulator access validation, 10 development seeds, with the seed-level v5 gates | `DT_SIM_ACCESS=… go test ./internal/sim -run TestSimulatorAccessValidation` | 189 s |
+| Per-seed safeguard evidence, 200 synthetic seeds × 7 scenarios, streamed per seed | `DT_SEED_SAFEGUARD=… DT_SEED_SAFEGUARD_N=200 go test ./internal/eval -run TestSeedSafeguardEvidence` | 341 s (a 1,000-seed run holding every record in memory exhausted the 8 GB machine and it rebooted, failing other work on the machine; the test now keeps only the differences) |
+| Full uncached suite | `go test ./... -count=1 -timeout 60m` under `systemd-run -p MemoryMax=6G` | 700 s wall (eval 411 s, sim 680 s, session 316 s); four eval tests then failed on the calendar rule and were moved to the pooled variant; the eval package rerun alone: 253 s, peak 149 MB |

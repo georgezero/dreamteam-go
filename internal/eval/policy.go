@@ -248,6 +248,12 @@ type Clinical struct {
 	// before the absolute limit.
 	MaxWeeklySevereRate map[string]float64 `json:"maxWeeklySevereRate,omitempty"`
 	MinWeeklyCohort     map[string]int64   `json:"minWeeklyCohort,omitempty"`
+	// WeeklyPartition: "calendar" (Slice 5C.4e) judges each fixed Monday–
+	// Sunday week of the gated period on its own, never pooled: a complete
+	// week below MinWeeklyCohort is insufficient, and a partial boundary
+	// week below it is reported and not judged (weeklySevereCalendar).
+	// Empty: the forward-pooled blocks above (Slice 5C.4c).
+	WeeklyPartition string `json:"weeklyPartition,omitempty"`
 	// LostDemand (modified option B): when set, lost and left orders leave
 	// the timeliness cohorts (counted apart as lost) and the demand the
 	// candidate leaves unimaged is gated against the paired baseline's
@@ -265,13 +271,30 @@ type Clinical struct {
 // seed, a seed with fewer than MinSeedOrders matched orders, fewer than
 // MinSeeds seeds, or a design whose bound with no difference at all
 // exceeds the margin, is insufficient.
+//
+// Rule "empirical" (Slice 5C.4e, the owner's option E) changes the claim:
+// Gate B passes when the observed seed-averaged increase is at most
+// MaxIncrease on the evaluated seeds, an empirical benchmark acceptance
+// with no population-confidence claim. Method and Confidence then give a
+// research diagnostic only (betting; the approximate t is refused), and
+// MaxSeedIncrease is the per-seed safeguard: a matched seed whose own
+// increase exceeds it is a clinically failing seed in the shared
+// allowance. Rule empty: the 5C.4d confidence rule.
 type LostDemand struct {
-	MaxIncrease   map[string]float64 `json:"maxIncrease"`
-	Confidence    float64            `json:"confidence"`
-	Method        string             `json:"method"` // betting (finite-sample) or t (approximate)
-	MinSeeds      int                `json:"minSeeds"`
-	MinSeedOrders map[string]int64   `json:"minSeedOrders"`
+	Rule            string             `json:"rule,omitempty"` // empirical, or empty for the 5C.4d confidence rule
+	MaxIncrease     map[string]float64 `json:"maxIncrease"`
+	MaxSeedIncrease map[string]float64 `json:"maxSeedIncrease,omitempty"`
+	Confidence      float64            `json:"confidence"`
+	Method          string             `json:"method"` // betting (finite-sample) or t (approximate)
+	MinSeeds        int                `json:"minSeeds"`
+	MinSeedOrders   map[string]int64   `json:"minSeedOrders"`
 }
+
+// Gate B acceptance rules and the weekly partition.
+const (
+	RuleEmpirical     = "empirical"
+	PartitionCalendar = "calendar"
+)
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
 // of its exact bytes.
@@ -454,6 +477,15 @@ func (c *Clinical) validate(p *Policy) error {
 			if ld.MaxIncrease[q] < 0 || ld.MaxIncrease[q] >= 1 || ld.MinSeedOrders[q] <= 0 {
 				return fmt.Errorf("clinical lostDemand %s: maxIncrease in [0, 1) and a positive minSeedOrders", q)
 			}
+			if ld.MaxSeedIncrease != nil {
+				if err := clinicalFraction("clinical lostDemand.maxSeedIncrease."+q, ld.MaxSeedIncrease[q], 0, 1); err != nil {
+					return err
+				}
+				if ld.MaxSeedIncrease[q] <= ld.MaxIncrease[q] || ld.MaxSeedIncrease[q] >= 1 {
+					return fmt.Errorf("clinical lostDemand %s: maxSeedIncrease %v above maxIncrease %v and below 1 (a seed's material deterioration, not the mean rule again)",
+						q, ld.MaxSeedIncrease[q], ld.MaxIncrease[q])
+				}
+			}
 		}
 		if c.MaxSeverePerWeek[q] < 0 || c.MinAccessCohort[q] <= 0 {
 			return fmt.Errorf("clinical %s: maxSeverePerWeek must not be negative, minAccessCohort must be positive", q)
@@ -478,12 +510,32 @@ func (c *Clinical) validate(p *Policy) error {
 		if ld.Confidence <= 0.5 || ld.Confidence >= 1 {
 			return fmt.Errorf("clinical lostDemand.confidence %v: in (0.5, 1)", ld.Confidence)
 		}
-		if ld.Method != BoundBetting && ld.Method != BoundT {
-			return fmt.Errorf("clinical lostDemand.method %q: %s or %s", ld.Method, BoundBetting, BoundT)
+		switch ld.Rule {
+		case RuleEmpirical:
+			// The diagnostic only; the approximate t is never used for
+			// clinical acceptance (owner decision, Slice 5C.4e).
+			if ld.Method != BoundBetting {
+				return fmt.Errorf("clinical lostDemand.method %q: the empirical rule's research diagnostic is %s only", ld.Method, BoundBetting)
+			}
+		case "":
+			if ld.Method != BoundBetting && ld.Method != BoundT {
+				return fmt.Errorf("clinical lostDemand.method %q: %s or %s", ld.Method, BoundBetting, BoundT)
+			}
+			if ld.MaxSeedIncrease != nil {
+				return fmt.Errorf("clinical lostDemand.maxSeedIncrease: the per-seed safeguard belongs to the %s rule", RuleEmpirical)
+			}
+		default:
+			return fmt.Errorf("clinical lostDemand.rule %q: %s, or empty for the confidence rule", ld.Rule, RuleEmpirical)
 		}
 		if ld.MinSeeds < 2 {
 			return fmt.Errorf("clinical lostDemand.minSeeds %d: at least 2", ld.MinSeeds)
 		}
+	}
+	switch {
+	case c.WeeklyPartition != "" && c.WeeklyPartition != PartitionCalendar:
+		return fmt.Errorf("clinical weeklyPartition %q: %s, or empty for pooled blocks", c.WeeklyPartition, PartitionCalendar)
+	case c.WeeklyPartition != "" && !weekly:
+		return fmt.Errorf("clinical weeklyPartition: only with maxWeeklySevereRate")
 	}
 	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
 		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)

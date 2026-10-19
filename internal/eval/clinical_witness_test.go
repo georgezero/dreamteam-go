@@ -21,12 +21,27 @@ import (
 
 const candidatePath = "../../docs/calibration/clinical-5c4b/candidate-policy-v5.json"
 
+// legacyCandidatePath is the 5C.4d candidate (the confidence rule and
+// pooled weekly blocks), kept for old v5 policy compatibility.
+const legacyCandidatePath = "testdata/candidate-policy-v5-5c4d.json"
+
 // candidatePolicy is the synthetic fixture's v5 policy with the
 // candidate's clinical section.
 func candidatePolicy(t *testing.T) (*Policy, string) {
 	t.Helper()
+	return clinicalFrom(t, candidatePath)
+}
+
+// legacyCandidatePolicy is the same with the 5C.4d candidate's.
+func legacyCandidatePolicy(t *testing.T) (*Policy, string) {
+	t.Helper()
+	return clinicalFrom(t, legacyCandidatePath)
+}
+
+func clinicalFrom(t *testing.T, path string) (*Policy, string) {
+	t.Helper()
 	p, d := v5Policy(t)
-	raw, err := os.ReadFile(candidatePath)
+	raw, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -341,7 +356,9 @@ func TestWitnessObservationBoundaries(t *testing.T) {
 // service-failing seeds and four other backlog-failing seeds (8 > 4 of
 // the shared allowance: NO GO, where v0.2-eval-4 passes).
 func TestWitnessAuditUnderCandidate(t *testing.T) {
-	p, d := candidatePolicy(t)
+	// The pooled weekly blocks: the fixture's seven urgent a week can
+	// never meet the calendar minimum (empirical_acceptance_test.go).
+	p, d := empiricalPolicy(t)
 	_, pr, c := clinicalCase(t, p, d, nil, func(b synth, r *Record) {
 		i := studiesOf(r, "routine", 140, 141)[0]
 		finishAt(r, i, r.Studies[i].AcquiredSec+testTargets["routine"]*60+348*hour)

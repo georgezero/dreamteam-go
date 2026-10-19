@@ -262,6 +262,13 @@ type Comparison struct {
 	// non-deterioration relative to the baseline.
 	Access           []AccessStatement `json:"access,omitempty"`
 	AccessLimitation string            `json:"accessLimitation,omitempty"`
+	// AccessClaims (the empirical rule): the empirical acceptance apart
+	// from population confidence and absolute adequacy. ClinicalJoint:
+	// with the per-seed safeguard, the candidate's shared clinical
+	// allowance with each seed's safeguard counted in; the verdict uses
+	// it in place of the plan's.
+	AccessClaims  *AccessClaims `json:"accessClaims,omitempty"`
+	ClinicalJoint *JointGate    `json:"clinicalJointWithSafeguard,omitempty"`
 	// Financial: the classification's evidence, kept apart (README §10).
 	Financial Financial `json:"financial"`
 	// ServiceRestored: the baseline fails the service gates the candidate

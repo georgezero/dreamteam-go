@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"cmp"
 	"fmt"
 	"slices"
 	"sort"
@@ -142,6 +143,10 @@ func compare(p *Policy, cand, ag *PlanReport, cr, ar []Record, global []string) 
 	if p.Clinical != nil && p.Clinical.LostDemand != nil {
 		c.LostDemand = lostDemandGates(p, cr, ar)
 		c.Access = accessStatements(cand, c.LostDemand)
+		if p.Clinical.LostDemand.Rule == RuleEmpirical {
+			c.AccessClaims = accessClaims(c.LostDemand)
+			c.ClinicalJoint = seedSafeguardJoint(p, cand, c.LostDemand)
+		}
 	}
 	slices.Sort(c.Integrity)
 	c.Integrity = slices.Compact(c.Integrity)
@@ -462,7 +467,7 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	}
 	var why []string
 	if v5 {
-		why = clinicalReasons(cand)
+		why = clinicalReasons(cand, cmp.Or(c.ClinicalJoint, cand.ClinicalJoint))
 		// Lost demand is its own gate: a timeliness gain never offsets it.
 		for _, g := range c.LostDemand {
 			if g.Status != Pass {
@@ -557,6 +562,10 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	c.Reasons = why
 	if v5 && p.Clinical.LostDemand != nil && (c.Verdict == GO || c.Verdict == CONDITIONAL) {
 		c.AccessLimitation = AccessLimitation
-		c.Reasons = append([]string{AccessLimitation}, c.Reasons...)
+		lead := []string{AccessLimitation}
+		if c.AccessClaims != nil {
+			lead = append(lead, EmpiricalScope)
+		}
+		c.Reasons = append(lead, c.Reasons...)
 	}
 }

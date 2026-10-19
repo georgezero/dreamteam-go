@@ -90,6 +90,13 @@ type accessSeed struct {
 	WorstPastDueMin map[string]int64              `json:"worstPastDueMin"`
 	SevereRate      map[string]map[string]float64 `json:"severeRateByWindow"`
 	WorstWeekSevere map[string]int64              `json:"worstWeekSevere"`
+	// Gate B's eligible demand (received after the takeover, wanted in the
+	// gated period): orders and those unimaged (lost, left, patient).
+	GateBEligible map[string][2]int64 `json:"gateBEligibleUnimaged"`
+	// The seed's v5 clinical gates under the candidate that are not PASS
+	// (gate, window, priority: status), and its shared clinical status.
+	ClinicalNotPass map[string]string `json:"clinicalGatesNotPass"`
+	ClinicalStatus  string            `json:"clinicalStatus"`
 }
 
 // openHours: the scenario's imaging hours, minutes after midnight, by
@@ -141,6 +148,7 @@ func TestSimulatorAccessValidation(t *testing.T) {
 	cfg := profileConfig(t)
 	grid := map[string][]int64{"urgent": {1440, 2880, 4320}, "soon": {3 * 1440, 7 * 1440, 10 * 1440}, "routine": {14 * 1440, 21 * 1440, 30 * 1440}}
 	res := make([]accessSeed, len(seeds))
+	recs := make([]eval.Record, len(seeds))
 	var wg sync.WaitGroup
 	for i, seed := range seeds {
 		wg.Add(1)
@@ -149,9 +157,31 @@ func TestSimulatorAccessValidation(t *testing.T) {
 			var losses []sim.LossDiagnosis
 			rec := recordBaselineProbe(pol4, cfg, seed, func(d sim.LossDiagnosis) { losses = append(losses, d) })
 			res[i] = accessOf(t, cand, grid, rec, losses)
+			recs[i] = rec
 		}()
 	}
 	wg.Wait()
+	// The seed-level clinical gates under the candidate (the plan against
+	// itself: only the plan's own gates are read).
+	in := eval.Input{Baseline: "A", Seeds: seeds, Plans: map[string][]eval.Record{"A": recs}}
+	rep := eval.Evaluate(cand, "candidate", in)
+	for _, pr := range rep.Plans {
+		for _, sr := range pr.PerSeed {
+			i := slices.Index(seeds, sr.Seed)
+			res[i].ClinicalStatus, res[i].ClinicalNotPass = sr.Clinical, map[string]string{}
+			for _, g := range sr.ClinicalGates {
+				if g.PerSeed && g.Status != eval.Pass {
+					res[i].ClinicalNotPass[g.Gate+" "+g.Window+" "+g.Stratum] = g.Status
+				}
+			}
+			if sr.Service != eval.Pass {
+				res[i].ClinicalNotPass["service"] = sr.Service
+			}
+			if sr.Backlog != "stable" {
+				res[i].ClinicalNotPass["backlog"] = sr.Backlog
+			}
+		}
+	}
 	// The probe only observes: the first seed's record is the same without
 	// it.
 	var probed []sim.LossDiagnosis
@@ -349,6 +379,18 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 		}
 	}
 	x.WeeklySevere = m.Clinical.WeeklySevere
+	x.GateBEligible = map[string][2]int64{}
+	for i, o := range rec.Orders {
+		if o.ReceivedSec <= t0 || o.WantedSec <= t0 || o.WantedSec > H {
+			continue
+		}
+		e := x.GateBEligible[o.Priority]
+		e[0]++
+		if out := end[i]; out == eval.OutLost || out == eval.OutLeft || out == eval.OutPatient {
+			e[1]++
+		}
+		x.GateBEligible[o.Priority] = e
+	}
 	for _, a := range m.Clinical.Absolute {
 		if a.Limit == "pastDue" {
 			x.AbsoluteViolations[a.Priority], x.WorstPastDueMin[a.Priority] = a.Violations, a.WorstMin

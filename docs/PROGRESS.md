@@ -7,6 +7,61 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4e — empirical clinical acceptance and weekly severity closure (0.2.0-dev.19)
+
+The owner's decisions of 2026-10-19 (`docs/calibration/clinical-5c4e/`):
+Gate B changes from a population confidence bound to an **empirical
+benchmark acceptance rule**, with a per-seed safeguard; the weekly
+severity moves to **fixed Monday–Sunday calendar weeks**.
+
+* **Not frozen.**
+* **Registers 0.2.0-dev.18** for replay (`mini-seed48-dev18`).
+* **v0.2-eval-4 is byte-identical;** the 5C.4d candidate's exact bytes
+  still evaluate under their own rules.
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream.
+
+**Gate B (`lostDemand.rule = "empirical"`).**
+
+* PASS when the observed seed-averaged increase on the 40 paired seeds
+  is at most 2 points (exact rational), FAIL above it; unmatched, thin
+  or too few seeds INSUFFICIENT, never PASS.
+* No bound, confidence or population enters the decision or its
+  reasons. The `betting` bound is reported beside it as a labelled
+  research diagnostic; `t` is refused even for that.
+* The seed differences' distribution and both absolute unimaged
+  fractions are reported.
+* Every comparison states its claims apart: empirical acceptance on
+  the paired seeds; population confidence not claimed; absolute
+  adequacy not established. Every favourable verdict leads with the
+  access limitation and the empirical scope.
+
+**Per-seed safeguard (`maxSeedIncrease` 10 / 6 / 5 points).** A seed
+whose own increase exceeds it fails in the shared allowance (4 of 40),
+so improvements elsewhere cannot hide concentrated harm. Thresholds
+from a prespecified rule on development-only evidence
+(`seed-safeguard.md`): z(0.999) times the largest no-effect sd among
+the development seeds, floored at 5 points.
+
+**Weekly severity (`weeklyPartition = "calendar"`).** Every complete
+week judged on its own: INSUFFICIENT below the minimum, FAIL above 5%;
+a partial boundary week below the minimum NOT_JUDGED, never PASS; no
+pooling. **Stop condition:** on the development seeds every complete
+urgent week (6.7 acquisitions a week against a minimum of 20) is
+insufficient, so every seed lacks evidence and no plan can pass; soon
+is insufficient on every seed too. Reported for the owner; the
+minimums and partition are unchanged.
+
+**Tested:** the 20 required witnesses (`empirical_acceptance_test.go`),
+policy validation, the safeguard rule and its development derivation
+(`seed_safeguard_test.go`), the mutation checks, the full uncached
+suite, vet, gofmt, the replay fixtures.
+
+**Open:** the weekly minimums; the Astra review of the empirical rule
+and safeguard; the reserved confirmation (NO GO); the freeze (NO GO).
+
+---
+
 ## V0.2 Slice 5C.4d — audit remediation and seed-level lost-demand inference (0.2.0-dev.18)
 
 This slice remediates the independent 5C.4c audit (kept verbatim; the
