@@ -3,6 +3,10 @@
 The one confirmatory clinical calibration before v0.2-eval-5 is frozen.
 It supersedes `../clinical-5c4d/reserved-validation-protocol.md`.
 
+**Superseded** by `../clinical-5c4f/reserved-validation-protocol.md`
+(2026-10-19): the owner set volume-aware severity windows. Kept as
+written.
+
 **Status: NOT RUNNABLE.** One owner decision is open: the weekly
 minimum cohorts under fixed calendar weeks make the urgent rule
 unevaluable on every development seed, and the soon rule on every

@@ -11,7 +11,9 @@ calendar weeks.
   unseal record or reserved stream.
 * **Stop condition reported:** the weekly minimum cohorts make the
   urgent rule unevaluable on every development seed
-  (`empirical-acceptance.md` §3.1). The minimums are unchanged.
+  (`empirical-acceptance.md` §3.1). The minimums are unchanged. The
+  owner then set volume-aware windows (`../clinical-5c4f/`) and
+  approved the safeguard.
 
 | File | What it is |
 |---|---|
@@ -19,4 +21,4 @@ calendar weeks.
 | `seed-safeguard.md` | The per-seed threshold's prespecified rule, its development-only derivation and the synthetic evidence. |
 | `seed-safeguard-evidence.json` | That evidence (`TestSeedSafeguardEvidence` with `DT_SEED_SAFEGUARD`). |
 | `sim-access-5c4e.json` | The no-action simulator records on the development seeds under the candidate: Gate B's eligible demand, the calendar weeks, every seed's clinical gates. |
-| `reserved-validation-protocol.md` | The updated confirmatory protocol: Gate B stated as empirical without coverage; not runnable until the weekly minimums are decided. |
+| `reserved-validation-protocol.md` | The 5C.4e confirmatory protocol, superseded by `../clinical-5c4f/reserved-validation-protocol.md` after the owner set the severity windows. |

@@ -34,3 +34,20 @@ owner's decisions of 2026-10-18).
   a partial boundary week below it is NOT_JUDGED, never PASS. On the
   development seeds this makes the urgent rule unevaluable (reported
   for the owner's decision, the minimums unchanged).
+
+## Slice 5C.4f addendum (2026-10-19)
+
+* **F7 (weekly severity).** The fixed calendar weeks of 5C.4e were
+  unevaluable for urgent at the simulator's volume (6.7 a week). The
+  owner set the windows by volume instead of lowering the standard:
+  * urgent has no weekly gate; its per-seed 5% severe rate and its
+    absolute 24 h limit remain;
+  * soon is judged in fixed, anchored four-week calendar blocks
+    (minimum 100);
+  * routine is judged in fixed weeks (minimum 100).
+
+  No window is pooled or slid. On the development seeds every complete
+  window is evaluable (`docs/calibration/clinical-5c4f/`).
+* **Safeguard.** The 10 / 6 / 5-point per-seed safeguard is approved.
+  It is an empirical benchmark safeguard without a calibrated false-flag
+  guarantee.

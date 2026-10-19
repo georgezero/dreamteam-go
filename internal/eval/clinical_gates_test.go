@@ -413,7 +413,7 @@ func TestCandidateValidation(t *testing.T) {
 // remainder joins the one block. Four severe studies in the last two days:
 // 4 of 72, above 5%: fail; three: 3 of 71, within: pass.
 func TestGateWeeklyRemainder(t *testing.T) {
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	c := *p.Clinical
 	c.MinWeeklyCohort = map[string]int64{"urgent": 60, "soon": 40, "routine": 100}
 	mk := func(severe int) *WeeklySevere {

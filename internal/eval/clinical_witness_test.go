@@ -32,6 +32,17 @@ func candidatePolicy(t *testing.T) (*Policy, string) {
 	return clinicalFrom(t, candidatePath)
 }
 
+// candidate5c4ePath is the 5C.4e candidate (calendar weeks for every
+// priority, minimums 20 / 40 / 100).
+const candidate5c4ePath = "testdata/candidate-policy-v5-5c4e.json"
+
+// candidate5c4ePolicy is the fixture's policy with the 5C.4e candidate's
+// clinical section.
+func candidate5c4ePolicy(t *testing.T) (*Policy, string) {
+	t.Helper()
+	return clinicalFrom(t, candidate5c4ePath)
+}
+
 // legacyCandidatePolicy is the same with the 5C.4d candidate's.
 func legacyCandidatePolicy(t *testing.T) (*Policy, string) {
 	t.Helper()

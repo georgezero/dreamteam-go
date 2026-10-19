@@ -116,6 +116,7 @@ type WeeklySevere struct {
 	// minimum (insufficient when complete, not judged when partial) and
 	// failing. Blocks, Failing and the worst block are then weeks.
 	Partition         string       `json:"partition,omitempty"`
+	WindowWeeks       int64        `json:"windowWeeks,omitempty"` // calendar weeks a window, when more than one
 	Weeks             []WeekSevere `json:"weeks,omitempty"`
 	PartialWeeks      int          `json:"partialWeeks,omitempty"`
 	InsufficientWeeks int          `json:"insufficientWeeks,omitempty"`
@@ -133,6 +134,7 @@ type WeekSevere struct {
 	From     string  `json:"from"` // Monday
 	To       string  `json:"to"`   // Sunday
 	FirstDay int64   `json:"firstDay"`
+	Weeks    int64   `json:"weeks,omitempty"` // calendar weeks, for a multi-week window
 	Complete bool    `json:"complete"`
 	Acquired int64   `json:"acquired"`
 	Severe   int64   `json:"severe"`
@@ -430,31 +432,65 @@ func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 }
 
 // weeklySevereCalendar measures the weekly severity of every priority
-// over the fixed Monday–Sunday weeks of the gated period (Slice 5C.4e):
-// each week judged on its own acquisitions, never pooled.
+// over fixed calendar windows of the gated period (Slices 5C.4e and
+// 5C.4f), each judged on its own acquisitions, never pooled. A
+// priority's window is weeklyWeeks(q) calendar weeks: the windows are
+// anchored at the first Monday 00:00 at or after the takeover and run
+// consecutively from it; the takeover's own week before the anchor is a
+// leading partial window; the window the horizon cuts is a trailing
+// partial one. A priority without a window (0) is not measured.
 func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 	t0, H := r.TakeoverSec, r.HorizonEndSec
 	date, _ := simtime.ParseDate(r.TakeoverDate)
 	// Week k runs from local day 7k − 3 (a Monday) for seven days.
 	week := func(sec int64) int64 { return floorDiv(sec/daySec+3, 7) }
+	monday := func(k int64) int64 { return (7*k - 3) * daySec }
 	first, last := week(t0+1), week(H)
+	anchor := first
+	if monday(first) < t0 {
+		anchor++
+	}
 	out := map[string]*WeeklySevere{}
+	// index is the window of week k for a priority with L-week windows.
+	index := func(k, L int64) int64 {
+		if k < anchor {
+			return 0
+		}
+		return anchor - first + (k-anchor)/L
+	}
 	for _, q := range Priorities {
+		L := c.weeklyWeeks(q)
+		if L == 0 {
+			continue
+		}
 		ws := &WeeklySevere{Partition: PartitionCalendar}
+		if L > 1 {
+			ws.WindowWeeks = L
+		}
 		out[q] = ws
-		for k := first; k <= last; k++ {
-			mon := (7*k - 3) * daySec
-			w := WeekSevere{FirstDay: 7*k - 3 - t0/daySec, Complete: mon >= t0 && mon+7*daySec <= H}
-			w.From, w.To = date.AddDays(w.FirstDay).String(), date.AddDays(w.FirstDay+6).String()
+		add := func(k, n int64) {
+			start := monday(k)
+			w := WeekSevere{FirstDay: 7*k - 3 - t0/daySec, Complete: start >= t0 && start+7*n*daySec <= H}
+			w.From, w.To = date.AddDays(w.FirstDay).String(), date.AddDays(w.FirstDay+7*n-1).String()
+			if L > 1 {
+				w.Weeks = n
+			}
 			ws.Weeks = append(ws.Weeks, w)
+		}
+		if anchor > first {
+			add(first, 1)
+		}
+		for k := anchor; k <= last; k += L {
+			add(k, L)
 		}
 	}
 	for i := range r.Studies {
 		s := &r.Studies[i]
-		if s.AcquiredSec <= t0 || s.AcquiredSec > H {
+		ws := out[s.Priority]
+		if ws == nil || s.AcquiredSec <= t0 || s.AcquiredSec > H {
 			continue
 		}
-		w := &out[s.Priority].Weeks[week(s.AcquiredSec)-first]
+		w := &ws.Weeks[index(week(s.AcquiredSec), c.weeklyWeeks(s.Priority))]
 		w.Acquired++
 		if l, _ := delayAt(s, s.AcquiredSec+target(r, s.Priority), E); c.severe(s.Priority, l) {
 			w.Severe++
@@ -462,6 +498,9 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 	}
 	for _, q := range Priorities {
 		ws := out[q]
+		if ws == nil {
+			continue
+		}
 		bpRate := bp(c.MaxWeeklySevereRate[q])
 		worst := -1
 		for i := range ws.Weeks {
@@ -490,7 +529,7 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 				w.Status = Pass
 			}
 			ws.Blocks++
-			// The worst judged week: the highest rate (exact, by
+			// The worst judged window: the highest rate (exact, by
 			// cross-products), the earliest of equals.
 			if worst < 0 || w.Severe*ws.Weeks[worst].Acquired > ws.Weeks[worst].Severe*w.Acquired {
 				worst = i
@@ -500,11 +539,19 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 		if worst >= 0 {
 			w := ws.Weeks[worst]
 			ws.WorstFirstDay, ws.WorstFrom, ws.WorstTo = w.FirstDay, w.From, w.To
-			ws.WorstWeeks, ws.WorstOccupiedWeeks = 1, 1
+			ws.WorstWeeks, ws.WorstOccupiedWeeks = int(max(1, w.Weeks)), int(max(1, w.Weeks))
 			ws.WorstAcquired, ws.WorstSevere = w.Acquired, w.Severe
 		}
 	}
 	return out
+}
+
+// calendarWindows names a calendar partition's windows in a reason.
+func calendarWindows(ws *WeeklySevere) string {
+	if ws.WindowWeeks > 1 {
+		return fmt.Sprintf("%d-week calendar blocks", ws.WindowWeeks)
+	}
+	return "calendar weeks"
 }
 
 // classifyAccess adds order o (outcome out at the end of observation E)
@@ -659,6 +706,8 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 	for _, q := range Priorities {
 		g := SeedGate{Gate: GateSevereWeek, Window: WinGated, Stratum: q, Threshold: float64(c.MaxSeverePerWeek[q]), PerSeed: true, Status: Pass}
 		switch {
+		case c.MaxWeeklySevereRate != nil && c.WeeklyPartition == PartitionCalendar && c.weeklyWeeks(q) == 0:
+			// No weekly gate for this priority (Slice 5C.4f).
 		case cm == nil:
 			g.Status, g.Reason, g.Undecided = Insufficient, "not measured", true
 		case c.MaxWeeklySevereRate != nil:
@@ -670,11 +719,11 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 			}
 			switch {
 			case ws.Partition == PartitionCalendar && ws.Failing > 0:
-				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d judged calendar weeks above the rate; worst %d of %d, %s to %s",
-					ws.Failing, ws.Blocks, ws.WorstSevere, ws.WorstAcquired, ws.WorstFrom, ws.WorstTo)
+				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d judged %s above the rate; worst %d of %d, %s to %s",
+					ws.Failing, ws.Blocks, calendarWindows(ws), ws.WorstSevere, ws.WorstAcquired, ws.WorstFrom, ws.WorstTo)
 			case ws.Partition == PartitionCalendar && ws.Insufficient:
-				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d of %d complete calendar weeks below the minimum cohort of %d",
-					ws.InsufficientWeeks, len(ws.Weeks)-ws.PartialWeeks, c.MinWeeklyCohort[q])
+				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d of %d complete %s below the minimum cohort of %d",
+					ws.InsufficientWeeks, len(ws.Weeks)-ws.PartialWeeks, calendarWindows(ws), c.MinWeeklyCohort[q])
 			case ws.Insufficient:
 				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d acquired in the gated period, fewer than %d", ws.Acquired, c.MinWeeklyCohort[q])
 			case ws.Failing > 0:
@@ -690,7 +739,9 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 				g.Status, g.Reason = Fail, fmt.Sprintf("%d in the week from day %d", cm.WorstWeekSevere[q], cm.WorstWeekFirstDay[q])
 			}
 		}
-		out = append(out, g)
+		if !(c.MaxWeeklySevereRate != nil && c.WeeklyPartition == PartitionCalendar && c.weeklyWeeks(q) == 0) {
+			out = append(out, g)
+		}
 		if c.MaxWaitAbsolute || c.MaxWaitReportOnly {
 			continue
 		}

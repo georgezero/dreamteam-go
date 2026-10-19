@@ -254,11 +254,27 @@ type Clinical struct {
 	// week below it is reported and not judged (weeklySevereCalendar).
 	// Empty: the forward-pooled blocks above (Slice 5C.4c).
 	WeeklyPartition string `json:"weeklyPartition,omitempty"`
+	// WeeklyWindowWeeks (calendar partition only; Slice 5C.4f): each
+	// priority's severity window in calendar weeks: 1, fixed Monday–
+	// Sunday weeks; L > 1, fixed consecutive blocks of L weeks anchored at
+	// the first Monday at or after the takeover; 0, no weekly gate for
+	// that priority (its rate and minimum then absent; the per-seed severe
+	// rate and the absolute limits stay). Nil: 1 for every priority.
+	WeeklyWindowWeeks map[string]int64 `json:"weeklyWindowWeeks,omitempty"`
 	// LostDemand (modified option B): when set, lost and left orders leave
 	// the timeliness cohorts (counted apart as lost) and the demand the
 	// candidate leaves unimaged is gated against the paired baseline's
 	// (lostDemandGates).
 	LostDemand *LostDemand `json:"lostDemand,omitempty"`
+}
+
+// weeklyWeeks is priority q's weekly severity window in calendar weeks
+// (0: no weekly gate).
+func (c *Clinical) weeklyWeeks(q string) int64 {
+	if c.WeeklyWindowWeeks == nil {
+		return 1
+	}
+	return c.WeeklyWindowWeeks[q]
 }
 
 // LostDemand is the paired non-deterioration gate on unimaged demand
@@ -458,7 +474,16 @@ func (c *Clinical) validate(p *Policy) error {
 				return fmt.Errorf("clinical %s.%s %d: positive and at most the %d minutes observed past the horizon", name, q, v, decided)
 			}
 		}
-		if weekly {
+		switch L := c.weeklyWeeks(q); {
+		case c.WeeklyWindowWeeks != nil && (c.WeeklyPartition != PartitionCalendar || L < 0 || L > 13):
+			return fmt.Errorf("clinical weeklyWindowWeeks.%s %d: 0 to 13 weeks, with the calendar partition only", q, L)
+		case c.WeeklyWindowWeeks != nil && L == 0 && (c.MaxWeeklySevereRate[q] != 0 || c.MinWeeklyCohort[q] != 0):
+			return fmt.Errorf("clinical %s: no weekly window, so no maxWeeklySevereRate or minWeeklyCohort", q)
+		}
+		if _, ok := c.WeeklyWindowWeeks[q]; c.WeeklyWindowWeeks != nil && !ok {
+			return fmt.Errorf("clinical weeklyWindowWeeks: %s missing (0 disables its weekly gate explicitly)", q)
+		}
+		if weekly && c.weeklyWeeks(q) > 0 {
 			r := c.MaxWeeklySevereRate[q]
 			if err := clinicalFraction("clinical maxWeeklySevereRate."+q, r, 0, 1); err != nil {
 				return err

@@ -125,7 +125,7 @@ func weeklyRecord(n, sev []int) *Record {
 
 func weeklySoon(t *testing.T, n, sev []int) *WeeklySevere {
 	t.Helper()
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	r := weeklyRecord(n, sev)
 	return weeklySevere(p.Clinical, r, r.HorizonEndSec+40*daySec)["soon"]
 }
@@ -153,7 +153,7 @@ func TestWeeklyBoundaries(t *testing.T) {
 	if ws := weeklySoon(t, []int{40}, []int{3}); ws.Failing != 1 {
 		t.Fatalf("3 of 40: %+v", ws)
 	}
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	r := weeklyRecord([]int{40, 40}, []int{0, 0})
 	mon2 := int64(11575)*daySec + 7*daySec
 	r.Studies = append(r.Studies, Study{Priority: "soon", AcquiredSec: mon2 - hour, FinalSec: mon2 - hour + 30*hour},

@@ -97,6 +97,10 @@ type accessSeed struct {
 	// (gate, window, priority: status), and its shared clinical status.
 	ClinicalNotPass map[string]string `json:"clinicalGatesNotPass"`
 	ClinicalStatus  string            `json:"clinicalStatus"`
+	// Soon by single calendar week (every week judged at a minimum of
+	// one): the counts any fixed block partition is summed from, for the
+	// anchoring and boundary sensitivity (reported only).
+	SoonWeeks []eval.WeekSevere `json:"soonCalendarWeeks,omitempty"`
 }
 
 // openHours: the scenario's imaging hours, minutes after midnight, by
@@ -379,6 +383,16 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 		}
 	}
 	x.WeeklySevere = m.Clinical.WeeklySevere
+	if cw := cand.Clinical.WeeklyWindowWeeks; cw != nil {
+		c := *cand.Clinical
+		c.WeeklyWindowWeeks = maps.Clone(cw)
+		c.WeeklyWindowWeeks["soon"] = 1
+		c.MinWeeklyCohort = maps.Clone(c.MinWeeklyCohort)
+		c.MinWeeklyCohort["soon"] = 1
+		p := *cand
+		p.Clinical = &c
+		x.SoonWeeks = eval.Measure(&p, &rec).Clinical.WeeklySevere["soon"].Weeks
+	}
 	x.GateBEligible = map[string][2]int64{}
 	for i, o := range rec.Orders {
 		if o.ReceivedSec <= t0 || o.WantedSec <= t0 || o.WantedSec > H {

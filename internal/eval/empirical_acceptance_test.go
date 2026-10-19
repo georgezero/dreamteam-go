@@ -20,10 +20,11 @@ import (
 // the candidate with the pooled weekly blocks, to isolate Gate B;
 // TestCalendarUrgentUnevaluable shows the candidate itself.
 
-// empiricalPolicy is the candidate with the pooled weekly blocks.
+// empiricalPolicy is the 5C.4e candidate (the same Gate B and safeguard
+// as the current one) with the pooled weekly blocks.
 func empiricalPolicy(t *testing.T) (*Policy, string) {
 	t.Helper()
-	p, d := candidatePolicy(t)
+	p, d := candidate5c4ePolicy(t)
 	c := *p.Clinical
 	c.WeeklyPartition = ""
 	p.Clinical = &c
@@ -312,7 +313,7 @@ func TestEmpiricalValidation(t *testing.T) {
 // a partial last week at the horizon's Monday 00:00).
 func calendarSoon(t *testing.T, n, sev []int) *WeeklySevere {
 	t.Helper()
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	r := weeklyRecord(n, sev)
 	return weeklySevereCalendar(p.Clinical, r, r.HorizonEndSec+40*daySec)["soon"]
 }
@@ -355,7 +356,7 @@ func TestCalendarWeeks(t *testing.T) {
 // 16: Monday and Sunday boundaries. Studies on Sunday 23:59:59 and
 // Monday 00:00:00 fall in different weeks; Sunday's is the first week's.
 func TestCalendarMondaySunday(t *testing.T) {
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	r := weeklyRecord([]int{40, 40}, []int{0, 0})
 	mon2 := int64(11575)*daySec + 7*daySec
 	sev := testTargets["soon"]*60 + 25*hour
@@ -376,7 +377,7 @@ func TestCalendarMondaySunday(t *testing.T) {
 // plan); its severe delays stay in the per-seed severe rate and the
 // absolute limits.
 func TestCalendarPartialWeeks(t *testing.T) {
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4ePolicy(t)
 	mon := int64(11575) * daySec
 	wed := mon + 2*daySec + 6*hour
 	rec := func(first, firstSev, last, lastSev int) *Record {
@@ -407,11 +408,11 @@ func TestCalendarPartialWeeks(t *testing.T) {
 	}
 }
 
-// The candidate on the synthetic fixture (7 urgent a week): every
+// The 5C.4e candidate on the synthetic fixture (7 urgent a week): every
 // complete urgent week below the minimum of 20, every seed insufficient,
 // NO GO; the gate reports the weeks.
 func TestCalendarUrgentUnevaluable(t *testing.T) {
-	p, d := candidatePolicy(t)
+	p, d := candidate5c4ePolicy(t)
 	pr, c := clinicalCaseAB(t, p, d, nil, nil)
 	ws := pr.PerSeed[0].Measures.Clinical.WeeklySevere["urgent"]
 	if ws.Partition != PartitionCalendar || ws.InsufficientWeeks != len(ws.Weeks)-ws.PartialWeeks || ws.InsufficientWeeks == 0 ||

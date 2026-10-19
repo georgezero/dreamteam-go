@@ -7,6 +7,56 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4f — volume-aware clinical severity windows (0.2.0-dev.20)
+
+Each priority's severity window now matches its volume (owner decisions
+of 2026-10-19; `docs/calibration/clinical-5c4f/`). The evaluation window
+changed; the severity standard did not.
+
+* **Not frozen.**
+* **Registers 0.2.0-dev.19** for replay (`mini-seed49-dev19`).
+* **v0.2-eval-4 is byte-identical.** The 5C.4d and 5C.4e candidates'
+  exact bytes still evaluate under their own rules.
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream.
+
+**Windows.** Each priority's window is set explicitly in the policy
+(`weeklyWindowWeeks`):
+
+| Priority | Weekly gate | Minimum | What remains for it |
+|---|---|---|---|
+| urgent | none | none | the per-seed 5% severe rate and the absolute 24 h limit |
+| soon | fixed four-week calendar blocks | 100 | |
+| routine | fixed calendar weeks | 100 | |
+
+* **Blocks:** anchored at the first complete Monday, consecutive and
+  never slid or pooled.
+* **Below the minimum:** a complete window is INSUFFICIENT; a partial
+  window is NOT_JUDGED, disclosed and never a pass.
+* **Safeguard:** approved at 10 / 6 / 5 points.
+
+**Development evaluability (seeds 901–910, no action):**
+* **Urgent:** every seed is evaluable.
+* **Soon:** complete blocks hold 127–218 acquisitions (mean 166), and
+  none is insufficient.
+* **Routine:** none of 200 weeks is insufficient.
+* **The no-action practice fails on genuine delays:** soon blocks fail
+  on 9 seeds (reports 42–45 h past due, severe rates up to 9.4%), and
+  urgent absolute violations occur on 8 seeds.
+* **Anchoring:** moving the anchor 1–3 weeks changes which seed fails
+  on 1–2 of 10 seeds, never evaluability.
+
+**Tested:** the window witnesses (`severity_window_test.go`), the
+policy validation, 11 mutations (all caught), the full uncached suite,
+vet, gofmt and the replay fixtures.
+
+**Next:** a narrow independent review of the final v5 policy and its
+statistical claims. The confirmatory protocol is complete and not run.
+The reserved calibration and the freeze are NO GO until that review is
+done.
+
+---
+
 ## V0.2 Slice 5C.4e — empirical clinical acceptance and weekly severity closure (0.2.0-dev.19)
 
 The owner's decisions of 2026-10-19 (`docs/calibration/clinical-5c4e/`):

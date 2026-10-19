@@ -631,3 +631,10 @@ stream was run.
 | No-action simulator access validation, 10 development seeds, with the seed-level v5 gates | `DT_SIM_ACCESS=… go test ./internal/sim -run TestSimulatorAccessValidation` | 189 s |
 | Per-seed safeguard evidence, 200 synthetic seeds × 7 scenarios, streamed per seed | `DT_SEED_SAFEGUARD=… DT_SEED_SAFEGUARD_N=200 go test ./internal/eval -run TestSeedSafeguardEvidence` | 341 s (a 1,000-seed run holding every record in memory exhausted the 8 GB machine and it rebooted, failing other work on the machine; the test now keeps only the differences) |
 | Full uncached suite | `go test ./... -count=1 -timeout 60m` under `systemd-run -p MemoryMax=6G` | 700 s wall (eval 411 s, sim 680 s, session 316 s); four eval tests then failed on the calendar rule and were moved to the pooled variant; the eval package rerun alone: 253 s, peak 149 MB |
+
+## 2026-10-19 — V0.2 Slice 5C.4f (same machine; heavy runs alone, memory-capped)
+
+| Measurement | Command | Result |
+|---|---|---|
+| No-action simulator access validation, 10 development seeds | `systemd-run --user --scope -p MemoryMax=5G … DT_SIM_ACCESS=… go test ./internal/sim -run TestSimulatorAccessValidation` | 115 s, peak 986 MB |
+| Full uncached suite | `systemd-run --user --scope -p MemoryMax=6G … go test ./... -count=1 -timeout 60m` | 707 s wall (sim 682 s, eval 419 s, session 314 s), peak 312 MB; every package passes |
