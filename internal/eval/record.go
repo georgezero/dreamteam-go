@@ -45,7 +45,12 @@ type Record struct {
 
 // Study is one study's timestamps (0: not yet).
 type Study struct {
-	ID           string `json:"id"`
+	ID string `json:"id"`
+	// Order: the ID of the order the study images (Slice 5C.4h): which
+	// order a study acquired after the horizon belongs to, for the
+	// absolute limits' follow-up (Clinical.SafetyCohort). Records written
+	// before 0.2.0-dev.21 have none.
+	Order        string `json:"order,omitempty"`
 	Priority     string `json:"priority"`
 	Modality     string `json:"modality"`
 	AcquiredSec  int64  `json:"acquiredSec"`

@@ -189,7 +189,7 @@ func (s synth) record() Record {
 				i := idx[q]
 				idx[q]++
 				acq := t0 + int64(d)*daySec + hour + int64(k)*600
-				o := Order{ID: "O", Origin: fmt.Sprintf("O/%s/%d/%d", q, d, k), Priority: q, Modality: mods[q], ReceivedSec: acq - 30*60, WantedSec: acq - 30*60, FirstApptSec: acq - 10*60}
+				o := Order{ID: fmt.Sprintf("O%s%d.%d", q[:1], d, k), Origin: fmt.Sprintf("O/%s/%d/%d", q, d, k), Priority: q, Modality: mods[q], ReceivedSec: acq - 30*60, WantedSec: acq - 30*60, FirstApptSec: acq - 10*60}
 				if acq > r.ObservedUntilSec {
 					continue
 				}
@@ -199,7 +199,7 @@ func (s synth) record() Record {
 					continue
 				}
 				outs = append(outs, served{acq, OutServed})
-				st := Study{ID: "S", Priority: q, Modality: mods[q], AcquiredSec: acq, EnteredSec: acq}
+				st := Study{ID: "S", Order: o.ID, Priority: q, Modality: mods[q], AcquiredSec: acq, EnteredSec: acq}
 				tg := testTargets[q] * 60
 				tat := tg / 2
 				if pm(i, s.seed, s.breachPMAt(q, acq)) {

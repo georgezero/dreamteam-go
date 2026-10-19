@@ -215,7 +215,7 @@ func TestEmpiricalAllUnimaged(t *testing.T) {
 	all := loseUrgent(func(int64) int { return 150 })
 	_, c := clinicalCaseAB(t, p, d, all, all)
 	g := lostDemandOf(c, "urgent")
-	if g.Status != Pass || g.Increase != 0 || g.SeedFraction != [2]float64{1, 1} || c.Verdict != NOGO || !hasReason(c, "timely_access") {
+	if g.Status != Pass || g.Increase != 0 || g.SeedFraction == nil || *g.SeedFraction != [2]float64{1, 1} || c.Verdict != NOGO || !hasReason(c, "timely_access") {
 		t.Fatalf("both: %+v %s %v", g, c.Verdict, c.Reasons)
 	}
 	_, c = clinicalCaseAB(t, p, d, nil, all)

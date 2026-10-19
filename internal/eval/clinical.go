@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 	"maps"
+	"math/bits"
 	"slices"
 )
 
@@ -61,6 +62,23 @@ type AbsoluteCount struct {
 	LimitMin   int64  `json:"limitMin"`
 	Violations int64  `json:"violations"`
 	WorstMin   int64  `json:"worstMin"`
+	// Under the safetyCohort ordersByHorizon (Slice 5C.4h), a past-due
+	// limit's studies by state at the end of observation, each from its
+	// own due time (acquisition plus the target): Observed, finished
+	// beyond the limit; Overdue, unfinished and already beyond it (an
+	// unresolved overdue obligation, a violation whatever follows);
+	// Pending, unfinished and not yet beyond it (not yet observable:
+	// never a pass). Violations = Observed + Overdue. PostHorizon: the
+	// cohort's studies acquired after the horizon, of orders wanted by it
+	// (judged in the follow-up). Unacquired: orders wanted by the horizon
+	// still open without a study (no report is yet due; Gate A judges
+	// their access).
+	SafetyCohort string `json:"safetyCohort,omitempty"`
+	Observed     int64  `json:"observed,omitempty"`
+	Overdue      int64  `json:"overdue,omitempty"`
+	Pending      int64  `json:"pending,omitempty"`
+	PostHorizon  int64  `json:"postHorizon,omitempty"`
+	Unacquired   int64  `json:"unacquired,omitempty"`
 }
 
 // ClinicalMeasures are one seed's clinical measures.
@@ -121,6 +139,15 @@ type WeeklySevere struct {
 	PartialWeeks      int          `json:"partialWeeks,omitempty"`
 	InsufficientWeeks int          `json:"insufficientWeeks,omitempty"`
 	NotJudgedWeeks    int          `json:"notJudgedWeeks,omitempty"`
+	// Under partialWindows countCeiling (Slice 5C.4h): PartialCeiling, the
+	// most severe reports a partial window below the minimum may hold
+	// (⌊rate × minimum⌋, a compliant minimum window's); PartialFailing,
+	// the partial windows above it (failing, counted in Failing); and
+	// NoJudgedWindow, when no window was judged and none is insufficient
+	// (the gate is then insufficient, never a vacuous pass).
+	PartialCeiling *int64 `json:"partialSevereCeiling,omitempty"`
+	PartialFailing int    `json:"partialFailingWeeks,omitempty"`
+	NoJudgedWindow bool   `json:"noJudgedWindow,omitempty"`
 }
 
 // WeekSevere is one calendar week of a priority's weekly severity.
@@ -131,15 +158,21 @@ type WeeklySevere struct {
 // the evaluation window's edge, the same for every plan; reported, never
 // a pass).
 type WeekSevere struct {
-	From     string  `json:"from"` // Monday
-	To       string  `json:"to"`   // Sunday
-	FirstDay int64   `json:"firstDay"`
-	Weeks    int64   `json:"weeks,omitempty"` // calendar weeks, for a multi-week window
+	From     string `json:"from"` // Monday
+	To       string `json:"to"`   // Sunday
+	FirstDay int64  `json:"firstDay"`
+	Weeks    int64  `json:"weeks,omitempty"` // calendar weeks, for a multi-week window
+	// Occupied: of a multi-week window's calendar weeks, those with an
+	// acquisition (audit G6.1).
+	Occupied int64   `json:"occupiedWeeks,omitempty"`
 	Complete bool    `json:"complete"`
 	Acquired int64   `json:"acquired"`
 	Severe   int64   `json:"severe"`
 	Rate     float64 `json:"rate"`
 	Status   string  `json:"status"`
+
+	first int64  // its first week (index)
+	occ   uint16 // its occupied weeks, by offset from first
 }
 
 // NotJudged: a partial calendar week below the minimum cohort.
@@ -269,22 +302,62 @@ func measureClinical(p *Policy, r *Record, ws map[string][2]int64, end *Capture)
 		}
 	}
 	// Absolute limits: every study acquired by the horizon (inherited
-	// included), and, when absolute, every served or open order's wait.
+	// included) and, under the safetyCohort ordersByHorizon, every study
+	// of an order wanted by the horizon acquired in the follow-up after
+	// it; and, when absolute, every served or open order's wait.
+	byHorizon := c.SafetyCohort == SafetyOrdersByHorizon
+	var wanted map[string]int64 // order ID → wanted time
+	var imaged map[string]bool  // orders with a study
+	if byHorizon {
+		wanted, imaged = map[string]int64{}, map[string]bool{}
+		for i := range r.Orders {
+			wanted[r.Orders[i].ID] = r.Orders[i].WantedSec
+		}
+		for i := range r.Studies {
+			imaged[r.Studies[i].Order] = true
+		}
+	}
 	for _, q := range Priorities {
 		a := AbsoluteCount{Limit: "pastDue", Priority: q, LimitMin: c.AbsoluteMaxPastDueMin[q]}
+		if byHorizon {
+			a.SafetyCohort = SafetyOrdersByHorizon
+		}
 		for i := range r.Studies {
 			s := &r.Studies[i]
-			if s.Priority != q || s.AcquiredSec > H {
+			if s.Priority != q {
 				continue
+			}
+			if s.AcquiredSec > H {
+				// checkClinicalRecord has verified the link.
+				if w, ok := wanted[s.Order]; !byHorizon || !ok || w > H {
+					continue
+				}
+				a.PostHorizon++
 			}
 			from := s.AcquiredSec + target(r, q)
 			if takeover && s.AcquiredSec <= t0 {
 				from = max(from, t0)
 			}
-			l, _ := delayAt(s, from, E)
+			l, cens := delayAt(s, from, E)
 			a.WorstMin = max(a.WorstMin, l/60)
-			if l > a.LimitMin*60 {
+			switch {
+			case l > a.LimitMin*60:
 				a.Violations++
+				if byHorizon && cens {
+					a.Overdue++
+				} else if byHorizon {
+					a.Observed++
+				}
+			case byHorizon && cens:
+				a.Pending++
+			}
+		}
+		if byHorizon {
+			for i := range r.Orders {
+				o := &r.Orders[i]
+				if o.Priority == q && o.WantedSec <= H && end.OrderOutcomes[i] == OutOpen && !imaged[o.ID] {
+					a.Unacquired++
+				}
 			}
 		}
 		m.Absolute = append(m.Absolute, a)
@@ -470,7 +543,7 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 		out[q] = ws
 		add := func(k, n int64) {
 			start := monday(k)
-			w := WeekSevere{FirstDay: 7*k - 3 - t0/daySec, Complete: start >= t0 && start+7*n*daySec <= H}
+			w := WeekSevere{FirstDay: 7*k - 3 - t0/daySec, Complete: start >= t0 && start+7*n*daySec <= H, first: k}
 			w.From, w.To = date.AddDays(w.FirstDay).String(), date.AddDays(w.FirstDay+7*n-1).String()
 			if L > 1 {
 				w.Weeks = n
@@ -490,8 +563,10 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 		if ws == nil || s.AcquiredSec <= t0 || s.AcquiredSec > H {
 			continue
 		}
-		w := &ws.Weeks[index(week(s.AcquiredSec), c.weeklyWeeks(s.Priority))]
+		k := week(s.AcquiredSec)
+		w := &ws.Weeks[index(k, c.weeklyWeeks(s.Priority))]
 		w.Acquired++
+		w.occ |= 1 << (k - w.first)
 		if l, _ := delayAt(s, s.AcquiredSec+target(r, s.Priority), E); c.severe(s.Priority, l) {
 			w.Severe++
 		}
@@ -501,7 +576,13 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 		if ws == nil {
 			continue
 		}
-		bpRate := bp(c.MaxWeeklySevereRate[q])
+		bpRate, minCohort := bp(c.MaxWeeklySevereRate[q]), c.MinWeeklyCohort[q]
+		ceiling := c.PartialWindows == PartialCountCeiling
+		if ceiling {
+			// The most severe a window of the minimum size may hold.
+			n := bpRate * minCohort / 10_000
+			ws.PartialCeiling = &n
+		}
 		worst := -1
 		for i := range ws.Weeks {
 			w := &ws.Weeks[i]
@@ -510,15 +591,25 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 			if w.Acquired > 0 {
 				w.Rate = float64(w.Severe) / float64(w.Acquired)
 			}
+			if ws.WindowWeeks > 1 {
+				w.Occupied = int64(bits.OnesCount16(w.occ))
+			}
 			if !w.Complete {
 				ws.PartialWeeks++
 			}
 			switch {
-			case w.Acquired < c.MinWeeklyCohort[q] && w.Complete:
+			case w.Acquired < minCohort && w.Complete:
 				w.Status = Insufficient
 				ws.InsufficientWeeks++
 				continue
-			case w.Acquired < c.MinWeeklyCohort[q]:
+			case w.Acquired < minCohort && ceiling && rateAbove(w.Severe, minCohort, bpRate):
+				// More severe reports than a compliant window of the
+				// minimum size could hold: a failure whatever the volume
+				// missing at the boundary (audit G4.1).
+				w.Status = Fail
+				ws.Failing++
+				ws.PartialFailing++
+			case w.Acquired < minCohort:
 				w.Status = NotJudged
 				ws.NotJudgedWeeks++
 				continue
@@ -536,10 +627,13 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 			}
 		}
 		ws.Insufficient = ws.InsufficientWeeks > 0
+		if ceiling && ws.Blocks == 0 && !ws.Insufficient {
+			ws.NoJudgedWindow, ws.Insufficient = true, true
+		}
 		if worst >= 0 {
 			w := ws.Weeks[worst]
 			ws.WorstFirstDay, ws.WorstFrom, ws.WorstTo = w.FirstDay, w.From, w.To
-			ws.WorstWeeks, ws.WorstOccupiedWeeks = int(max(1, w.Weeks)), int(max(1, w.Weeks))
+			ws.WorstWeeks, ws.WorstOccupiedWeeks = int(max(1, w.Weeks)), bits.OnesCount16(w.occ)
 			ws.WorstAcquired, ws.WorstSevere = w.Acquired, w.Severe
 		}
 	}
@@ -599,9 +693,33 @@ func classifyAccess(a *AccessCohort, o *Order, out string, from, limit, E int64)
 // priority to be a known one and every capture's order outcome to be a
 // known outcome, a resolved order's final one terminal (served, lost,
 // left or patient): missing or unknown evidence is INVALID, never a
-// default. It reports whether the record can be measured clinically.
-func checkClinicalRecord(r *Record, caps map[string]*Capture, bad func(string, ...any)) bool {
+// default. Under the safetyCohort ordersByHorizon (Slice 5C.4h) every
+// study acquired after the horizon must name exactly one order of the
+// record, of its priority: without it the absolute limits' cohort cannot
+// be decided. It reports whether the record can be measured clinically.
+func checkClinicalRecord(c *Clinical, r *Record, caps map[string]*Capture, bad func(string, ...any)) bool {
 	ok := true
+	if c.SafetyCohort == SafetyOrdersByHorizon {
+		ids := map[string]int{}
+		for i := range r.Orders {
+			ids[r.Orders[i].ID]++
+		}
+		pri := map[string]string{}
+		for i := range r.Orders {
+			pri[r.Orders[i].ID] = r.Orders[i].Priority
+		}
+		for i := range r.Studies {
+			s := &r.Studies[i]
+			if s.AcquiredSec <= r.HorizonEndSec {
+				continue
+			}
+			if ids[s.Order] != 1 || pri[s.Order] != s.Priority {
+				bad("study %s: acquired after the horizon without exactly one order of its priority (%q)", s.ID, s.Order)
+				ok = false
+				break
+			}
+		}
+	}
 	for i := range r.Orders {
 		if !slices.Contains(Priorities, r.Orders[i].Priority) {
 			bad("order %s: unknown priority %q", r.Orders[i].ID, r.Orders[i].Priority)
@@ -721,6 +839,13 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 			case ws.Partition == PartitionCalendar && ws.Failing > 0:
 				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d judged %s above the rate; worst %d of %d, %s to %s",
 					ws.Failing, ws.Blocks, calendarWindows(ws), ws.WorstSevere, ws.WorstAcquired, ws.WorstFrom, ws.WorstTo)
+				if ws.PartialFailing > 0 {
+					g.Reason += fmt.Sprintf("; %d partial windows below the minimum with more than the %d severe a minimum window may hold",
+						ws.PartialFailing, *ws.PartialCeiling)
+				}
+			case ws.Partition == PartitionCalendar && ws.NoJudgedWindow:
+				g.Status, g.Reason, g.Undecided = Insufficient, fmt.Sprintf("no window judged: %d partial %s below the minimum cohort of %d, none above the count ceiling of %d severe",
+					ws.NotJudgedWeeks, calendarWindows(ws), c.MinWeeklyCohort[q], *ws.PartialCeiling), true
 			case ws.Partition == PartitionCalendar && ws.Insufficient:
 				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d of %d complete %s below the minimum cohort of %d",
 					ws.InsufficientWeeks, len(ws.Weeks)-ws.PartialWeeks, calendarWindows(ws), c.MinWeeklyCohort[q])
@@ -732,6 +857,10 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 				if ws.WorstFrom != "" {
 					g.Reason += fmt.Sprintf(" (%s to %s)", ws.WorstFrom, ws.WorstTo)
 				}
+			case ws.PartialCeiling != nil && ws.NotJudgedWeeks > 0:
+				// Disclosed, never counted as passing windows.
+				g.Reason = fmt.Sprintf("%d judged %s pass; %d partial windows below the minimum not judged, each within the count ceiling of %d severe",
+					ws.Blocks, calendarWindows(ws), ws.NotJudgedWeeks, *ws.PartialCeiling)
 			}
 		default:
 			g.Value, g.Num = float64(cm.WorstWeekSevere[q]), cm.WorstWeekSevere[q]
@@ -795,11 +924,15 @@ type SafetyViolation struct {
 }
 
 // Safety is the plan's absolute limits: any violation on any seed makes
-// the plan NO GO (clinical safety), whatever the seed allowance.
+// the plan NO GO (clinical safety), whatever the seed allowance. Under
+// the safetyCohort ordersByHorizon, a study not yet observable against
+// its limit when observation ends (Pending) leaves the safety
+// insufficient when nothing is violated: never a pass.
 type Safety struct {
 	Status     string            `json:"status"`
 	Seeds      []int64           `json:"seeds"`
 	Violations []SafetyViolation `json:"violations"`
+	Pending    []SafetyViolation `json:"pending,omitempty"`
 }
 
 // clinicalPlan completes a v0.2-eval-5 plan report: the clinical gates'
@@ -821,6 +954,22 @@ func clinicalPlan(p *Policy, pr *PlanReport) {
 	}
 	pr.ClinicalJoint = &j
 	pr.ClinicalStatus = j.Status
+	for _, s := range pr.PerSeed {
+		note := func(key string) {
+			if pr.ClinicalInsufficient == nil {
+				pr.ClinicalInsufficient = map[string][]int64{}
+			}
+			pr.ClinicalInsufficient[key] = append(pr.ClinicalInsufficient[key], s.Seed)
+		}
+		for _, g := range append(slices.Clone(s.Gates), s.ClinicalGates...) {
+			if g.PerSeed && role(p, g.Window) == "gated" && g.Status == Insufficient {
+				note(g.Gate + " " + g.Window + " " + g.Stratum)
+			}
+		}
+		if s.Backlog != "stable" && s.Backlog != "unstable" {
+			note("backlog_stability")
+		}
+	}
 	for _, gs := range [][]GateSummary{pr.ServiceGates, pr.ClinicalGates} {
 		for _, g := range gs {
 			switch {
@@ -842,6 +991,10 @@ func clinicalPlan(p *Policy, pr *PlanReport) {
 				if a.Violations > 0 {
 					sf.Violations = append(sf.Violations, SafetyViolation{Seed: s.Seed, AbsoluteCount: a})
 					hit = true
+				}
+				if a.Pending > 0 {
+					sf.Pending = append(sf.Pending, SafetyViolation{Seed: s.Seed, AbsoluteCount: a})
+					sf.Status = Insufficient
 				}
 			}
 		}
@@ -866,7 +1019,11 @@ func clinicalReasons(cand *PlanReport, j *JointGate) []string {
 			why = append(why, fmt.Sprintf("clinical safety: seed %d, %d %s studies or orders beyond the absolute %s limit of %d min (worst %d)",
 				v.Seed, v.Violations, v.Priority, v.Limit, v.LimitMin, v.WorstMin))
 		}
-		if len(s.Violations) == 0 {
+		for _, v := range s.Pending {
+			why = append(why, fmt.Sprintf("clinical safety: seed %d, %d %s studies unfinished and not yet observable against the absolute %s limit of %d min when observation ended",
+				v.Seed, v.Pending, v.Priority, v.Limit, v.LimitMin))
+		}
+		if len(s.Violations) == 0 && len(s.Pending) == 0 {
 			why = append(why, "clinical safety: not measured")
 		}
 	}

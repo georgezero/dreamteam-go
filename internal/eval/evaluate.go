@@ -204,6 +204,11 @@ type PlanReport struct {
 	ClinicalJoint  *JointGate    `json:"clinicalJoint,omitempty"`
 	ClinicalStatus string        `json:"clinicalStatus,omitempty"`
 	ClinicalSafety *Safety       `json:"clinicalSafety,omitempty"`
+	// ClinicalInsufficient: by seed-level gate of the shared allowance,
+	// every seed lacking evidence on it, whatever its other gates' outcomes
+	// (Slice 5C.4h, audit G1: a seed failing elsewhere is FAIL in the
+	// joint rule, so the joint lists cannot give these counts).
+	ClinicalInsufficient map[string][]int64 `json:"clinicalInsufficientSeedsByGate,omitempty"`
 }
 
 // Payback is the sustained break-even of a paired increment: the first

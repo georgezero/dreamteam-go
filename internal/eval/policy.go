@@ -261,6 +261,24 @@ type Clinical struct {
 	// that priority (its rate and minimum then absent; the per-seed severe
 	// rate and the absolute limits stay). Nil: 1 for every priority.
 	WeeklyWindowWeeks map[string]int64 `json:"weeklyWindowWeeks,omitempty"`
+	// PartialWindows (calendar partition only; Slice 5C.4h, audit G4.1):
+	// "countCeiling" judges a partial boundary window below
+	// MinWeeklyCohort by its severe count against what a window of the
+	// minimum size may hold: it fails when severe ÷ MinWeeklyCohort is
+	// above the rate (more severe reports than a compliant minimum window
+	// could contain, whatever the missing volume), and is otherwise not
+	// judged; a priority with no judged and no insufficient window is
+	// insufficient, never a vacuous pass. Empty: partial windows below
+	// the minimum are not judged (Slice 5C.4f).
+	PartialWindows string `json:"partialWindows,omitempty"`
+	// SafetyCohort (Slice 5C.4h, audit G4.2): "ordersByHorizon" applies
+	// the absolute past-due limits to every study acquired by the horizon
+	// and every study of an order wanted by the horizon acquired after it
+	// (in the follow-up to the end of observation), each judged from its
+	// own due time; an unfinished study not yet past its limit when
+	// observation ends is not yet observable, and makes the seed's safety
+	// insufficient (clinicalPlan). Empty: studies acquired by the horizon.
+	SafetyCohort string `json:"safetyCohort,omitempty"`
 	// LostDemand (modified option B): when set, lost and left orders leave
 	// the timeliness cohorts (counted apart as lost) and the demand the
 	// candidate leaves unimaged is gated against the paired baseline's
@@ -310,6 +328,10 @@ type LostDemand struct {
 const (
 	RuleEmpirical     = "empirical"
 	PartitionCalendar = "calendar"
+	// PartialCountCeiling and SafetyOrdersByHorizon: Slice 5C.4h's
+	// boundary rules (Clinical.PartialWindows, Clinical.SafetyCohort).
+	PartialCountCeiling   = "countCeiling"
+	SafetyOrdersByHorizon = "ordersByHorizon"
 )
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -561,6 +583,10 @@ func (c *Clinical) validate(p *Policy) error {
 		return fmt.Errorf("clinical weeklyPartition %q: %s, or empty for pooled blocks", c.WeeklyPartition, PartitionCalendar)
 	case c.WeeklyPartition != "" && !weekly:
 		return fmt.Errorf("clinical weeklyPartition: only with maxWeeklySevereRate")
+	case c.PartialWindows != "" && (c.PartialWindows != PartialCountCeiling || c.WeeklyPartition != PartitionCalendar):
+		return fmt.Errorf("clinical partialWindows %q: %s with the calendar partition only, or empty", c.PartialWindows, PartialCountCeiling)
+	case c.SafetyCohort != "" && c.SafetyCohort != SafetyOrdersByHorizon:
+		return fmt.Errorf("clinical safetyCohort %q: %s, or empty for the studies acquired by the horizon", c.SafetyCohort, SafetyOrdersByHorizon)
 	}
 	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
 		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)

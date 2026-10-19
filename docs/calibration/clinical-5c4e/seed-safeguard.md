@@ -47,11 +47,23 @@ fraction and n its eligible orders on that seed; z₀.₉₉₉ = 3.09.
 committed file and requires the candidate's values.
 
 Against the mean rule: urgent 10 points is five margins, soon three,
-routine two and a half. Against the allowance: with the v4
-case-selection per-seed served-drop rule (5 points, its own allowance)
-still in force, the two overlap on an urgent seed losing 5–10 points
-more; the safeguard adds the seeds above 10 points, in the clinical
-allowance, where the case-selection rule's allowance is separate.
+routine two and a half.
+
+**Against the allowance (corrected in Slice 5C.4h, audit G5).** The v4
+case-selection per-seed served-drop rule (5 points, with its own
+allowance of four seeds in 40) stays in force beside the safeguard.
+* **Above 10 points, both can flag a seed.** A seed losing more than 5
+  points of urgent service can fail case selection; the safeguard flags
+  it only above 10 points. The text previously said "5–10 points",
+  which was wrong: the safeguard never flags at or below 10.
+* **The two counts are separate.** A seed losing 5–10 points can fail
+  case selection alone. Case selection counts it in its own allowance;
+  the safeguard does not flag it. The safeguard's seeds count in the
+  clinical allowance.
+* **So the four-seed allowance is not universal.** The two allowances
+  may cover disjoint seeds. Four seeds can fail case selection and four
+  different seeds a clinical gate, and the verdict stays favourable
+  (`TestAllowanceInteraction`; `../clinical-5c4h/allowance-interaction.md`).
 
 ## 3. Synthetic evidence (`seed-safeguard-evidence.json`)
 

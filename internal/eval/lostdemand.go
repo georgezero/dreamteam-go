@@ -50,10 +50,13 @@ type LostDemandGate struct {
 	Orders    int64    `json:"orders"`
 	Candidate Unimaged `json:"candidate"`
 	Baseline  Unimaged `json:"baseline"`
-	// Absolute unimaged fractions, reported always: seed-averaged and
-	// pooled, candidate then baseline.
-	SeedFraction   [2]float64 `json:"unimagedFractionSeedMean"`
-	PooledFraction [2]float64 `json:"unimagedFractionPooled"`
+	// Absolute unimaged fractions of the matched demand, candidate then
+	// baseline: seed-averaged over the judged seeds (matched, not thin),
+	// and pooled over every matched seed's orders. Null when there is
+	// nothing to average (audit G6.2: unavailable, never a measured zero);
+	// they never describe unmatched demand.
+	SeedFraction   *[2]float64 `json:"unimagedFractionSeedMean"`
+	PooledFraction *[2]float64 `json:"unimagedFractionPooled"`
 	// The seed-averaged increase, its standard deviation and, under the
 	// confidence rule only, the bound and the bound the design gives when
 	// every seed's difference is zero.
@@ -260,12 +263,12 @@ func lostDemandGates(p *Policy, cr, ar []Record) []LostDemandGate {
 			fa, fb = append(fa, float64(sa.Total)/float64(n)), append(fb, float64(sb.Total)/float64(n))
 		}
 		if g.Orders > 0 {
-			g.PooledFraction = [2]float64{float64(g.Candidate.Total) / float64(g.Orders), float64(g.Baseline.Total) / float64(g.Orders)}
+			g.PooledFraction = &[2]float64{float64(g.Candidate.Total) / float64(g.Orders), float64(g.Baseline.Total) / float64(g.Orders)}
 		}
 		if len(diffs) > 0 {
 			ma, _ := meanSD(fa)
 			mb, _ := meanSD(fb)
-			g.SeedFraction = [2]float64{ma, mb}
+			g.SeedFraction = &[2]float64{ma, mb}
 			g.Increase, g.IncreaseSD = meanSD(diffs)
 		}
 		if empirical {
@@ -420,18 +423,18 @@ func accessClaims(gates []LostDemandGate) *AccessClaims {
 // pooled over the gated period), the absolute unimaged fractions of the
 // candidate and the baseline, and Gate B's increase with its bound.
 type AccessStatement struct {
-	Priority            string     `json:"priority"`
-	Timeliness          Ratio      `json:"timeliness"`
-	TimelinessStatus    string     `json:"timelinessStatus"`
-	Unimaged            [2]float64 `json:"unimagedFractionSeedMean"` // candidate, baseline
-	PooledUnimaged      [2]float64 `json:"unimagedFractionPooled"`
-	Increase            float64    `json:"increase"`
-	IncreaseUpper       *float64   `json:"increaseUpper,omitempty"` // the confidence rule's bound
-	Rule                string     `json:"rule,omitempty"`
-	DiagnosticUpper     *float64   `json:"researchDiagnosticUpper,omitempty"` // the empirical rule's, never decisive
-	Method              string     `json:"method"`
-	LostDemandStatus    string     `json:"lostDemandStatus"`
-	AdequacyEstablished bool       `json:"absoluteAdequacyEstablished"` // always false: no gate establishes it
+	Priority            string      `json:"priority"`
+	Timeliness          Ratio       `json:"timeliness"`
+	TimelinessStatus    string      `json:"timelinessStatus"`
+	Unimaged            *[2]float64 `json:"unimagedFractionSeedMean"` // candidate, baseline; null: unavailable
+	PooledUnimaged      *[2]float64 `json:"unimagedFractionPooled"`
+	Increase            float64     `json:"increase"`
+	IncreaseUpper       *float64    `json:"increaseUpper,omitempty"` // the confidence rule's bound
+	Rule                string      `json:"rule,omitempty"`
+	DiagnosticUpper     *float64    `json:"researchDiagnosticUpper,omitempty"` // the empirical rule's, never decisive
+	Method              string      `json:"method"`
+	LostDemandStatus    string      `json:"lostDemandStatus"`
+	AdequacyEstablished bool        `json:"absoluteAdequacyEstablished"` // always false: no gate establishes it
 }
 
 // accessStatements are a candidate's access statements.

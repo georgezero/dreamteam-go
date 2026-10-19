@@ -437,7 +437,7 @@ func Measure(p *Policy, r *Record) *SeedMeasures {
 	}
 	m.Backlog = measureBacklog(p, r, t90)
 	if p.Clinical != nil {
-		if checkClinicalRecord(r, caps, bad) {
+		if checkClinicalRecord(p.Clinical, r, caps, bad) {
 			m.Clinical = measureClinical(p, r, ws, end)
 		}
 	}

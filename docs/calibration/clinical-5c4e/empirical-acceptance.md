@@ -54,8 +54,10 @@ or population.
   diagnostic only: not used for acceptance"): the finite-sample
   `betting` bound on the same differences at the policy's confidence,
   the bound the design gives with no difference at all, and whether the
-  bound reaches the margin (at 40 seeds it never does: 0.207 with no
-  difference). It is what a population claim could and could not
+  bound reaches the margin. At 40 seeds it is 0.207 with no
+  difference. Strong observed improvements can bring it below the
+  margin: −0.293 for 40 differences of −0.5 (correction, Slice 5C.4h,
+  audit G7). It is what a population claim could and could not
   establish from these seeds. The approximate `t` method is refused by
   policy validation, even as the diagnostic.
 

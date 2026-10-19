@@ -49,9 +49,11 @@ func blockRecord(q string, at []int64, n, sev []int) *Record {
 // trailing partial block.
 var soonStarts = []int64{bwTake, bwAnchor, bwAnchor + 28*daySec, bwAnchor + 56*daySec}
 
+// soonBlocks judges them under the 5C.4f candidate (the 5C.4h count
+// ceiling on partial windows: boundary_safety_test.go).
 func soonBlocks(t *testing.T, n, sev []int) *WeeklySevere {
 	t.Helper()
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4fPolicy(t)
 	r := blockRecord("soon", soonStarts, n, sev)
 	return weeklySevereCalendar(p.Clinical, r, bwHorz+40*daySec)["soon"]
 }
@@ -128,7 +130,7 @@ func TestSoonBlockPartials(t *testing.T) {
 	if statuses(ws) != "fail pass pass not_judged" || ws.Insufficient || ws.Failing != 1 || ws.NotJudgedWeeks != 1 || ws.Weeks[3].Severe != 10 {
 		t.Fatalf("%s %+v", statuses(ws), ws)
 	}
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4fPolicy(t)
 	r := blockRecord("soon", soonStarts, []int{0, 100, 100, 100}, []int{0, 0, 0, 6})
 	r.Studies = append(r.Studies, Study{Priority: "soon", AcquiredSec: bwHorz + hour, FinalSec: bwHorz + 40*hour})
 	ws = weeklySevereCalendar(p.Clinical, r, bwHorz+40*daySec)["soon"]
@@ -146,7 +148,7 @@ func TestSoonBlockPartials(t *testing.T) {
 // Routine is unchanged from 5C.4e: the same fixed weeks, minimum 100,
 // 5%: identical results under both candidates.
 func TestRoutineWeeksUnchanged(t *testing.T) {
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4fPolicy(t)
 	old, _ := candidate5c4ePolicy(t)
 	var at []int64
 	for k := range 9 {

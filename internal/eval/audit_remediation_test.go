@@ -230,7 +230,7 @@ func TestAccessVerdictLimitation(t *testing.T) {
 		if a.AdequacyEstablished || a.LostDemandStatus != Pass || a.TimelinessStatus == "missing" {
 			t.Fatalf("%+v", a)
 		}
-		if a.Priority == "urgent" && (a.Unimaged[0] < 0.64 || a.Unimaged[1] < 0.64 || a.Timeliness.Value != 1) {
+		if a.Priority == "urgent" && (a.Unimaged == nil || a.Unimaged[0] < 0.64 || a.Unimaged[1] < 0.64 || a.Timeliness.Value != 1) {
 			t.Fatalf("urgent: %+v", a)
 		}
 	}

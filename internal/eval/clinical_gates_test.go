@@ -68,8 +68,8 @@ func withMethod(p *Policy, m string) *Policy {
 }
 
 // C1: lost urgent orders, seed-level Gate B (5C.4d). Under the candidate's
-// finite-sample bound (betting) Gate B at 40 seeds is insufficient
-// whatever the data: its bound with no difference on any seed is about
+// finite-sample bound (betting) Gate B at 40 seeds is insufficient by the
+// rule's design check: its bound with no difference on any seed is about
 // 0.21, above the 2-point margin (gate-b-statistics.md §4): 30 lost a seed
 // and none lost alike, NO GO. Under the t bound: 30 lost a seed (an
 // increase of 0.20 on every seed) fails; none lost passes (zero

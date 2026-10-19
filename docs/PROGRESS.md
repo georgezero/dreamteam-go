@@ -7,6 +7,89 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4h — reserved protocol closure and clinical boundary safety (0.2.0-dev.21)
+
+This slice is the remediation of the independent 5C.4g audit (c55f3cb,
+committed verbatim before any change), under the owner's decisions of
+2026-10-19 (`docs/calibration/clinical-5c4h/`).
+* **Not locked, not run, not frozen.**
+* **Registers 0.2.0-dev.20** for replay (`mini-seed50-dev20`).
+* **v0.2-eval-4 is byte-identical.** The 5C.4d, 5C.4e and 5C.4f
+  candidates keep their own rules.
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream (the harness refuses PCG(20261201, ·)).
+
+**Boundary safety: a clinical-policy revision, pending re-review.**
+* **Partial windows** (`partialWindows: countCeiling`). A partial window
+  below the minimum fails when it holds more severe reports than a
+  compliant minimum window may: 5. A priority with nothing judged is
+  INSUFFICIENT, never a vacuous pass. The audit's 640-report witness was
+  GO and is now NO GO.
+* **Horizon** (`safetyCohort: ordersByHorizon`). The absolute limits
+  cover every study of an order wanted by the horizon, observed in the
+  follow-up. Each study is in one state: observed violation, unresolved
+  overdue, not yet observable (INSUFFICIENT), or completed in the
+  follow-up. Unacquired orders are counted, and Gate A judges them.
+  * **Witness:** the one-second witness was GO and is now NO GO.
+  * **Link:** records carry a study-to-order link, exported without any
+    draw.
+  * **Integrity:** a post-horizon study without a valid link is INVALID.
+* **Thresholds, minimums, anchor, allowance, Gate B and the safeguard:**
+  unchanged.
+
+**Protocol (proposed, not locked):**
+* **The protocol itself.** `reserved-validation-protocol.md` gives every
+  criterion an estimator, interval, family rule, numeric threshold,
+  group and remainder handling, and PASS / FAIL / INCONCLUSIVE. A FAIL
+  or INCONCLUSIVE is a documented NO GO; a post-result waiver is a
+  deviation.
+* **T2.** Harmed-seed detection must be at least 0.95. Whole-evaluation
+  rejection is reported against the allowance's 0.371.
+* **T5.** The tolerances are proposed (0.40 at +2.1 points, 0.01 at +3)
+  and **await the owner's approval**.
+* **The manifest.** `scenario-manifest.json` defines 49 scenarios:
+  * disjoint streams and identical paired demand (no A85-against-B85
+    pair);
+  * random injections, record-reconciled;
+  * exact margin witnesses.
+
+  It is executed by `reserved_manifest_test.go` and judged by
+  `reservedCriteria`.
+
+**Reporting:**
+* **G6:** occupied weeks are counted correctly, and unavailable unimaged
+  fractions are null.
+* **T7:** the raw per-gate insufficient seeds are listed.
+* **G5:** the allowance interaction is documented
+  (`allowance-interaction.md`) and the safeguard's overlap wording
+  corrected.
+* **G7:** the 40-seed impossibility statement is corrected.
+
+**Development checks** (PCG(20261021, ·), simulator seeds 901–910):
+* **Construction.** Every scenario was constructed and paired; all 14
+  witnesses met their expectation. One construction defect was found
+  and repaired: modality drawn from the booking stream made v4 case
+  selection reject 4 of 20 stable groups. After the repair, none.
+* **Near the margin.** Gate B accepted 0.32 at +2.1 points (predicted
+  0.31) and 0 at +3.
+* **Follow-up.** It leaves 1–6 routine studies not yet observable on 9
+  of 10 no-action seeds (INSUFFICIENT). A 45-day follow-up is offered to
+  the owner.
+
+**Tested:** the boundary, horizon, allowance, reporting, criteria and
+manifest witnesses; the mutation checks; the full uncached suite, vet,
+gofmt and the replay fixtures.
+
+**Next:** the owner's decisions:
+* the T5 tolerances;
+* the follow-up length;
+* a targeted independent re-review of the boundary-safety revision.
+
+Then the lock commit, and the reserved run exactly once. Reserved
+calibration and the freeze stay NO GO until then.
+
+---
+
 ## V0.2 Slice 5C.4f — volume-aware clinical severity windows (0.2.0-dev.20)
 
 Each priority's severity window now matches its volume (owner decisions

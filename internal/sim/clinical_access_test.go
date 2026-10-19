@@ -101,6 +101,10 @@ type accessSeed struct {
 	// one): the counts any fixed block partition is summed from, for the
 	// anchoring and boundary sensitivity (reported only).
 	SoonWeeks []eval.WeekSevere `json:"soonCalendarWeeks,omitempty"`
+	// The candidate's absolute limits on the seed with each study's state
+	// at the end of observation (Slice 5C.4h: observed, overdue, pending,
+	// post-horizon, unacquired).
+	Absolute []eval.AbsoluteCount `json:"absoluteLimits,omitempty"`
 }
 
 // openHours: the scenario's imaging hours, minutes after midnight, by
@@ -173,6 +177,9 @@ func TestSimulatorAccessValidation(t *testing.T) {
 		for _, sr := range pr.PerSeed {
 			i := slices.Index(seeds, sr.Seed)
 			res[i].ClinicalStatus, res[i].ClinicalNotPass = sr.Clinical, map[string]string{}
+			if sr.Measures.Clinical != nil {
+				res[i].Absolute = sr.Measures.Clinical.Absolute
+			}
 			for _, g := range sr.ClinicalGates {
 				if g.PerSeed && g.Status != eval.Pass {
 					res[i].ClinicalNotPass[g.Gate+" "+g.Window+" "+g.Stratum] = g.Status
@@ -201,6 +208,7 @@ func TestSimulatorAccessValidation(t *testing.T) {
 		"policy":   candidatePolicy,
 		"grid":     grid,
 		"seeds":    res,
+		"safety":   rep.Plans[0].ClinicalSafety,
 	}
 	raw, err := json.MarshalIndent(doc, "", " ")
 	if err != nil {

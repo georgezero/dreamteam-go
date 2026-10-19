@@ -3,6 +3,10 @@
 The one confirmatory clinical calibration before v0.2-eval-5 is frozen.
 It supersedes `../clinical-5c4e/reserved-validation-protocol.md`.
 
+**Superseded** by `../clinical-5c4h/reserved-validation-protocol.md`
+(2026-10-19). The independent 5C.4g audit found it NO GO (G1–G3). Kept
+as written.
+
 **Status: COMPLETE, NOT RUN.** Every owner decision it needs is made
 (2026-10-19). The windows are evaluable on every development seed
 (`severity-windows.md` §4). It is to be locked by the owner after the

@@ -114,9 +114,11 @@ func tQuantile(p float64, df int) float64 {
 	return (lo + hi) / 2
 }
 
-// zeroFloor is method's bound for n seeds that all show no difference:
-// the smallest bound the design can give. Above the margin, the design
-// cannot establish it whatever the data.
+// zeroFloor is method's bound for n seeds that all show no difference.
+// It is not the smallest bound over every sample: strong observed
+// improvements bound lower (audit G7). The 5C.4d confidence rule
+// declares Gate B insufficient when it exceeds the margin, as a design
+// check.
 func zeroFloor(method string, n int, conf, lo, hi float64) float64 {
 	return upperBound(method, make([]float64, n), conf, lo, hi)
 }

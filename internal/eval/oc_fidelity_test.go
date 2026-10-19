@@ -221,6 +221,16 @@ type ocFidelity struct {
 	// Takeover: the takeover instant (0: t0); fidAlignedTakeover aligns the
 	// evaluator's weeks with the synthetic calendar's.
 	Takeover int64 `json:"takeoverSec,omitempty"`
+	// Volume: a demand-rate multiplier (0: 1), the same for both plans
+	// of a pair: seeds of unequal volume with identical paired demand
+	// (Slice 5C.4h scenario manifest).
+	Volume float64 `json:"demandVolume,omitempty"`
+	// ExogenousModality: each order's modality is part of its demand (as
+	// the simulator's: an order's exam is drawn with it), set on the order
+	// and its study from the demand side, so that two plans of a pair see
+	// the same modalities (Slice 5C.4h). Off: the committed model, whose
+	// study modality is drawn at acquisition from the booking stream.
+	ExogenousModality bool `json:"exogenousModality,omitempty"`
 }
 
 func (q ocFidelity) origin() int64 { return cmp.Or(q.Takeover, t0) }
@@ -388,6 +398,7 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) { return q.r
 // demand, as the simulator's do (TestDemandExogenousAcrossPlans), so the
 // lost-demand gate pairs them.
 func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
+	qf := q
 	p, err := simProfile()
 	if err != nil {
 		panic(err)
@@ -399,6 +410,25 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		TakeoverSec: start, TakeoverDate: t0Date, HorizonEndSec: start + 150*daySec, AppointmentsSHA256: "oc"}
 	rec.ObservedUntilSec = observationNeeded(pol, rec)
 	E := rec.ObservedUntilSec
+	// The exogenous modalities' salt: one demand draw, the same for both
+	// plans of a pair.
+	var salt uint64
+	if q.ExogenousModality {
+		salt = rd.Uint64()
+	}
+	modalityOf := func(q string, u float64) string {
+		tot := 0
+		for _, m := range simModalities {
+			tot += p.Modality[q][m]
+		}
+		u *= float64(tot)
+		for _, m := range simModalities {
+			if u -= float64(p.Modality[q][m]); u < 0 {
+				return m
+			}
+		}
+		return simModalities[len(simModalities)-1]
+	}
 	days := int((E - start) / daySec)
 	w := fidWarmup
 	mix := p.mix()
@@ -473,8 +503,10 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		return js
 	}
 	type acq struct {
-		at int64
-		k  int
+		at    int64
+		k     int
+		order string
+		mod   string // exogenous modality (ExogenousModality)
 	}
 	var acqs []acq
 	var resolved []int64
@@ -497,6 +529,9 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		if q.Seasonal {
 			lam *= ocSeason[dt.Month-1]
 		}
+		if q.Volume != 0 {
+			lam *= q.Volume
+		}
 		for range rd.poisson(lam) {
 			u := rd.Float64()
 			k := 2
@@ -517,7 +552,12 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 			}
 			wantDay := day + int(lead)
 			wanted := max(recv, fidMidnight(wantDay))
-			o := Order{ID: "o", Origin: strconv.Itoa(len(rec.Orders)), Priority: pri, Modality: "XR", ReceivedSec: recv, WantedSec: wanted}
+			// The order's ID, unique in the record, links its study (5C.4h).
+			mod := "XR"
+			if q.ExogenousModality {
+				mod = modalityOf(pri, float64(splitmix64(salt+uint64(len(rec.Orders)))>>11)/(1<<53))
+			}
+			o := Order{ID: "o" + strconv.Itoa(len(rec.Orders)), Origin: strconv.Itoa(len(rec.Orders)), Priority: pri, Modality: mod, ReceivedSec: recv, WantedSec: wanted}
 			bookDay, found := 0, false
 			var cands []int
 			for d := wantDay; d <= wantDay+ocTolerance[pri] && d+w < len(capOf); d++ {
@@ -553,7 +593,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 					}
 				case appt <= E:
 					out, res = OutServed, appt
-					acqs = append(acqs, acq{appt, k})
+					acqs = append(acqs, acq{appt, k, o.ID, mod})
 				}
 			}
 			rec.Orders = append(rec.Orders, o)
@@ -580,20 +620,12 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	var info []fidStudy
 	for _, a := range acqs {
 		q := Priorities[a.k]
-		tot := 0
-		for _, m := range simModalities {
-			tot += p.Modality[q][m]
-		}
-		u := rb.Float64() * float64(tot)
-		mod := simModalities[len(simModalities)-1]
-		for _, m := range simModalities {
-			if u -= float64(p.Modality[q][m]); u < 0 {
-				mod = m
-				break
-			}
+		mod := a.mod
+		if !qf.ExogenousModality {
+			mod = modalityOf(q, rb.Float64())
 		}
 		entered := a.at + int64(tableDraw(p.EntrySec[mod], rb.Float64()))
-		rec.Studies = append(rec.Studies, Study{ID: "s", Priority: q, Modality: mod, AcquiredSec: a.at, EnteredSec: entered})
+		rec.Studies = append(rec.Studies, Study{ID: "s", Order: a.order, Priority: q, Modality: mod, AcquiredSec: a.at, EnteredSec: entered})
 		info = append(info, fidStudy{mod, tableDraw(p.ReadSec[mod], rb.Float64())})
 	}
 	// Studies enter the worklist in entry order.
@@ -1392,10 +1424,14 @@ func TestOCFidelityModelUnchanged(t *testing.T) {
 		}
 		for i := range 2 {
 			rec, _ := def.q.record(ocRNG{rand.New(rand.NewPCG(20261103, uint64(100000*k+i)))}, base)
-			// The orders' origins (5C.4d) are provenance added since: the
-			// digest is of the record without them.
+			// The orders' origins (5C.4d) and the study-to-order links with
+			// the unique order IDs they name (5C.4h) are provenance added
+			// since: the digest is of the record without them.
 			for j := range rec.Orders {
-				rec.Orders[j].Origin = ""
+				rec.Orders[j].Origin, rec.Orders[j].ID = "", "o"
+			}
+			for j := range rec.Studies {
+				rec.Studies[j].Order = ""
 			}
 			raw, _ := json.Marshal(struct {
 				R *Record
@@ -1479,4 +1515,13 @@ func TestOCFidelityPairedDemand(t *testing.T) {
 	if gs := lostDemandGates(cand, []Record{*y}, []Record{*x}); gs[2].MatchedSeeds != 0 || gs[2].Status != Insufficient {
 		t.Errorf("one stream: demand unexpectedly matched")
 	}
+}
+
+// splitmix64 is a 64-bit mixing function (SplitMix64's finalizer): an
+// exogenous modality's uniform from the salt and the order's index.
+func splitmix64(x uint64) uint64 {
+	x += 0x9e3779b97f4a7c15
+	x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
+	x = (x ^ (x >> 27)) * 0x94d049bb133111eb
+	return x ^ (x >> 31)
 }

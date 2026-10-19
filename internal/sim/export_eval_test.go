@@ -430,7 +430,7 @@ func (r *EvalRecorder) Finish(lastActionSec, latestEffectSec, horizonEndSec int6
 	}
 	for _, si := range studies {
 		s := &st.dem.studies[si]
-		x := eval.Study{ID: studyID(si), Priority: s.priority.String(), Modality: st.cfg.Catalog[s.exam].Modality,
+		x := eval.Study{ID: studyID(si), Order: orderID(s.order), Priority: s.priority.String(), Modality: st.cfg.Catalog[s.exam].Modality,
 			AcquiredSec: int64(s.acquiredAt), EnteredSec: int64(s.enteredAt), ClaimedSec: int64(s.claimedAt)}
 		if s.state == studyFinal {
 			x.FinalSec = int64(s.finalAt)

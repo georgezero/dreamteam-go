@@ -69,12 +69,28 @@ This is the audit's correlated-shock witness F4.2 in general form. A
 practice in which an occasional seed loses everything is not
 distinguishable, in 40 seeds, from one that never does.
 
-**Consequence.** With 40 seeds no distribution-free valid bound can
-ever establish non-deterioration within 2 points. A correctly
-conservative Gate B is **INSUFFICIENT for every plan** at 40 seeds,
-whatever the data. Establishing the margin distribution-free needs at
-least 149 seeds even for perfectly identical plans, and more for
+**Consequence.** With 40 seeds, no distribution-free valid bound can
+establish non-deterioration within 2 points **from the all-zero
+sample**: identical outcomes on every seed. Establishing the margin
+from that configuration needs at least 149 seeds, and more for
 realistic procedures (§5).
+
+> **Correction (Slice 5C.4h, audit G7, 2026-10-19).** This section
+> previously said the margin could never be established at 40 seeds
+> "whatever the data". That overstated the result. The argument above
+> bounds only the all-zero sample. It is not the smallest bound over all
+> possible samples. Strong observed improvements can give a valid bound
+> below the margin with 40 seeds. The `betting` bound of 40 seed
+> differences of −0.5 each is −0.2926, against 0.2074 for 40 zeros
+> (`TestGateBStrongImprovementBound`).
+>
+> * **The 5C.4d confidence rule.** Its INSUFFICIENT for every plan at 40
+>   seeds came from its own design check, not from this impossibility:
+>   Gate B is insufficient when the all-zero bound exceeds the margin
+>   (§5). That check is kept unchanged, as that historical rule's
+>   behaviour.
+> * **The empirical rule (5C.4e onward).** It uses no bound for
+>   acceptance, and this correction gives it none.
 
 ## 5. Procedures implemented (`internal/eval/bounds.go`)
 
@@ -99,8 +115,9 @@ variance from a prior of 0.25.
   * a seed has fewer matched orders than the policy's per-seed minimum;
   * there are fewer seeds than the policy's minimum;
   * or the procedure's bound for an all-zero sample of the same size
-    exceeds the margin: the design cannot establish the margin whatever
-    the data;
+    exceeds the margin: the rule's design check. It is not an
+    impossibility for every sample, since strong observed improvements
+    can bound below the margin (§4, corrected);
 * **fail** when U > margin;
 * **pass** otherwise.
 
@@ -163,7 +180,8 @@ Monte Carlo standard error 0.0049 at 95%.
 
 * **Active candidate method:** `betting`, the only one with the
   required guarantee. Gate B is then **INSUFFICIENT for every plan at 40
-  seeds** (§4), so every plan is NO GO on access.
+  seeds**, through the rule's design check on the all-zero sample (§4,
+  corrected), so every plan is NO GO on access.
 * **This is the owner's stopping condition:** a correct bound makes the
   gate unable to pass, and is reported rather than weakened.
 * **Alternatives**, each needing explicit owner approval:
