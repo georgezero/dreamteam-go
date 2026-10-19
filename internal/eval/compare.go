@@ -139,6 +139,9 @@ func compare(p *Policy, cand, ag *PlanReport, cr, ar []Record, global []string) 
 		OperatingAbsolute: cand.OperatingProfit[WinOps], OperatingIncrement: c.Profit[WinOps],
 		T180Absolute: cand.OperatingProfit[WinT180], T180Increment: c.Profit[WinT180], TransitionObligationsT90: pairedT(obl)}
 	c.CaseSelection, c.CaseSelectionStatus = caseSelection(p, cand, ag)
+	if p.Clinical != nil && p.Clinical.LostDemand != nil {
+		c.LostDemand = lostDemandGates(p, cr, ar)
+	}
 	slices.Sort(c.Integrity)
 	c.Integrity = slices.Compact(c.Integrity)
 	c.Valid = len(c.Integrity) == 0
@@ -459,6 +462,12 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 	var why []string
 	if v5 {
 		why = clinicalReasons(cand)
+		// Lost demand is its own gate: a timeliness gain never offsets it.
+		for _, g := range c.LostDemand {
+			if g.Status != Pass {
+				why = append(why, fmt.Sprintf("lost demand %s: %s (%s)", g.Priority, g.Status, g.Reason))
+			}
+		}
 	}
 	if j := cand.ServiceJoint; !v5 && j.Status != Pass {
 		why = append(why, fmt.Sprintf("service seed reliability: %s (%d failing %v and %d insufficient %v of %d seeds, limit %d)",

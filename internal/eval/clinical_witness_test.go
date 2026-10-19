@@ -12,10 +12,12 @@ import (
 // (docs/calibration/clinical-5c4b/acceptance-design.md §6): each under the
 // candidate policy's clinical values (docs/calibration/clinical-5c4b/
 // candidate-policy-v5.json) on the synthetic records, with its expected
-// classification, denominator, numerator and gate outcome. The urgent
-// access limit is the candidate's 48 calendar hours at 90%; the synthetic
-// practice has one urgent order a day, wanted 30 minutes before it is
-// imaged.
+// classification, denominator, numerator and gate outcome. Since Slice
+// 5C.4c the candidate is the owner's modified option B: timeliness over
+// served, open and late-cancelled orders (urgent 48 calendar hours at
+// 95%), and lost, left and patient-ended demand against the paired
+// baseline (the comparison's lostDemand). The synthetic practice has one
+// urgent order a day, wanted 30 minutes before it is imaged.
 
 const candidatePath = "../../docs/calibration/clinical-5c4b/candidate-policy-v5.json"
 
@@ -109,9 +111,9 @@ func urgentAccess(pr *PlanReport) *AccessCohort {
 
 // W1: thirty urgent acquisitions 30 days after their wanted time (the
 // audit's witness). Denominator every urgent order wanted in the gated
-// period; the thirty are served late (untimely); timely 0.8 of decided
-// < 0.90: timely access and the maximum wait fail on every seed: NO GO
-// (clinical seed reliability). v0.2-eval-4 returns GO.
+// period; the thirty are served late (untimely); timely 0.8 < 0.95:
+// timely access fails on every seed: NO GO (clinical seed reliability);
+// the lost-demand gate passes (nothing unimaged). v0.2-eval-4 returns GO.
 func TestWitnessDelayedUrgentAccess(t *testing.T) {
 	p, d := candidatePolicy(t)
 	_, pr, c := clinicalCase(t, p, d, nil, delayOrders("urgent", 0, 30, 30*daySec, 30))
@@ -119,21 +121,23 @@ func TestWitnessDelayedUrgentAccess(t *testing.T) {
 	if a := urgentAccess(pr); a.Untimely != 30 || a.Timely+a.Untimely != a.Wanted || a.Withdrawn != 0 {
 		t.Fatalf("%+v", a)
 	}
-	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Fail || gateStatus(pr, 1, GateMaxWait, WinGated, "urgent") != Fail {
-		t.Fatal("gates")
+	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Fail || gateStatus(pr, 1, GateMaxWait, WinGated, "urgent") != "missing" ||
+		pr.PerSeed[0].Measures.Clinical.MaxWaitGatedMin["urgent"] < 30*1440 || c.LostDemand[0].Status != Pass {
+		t.Fatalf("gates: lost demand %+v", c.LostDemand[0])
 	}
 	q, qd := testPolicy(t)
 	_, pr4, c4 := clinicalCase(t, q, qd, nil, delayOrders("urgent", 0, 30, 30*daySec, 30))
 	wantVerdict(t, pr4, c4, GO, "")
 }
 
-// W2: thirty urgent orders never imaged. Lost (the practice's): in the
-// denominator, untimely, timely access fails. Cancelled by the patient
-// after the 48-hour limit: untimely, fails. Cancelled by the patient
-// within the limit: withdrawn, out of the denominator, the gate passes:
-// the record does not say why a patient cancelled (§3 of
-// access-denominators.md), so a cancellation before the limit is not
-// counted as a failure.
+// W2: thirty urgent orders never imaged, the baseline imaging them.
+// Lost: counted apart from timeliness (timely access passes) and unimaged
+// against the baseline: the lost-demand gate fails, NO GO. Cancelled by
+// the patient after the 48-hour limit: untimely, and unimaged: both fail.
+// Cancelled by the patient within the limit: withdrawn from timeliness
+// (the record does not say why a patient cancelled) but still unimaged
+// against the baseline: the lost-demand gate fails. No outcome lets
+// demand disappear.
 func TestWitnessUrgentOrdersNotImaged(t *testing.T) {
 	p, d := candidatePolicy(t)
 	for _, c := range []struct {
@@ -142,13 +146,14 @@ func TestWitnessUrgentOrdersNotImaged(t *testing.T) {
 		after    int64 // resolution after the wanted time
 		untimely int64
 		withdraw int64
+		lost     int64
 		gate     string
 	}{
-		{"lost", OutLost, 0, 30, 0, Fail},
-		{"patient after the limit", OutPatient, 3 * daySec, 30, 0, Fail},
-		{"patient within the limit", OutPatient, 2 * hour, 0, 30, Pass},
+		{"lost", OutLost, 0, 0, 0, 30, Pass},
+		{"patient after the limit", OutPatient, 3 * daySec, 30, 0, 0, Fail},
+		{"patient within the limit", OutPatient, 2 * hour, 0, 30, 0, Pass},
 	} {
-		_, pr, _ := clinicalCase(t, p, d, nil, func(b synth, r *Record) {
+		_, pr, cmp := clinicalCase(t, p, d, nil, func(b synth, r *Record) {
 			for _, i := range urgentOrders(r, 20, 50) {
 				at := r.Orders[i].WantedSec + c.after
 				if c.out == OutLost {
@@ -158,15 +163,20 @@ func TestWitnessUrgentOrdersNotImaged(t *testing.T) {
 			}
 		})
 		a := urgentAccess(pr)
-		if a.Untimely != c.untimely || a.Withdrawn != c.withdraw || a.Timely+a.Untimely+a.Withdrawn != a.Wanted || gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != c.gate {
+		ld := cmp.LostDemand[0]
+		if a.Untimely != c.untimely || a.Withdrawn != c.withdraw || a.Lost != c.lost || a.Timely+a.Untimely+a.Withdrawn+a.Lost != a.Wanted ||
+			gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != c.gate {
 			t.Errorf("%s: %+v, gate %s", c.name, a, gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent"))
+		}
+		if ld.Priority != "urgent" || ld.Status != Fail || ld.Candidate.Total != 40*30 || ld.Baseline.Total != 0 || cmp.Verdict != NOGO {
+			t.Errorf("%s: lost demand %+v, verdict %s", c.name, ld, cmp.Verdict)
 		}
 	}
 }
 
 // W3: thirty urgent orders still unresolved at the end of observation,
-// long past the limit: untimely (never dropped), timely access and the
-// maximum wait fail. Within the limit at the end they would be
+// long past the limit: untimely (never dropped), timely access fails;
+// the maximum wait is reported (over 100 days). Within the limit at the end they would be
 // undecided, and the gate lacks evidence (not a pass).
 func TestWitnessUnresolvedUrgentOrders(t *testing.T) {
 	p, d := candidatePolicy(t)
@@ -176,7 +186,7 @@ func TestWitnessUnresolvedUrgentOrders(t *testing.T) {
 		}
 	})
 	wantVerdict(t, pr, c, NOGO, "clinical seed reliability")
-	if a := urgentAccess(pr); a.Untimely != 30 || a.Undecided != 0 || gateStatus(pr, 1, GateMaxWait, WinGated, "urgent") != Fail {
+	if a := urgentAccess(pr); a.Untimely != 30 || a.Undecided != 0 || pr.PerSeed[0].Measures.Clinical.MaxWaitGatedMin["urgent"] < 100*1440 {
 		t.Fatalf("%+v", a)
 	}
 	var a AccessCohort

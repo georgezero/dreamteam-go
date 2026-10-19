@@ -598,3 +598,16 @@ was run.
 | No-action access validation, development seeds 901–910 (`DT_SIM_ACCESS`) | Pi 4 | 84–125 s (three runs; the second byte-identical to the first, the third adds the reporting measures) |
 | Acceptance witnesses W1–W12 (`TestWitness*`, `TestCandidatePolicyFile`) | Pi 4 | about 30 s; 5 of 5 mutations of the access rules caught |
 | Full suite `go test ./... -count=1` | Pi 4 | 756 s wall; every package passes (sim 751, session 325, eval 309, cmd 104, tui 29) |
+
+## 2026-10-18 — V0.2 Slice 5C.4c, clinical access and weekly severity gates (0.2.0-dev.17)
+
+Raspberry Pi 4 (4 cores). No strategy, reference, holdout or reserved
+stream was run.
+
+| Run | Machine | Time |
+|---|---|---|
+| No-action access validation under the current candidate (development seeds) | Pi 4 | 128 s |
+| Gate cases C1–C10 and C7a, witnesses W1–W12, validation | Pi 4 | about 60 s |
+| 10 targeted mutations of the new rules (each a focused test run) | Pi 4 | about 15 min; 10 of 10 caught (one after adding a test) |
+| `TestDemandExogenousAcrossPlans` (mini fixture, three plans, two seeds) | Pi 4 | 11 s |
+| Full suite `go test ./... -count=1` | Pi 4 | 814 s wall; every package passes (sim 795, eval 390, session 343, cmd 105, tui 27) |

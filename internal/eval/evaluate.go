@@ -252,6 +252,9 @@ type Comparison struct {
 	CashPayback         []Payback                            `json:"cashPayback"`
 	CaseSelection       []GateSummary                        `json:"caseSelection"`
 	CaseSelectionStatus string                               `json:"caseSelectionStatus"`
+	// LostDemand: v0.2-eval-5's lost-demand gates against the paired plan
+	// (policies with clinical.lostDemand only).
+	LostDemand []LostDemandGate `json:"lostDemand,omitempty"`
 	// Financial: the classification's evidence, kept apart (README §10).
 	Financial Financial `json:"financial"`
 	// ServiceRestored: the baseline fails the service gates the candidate

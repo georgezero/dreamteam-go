@@ -25,11 +25,11 @@ implementation decisions in §J).
 | `../../evaluation/oc-v0.2-eval-5-exploratory-fidelity.json` | The fidelity run's output (joofi; A85, Wg85 and M reproduced identically on the Pi). |
 | `findings-fidelity.md` | What the fidelity run shows: weekday and mix, readers, utilization, warm start, weekend comparison, delay tails, full bundles, the mirror against the simulator, limitations, and the owner's provisional values. |
 | `acceptance-design.md` | The acceptance-design closure: the provisional policy, the stopping point (urgent access cannot be justified as specified), the simulator check of the reporting limits, the witnesses, external validity and the owner decision table. |
-| `candidate-policy-v5.json` | The candidate v5 policy: a proposal, not in force, not frozen. |
+| `candidate-policy-v5.json` | The candidate v5 policy: a proposal, not in force, not frozen. Since Slice 5C.4c it carries the owner's modified option B and the weekly rate (`../clinical-5c4c/access-gates.md`). |
 | `order-lifecycle.md` | The simulator's order lifecycle and the reconciliation of orders with acquisitions. |
 | `access-denominators.md` | Access rules A–J, gaming, the calendar and service-opportunity clocks, no-action access. |
 | `sim-access-5c4b.json` | The no-action access validation (development seeds; `internal/sim/clinical_access_test.go`). |
-| `reserved-validation-protocol.md` | The reserved-stream confirmatory protocol: a draft, not runnable until the owner's decisions. |
+| `reserved-validation-protocol.md` | The reserved-stream confirmatory protocol: a draft, superseded by `../clinical-5c4c/reserved-validation-protocol.md`. |
 
 Code:
 

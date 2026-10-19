@@ -80,6 +80,12 @@ func commonHorizon(t *testing.T, p *eval.Policy, seed int64) int64 {
 // applying a teleradiology contract at the takeover when tele is set;
 // record false runs the same without a recorder.
 func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (eval.Record, string) {
+	return recordMiniActs(t, p, seed, tele, record, nil)
+}
+
+// recordMiniActs is recordMini with acts applied at the takeover (after
+// the recorder starts), each to be accepted.
+func recordMiniActs(t *testing.T, p *eval.Policy, seed int64, tele, record bool, acts []api.Action) (eval.Record, string) {
 	t.Helper()
 	horizon := commonHorizon(t, p, seed)
 	var rec *sim.EvalRecorder
@@ -87,7 +93,17 @@ func recordMini(t *testing.T, p *eval.Policy, seed int64, tele, record bool) (ev
 		if record {
 			rec = w.NewEvalRecorder(map[bool]string{false: "A", true: "T"}[tele], "", "", seed, p.Finance.EmployeeCommitmentDays)
 		}
+		if len(acts) > 0 {
+			for _, r := range w.Apply(acts) {
+				if !r.OK {
+					t.Fatalf("%+v", r)
+				}
+			}
+		}
 	})
+	if len(acts) > 0 {
+		last = max(last, int64(w.StartTime()))
+	}
 	start := w.StartTime()
 	h := p.Horizons
 	day := func(n int) simtime.Time { return start.Add(simtime.Duration(n) * simtime.Day) }

@@ -234,6 +234,38 @@ type Clinical struct {
 	// lacking evidence on any seed-level clinical gate (service, severe
 	// delay, access, backlog), each counted once.
 	MaxFailingSeedFraction float64 `json:"maxFailingSeedFraction"`
+	// MaxWaitReportOnly: the maximum wait is reported, not gated (no
+	// maxWaitMin).
+	MaxWaitReportOnly bool `json:"maxWaitReportOnly,omitempty"`
+	// MaxWeeklySevereRate and MinWeeklyCohort: the volume-normalized
+	// weekly severity, in place of maxSeverePerWeek. The gated period's
+	// Monday weeks are taken in order and joined into blocks of at least
+	// MinWeeklyCohort acquisitions (a short remainder joins the last
+	// block); no block may have a severe-delay rate above
+	// MaxWeeklySevereRate. Fewer acquisitions in the whole period than
+	// the minimum: insufficient. A severe delay must then come strictly
+	// before the absolute limit.
+	MaxWeeklySevereRate map[string]float64 `json:"maxWeeklySevereRate,omitempty"`
+	MinWeeklyCohort     map[string]int64   `json:"minWeeklyCohort,omitempty"`
+	// LostDemand (modified option B): when set, lost and left orders leave
+	// the timeliness cohorts (counted apart as lost) and the demand the
+	// candidate leaves unimaged is gated against the paired baseline's
+	// (lostDemandGates).
+	LostDemand *LostDemand `json:"lostDemand,omitempty"`
+}
+
+// LostDemand is the paired non-deterioration gate on unimaged demand: of
+// the eligible orders (received after the takeover, wanted in the gated
+// period), those lost, left or ended by the patient. Seeds are paired only
+// where the candidate's eligible demand is the baseline's, order for order
+// (receipt and wanted times, priority, modality, walk-in); then the
+// one-sided upper confidence bound of the pooled increase must not exceed
+// MaxIncrease. Unmatched demand on any seed, or fewer than MinCohort
+// matched orders, is insufficient.
+type LostDemand struct {
+	MaxIncrease map[string]float64 `json:"maxIncrease"`
+	Confidence  float64            `json:"confidence"`
+	MinCohort   map[string]int64   `json:"minCohort"`
 }
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -380,11 +412,42 @@ func (c *Clinical) validate(p *Policy) error {
 	// settlementDays past the horizon, so a study due or an order wanted by
 	// the horizon is decided against any limit no longer than that.
 	decided := int64(p.Finance.SettlementDays) * 1440
+	weekly := c.MaxWeeklySevereRate != nil
+	switch {
+	case c.MaxWaitReportOnly && (len(c.MaxWaitMin) > 0 || c.MaxWaitAbsolute):
+		return fmt.Errorf("clinical maxWaitReportOnly: no maxWaitMin and no absolute maximum wait")
+	case weekly && len(c.MaxSeverePerWeek) > 0:
+		return fmt.Errorf("clinical maxWeeklySevereRate replaces maxSeverePerWeek: give one")
+	}
 	for _, q := range Priorities {
-		for name, v := range map[string]int64{"absoluteMaxPastDueMin": c.AbsoluteMaxPastDueMin[q], "severeAfterDueMin": c.SevereAfterDueMin[q],
-			"accessLimitMin": c.AccessLimitMin[q], "maxWaitMin": c.MaxWaitMin[q]} {
+		limits := map[string]int64{"absoluteMaxPastDueMin": c.AbsoluteMaxPastDueMin[q], "severeAfterDueMin": c.SevereAfterDueMin[q],
+			"accessLimitMin": c.AccessLimitMin[q]}
+		if !c.MaxWaitReportOnly {
+			limits["maxWaitMin"] = c.MaxWaitMin[q]
+		}
+		for name, v := range limits {
 			if v <= 0 || v > decided {
 				return fmt.Errorf("clinical %s.%s %d: positive and at most the %d minutes observed past the horizon", name, q, v, decided)
+			}
+		}
+		if weekly {
+			r := c.MaxWeeklySevereRate[q]
+			if err := wholeBP("clinical maxWeeklySevereRate."+q, r); err != nil {
+				return err
+			}
+			if r <= 0 || r >= 1 || c.MinWeeklyCohort[q] <= 0 {
+				return fmt.Errorf("clinical %s: maxWeeklySevereRate in (0, 1) and a positive minWeeklyCohort", q)
+			}
+			if c.SevereAfterDueMin[q] >= c.AbsoluteMaxPastDueMin[q] {
+				return fmt.Errorf("clinical %s: a severe delay (%d min) must be defined apart from, and before, the absolute limit (%d min)", q, c.SevereAfterDueMin[q], c.AbsoluteMaxPastDueMin[q])
+			}
+		}
+		if ld := c.LostDemand; ld != nil {
+			if err := wholeBP("clinical lostDemand.maxIncrease."+q, ld.MaxIncrease[q]); err != nil {
+				return err
+			}
+			if ld.MaxIncrease[q] < 0 || ld.MaxIncrease[q] >= 1 || ld.MinCohort[q] <= 0 {
+				return fmt.Errorf("clinical lostDemand %s: maxIncrease in [0, 1) and a positive minCohort", q)
 			}
 		}
 		if c.MaxSeverePerWeek[q] < 0 || c.MinAccessCohort[q] <= 0 {
@@ -398,13 +461,21 @@ func (c *Clinical) validate(p *Policy) error {
 				return fmt.Errorf("clinical %s.%s %v: a fraction", name, q, f)
 			}
 		}
-		if c.SevereAfterDueMin[q] > c.AbsoluteMaxPastDueMin[q] || c.AccessLimitMin[q] > c.MaxWaitMin[q] {
+		if c.SevereAfterDueMin[q] > c.AbsoluteMaxPastDueMin[q] || (!c.MaxWaitReportOnly && c.AccessLimitMin[q] > c.MaxWaitMin[q]) {
 			return fmt.Errorf("clinical %s: a severe delay must come before the absolute limit, timely access before the maximum wait", q)
 		}
 	}
 	a := c.AbsoluteMaxPastDueMin
 	if a["urgent"] > a["soon"] || a["soon"] > a["routine"] {
 		return fmt.Errorf("clinical absolute limits must not allow a more urgent priority a longer delay: %v", a)
+	}
+	if ld := c.LostDemand; ld != nil {
+		if err := wholeBP("clinical lostDemand.confidence", ld.Confidence); err != nil {
+			return err
+		}
+		if ld.Confidence <= 0.5 || ld.Confidence >= 1 {
+			return fmt.Errorf("clinical lostDemand.confidence %v: in (0.5, 1)", ld.Confidence)
+		}
 	}
 	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
 		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)

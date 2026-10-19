@@ -2,7 +2,9 @@ package eval
 
 import (
 	"cmp"
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand/v2"
 	"os"
@@ -215,7 +217,12 @@ type ocFidelity struct {
 	ImgCap       []ocCap `json:"imagingCapacity,omitempty"`
 	ImgErode     ocErode `json:"imagingErosion,omitzero"`
 	Worklist     string  `json:"worklist,omitempty"` // "": urgent_then_fifo; "strict": urgent, soon, routine
+	// Takeover: the takeover instant (0: t0); fidAlignedTakeover aligns the
+	// evaluator's weeks with the synthetic calendar's.
+	Takeover int64 `json:"takeoverSec,omitempty"`
 }
+
+func (q ocFidelity) origin() int64 { return cmp.Or(q.Takeover, t0) }
 
 const fidWarmup = 181
 
@@ -240,7 +247,18 @@ func fidWeekday(d int) int {
 	return (int(date.AddDays(int64(d)).Weekday()) + 6) % 7
 }
 
-func fidMidnight(d int) int64 { return t0 - 6*hour + int64(d)*daySec }
+func fidMidnight(d int) int64 { return fidMidnightAt(t0, d) }
+
+// fidMidnightAt: day d's midnight for a takeover (06:00 on day 0) at o.
+func fidMidnightAt(o int64, d int) int64 { return o - 6*hour + int64(d)*daySec }
+
+// fidAlignedTakeover is a takeover instant at 06:00 on a day the
+// evaluator's Monday-based weeks (floorDiv(sec/day + 3, 7)) count as a
+// Tuesday, as the synthetic calendar's takeover date is: with it the
+// evaluator's weeks are the synthetic calendar's weeks. t0 (1e9 s) falls
+// in an evaluator week that starts on the synthetic Wednesday at about
+// 04:13.
+const fidAlignedTakeover = int64(11576)*86400 + 6*3600
 
 // rotaWeekOf: 0 in rota week A (the scenario's rotaWeekA, Mon
 // 2026-10-12, and every second week), 1 in week B.
@@ -261,6 +279,12 @@ func rotaWeekOf(d int) int {
 //   - "" (stable): the satgap practice and weekend reading, a reader
 //     Saturday 14:00–18:00 and Sunday 08:00–12:00.
 func ocReaders(p *simProfileData, coverage string, from, to int) []ocReader {
+	return ocReadersAt(p, coverage, from, to, t0)
+}
+
+// ocReadersAt is ocReaders for a takeover at o.
+func ocReadersAt(p *simProfileData, coverage string, from, to int, o int64) []ocReader {
+	fidMidnight := func(d int) int64 { return fidMidnightAt(o, d) }
 	var rs []ocReader
 	for _, r := range p.Readers {
 		x := ocReader{general: true, core: true}
@@ -351,12 +375,24 @@ type fidStudy struct {
 	dur      float64 // read time drawn (seconds, unscaled)
 }
 
-func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
+// record is recordPaired with one stream for demand and everything else.
+func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) { return q.recordPaired(r, r, pol) }
+
+// recordPaired builds the practice's record with the demand (order
+// arrivals, priorities, receipt times, wanted times and day factors)
+// drawn from rd and everything else (booking choices, cancellations,
+// modalities, documentation and read times) from rb. With rd and rb the
+// same stream it is the committed model's record; with a separate demand
+// stream, practices that differ in capacity receive the same eligible
+// demand, as the simulator's do (TestDemandExogenousAcrossPlans), so the
+// lost-demand gate pairs them.
+func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	p, err := simProfile()
 	if err != nil {
 		panic(err)
 	}
-	start := t0
+	start := q.origin()
+	fidMidnight := func(d int) int64 { return fidMidnightAt(start, d) }
 	date, _ := simtime.ParseDate(t0Date)
 	rec := &Record{Schema: RecordSchema, Plan: "P", Engine: "oc", ScenarioFingerprint: "fp", TATTargetMin: testTargets,
 		TakeoverSec: start, TakeoverDate: t0Date, HorizonEndSec: start + 150*daySec, AppointmentsSHA256: "oc"}
@@ -451,7 +487,7 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 		wd := fidWeekday(day)
 		if clock == 0 && q.DayCV > 0 {
 			k := 1 / (q.DayCV * q.DayCV)
-			dayFactor = r.gamma(k) / k
+			dayFactor = rd.gamma(k) / k
 		}
 		if clock < 7 || clock >= 19 {
 			continue
@@ -460,8 +496,8 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 		if q.Seasonal {
 			lam *= ocSeason[dt.Month-1]
 		}
-		for range r.poisson(lam) {
-			u := r.Float64()
+		for range rd.poisson(lam) {
+			u := rd.Float64()
 			k := 2
 			switch {
 			case u < mix[0]:
@@ -470,13 +506,13 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 				k = 1
 			}
 			pri := Priorities[k]
-			recv := at + int64(r.Float64()*3600)
+			recv := at + int64(rd.Float64()*3600)
 			var lead float64
 			switch k {
 			case 1:
-				lead = 2 * r.Float64()
+				lead = 2 * rd.Float64()
 			case 2:
-				lead = leadDays(r.Float64())
+				lead = leadDays(rd.Float64())
 			}
 			wantDay := day + int(lead)
 			wanted := max(recv, fidMidnight(wantDay))
@@ -504,13 +540,13 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 				out, res = OutLost, recv
 			} else {
 				booked[bookDay+w]++
-				j := cands[r.IntN(len(cands))]
+				j := cands[rb.IntN(len(cands))]
 				free[bookDay+w][j] = false
 				appt := slotTimes[bookDay+w][j]
 				o.FirstApptSec = appt
 				switch {
-				case k == 2 && r.Float64() < 0.05:
-					c := recv + int64(r.Float64()*float64(appt-recv))
+				case k == 2 && rb.Float64() < 0.05:
+					c := recv + int64(rb.Float64()*float64(appt-recv))
 					if c <= E {
 						out, res = OutPatient, c
 					}
@@ -547,7 +583,7 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 		for _, m := range simModalities {
 			tot += p.Modality[q][m]
 		}
-		u := r.Float64() * float64(tot)
+		u := rb.Float64() * float64(tot)
 		mod := simModalities[len(simModalities)-1]
 		for _, m := range simModalities {
 			if u -= float64(p.Modality[q][m]); u < 0 {
@@ -555,9 +591,9 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) {
 				break
 			}
 		}
-		entered := a.at + int64(tableDraw(p.EntrySec[mod], r.Float64()))
+		entered := a.at + int64(tableDraw(p.EntrySec[mod], rb.Float64()))
 		rec.Studies = append(rec.Studies, Study{ID: "s", Priority: q, Modality: mod, AcquiredSec: a.at, EnteredSec: entered})
-		info = append(info, fidStudy{mod, tableDraw(p.ReadSec[mod], r.Float64())})
+		info = append(info, fidStudy{mod, tableDraw(p.ReadSec[mod], rb.Float64())})
 	}
 	// Studies enter the worklist in entry order.
 	order := make([]int, len(rec.Studies))
@@ -603,7 +639,7 @@ func (q ocFidelity) read(p *simProfileData, rec *Record, info []fidStudy, order 
 		xs := p.ReadSec[m]
 		maxRead[m] = float64(xs[len(xs)-1])
 	}
-	rs := ocReaders(p, q.Coverage, from, to)
+	rs := ocReadersAt(p, q.Coverage, from, to, q.origin())
 	type state struct {
 		bi       int   // current block
 		readFrom int64 // when the reader may next claim
@@ -665,7 +701,7 @@ func (q ocFidelity) read(p *simProfileData, rec *Record, info []fidStudy, order 
 			next++
 		}
 		b := rs[i].blocks[sts[i].bi]
-		day := int(floorDiv(t-(t0-6*hour), daySec))
+		day := int(floorDiv(t-(q.origin()-6*hour), daySec))
 		f := 1 / max(0.05, capFactor(day, q.ReadCap, q.ReadErode))
 		pick := -1
 		fits := func(s int) bool {
@@ -811,7 +847,7 @@ func ocFidExtraOf(q ocFidelity, r *Record, busy fidBusy) ocFidExtra {
 	x := ocFidExtra{scale: q.scale(p)}
 	start, H := r.TakeoverSec, r.HorizonEndSec
 	late := H - 30*daySec
-	rs := ocReaders(p, q.Coverage, 0, 151)
+	rs := ocReadersAt(p, q.Coverage, 0, 151, r.TakeoverSec)
 	var blk, blkLate, cblk, cblkLate float64
 	for _, rd := range rs {
 		if !rd.general {
@@ -858,7 +894,7 @@ func ocFidExtraOf(q ocFidelity, r *Record, busy fidBusy) ocFidExtra {
 			rdLate += busy.general[i]
 			crLate += busy.core[i]
 		}
-		d := int(floorDiv(s.AcquiredSec-(t0-6*hour), daySec))
+		d := int(floorDiv(s.AcquiredSec-(r.TakeoverSec-6*hour), daySec))
 		wd := fidWeekday(d)
 		x.weekdayShare[wd]++
 		k := slices.Index(Priorities, s.Priority)
@@ -866,7 +902,7 @@ func ocFidExtraOf(q ocFidelity, r *Record, busy fidBusy) ocFidExtra {
 		if fin := cmp.Or(s.FinalSec, r.ObservedUntilSec); fin-s.AcquiredSec > target(r, s.Priority) {
 			x.breach[k]++
 		}
-		if s.Priority == "urgent" && wd == 5 && (s.AcquiredSec-fidMidnight(d)) >= 14*hour {
+		if s.Priority == "urgent" && wd == 5 && (s.AcquiredSec-fidMidnightAt(r.TakeoverSec, d)) >= 14*hour {
 			fin := s.FinalSec
 			if fin == 0 {
 				fin = r.ObservedUntilSec
@@ -1331,5 +1367,108 @@ func TestClinicalOCFidelity(t *testing.T) {
 	}
 	if err := os.WriteFile(out, append(raw, '\n'), 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// The fidelity model's default records are those of the committed run
+// (oc-v0.2-eval-5-exploratory-fidelity.json, 18b21d6): digests of sampled
+// records on its stream, taken before the takeover instant became a
+// field.
+func TestOCFidelityModelUnchanged(t *testing.T) {
+	if testing.Short() {
+		t.Skip("short")
+	}
+	want := map[string][2]string{
+		"A85":  {"6b3024e4bd64c9d983ff815ed7a7997c889c377ad4b42e05b74c643d33c2425d", "2c497a4e121e0d1b30f3ac7500e6379d083bf185745dbfdf7f70e0f1fc14c25e"},
+		"D-85": {"2adb4b21a3dd0bbf5f2e536105e516376ae46e60c90fc964071460deb2a1f649", "3aa3ecbb62b78aac3b354553fc2501f46f7869e36e469d44638bddc93a83c00b"},
+		"Wg92": {"e504f5fd00325d0454a5c906e45f56016f82c73a006c0790da111513841f212e", "23cee2e858b06eedb6ce5133e590bcd7537c0fd5b85b1bb2c73981f0da684699"},
+	}
+	base := ocClinicalPolicy(t, ocBundles[1])
+	for k, def := range ocFidelityScenarios() {
+		w, ok := want[def.name]
+		if !ok {
+			continue
+		}
+		for i := range 2 {
+			rec, _ := def.q.record(ocRNG{rand.New(rand.NewPCG(20261103, uint64(100000*k+i)))}, base)
+			raw, _ := json.Marshal(struct {
+				R *Record
+				B fidBusy
+			}{rec, fidBusy{}})
+			if got := fmt.Sprintf("%x", sha256.Sum256(raw)); got != w[i] {
+				t.Errorf("%s seed %d: record digest %s, the committed run's %s", def.name, i, got, w[i])
+			}
+		}
+	}
+}
+
+// The aligned takeover is 06:00 on an evaluator Tuesday, so that the
+// evaluator's Monday weeks start at the synthetic calendar's Monday
+// midnight; t0's start on the synthetic Wednesday. A practice at the
+// aligned takeover is the same practice shifted in time.
+func TestOCFidelityAlignedWeeks(t *testing.T) {
+	week := func(sec int64) int64 { return floorDiv(sec/daySec+3, 7) }
+	o := fidAlignedTakeover
+	if o%daySec != 6*hour || floorDiv(o/daySec+3, 7)*7-3 != o/daySec-1 {
+		t.Fatalf("aligned takeover %d is not an evaluator Tuesday 06:00", o)
+	}
+	mon := fidMidnightAt(o, 6) // day 0 Tuesday, day 6 Monday
+	if week(mon) == week(mon-1) || week(mon) != week(mon+7*daySec-1) {
+		t.Error("the aligned evaluator week does not run Monday to Sunday")
+	}
+	mon0 := fidMidnight(6)
+	if week(mon0) != week(mon0-1) {
+		t.Error("t0's evaluator weeks unexpectedly start on Monday")
+	}
+	base := ocClinicalPolicy(t, ocBundles[1])
+	q := ocFidelity{Util: 0.85}
+	a, _ := q.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, base)
+	q.Takeover = o
+	b, _ := q.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, base)
+	shift := o - t0
+	if len(a.Studies) != len(b.Studies) || len(a.Orders) != len(b.Orders) {
+		t.Fatalf("studies %d / %d, orders %d / %d", len(a.Studies), len(b.Studies), len(a.Orders), len(b.Orders))
+	}
+	for i := range a.Studies {
+		if b.Studies[i].AcquiredSec-a.Studies[i].AcquiredSec != shift || (a.Studies[i].FinalSec != 0 && b.Studies[i].FinalSec-a.Studies[i].FinalSec != shift) {
+			t.Fatalf("study %d not shifted by the takeover", i)
+		}
+	}
+}
+
+// With a demand stream of their own, a practice and the same practice
+// with 60% less imaging capacity from day 30 (each with the same booking
+// stream, as two plans on one seed) receive the same eligible demand: the
+// lost-demand gate pairs every seed, and sees the cut's lost orders.
+func TestOCFidelityPairedDemand(t *testing.T) {
+	if testing.Short() {
+		t.Skip("short")
+	}
+	pol := ocClinicalPolicy(t, ocBundles[1])
+	cand, _ := candidatePolicy(t)
+	a, b := ocFidelity{Util: 0.85}, ocFidelity{Util: 0.85, ImgCap: []ocCap{{From: 30, Factor: 0.4}}}
+	var ra, rb []Record
+	for i := range 3 {
+		demand := func() ocRNG { return ocRNG{rand.New(rand.NewPCG(1, uint64(2*i)))} }
+		x, _ := a.recordPaired(demand(), ocRNG{rand.New(rand.NewPCG(1, uint64(2*i+1)))}, pol)
+		y, _ := b.recordPaired(demand(), ocRNG{rand.New(rand.NewPCG(1, uint64(2*i+1)))}, pol)
+		x.Seed, y.Seed = int64(i), int64(i)
+		ra, rb = append(ra, *x), append(rb, *y)
+	}
+	for _, g := range lostDemandGates(cand, rb, ra) {
+		if g.MatchedSeeds != 3 || len(g.UnmatchedSeeds) != 0 {
+			t.Fatalf("%s: not paired: %+v", g.Priority, g)
+		}
+		if g.Priority == "routine" && (g.Candidate.Lost <= g.Baseline.Lost || g.Status != Fail) {
+			t.Errorf("routine: the imaging cut's losses not seen: %+v", g)
+		}
+	}
+	// One stream for both (the committed model's): the cut changes the
+	// booking draws and with them the demand.
+	x, _ := a.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, pol)
+	y, _ := b.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, pol)
+	x.Seed, y.Seed = 0, 0
+	if gs := lostDemandGates(cand, []Record{*y}, []Record{*x}); gs[2].MatchedSeeds != 0 {
+		t.Errorf("one stream: demand unexpectedly matched")
 	}
 }

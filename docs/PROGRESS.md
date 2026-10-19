@@ -7,6 +7,75 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4c — clinical access and weekly severity gates (0.2.0-dev.17)
+
+The owner's modified option B and the volume-normalized weekly
+severity, in the v5 evaluator
+(`docs/calibration/clinical-5c4c/access-gates.md`).
+
+* **Not frozen:** the candidate policy is still a proposal.
+* **v0.2-eval-4 is byte-identical** (`TestV4Neutrality`).
+* **Earlier behaviour kept:** v5 policies without the new fields (every
+  calibration harness) are unchanged, and the committed calibration runs
+  reproduce (`TestOCFidelityModelUnchanged`).
+* **Registers 0.2.0-dev.16** for replay (batch mode `v0.2_dev16`,
+  fixture `mini-seed45-dev16`).
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream.
+
+**The rules:**
+
+* **Gate A (timeliness):** served, open and late-cancelled eligible
+  orders, from the original wanted time, at ≥ 95% (urgent 48 h; soon 7
+  and routine 30 days, provisional). Lost and left orders are counted
+  apart.
+* **Gate B (lost demand):** unimaged demand (lost, left or ended by the
+  patient) against the no-action baseline, per priority.
+  * Paired only on identical eligible demand: identity by receipt and
+    wanted times, priority, modality and walk-in. The simulator's demand
+    is shown exogenous across plans (`TestDemandExogenousAcrossPlans`).
+  * The exact one-sided 95% bound of the pooled increase must be at most
+    2 points.
+  * Unmatched demand is insufficient (NO GO).
+  * It is a non-deterioration gate: absolute fractions are always
+    reported, and adequacy is not certified.
+* **Weekly severity:** severe-delay rate ≤ 5% in blocks of Monday weeks
+  of at least 20, 40 or 100 acquisitions; low volume is pooled, a short
+  remainder is joined, and too few is insufficient.
+  * Severity is defined apart from the absolute limits: urgent 12 h,
+    soon 24 h, routine 72 h past due.
+* **Maximum wait:** reported only.
+
+**Synthetic model:**
+
+* the takeover instant is a field, and the aligned takeover gives
+  calendar evaluator weeks (the old ones ran Wednesday to Wednesday);
+* demand can be drawn from its own stream, so that paired practices
+  share it.
+
+**Tests:**
+
+* cases C1–C10 and C7a (lost, delayed, loss against timeliness,
+  cancellation manipulation, rebooking, horizon, low-volume weeks,
+  overlapping failures, missing baseline, noncomparable demand);
+* the updated witnesses W1–W12;
+* validation;
+* 10 of 10 mutations caught.
+
+**No-action simulator:**
+
+* Gate A passes the baseline: urgent 0.993, soon 0.965, routine 0.979.
+* Gate B reports 65% / 38% / 14% lost or left, not certified.
+* The weekly 5% rule fails every seed on soon (weekend concentration).
+
+**Next:**
+
+* the reserved protocol is complete but not to be run;
+* the Astra High review package is prepared;
+* the owner approvals are listed in access-gates §7.
+
+---
+
 ## V0.2 Slice 5C.4b closure — clinical acceptance design (0.2.0-dev.16)
 
 The final specification step before v0.2-eval-5

@@ -35,11 +35,14 @@ type DelayCohort struct {
 // without being imaged (out of the denominator); undecided, open and
 // within the limit when observation ended.
 type AccessCohort struct {
-	Wanted         int64 `json:"wanted"`
-	Timely         int64 `json:"timely"`
-	Untimely       int64 `json:"untimely"`
-	Withdrawn      int64 `json:"withdrawn"`
-	Undecided      int64 `json:"undecided"`
+	Wanted    int64 `json:"wanted"`
+	Timely    int64 `json:"timely"`
+	Untimely  int64 `json:"untimely"`
+	Withdrawn int64 `json:"withdrawn"`
+	Undecided int64 `json:"undecided"`
+	// Lost: lost and left orders, apart from the timeliness count when
+	// the policy gates lost demand against the baseline (lostDemand).
+	Lost           int64 `json:"lost,omitempty"`
 	TimelyFraction Ratio `json:"timelyFraction"` // timely ÷ (timely + untimely); undefined if undecided
 	// MaxWaitMin: the longest wait of a served or open order (open: to the
 	// end of observation); WaitMin, their distribution.
@@ -77,6 +80,25 @@ type ClinicalMeasures struct {
 	// the gated period, new or inherited (the maximum-wait limit's value).
 	MaxWaitGatedMin map[string]int64 `json:"maxWaitGatedMin"`
 	Absolute        []AbsoluteCount  `json:"absolute"`
+	// WeeklySevere: the volume-normalized weekly severity
+	// (maxWeeklySevereRate), by priority.
+	WeeklySevere map[string]*WeeklySevere `json:"weeklySevere,omitempty"`
+}
+
+// WeeklySevere is a priority's weekly severity: the gated period's Monday
+// weeks joined in order into blocks of at least minWeeklyCohort
+// acquisitions (a short remainder joins the last block), each block's
+// severe-delay rate, the worst block, and how many exceed the rate.
+type WeeklySevere struct {
+	Acquired      int64 `json:"acquired"`
+	Severe        int64 `json:"severe"`
+	Blocks        int   `json:"blocks"`
+	Failing       int   `json:"failingBlocks"`
+	Insufficient  bool  `json:"insufficient"` // fewer acquired in the period than the minimum
+	WorstFirstDay int64 `json:"worstFirstDay"`
+	WorstWeeks    int   `json:"worstWeeks"`
+	WorstAcquired int64 `json:"worstAcquired"`
+	WorstSevere   int64 `json:"worstSevere"`
 }
 
 // delayAt is a study's delay past due at the end of observation end:
@@ -140,7 +162,7 @@ func measureClinical(p *Policy, r *Record, ws map[string][2]int64, end *Capture)
 			if o.ReceivedSec <= t0 || o.WantedSec <= b[0] || o.WantedSec > b[1] {
 				continue
 			}
-			classifyAccess(m.Access[w][o.Priority], o, end.OrderOutcomes[i], o.WantedSec, c.AccessLimitMin[o.Priority]*60, E)
+			c.classify(m.Access[w][o.Priority], o, end.OrderOutcomes[i], o.WantedSec, E)
 		}
 		for _, q := range Priorities {
 			a := m.Access[w][q]
@@ -166,7 +188,7 @@ func measureClinical(p *Policy, r *Record, ws map[string][2]int64, end *Capture)
 			from = max(from, t0)
 		}
 		a := m.InheritedAccess[o.Priority]
-		classifyAccess(a, o, end.OrderOutcomes[i], from, c.AccessLimitMin[o.Priority]*60, E)
+		c.classify(a, o, end.OrderOutcomes[i], from, E)
 		m.MaxWaitGatedMin[o.Priority] = max(m.MaxWaitGatedMin[o.Priority], a.MaxWaitMin)
 	}
 	for _, q := range Priorities {
@@ -187,6 +209,9 @@ func measureClinical(p *Policy, r *Record, ws map[string][2]int64, end *Capture)
 			}
 			weeks[s.Priority][floorDiv(s.AcquiredSec/daySec+3, 7)]++
 		}
+	}
+	if c.MaxWeeklySevereRate != nil {
+		m.WeeklySevere = weeklySevere(c, r, E)
 	}
 	for _, q := range Priorities {
 		for _, k := range slices.Sorted(maps.Keys(weeks[q])) {
@@ -231,6 +256,102 @@ func measureClinical(p *Policy, r *Record, ws map[string][2]int64, end *Capture)
 		}
 	}
 	return m
+}
+
+// classify adds order o to a under the policy: with lostDemand, a lost or
+// left order is counted apart (gated against the baseline instead);
+// otherwise classifyAccess.
+func (c *Clinical) classify(a *AccessCohort, o *Order, out string, from, E int64) {
+	if c.LostDemand != nil && (out == OutLost || out == OutLeft) {
+		a.Wanted++
+		a.Lost++
+		return
+	}
+	classifyAccess(a, o, out, from, c.AccessLimitMin[o.Priority]*60, E)
+}
+
+// weeklySevere measures the volume-normalized weekly severity of every
+// priority: studies acquired in the gated period by Monday week, joined
+// into blocks of at least minWeeklyCohort acquisitions.
+func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
+	t0, H := r.TakeoverSec, r.HorizonEndSec
+	type wk struct{ acq, sev int64 }
+	weeks := map[string]map[int64]*wk{}
+	for i := range r.Studies {
+		s := &r.Studies[i]
+		if s.AcquiredSec <= t0 || s.AcquiredSec > H {
+			continue
+		}
+		k := floorDiv(s.AcquiredSec/daySec+3, 7)
+		if weeks[s.Priority] == nil {
+			weeks[s.Priority] = map[int64]*wk{}
+		}
+		w := weeks[s.Priority][k]
+		if w == nil {
+			w = &wk{}
+			weeks[s.Priority][k] = w
+		}
+		w.acq++
+		if l, _ := delayAt(s, s.AcquiredSec+target(r, s.Priority), E); c.severe(s.Priority, l) {
+			w.sev++
+		}
+	}
+	out := map[string]*WeeklySevere{}
+	for _, q := range Priorities {
+		ws := &WeeklySevere{}
+		out[q] = ws
+		type block struct {
+			first    int64
+			n        int
+			acq, sev int64
+		}
+		var blocks []block
+		var cur block
+		minCohort := c.MinWeeklyCohort[q]
+		for _, k := range slices.Sorted(maps.Keys(weeks[q])) {
+			w := weeks[q][k]
+			ws.Acquired += w.acq
+			ws.Severe += w.sev
+			if cur.n == 0 {
+				cur.first = k
+			}
+			cur.n++
+			cur.acq += w.acq
+			cur.sev += w.sev
+			if cur.acq >= minCohort {
+				blocks = append(blocks, cur)
+				cur = block{}
+			}
+		}
+		switch {
+		case cur.n > 0 && len(blocks) > 0:
+			last := &blocks[len(blocks)-1]
+			last.n += cur.n
+			last.acq += cur.acq
+			last.sev += cur.sev
+		case cur.n > 0:
+			blocks = append(blocks, cur)
+		}
+		ws.Insufficient = ws.Acquired < minCohort
+		ws.Blocks = len(blocks)
+		bpRate := bp(c.MaxWeeklySevereRate[q])
+		worst := -1
+		for i, b := range blocks {
+			if rateAbove(b.sev, b.acq, bpRate) {
+				ws.Failing++
+			}
+			// The worst block: the highest rate (exact, by cross-products).
+			if worst < 0 || b.sev*blocks[worst].acq > blocks[worst].sev*b.acq {
+				worst = i
+			}
+		}
+		if worst >= 0 {
+			b := blocks[worst]
+			// Week b.first's Monday is local day 7k − 3 (clusterEffects).
+			ws.WorstFirstDay, ws.WorstWeeks, ws.WorstAcquired, ws.WorstSevere = 7*b.first-3-t0/daySec, b.n, b.acq, b.sev
+		}
+	}
+	return out
 }
 
 // classifyAccess adds order o (outcome out at the end of observation E)
@@ -341,16 +462,31 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 	}
 	for _, q := range Priorities {
 		g := SeedGate{Gate: GateSevereWeek, Window: WinGated, Stratum: q, Threshold: float64(c.MaxSeverePerWeek[q]), PerSeed: true, Status: Pass}
-		if cm == nil {
+		switch {
+		case cm == nil:
 			g.Status, g.Reason, g.Undecided = Insufficient, "not measured", true
-		} else {
+		case c.MaxWeeklySevereRate != nil:
+			ws := cm.WeeklySevere[q]
+			g.Threshold = c.MaxWeeklySevereRate[q]
+			g.Num, g.Den = ws.WorstSevere, ws.WorstAcquired
+			if ws.WorstAcquired > 0 {
+				g.Value = float64(ws.WorstSevere) / float64(ws.WorstAcquired)
+			}
+			switch {
+			case ws.Insufficient:
+				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d acquired in the gated period, fewer than %d", ws.Acquired, c.MinWeeklyCohort[q])
+			case ws.Failing > 0:
+				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d weekly blocks above the rate; worst %d of %d in %d weeks from day %d",
+					ws.Failing, ws.Blocks, ws.WorstSevere, ws.WorstAcquired, ws.WorstWeeks, ws.WorstFirstDay)
+			}
+		default:
 			g.Value, g.Num = float64(cm.WorstWeekSevere[q]), cm.WorstWeekSevere[q]
 			if cm.WorstWeekSevere[q] > c.MaxSeverePerWeek[q] {
 				g.Status, g.Reason = Fail, fmt.Sprintf("%d in the week from day %d", cm.WorstWeekSevere[q], cm.WorstWeekFirstDay[q])
 			}
 		}
 		out = append(out, g)
-		if c.MaxWaitAbsolute {
+		if c.MaxWaitAbsolute || c.MaxWaitReportOnly {
 			continue
 		}
 		g = SeedGate{Gate: GateMaxWait, Window: WinGated, Stratum: q, Threshold: float64(c.MaxWaitMin[q]), PerSeed: true, Status: Pass}

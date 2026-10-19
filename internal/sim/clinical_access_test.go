@@ -33,6 +33,7 @@ type accessCell struct {
 	Untimely  int64   `json:"untimely"`
 	Withdrawn int64   `json:"withdrawn"`
 	Undecided int64   `json:"undecided"`
+	Lost      int64   `json:"lost,omitempty"` // lost and left, apart (policies gating lost demand)
 	Fraction  float64 `json:"timelyFraction"`
 	// The untimely orders by what happened to them.
 	UntimelyBy map[string]int64 `json:"untimelyByOutcome"`
@@ -83,10 +84,12 @@ type accessSeed struct {
 	// The candidate's reporting-delay measures: absolute violations and
 	// the worst past due (minutes), the severe-delay rate by per-seed
 	// window, and the worst week's severe count.
-	AbsoluteViolations map[string]int64              `json:"absoluteViolations"`
-	WorstPastDueMin    map[string]int64              `json:"worstPastDueMin"`
-	SevereRate         map[string]map[string]float64 `json:"severeRateByWindow"`
-	WorstWeekSevere    map[string]int64              `json:"worstWeekSevere"`
+	AbsoluteViolations map[string]int64 `json:"absoluteViolations"`
+	// The volume-normalized weekly severity (when the policy has it).
+	WeeklySevere    map[string]*eval.WeeklySevere `json:"weeklySevere,omitempty"`
+	WorstPastDueMin map[string]int64              `json:"worstPastDueMin"`
+	SevereRate      map[string]map[string]float64 `json:"severeRateByWindow"`
+	WorstWeekSevere map[string]int64              `json:"worstWeekSevere"`
 }
 
 // openHours: the scenario's imaging hours, minutes after midnight, by
@@ -287,14 +290,16 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 		for _, lim := range grid[q] {
 			c := *cand.Clinical
 			c.AccessLimitMin = maps.Clone(c.AccessLimitMin)
-			c.MaxWaitMin = maps.Clone(c.MaxWaitMin)
 			c.AccessLimitMin[q] = lim
-			c.MaxWaitMin[q] = max(c.MaxWaitMin[q], lim)
+			if !c.MaxWaitReportOnly {
+				c.MaxWaitMin = maps.Clone(c.MaxWaitMin)
+				c.MaxWaitMin[q] = max(c.MaxWaitMin[q], lim)
+			}
 			p := *cand
 			p.Clinical = &c
 			m := eval.Measure(&p, &rec)
 			a := m.Clinical.Access[eval.WinGated][q]
-			cell := accessCell{LimitMin: lim, Wanted: a.Wanted, Timely: a.Timely, Untimely: a.Untimely, Withdrawn: a.Withdrawn, Undecided: a.Undecided,
+			cell := accessCell{LimitMin: lim, Wanted: a.Wanted, Timely: a.Timely, Untimely: a.Untimely, Withdrawn: a.Withdrawn, Undecided: a.Undecided, Lost: a.Lost,
 				Fraction: float64(a.Timely) / float64(max(1, a.Timely+a.Untimely)), UntimelyBy: map[string]int64{}}
 			// The untimely orders by outcome (the evaluator's rule restated:
 			// served late, open past the limit, patient after the limit, lost,
@@ -311,6 +316,8 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 					cell.UntimelyBy["openPastLimit"]++
 				case out == eval.OutPatient && cmpOr(o.ResolvedSec, E) >= o.WantedSec+l:
 					cell.UntimelyBy["patientAfterLimit"]++
+				case (out == eval.OutLost || out == eval.OutLeft) && cand.Clinical.LostDemand != nil:
+					// counted apart (Lost), gated against the baseline
 				case out == eval.OutLost:
 					cell.UntimelyBy["lost"]++
 				case out == eval.OutLeft:
@@ -341,6 +348,7 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 			x.SevereRate[q][w] = float64(dc.Severe) / float64(max(1, dc.Acquired))
 		}
 	}
+	x.WeeklySevere = m.Clinical.WeeklySevere
 	for _, a := range m.Clinical.Absolute {
 		if a.Limit == "pastDue" {
 			x.AbsoluteViolations[a.Priority], x.WorstPastDueMin[a.Priority] = a.Violations, a.WorstMin
