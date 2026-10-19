@@ -59,7 +59,13 @@ type Study struct {
 
 // Order is one referral or walk-in.
 type Order struct {
-	ID          string `json:"id"`
+	ID string `json:"id"`
+	// Origin: the order's immutable demand identity (Slice 5C.4d): fixed
+	// at the order's creation from the simulator's exogenous demand key,
+	// the same for the same request under every plan on a seed. Records
+	// written before 0.2.0-dev.18 have none (lost-demand pairing then
+	// lacks evidence).
+	Origin      string `json:"origin,omitempty"`
 	Priority    string `json:"priority"`
 	Modality    string `json:"modality"`
 	WalkIn      bool   `json:"walkIn"`

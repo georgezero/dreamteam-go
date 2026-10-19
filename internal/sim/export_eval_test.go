@@ -108,6 +108,12 @@ func (w *World) newEvalRecorder(plan, planSHA256, fingerprint string, seed int64
 	return r
 }
 
+// originID is an order's demand identity for the evaluation record: its
+// origin key (day, source, hour block, index; walk-ins source −1, the
+// opening schedule day, source and block −1), fixed when the order is
+// created from the exogenous demand draws. Recording it draws nothing.
+func originID(k originKey) string { return fmt.Sprintf("%d/%d/%d/%d", k.day, k.src, k.block, k.k) }
+
 func (r *EvalRecorder) orderIndices() []int {
 	out := slices.Clone(r.inhOrders)
 	for oi := r.nOrders0; oi < len(r.w.st.dem.orders); oi++ {
@@ -406,7 +412,7 @@ func (r *EvalRecorder) Finish(lastActionSec, latestEffectSec, horizonEndSec int6
 		}
 		ds := disp[oi]
 		slices.Sort(ds)
-		rec.Orders = append(rec.Orders, eval.Order{ID: orderID(oi), Priority: o.priority.String(), Modality: st.cfg.Catalog[o.exam].Modality,
+		rec.Orders = append(rec.Orders, eval.Order{ID: orderID(oi), Origin: originID(o.key), Priority: o.priority.String(), Modality: st.cfg.Catalog[o.exam].Modality,
 			WalkIn: o.walkIn, ReceivedSec: int64(o.received), WantedSec: wanted, FirstApptSec: firstAppt[oi], ResolvedSec: resolved,
 			DisplacementSec: ds})
 	}

@@ -141,6 +141,7 @@ func compare(p *Policy, cand, ag *PlanReport, cr, ar []Record, global []string) 
 	c.CaseSelection, c.CaseSelectionStatus = caseSelection(p, cand, ag)
 	if p.Clinical != nil && p.Clinical.LostDemand != nil {
 		c.LostDemand = lostDemandGates(p, cr, ar)
+		c.Access = accessStatements(cand, c.LostDemand)
 	}
 	slices.Sort(c.Integrity)
 	c.Integrity = slices.Compact(c.Integrity)
@@ -554,4 +555,8 @@ func verdict(p *Policy, c *Comparison, cand, base *PlanReport) {
 		why = append(why, fmt.Sprintf("no T90 profit over %s (%.0f cents), whose service already passes", c.Against, t90.Mean))
 	}
 	c.Reasons = why
+	if v5 && p.Clinical.LostDemand != nil && (c.Verdict == GO || c.Verdict == CONDITIONAL) {
+		c.AccessLimitation = AccessLimitation
+		c.Reasons = append([]string{AccessLimitation}, c.Reasons...)
+	}
 }

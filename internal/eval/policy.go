@@ -12,6 +12,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"slices"
 )
@@ -254,18 +255,22 @@ type Clinical struct {
 	LostDemand *LostDemand `json:"lostDemand,omitempty"`
 }
 
-// LostDemand is the paired non-deterioration gate on unimaged demand: of
-// the eligible orders (received after the takeover, wanted in the gated
-// period), those lost, left or ended by the patient. Seeds are paired only
-// where the candidate's eligible demand is the baseline's, order for order
-// (receipt and wanted times, priority, modality, walk-in); then the
-// one-sided upper confidence bound of the pooled increase must not exceed
-// MaxIncrease. Unmatched demand on any seed, or fewer than MinCohort
-// matched orders, is insufficient.
+// LostDemand is the paired non-deterioration gate on unimaged demand
+// (lostdemand.go): of the eligible orders (received after the takeover,
+// wanted in the gated period), those lost, left or ended by the patient.
+// Seeds are paired by the orders' immutable origin; each matched seed
+// gives the candidate's unimaged fraction less the baseline's, and the
+// one-sided upper confidence bound (Method, at Confidence) of their mean
+// must not exceed MaxIncrease. Unmatched demand or missing identity on any
+// seed, a seed with fewer than MinSeedOrders matched orders, fewer than
+// MinSeeds seeds, or a design whose bound with no difference at all
+// exceeds the margin, is insufficient.
 type LostDemand struct {
-	MaxIncrease map[string]float64 `json:"maxIncrease"`
-	Confidence  float64            `json:"confidence"`
-	MinCohort   map[string]int64   `json:"minCohort"`
+	MaxIncrease   map[string]float64 `json:"maxIncrease"`
+	Confidence    float64            `json:"confidence"`
+	Method        string             `json:"method"` // betting (finite-sample) or t (approximate)
+	MinSeeds      int                `json:"minSeeds"`
+	MinSeedOrders map[string]int64   `json:"minSeedOrders"`
 }
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -432,7 +437,7 @@ func (c *Clinical) validate(p *Policy) error {
 		}
 		if weekly {
 			r := c.MaxWeeklySevereRate[q]
-			if err := wholeBP("clinical maxWeeklySevereRate."+q, r); err != nil {
+			if err := clinicalFraction("clinical maxWeeklySevereRate."+q, r, 0, 1); err != nil {
 				return err
 			}
 			if r <= 0 || r >= 1 || c.MinWeeklyCohort[q] <= 0 {
@@ -443,22 +448,19 @@ func (c *Clinical) validate(p *Policy) error {
 			}
 		}
 		if ld := c.LostDemand; ld != nil {
-			if err := wholeBP("clinical lostDemand.maxIncrease."+q, ld.MaxIncrease[q]); err != nil {
+			if err := clinicalFraction("clinical lostDemand.maxIncrease."+q, ld.MaxIncrease[q], 0, 1); err != nil {
 				return err
 			}
-			if ld.MaxIncrease[q] < 0 || ld.MaxIncrease[q] >= 1 || ld.MinCohort[q] <= 0 {
-				return fmt.Errorf("clinical lostDemand %s: maxIncrease in [0, 1) and a positive minCohort", q)
+			if ld.MaxIncrease[q] < 0 || ld.MaxIncrease[q] >= 1 || ld.MinSeedOrders[q] <= 0 {
+				return fmt.Errorf("clinical lostDemand %s: maxIncrease in [0, 1) and a positive minSeedOrders", q)
 			}
 		}
 		if c.MaxSeverePerWeek[q] < 0 || c.MinAccessCohort[q] <= 0 {
 			return fmt.Errorf("clinical %s: maxSeverePerWeek must not be negative, minAccessCohort must be positive", q)
 		}
 		for name, f := range map[string]float64{"maxSevereRate": c.MaxSevereRate[q], "minTimelyFraction": c.MinTimelyFraction[q]} {
-			if err := wholeBP("clinical "+name+"."+q, f); err != nil {
+			if err := clinicalFraction("clinical "+name+"."+q, f, 0, 1); err != nil {
 				return err
-			}
-			if f < 0 || f > 1 {
-				return fmt.Errorf("clinical %s.%s %v: a fraction", name, q, f)
 			}
 		}
 		if c.SevereAfterDueMin[q] > c.AbsoluteMaxPastDueMin[q] || (!c.MaxWaitReportOnly && c.AccessLimitMin[q] > c.MaxWaitMin[q]) {
@@ -470,17 +472,33 @@ func (c *Clinical) validate(p *Policy) error {
 		return fmt.Errorf("clinical absolute limits must not allow a more urgent priority a longer delay: %v", a)
 	}
 	if ld := c.LostDemand; ld != nil {
-		if err := wholeBP("clinical lostDemand.confidence", ld.Confidence); err != nil {
+		if err := clinicalFraction("clinical lostDemand.confidence", ld.Confidence, 0, 1); err != nil {
 			return err
 		}
 		if ld.Confidence <= 0.5 || ld.Confidence >= 1 {
 			return fmt.Errorf("clinical lostDemand.confidence %v: in (0.5, 1)", ld.Confidence)
 		}
+		if ld.Method != BoundBetting && ld.Method != BoundT {
+			return fmt.Errorf("clinical lostDemand.method %q: %s or %s", ld.Method, BoundBetting, BoundT)
+		}
+		if ld.MinSeeds < 2 {
+			return fmt.Errorf("clinical lostDemand.minSeeds %d: at least 2", ld.MinSeeds)
+		}
 	}
 	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
 		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)
 	}
-	return wholeBP("clinical maxFailingSeedFraction", c.MaxFailingSeedFraction)
+	return clinicalFraction("clinical maxFailingSeedFraction", c.MaxFailingSeedFraction, 0, 1)
+}
+
+// clinicalFraction requires a clinical fraction to be finite, within [lo,
+// hi] and a whole number of basis points (audit F8: NaN and infinity pass
+// wholeBP, and the allowance had no upper bound).
+func clinicalFraction(name string, f, lo, hi float64) error {
+	if math.IsNaN(f) || math.IsInf(f, 0) || f < lo || f > hi {
+		return fmt.Errorf("%s %v: a fraction in [%v, %v]", name, f, lo, hi)
+	}
+	return wholeBP(name, f)
 }
 
 // backlogChecks are the backlog rule's checks, sorted.

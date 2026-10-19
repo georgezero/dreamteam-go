@@ -255,6 +255,13 @@ type Comparison struct {
 	// LostDemand: v0.2-eval-5's lost-demand gates against the paired plan
 	// (policies with clinical.lostDemand only).
 	LostDemand []LostDemandGate `json:"lostDemand,omitempty"`
+	// Access: the candidate's access by priority, always shown with the
+	// lost-demand gates: timeliness, absolute unimaged demand, the
+	// baseline's, and the comparison's uncertainty. AccessLimitation is
+	// set on every favourable verdict: the access gates establish only
+	// non-deterioration relative to the baseline.
+	Access           []AccessStatement `json:"access,omitempty"`
+	AccessLimitation string            `json:"accessLimitation,omitempty"`
 	// Financial: the classification's evidence, kept apart (README §10).
 	Financial Financial `json:"financial"`
 	// ServiceRestored: the baseline fails the service gates the candidate

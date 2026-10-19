@@ -122,7 +122,7 @@ func TestWitnessDelayedUrgentAccess(t *testing.T) {
 		t.Fatalf("%+v", a)
 	}
 	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Fail || gateStatus(pr, 1, GateMaxWait, WinGated, "urgent") != "missing" ||
-		pr.PerSeed[0].Measures.Clinical.MaxWaitGatedMin["urgent"] < 30*1440 || c.LostDemand[0].Status != Pass {
+		pr.PerSeed[0].Measures.Clinical.MaxWaitGatedMin["urgent"] < 30*1440 || c.LostDemand[0].Status == Fail {
 		t.Fatalf("gates: lost demand %+v", c.LostDemand[0])
 	}
 	q, qd := testPolicy(t)
@@ -168,7 +168,7 @@ func TestWitnessUrgentOrdersNotImaged(t *testing.T) {
 			gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != c.gate {
 			t.Errorf("%s: %+v, gate %s", c.name, a, gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent"))
 		}
-		if ld.Priority != "urgent" || ld.Status != Fail || ld.Candidate.Total != 40*30 || ld.Baseline.Total != 0 || cmp.Verdict != NOGO {
+		if ld.Priority != "urgent" || ld.Status == Pass || ld.Candidate.Total != 40*30 || ld.Baseline.Total != 0 || cmp.Verdict != NOGO {
 			t.Errorf("%s: lost demand %+v, verdict %s", c.name, ld, cmp.Verdict)
 		}
 	}

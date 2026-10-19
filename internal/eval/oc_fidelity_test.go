@@ -10,6 +10,7 @@ import (
 	"os"
 	"runtime"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -516,7 +517,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 			}
 			wantDay := day + int(lead)
 			wanted := max(recv, fidMidnight(wantDay))
-			o := Order{ID: "o", Priority: pri, Modality: "XR", ReceivedSec: recv, WantedSec: wanted}
+			o := Order{ID: "o", Origin: strconv.Itoa(len(rec.Orders)), Priority: pri, Modality: "XR", ReceivedSec: recv, WantedSec: wanted}
 			bookDay, found := 0, false
 			var cands []int
 			for d := wantDay; d <= wantDay+ocTolerance[pri] && d+w < len(capOf); d++ {
@@ -1391,6 +1392,11 @@ func TestOCFidelityModelUnchanged(t *testing.T) {
 		}
 		for i := range 2 {
 			rec, _ := def.q.record(ocRNG{rand.New(rand.NewPCG(20261103, uint64(100000*k+i)))}, base)
+			// The orders' origins (5C.4d) are provenance added since: the
+			// digest is of the record without them.
+			for j := range rec.Orders {
+				rec.Orders[j].Origin = ""
+			}
 			raw, _ := json.Marshal(struct {
 				R *Record
 				B fidBusy
@@ -1455,7 +1461,9 @@ func TestOCFidelityPairedDemand(t *testing.T) {
 		x.Seed, y.Seed = int64(i), int64(i)
 		ra, rb = append(ra, *x), append(rb, *y)
 	}
-	for _, g := range lostDemandGates(cand, rb, ra) {
+	pt := withMethod(cand, BoundT)
+	pt.Clinical.LostDemand.MinSeeds = 2
+	for _, g := range lostDemandGates(pt, rb, ra) {
 		if g.MatchedSeeds != 3 || len(g.UnmatchedSeeds) != 0 {
 			t.Fatalf("%s: not paired: %+v", g.Priority, g)
 		}
@@ -1468,7 +1476,7 @@ func TestOCFidelityPairedDemand(t *testing.T) {
 	x, _ := a.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, pol)
 	y, _ := b.record(ocRNG{rand.New(rand.NewPCG(1, 0))}, pol)
 	x.Seed, y.Seed = 0, 0
-	if gs := lostDemandGates(cand, []Record{*y}, []Record{*x}); gs[2].MatchedSeeds != 0 {
+	if gs := lostDemandGates(cand, []Record{*y}, []Record{*x}); gs[2].MatchedSeeds != 0 || gs[2].Status != Insufficient {
 		t.Errorf("one stream: demand unexpectedly matched")
 	}
 }

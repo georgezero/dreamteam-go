@@ -2,6 +2,7 @@ package eval
 
 import (
 	"maps"
+	"math"
 	"slices"
 	"strings"
 	"testing"
@@ -53,50 +54,61 @@ func hasReason(c Comparison, sub string) bool {
 	return slices.ContainsFunc(c.Reasons, func(s string) bool { return strings.Contains(s, sub) })
 }
 
-// C1: lost urgent orders. Thirty urgent orders a seed lost where the
-// baseline images them: counted apart from timeliness (timely access
-// passes), the unimaged fraction rises 0.20: lost demand fails, NO GO.
-// Three lost a seed rise exactly the margin (0.02): every discordant order
-// one way, the bound is the increase itself: pass (the margin is
-// inclusive); four: fail. Four lost a seed where the baseline loses one
-// other: the increase is the margin again, but with discordance both ways
-// its one-sided upper bound exceeds it: fail. None lost: pass.
+// withMethod is p with Gate B's bound method replaced (the t method is
+// under owner decision: it exercises the pass and fail logic here).
+func withMethod(p *Policy, m string) *Policy {
+	q := *p
+	c := *p.Clinical
+	ld := *c.LostDemand
+	ld.Method = m
+	c.LostDemand = &ld
+	q.Clinical = &c
+	return &q
+}
+
+// C1: lost urgent orders, seed-level Gate B (5C.4d). Under the candidate's
+// finite-sample bound (betting) Gate B at 40 seeds is insufficient
+// whatever the data: its bound with no difference on any seed is about
+// 0.21, above the 2-point margin (gate-b-statistics.md §4): 30 lost a seed
+// and none lost alike, NO GO. Under the t bound: 30 lost a seed (an
+// increase of 0.20 on every seed) fails; none lost passes (zero
+// variance, bound 0); 2 or 3 lost by seed (mean 1.67 points) passes; 3 or
+// 4 (mean 2.33) fails. Lost orders stay apart from timeliness.
 func TestGateLostUrgentOrders(t *testing.T) {
 	p, d := candidatePolicy(t)
-	lose := func(n int) func(b synth, r *Record) {
+	pt := withMethod(p, BoundT)
+	lose := func(k func(seed int64) int) func(b synth, r *Record) {
 		return func(b synth, r *Record) {
-			for _, i := range urgentOrders(r, 20, 50)[:n] {
+			for _, i := range urgentOrders(r, 20, 50)[:k(r.Seed)] {
 				resolveAs(r, i, OutLost, r.Orders[i].ReceivedSec)
 			}
 		}
 	}
-	pr, c := clinicalCaseAB(t, p, d, nil, lose(30))
+	thirty := lose(func(int64) int { return 30 })
+	pr, c := clinicalCaseAB(t, p, d, nil, thirty)
 	g := lostDemandOf(c, "urgent")
-	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Pass || g.Status != Fail || g.Discordant != [2]int64{1200, 0} ||
-		g.Increase < 0.199 || c.Verdict != NOGO || !hasReason(c, "lost demand urgent: fail") {
-		t.Fatalf("30 lost: %+v, verdict %s %v", g, c.Verdict, c.Reasons)
-	}
-	if lostDemandOf(c, "soon").Status != Pass || lostDemandOf(c, "routine").Status != Pass {
-		t.Fatal("other priorities")
-	}
-	_, c = clinicalCaseAB(t, p, d, nil, lose(3))
-	if g := lostDemandOf(c, "urgent"); g.Status != Pass || g.Increase != 0.02 || g.IncreaseUpper != 0.02 {
-		t.Fatalf("3 lost: %+v", g)
-	}
-	_, c = clinicalCaseAB(t, p, d, nil, lose(4))
-	if g := lostDemandOf(c, "urgent"); g.Status != Fail {
-		t.Fatalf("4 lost: %+v", g)
-	}
-	_, c = clinicalCaseAB(t, p, d, func(b synth, r *Record) {
-		i := urgentOrders(r, 30, 31)[0]
-		resolveAs(r, i, OutLost, r.Orders[i].ReceivedSec)
-	}, lose(4))
-	if g := lostDemandOf(c, "urgent"); g.Status != Fail || g.Discordant != [2]int64{160, 40} || g.Increase > 0.0201 || g.IncreaseUpper <= 0.021 {
-		t.Fatalf("4 against 1: %+v", g)
+	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Pass || g.Status != Insufficient || !strings.Contains(g.Reason, "cannot establish") ||
+		g.Increase < 0.199 || len(g.Seeds) != 40 || g.ZeroIncreaseUpper < 0.2 || c.Verdict != NOGO || !hasReason(c, "lost demand urgent: insufficient") {
+		t.Fatalf("30 lost, betting: %+v, verdict %s %v", g, c.Verdict, c.Reasons)
 	}
 	_, c = clinicalCaseAB(t, p, d, nil, nil)
-	if g := lostDemandOf(c, "urgent"); g.Status != Pass || g.IncreaseUpper != 0 || g.MatchedSeeds != 40 || g.Orders != 40*150 {
-		t.Fatalf("none lost: %+v", g)
+	if g := lostDemandOf(c, "urgent"); g.Status != Insufficient || g.Increase != 0 || g.MatchedSeeds != 40 || g.Orders != 40*150 {
+		t.Fatalf("none lost, betting: %+v", g)
+	}
+	for _, x := range []struct {
+		name string
+		k    func(int64) int
+		want string
+	}{
+		{"30 lost", func(int64) int { return 30 }, Fail},
+		{"none lost", func(int64) int { return 0 }, Pass},
+		{"2 or 3 lost", func(s int64) int { return 2 + int(s%2) }, Pass},
+		{"3 or 4 lost", func(s int64) int { return 3 + int(s%2) }, Fail},
+	} {
+		_, c := clinicalCaseAB(t, pt, d, nil, lose(x.k))
+		if g := lostDemandOf(c, "urgent"); g.Status != x.want || g.Method != BoundT {
+			t.Errorf("t, %s: %+v", x.name, g)
+		}
 	}
 }
 
@@ -106,7 +118,7 @@ func TestGateLostUrgentOrders(t *testing.T) {
 func TestGateDelayedUrgentAcquisition(t *testing.T) {
 	p, d := candidatePolicy(t)
 	pr, c := clinicalCaseAB(t, p, d, nil, delayOrders("urgent", 0, 30, 10*daySec, 30))
-	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Fail || lostDemandOf(c, "urgent").Status != Pass ||
+	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Fail || lostDemandOf(c, "urgent").Status == Fail ||
 		!hasReason(c, "clinical seed reliability") {
 		t.Fatalf("%s %v", c.Verdict, c.Reasons)
 	}
@@ -115,11 +127,12 @@ func TestGateDelayedUrgentAcquisition(t *testing.T) {
 // C3: more loss bought with better timeliness. The baseline images 15
 // urgent orders a seed three days late; the candidate images every one it
 // keeps on time but loses 15 others: its timeliness (1.0) is better than
-// the baseline's (0.90) and passes, the lost-demand gate fails: the gain
-// does not offset the loss.
+// the baseline's (0.90) and passes, the lost-demand gate fails (t bound;
+// under betting it is insufficient at 40 seeds): the gain does not offset
+// the loss.
 func TestGateLossNotOffsetByTimeliness(t *testing.T) {
 	p, d := candidatePolicy(t)
-	pr, c := clinicalCaseAB(t, p, d, delayOrders("urgent", 60, 75, 3*daySec, 15), func(b synth, r *Record) {
+	pr, c := clinicalCaseAB(t, withMethod(p, BoundT), d, delayOrders("urgent", 60, 75, 3*daySec, 15), func(b synth, r *Record) {
 		for _, i := range urgentOrders(r, 80, 95) {
 			resolveAs(r, i, OutLost, r.Orders[i].ReceivedSec)
 		}
@@ -136,10 +149,10 @@ func TestGateLossNotOffsetByTimeliness(t *testing.T) {
 // C4: cancellation manipulation. Thirty urgent orders a seed ended by the
 // patient within an hour of their wanted time (withdrawn from timeliness)
 // where the baseline images them: still unimaged demand, lost demand
-// fails. A patient outcome is not a way out of the denominator.
+// fails (t bound). A patient outcome is not a way out of the denominator.
 func TestGateCancellationManipulation(t *testing.T) {
 	p, d := candidatePolicy(t)
-	pr, c := clinicalCaseAB(t, p, d, nil, func(b synth, r *Record) {
+	pr, c := clinicalCaseAB(t, withMethod(p, BoundT), d, nil, func(b synth, r *Record) {
 		for _, i := range urgentOrders(r, 20, 50) {
 			resolveAs(r, i, OutPatient, r.Orders[i].WantedSec+hour)
 		}
@@ -166,7 +179,7 @@ func TestGateRebooking(t *testing.T) {
 		}
 	}
 	pr, c := clinicalCaseAB(t, p, d, nil, rebook(40*hour))
-	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Pass || lostDemandOf(c, "urgent").Status != Pass {
+	if gateStatus(pr, 1, GateTimelyAccess, WinGated, "urgent") != Pass || lostDemandOf(c, "urgent").Status == Fail {
 		t.Fatalf("within 40 h: %v", c.Reasons)
 	}
 	pr, _ = clinicalCaseAB(t, p, d, nil, rebook(5*daySec))
@@ -190,17 +203,17 @@ func TestGateHorizonCensoring(t *testing.T) {
 	}
 	both := func(b synth, r *Record) {
 		H := r.HorizonEndSec
-		add(r, Order{ID: "H1", Priority: "urgent", Modality: "CT", ReceivedSec: H - 2*hour, WantedSec: H - hour}, OutOpen)
+		add(r, Order{ID: "H1", Origin: "H1", Priority: "urgent", Modality: "CT", ReceivedSec: H - 2*hour, WantedSec: H - hour}, OutOpen)
 	}
 	pr, c := clinicalCaseAB(t, p, d, both, func(b synth, r *Record) {
 		both(b, r)
 		H := r.HorizonEndSec
-		add(r, Order{ID: "H2", Priority: "urgent", Modality: "CT", ReceivedSec: H - hour, WantedSec: H + hour}, OutOpen)
+		add(r, Order{ID: "H2", Origin: "H2", Priority: "urgent", Modality: "CT", ReceivedSec: H - hour, WantedSec: H + hour}, OutOpen)
 	})
 	if a := urgentAccess(pr); a.Untimely != 1 || a.Undecided != 0 {
 		t.Fatalf("open at the end: %+v", a)
 	}
-	if g := lostDemandOf(c, "urgent"); g.Status != Pass || g.MatchedSeeds != 40 {
+	if g := lostDemandOf(c, "urgent"); g.Status == Fail || len(g.UnmatchedSeeds) != 0 || g.MatchedSeeds != 40 {
 		t.Fatalf("after the horizon: %+v", g)
 	}
 	pr, _ = clinicalCaseAB(t, p, d, nil, func(b synth, r *Record) {
@@ -358,10 +371,25 @@ func TestCandidateValidation(t *testing.T) {
 		"report-only with wait": func(c *Clinical) { c.MaxWaitMin = map[string]int64{"urgent": 10080, "soon": 30240, "routine": 44640} },
 		"no weekly minimum":     func(c *Clinical) { c.MinWeeklyCohort = map[string]int64{} },
 		"margin out of range": func(c *Clinical) {
-			c.LostDemand = &LostDemand{MaxIncrease: map[string]float64{"urgent": 1, "soon": 0, "routine": 0}, Confidence: 0.95, MinCohort: map[string]int64{"urgent": 1, "soon": 1, "routine": 1}}
+			c.LostDemand = &LostDemand{MaxIncrease: map[string]float64{"urgent": 1, "soon": 0, "routine": 0}, Confidence: 0.95, Method: BoundBetting, MinSeeds: 20, MinSeedOrders: map[string]int64{"urgent": 1, "soon": 1, "routine": 1}}
 		},
 		"low confidence": func(c *Clinical) {
-			c.LostDemand = &LostDemand{MaxIncrease: map[string]float64{"urgent": 0.02, "soon": 0.02, "routine": 0.02}, Confidence: 0.5, MinCohort: map[string]int64{"urgent": 1, "soon": 1, "routine": 1}}
+			c.LostDemand = &LostDemand{MaxIncrease: map[string]float64{"urgent": 0.02, "soon": 0.02, "routine": 0.02}, Confidence: 0.5, Method: BoundBetting, MinSeeds: 20, MinSeedOrders: map[string]int64{"urgent": 1, "soon": 1, "routine": 1}}
+		},
+		"unknown method": func(c *Clinical) {
+			ld := *c.LostDemand
+			ld.Method = "pooled"
+			c.LostDemand = &ld
+		},
+		"one seed": func(c *Clinical) {
+			ld := *c.LostDemand
+			ld.MinSeeds = 1
+			c.LostDemand = &ld
+		},
+		"allowance above one": func(c *Clinical) { c.MaxFailingSeedFraction = 1.01 },
+		"allowance NaN":       func(c *Clinical) { c.MaxFailingSeedFraction = math.NaN() },
+		"severe rate infinite": func(c *Clinical) {
+			c.MaxSevereRate = map[string]float64{"urgent": math.Inf(1), "soon": 0.05, "routine": 0.05}
 		},
 	} {
 		q := *p

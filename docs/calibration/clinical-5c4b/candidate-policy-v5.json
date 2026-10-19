@@ -1,7 +1,7 @@
 {
  "schema": "dreamteam.evalpolicy/v5",
  "id": "v0.2-eval-5-candidate",
- "status": "PROPOSAL, not in force and not frozen (Slice 5C.4c, 2026-10-18): the owner's modified option B (served and open access timeliness, lost demand against the paired baseline) and the volume-normalized weekly severity, for the independent review and the reserved-stream validation (docs/calibration/clinical-5c4c/access-gates.md); values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
+ "status": "PROPOSAL, not in force and not frozen (Slice 5C.4d, 2026-10-18): the owner's modified option B with the seed-level lost-demand gate (docs/calibration/clinical-5c4d/gate-b-statistics.md) and the volume-normalized weekly severity, for the independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
  "effective": "none: v0.2-eval-4 stays in force",
  "notes": [
   "Candidate only. The clinical section implements docs/evaluation/proposals/v5-clinical-acceptance.md with the values of docs/calibration/clinical-5c4b/acceptance-design.md; every other rule is v0.2-eval-4 unchanged, except the sampled persistent age check, reported only (v5 replaces it with the exact absolute limits)."
@@ -421,10 +421,12 @@
     "routine": 0.02
    },
    "confidence": 0.95,
-   "minCohort": {
-    "urgent": 200,
-    "soon": 400,
-    "routine": 400
+   "method": "betting",
+   "minSeeds": 20,
+   "minSeedOrders": {
+    "urgent": 20,
+    "soon": 40,
+    "routine": 40
    }
   }
  }

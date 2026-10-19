@@ -7,6 +7,67 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4d — audit remediation and seed-level lost-demand inference (0.2.0-dev.18)
+
+This slice remediates the independent 5C.4c audit (kept verbatim; the
+response is in `docs/audits/slice-5c4c-access-gates-audit-response.md`)
+under the owner's decisions (`docs/calibration/clinical-5c4d/`).
+
+* **Not frozen.**
+* **Registers 0.2.0-dev.17** for replay (`mini-seed47-dev17`).
+* **v0.2-eval-4 is byte-identical.**
+* **Nothing else was run:** no strategy, reference or holdout seed,
+  unseal record or reserved stream.
+
+**Fixes:**
+
+* **F2:** the validated named end capture.
+* **F3:** unknown outcomes and priorities are INVALID, never a panic or
+  a pass.
+* **F8:** every clinical fraction is finite and in [0, 1].
+* **F9:** weekly spans are given in calendar weeks and dates.
+
+**Identity.** Evaluation orders carry the simulator's immutable
+`origin`, drawn from nothing. Under three plans it is unique within a
+record and identical, request for request.
+
+**Gate B:**
+
+* now seed-level: one difference per matched seed, estimand their mean;
+* the invalid conditional bound is removed;
+* two procedures implemented: `betting` (finite-sample) and `t`
+  (approximate).
+* **No valid bound can pass the 2-point margin at 40 seeds.** The best
+  any valid method can reach is 7.2 points; `betting` reaches 20.7 (2.0
+  needs 400 seeds).
+* So with the guaranteed method **Gate B is INSUFFICIENT for every
+  plan.** This is reported for the owner's decision, not weakened.
+* **Coverage study:**
+  * `betting` covers in every scenario;
+  * `t` is near nominal in smooth scenarios but covers only 0.70 (and
+    accepts a 3-point increase 30% of the time) under all-or-nothing
+    seed shocks.
+
+**Verdict limitation.** Every favourable verdict states "Access
+non-deterioration only; absolute access adequacy not established." with
+access statements: timeliness, absolute unimaged fractions for
+candidate and baseline, and the bound.
+
+**Weekly rule:**
+
+* the strict 5% ceiling and forward pooling are kept;
+* backward pooling is reported, with a partition-sensitivity flag;
+* a valid partition alone can change the verdict, in synthetic
+  witnesses and on 1 of 10 no-action simulator seeds (urgent): a
+  **freeze blocker**.
+
+**Protocol.** The reserved protocol is updated: near-margin pairs,
+coverage, clusters, identity, every audit witness. It is **not
+runnable** until the owner decides the Gate B method and the weekly
+partition rule.
+
+---
+
 ## V0.2 Slice 5C.4c — clinical access and weekly severity gates (0.2.0-dev.17)
 
 The owner's modified option B and the volume-normalized weekly

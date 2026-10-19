@@ -2,6 +2,7 @@ package eval
 
 import (
 	"fmt"
+	"github.com/georgezero/dreamteam-go/internal/simtime"
 	"maps"
 	"slices"
 )
@@ -88,17 +89,28 @@ type ClinicalMeasures struct {
 // WeeklySevere is a priority's weekly severity: the gated period's Monday
 // weeks joined in order into blocks of at least minWeeklyCohort
 // acquisitions (a short remainder joins the last block), each block's
-// severe-delay rate, the worst block, and how many exceed the rate.
+// severe-delay rate, the worst block, and how many exceed the rate. The
+// worst block's span is given in calendar weeks and dates (audit F9: a
+// block over sparse weeks spans more calendar weeks than it has weeks
+// with acquisitions). Backward is the same weeks pooled from the end (a
+// short remainder joining the first block): another valid partition,
+// reported only; PartitionSensitive when the two disagree on whether any
+// block exceeds the rate.
 type WeeklySevere struct {
-	Acquired      int64 `json:"acquired"`
-	Severe        int64 `json:"severe"`
-	Blocks        int   `json:"blocks"`
-	Failing       int   `json:"failingBlocks"`
-	Insufficient  bool  `json:"insufficient"` // fewer acquired in the period than the minimum
-	WorstFirstDay int64 `json:"worstFirstDay"`
-	WorstWeeks    int   `json:"worstWeeks"`
-	WorstAcquired int64 `json:"worstAcquired"`
-	WorstSevere   int64 `json:"worstSevere"`
+	Acquired           int64  `json:"acquired"`
+	Severe             int64  `json:"severe"`
+	Blocks             int    `json:"blocks"`
+	Failing            int    `json:"failingBlocks"`
+	Insufficient       bool   `json:"insufficient"` // fewer acquired in the period than the minimum
+	WorstFirstDay      int64  `json:"worstFirstDay"`
+	WorstFrom          string `json:"worstFrom"` // the worst block's first Monday
+	WorstTo            string `json:"worstTo"`   // its last Sunday
+	WorstWeeks         int    `json:"worstWeeks"`
+	WorstOccupiedWeeks int    `json:"worstOccupiedWeeks"`
+	WorstAcquired      int64  `json:"worstAcquired"`
+	WorstSevere        int64  `json:"worstSevere"`
+	BackwardFailing    int    `json:"backwardFailingBlocks"`
+	PartitionSensitive bool   `json:"partitionSensitive"`
 }
 
 // delayAt is a study's delay past due at the end of observation end:
@@ -275,7 +287,11 @@ func (c *Clinical) classify(a *AccessCohort, o *Order, out string, from, E int64
 // into blocks of at least minWeeklyCohort acquisitions.
 func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 	t0, H := r.TakeoverSec, r.HorizonEndSec
-	type wk struct{ acq, sev int64 }
+	date, _ := simtime.ParseDate(r.TakeoverDate)
+	type wk struct {
+		k        int64
+		acq, sev int64
+	}
 	weeks := map[string]map[int64]*wk{}
 	for i := range r.Studies {
 		s := &r.Studies[i]
@@ -288,7 +304,7 @@ func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 		}
 		w := weeks[s.Priority][k]
 		if w == nil {
-			w = &wk{}
+			w = &wk{k: k}
 			weeks[s.Priority][k] = w
 		}
 		w.acq++
@@ -296,28 +312,21 @@ func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 			w.sev++
 		}
 	}
-	out := map[string]*WeeklySevere{}
-	for _, q := range Priorities {
-		ws := &WeeklySevere{}
-		out[q] = ws
-		type block struct {
-			first    int64
-			n        int
-			acq, sev int64
-		}
+	type block struct {
+		first, last int64 // weeks
+		n           int   // weeks with acquisitions
+		acq, sev    int64
+	}
+	// pool joins weeks (in order) into blocks of at least minCohort; a
+	// short remainder joins the block before it.
+	pool := func(ws []*wk, minCohort int64) []block {
 		var blocks []block
 		var cur block
-		minCohort := c.MinWeeklyCohort[q]
-		for _, k := range slices.Sorted(maps.Keys(weeks[q])) {
-			w := weeks[q][k]
-			ws.Acquired += w.acq
-			ws.Severe += w.sev
+		for _, w := range ws {
 			if cur.n == 0 {
-				cur.first = k
+				cur.first = w.k
 			}
-			cur.n++
-			cur.acq += w.acq
-			cur.sev += w.sev
+			cur.last, cur.n, cur.acq, cur.sev = w.k, cur.n+1, cur.acq+w.acq, cur.sev+w.sev
 			if cur.acq >= minCohort {
 				blocks = append(blocks, cur)
 				cur = block{}
@@ -329,12 +338,32 @@ func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 			last.n += cur.n
 			last.acq += cur.acq
 			last.sev += cur.sev
+			if cur.first < last.first {
+				last.first = cur.first
+			}
+			if cur.last > last.last {
+				last.last = cur.last
+			}
 		case cur.n > 0:
 			blocks = append(blocks, cur)
 		}
+		return blocks
+	}
+	out := map[string]*WeeklySevere{}
+	for _, q := range Priorities {
+		ws := &WeeklySevere{}
+		out[q] = ws
+		var ordered []*wk
+		for _, k := range slices.Sorted(maps.Keys(weeks[q])) {
+			ordered = append(ordered, weeks[q][k])
+			ws.Acquired += weeks[q][k].acq
+			ws.Severe += weeks[q][k].sev
+		}
+		minCohort := c.MinWeeklyCohort[q]
+		bpRate := bp(c.MaxWeeklySevereRate[q])
+		blocks := pool(ordered, minCohort)
 		ws.Insufficient = ws.Acquired < minCohort
 		ws.Blocks = len(blocks)
-		bpRate := bp(c.MaxWeeklySevereRate[q])
 		worst := -1
 		for i, b := range blocks {
 			if rateAbove(b.sev, b.acq, bpRate) {
@@ -347,9 +376,22 @@ func weeklySevere(c *Clinical, r *Record, E int64) map[string]*WeeklySevere {
 		}
 		if worst >= 0 {
 			b := blocks[worst]
-			// Week b.first's Monday is local day 7k − 3 (clusterEffects).
-			ws.WorstFirstDay, ws.WorstWeeks, ws.WorstAcquired, ws.WorstSevere = 7*b.first-3-t0/daySec, b.n, b.acq, b.sev
+			// Week k's Monday is local day 7k − 3 (clusterEffects).
+			ws.WorstFirstDay = 7*b.first - 3 - t0/daySec
+			ws.WorstFrom = date.AddDays(ws.WorstFirstDay).String()
+			ws.WorstTo = date.AddDays(7*b.last - 3 - t0/daySec + 6).String()
+			ws.WorstWeeks, ws.WorstOccupiedWeeks = int(b.last-b.first+1), b.n
+			ws.WorstAcquired, ws.WorstSevere = b.acq, b.sev
 		}
+		// The same weeks pooled from the end.
+		rev := slices.Clone(ordered)
+		slices.Reverse(rev)
+		for _, b := range pool(rev, minCohort) {
+			if rateAbove(b.sev, b.acq, bpRate) {
+				ws.BackwardFailing++
+			}
+		}
+		ws.PartitionSensitive = !ws.Insufficient && (ws.Failing > 0) != (ws.BackwardFailing > 0)
 	}
 	return out
 }
@@ -394,17 +436,60 @@ func classifyAccess(a *AccessCohort, o *Order, out string, from, limit, E int64)
 
 // checkClinicalRecord is v0.2-eval-5's additional record integrity: an
 // order cannot be imaged before its wanted time.
-func checkClinicalRecord(r *Record, end *Capture, bad func(string, ...any)) {
+//
+// Since 5C.4d (audit F3) it also requires every order's and study's
+// priority to be a known one and every capture's order outcome to be a
+// known outcome, a resolved order's final one terminal (served, lost,
+// left or patient): missing or unknown evidence is INVALID, never a
+// default. It reports whether the record can be measured clinically.
+func checkClinicalRecord(r *Record, caps map[string]*Capture, bad func(string, ...any)) bool {
+	ok := true
+	for i := range r.Orders {
+		if !slices.Contains(Priorities, r.Orders[i].Priority) {
+			bad("order %s: unknown priority %q", r.Orders[i].ID, r.Orders[i].Priority)
+			ok = false
+			break
+		}
+	}
+	for i := range r.Studies {
+		if !slices.Contains(Priorities, r.Studies[i].Priority) {
+			bad("study %s: unknown priority %q", r.Studies[i].ID, r.Studies[i].Priority)
+			ok = false
+			break
+		}
+	}
+	known := []string{OutServed, OutLost, OutLeft, OutPatient, OutOpen, OutNotDisclosed}
+	terminal := []string{OutServed, OutLost, OutLeft, OutPatient}
+	for _, n := range captureNames {
+		c := caps[n]
+		if c == nil {
+			continue
+		}
+		for i, out := range c.OrderOutcomes {
+			if !slices.Contains(known, out) {
+				bad("order %s: unknown outcome %q at %s", r.Orders[i].ID, out, n)
+				ok = false
+				break
+			}
+		}
+	}
+	end := caps["end"]
 	if end == nil {
-		return
+		return false
 	}
 	for i := range r.Orders {
 		o := &r.Orders[i]
-		if end.OrderOutcomes[i] == OutServed && o.ResolvedSec < o.WantedSec {
+		out := end.OrderOutcomes[i]
+		if o.ResolvedSec != 0 && !slices.Contains(terminal, out) {
+			bad("order %s: resolved at %d with no terminal outcome (%q)", o.ID, o.ResolvedSec, out)
+			return false
+		}
+		if out == OutServed && o.ResolvedSec < o.WantedSec {
 			bad("order %s: imaged at %d, before its wanted time %d", o.ID, o.ResolvedSec, o.WantedSec)
-			return
+			return false
 		}
 	}
+	return ok
 }
 
 // Clinical gate names.
@@ -478,6 +563,9 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 			case ws.Failing > 0:
 				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d weekly blocks above the rate; worst %d of %d in %d weeks from day %d",
 					ws.Failing, ws.Blocks, ws.WorstSevere, ws.WorstAcquired, ws.WorstWeeks, ws.WorstFirstDay)
+				if ws.WorstFrom != "" {
+					g.Reason += fmt.Sprintf(" (%s to %s)", ws.WorstFrom, ws.WorstTo)
+				}
 			}
 		default:
 			g.Value, g.Num = float64(cm.WorstWeekSevere[q]), cm.WorstWeekSevere[q]

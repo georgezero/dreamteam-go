@@ -12,7 +12,7 @@ weekly severity are implemented in the v5 evaluator (0.2.0-dev.17).
 | File | What it is |
 |---|---|
 | `access-gates.md` | The implemented rules, the lost-demand methodology, the weekly rule, the adversarial tests, the no-action check and the remaining owner decisions. |
-| `reserved-validation-protocol.md` | The completed confirmatory protocol; not to be run before the review and the owner's approvals. |
+| `reserved-validation-protocol.md` | The completed confirmatory protocol of 5C.4c, superseded by `../clinical-5c4d/reserved-validation-protocol.md` after the audit. |
 | `astra-review-package.md` | The independent review's scope, questions and constraints. |
 | `sim-access-5c4c.json` | The no-action access validation under the current candidate (development seeds). |
 

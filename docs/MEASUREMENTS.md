@@ -611,3 +611,15 @@ stream was run.
 | 10 targeted mutations of the new rules (each a focused test run) | Pi 4 | about 15 min; 10 of 10 caught (one after adding a test) |
 | `TestDemandExogenousAcrossPlans` (mini fixture, three plans, two seeds) | Pi 4 | 11 s |
 | Full suite `go test ./... -count=1` | Pi 4 | 814 s wall; every package passes (sim 795, eval 390, session 343, cmd 105, tui 27) |
+
+## 2026-10-18 — V0.2 Slice 5C.4d, audit remediation and seed-level lost-demand inference (0.2.0-dev.18)
+
+Raspberry Pi 4 (4 cores). No strategy, reference, holdout or reserved
+stream was run.
+
+| Run | Machine | Time |
+|---|---|---|
+| Gate B coverage study (`DT_GATEB_COVERAGE`, 17 scenarios × 2,000 replicates × two bounds) | Pi 4 | 29 s |
+| No-action access validation with the weekly partitions (development seeds) | Pi 4 | 129 s |
+| 14 targeted mutations, then 4 reruns | Pi 4 | about 40 min; all caught (four after adding tests) |
+| Full suite `go test ./... -count=1` | Pi 4 | 807 s wall; every package passes (sim 798, eval 432, session 352, cmd 104, tui 30) |

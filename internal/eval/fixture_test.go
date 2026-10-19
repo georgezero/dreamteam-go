@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/simtime"
@@ -160,7 +161,7 @@ func (s synth) record() Record {
 		acq := t0 - 2*hour + int64(k)*60
 		r.Studies = append(r.Studies, Study{ID: "I", Priority: "routine", Modality: "XR", AcquiredSec: acq, EnteredSec: acq,
 			ClaimedSec: acq + 31*hour, ReadStartSec: acq + 31*hour, FinalSec: acq + 32*hour})
-		r.Orders = append(r.Orders, Order{ID: "IO", Priority: "routine", Modality: "XR", ReceivedSec: t0 - 3*daySec, WantedSec: t0 - 3*daySec, ResolvedSec: t0 + hour})
+		r.Orders = append(r.Orders, Order{ID: "IO", Origin: fmt.Sprintf("IO/%d", k), Priority: "routine", Modality: "XR", ReceivedSec: t0 - 3*daySec, WantedSec: t0 - 3*daySec, ResolvedSec: t0 + hour})
 	}
 	mods := map[string]string{"urgent": "MR", "soon": "CT", "routine": "XR"}
 	idx := map[string]int{}
@@ -171,9 +172,9 @@ func (s synth) record() Record {
 	}
 	var outs []served // per order: the time it resolves and how (0: open)
 	sec := func(d float64) int64 { return t0 + int64(d*daySec) }
-	for _, l := range s.late {
+	for li, l := range s.late {
 		for k := range l.n {
-			o := Order{ID: "L", Priority: "soon", Modality: "CT", ReceivedSec: sec(l.recv) + int64(k)*60, WantedSec: sec(l.want) + int64(k)*60}
+			o := Order{ID: "L", Origin: fmt.Sprintf("L/%d/%d", li, k), Priority: "soon", Modality: "CT", ReceivedSec: sec(l.recv) + int64(k)*60, WantedSec: sec(l.want) + int64(k)*60}
 			r.Orders = append(r.Orders, o)
 			if l.out == OutOpen {
 				outs = append(outs, served{0, OutOpen})
@@ -188,7 +189,7 @@ func (s synth) record() Record {
 				i := idx[q]
 				idx[q]++
 				acq := t0 + int64(d)*daySec + hour + int64(k)*600
-				o := Order{ID: "O", Priority: q, Modality: mods[q], ReceivedSec: acq - 30*60, WantedSec: acq - 30*60, FirstApptSec: acq - 10*60}
+				o := Order{ID: "O", Origin: fmt.Sprintf("O/%s/%d/%d", q, d, k), Priority: q, Modality: mods[q], ReceivedSec: acq - 30*60, WantedSec: acq - 30*60, FirstApptSec: acq - 10*60}
 				if acq > r.ObservedUntilSec {
 					continue
 				}
@@ -221,7 +222,7 @@ func (s synth) record() Record {
 		if s.rare > 0 && d%s.rare == 0 {
 			at := t0 + int64(d)*daySec + 2*hour
 			if at+hour <= r.ObservedUntilSec {
-				r.Orders = append(r.Orders, Order{ID: "R", Priority: "routine", Modality: "US", ReceivedSec: at, WantedSec: at})
+				r.Orders = append(r.Orders, Order{ID: "R", Origin: fmt.Sprintf("R/%d", d), Priority: "routine", Modality: "US", ReceivedSec: at, WantedSec: at})
 				if s.rareLost {
 					outs = append(outs, served{at, OutLost})
 				} else {
@@ -234,7 +235,7 @@ func (s synth) record() Record {
 			if at > r.ObservedUntilSec {
 				continue
 			}
-			r.Orders = append(r.Orders, Order{ID: "W", Priority: "routine", Modality: "XR", WalkIn: true, ReceivedSec: at, WantedSec: at})
+			r.Orders = append(r.Orders, Order{ID: "W", Origin: fmt.Sprintf("W/%d/%d", d, k), Priority: "routine", Modality: "XR", WalkIn: true, ReceivedSec: at, WantedSec: at})
 			out := OutServed
 			if pm(d*s.walkIns+k, s.seed, s.walkLeft) {
 				out = OutLeft
