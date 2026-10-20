@@ -35,6 +35,13 @@ func compare(p *Policy, cand, ag *PlanReport, cr, ar []Record, global []string) 
 		if a.Engine != b.Engine || a.ScenarioFingerprint != b.ScenarioFingerprint || a.TakeoverSec != b.TakeoverSec {
 			bad("seed %d: engine, scenario or takeover differ", a.Seed)
 		}
+		if provenanceApplies(p) {
+			// Order provenance (Slice 5C.4l): every order of either record
+			// in the other by origin, with the same immutable request.
+			for _, f := range orderProvenance(a, b) {
+				bad("seed %d: order provenance: %s", a.Seed, f)
+			}
+		}
 	}
 	for _, pr := range []*PlanReport{cand, ag} {
 		if !pr.Valid {

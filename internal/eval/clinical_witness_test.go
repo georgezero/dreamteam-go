@@ -372,12 +372,12 @@ func TestWitnessObservationBoundaries(t *testing.T) {
 	add(Order{ID: "B2", Priority: "urgent", Modality: "CT", ReceivedSec: H, WantedSec: H + hour, FirstApptSec: H + 3*hour, ResolvedSec: H + 3*hour}, OutServed)
 	add(Order{ID: "B3", Priority: "urgent", Modality: "CT", ReceivedSec: H - 2*hour, WantedSec: H - hour}, OutOpen)
 	add(Order{ID: "B4", Priority: "urgent", Modality: "CT", ReceivedSec: t0 - daySec, WantedSec: t0 - 12*hour, FirstApptSec: t0 + hour, ResolvedSec: t0 + hour}, OutServed)
-	// The served new orders' studies (the order–study contract); B4 is
-	// inherited work, exempt.
+	// The served orders' studies (the order–study contract, inherited
+	// work included under the 5C.4l candidate).
 	for _, x := range []struct {
 		id string
 		at int64
-	}{{"B1", H + 10*hour}, {"B2", H + 3*hour}} {
+	}{{"B1", H + 10*hour}, {"B2", H + 3*hour}, {"B4", t0 + hour}} {
 		r.Studies = append(r.Studies, Study{ID: "S" + x.id, Order: x.id, Priority: "urgent", Modality: "CT", AcquiredSec: x.at, EnteredSec: x.at,
 			ClaimedSec: x.at + 60, ReadStartSec: x.at + 60, FinalSec: x.at + 1800})
 	}
@@ -484,7 +484,7 @@ func TestWitnessContradictoryLifecycle(t *testing.T) {
 // 0.87 < 0.90: NO GO).
 func TestWitnessManipulation(t *testing.T) {
 	p, d := candidatePolicy(t)
-	_, pr, c := clinicalCase(t, p, d, nil, func(b synth, r *Record) {
+	relabel := func(b synth, r *Record) {
 		for _, i := range urgentOrders(r, 20, 50) {
 			at := r.Orders[i].ResolvedSec
 			r.Orders[i].Priority = "routine"
@@ -494,7 +494,14 @@ func TestWitnessManipulation(t *testing.T) {
 				}
 			}
 		}
-	})
+	}
+	// Under the 5C.4l candidate the relabelled requests no longer
+	// reconcile with the baseline's by origin: INVALID (order provenance);
+	// under the 5C.4j candidate case selection catches it.
+	_, pr, c := clinicalCase(t, p, d, nil, relabel)
+	wantVerdict(t, pr, c, INVALID, "order provenance")
+	pj, dj := candidate5c4jPolicy(t)
+	_, pr, c = clinicalCase(t, pj, dj, nil, relabel)
 	wantVerdict(t, pr, c, NOGO, "case selection")
 	if a := urgentAccess(pr); a.Untimely != 0 {
 		t.Fatalf("relabelled: %+v", a)

@@ -1,0 +1,1283 @@
+{
+ "schema": "dreamteam.reserved-scenario-manifest/v1",
+ "version": 3,
+ "status": "PROPOSED with the 5C.4l protocol, not locked: locked only at the owner's lock commit, with the candidate's and this manifest's digests pinned; never run on the reserved family before then",
+ "policy": {
+  "path": "docs/calibration/clinical-5c4b/candidate-policy-v5.json",
+  "sha256": "83d481b7040b69d78a58de68afc938a588b5b37ba396438509f38c56ca163948",
+  "note": "the candidate as proposed at 0.2.0-dev.23; re-pinned (and this manifest's own digest pinned) at the lock commit"
+ },
+ "streams": {
+  "family": "F: the reserved PCG(20261201, ·) for the confirmatory run (refused by this build); PCG(20261021, ·) for the development construction checks; PCG(1, ·) for the suite's construction test",
+  "demand": "seed i of every scenario: PCG(F, 2·i) for both plans (identical exogenous demand within each pair, the same seed i in every scenario)",
+  "baselineBooking": "PCG(F, 10000000 + 100000·k + i)",
+  "candidateBooking": "PCG(F, 20000000 + 100000·k + i); booking 'baseline': the baseline's stream (identical records before injection)",
+  "candidateInjection": "PCG(F, 30000000 + 100000·k + i): first draw the harm assignment when harmProbability is set, then the injection's draws in record order; replicates continue the same stream",
+  "baselineInjection": "PCG(F, 40000000 + 100000·k + i)",
+  "reuse": "a scenario with baseScenario b uses scenario b's pairs (b's booking streams, seeds 0…seeds−1) and its own k for injection",
+  "disjointness": "k < 100 and i < 100000: every role's range [role, role + 10^7) is disjoint from the others and from the demand streams (even, below 200000)"
+ },
+ "groupSize": 40,
+ "practices": {
+  "*": "the fidelity model (internal/eval/oc_fidelity_test.go ocFidelityScenarios) at the aligned takeover (fidAlignedTakeover), with exogenous modalities (exogenousModality: each order's modality drawn with its demand and carried by its study, as in the simulator, so that case selection's modality strata pair) prefix-stable draws (prefixStableDraws: each study's documentation and read times drawn from its order's identity, so that a longer observation leaves every earlier outcome unchanged) and a shared history (sharedHistory: the candidate's bookings before the takeover are the baseline's, from the baseline's practice and booking stream, so that both records hold the same inherited orders and every order reconciles by origin, as in the simulator); IL40-85: A85 with imaging capacity 0.6 from day 30; volumeCycle: the demand-rate multiplier of seed i is volumeCycle[i mod length], the same for both plans"
+ },
+ "scenarios": [
+  {
+   "k": 0,
+   "id": "S-A85",
+   "group": "stable",
+   "criteria": [
+    "T1",
+    "T3",
+    "T6",
+    "T7",
+    "T8"
+   ],
+   "mechanism": "stable practice A85 (stationary) against itself",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate; per-seed absolute violations, safeguard flags and raw insufficiency",
+   "acceptanceRule": "T1: at most 3 of 62 groups rejected; T3: no seed violating an absolute limit; T6 and T7 as protocol §4",
+   "failureConsequence": "a missed criterion is FAIL: confirmation fails (documented NO GO); no value is changed on these streams"
+  },
+  {
+   "k": 1,
+   "id": "S-B85",
+   "group": "stable",
+   "criteria": [
+    "T1",
+    "T3",
+    "T6",
+    "T7",
+    "T8"
+   ],
+   "mechanism": "stable practice B85 (seasonal (both plans seasonal: identical paired demand)) against itself",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "B85"
+   },
+   "candidate": {
+    "practice": "B85",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate; per-seed absolute violations, safeguard flags and raw insufficiency",
+   "acceptanceRule": "T1: at most 3 of 62 groups rejected; T3: no seed violating an absolute limit; T6 and T7 as protocol §4",
+   "failureConsequence": "a missed criterion is FAIL: confirmation fails (documented NO GO); no value is changed on these streams"
+  },
+  {
+   "k": 2,
+   "id": "S-C85",
+   "group": "stable",
+   "criteria": [
+    "T1",
+    "T3",
+    "T6",
+    "T7",
+    "T8"
+   ],
+   "mechanism": "stable practice C85 (bursty, day CV 0.15) against itself",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "C85"
+   },
+   "candidate": {
+    "practice": "C85",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate; per-seed absolute violations, safeguard flags and raw insufficiency",
+   "acceptanceRule": "T1: at most 3 of 62 groups rejected; T3: no seed violating an absolute limit; T6 and T7 as protocol §4",
+   "failureConsequence": "a missed criterion is FAIL: confirmation fails (documented NO GO); no value is changed on these streams"
+  },
+  {
+   "k": 3,
+   "id": "S-Cs85",
+   "group": "stable",
+   "criteria": [
+    "T1",
+    "T3",
+    "T6",
+    "T7",
+    "T8"
+   ],
+   "mechanism": "stable practice Cs85 (seasonal and bursty) against itself",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "Cs85"
+   },
+   "candidate": {
+    "practice": "Cs85",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate; per-seed absolute violations, safeguard flags and raw insufficiency",
+   "acceptanceRule": "T1: at most 3 of 62 groups rejected; T3: no seed violating an absolute limit; T6 and T7 as protocol §4",
+   "failureConsequence": "a missed criterion is FAIL: confirmation fails (documented NO GO); no value is changed on these streams"
+  },
+  {
+   "k": 4,
+   "id": "S-A92",
+   "group": "stress",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "stress practice A92 (stationary) against itself at 0.92 core load: diagnostic",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "A92"
+   },
+   "candidate": {
+    "practice": "A92",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only, never judged; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 5,
+   "id": "S-B92",
+   "group": "stress",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "stress practice B92 (seasonal) against itself at 0.92 core load: diagnostic",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "B92"
+   },
+   "candidate": {
+    "practice": "B92",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only, never judged; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 6,
+   "id": "S-C92",
+   "group": "stress",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "stress practice C92 (bursty) against itself at 0.92 core load: diagnostic",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "C92"
+   },
+   "candidate": {
+    "practice": "C92",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only, never judged; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 7,
+   "id": "S-Cs92",
+   "group": "stress",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "stress practice Cs92 (seasonal and bursty) against itself at 0.92 core load: diagnostic",
+   "seeds": 2500,
+   "baseline": {
+    "practice": "Cs92"
+   },
+   "candidate": {
+    "practice": "Cs92",
+    "booking": "independent"
+   },
+   "expectedEffect": "none: the same practice on an independent booking stream",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only, never judged; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 8,
+   "id": "Wg85",
+   "group": "structural",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "structural practice Wg85 (no reading Saturday after 14:00 or Sunday, A85's staffing) against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "Wg85",
+    "booking": "independent"
+   },
+   "expectedEffect": "structural; no prespecified clinical effect",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 9,
+   "id": "WgU85",
+   "group": "structural",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "structural practice WgU85 (the weekend gap at A85's realized utilization) against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "WgU85",
+    "booking": "independent"
+   },
+   "expectedEffect": "structural; no prespecified clinical effect",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 10,
+   "id": "R085",
+   "group": "structural",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "structural practice R085 (the simulator's rota alone) against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "R085",
+    "booking": "independent"
+   },
+   "expectedEffect": "structural; no prespecified clinical effect",
+   "primaryMetric": "40-seed rejection rate (reported)",
+   "acceptanceRule": "reported only; pairing must hold (T8)",
+   "failureConsequence": "none for the policy; a pairing failure is T8"
+  },
+  {
+   "k": 11,
+   "id": "L10-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration L10-85: reading capacity 10% lower from day 60, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "L10-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 12,
+   "id": "L20-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration L20-85: reading capacity 20% lower from day 60, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "L20-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 13,
+   "id": "D-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration D-85: reading capacity 25% lower from day 30, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "D-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 14,
+   "id": "K-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration K-85: reading capacity eroding 0.2% a day from day 30, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "K-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 15,
+   "id": "IL10-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration IL10-85: imaging capacity 10% lower from day 60, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "IL10-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 16,
+   "id": "IK-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration IK-85: imaging capacity eroding 0.2% a day from day 30, against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "IK-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 17,
+   "id": "IL40-85",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration IL40-85: imaging capacity 40% lower from day 30 (material loss), against A85",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "IL40-85",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 18,
+   "id": "L10-92",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration L10-92: reading capacity 10% lower from day 60, against A92",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A92"
+   },
+   "candidate": {
+    "practice": "L10-92",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 19,
+   "id": "K-92",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration K-92: reading capacity eroding 0.2% a day from day 30, against A92",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A92"
+   },
+   "candidate": {
+    "practice": "K-92",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 20,
+   "id": "IL10-92",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration IL10-92: imaging capacity 10% lower from day 60, against A92",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A92"
+   },
+   "candidate": {
+    "practice": "IL10-92",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 21,
+   "id": "IK-92",
+   "group": "deterioration",
+   "criteria": [
+    "T2G",
+    "T8"
+   ],
+   "mechanism": "deterioration IK-92: imaging capacity eroding 0.2% a day from day 30, against A92",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A92"
+   },
+   "candidate": {
+    "practice": "IK-92",
+    "booking": "independent"
+   },
+   "expectedEffect": "materiality decided in the run by the prespecified rule (protocol §4 T2G)",
+   "primaryMetric": "40-seed rejection rate of a material deterioration",
+   "acceptanceRule": "T2G: a material deterioration rejected in at least 90% of its 25 groups (at least 23); a non-material one reported",
+   "failureConsequence": "a material deterioration rejected in fewer than 23 of 25 groups: T2G FAIL"
+  },
+  {
+   "k": 22,
+   "id": "H10",
+   "group": "concentrated harm",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "concentrated urgent harm of 10 points on 10% of seeds (at the safeguard's threshold)",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "harmProbability": 0.1,
+     "effect": 0.1
+    }
+   },
+   "expectedEffect": "a harmed seed loses ⌈0.1 × N⌉ of its N eligible urgent orders (realized injected increase at least 10 points); each seed harmed independently with probability 0.1",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds (seed-level detection); 40-seed rejection (reported against the allowance's analytical prediction)",
+   "acceptanceRule": "reported only (at the 10-point threshold: a seed is flagged only above it)",
+   "failureConsequence": "none"
+  },
+  {
+   "k": 23,
+   "id": "H15",
+   "group": "concentrated harm",
+   "criteria": [
+    "T2",
+    "T8"
+   ],
+   "mechanism": "concentrated urgent harm of 15 points on 10% of seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "harmProbability": 0.1,
+     "effect": 0.15
+    }
+   },
+   "expectedEffect": "a harmed seed loses ⌈0.15 × N⌉ of its N eligible urgent orders (realized injected increase at least 15 points); each seed harmed independently with probability 0.1",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds (seed-level detection); 40-seed rejection (reported against the allowance's analytical prediction)",
+   "acceptanceRule": "T2: harmed-seed detection (pooled over the T2 scenarios) at least 0.95, point estimate; whole-evaluation rejection reported, never a target",
+   "failureConsequence": "detection below 0.95: T2 FAIL"
+  },
+  {
+   "k": 24,
+   "id": "H20",
+   "group": "concentrated harm",
+   "criteria": [
+    "T2",
+    "T8"
+   ],
+   "mechanism": "concentrated urgent harm of 20 points on 10% of seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "harmProbability": 0.1,
+     "effect": 0.2
+    }
+   },
+   "expectedEffect": "a harmed seed loses ⌈0.2 × N⌉ of its N eligible urgent orders (realized injected increase at least 20 points); each seed harmed independently with probability 0.1",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds (seed-level detection); 40-seed rejection (reported against the allowance's analytical prediction)",
+   "acceptanceRule": "T2: harmed-seed detection (pooled over the T2 scenarios) at least 0.95, point estimate; whole-evaluation rejection reported, never a target",
+   "failureConsequence": "detection below 0.95: T2 FAIL"
+  },
+  {
+   "k": 25,
+   "id": "SHOCK",
+   "group": "concentrated harm",
+   "criteria": [
+    "T2",
+    "T8"
+   ],
+   "mechanism": "all-or-nothing seed shock: 3% of seeds lose every urgent order",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "all",
+     "priority": "urgent",
+     "harmProbability": 0.03
+    }
+   },
+   "expectedEffect": "every urgent order of a harmed seed lost; each seed harmed independently with probability 0.03",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds (seed-level detection); 40-seed rejection (reported against the allowance's analytical prediction)",
+   "acceptanceRule": "T2: harmed-seed detection (pooled over the T2 scenarios) at least 0.95, point estimate; whole-evaluation rejection reported, never a target",
+   "failureConsequence": "detection below 0.95: T2 FAIL"
+  },
+  {
+   "k": 26,
+   "id": "OH10",
+   "group": "offset harm",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "offset harm: the candidate 5 points better on unharmed seeds, 10 points worse on 10% of seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.05
+    }
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.15,
+     "harmProbability": 0.1
+    }
+   },
+   "expectedEffect": "the baseline loses ⌈0.05 × N⌉ urgent orders on every seed (enough unimaged demand for a 5-point improvement); a harmed candidate seed loses ⌈0.15 × N⌉: about −5 points on unharmed seeds, +10 on harmed; seed mean about -3.5 points",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds; Gate B's mean (passes); 40-seed rejection reported against the analytical prediction",
+   "acceptanceRule": "reported only",
+   "failureConsequence": "none"
+  },
+  {
+   "k": 27,
+   "id": "OH15",
+   "group": "offset harm",
+   "criteria": [
+    "T2",
+    "T8"
+   ],
+   "mechanism": "offset harm: the candidate 5 points better on unharmed seeds, 15 points worse on 10% of seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.05
+    }
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.2,
+     "harmProbability": 0.1
+    }
+   },
+   "expectedEffect": "the baseline loses ⌈0.05 × N⌉ urgent orders on every seed (enough unimaged demand for a 5-point improvement); a harmed candidate seed loses ⌈0.2 × N⌉: about −5 points on unharmed seeds, +15 on harmed; seed mean about -3.0 points",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds; Gate B's mean (passes); 40-seed rejection reported against the analytical prediction",
+   "acceptanceRule": "T2 detection pool (harm at least 15 points)",
+   "failureConsequence": "detection below 0.95: T2 FAIL"
+  },
+  {
+   "k": 28,
+   "id": "OH20",
+   "group": "offset harm",
+   "criteria": [
+    "T2",
+    "T8"
+   ],
+   "mechanism": "offset harm: the candidate 5 points better on unharmed seeds, 20 points worse on 10% of seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.05
+    }
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.25,
+     "harmProbability": 0.1
+    }
+   },
+   "expectedEffect": "the baseline loses ⌈0.05 × N⌉ urgent orders on every seed (enough unimaged demand for a 5-point improvement); a harmed candidate seed loses ⌈0.25 × N⌉: about −5 points on unharmed seeds, +20 on harmed; seed mean about -2.5 points",
+   "primaryMetric": "the safeguard's urgent flag on harmed seeds; Gate B's mean (passes); 40-seed rejection reported against the analytical prediction",
+   "acceptanceRule": "T2 detection pool (harm at least 15 points)",
+   "failureConsequence": "detection below 0.95: T2 FAIL"
+  },
+  {
+   "k": 29,
+   "id": "NM0",
+   "group": "near margin",
+   "criteria": [
+    "T5",
+    "T8"
+   ],
+   "mechanism": "Gate B near its margin: an expected urgent unimaged increase of 0 points injected at random",
+   "seeds": 1000,
+   "baseScenario": 0,
+   "injectionReplicates": 20,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent"
+   },
+   "expectedEffect": "none beyond S-A85's natural difference",
+   "primaryMetric": "Gate B urgent acceptance over 25 groups × 20 injection replicates",
+   "acceptanceRule": "T5: acceptance against the prediction from the same pairs (conformance), and at 2.1 and 3 points against the owner's tolerances (protocol §4 T5; tolerances proposed, not approved)",
+   "failureConsequence": "a conformance miss or a tolerance exceeded: T5 FAIL"
+  },
+  {
+   "k": 30,
+   "id": "NM1",
+   "group": "near margin",
+   "criteria": [
+    "T5",
+    "T8"
+   ],
+   "mechanism": "Gate B near its margin: an expected urgent unimaged increase of 1 points injected at random",
+   "seeds": 1000,
+   "baseScenario": 0,
+   "injectionReplicates": 20,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "bernoulli",
+     "priority": "urgent",
+     "effect": 0.01
+    }
+   },
+   "expectedEffect": "each served eligible urgent order of the candidate lost independently with probability 0.01 × N ÷ served: an expected increase of exactly 1 points on every seed (on the S-A85 pairs, whose natural difference is added)",
+   "primaryMetric": "Gate B urgent acceptance over 25 groups × 20 injection replicates",
+   "acceptanceRule": "T5: acceptance against the prediction from the same pairs (conformance), and at 2.1 and 3 points against the owner's tolerances (protocol §4 T5; tolerances proposed, not approved)",
+   "failureConsequence": "a conformance miss or a tolerance exceeded: T5 FAIL"
+  },
+  {
+   "k": 31,
+   "id": "NM2",
+   "group": "near margin",
+   "criteria": [
+    "T5",
+    "T8"
+   ],
+   "mechanism": "Gate B near its margin: an expected urgent unimaged increase of 2 points injected at random",
+   "seeds": 1000,
+   "baseScenario": 0,
+   "injectionReplicates": 20,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "bernoulli",
+     "priority": "urgent",
+     "effect": 0.02
+    }
+   },
+   "expectedEffect": "each served eligible urgent order of the candidate lost independently with probability 0.02 × N ÷ served: an expected increase of exactly 2 points on every seed (on the S-A85 pairs, whose natural difference is added)",
+   "primaryMetric": "Gate B urgent acceptance over 25 groups × 20 injection replicates",
+   "acceptanceRule": "T5: acceptance against the prediction from the same pairs (conformance), and at 2.1 and 3 points against the owner's tolerances (protocol §4 T5; tolerances proposed, not approved)",
+   "failureConsequence": "a conformance miss or a tolerance exceeded: T5 FAIL"
+  },
+  {
+   "k": 32,
+   "id": "NM2.1",
+   "group": "near margin",
+   "criteria": [
+    "T5",
+    "T8"
+   ],
+   "mechanism": "Gate B near its margin: an expected urgent unimaged increase of 2.1 points injected at random",
+   "seeds": 1000,
+   "baseScenario": 0,
+   "injectionReplicates": 20,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "bernoulli",
+     "priority": "urgent",
+     "effect": 0.021
+    }
+   },
+   "expectedEffect": "each served eligible urgent order of the candidate lost independently with probability 0.021 × N ÷ served: an expected increase of exactly 2.1 points on every seed (on the S-A85 pairs, whose natural difference is added)",
+   "primaryMetric": "Gate B urgent acceptance over 25 groups × 20 injection replicates",
+   "acceptanceRule": "T5: acceptance against the prediction from the same pairs (conformance), and at 2.1 and 3 points against the owner's tolerances (protocol §4 T5; tolerances proposed, not approved)",
+   "failureConsequence": "a conformance miss or a tolerance exceeded: T5 FAIL"
+  },
+  {
+   "k": 33,
+   "id": "NM3",
+   "group": "near margin",
+   "criteria": [
+    "T5",
+    "T8"
+   ],
+   "mechanism": "Gate B near its margin: an expected urgent unimaged increase of 3 points injected at random",
+   "seeds": 1000,
+   "baseScenario": 0,
+   "injectionReplicates": 20,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "bernoulli",
+     "priority": "urgent",
+     "effect": 0.03
+    }
+   },
+   "expectedEffect": "each served eligible urgent order of the candidate lost independently with probability 0.03 × N ÷ served: an expected increase of exactly 3 points on every seed (on the S-A85 pairs, whose natural difference is added)",
+   "primaryMetric": "Gate B urgent acceptance over 25 groups × 20 injection replicates",
+   "acceptanceRule": "T5: acceptance against the prediction from the same pairs (conformance), and at 2.1 and 3 points against the owner's tolerances (protocol §4 T5; tolerances proposed, not approved)",
+   "failureConsequence": "a conformance miss or a tolerance exceeded: T5 FAIL"
+  },
+  {
+   "k": 34,
+   "id": "HV",
+   "group": "unequal volume",
+   "criteria": [
+    "report",
+    "T8"
+   ],
+   "mechanism": "unequal seed volumes with identical paired demand: demand volume 0.6, 0.8, 1.0 by seed (i mod 3) for both plans; 3 points of urgent loss on the full-volume seeds",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85",
+    "volumeCycle": [
+     0.6,
+     0.8,
+     1.0
+    ]
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "volumeCycle": [
+     0.6,
+     0.8,
+     1.0
+    ],
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.03,
+     "onVolume": 1.0
+    }
+   },
+   "expectedEffect": "seed-averaged injected increase 1 point (3 points on one seed in three); pooled about 1.25 (volume-weighted)",
+   "primaryMetric": "Gate B's seed mean against the pooled difference; pairing at unequal volumes",
+   "acceptanceRule": "reported; every seed paired (T8)",
+   "failureConsequence": "a pairing failure: T8 (INCONCLUSIVE)"
+  },
+  {
+   "k": 35,
+   "id": "W-URG-LATE",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "six urgent reports a week reported eight days past due from day 60",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "urgentLate8d"
+    }
+   },
+   "expectedEffect": "rejected by clinical safety (absolute 24 h)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by clinical safety (absolute 24 h)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 36,
+   "id": "W-ROUT-348",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "one routine report 348 hours past due",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "routine348"
+    }
+   },
+   "expectedEffect": "rejected by clinical safety (absolute 14 days)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by clinical safety (absolute 14 days)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 37,
+   "id": "W-ACC-LATE",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "30 urgent orders a seed imaged 30 days late",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "accessLate30d"
+    }
+   },
+   "expectedEffect": "rejected by the shared allowance (Gate A timely access)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by the shared allowance (Gate A timely access)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 38,
+   "id": "W-LOST30",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "30 urgent orders a seed lost",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "count",
+     "priority": "urgent",
+     "count": 30
+    }
+   },
+   "expectedEffect": "rejected by Gate B urgent",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by Gate B urgent",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 39,
+   "id": "W-PAT30",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "30 urgent orders a seed ended by the patient 30 minutes after receipt",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "count",
+     "priority": "urgent",
+     "count": 30,
+     "outcome": "patient"
+    }
+   },
+   "expectedEffect": "rejected by Gate B urgent",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by Gate B urgent",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 40,
+   "id": "W-ID-REMOVED",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "an eligible urgent order's origin removed on each group's first seed",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "idRemove",
+     "groupFirstSeedOnly": true
+    }
+   },
+   "expectedEffect": "rejected by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 41,
+   "id": "W-ID-REPEATED",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "an origin repeated on each group's first seed",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "idRepeat",
+     "groupFirstSeedOnly": true
+    }
+   },
+   "expectedEffect": "rejected by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 42,
+   "id": "W-ID-CHANGED",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "an eligible urgent request's wanted time moved one minute later under its origin on each group's first seed (the first such order imaged, if at all, at least a minute after it)",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "idChange",
+     "groupFirstSeedOnly": true
+    }
+   },
+   "expectedEffect": "rejected by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by order provenance on that seed alone (the comparison INVALID), Gate B INSUFFICIENT with that seed unmatched",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 43,
+   "id": "W-PARTIAL",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "every soon study of the leading partial week reported 30 hours past due (audit G4.1)",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "partialSevere"
+    }
+   },
+   "expectedEffect": "rejected by the shared allowance (the soon partial-window count ceiling)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by the shared allowance (the soon partial-window count ceiling)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 44,
+   "id": "W-HORIZON",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "a soon order wanted by the horizon imaged one second after it and reported 60 hours past due (audit G4.2)",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "horizonCross"
+    }
+   },
+   "expectedEffect": "rejected by clinical safety (the follow-up's observed violation)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by clinical safety (the follow-up's observed violation)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 45,
+   "id": "W-PENDING",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "a soon order wanted by the horizon imaged 10 hours before the end of observation, unfinished",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "pending"
+    }
+   },
+   "expectedEffect": "rejected by clinical safety INSUFFICIENT (not yet observable)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by clinical safety INSUFFICIENT (not yet observable)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 46,
+   "id": "W-MARGIN-ABOVE",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "⌊0.02 N⌋ + 1 urgent orders lost on every seed, on identical records",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "baseline",
+    "inject": {
+     "kind": "marginAbove"
+    }
+   },
+   "expectedEffect": "rejected by Gate B urgent (every seed above 2 points)",
+   "primaryMetric": "the groups rejected by the targeted rule",
+   "acceptanceRule": "T4: all 25 groups rejected, each by Gate B urgent (every seed above 2 points)",
+   "failureConsequence": "any group not so rejected: T4 FAIL"
+  },
+  {
+   "k": 47,
+   "id": "W-MARGIN-AT",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "⌊0.02 N⌋ urgent orders lost on every seed, on identical records (every seed at most 2 points)",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85"
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "baseline",
+    "inject": {
+     "kind": "marginFloor"
+    }
+   },
+   "expectedEffect": "Gate B urgent PASS (the mean at most 2 points exactly)",
+   "primaryMetric": "Gate B urgent status",
+   "acceptanceRule": "T4: Gate B urgent PASS in all 25 groups",
+   "failureConsequence": "any group with Gate B urgent not PASS: T4 FAIL"
+  },
+  {
+   "k": 48,
+   "id": "W-ACCESS65",
+   "group": "witness",
+   "criteria": [
+    "T4",
+    "T8"
+   ],
+   "mechanism": "both plans lose 65% of their eligible urgent orders",
+   "seeds": 1000,
+   "baseline": {
+    "practice": "A85",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.65
+    }
+   },
+   "candidate": {
+    "practice": "A85",
+    "booking": "independent",
+    "inject": {
+     "kind": "quota",
+     "priority": "urgent",
+     "effect": 0.65
+    }
+   },
+   "expectedEffect": "Gate B urgent PASS (non-deterioration only), disclosed with both plans' urgent unimaged fractions of at least 0.65",
+   "primaryMetric": "Gate B urgent status, the disclosed unimaged fractions and the access claims",
+   "acceptanceRule": "T4: in every group, Gate B urgent PASS, both urgent unimaged seed-mean fractions at least 0.65, empirical acceptance PASS, absolute adequacy 'not established' and population confidence 'not claimed'",
+   "failureConsequence": "a group with Gate B not passing, without the disclosed loss, or claiming adequacy or confidence: T4 FAIL"
+  }
+ ],
+ "criteria": "docs/calibration/clinical-5c4l/reserved-validation-protocol.md §4",
+ "t5Tolerances": {
+  "status": "APPROVED by the owner 2026-10-19: empirical operating-characteristic tolerances under the manifest's exact injection distributions, not population-confidence guarantees",
+  "at2.1": 0.4,
+  "at3": 0.01,
+  "rule": "T5b PASS when the observed Gate B urgent acceptance over NM2.1's 500 evaluations is at most 0.40 and over NM3's at most 0.01 (point estimates)",
+  "protocol": "docs/calibration/clinical-5c4l/reserved-validation-protocol.md §5"
+ }
+}

@@ -338,7 +338,8 @@ func TestGateMissingBaseline(t *testing.T) {
 // C10: noncomparable demand. Extra urgent orders on one seed of the
 // candidate, or receipt times moved: that seed's demand is not the
 // baseline's, so the comparison is not paired: lost demand insufficient,
-// NO GO, rather than pairing orders that are not the same patients.
+// rather than pairing orders that are not the same patients; and under
+// the 5C.4l candidate the orders do not reconcile by origin: INVALID.
 // Relabelling thirty urgent orders as routine changes both priorities'
 // demand: both insufficient.
 func TestGateNoncomparableDemand(t *testing.T) {
@@ -351,8 +352,8 @@ func TestGateNoncomparableDemand(t *testing.T) {
 			}
 		}
 	})
-	if g := lostDemandOf(c, "urgent"); g.Status != Insufficient || !slices.Equal(g.UnmatchedSeeds, []int64{9}) || c.Verdict != NOGO ||
-		!hasReason(c, "not paired") {
+	if g := lostDemandOf(c, "urgent"); g.Status != Insufficient || !slices.Equal(g.UnmatchedSeeds, []int64{9}) || c.Verdict != INVALID ||
+		!strings.Contains(g.Reason, "not paired") || !hasReason(c, "order provenance") {
 		t.Fatalf("moved receipts: %+v %v", g, c.Reasons)
 	}
 	// Relabelled requests (the orders and their studies routine): the
@@ -370,7 +371,8 @@ func TestGateNoncomparableDemand(t *testing.T) {
 		}
 	}
 	_, c = clinicalCaseAB(t, p, d, nil, relabel(true))
-	if lostDemandOf(c, "urgent").Status != Insufficient || lostDemandOf(c, "routine").Status != Insufficient || c.Verdict != NOGO {
+	if lostDemandOf(c, "urgent").Status != Insufficient || lostDemandOf(c, "routine").Status != Insufficient || c.Verdict != INVALID ||
+		!hasReason(c, "order provenance") {
 		t.Fatalf("relabelled: %+v", c.LostDemand)
 	}
 	// The orders alone relabelled, their studies still urgent: the

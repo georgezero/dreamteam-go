@@ -659,3 +659,15 @@ stream was run.
 | No-action simulator access validation, 10 development seeds, 45-day follow-up | `systemd-run … DT_SIM_ACCESS=… go test ./internal/sim -run TestSimulatorAccessValidation` | 140 s |
 | Mutation checks, 24 mutations, one at a time | `python3 mutate2.py`, `mutate3.py` (scratch), and the recorder revert | all 24 caught |
 | Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 60m` | eval 1,350 s, sim 548 s, session 175 s, cmd 48 s; every package passes; vet and gofmt clean |
+
+## 2026-10-20 — V0.2 Slice 5C.4l (same machine; heavy runs alone, memory-capped)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Scenario manifest version 3, all 49 scenarios × 40 seeds, development family PCG(20261021, ·), shared pre-takeover history | `systemd-run --user --scope -p MemoryMax=6G … DT_MANIFEST_OUT=… DT_MANIFEST_SEEDS=40 eval.test -test.run TestReservedManifestRun` | 2,370 s, peak 1.13 GB (5C.4j: 2,116 s) |
+| Stable and near-margin scenarios × 200 seeds | the same with `DT_MANIFEST_SEEDS=200 DT_MANIFEST_SCENARIOS=…` | 3,954 s, peak 1.15 GB |
+| No-action simulator access validation, 10 development seeds | `systemd-run … DT_SIM_ACCESS=… go test ./internal/sim -run TestSimulatorAccessValidation` | 125 s, peak 1.07 GB |
+| Follow-up financial comparison, 10 development seeds recorded to H + 31 d and H + 45 d | `DT_FIN_FOLLOWUP=… sim.test -test.run TestFollowUpFinancialObservation` | 280 s |
+| Full eval package, non-short | `systemd-run … eval.test -test.v` | 1,928 s, peak 722 MB |
+| Mutation checks: 23 new, the 5C.4j sets re-run | `python3 mutate4l.py`, `mutate2.py`, `mutate3.py` (scratch) | 23 of 23; 21 of 21 applicable |
+| Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 120m` | 2,696 s wall (eval 1,905 s, sim 544 s, session 182 s, cmd 42 s), peak 662 MB; every package passes; vet and gofmt clean |

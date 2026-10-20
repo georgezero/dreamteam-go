@@ -1,0 +1,447 @@
+{
+ "schema": "dreamteam.evalpolicy/v5",
+ "id": "v0.2-eval-5-candidate",
+ "status": "PROPOSAL, not in force and not frozen (Slice 5C.4j, 2026-10-19): the owner's modified option B with Gate B as an empirical benchmark acceptance rule without a population-confidence claim, its approved per-seed safeguard, volume-aware severity windows (no urgent weekly gate; soon fixed four-week calendar blocks; routine fixed calendar weeks; docs/calibration/clinical-5c4f/), the boundary-safety revision (the absolute limits over every study of an order wanted by the horizon; docs/calibration/clinical-5c4h/) and its remediation (an observed 5% severe-rate ceiling on every nonempty partial window, the order-study integrity contract, a 45-day follow-up; docs/calibration/clinical-5c4j/), for renewed independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
+ "effective": "none: v0.2-eval-4 stays in force",
+ "notes": [
+  "Candidate only. The clinical section implements docs/evaluation/proposals/v5-clinical-acceptance.md with the values of docs/calibration/clinical-5c4b/acceptance-design.md; every other rule is v0.2-eval-4 unchanged, except the sampled persistent age check, reported only (v5 replaces it with the exact absolute limits)."
+ ],
+ "supersedes": {
+  "id": "v0.2-eval-4",
+  "path": "docs/evaluation/policy-v0.2-eval-4.json",
+  "sha256": "4e277c7263dcff7ddabe63741beb44abfc9a46d3bc23f6b6418715b58ffb6fb3"
+ },
+ "scenario": {
+  "fingerprint": "e8718dbd1031feb326b4934d291f81eb14fd867d4a8fa6acc1673a75b55b76f8",
+  "tatTargetMin": {
+   "urgent": 60,
+   "soon": 240,
+   "routine": 1440
+  },
+  "rotaWeekA": "2026-10-12"
+ },
+ "horizons": {
+  "feedbackDays": 30,
+  "primaryDays": 90,
+  "operatingFromDay": 30,
+  "validationDays": 180,
+  "tail": {
+   "minDaysAfterPrimary": 60,
+   "daysAfterLatestEffect": 30
+  },
+  "closureMin": 1440
+ },
+ "service": {
+  "breachGate": {
+   "urgent": 0.12,
+   "soon": 0.32,
+   "routine": 0.06
+  },
+  "gatedWindows": [
+   "T90",
+   "tail"
+  ],
+  "validationWindows": [
+   "T180"
+  ],
+  "infoWindows": [
+   "T30",
+   "D31-90"
+  ],
+  "perSeedWindows": {
+   "urgent": [
+    "gated"
+   ],
+   "soon": [
+    "T90",
+    "tail"
+   ],
+   "routine": [
+    "T90",
+    "tail"
+   ]
+  },
+  "minCohort": {
+   "urgent": 43,
+   "soon": 88,
+   "routine": 23
+  },
+  "maxFailingSeedFraction": 0.1,
+  "planningRate": {
+   "urgent": 0.08,
+   "soon": 0.21,
+   "routine": 0.04
+  },
+  "operatingCharacteristics": "docs/evaluation/oc-v0.2-eval-4.json",
+  "clusterLevels": [
+   "day",
+   "week"
+  ],
+  "reliabilityConfidence": 0.95
+ },
+ "caseSelection": {
+  "minStratumDue": 30,
+  "perSeedMaxServedDrop": 0.05,
+  "pooledMaxServedDrop": 0.02,
+  "maxAcquiredDrop": 0.02,
+  "maxLossRateIncrease": 0.02,
+  "blockingStrata": [
+   "priority",
+   "modality",
+   "inherited"
+  ]
+ },
+ "backlog": {
+  "blockDays": 28,
+  "rotaCycleDays": 14,
+  "levelStatistic": "mean",
+  "levelGrowthFraction": 1.5,
+  "levelGrowthStudies": 2,
+  "lateWorkStatistic": "median",
+  "growthFraction": 0.1,
+  "growthStudies": 2,
+  "exposureFloorStudyMin": 2880,
+  "staleAfterDueMin": 1440,
+  "persistentAfterDueDays": 14,
+  "staleCapStudies": 3,
+  "maxUnstableSeedFraction": 0.1,
+  "legacyRule": "historical (plan D README): mean backlog at the day-180 sample at most 1.1 times the mean at the day-90 sample; single samples on different weekdays. Reported for comparison, never gated.",
+  "workloadAdjustedChecks": [
+   "level",
+   "mean",
+   "max",
+   "overdue",
+   "exposure"
+  ],
+  "absoluteChecks": [
+   "stale",
+   "staleCap",
+   "persistent"
+  ],
+  "informationalChecks": [
+   "mean",
+   "max",
+   "persistent"
+  ]
+ },
+ "finance": {
+  "minCashFloorCents": 0,
+  "maxInsolventSeeds": 0,
+  "maxPastDueCents": 0,
+  "settlementDays": 31,
+  "employeeCommitmentDays": 14,
+  "maxFundingGapSeeds": 0
+ },
+ "payback": {
+  "horizonDays": [
+   90,
+   180
+  ],
+  "medianMinRepaidFraction": 0.5
+ },
+ "seeds": {
+  "development": "901-910",
+  "reference": "1001-1020",
+  "holdoutManifest": "docs/evaluation/holdout-v0.2.json"
+ },
+ "verdict": [
+  "INVALID: any record, comparison or evaluation integrity check fails (README §10). An invalid evaluation is not evidence; fix and rerun.",
+  "NO GO: any hard gate fails or lacks evidence: service (the joint seed rule over every per-seed gate of the gated windows, and every gated pooled rate), case selection (every failing stratum, and every blocking stratum lacking evidence), backlog (every later block's workload-adjusted level, overdue count and exposure, its absolute stale count, the stale cap in every block from the reference on, and no study more than 14 days past due; the peak, the v0.2-eval-3 mean check and recovery time are reported, never gated), solvency (cash after every posting at or above the floor, nothing past due) and funding (the dated settlement test: every obligation recognized by the horizon paid when due within the observation, and cash at the end of observation covering the committed liabilities outside the recurring payment cycle). The 14-day employee-commitment coverage is reported, never gated.",
+  "GO (financial superiority): every hard gate passes; the plan's own mean operating profit is positive at T90 and at T180; the T90 paired 95% interval of incremental operating profit is above zero; and T180 validation holds (its joint seed rule and pooled rates pass, and its mean increment is positive).",
+  "CONDITIONAL GO (relative improvement): every hard gate passes and the mean T90 increment is positive without every GO condition; the missing conditions are listed.",
+  "CONDITIONAL GO (transition, not yet repaid): every hard gate passes, the mean T90 increment is not positive, and the mean increment over the operating window (days 31-90) is positive: a solvent, clinically eligible reorganization that has not repaid its transition cost by T90. T180 profit and payback are reported, never promoted to financial GO. When the baseline fails service, the service restoration and its T90 cost are also stated.",
+  "CONDITIONAL GO (service purchase): every hard gate passes, the mean T90 increment and the operating-window increment are not positive, and the baseline fails the service gates the candidate passes: service restored at the stated cost. A baseline that fails only solvency, funding, backlog or case selection is not a service restoration.",
+  "NO GO (no benefit) otherwise: every hard gate passes but there is no T90 increment and the baseline's service already passes."
+ ],
+ "changes": [
+  {
+   "rule": "clinical (new)",
+   "finding": "audit docs/audits/slice-5c3-eval4-framework-audit.md: severe report delays, a report 348 h past due, thirty urgent patients a month late and separate allowances all passed v0.2-eval-4",
+   "was": "none",
+   "now": "absolute past-due limits at zero tolerance over every study acquired by the horizon or of an order wanted by it, observed through a 45-day follow-up, a study not yet observable when observation ends leaving safety insufficient; the order-study integrity contract; the severe-delay rate; the severe rate in each fixed calendar window (soon four-week blocks, routine weeks; no urgent weekly gate), every nonempty partial boundary window failing above the rate whatever its size; timely access over served, open and late-cancelled eligible orders from the original wanted time; lost, left and patient-ended demand against the paired baseline as an empirical benchmark acceptance (no population-confidence claim) with a per-seed safeguard; the maximum wait reported; one shared seed allowance"
+  },
+  {
+   "rule": "backlog.informationalChecks (persistent)",
+   "finding": "the sampled 72-hour age check sees a 348 h report only at a daily sample",
+   "was": "gating",
+   "now": "reported only; replaced by the exact absolute past-due limits"
+  }
+ ],
+ "deferredMeasures": [
+  "Payer and referral-source strata (§13.2): not recorded; a refused patient's payer is never drawn.",
+  "Workforce obligations (§13.2, §13.3 DELTA_WORKFORCE): contracted, rostered and worked hours, training, overrun, premium hours, break entitlement and rest deficits.",
+  "Sustainable coverage capacity-hours (§13.3 DELTA_COVERAGE).",
+  "Access distributions wanted-to-first-booked, wanted-to-current-booked and wanted-to-actual-service for new demand (§13.2); reported instead: booking lead and, for inherited orders, wait past the wanted time.",
+  "Contribution by modality and the provisional guarantee shown apart from accrued payroll (§13.2).",
+  "Reading-mix coverage-gap exposure and outcome tails by reader kind (§13.2).",
+  "Every baseline-relative DELTA_* tolerance of §13.3: none is calibrated or gated."
+ ],
+ "historicalReferences": [
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/A-no-action.json",
+   "sha256": "a7285526e81632221b4312398137b3726d4e895976c12528bf32123e6705f21d"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B1-mr-evening.json",
+   "sha256": "7d313133d50e7f212888fa39a8976d1de098223b35b4186edb32a2b022515811"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B2-float.json",
+   "sha256": "ed316cd46cc34c47fa1f3ee4455d990ccdba33d8de5aabbbc8aaac41ff0e985c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/B3-float-mr-evening.json",
+   "sha256": "50c47de0f6885579c9aea53abbe78648440ba97d570a38d9b6535d3f57e4a735"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/C-full-reorganization.json",
+   "sha256": "55f5247e9d9de081694bb9e7bcfdf40c0317a8d870e5281b19d6ce96b3059d01"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/report.md",
+   "sha256": "40d73a49f69ac5a00dd815fefec3a2f4f34857690dc85aece74b90bc313b1047"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/dev/trajectory.csv",
+   "sha256": "f1ee11fe0d351012680df794c9fc1c99004ca37a2e3d3230b4483e5323d6b6ba"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/A-no-action.json",
+   "sha256": "e292e1369523df98df69e5db2fd536348532ca466a3568d0353f7344830e23ec"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/B-partial.json",
+   "sha256": "7794da84845aef5bd77d0c139b2ccf4181e9ad36ca49787e3cd186ac5fffef0c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/C-full-reorganization.json",
+   "sha256": "043142d120775194479c8ff0183789a3a91d364fc1adb69836638a4b021e8be8"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/report.md",
+   "sha256": "73cb7ecec7d1d319577c84e87262603927e66b3d34558d4890122a4c8bfa2d71"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/eval/trajectory.csv",
+   "sha256": "ad68d487ff943669ca23aa63c7a544de84bacc704f995ddfd603fa734c3e35d0"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/A-no-action.json",
+   "sha256": "01649089776e1778556eab097b70b32eec02c65bbba252504915b3b62e7167ab"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/C-full-reorganization.json",
+   "sha256": "f5f340f1deb85cd23ffc752ab91e4e9a6663d60d4abac4b35ce46903444548f3"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/D-full-reading.json",
+   "sha256": "0e3fc9f76cc7257c200509258aa6daa647ea61e346a748d7a3992ac3e3aa3674"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/reading.md",
+   "sha256": "a702e0491c289a06643491dc34c0be6aad5dfb8c8e078c035243e6fe4ed56144"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/report.md",
+   "sha256": "39178bf587b7a0e518314449d0df4651420f71f719ea8b0d66865b66f8d1733f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-dev/trajectory.csv",
+   "sha256": "df9eba7eb7df8fcea2ef8b33b767177bef41439e9079a654f9372cb4802b86c3"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/A-no-action.json",
+   "sha256": "013f0534e7c9056cb0ee8cd6da843db64ff4a6bfdde65be104f9f4d3fb9c7c3c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/B-partial.json",
+   "sha256": "58b197bb1b7e1b77fa257a8e9ff6d9fa4a24a1f909c40a3b0b0d3958f819146e"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/C-full-reorganization.json",
+   "sha256": "fec7ae9a5d5f682103ca440629877ebc65614b00b40a2170497dd12ac94a7e3f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/D-full-reading.json",
+   "sha256": "15dc838465e8f86d976d42f01a403f3a26035c93fc89e2735e29e0679142dc3c"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/reading.md",
+   "sha256": "9743e7a28e6ba3a317c4d08f397ce80161c1461c293a748b82654c521d8ead05"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/report.md",
+   "sha256": "7d6a3209804d26007733ef2bb801fe676f81c9594c8b64203d44cf3695e990f2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/results/reading-eval/trajectory.csv",
+   "sha256": "1282e27c9f7557efd0dc0108db626a4b8e61df312ab0b177b1a1b245d0b5b7be"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/benchmark.json",
+   "sha256": "dbf4c0ea424485a4483241dae560e2fbdb2012272e334efaa6af639bef4b5a62"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/A-no-action.json",
+   "sha256": "8cb36a89e1afe9003e86c2753d2f43da81a0498cc61b9a8383a33fe466aae004"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B1-mr-evening.json",
+   "sha256": "dd3a8b740c3cb24e3a5d44b1e008cb2693cef9c4df98090bce26602e5368555f"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B2-float.json",
+   "sha256": "4ea7ea402c56c794881b49345ee1d76ca38a1d6cc9ee4ed594e953b598ca6fb2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B3-float-mr-evening.json",
+   "sha256": "8d97a97d493d69ef1e03cadfac1dc378a9433d64bb414660435352f5042f75d6"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/B-partial.json",
+   "sha256": "e5939ab6f5cccd964694a64fc4472838f66c432ef0bc3ee6300acc5e54fb47f2"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/C-full-reorganization.json",
+   "sha256": "19a032ad28ee41d95e99a218d02d9e3ec4a91c0974c6c7b4aa8844169160bf01"
+  },
+  {
+   "path": "docs/calibration/dynamic-staffing/plans/D-full-reading.json",
+   "sha256": "1257cfec2c7d109f73fd460f466af98c45c934217b3a524c14d08f53603f78ad"
+  },
+  {
+   "path": "docs/calibration/teleradiology-5b/results/functional-dev.json",
+   "sha256": "75de712774da65f7fcd25a043ddad9057334034b202784876141fb33213b21ef"
+  },
+  {
+   "path": "docs/evaluation/policy-v0.2.json",
+   "sha256": "337234ba49a86b62e294488bdc6d3b8450ae596d6a1b44934427f2a4c94dbf4f"
+  },
+  {
+   "path": "docs/evaluation/policy-v0.2-eval-2.json",
+   "sha256": "5dbab4626bea560c2e3e96e49085730cb53998c806e0e35a1bdf2db10d595ef9"
+  },
+  {
+   "path": "docs/evaluation/policy-v0.2-eval-3.json",
+   "sha256": "0cf4884f216170c7bba4d869039a86ba8fba70d76f31c2e36aebf58620213915"
+  },
+  {
+   "path": "docs/evaluation/oc-v0.2-eval-2.json",
+   "sha256": "d89fed013f50df099516d36e9b76101a39a0396125515f418b6da62b363f48a2"
+  },
+  {
+   "path": "docs/evaluation/oc-v0.2-eval-3.json",
+   "sha256": "7dcac30ce64cdbed729efde3d103afacf5b09acff5ee2fb1cc12025c1961f5a2"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p1-historical/run.json",
+   "sha256": "06e3018ef18f03d0d1dee0afcab3815a66b46a689ddb72ca6071752a1723b54f"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p1-historical/report.json",
+   "sha256": "fc5f8bf9d8340291678101e1eb10ee1a6833be50367fa6ab8cbec81eae745f82"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p2-family/run.json",
+   "sha256": "3bd8129df29c02c3e125fcc0207724d83b0493fbbe43a29bb7f97bd10ea52ee9"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p2-family/report.json",
+   "sha256": "d792227d8f581c06b2d3667a027be0acad1df7ffd2770c4a2ebbc7ea90044a08"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p3-refine/run.json",
+   "sha256": "33ba9ae15d31d9cc0c7a4ee9a7629f04f02aad10bf7d44a8094b833406125b80"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p3-refine/report.json",
+   "sha256": "762fde0c62daa5531856ac1a2fa2efdb66a8ade56d9aa7f736a9c78dd5c4cdbf"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p4-refine/run.json",
+   "sha256": "204358b7b4fb7a8829931bfa7c9214a9102c8bc50cf2e0c3213aa1fe84328a3d"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p4-refine/report.json",
+   "sha256": "140cdfb27daa4997bf5c772a1bef9a695f79c6c8066a96c79d33978e83c302a6"
+  },
+  {
+   "path": "docs/calibration/strategy-development/results/p5-eval3/run.json",
+   "sha256": "f1cd5db663b6e8192f1e237e40704fd7232ff919d3ff336501ab759f37586d7a"
+  }
+ ],
+ "clinical": {
+  "absoluteMaxPastDueMin": {
+   "urgent": 1440,
+   "soon": 2880,
+   "routine": 20160
+  },
+  "severeAfterDueMin": {
+   "urgent": 720,
+   "soon": 1440,
+   "routine": 4320
+  },
+  "maxSevereRate": {
+   "urgent": 0.05,
+   "soon": 0.05,
+   "routine": 0.05
+  },
+  "weeklyPartition": "calendar",
+  "weeklyWindowWeeks": {
+   "urgent": 0,
+   "soon": 4,
+   "routine": 1
+  },
+  "maxWeeklySevereRate": {
+   "soon": 0.05,
+   "routine": 0.05
+  },
+  "minWeeklyCohort": {
+   "soon": 100,
+   "routine": 100
+  },
+  "partialWindows": "rateCeiling",
+  "safetyCohort": "ordersByHorizon",
+  "followUpDays": 45,
+  "orderStudyIntegrity": "contract",
+  "accessLimitMin": {
+   "urgent": 2880,
+   "soon": 10080,
+   "routine": 43200
+  },
+  "minTimelyFraction": {
+   "urgent": 0.95,
+   "soon": 0.95,
+   "routine": 0.95
+  },
+  "minAccessCohort": {
+   "urgent": 43,
+   "soon": 88,
+   "routine": 23
+  },
+  "maxWaitReportOnly": true,
+  "inheritedFrom": "takeover",
+  "maxFailingSeedFraction": 0.1,
+  "lostDemand": {
+   "rule": "empirical",
+   "maxIncrease": {
+    "urgent": 0.02,
+    "soon": 0.02,
+    "routine": 0.02
+   },
+   "maxSeedIncrease": {
+    "urgent": 0.1,
+    "soon": 0.06,
+    "routine": 0.05
+   },
+   "confidence": 0.95,
+   "method": "betting",
+   "minSeeds": 40,
+   "minSeedOrders": {
+    "urgent": 20,
+    "soon": 40,
+    "routine": 40
+   }
+  }
+ }
+}

@@ -61,6 +61,20 @@ func TestDemandExogenousAcrossPlans(t *testing.T) {
 		}
 		return m
 	}
+	// whole: every order of the record, inherited included, by origin: its
+	// ID and request (the provenance the 5C.4l candidate reconciles,
+	// eval orderProvenance).
+	type ident struct {
+		id string
+		k  key
+	}
+	whole := func(r eval.Record) map[string]ident {
+		m := map[string]ident{}
+		for _, o := range r.Orders {
+			m[o.Origin] = ident{o.ID, key{o.ReceivedSec, o.WantedSec, o.Priority, o.Modality, o.WalkIn}}
+		}
+		return m
+	}
 	p, _ := shortPolicy(t, miniConfig(t))
 	for _, seed := range []int64{41, 42} {
 		a, _ := recordMini(t, p, seed, false, true)
@@ -81,6 +95,12 @@ func TestDemandExogenousAcrossPlans(t *testing.T) {
 		oa := byOrigin(a)
 		if !maps.Equal(oa, byOrigin(b)) || !maps.Equal(oa, byOrigin(c)) {
 			t.Fatalf("seed %d: origins or their requests differ between plans", seed)
+		}
+		// Every order, inherited or new, with the same ID and request
+		// under all three plans: the paired plan authenticates each.
+		wa := whole(a)
+		if len(wa) != len(a.Orders) || !maps.Equal(wa, whole(b)) || !maps.Equal(wa, whole(c)) {
+			t.Fatalf("seed %d: the records' orders, IDs or requests differ between plans", seed)
 		}
 		if maps.Equal(outcomes(a), outcomes(c)) {
 			t.Fatalf("seed %d: the policies changed no outcome: no test", seed)

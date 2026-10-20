@@ -723,8 +723,8 @@ func classifyAccess(a *AccessCohort, o *Order, out string, from, limit, E int64)
 func checkClinicalRecord(c *Clinical, r *Record, caps map[string]*Capture, bad func(string, ...any)) bool {
 	ok := true
 	switch end := caps["end"]; {
-	case c.OrderStudyIntegrity == IntegrityContract && end != nil && len(end.OrderOutcomes) == len(r.Orders):
-		ok = checkOrderStudies(r, end, bad)
+	case (c.OrderStudyIntegrity == IntegrityContract || c.OrderStudyIntegrity == IntegrityContractInherited) && end != nil && len(end.OrderOutcomes) == len(r.Orders):
+		ok = checkOrderStudies(r, end, c.OrderStudyIntegrity == IntegrityContractInherited, bad)
 	case c.SafetyCohort == SafetyOrdersByHorizon:
 		ids, pri := map[string]int{}, map[string]string{}
 		for i := range r.Orders {
@@ -1090,13 +1090,25 @@ func clinicalReasons(cand *PlanReport, j *JointGate) []string {
 //
 // Inherited work is exempt where the records cannot reconcile it: a
 // study acquired at or before the takeover (its order may have been
-// resolved before it and be absent), and an order received at or before
-// the takeover and served after it without a post-takeover study.
-func checkOrderStudies(r *Record, end *Capture, bad func(string, ...any)) bool {
+// resolved before it and be absent), and, unless inherited is set, an
+// order received at or before the takeover and served after it without
+// a post-takeover study. With inherited (contractInherited, Slice 5C.4l,
+// audit 5C.4k K2) every order served after the takeover has exactly one
+// post-takeover study, and every order has a unique ID (origins are
+// reconciled with the paired plan: orderProvenance).
+func checkOrderStudies(r *Record, end *Capture, inherited bool, bad func(string, ...any)) bool {
 	t0 := r.TakeoverSec
 	byID := map[string][]int{}
 	for i := range r.Orders {
-		byID[r.Orders[i].ID] = append(byID[r.Orders[i].ID], i)
+		o := &r.Orders[i]
+		byID[o.ID] = append(byID[o.ID], i)
+		if !inherited {
+			continue
+		}
+		if len(byID[o.ID]) > 1 {
+			bad("order %s: its ID repeats", o.ID)
+			return false
+		}
 	}
 	linked := map[int]int{} // order index → its post-takeover studies
 	ids := map[string]bool{}
@@ -1134,7 +1146,9 @@ func checkOrderStudies(r *Record, end *Capture, bad func(string, ...any)) bool {
 	}
 	for i := range r.Orders {
 		o := &r.Orders[i]
-		if o.ReceivedSec > t0 && end.OrderOutcomes[i] == OutServed && linked[i] != 1 {
+		// Inherited orders in a record are those open at the takeover, so
+		// with inherited every served order was served after it.
+		if (o.ReceivedSec > t0 || inherited) && end.OrderOutcomes[i] == OutServed && linked[i] != 1 {
 			bad("order %s: served with no study", o.ID)
 			return false
 		}

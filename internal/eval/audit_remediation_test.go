@@ -256,7 +256,10 @@ func TestGateBMissingIdentity(t *testing.T) {
 				change(r)
 			}
 		})
-		if g := lostDemandOf(c, "urgent"); g.Status != Insufficient || !slices.Equal(g.UnmatchedSeeds, []int64{5}) || c.Verdict != NOGO {
+		// Gate B unmatched there; the comparison INVALID by order
+		// provenance (Slice 5C.4l), no longer merely NO GO.
+		if g := lostDemandOf(c, "urgent"); g.Status != Insufficient || !slices.Equal(g.UnmatchedSeeds, []int64{5}) || c.Verdict != INVALID ||
+			!hasReason(c, "order provenance") {
 			t.Errorf("%s: %+v %s", name, g, c.Verdict)
 		}
 	}

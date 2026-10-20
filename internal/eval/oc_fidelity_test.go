@@ -238,6 +238,15 @@ type ocFidelity struct {
 	// earlier draw and outcome as it was (Slice 5C.4j, audit 5C.4i I4).
 	// Off: the committed model.
 	PrefixStable bool `json:"prefixStableDraws,omitempty"`
+	// SharedHistory: a candidate's record shares its paired plan's history
+	// before the takeover (recordTakeover): the bookings and cancellations
+	// decided before it are the paired plan's (its practice's imaging
+	// capacity and its booking stream), so the two records hold the same
+	// inherited orders, as the simulator's do (one takeover state for
+	// every plan). The practice and the candidate's own booking stream
+	// decide from the takeover on (Slice 5C.4l, audit 5C.4k K2: inherited
+	// orders reconciled with the paired plan). Needs PrefixStable.
+	SharedHistory bool `json:"sharedHistory,omitempty"`
 }
 
 func (q ocFidelity) origin() int64 { return cmp.Or(q.Takeover, t0) }
@@ -405,7 +414,19 @@ func (q ocFidelity) record(r ocRNG, pol *Policy) (*Record, fidBusy) { return q.r
 // demand, as the simulator's do (TestDemandExogenousAcrossPlans), so the
 // lost-demand gate pairs them.
 func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
+	return q.recordTakeover(rd, rb, rb, nil, pol)
+}
+
+// recordTakeover is recordPaired with the history before the takeover
+// taken from the paired plan (SharedHistory): hist's practice and its
+// booking stream rbHist (a fresh copy of the paired plan's, which it
+// replays) decide every booking before the takeover, rb every one after
+// it. With hist nil it is recordPaired.
+func (q ocFidelity) recordTakeover(rd, rbHist, rb ocRNG, hist *ocFidelity, pol *Policy) (*Record, fidBusy) {
 	qf := q
+	if hist != nil && !q.PrefixStable {
+		panic("oc fidelity: a shared history needs prefix-stable draws")
+	}
 	p, err := simProfile()
 	if err != nil {
 		panic(err)
@@ -419,12 +440,25 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	E := rec.ObservedUntilSec
 	// The exogenous modalities' salt: one demand draw, the same for both
 	// plans of a pair.
-	var salt, bsalt uint64
+	var salt, bsalt, bsaltHist uint64
 	if q.ExogenousModality {
 		salt = rd.Uint64()
 	}
 	if q.PrefixStable {
 		bsalt = rb.Uint64()
+		bsaltHist = bsalt
+	}
+	// Before the takeover the paired plan's booking stream decides (it
+	// draws its salt first, as the paired plan's record does).
+	rbAt := func(h int) ocRNG { return rb }
+	if hist != nil {
+		bsaltHist = rbHist.Uint64()
+		rbAt = func(h int) ocRNG {
+			if h < 0 {
+				return rbHist
+			}
+			return rb
+		}
 	}
 	// unit is a uniform in [0, 1) from a 64-bit mix.
 	unit := func(x uint64) float64 { return float64(splitmix64(x)>>11) / (1 << 53) }
@@ -461,8 +495,23 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	for i := range capOf {
 		capOf[i] = q.slots(weekly, acqShare, i-w)
 	}
+	// capAt: the slot limit of day d for a decision at hour h: before the
+	// takeover the paired plan's practice's (a shared history).
+	capHist := capOf
+	if hist != nil {
+		capHist = make([]int, len(capOf))
+		for i := range capHist {
+			capHist[i] = hist.slots(weekly, acqShare, i-w)
+		}
+	}
+	capAt := func(h, d int) int {
+		if h < 0 {
+			return capHist[d+w]
+		}
+		return capOf[d+w]
+	}
 	booked := make([]int, len(capOf))
-	routineCap := func(d int) int { return int(math.Floor(0.85 * float64(capOf[d+w]))) }
+	routineCap := func(h, d int) int { return int(math.Floor(0.85 * float64(capAt(h, d)))) }
 	// Order receipt hours: the scenario's hourProfileBP, 07:00–19:00.
 	recvHours := []float64{400, 900, 1100, 1100, 1000, 700, 900, 1000, 1000, 900, 600, 400}
 	hs := 0.0
@@ -478,7 +527,9 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	slotsOf := func(d int) []int64 {
 		i := d + w
 		if slotTimes[i] == nil {
-			n := capOf[i]
+			// With a shared history, the more of the two practices' slots
+			// (bookings stay within each decision's own limit).
+			n := max(capOf[i], capHist[i])
 			hp := p.Hours["weekday"]
 			if fidWeekday(d) == 5 {
 				hp = p.Hours["saturday"]
@@ -578,9 +629,9 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 				if cl == 0 || fidMidnight(d)+int64(cl)*hour <= wanted {
 					continue
 				}
-				limit := capOf[d+w]
+				limit := capAt(h, d)
 				if k == 2 {
-					limit = routineCap(d)
+					limit = routineCap(h, d)
 				}
 				if booked[d+w] < limit {
 					if cands = freeAfter(d, wanted); len(cands) > 0 {
@@ -594,6 +645,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 				out, res = OutLost, recv
 			} else {
 				booked[bookDay+w]++
+				rb := rbAt(h)
 				j := cands[rb.IntN(len(cands))]
 				free[bookDay+w][j] = false
 				appt := slotTimes[bookDay+w][j]
@@ -639,7 +691,12 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		}
 		ue, ur := 0.0, 0.0
 		if qf.PrefixStable {
-			ue, ur = unit(bsalt+2*uint64(a.idx)), unit(bsalt+2*uint64(a.idx)+1)
+			// A study acquired before the takeover is the shared history's.
+			bs := bsalt
+			if a.at <= start {
+				bs = bsaltHist
+			}
+			ue, ur = unit(bs+2*uint64(a.idx)), unit(bs+2*uint64(a.idx)+1)
 		} else {
 			ue = rb.Float64()
 			ur = rb.Float64()

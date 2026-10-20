@@ -7,6 +7,74 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4l — order provenance, inherited safety and reserved protocol closure (0.2.0-dev.23)
+
+This slice remediates the independent 5C.4k audit (d06cdb9, committed
+verbatim before any change), under the owner's decisions of 2026-10-20
+(`docs/calibration/clinical-5c4l/`). The maintainer's response is
+`docs/audits/slice-5c4k-clinical-safety-protocol-lock-audit-response.md`.
+* **Not locked, not run, not frozen, not reviewed.** The focused 5C.4m
+  review comes next.
+* **The clinical policy is unchanged:** no threshold, window, limit,
+  ceiling, follow-up or tolerance changed.
+* **Registers 0.2.0-dev.22** for replay (`mini-seed52-dev22`).
+* **v0.2-eval-4 is byte-identical.** The 5C.4d, e, f, h and j
+  candidates keep their own rules, from their exact bytes.
+* **Nothing reserved was run:** no strategy, reference or holdout seed,
+  unseal record or PCG(20261201, ·) stream.
+
+**Record integrity** (candidate SHA-256 `83d481b7…3948`):
+* **K1, order provenance** (`orderProvenance: pairedOrigin`). Every
+  order of a candidate's record, inherited or new, eligible or not, must
+  reconcile with the paired plan's by origin: the same ID, receipt,
+  wanted time, priority, modality and walk-in flag. Outcomes are never
+  compared. A difference, a missing order or a candidate-only order
+  makes the comparison INVALID. The audit's relink-and-retime bypass is
+  INVALID (GO under the 5C.4j candidate).
+* **K2, inherited safety** (`orderStudyIntegrity: contractInherited`).
+  The inherited exemption is gone: every served order has exactly one
+  post-takeover study, and order IDs are unique. Every inherited bypass
+  of the audit is INVALID.
+* **Not closed, reported for the owner:** an outcome-only study swap
+  between two same-request orders around the horizon stays GO, because
+  nothing immutable changes (`TestStudySwapLimitation`). Four options
+  are set out; the reserved run is not affected (its records are built
+  in process).
+* **The fidelity model** gained a shared pre-takeover history, so
+  paired records hold the same inherited orders, as the simulator's do.
+
+**Adjudicator and protocol:**
+* **K4:** no criterion passes with zero evidence; scenarios not run are
+  incomplete coverage; the output records what was judged
+  (`invocation`: `confirmatory` or `development`). The harness defaults
+  to the manifest's seeds. The reserved execution is pinned in protocol
+  §8 (expected 3,904 lines), not run.
+* **K6:** the promised T1, T2 and T7 reports are emitted; W-ACCESS65
+  checks the disclosed loss under a favourable Gate B; the follow-up's
+  financial observation is measured: no financial measure or decision
+  changed on the development seeds.
+* **K5:** the false statement that no simulator partial window failed is
+  corrected (seeds 901–903 failed locally; no seed or evaluation verdict
+  changed), and local, seed-level and evaluation-level results are now
+  reported apart.
+
+**Development checks** (PCG(20261021, ·), seeds 901–910):
+* every judged criterion passes; T5b 0.33 at +2.1 points, 0 at +3;
+* provenance fails only on the identity witnesses' first seeds;
+* 0 of 28 stable groups rejected; no stable seed fails the
+  partial-window ceiling;
+* the simulator records under the candidate are identical to 5C.4j's.
+
+**Tested:** the audit's K1 and K2 witnesses as regression tests, the
+5C.4i and 5C.4k witnesses, 23 new mutations (all caught) and the 5C.4j sets (21 of 21 applicable caught), the full uncached suite, vet,
+gofmt and the replay fixtures.
+
+**Next:** the owner's decision on the study swap, and the focused 5C.4m
+review. Protocol lock only if clean; the reserved draw is authorized
+separately after the owner inspects the lock commit.
+
+---
+
 ## V0.2 Slice 5C.4j — clinical safety and reserved protocol remediation (0.2.0-dev.22)
 
 This slice remediates the independent 5C.4i audit (4bead43, committed

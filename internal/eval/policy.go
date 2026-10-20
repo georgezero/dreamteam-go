@@ -294,8 +294,22 @@ type Clinical struct {
 	// enforces the order–study contract for new work (checkOrderStudies);
 	// only with the safetyCohort ordersByHorizon. Empty: the 5C.4h link
 	// check alone (a post-horizon study names exactly one order of its
-	// priority).
+	// priority). "contractInherited" (Slice 5C.4l, owner decision on audit
+	// 5C.4k K2): the contract for inherited work too: every order served
+	// after the takeover, received before it or not, has exactly one
+	// post-takeover study, and every order of the record has a unique ID.
 	OrderStudyIntegrity string `json:"orderStudyIntegrity,omitempty"`
+	// OrderProvenance (Slice 5C.4l, audit 5C.4k K1 and K2): "pairedOrigin"
+	// reconciles every order of a candidate's record, inherited and new,
+	// with the paired plan's record of the same seed by origin: the same
+	// origins, each with the same ID, receipt, wanted time, priority,
+	// modality and walk-in flag (the immutable request; outcomes may
+	// differ). Under exogenous demand every order of a plan exists in the
+	// other, so an order of one record alone has no trusted provenance;
+	// any difference makes the comparison INVALID (orderProvenance). Only
+	// with orderStudyIntegrity contractInherited. Empty: no
+	// reconciliation beyond Gate B's eligible demand.
+	OrderProvenance string `json:"orderProvenance,omitempty"`
 	// LostDemand (modified option B): when set, lost and left orders leave
 	// the timeliness cohorts (counted apart as lost) and the demand the
 	// candidate leaves unimaged is gated against the paired baseline's
@@ -354,8 +368,12 @@ const (
 	// rate and below the minimum is not judged.
 	PartialRateCeiling    = "rateCeiling"
 	SafetyOrdersByHorizon = "ordersByHorizon"
-	// IntegrityContract: Clinical.OrderStudyIntegrity's value (5C.4j).
-	IntegrityContract = "contract"
+	// IntegrityContract: Clinical.OrderStudyIntegrity's value (5C.4j);
+	// IntegrityContractInherited: the contract with inherited work (5C.4l).
+	IntegrityContract          = "contract"
+	IntegrityContractInherited = "contractInherited"
+	// ProvenancePairedOrigin: Clinical.OrderProvenance's value (5C.4l).
+	ProvenancePairedOrigin = "pairedOrigin"
 )
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -611,8 +629,10 @@ func (c *Clinical) validate(p *Policy) error {
 		return fmt.Errorf("clinical partialWindows %q: %s or %s with the calendar partition only, or empty", c.PartialWindows, PartialRateCeiling, PartialCountCeiling)
 	case c.SafetyCohort != "" && c.SafetyCohort != SafetyOrdersByHorizon:
 		return fmt.Errorf("clinical safetyCohort %q: %s, or empty for the studies acquired by the horizon", c.SafetyCohort, SafetyOrdersByHorizon)
-	case c.OrderStudyIntegrity != "" && (c.OrderStudyIntegrity != IntegrityContract || c.SafetyCohort != SafetyOrdersByHorizon):
-		return fmt.Errorf("clinical orderStudyIntegrity %q: %s with the safetyCohort %s only, or empty", c.OrderStudyIntegrity, IntegrityContract, SafetyOrdersByHorizon)
+	case c.OrderStudyIntegrity != "" && (c.OrderStudyIntegrity != IntegrityContract && c.OrderStudyIntegrity != IntegrityContractInherited || c.SafetyCohort != SafetyOrdersByHorizon):
+		return fmt.Errorf("clinical orderStudyIntegrity %q: %s or %s with the safetyCohort %s only, or empty", c.OrderStudyIntegrity, IntegrityContractInherited, IntegrityContract, SafetyOrdersByHorizon)
+	case c.OrderProvenance != "" && (c.OrderProvenance != ProvenancePairedOrigin || c.OrderStudyIntegrity != IntegrityContractInherited):
+		return fmt.Errorf("clinical orderProvenance %q: %s with the orderStudyIntegrity %s only, or empty", c.OrderProvenance, ProvenancePairedOrigin, IntegrityContractInherited)
 	case c.FollowUpDays != 0 && c.SafetyCohort != SafetyOrdersByHorizon:
 		return fmt.Errorf("clinical followUpDays: only with the safetyCohort %s", SafetyOrdersByHorizon)
 	case c.FollowUpDays < 0 || c.FollowUpDays > 366:

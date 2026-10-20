@@ -224,11 +224,14 @@ func TestOrderStudyContract(t *testing.T) {
 	}
 }
 
-// The contract's exemptions: inherited work (studies acquired before the
-// takeover, their orders served before or after it) is valid as the
-// fixture records it, and the candidate's ordinary records are valid.
+// The 5C.4j contract's exemptions: inherited work (studies acquired
+// before the takeover, their orders served before or after it) is valid
+// as the fixture records it under the 5C.4j candidate. The 5C.4l
+// candidate removes the second exemption (owner decision on audit 5C.4k
+// K2): the fixture's inherited orders, served after the takeover without
+// a post-takeover study, are INVALID there (TestInheritedSafety).
 func TestOrderStudyInheritedExempt(t *testing.T) {
-	p, d := candidatePolicy(t)
+	p, d := candidate5c4jPolicy(t)
 	in := Input{Baseline: "A", Plans: map[string][]Record{}}
 	for seed := int64(1); seed <= 40; seed++ {
 		in.Seeds = append(in.Seeds, seed)
@@ -242,6 +245,12 @@ func TestOrderStudyInheritedExempt(t *testing.T) {
 	for _, pr := range rep.Plans {
 		if !pr.Valid {
 			t.Fatalf("%s: %v", pr.Plan, pr.Integrity)
+		}
+	}
+	cand, dc := candidatePolicy(t)
+	for _, pr := range Evaluate(cand, dc, in).Plans {
+		if pr.Valid || !strings.Contains(strings.Join(pr.Integrity, " "), "served with no study") {
+			t.Fatalf("5C.4l: %s valid %v %v", pr.Plan, pr.Valid, pr.Integrity)
 		}
 	}
 }

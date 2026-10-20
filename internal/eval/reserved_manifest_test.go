@@ -15,14 +15,14 @@ import (
 )
 
 // The reserved protocol's executable scenario manifest (Slices 5C.4h and 5C.4j,
-// docs/calibration/clinical-5c4j/scenario-manifest.json): every
+// docs/calibration/clinical-5c4l/scenario-manifest.json): every
 // scenario's practices, paired demand, booking and injection streams,
 // injection, seeds and groups, built here exactly as the manifest says
 // and judged by the production evaluator. The reserved family is refused
 // in this build: the manifest runs only on a non-reserved family (the
 // development checks, PCG(20261021, ·)).
 
-const manifestPath = "../../docs/calibration/clinical-5c4j/scenario-manifest.json"
+const manifestPath = "../../docs/calibration/clinical-5c4l/scenario-manifest.json"
 
 // reservedFamily is the confirmatory calibration's family, never run by
 // this build.
@@ -126,7 +126,7 @@ func manPractices() map[string]ocFidelity {
 	out := map[string]ocFidelity{}
 	for _, d := range ocFidelityScenarios() {
 		q := d.q
-		q.Takeover, q.ExogenousModality, q.PrefixStable = fidAlignedTakeover, true, true
+		q.Takeover, q.ExogenousModality, q.PrefixStable, q.SharedHistory = fidAlignedTakeover, true, true, true
 		out[d.name] = q
 	}
 	q := out["A85"]
@@ -188,7 +188,13 @@ func manPair(s *manScenario, F uint64, i int, pol *Policy, practices map[string]
 		cb = bb
 	}
 	base, _ = qb.recordPaired(pcg(uint64(2*i)), pcg(bb), pol)
-	cand, _ = qc.recordPaired(pcg(uint64(2*i)), pcg(cb), pol)
+	if qc.SharedHistory && cb != bb {
+		// The takeover state is the baseline's (Slice 5C.4l): its practice
+		// and booking stream before the takeover, the candidate's after.
+		cand, _ = qc.recordTakeover(pcg(uint64(2*i)), pcg(bb), pcg(cb), &qb, pol)
+	} else {
+		cand, _ = qc.recordPaired(pcg(uint64(2*i)), pcg(cb), pol)
+	}
 	base.Seed, cand.Seed = int64(i), int64(i)
 	base.Plan, cand.Plan = "B", "C"
 	if in := s.Baseline.Inject; in != nil {
@@ -510,6 +516,10 @@ type groupResult struct {
 	// UnmatchedUrgent: Gate B urgent's first unmatched seed (−1: none),
 	// for the identity witnesses' attribution.
 	UnmatchedUrgent int `json:"unmatchedUrgentSeed"`
+	// Provenance: the seeds whose candidate orders do not reconcile with
+	// the baseline's by origin (orderProvenance, Slice 5C.4l): the
+	// comparison is INVALID there.
+	Provenance []int64 `json:"provenanceSeeds,omitempty"`
 	// UrgentSeeds: Gate B's urgent seed differences (T5's prediction).
 	UrgentSeeds []SeedDifference `json:"urgentSeeds,omitempty"`
 	// T2G's materiality inputs: the candidate's severe and acquired
@@ -531,6 +541,9 @@ func protocolDecision(p *Policy, base, cand []Record) groupResult {
 	if !g.Valid {
 		g.Rejected, g.Rules = true, []string{"integrity"}
 		return g
+	}
+	if g.Provenance = provenanceSeeds(p, base, cand); len(g.Provenance) > 0 {
+		g.Rules = append(g.Rules, "provenance")
 	}
 	gates := lostDemandGates(p, cand, base)
 	j := cmp.Or(seedSafeguardJoint(p, pc, gates), pc.ClinicalJoint)
@@ -616,6 +629,26 @@ func protocolDecision(p *Policy, base, cand []Record) groupResult {
 	return g
 }
 
+// provenanceSeeds: the seeds whose candidate record does not reconcile
+// with the baseline's by origin, under a policy that reconciles (as
+// compare does: the comparison is INVALID).
+func provenanceSeeds(p *Policy, base, cand []Record) []int64 {
+	if !provenanceApplies(p) {
+		return nil
+	}
+	by := map[int64]*Record{}
+	for i := range base {
+		by[base[i].Seed] = &base[i]
+	}
+	var out []int64
+	for i := range cand {
+		if b := by[cand[i].Seed]; b == nil || len(orderProvenance(&cand[i], b)) > 0 {
+			out = append(out, cand[i].Seed)
+		}
+	}
+	return out
+}
+
 // familyAllowed refuses the reserved family: this build is not the lock
 // commit.
 func familyAllowed(F uint64) error {
@@ -631,6 +664,9 @@ func familyAllowed(F uint64) error {
 // same pairs without injection (the base scenario).
 func gateBDecision(p *Policy, base, cand []Record) groupResult {
 	g := groupResult{Valid: true, GateB: map[string]string{}, Increase: map[string]float64{}, Matched: map[string]int{}, Deteriorated: map[string][]int64{}, UnmatchedUrgent: -1}
+	if g.Provenance = provenanceSeeds(p, base, cand); len(g.Provenance) > 0 {
+		g.Rules = append(g.Rules, "provenance")
+	}
 	for _, x := range lostDemandGates(p, cand, base) {
 		g.GateB[x.Priority], g.Increase[x.Priority], g.Matched[x.Priority] = x.Status, x.Increase, x.MatchedSeeds
 		g.Deteriorated[x.Priority] = x.Deteriorated
@@ -728,7 +764,9 @@ func manifestPolicy(t *testing.T) *Policy {
 // TestReservedManifestRun runs the manifest on a non-reserved family:
 // DT_MANIFEST_OUT=<file>, DT_MANIFEST_FAMILY (default the development
 // checks' 20261021; the reserved family is refused), DT_MANIFEST_SEEDS
-// (seeds a scenario, default 40) and DT_MANIFEST_SCENARIOS (IDs).
+// (seeds a scenario, at most the manifest's; unset: the manifest's, as
+// the confirmatory run must be: protocol §8) and DT_MANIFEST_SCENARIOS
+// (IDs).
 func TestReservedManifestRun(t *testing.T) {
 	out := os.Getenv("DT_MANIFEST_OUT")
 	if out == "" {
@@ -742,9 +780,11 @@ func TestReservedManifestRun(t *testing.T) {
 		}
 		F = x
 	}
-	n := 40
+	n := 100_000 // unset: every scenario at its manifest seeds
 	if v := os.Getenv("DT_MANIFEST_SEEDS"); v != "" {
-		n, _ = strconv.Atoi(v)
+		if n, _ = strconv.Atoi(v); n <= 0 {
+			t.Fatalf("DT_MANIFEST_SEEDS %q", v)
+		}
 	}
 	var only []string
 	if v := os.Getenv("DT_MANIFEST_SCENARIOS"); v != "" {
@@ -943,9 +983,17 @@ func manCoverage(m *manifestDoc, lines []groupResult, seeds func(*manScenario) i
 		if !g.Valid {
 			note(s.ID, "group %d: an invalid record", g.Group)
 		}
+		if len(g.Provenance) > 0 && !slices.Contains([]string{"W-ID-REMOVED", "W-ID-REPEATED", "W-ID-CHANGED"}, s.ID) {
+			note(s.ID, "group %d: order provenance fails on seeds %v", g.Group, g.Provenance)
+		}
 	}
 	for _, s := range m.Scenarios {
 		n, reps := seeds(&s), max(1, s.Replicates)
+		if n <= 0 {
+			// Not run under this invocation: never complete coverage
+			// (audit 5C.4k K4).
+			note(s.ID, "no seeds under this invocation: not run")
+		}
 		for g := 0; g*size < n; g++ {
 			for r := range reps {
 				if !seen[s.ID][key{g, r}] {
@@ -1013,6 +1061,46 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		return Pass
 	}
 	const dependence = "seeds share their demand across scenarios (paired demand): pooled per-seed counts are not independent binomial trials; intervals are reported for orientation only"
+	// empty: a criterion with nothing to judge is never PASS (audit 5C.4k
+	// K4): no scenario of its kind in the manifest, or one of them with no
+	// complete group (or, for per-seed criteria, no seed).
+	empty := func(ids []string, n func(id string) int) bool {
+		if len(ids) == 0 {
+			return true
+		}
+		for _, id := range ids {
+			if n(id) == 0 {
+				return true
+			}
+		}
+		return false
+	}
+	groups := func(id string) int { return len(by[id]) }
+	// partialSeeds: each scenario's seeds failing the partial-window
+	// ceiling, by priority (reported: T1 and T7).
+	partialSeeds := func(id string) map[string][]int64 {
+		out := map[string][]int64{}
+		for _, g := range all[id] {
+			for _, q := range Priorities {
+				out[q] = append(out[q], g.FailingByGate["partial_window_ceiling "+q]...)
+			}
+		}
+		return out
+	}
+	// rates: rejected complete groups of report-only scenarios.
+	rates := func(ids ...string) map[string]any {
+		out := map[string]any{}
+		for _, id := range ids {
+			rej := 0
+			for _, g := range by[id] {
+				if g.Rejected {
+					rej++
+				}
+			}
+			out[id] = map[string]any{"groups": len(by[id]), "rejected": rej, "interval95": cpInterval(rej, len(by[id]), 0.05)}
+		}
+		return out
+	}
 	// T1 and T7: at most 5% of the complete groups (3 of 62).
 	t1, t7 := map[string]any{}, map[string]any{}
 	f1, f7 := false, false
@@ -1040,16 +1128,21 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			}
 		}
 		f1, f7 = f1 || rej > limit, f7 || ins > limit
+		ps := partialSeeds(id)
 		t1[id] = map[string]any{"groups": len(gs), "rejected": rej, "limit": limit, "byRule": rules,
-			"interval95": cpInterval(rej, len(gs), 0.05), "bonferroniInterval": cpInterval(rej, len(gs), 0.05/float64(len(stable)))}
+			"interval95": cpInterval(rej, len(gs), 0.05), "bonferroniInterval": cpInterval(rej, len(gs), 0.05/float64(len(stable))),
+			"partialCeilingSeeds": ps}
 		t7[id] = map[string]any{"groups": len(gs), "insufficient": ins, "limit": limit, "groupsByGate": gates,
-			"interval95": cpInterval(ins, len(gs), 0.05)}
+			"interval95": cpInterval(ins, len(gs), 0.05), "partialCeilingSeeds": ps}
 	}
-	out["T1"] = criterion{verdict(f1, incomplete(stable...)), t1}
-	out["T7"] = criterion{verdict(f7, incomplete(stable...)), t7}
+	// The stress practices: reported, never judged (protocol §4 T1).
+	t1["stress (reported, never judged)"] = rates("S-A92", "S-B92", "S-C92", "S-Cs92")
+	out["T1"] = criterion{verdict(f1, incomplete(stable...) || empty(stable, groups)), t1}
+	out["T7"] = criterion{verdict(f7, incomplete(stable...) || empty(stable, groups)), t7}
 	// T3 and T6: per seed, all seeds.
 	t3, t6 := map[string]any{}, map[string]int{}
 	f3, n6 := false, 0
+	seedsOf := map[string]int{}
 	for _, id := range stable {
 		v := map[string]int{}
 		n := 0
@@ -1064,6 +1157,7 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			n += len(g.Pairs)
 		}
 		n6 += n
+		seedsOf[id] = n
 		bounds := map[string]float64{}
 		for _, q := range Priorities {
 			k := v["pastDue "+q]
@@ -1072,35 +1166,39 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		t3[id] = map[string]any{"seeds": n, "violatingSeeds": v, "upper95": bounds,
 			"bonferroniUpper": cpInterval(0, n, 0.10/float64(3*len(stable)))[1]}
 	}
-	out["T3"] = criterion{verdict(f3, incomplete(stable...)), t3}
+	perSeed := func(id string) int { return seedsOf[id] }
+	out["T3"] = criterion{verdict(f3, incomplete(stable...) || empty(stable, perSeed)), t3}
 	f6 := false
 	ivs := map[string][2]float64{}
 	for _, q := range Priorities {
 		f6 = f6 || t6[q] > 19
 		ivs[q] = cpInterval(t6[q], n6, 0.05)
 	}
-	out["T6"] = criterion{verdict(f6, incomplete(stable...)), map[string]any{"seeds": n6, "flagged": t6, "limit": 19, "interval95": ivs, "note": dependence}}
+	out["T6"] = criterion{verdict(f6, incomplete(stable...) || empty(stable, perSeed)), map[string]any{"seeds": n6, "flagged": t6, "limit": 19, "interval95": ivs, "note": dependence}}
 	// T2: detection of harmed seeds (every seed), conformance and
 	// rejection (complete groups).
 	harmed, flagged, conform := 0, 0, true
 	t2rep := map[string]any{}
 	for _, id := range t2 {
+		sh, sf := 0, 0
 		for _, g := range all[id] {
 			for _, p := range g.Pairs {
 				if !p.Harmed {
 					continue
 				}
 				harmed++
+				sh++
 				hit := slices.Contains(g.Deteriorated["urgent"], int64(p.Seed))
 				if hit {
 					flagged++
+					sf++
 				}
 				if hit && !g.Remainder && !slices.Contains(g.Failing, int64(p.Seed)) {
 					conform = false
 				}
 			}
 		}
-		rej := 0
+		rej, predicted := 0, 0
 		rules := map[string]int{}
 		for _, g := range by[id] {
 			if g.Rejected {
@@ -1112,17 +1210,36 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			if len(g.Failing)+len(g.Insufficient) > 4 && !g.Rejected {
 				conform = false
 			}
+			// The exact conditional prediction: every harmed seed flagged
+			// and failing, beside the group's other failing or insufficient
+			// seeds; rejected when more than four (the allowance).
+			n := 0
+			for _, p := range g.Pairs {
+				x := int64(p.Seed)
+				if p.Harmed || slices.Contains(g.Failing, x) || slices.Contains(g.Insufficient, x) {
+					n++
+				}
+			}
+			if n > 4 {
+				predicted++
+			}
 		}
-		t2rep[id] = map[string]any{"groups": len(by[id]), "rejected": rej, "byRule": rules}
+		det := 0.0
+		if sh > 0 {
+			det = float64(sf) / float64(sh)
+		}
+		t2rep[id] = map[string]any{"groups": len(by[id]), "rejected": rej, "byRule": rules, "harmed": sh, "flagged": sf, "detection": det,
+			"lower95": cpInterval(sf, sh, 0.10)[0], "conditionalPrediction": float64(predicted) / float64(max(1, len(by[id])))}
 	}
+	t2rep["H10, OH10 (reported, never judged)"] = rates("H10", "OH10")
 	det := 0.0
 	if harmed > 0 {
 		det = float64(flagged) / float64(harmed)
 	}
-	out["T2"] = criterion{verdict(harmed >= 200 && det < 0.95, harmed < 200 || incomplete(t2...)),
+	out["T2"] = criterion{verdict(harmed >= 200 && det < 0.95, harmed < 200 || incomplete(t2...) || empty(t2, groups)),
 		map[string]any{"harmed": harmed, "flagged": flagged, "detection": det, "lower95": cpInterval(flagged, harmed, 0.10)[0],
 			"rejection": t2rep, "allowancePrediction": 0.3710, "note": dependence}}
-	out["T2-conformance"] = criterion{verdict(!conform, incomplete(t2...)), map[string]any{"holds": conform}}
+	out["T2-conformance"] = criterion{verdict(!conform, incomplete(t2...) || empty(t2, groups)), map[string]any{"holds": conform}}
 	// T2G: materiality from the run, each trigger on its own (a severe
 	// soon share, or a severe routine share, of at least 1%; a median
 	// worst soon delay of at least 48 h; a Gate B seed-mean increase of
@@ -1167,7 +1284,7 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		}
 		t2gRep[id] = map[string]any{"material": material, "severeShare": share, "worstSoonMedianMin": med, "maxIncrease": maxInc, "rejected": rej, "groups": len(by[id])}
 	}
-	out["T2G"] = criterion{verdict(f2g, incomplete(t2g...)), t2gRep}
+	out["T2G"] = criterion{verdict(f2g, incomplete(t2g...) || empty(t2g, groups)), t2gRep}
 	// T4: every complete group of every witness as expected, by its
 	// targeted rule.
 	t4 := map[string]any{}
@@ -1182,7 +1299,7 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		f4 = f4 || met != len(by[id])
 		t4[id] = map[string]any{"groups": len(by[id]), "met": met}
 	}
-	out["T4"] = criterion{verdict(f4, incomplete(wit...)), t4}
+	out["T4"] = criterion{verdict(f4, incomplete(wit...) || empty(wit, groups)), t4}
 	// T5: conformance with the prediction, and the tolerances.
 	t5 := map[string]any{}
 	f5a := false
@@ -1222,12 +1339,12 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		t5[id] = map[string]any{"evaluations": total, "accepted": pass, "rate": obs, "groupMean": mu, "clusterSE": se, "predicted": pm, "conforms": ok,
 			"note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them"}
 	}
-	out["T5a"] = criterion{verdict(f5a && !few, few || incomplete(nm...)), t5}
+	out["T5a"] = criterion{verdict(f5a && !few, few || incomplete(nm...) || empty(nm, groups)), t5}
 	switch {
 	case tol.At21 == nil || tol.At3 == nil:
 		out["T5b"] = criterion{"not locked", map[string]any{"reason": "the owner has not approved the T5 tolerances", "rate2.1": rate["NM2.1"], "rate3": rate["NM3"]}}
 	default:
-		out["T5b"] = criterion{verdict(rate["NM2.1"] > *tol.At21 || rate["NM3"] > *tol.At3, incomplete("NM2.1", "NM3")),
+		out["T5b"] = criterion{verdict(rate["NM2.1"] > *tol.At21 || rate["NM3"] > *tol.At3, incomplete("NM2.1", "NM3") || empty([]string{"NM2.1", "NM3"}, groups)),
 			map[string]any{"rate2.1": rate["NM2.1"], "tolerance2.1": *tol.At21, "rate3": rate["NM3"], "tolerance3": *tol.At3}}
 	}
 	// T8: construction integrity everywhere: complete coverage, every pair
@@ -1264,7 +1381,22 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			t8[s.ID] = bad[:min(len(bad), 10)]
 		}
 	}
-	out["T8"] = criterion{verdict(false, f8), t8}
+	out["T8"] = criterion{verdict(false, f8 || len(lines) == 0), t8}
+	// What was judged: the seeds each scenario was judged on, against the
+	// manifest's (audit 5C.4k K4). Confirmatory only when every scenario
+	// was declared at its manifest seeds; otherwise a development check.
+	inv := map[string]any{}
+	confirmatory := true
+	for _, s := range m.Scenarios {
+		n := seeds(&s)
+		inv[s.ID] = map[string]int{"seeds": n, "manifestSeeds": s.Seeds, "lines": len(all[s.ID])}
+		confirmatory = confirmatory && n == s.Seeds
+	}
+	status := "development"
+	if confirmatory {
+		status = "confirmatory"
+	}
+	out["invocation"] = criterion{status, inv}
 	return out
 }
 
@@ -1315,12 +1447,22 @@ func witnessMet(id string, g groupResult) bool {
 	case "W-LOST30", "W-PAT30", "W-MARGIN-ABOVE":
 		return rule("gateB:urgent") && g.GateB["urgent"] == Fail
 	case "W-ID-REMOVED", "W-ID-REPEATED", "W-ID-CHANGED":
-		return rule("gateB:urgent") && g.GateB["urgent"] == Insufficient && g.Matched["urgent"] == len(g.Pairs)-1 && len(g.Pairs) > 0 &&
-			g.UnmatchedUrgent == g.Pairs[0].Seed
+		// Order provenance on exactly the stated seed (Slice 5C.4l: the
+		// comparison INVALID), and Gate B unmatched there.
+		return rule("provenance") && len(g.Pairs) > 0 && slices.Equal(g.Provenance, []int64{int64(g.Pairs[0].Seed)}) &&
+			rule("gateB:urgent") && g.GateB["urgent"] == Insufficient && g.UnmatchedUrgent == g.Pairs[0].Seed
 	case "W-MARGIN-AT":
 		return g.GateB["urgent"] == Pass
 	case "W-ACCESS65":
-		return g.GateB["urgent"] != Pass || (g.Claims != nil && g.Claims.AbsoluteAdequacy == AdequacyNotEstablished && g.Claims.PopulationConfidence == ConfidenceNotClaimed)
+		// A favourable Gate B on both plans losing 65% of their urgent
+		// demand (non-deterioration only): Gate B PASS, and the comparison
+		// discloses the absolute loss with it (each plan's urgent unimaged
+		// fraction at least 0.65) and claims neither adequacy nor
+		// population confidence (audit 5C.4k K6: not the constants alone).
+		fr, ok := g.Fractions["urgent"]
+		return g.GateB["urgent"] == Pass && ok && fr[0] >= 0.65-1e-9 && fr[1] >= 0.65-1e-9 &&
+			g.Claims != nil && g.Claims.EmpiricalAcceptance == Pass && g.Claims.AbsoluteAdequacy == AdequacyNotEstablished &&
+			g.Claims.PopulationConfidence == ConfidenceNotClaimed
 	}
 	return false
 }
@@ -1535,9 +1677,11 @@ func witnessesMet(ls []groupResult) {
 		case "W-LOST30", "W-PAT30", "W-MARGIN-ABOVE":
 			x.Rejected, x.Rules, x.GateB["urgent"] = true, []string{"gateB:urgent"}, Fail
 		case "W-ID-REMOVED", "W-ID-REPEATED", "W-ID-CHANGED":
-			x.Rejected, x.Rules, x.GateB["urgent"], x.UnmatchedUrgent = true, []string{"gateB:urgent"}, Insufficient, x.Pairs[0].Seed
+			x.Rejected, x.Rules, x.GateB["urgent"], x.UnmatchedUrgent = true, []string{"provenance", "gateB:urgent"}, Insufficient, x.Pairs[0].Seed
+			x.Provenance = []int64{int64(x.Pairs[0].Seed)}
 		case "W-ACCESS65":
-			x.Claims = &AccessClaims{AbsoluteAdequacy: AdequacyNotEstablished, PopulationConfidence: ConfidenceNotClaimed}
+			x.Claims = &AccessClaims{EmpiricalAcceptance: Pass, AbsoluteAdequacy: AdequacyNotEstablished, PopulationConfidence: ConfidenceNotClaimed}
+			x.Fractions = map[string][2]float64{"urgent": {0.66, 0.66}}
 		}
 	}
 }
@@ -1711,6 +1855,15 @@ func TestReservedCriteriaRules(t *testing.T) {
 		"W-ACC-LATE by an unrelated gate": func(x *groupResult) { x.FailingByGate = map[string][]int64{"unrelated": all(x)} },
 		"W-HORIZON by another limit":      func(x *groupResult) { x.Violations = map[string][]int64{"pastDue urgent": all(x)} },
 		"W-ID-CHANGED on another seed":    func(x *groupResult) { x.UnmatchedUrgent = x.Pairs[1].Seed },
+		"W-ID-REMOVED by Gate B alone (no provenance failure)": func(x *groupResult) {
+			x.Provenance, x.Rules = nil, []string{"gateB:urgent"}
+		},
+		"W-ID-REPEATED with provenance failing on two seeds": func(x *groupResult) {
+			x.Provenance = []int64{int64(x.Pairs[0].Seed), int64(x.Pairs[1].Seed)}
+		},
+		"W-ACCESS65 with Gate B failing":                func(x *groupResult) { x.GateB["urgent"] = Fail },
+		"W-ACCESS65 without the disclosed loss":         func(x *groupResult) { x.Fractions = nil },
+		"W-ACCESS65 disclosing a loss below 65 percent": func(x *groupResult) { x.Fractions = map[string][2]float64{"urgent": {0.3, 0.66}} },
 	} {
 		id := strings.Fields(name)[0]
 		ls := run()

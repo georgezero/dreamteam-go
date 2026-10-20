@@ -117,8 +117,14 @@ prefix-stable draws; `construction-checks.json`):
   D-85 (16), K-92 (27), K-85 (1), L20-85 (1), and the W-PARTIAL witness
   (40 of 40). The count ceiling fired on 4 of these. No scenario's group
   verdict changed between 5C.4h and 5C.4j (34 of 49 rejected in both).
-* **The simulator's no-action practice** (seeds 901–910, §3.1): no
-  partial window fails.
+* **The simulator's no-action practice** (seeds 901–910, §3.1).
+  *Corrected in Slice 5C.4l (audit 5C.4k K5); this said "no partial
+  window fails", which was wrong.* The leading partial soon window fails
+  the ceiling on 3 of 10 seeds: 901 (3 of 42), 902 (3 of 41) and 903
+  (4 of 41). Those seeds already failed the soon window gate on complete
+  blocks, so no seed's status and no gate's status changed; the
+  aggregate comparison hid the new local failures
+  (`../clinical-5c4l/clinical-provenance.md` §4).
 * **Limitation.** These are the manifest's stable practices on the
   development family, not a population. A practice with sparse,
   front-loaded soon demand would fail on one severe report in a short
@@ -250,7 +256,10 @@ recorded under the revised candidate and observed 45 days past H
 
 * **Seed-level results unchanged.** Every seed has the same clinical
   status and the same failing gates as in 5C.4h. Urgent absolute
-  violations occur on 8 seeds (1–5 each), and no partial window fails.
+  violations occur on 8 seeds (1–5 each). *Corrected in Slice 5C.4l:
+  this said that no partial window fails; the leading soon window fails
+  on seeds 901, 902 and 903 (§1.4), each already failing the soon window
+  gate.*
 * **A recorder defect found and repaired.** The order–study contract
   exposed it. The evaluation recorder exported only the orders open at
   the takeover. An order whose patient missed an appointment just before
