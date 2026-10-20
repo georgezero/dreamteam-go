@@ -444,7 +444,7 @@ func TestReservedCriteriaZeroEvidence(t *testing.T) {
 	ls := fakeRun(m)
 	witnessesMet(ls)
 	r := reservedCriteria(m, ls, tol, full)
-	if r["invocation"].Status != "confirmatory" {
+	if r["invocation"].Status != "manifest seeds" {
 		t.Fatalf("full run: %v", r["invocation"])
 	}
 	criteria := []string{"T1", "T2-conformance", "T2G", "T3", "T4", "T5a", "T5b", "T6", "T7", "T8"}

@@ -3,6 +3,7 @@ package sim_test
 import (
 	"cmp"
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -28,8 +29,10 @@ import (
 const profileManifest = "docs/calibration/feasibility/step0c/experiments/W130-SHR-MRft-s20.json"
 
 // profileConfig compiles the evaluation scenario (the development sets'
-// scenario manifest), with an open-ended evaluation window.
-func profileConfig(t *testing.T) *sim.Config {
+// scenario manifest), with an open-ended evaluation window, and returns
+// its fingerprint (the overlaid scenario's, as the records carry it:
+// audit 5C.4m M6).
+func profileConfig(t *testing.T) (*sim.Config, string) {
 	t.Helper()
 	raw, err := os.ReadFile(filepath.Join("../..", profileManifest))
 	if err != nil {
@@ -59,30 +62,37 @@ func profileConfig(t *testing.T) *sim.Config {
 	if f, err = scenario.Decode(merged); err != nil {
 		t.Fatal(err)
 	}
+	fp, err := scenario.Fingerprint(f)
+	if err != nil {
+		t.Fatal(err)
+	}
 	cfg, err := scenario.Compile(f)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cfg.EvaluationDays = 0
-	return cfg
+	return cfg, fp
 }
 
 // recordBaseline runs seed with no action to the policy's observation
-// end, recorded as the evaluation records a plan.
-func recordBaseline(p *eval.Policy, cfg *sim.Config, seed int64) eval.Record {
-	return recordBaselineWith(p, cfg, seed, nil)
+// end, recorded as the evaluation records a plan, with the scenario's
+// fingerprint fp.
+func recordBaseline(p *eval.Policy, cfg *sim.Config, fp string, seed int64) eval.Record {
+	return recordBaselineWith(p, cfg, fp, seed, nil)
 }
 
 // recordBaselineWith is recordBaseline with observe called on the new
-// world before it runs (an observer that does not change the run).
-func recordBaselineWith(p *eval.Policy, cfg *sim.Config, seed int64, observe func(*sim.World)) eval.Record {
+// world before it runs (an observer that does not change the run). A
+// record that does not pass the policy's integrity checks is never
+// returned as evidence (audit 5C.4m M6).
+func recordBaselineWith(p *eval.Policy, cfg *sim.Config, fp string, seed int64, observe func(*sim.World)) eval.Record {
 	w := sim.NewEvalWorld(cfg, seed)
 	if observe != nil {
 		observe(w)
 	}
 	start := w.StartTime()
 	w.Engine().RunUntil(start, nil)
-	rec := w.NewEvalRecorder("baseline", "", "", seed, p.Finance.EmployeeCommitmentDays)
+	rec := w.NewEvalRecorder("baseline", "", fp, seed, p.Finance.EmployeeCommitmentDays)
 	horizon := eval.TailEnd(p, int64(start), 0, 0)
 	h := p.Horizons
 	day := func(n int) simtime.Time { return start.Add(simtime.Duration(n) * simtime.Day) }
@@ -112,7 +122,11 @@ func recordBaselineWith(p *eval.Policy, cfg *sim.Config, seed int64, observe fun
 	if err := w.Check(); err != nil {
 		panic(err)
 	}
-	return rec.Finish(0, w.LatestEffect(), horizon, "")
+	r := rec.Finish(0, w.LatestEffect(), horizon, "")
+	if bad := eval.Measure(p, &r).Integrity; len(bad) > 0 {
+		panic(fmt.Sprintf("seed %d: the record fails integrity: %v", seed, bad))
+	}
+	return r
 }
 
 // The profile (dreamteam.simprofile/v1). Counts are totals over the
@@ -204,14 +218,14 @@ func TestSimulatorClinicalProfile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := profileConfig(t)
+	cfg, fp := profileConfig(t)
 	recs := make([]eval.Record, len(seeds))
 	var wg sync.WaitGroup
 	for i, s := range seeds {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			recs[i] = recordBaseline(p, cfg, s)
+			recs[i] = recordBaseline(p, cfg, fp, s)
 		}()
 	}
 	wg.Wait()

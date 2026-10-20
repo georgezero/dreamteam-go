@@ -6,9 +6,12 @@ committed verbatim before any of this) under the owner's decisions of
 2026-10-20. The evaluator is 0.2.0-dev.23. The maintainer's response is
 `docs/audits/slice-5c4k-clinical-safety-protocol-lock-audit-response.md`.
 
-* **Not locked, not run, not frozen, not reviewed.** The focused 5C.4m
-  review comes next; the owner decides on the study-swap limitation
-  (`clinical-provenance.md` §2.3) before any lock.
+* **Superseded for the certification pipeline by Slice 5C.4n**
+  (`../clinical-5c4n/`), after the 5C.4m audit. The owner accepted the
+  study-swap limitation for trusted in-process evaluation only
+  (`../clinical-5c4n/reserved-validation-protocol.md`, CERTIFICATION
+  SCOPE).
+* **Not locked, not run, not frozen.**
 * **Nothing reserved was run.** No reference or holdout seed, unseal
   record or reserved stream PCG(20261201, ·) was used; the harness
   refuses that family. No strategy was evaluated. The simulator ran with
@@ -56,13 +59,29 @@ reserved family; these checks judge 1 or 5 groups, so the adjudicator's
 * **Provenance:** every stable, harmful and near-margin pair reconciles
   by origin; failures occur only on the three identity witnesses' first
   seeds, as specified.
-* **Stable practices:** 0 of 28 groups rejected; 22 seed-level failures
+* **Stable practices:** no stable group rejected; 22 seed-level failures
   in all, on urgent timely access and backlog stability (and one soon
   breach rate); **no stable seed fails the partial-window ceiling**.
   This shows no regression on the development family; it does not
   establish the T1 target (audit 5C.4k K7).
+  * **Correction (5C.4n, audit 5C.4m):** this read "0 of 28 groups".
+    The two passes judged 4 + 20 T1 group evaluations and reported 4
+    stress groups, but each first-pass T1 group (seeds 0–39) is the
+    second pass's group 0, the same seeds on the same family. There are
+    **20 distinct T1 groups**, none rejected, sharing their demand
+    across scenarios: 20 dependent observations, not 28 independent
+    ones.
 * **Near the margin**, Gate B accepted 0.65 at +2 points (exact
   binomial prediction 0.549) and 0.33 at +2.1 (0.344), 0 at +3.
+  * **Correction (5C.4n, audit 5C.4m):** these results are not those of
+    5C.4j. The shared pre-takeover history (this slice's fidelity-model
+    change) changed the near-margin measurements: at +2.1 points,
+    0.35 → 0.30 on 40 seeds and 0.31 → 0.33 on 200 (predictions
+    0.297 → 0.300 and 0.303 → 0.344); at +2 points on 200 seeds,
+    0.56 → 0.65 (prediction 0.508 → 0.549). No threshold or tolerance
+    changed; the measurement inputs did
+    (`../clinical-5c4j/construction-checks.json` against
+    `construction-checks.json`).
 * **The 200-seed pass** shows the K4 repair: the eleven deterioration,
   five harm and fourteen witness scenarios it does not run make T2G,
   T2-conformance, T4 and T8 INCONCLUSIVE, where the 5C.4j adjudicator

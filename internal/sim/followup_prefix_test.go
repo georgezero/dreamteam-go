@@ -27,8 +27,8 @@ func TestFollowUpPrefixUnchanged(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := profileConfig(t)
-	a, b := recordBaseline(pol4, cfg, 901), recordBaseline(cand, cfg, 901)
+	cfg, fp := profileConfig(t)
+	a, b := recordBaseline(pol4, cfg, fp, 901), recordBaseline(cand, cfg, fp, 901)
 	E := a.ObservedUntilSec
 	if b.ObservedUntilSec-b.HorizonEndSec != 45*86400 || E-a.HorizonEndSec != 31*86400 || a.HorizonEndSec != b.HorizonEndSec {
 		t.Fatalf("observation: %d and %d days past the horizon", (E-a.HorizonEndSec)/86400, (b.ObservedUntilSec-b.HorizonEndSec)/86400)

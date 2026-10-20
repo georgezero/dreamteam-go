@@ -358,3 +358,14 @@ batch mode `v0.2_dev22` with every digest verified
 (`earlier_build_exact`). It continues with the file embedded as the new
 record's prefix (`internal/session/dev22_test.go`). Before 0.2.0-dev.22
 was registered this build refused it as an engine mismatch.
+
+The Slice 5C.4l file was made from c456c94 (the 5C.4m audit commit,
+whose code is 2533a39's) with `-scenario mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-dev23.actions.json` (the same batches as
+the 5C.4j file's).
+
+0.2.0-dev.24 has the same action set and rules, so the file replays in
+batch mode `v0.2_dev23` with every digest verified
+(`earlier_build_exact`). It continues with the file embedded as the new
+record's prefix (`internal/session/dev23_test.go`). Before 0.2.0-dev.23
+was registered this build refused it as an engine mismatch.

@@ -37,7 +37,7 @@ This is the maintainer's account of what was done with each finding of
 | **K4** (Medium): zero-evidence PASS, invocation | **Closed.** No criterion passes with nothing judged, in T1–T8: a criterion with no scenario of its kind, or with a scenario without a complete group (or seed) is INCONCLUSIVE; T8 with no line is INCONCLUSIVE; a scenario declared absent by the invocation is incomplete coverage. The output records each scenario's judged seeds against the manifest's (`invocation`: `confirmatory` only at the manifest's seeds). The harness now defaults to the manifest's seeds. The reserved run and its adjudication are pinned as commands (protocol §8), not run | `reservedCriteria`, `manCoverage`; `TestReservedCriteriaZeroEvidence`, `TestProvenanceCoverage` |
 | **K5**: the partial-window statement | **Corrected** in place in the 5C.4j documents, marked as corrections. The leading soon window failed on seeds 901 (3/42), 902 (3/41) and 903 (4/41); seed and evaluation verdicts did not change. Local, seed-level and evaluation-level results are now reported apart | `clinical-provenance.md` §4; `../calibration/clinical-5c4j/clinical-safety.md` |
 | **K6**: promised reports, W-ACCESS65, financial observation | **Closed.** T1 reports each stable scenario's partial-ceiling seeds and the stress practices' rates; T7 the partial-ceiling seeds; T2 each scenario's detection and lower bound, the conditional prediction, and the H10 and OH10 rates. W-ACCESS65 now needs Gate B PASS disclosed with both plans' urgent unimaged fractions (at least 0.65) and the claims. The follow-up's financial effect is measured and documented (below) | `reservedCriteria`; `witnessMet`; `clinical-provenance.md` §5 |
-| **K7**: statistical limitations | **Carried.** 0 of 28 stable groups shows no regression on the development family, not the T1 target; T5a's first test at its own size is the reserved run | protocol §7 |
+| **K7**: statistical limitations | **Carried.** No stable group rejected shows no regression on the development family, not the T1 target (*correction, 5C.4n: 20 distinct T1 groups, not "0 of 28"*); T5a's first test at its own size is the reserved run | protocol §7 |
 
 ## Validation
 
@@ -90,9 +90,12 @@ study rule, the identity witnesses' rule, prefix stability).
 development family only:
 * every judged criterion passes;
 * provenance fails only on the identity witnesses' first seeds;
-* 0 of 28 stable groups are rejected, and no stable seed fails the
+* no stable group is rejected (*correction, 5C.4n, audit 5C.4m: 20
+  distinct T1 groups, not "0 of 28"*), and no stable seed fails the
   partial-window ceiling;
-* T5b: 0.33 at +2.1 points, 0 at +3;
+* T5b: 0.33 at +2.1 points, 0 at +3 (*correction, 5C.4n: changed from
+  5C.4j's 0.31 by the shared pre-takeover history; at +2 points 0.56 →
+  0.65*);
 * the 200-seed pass makes every criterion with an unrun scenario
   INCONCLUSIVE (K4).
 

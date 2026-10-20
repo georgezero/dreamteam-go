@@ -2,16 +2,24 @@ package eval
 
 import (
 	"bufio"
+	"bytes"
 	"cmp"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"maps"
 	"math"
 	"math/rand/v2"
 	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/georgezero/dreamteam-go/internal/version"
 )
 
 // The reserved protocol's executable scenario manifest (Slices 5C.4h and 5C.4j,
@@ -689,13 +697,232 @@ func firstOr(xs []int64, d int) int {
 	return int(xs[0])
 }
 
+// The certified execution (Slice 5C.4n, audit 5C.4m M1). A confirmatory
+// verdict is computed only by the process that constructs the records:
+// TestReservedManifestRun builds every pair, judges every group and
+// adjudicates every criterion in memory, and decides the certification
+// before it writes anything. Its files report that decision; they are
+// never its input. A reader of result files (TestReservedCriteria) is an
+// offline analysis whose output is non-certifying, whatever the file
+// says.
+
+// protocolPath is the confirmatory protocol the execution certifies
+// under.
+const protocolPath = "../../docs/calibration/clinical-5c4n/reserved-validation-protocol.md"
+
+// certifiedInputs are the files the execution reads at run time, with
+// their SHA-256 in this build. Each is verified before anything runs; the
+// lock commit re-pins them (TestCertifiedInputsPinned).
+var certifiedInputs = []struct{ Role, Path, SHA256 string }{
+	{"candidate", candidatePath, "83d481b7040b69d78a58de68afc938a588b5b37ba396438509f38c56ca163948"},
+	{"manifest", manifestPath, "250bc7fc835d99140212505e0e79f74f2da1484dbe856fea6a5b93eec9153ef4"},
+	{"protocol", protocolPath, "7ab8988122688d563d0dbb5ba521256d7001c206b44d9be03c25fe213907af33"},
+	{"policyInForce", "../../" + PolicyPath, "4e277c7263dcff7ddabe63741beb44abfc9a46d3bc23f6b6418715b58ffb6fb3"},
+	{"simProfile", simProfilePath, "ac8621889813a2d582b4b19674f04871c5711d27d0ac1620839ba01df4596100"},
+}
+
+// verifyInputs checks every runtime input against this build's digest,
+// and the manifest's pin of the candidate, returning the digests.
+func verifyInputs() (map[string]string, error) { return verifyInputList(certifiedInputs, manifestPath) }
+
+func verifyInputList(inputs []struct{ Role, Path, SHA256 string }, manifestPath string) (map[string]string, error) {
+	out := map[string]string{}
+	for _, x := range inputs {
+		got, err := fileDigest(x.Path)
+		if err != nil {
+			return nil, err
+		}
+		if got != x.SHA256 {
+			return nil, fmt.Errorf("%s %s: SHA-256 %s; this build pins %s", x.Role, x.Path, got, x.SHA256)
+		}
+		out[x.Role] = x.SHA256
+	}
+	raw, err := os.ReadFile(manifestPath)
+	if err != nil {
+		return nil, err
+	}
+	var m struct {
+		Policy map[string]string `json:"policy"`
+	}
+	if err := json.Unmarshal(raw, &m); err != nil {
+		return nil, err
+	}
+	if m.Policy["sha256"] != out["candidate"] {
+		return nil, fmt.Errorf("the manifest pins candidate %q, not %s", m.Policy["sha256"], out["candidate"])
+	}
+	return out, nil
+}
+
+// fileDigest is a file's SHA-256, hex.
+func fileDigest(path string) (string, error) {
+	raw, err := os.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(raw)
+	return hex.EncodeToString(sum[:]), nil
+}
+
+// sourceDigest is the SHA-256 of this package's Go sources as found at
+// run time (names and contents, in name order): recorded, so that the
+// run can be checked against the lock commit's tree.
+func sourceDigest() (string, error) {
+	names, err := filepath.Glob("*.go")
+	if err != nil {
+		return "", err
+	}
+	slices.Sort(names)
+	h := sha256.New()
+	for _, n := range names {
+		raw, err := os.ReadFile(n)
+		if err != nil {
+			return "", err
+		}
+		fmt.Fprintf(h, "%s %d\n", n, len(raw))
+		h.Write(raw)
+	}
+	return hex.EncodeToString(h.Sum(nil)), nil
+}
+
+// certContext is how a set of lines came to be judged.
+type certContext struct {
+	// Trusted: computed in this process from the records it constructed
+	// (TestReservedManifestRun), never read from a file.
+	Trusted bool
+	Family  uint64
+	Inputs  map[string]string
+	Source  string
+}
+
+// mandatoryCriteria are those every one of which must PASS (protocol §6).
+var mandatoryCriteria = []string{"T1", "T2", "T2-conformance", "T2G", "T3", "T4", "T5a", "T5b", "T6", "T7", "T8"}
+
+// certify decides what the criteria certify. The invocation is
+// confirmatory only for a trusted execution on the reserved family at
+// every scenario's manifest seeds; a development execution never
+// certifies; lines read from a file are a non-certifying analysis,
+// whatever they contain. A confirmatory invocation certifies GO only
+// when every mandatory criterion PASSes, and NO GO otherwise (§6).
+func certify(r map[string]criterion, ctx certContext) {
+	inv := r["invocation"]
+	full := inv.Status == "manifest seeds"
+	switch {
+	case !ctx.Trusted:
+		inv.Status = "non-certifying analysis"
+	case full && ctx.Family == reservedFamily:
+		inv.Status = "confirmatory"
+	default:
+		inv.Status = "development"
+	}
+	if inv.Detail == nil {
+		inv.Detail = map[string]any{}
+	}
+	inv.Detail["trustedExecution"] = ctx.Trusted
+	if ctx.Trusted {
+		inv.Detail["family"] = ctx.Family
+		inv.Detail["inputs"] = ctx.Inputs
+		inv.Detail["sourceSHA256"] = ctx.Source
+		inv.Detail["engine"] = version.Number
+	}
+	r["invocation"] = inv
+	var fail, open []string
+	for _, c := range mandatoryCriteria {
+		switch r[c].Status {
+		case Pass:
+		case Fail:
+			fail = append(fail, c)
+		default:
+			open = append(open, c)
+		}
+	}
+	d := map[string]any{"failing": fail, "notPassing": open}
+	cert := criterion{Detail: d}
+	switch {
+	case inv.Status != "confirmatory":
+		cert.Status = "not certified"
+		d["reason"] = map[string]string{
+			"non-certifying analysis": "lines read from a file: an offline analysis never certifies (audit 5C.4m M1)",
+			"development":             "a development execution: not the reserved family at every scenario's manifest seeds",
+		}[inv.Status]
+	case len(fail) > 0:
+		cert.Status = "certified NO GO: confirmation failed"
+	case len(open) > 0:
+		cert.Status = "certified NO GO: confirmation not achieved"
+	default:
+		cert.Status = "certified GO: confirmation succeeded"
+	}
+	r["certification"] = cert
+}
+
+// manInvocation reads a run's settings strictly (audit 5C.4m M4): a
+// malformed family, a malformed or nonpositive seed count or an unknown
+// or repeated scenario is an error, never a default. Unset: the
+// development family, every scenario at its manifest seeds.
+func manInvocation(m *manifestDoc) (F uint64, seeds func(*manScenario) int, err error) {
+	F = devManifestFamily
+	if v := os.Getenv("DT_MANIFEST_FAMILY"); v != "" {
+		if F, err = strconv.ParseUint(v, 10, 64); err != nil {
+			return 0, nil, fmt.Errorf("DT_MANIFEST_FAMILY %q: %v", v, err)
+		}
+	}
+	n := 0
+	if v := os.Getenv("DT_MANIFEST_SEEDS"); v != "" {
+		if n, err = strconv.Atoi(v); err != nil || n <= 0 {
+			return 0, nil, fmt.Errorf("DT_MANIFEST_SEEDS %q: not a positive count", v)
+		}
+	}
+	var only []string
+	if v := os.Getenv("DT_MANIFEST_SCENARIOS"); v != "" {
+		for _, id := range strings.Split(v, ",") {
+			if manScenarioOf(m, id) == nil || slices.Contains(only, id) {
+				return 0, nil, fmt.Errorf("DT_MANIFEST_SCENARIOS: %q unknown or repeated", id)
+			}
+			only = append(only, id)
+		}
+	}
+	return F, func(s *manScenario) int {
+		switch {
+		case len(only) > 0 && !slices.Contains(only, s.ID):
+			return 0 // not run under this invocation: missing, reported
+		case n > 0:
+			return min(n, s.Seeds)
+		}
+		return s.Seeds
+	}, nil
+}
+
+// writeCriteria writes the adjudication; it never writes a blank or
+// partial file (audit 5C.4m M4).
+func writeCriteria(path string, r map[string]criterion) error {
+	raw, err := json.MarshalIndent(r, "", " ")
+	if err != nil {
+		return fmt.Errorf("the adjudication cannot be serialized: %v", err)
+	}
+	return os.WriteFile(path, append(raw, '\n'), 0o644)
+}
+
+// coverageProblems lists every scenario's coverage problems, but the
+// identity witnesses' expected provenance (none of them is complete
+// coverage).
+func coverageProblems(m *manifestDoc, lines []groupResult, seeds func(*manScenario) int) []string {
+	var out []string
+	cov := manCoverage(m, lines, seeds)
+	for _, id := range slices.Sorted(maps.Keys(cov)) {
+		for _, p := range cov[id] {
+			out = append(out, id+": "+p)
+		}
+	}
+	return out
+}
+
 // manRunScenario runs scenario s on family F, n seeds (whole groups
-// only; the remainder is per-seed only), writing one JSON line a group
-// (a replicate) to w. Records are dropped after each group.
-func manRunScenario(t *testing.T, m *manifestDoc, s *manScenario, F uint64, n int, pol *Policy, w *bufio.Writer) {
+// only; the remainder is per-seed only), returning one line a group (a
+// replicate). Records are dropped after each group.
+func manRunScenario(t *testing.T, m *manifestDoc, s *manScenario, F uint64, n int, pol *Policy) []groupResult {
 	if err := familyAllowed(F); err != nil {
 		t.Fatal(err)
 	}
+	var lines []groupResult
 	practices := manPractices()
 	size := m.GroupSize
 	for g := 0; g*size < n; g++ {
@@ -725,8 +952,7 @@ func manRunScenario(t *testing.T, m *manifestDoc, s *manScenario, F uint64, n in
 				res.Scenario, res.Group, res.Replicate, res.Seeds = s.ID, g, r, [2]int{lo, hi - 1}
 			}
 			res.Pairs, res.Errors, res.Remainder = infos, errs, hi-lo < size
-			raw, _ := json.Marshal(res)
-			w.Write(append(raw, '\n'))
+			lines = append(lines, res)
 		}
 		if s.Replicates == 0 {
 			emit(0, cs, infos)
@@ -749,9 +975,8 @@ func manRunScenario(t *testing.T, m *manifestDoc, s *manScenario, F uint64, n in
 			})
 			emit(r, cr, ri)
 		}
-		w.Flush()
 	}
-	w.Flush()
+	return lines
 }
 
 // manifestPolicy is the fixture policy with the candidate's clinical
@@ -761,51 +986,92 @@ func manifestPolicy(t *testing.T) *Policy {
 	return p
 }
 
-// TestReservedManifestRun runs the manifest on a non-reserved family:
-// DT_MANIFEST_OUT=<file>, DT_MANIFEST_FAMILY (default the development
-// checks' 20261021; the reserved family is refused), DT_MANIFEST_SEEDS
-// (seeds a scenario, at most the manifest's; unset: the manifest's, as
-// the confirmatory run must be: protocol §8) and DT_MANIFEST_SCENARIOS
-// (IDs).
+// TestReservedManifestRun is the certified execution (protocol §8): it
+// runs the manifest, judges every group and adjudicates every criterion
+// in this process, decides the certification, and only then writes the
+// lines (DT_MANIFEST_OUT) and the adjudication (DT_CRITERIA_OUT), neither
+// of which may exist. DT_MANIFEST_FAMILY (default the development checks'
+// 20261021; this build refuses the reserved family), DT_MANIFEST_SEEDS
+// (seeds a scenario, at most the manifest's; unset: the manifest's) and
+// DT_MANIFEST_SCENARIOS (IDs) are read strictly. Every runtime input is
+// verified against this build's digests first. Incomplete coverage fails
+// the test after the files are written.
 func TestReservedManifestRun(t *testing.T) {
-	out := os.Getenv("DT_MANIFEST_OUT")
-	if out == "" {
-		t.Skip("set DT_MANIFEST_OUT=<file> to run the scenario manifest on a non-reserved family")
-	}
-	F := uint64(devManifestFamily)
-	if v := os.Getenv("DT_MANIFEST_FAMILY"); v != "" {
-		x, err := strconv.ParseUint(v, 10, 64)
-		if err != nil {
-			t.Fatal(err)
-		}
-		F = x
-	}
-	n := 100_000 // unset: every scenario at its manifest seeds
-	if v := os.Getenv("DT_MANIFEST_SEEDS"); v != "" {
-		if n, _ = strconv.Atoi(v); n <= 0 {
-			t.Fatalf("DT_MANIFEST_SEEDS %q", v)
-		}
-	}
-	var only []string
-	if v := os.Getenv("DT_MANIFEST_SCENARIOS"); v != "" {
-		only = strings.Split(v, ",")
+	out, crit := os.Getenv("DT_MANIFEST_OUT"), os.Getenv("DT_CRITERIA_OUT")
+	if out == "" || crit == "" {
+		t.Skip("set DT_MANIFEST_OUT=<lines> and DT_CRITERIA_OUT=<adjudication> to run the scenario manifest on a non-reserved family")
 	}
 	m := loadManifest(t)
-	pol := manifestPolicy(t)
-	f, err := os.Create(out)
+	F, seeds, err := manInvocation(m)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	w := bufio.NewWriter(f)
+	if err := familyAllowed(F); err != nil {
+		t.Fatal(err)
+	}
+	inputs, err := verifyInputs()
+	if err != nil {
+		t.Fatal(err)
+	}
+	src, err := sourceDigest()
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{out, crit} {
+		if _, err := os.Stat(p); !errors.Is(err, os.ErrNotExist) {
+			t.Fatalf("%s exists: the execution never overwrites", p)
+		}
+	}
+	lines, r := runCertified(t, m, F, seeds, certContext{Trusted: true, Family: F, Inputs: inputs, Source: src})
+	t.Logf("invocation %s; certification: %s", r["invocation"].Status, r["certification"].Status)
+	// The report of that decision.
+	var buf bytes.Buffer
+	for _, g := range lines {
+		raw, err := json.Marshal(g)
+		if err != nil {
+			t.Fatal(err)
+		}
+		buf.Write(append(raw, '\n'))
+	}
+	if err := os.WriteFile(out, buf.Bytes(), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := writeCriteria(crit, r); err != nil {
+		t.Fatal(err)
+	}
+	for _, p := range []string{out, crit} {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("SHA-256 %x  %s", sha256.Sum256(raw), p)
+	}
+	if bad := coverageProblems(m, lines, seeds); len(bad) > 0 {
+		t.Fatalf("incomplete execution (%d problems, first %q): not certified", len(bad), bad[0])
+	}
+}
+
+// runCertified runs the manifest's scenarios on family F, judges every
+// group and adjudicates every criterion, all in this process, and
+// decides the certification (ctx: the execution's identity). Nothing is
+// read from or written to a file.
+func runCertified(t *testing.T, m *manifestDoc, F uint64, seeds func(*manScenario) int, ctx certContext) ([]groupResult, map[string]criterion) {
+	tol, err := manifestTolerances(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pol := manifestPolicy(t)
+	var lines []groupResult
 	for i := range m.Scenarios {
 		s := &m.Scenarios[i]
-		if len(only) > 0 && !slices.Contains(only, s.ID) {
-			continue
+		if n := seeds(s); n > 0 {
+			lines = append(lines, manRunScenario(t, m, s, F, n, pol)...)
+			t.Logf("%s done", s.ID)
 		}
-		manRunScenario(t, m, s, F, min(n, s.Seeds), pol, w)
-		t.Logf("%s done", s.ID)
 	}
+	r := reservedCriteria(m, lines, tol, seeds)
+	certify(r, ctx)
+	return lines, r
 }
 
 // The manifest is complete and its streams disjoint: every scenario has
@@ -883,12 +1149,9 @@ func TestReservedManifestConstruction(t *testing.T) {
 	for i := range m.Scenarios {
 		s := m.Scenarios[i]
 		s.Replicates = min(s.Replicates, 1)
-		var buf strings.Builder
-		w := bufio.NewWriter(&buf)
-		manRunScenario(t, m, &s, 1, 2, pol, w)
-		var g groupResult
-		if err := json.Unmarshal([]byte(strings.SplitN(buf.String(), "\n", 2)[0]), &g); err != nil {
-			t.Fatal(err)
+		g := manRunScenario(t, m, &s, 1, 2, pol)[0]
+		if bad := lineProblems(&s, &g); len(bad) > 0 {
+			t.Errorf("%s: measurements %v", s.ID, bad)
 		}
 		if len(g.Errors) > 0 {
 			t.Errorf("%s: %v", s.ID, g.Errors)
@@ -983,6 +1246,11 @@ func manCoverage(m *manifestDoc, lines []groupResult, seeds func(*manScenario) i
 		if !g.Valid {
 			note(s.ID, "group %d: an invalid record", g.Group)
 		}
+		if len(g.Errors) == 0 && g.Valid {
+			for _, p := range lineProblems(s, &g) {
+				note(s.ID, "group %d replicate %d: %s", g.Group, g.Replicate, p)
+			}
+		}
 		if len(g.Provenance) > 0 && !slices.Contains([]string{"W-ID-REMOVED", "W-ID-REPEATED", "W-ID-CHANGED"}, s.ID) {
 			note(s.ID, "group %d: order provenance fails on seeds %v", g.Group, g.Provenance)
 		}
@@ -1000,6 +1268,135 @@ func manCoverage(m *manifestDoc, lines []groupResult, seeds func(*manScenario) i
 					note(s.ID, "group %d replicate %d missing", g, r)
 				}
 			}
+		}
+	}
+	return out
+}
+
+// lineRules are the rules a group can be rejected by (protocol §3).
+var lineRules = []string{"integrity", "provenance", "gateB:urgent", "gateB:soon", "gateB:routine", "allowance", "pooled", "safety", "pending", "caseSelection"}
+
+// lineProblems: a judged line's measurements are complete and coherent
+// (audit 5C.4m M2). Every measurement a criterion reads is present, of
+// its exact cardinality, finite and in its range; every seed it names is
+// one of the group's pairs, named once; the decision agrees with its
+// rules. A missing measurement is never read as zero. A near-margin
+// replicate carries Gate B alone (gateBDecision).
+func lineProblems(s *manScenario, g *groupResult) []string {
+	var out []string
+	bad := func(f string, a ...any) { out = append(out, fmt.Sprintf(f, a...)) }
+	finite := func(x float64) bool { return !math.IsNaN(x) && !math.IsInf(x, 0) }
+	n := len(g.Pairs)
+	pairs := map[int64]bool{}
+	for _, p := range g.Pairs {
+		pairs[int64(p.Seed)] = true
+		if p.Injected < 0 || p.BaseInj < 0 || p.Eligible < 0 || p.BaseEligible < 0 || p.Served < 0 || p.Served > p.Eligible || !finite(p.Volume) {
+			bad("seed %d: construction counts out of range", p.Seed)
+		}
+	}
+	// seeds: every seed one of the group's pairs, and named once unless
+	// repeats are its form (a seed pending in two priorities).
+	seedsRep := func(name string, ss []int64, repeats bool) {
+		seen := map[int64]bool{}
+		for _, x := range ss {
+			switch {
+			case !pairs[x]:
+				bad("%s: seed %d is not one of the group's pairs", name, x)
+			case seen[x] && !repeats:
+				bad("%s: seed %d twice", name, x)
+			}
+			seen[x] = true
+		}
+	}
+	seeds := func(name string, ss []int64) { seedsRep(name, ss, false) }
+	if g.Rejected != (len(g.Rules) > 0) {
+		bad("rejected %v with rules %v", g.Rejected, g.Rules)
+	}
+	for i, r := range g.Rules {
+		if !slices.Contains(lineRules, r) || slices.Contains(g.Rules[:i], r) {
+			bad("rule %q unknown or repeated", r)
+		}
+	}
+	if len(g.GateB) != len(Priorities) || len(g.Increase) != len(Priorities) || len(g.Matched) != len(Priorities) || len(g.Deteriorated) != len(Priorities) {
+		bad("Gate B's measurements are not exactly one a priority")
+	}
+	for _, q := range Priorities {
+		if st, ok := g.GateB[q]; !ok || (st != Pass && st != Fail && st != Insufficient) {
+			bad("Gate B %s: status %q", q, st)
+		}
+		if x, ok := g.Increase[q]; !ok || !finite(x) {
+			bad("Gate B %s: increase missing or not finite", q)
+		}
+		if x, ok := g.Matched[q]; !ok || x < 0 || x > n {
+			bad("Gate B %s: %d matched seeds of %d pairs", q, x, n)
+		}
+		if _, ok := g.Deteriorated[q]; !ok {
+			bad("Gate B %s: deteriorated seeds missing", q)
+		}
+		seeds("deteriorated "+q, g.Deteriorated[q])
+	}
+	if g.UnmatchedUrgent != -1 && !pairs[int64(g.UnmatchedUrgent)] {
+		bad("unmatched urgent seed %d is not one of the group's pairs", g.UnmatchedUrgent)
+	}
+	seeds("provenance", g.Provenance)
+	var us []int64
+	for _, d := range g.UrgentSeeds {
+		us = append(us, d.Seed)
+		if d.Orders <= 0 || d.Baseline < 0 || d.Candidate < 0 || d.Baseline > d.Orders || d.Candidate > d.Orders || !finite(d.Difference) {
+			bad("urgent seed %d: counts out of range", d.Seed)
+		}
+	}
+	seeds("urgent seeds", us)
+	if len(us) > g.Matched["urgent"] {
+		bad("%d urgent seed differences, %d matched seeds", len(us), g.Matched["urgent"])
+	}
+	if s.Replicates > 0 {
+		// T5's prediction reads every seed's difference and its served
+		// orders.
+		if len(us) == 0 {
+			bad("no urgent seed difference: T5's prediction has nothing to draw")
+		}
+		for _, p := range g.Pairs {
+			if s.Candidate.Inject != nil && p.Served == 0 {
+				bad("seed %d: no served order recorded for the injection", p.Seed)
+			}
+		}
+		return out
+	}
+	if g.Claims == nil {
+		bad("access claims missing")
+	}
+	seeds("allowance failing", g.Failing)
+	seeds("allowance insufficient", g.Insufficient)
+	seedsRep("pending", g.Pending, true)
+	for k, ss := range g.Violations {
+		seeds("violations "+k, ss)
+	}
+	for k, ss := range g.FailingByGate {
+		seeds("failing "+k, ss)
+	}
+	for k, ss := range g.RawInsuff {
+		seeds("raw insufficient "+k, ss)
+	}
+	if len(g.Severe) != len(Priorities) {
+		bad("severe and acquired studies: %d priorities", len(g.Severe))
+	}
+	for _, q := range Priorities {
+		if x, ok := g.Severe[q]; !ok || x[0] < 0 || x[1] < x[0] {
+			bad("severe and acquired %s: %v", q, x)
+		}
+	}
+	if len(g.WorstSoonPast) != n {
+		bad("%d worst soon delays for %d pairs", len(g.WorstSoonPast), n)
+	}
+	for _, x := range g.WorstSoonPast {
+		if x < 0 {
+			bad("worst soon delay %d", x)
+		}
+	}
+	for q, f := range g.Fractions {
+		if !finite(f[0]) || !finite(f[1]) || f[0] < 0 || f[0] > 1 || f[1] < 0 || f[1] > 1 {
+			bad("unimaged fraction %s: %v", q, f)
 		}
 	}
 	return out
@@ -1245,7 +1642,7 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 	// worst soon delay of at least 48 h; a Gate B seed-mean increase of
 	// at least 3 points in a priority), then rejection of the material.
 	t2gRep := map[string]any{}
-	f2g := false
+	f2g, u2g := false, false
 	for _, id := range t2g {
 		share := map[string]float64{}
 		var worst []int64
@@ -1271,10 +1668,16 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			med = worst[len(worst)/2]
 		}
 		maxInc := 0.0
+		// Materiality needs its observations (audit 5C.4m M2): a priority
+		// with no acquired study, no worst delay or a missing increase
+		// leaves it undetermined, never non-material.
+		undetermined := len(worst) == 0 || len(share) < 2
 		for _, q := range Priorities {
 			var s float64
 			for _, g := range by[id] {
-				s += g.Increase[q]
+				x, ok := g.Increase[q]
+				undetermined = undetermined || !ok
+				s += x
 			}
 			maxInc = max(maxInc, s/float64(max(1, len(by[id]))))
 		}
@@ -1282,9 +1685,11 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		if material && rej < len(by[id])-2 {
 			f2g = true
 		}
-		t2gRep[id] = map[string]any{"material": material, "severeShare": share, "worstSoonMedianMin": med, "maxIncrease": maxInc, "rejected": rej, "groups": len(by[id])}
+		u2g = u2g || (undetermined && !material)
+		t2gRep[id] = map[string]any{"material": material, "materialityUndetermined": undetermined && !material, "severeShare": share,
+			"worstSoonMedianMin": med, "maxIncrease": maxInc, "rejected": rej, "groups": len(by[id])}
 	}
-	out["T2G"] = criterion{verdict(f2g, incomplete(t2g...) || empty(t2g, groups)), t2gRep}
+	out["T2G"] = criterion{verdict(f2g, u2g || incomplete(t2g...) || empty(t2g, groups)), t2gRep}
 	// T4: every complete group of every witness as expected, by its
 	// targeted rule.
 	t4 := map[string]any{}
@@ -1304,7 +1709,7 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 	t5 := map[string]any{}
 	f5a := false
 	rate := map[string]float64{}
-	few := false
+	few, unpredicted := false, false
 	for _, id := range nm {
 		means := map[int][2]float64{}
 		pred := map[int]float64{}
@@ -1330,16 +1735,23 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 			pm += pred[k] / float64(len(means))
 		}
 		few = few || len(means) < 2 // a cluster standard error needs two groups
-		mu, sd := meanSD(gm)
-		se := sd / math.Sqrt(float64(max(1, len(gm))))
 		obs := float64(pass) / float64(max(1, total))
 		rate[id] = obs
+		if len(gm) < 2 || math.IsNaN(pm) {
+			// No prediction without seed differences to draw (audit 5C.4m
+			// M2): undetermined, never a prediction of zero.
+			unpredicted = unpredicted || math.IsNaN(pm)
+			t5[id] = map[string]any{"evaluations": total, "accepted": pass, "rate": obs, "predicted": nil, "conforms": nil}
+			continue
+		}
+		mu, sd := meanSD(gm)
+		se := sd / math.Sqrt(float64(len(gm)))
 		ok := math.Abs(obs-pm) <= 4*se+0.02
 		f5a = f5a || !ok
 		t5[id] = map[string]any{"evaluations": total, "accepted": pass, "rate": obs, "groupMean": mu, "clusterSE": se, "predicted": pm, "conforms": ok,
 			"note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them"}
 	}
-	out["T5a"] = criterion{verdict(f5a && !few, few || incomplete(nm...) || empty(nm, groups)), t5}
+	out["T5a"] = criterion{verdict(f5a && !few && !unpredicted, few || unpredicted || incomplete(nm...) || empty(nm, groups)), t5}
 	switch {
 	case tol.At21 == nil || tol.At3 == nil:
 		out["T5b"] = criterion{"not locked", map[string]any{"reason": "the owner has not approved the T5 tolerances", "rate2.1": rate["NM2.1"], "rate3": rate["NM3"]}}
@@ -1358,12 +1770,13 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 	for _, s := range m.Scenarios {
 		bad := slices.Clone(cov[s.ID])
 		for _, g := range all[s.ID] {
-			want := len(g.Pairs)
-			if c := s.Candidate.Inject; c != nil && strings.HasPrefix(c.Kind, "id") && len(g.Pairs) > 0 && g.Pairs[0].Seed%40 == 0 {
-				want-- // the identity witness's own seed
-			}
 			for _, q := range Priorities {
-				if g.Valid && g.Matched[q] < want {
+				want := len(g.Pairs)
+				if c := s.Candidate.Inject; c != nil && len(g.Pairs) > 0 && g.Pairs[0].Seed%40 == 0 && idUnmatched(c.Kind, q) {
+					want-- // the identity witness's own seed
+				}
+				// Exactly the group's pairs (audit 5C.4m M2: never more).
+				if g.Valid && g.Matched[q] != want {
 					bad = append(bad, fmt.Sprintf("group %d: %s matched %d of %d", g.Group, q, g.Matched[q], want))
 				}
 			}
@@ -1383,21 +1796,38 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 	}
 	out["T8"] = criterion{verdict(false, f8 || len(lines) == 0), t8}
 	// What was judged: the seeds each scenario was judged on, against the
-	// manifest's (audit 5C.4k K4). Confirmatory only when every scenario
-	// was declared at its manifest seeds; otherwise a development check.
+	// manifest's (audit 5C.4k K4): "manifest seeds" only when every
+	// scenario was declared at its manifest seeds; otherwise a development
+	// check.
 	inv := map[string]any{}
-	confirmatory := true
+	full := true
 	for _, s := range m.Scenarios {
 		n := seeds(&s)
 		inv[s.ID] = map[string]int{"seeds": n, "manifestSeeds": s.Seeds, "lines": len(all[s.ID])}
-		confirmatory = confirmatory && n == s.Seeds
+		full = full && n == s.Seeds
 	}
+	// Whether the lines certify anything is decided by certify, from how
+	// they were computed: never from the lines themselves.
 	status := "development"
-	if confirmatory {
-		status = "confirmatory"
+	if full {
+		status = "manifest seeds"
 	}
 	out["invocation"] = criterion{status, inv}
 	return out
+}
+
+// idUnmatched: whether an identity witness's own seed is unmatched in
+// priority q. A removed or repeated origin leaves the record without
+// identity evidence, so every priority is unmatched; a changed urgent
+// request leaves only urgent unmatched.
+func idUnmatched(kind, q string) bool {
+	switch kind {
+	case "idRemove", "idRepeat":
+		return true
+	case "idChange":
+		return q == "urgent"
+	}
+	return false
 }
 
 // injectionExpected is a quota or count injection's specified number of
@@ -1419,13 +1849,25 @@ func injectionExpected(in *manInject, harmed bool, volume float64, eligible int)
 // by its targeted rule: the named gate on every seed, or the named limit.
 func witnessMet(id string, g groupResult) bool {
 	rule := func(r string) bool { return g.Rejected && slices.Contains(g.Rules, r) }
+	// every: the seeds named are exactly the group's pairs (audit 5C.4m
+	// M2: not merely as many).
+	every := func(ss []int64) bool {
+		var want []int64
+		for _, p := range g.Pairs {
+			want = append(want, int64(p.Seed))
+		}
+		got := slices.Clone(ss)
+		slices.Sort(got)
+		slices.Sort(want)
+		return len(want) > 0 && slices.Equal(slices.Compact(got), want)
+	}
 	everySeed := func(gate string) bool {
 		ss := g.FailingByGate[gate]
-		if len(ss) != len(g.Pairs) {
+		if len(ss) != len(g.Pairs) || !every(ss) {
 			return false
 		}
 		for _, p := range g.Pairs {
-			if !slices.Contains(ss, int64(p.Seed)) || !slices.Contains(g.Failing, int64(p.Seed)) {
+			if !slices.Contains(g.Failing, int64(p.Seed)) {
 				return false
 			}
 		}
@@ -1433,13 +1875,13 @@ func witnessMet(id string, g groupResult) bool {
 	}
 	switch id {
 	case "W-URG-LATE":
-		return rule("safety") && len(g.Violations["pastDue urgent"]) == len(g.Pairs)
+		return rule("safety") && every(g.Violations["pastDue urgent"]) && len(g.Violations["pastDue urgent"]) == len(g.Pairs)
 	case "W-ROUT-348":
-		return rule("safety") && len(g.Violations["pastDue routine"]) == len(g.Pairs)
+		return rule("safety") && every(g.Violations["pastDue routine"]) && len(g.Violations["pastDue routine"]) == len(g.Pairs)
 	case "W-HORIZON":
-		return rule("safety") && len(g.Violations["pastDue soon"]) == len(g.Pairs)
+		return rule("safety") && every(g.Violations["pastDue soon"]) && len(g.Violations["pastDue soon"]) == len(g.Pairs)
 	case "W-PENDING":
-		return rule("pending") && len(g.Pending) == len(g.Pairs)
+		return rule("pending") && every(g.Pending)
 	case "W-PARTIAL":
 		return rule("allowance") && everySeed("partial_window_ceiling soon")
 	case "W-ACC-LATE":
@@ -1519,6 +1961,9 @@ func predictAcceptance(g groupResult, d *manInject, draws int) float64 {
 		p := inj[s.Seed]
 		ss = append(ss, seed{s.Orders, s.Baseline, s.Candidate - int64(p.Injected), binomialCDF(p.Served, d.Effect*float64(s.Orders)/float64(p.Served))})
 	}
+	if len(ss) == 0 {
+		return math.NaN() // nothing to draw: no prediction (audit 5C.4m M2)
+	}
 	r := rand.New(rand.NewPCG(7, 7)) // the prediction's own Monte Carlo
 	ok := 0
 	for range draws {
@@ -1564,22 +2009,22 @@ func TestCPInterval(t *testing.T) {
 	}
 }
 
-// TestReservedCriteria judges a run's lines: DT_MANIFEST_IN=<lines>,
-// DT_CRITERIA_OUT=<file>, DT_MANIFEST_SEEDS (the seeds a scenario the
-// run used, when fewer than the manifest's: a development check). The T5
-// tolerances are the manifest's approved ones.
-func TestReservedCriteria(t *testing.T) {
-	in, out := os.Getenv("DT_MANIFEST_IN"), os.Getenv("DT_CRITERIA_OUT")
-	if in == "" || out == "" {
-		t.Skip("set DT_MANIFEST_IN and DT_CRITERIA_OUT to judge a manifest run")
-	}
-	n := 0
-	if v := os.Getenv("DT_MANIFEST_SEEDS"); v != "" {
-		n, _ = strconv.Atoi(v)
-	}
-	f, err := os.Open(in)
+// analyzeFile judges a file of lines offline: never certifying, whatever
+// the lines claim (audit 5C.4m M1). The settings are read as the run's
+// (manInvocation). Its error is an unreadable, truncated or malformed
+// file, or malformed settings; incomplete coverage is in the criteria.
+func analyzeFile(m *manifestDoc, path string) (map[string]criterion, []string, error) {
+	_, seeds, err := manInvocation(m)
 	if err != nil {
-		t.Fatal(err)
+		return nil, nil, err
+	}
+	tol, err := manifestTolerances(m)
+	if err != nil {
+		return nil, nil, err
+	}
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, nil, err
 	}
 	defer f.Close()
 	var lines []groupResult
@@ -1587,35 +2032,45 @@ func TestReservedCriteria(t *testing.T) {
 	sc.Buffer(make([]byte, 1<<20), 1<<26)
 	for sc.Scan() {
 		var g groupResult
-		if err := json.Unmarshal(sc.Bytes(), &g); err != nil {
-			t.Fatal(err)
+		dec := json.NewDecoder(bytes.NewReader(sc.Bytes()))
+		dec.DisallowUnknownFields()
+		if err := dec.Decode(&g); err != nil {
+			return nil, nil, fmt.Errorf("line %d: %v", len(lines)+1, err)
 		}
 		lines = append(lines, g)
 	}
 	if err := sc.Err(); err != nil {
-		t.Fatal(err) // an unreadable or truncated input is never judged
+		return nil, nil, err // an unreadable or truncated input is never judged
+	}
+	r := reservedCriteria(m, lines, tol, seeds)
+	certify(r, certContext{Trusted: false})
+	return r, coverageProblems(m, lines, seeds), nil
+}
+
+// TestReservedCriteria is an offline analysis of a file of lines:
+// DT_MANIFEST_IN=<lines>, DT_CRITERIA_OUT=<file>, with the run's
+// DT_MANIFEST_SEEDS and DT_MANIFEST_SCENARIOS. Its output is always
+// non-certifying: a file's lines are assertions, not trusted
+// measurements (audit 5C.4m M1); only the execution certifies
+// (TestReservedManifestRun). Malformed settings or input fail before
+// anything is written; incomplete coverage fails after the analysis is
+// written.
+func TestReservedCriteria(t *testing.T) {
+	in, out := os.Getenv("DT_MANIFEST_IN"), os.Getenv("DT_CRITERIA_OUT")
+	if in == "" || out == "" {
+		t.Skip("set DT_MANIFEST_IN and DT_CRITERIA_OUT to analyze a manifest run's lines (non-certifying)")
 	}
 	m := loadManifest(t)
-	tol, err := manifestTolerances(m)
+	r, bad, err := analyzeFile(m, in)
 	if err != nil {
 		t.Fatal(err)
 	}
-	var only []string
-	if v := os.Getenv("DT_MANIFEST_SCENARIOS"); v != "" {
-		only = strings.Split(v, ",")
-	}
-	res := reservedCriteria(m, lines, tol, func(s *manScenario) int {
-		switch {
-		case len(only) > 0 && !slices.Contains(only, s.ID):
-			return 0 // not part of this partial run: missing groups reported
-		case n > 0:
-			return min(n, s.Seeds)
-		}
-		return s.Seeds
-	})
-	raw, _ := json.MarshalIndent(res, "", " ")
-	if err := os.WriteFile(out, append(raw, '\n'), 0o644); err != nil {
+	if err := writeCriteria(out, r); err != nil {
 		t.Fatal(err)
+	}
+	t.Logf("non-certifying analysis: %s", r["certification"].Status)
+	if len(bad) > 0 {
+		t.Fatalf("incomplete input (%d problems, first %q)", len(bad), bad[0])
 	}
 }
 
@@ -1629,10 +2084,24 @@ func fakeRun(m *manifestDoc) []groupResult {
 			lo, hi := 40*g, min(s.Seeds, 40*g+40)
 			for r := range max(1, s.Replicates) {
 				x := groupResult{Scenario: s.ID, Group: g, Replicate: r, Seeds: [2]int{lo, hi - 1}, Remainder: hi-lo < 40, Valid: true,
-					GateB: map[string]string{"urgent": Pass, "soon": Pass, "routine": Pass}, Deteriorated: map[string][]int64{}, UnmatchedUrgent: -1,
-					Matched: map[string]int{"urgent": hi - lo, "soon": hi - lo, "routine": hi - lo}}
+					GateB:        map[string]string{"urgent": Pass, "soon": Pass, "routine": Pass},
+					Deteriorated: map[string][]int64{"urgent": nil, "soon": nil, "routine": nil}, UnmatchedUrgent: -1,
+					Matched:  map[string]int{"urgent": hi - lo, "soon": hi - lo, "routine": hi - lo},
+					Increase: map[string]float64{"urgent": 0, "soon": 0, "routine": 0}}
+				if s.Replicates == 0 {
+					// The whole decision's measurements (audit 5C.4m M2).
+					x.Claims = &AccessClaims{EmpiricalAcceptance: Pass, AbsoluteAdequacy: AdequacyNotEstablished, PopulationConfidence: ConfidenceNotClaimed}
+					x.Severe = map[string][2]int64{"urgent": {0, 400}, "soon": {0, 1200}, "routine": {0, 2000}}
+					x.WorstSoonPast = make([]int64, hi-lo)
+				}
 				for i := lo; i < hi; i++ {
 					p := pairInfo{Seed: i}
+					if s.Replicates > 0 {
+						p.Eligible, p.Served = 30, 25
+						if i == lo { // one seed's difference: enough to predict, quick to draw
+							x.UrgentSeeds = append(x.UrgentSeeds, SeedDifference{Seed: int64(i), Orders: 30, Candidate: 3, Baseline: 3})
+						}
+					}
 					if in := s.Candidate.Inject; in != nil && in.HarmProbability == 0 && (!in.GroupFirstOnly || i%40 == 0) {
 						p.Harmed = true
 						if in.Kind == "count" {
@@ -1641,8 +2110,12 @@ func fakeRun(m *manifestDoc) []groupResult {
 					}
 					x.Pairs = append(x.Pairs, p)
 				}
-				if c := s.Candidate.Inject; c != nil && strings.HasPrefix(c.Kind, "id") && lo%40 == 0 {
-					for _, q := range Priorities {
+				if c := s.Candidate.Inject; c != nil && lo%40 == 0 {
+					// What the development runs measured, written out
+					// rather than taken from idUnmatched, so that the
+					// adjudicator's expectation is tested, not repeated.
+					unmatched := map[string][]string{"idRemove": Priorities, "idRepeat": Priorities, "idChange": {"urgent"}}[c.Kind]
+					for _, q := range unmatched {
 						x.Matched[q]--
 					}
 				}
@@ -1754,12 +2227,12 @@ func TestReservedCriteriaRules(t *testing.T) {
 		})},
 		{"T2G soon 1.5%, routine 0%, not rejected", "T2G", Fail, edit(func(ls []groupResult) {
 			for g := range 25 {
-				find(ls, "L10-85", g, 0).Severe = map[string][2]int64{"soon": {3, 200}, "routine": {0, 10000}}
+				find(ls, "L10-85", g, 0).Severe = map[string][2]int64{"urgent": {0, 400}, "soon": {3, 200}, "routine": {0, 10000}}
 			}
 		})},
 		{"T2G soon 1.5%, rejected in 23 of 25", "T2G", Pass, edit(func(ls []groupResult) {
 			for g := range 25 {
-				find(ls, "L10-85", g, 0).Severe = map[string][2]int64{"soon": {3, 200}, "routine": {0, 10000}}
+				find(ls, "L10-85", g, 0).Severe = map[string][2]int64{"urgent": {0, 400}, "soon": {3, 200}, "routine": {0, 10000}}
 			}
 			reject(ls, "L10-85", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22)
 		})},

@@ -33,7 +33,7 @@ func TestFollowUpFinancialObservation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := profileConfig(t)
+	cfg, fp := profileConfig(t)
 	type fin struct {
 		ObservedDays  int64 `json:"observedDaysPastHorizon"`
 		MinCash       int64 `json:"minCashCents"`
@@ -62,7 +62,7 @@ func TestFollowUpFinancialObservation(t *testing.T) {
 	var rows []row
 	changed := 0
 	for _, seed := range seeds {
-		a, b := measure(recordBaseline(pol4, cfg, seed)), measure(recordBaseline(cand, cfg, seed))
+		a, b := measure(recordBaseline(pol4, cfg, fp, seed)), measure(recordBaseline(cand, cfg, fp, seed))
 		x := row{seed, a, b, a.Solvent != b.Solvent || a.Funded != b.Funded}
 		if x.Changed {
 			changed++

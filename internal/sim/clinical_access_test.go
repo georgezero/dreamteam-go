@@ -153,7 +153,7 @@ func TestSimulatorAccessValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg := profileConfig(t)
+	cfg, fp := profileConfig(t)
 	grid := map[string][]int64{"urgent": {1440, 2880, 4320}, "soon": {3 * 1440, 7 * 1440, 10 * 1440}, "routine": {14 * 1440, 21 * 1440, 30 * 1440}}
 	res := make([]accessSeed, len(seeds))
 	recs := make([]eval.Record, len(seeds))
@@ -165,7 +165,7 @@ func TestSimulatorAccessValidation(t *testing.T) {
 			var losses []sim.LossDiagnosis
 			// Recorded under the candidate: its observation includes the
 			// clinical follow-up (followUpDays, Slice 5C.4j).
-			rec := recordBaselineProbe(cand, cfg, seed, func(d sim.LossDiagnosis) { losses = append(losses, d) })
+			rec := recordBaselineProbe(cand, cfg, fp, seed, func(d sim.LossDiagnosis) { losses = append(losses, d) })
 			res[i] = accessOf(t, cand, grid, rec, losses)
 			recs[i] = rec
 		}()
@@ -198,8 +198,8 @@ func TestSimulatorAccessValidation(t *testing.T) {
 	// The probe only observes: the first seed's record is the same without
 	// it.
 	var probed []sim.LossDiagnosis
-	a, _ := json.Marshal(recordBaseline(cand, cfg, seeds[0]))
-	b, _ := json.Marshal(recordBaselineProbe(cand, cfg, seeds[0], func(d sim.LossDiagnosis) { probed = append(probed, d) }))
+	a, _ := json.Marshal(recordBaseline(cand, cfg, fp, seeds[0]))
+	b, _ := json.Marshal(recordBaselineProbe(cand, cfg, fp, seeds[0], func(d sim.LossDiagnosis) { probed = append(probed, d) }))
 	if string(a) != string(b) || len(probed) == 0 {
 		t.Fatalf("the loss probe changed the record (%d diagnoses)", len(probed))
 	}
@@ -223,8 +223,8 @@ func TestSimulatorAccessValidation(t *testing.T) {
 
 // recordBaselineProbe is recordBaseline with the loss probe attached from
 // the takeover (the probe only observes).
-func recordBaselineProbe(p *eval.Policy, cfg *sim.Config, seed int64, probe func(sim.LossDiagnosis)) eval.Record {
-	return recordBaselineWith(p, cfg, seed, func(w *sim.World) { w.SetLossProbe(probe) })
+func recordBaselineProbe(p *eval.Policy, cfg *sim.Config, fp string, seed int64, probe func(sim.LossDiagnosis)) eval.Record {
+	return recordBaselineWith(p, cfg, fp, seed, func(w *sim.World) { w.SetLossProbe(probe) })
 }
 
 func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval.Record, losses []sim.LossDiagnosis) accessSeed {

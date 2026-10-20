@@ -213,6 +213,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.20": batchModeDev20,  // V0.2 Slice 5C.4f (volume-aware clinical severity windows): this build's action set and rules
 	"0.2.0-dev.21": batchModeDev21,  // V0.2 Slice 5C.4h (reserved protocol closure and clinical boundary safety): this build's action set and rules
 	"0.2.0-dev.22": batchModeDev22,  // V0.2 Slice 5C.4j (clinical safety and reserved protocol remediation): this build's action set and rules
+	"0.2.0-dev.23": batchModeDev23,  // V0.2 Slice 5C.4l (order provenance, inherited safety and reserved protocol closure): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

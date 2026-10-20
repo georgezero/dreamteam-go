@@ -7,6 +7,66 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4n — final certification pipeline remediation (0.2.0-dev.24)
+
+This slice remediates the independent 5C.4m audit (c456c94, committed
+verbatim before any change) under the owner's decisions of 2026-10-20
+(`docs/calibration/clinical-5c4n/`). It is the final planned remediation
+before the focused 5C.4o release-gate audit. The maintainer's response
+is `docs/audits/slice-5c4m-provenance-protocol-lock-audit-response.md`.
+* **Not locked, not run, not frozen, not reviewed.**
+* **Unchanged:** the clinical policy (`83d481b7…3948`), the simulator's
+  behaviour, the severity thresholds, the scenario manifest
+  (`250bc7fc…3ef4`) and the reserved seed protocol.
+* **Registers 0.2.0-dev.23** for replay (`mini-seed52-dev23`).
+* **Nothing reserved was run:** no strategy, reference or holdout seed,
+  unseal record or PCG(20261201, ·) stream.
+
+**Release blockers:**
+* **M1, the trust boundary.** The reserved execution constructs,
+  judges, adjudicates and certifies in one process and writes its files
+  afterwards; certification is decided from how the lines were computed
+  (trusted, family, manifest seeds), never from a file. A file read back
+  is a `non-certifying analysis`: the auditor's fabricated, complete
+  3,904-line file, on which every criterion PASSes, is `not certified`.
+  The candidate, manifest, protocol, policy in force and simulator
+  profile are verified against digests compiled into the build.
+* **M2, measurement completeness.** Every line's measurements are
+  checked for presence, cardinality, range, finiteness, seed identity
+  and consistency before any criterion reads them. T2G (undetermined
+  materiality), T5a (no prediction), T8 (matched counts by equality,
+  exact per identity-witness kind) and T4 (exact seed sets) no longer
+  read missing evidence favourably.
+* **M3, the protocol.** It opens with the CERTIFICATION SCOPE: trusted
+  in-process evaluation only; the study swap accepted, undetected, only
+  there; authenticated order-to-study provenance for any future external
+  records.
+* **M4, errors.** Malformed settings, truncated or malformed input and
+  unserializable results are errors; incomplete coverage fails the exit;
+  no partial or development invocation is confirmatory.
+* **M6, the validation helper.** It records the scenario's fingerprint
+  and refuses records failing integrity; the regenerated access and
+  follow-up evidence is byte-identical to 5C.4l's.
+* **M5** (shared history with a larger candidate capacity): deferred;
+  no manifest scenario has one.
+
+**Corrections:** 20 distinct stable T1 groups, not "0 of 28"; the
+near-margin results changed with 5C.4l's shared history (0.35 → 0.30
+and 0.31 → 0.33 at +2.1 points; 0.56 → 0.65 at +2 points); "every seed
+is valid" and "no bearing on the confirmatory run" corrected in place.
+
+**Development checks** (PCG(20261021, ·), certified path, both
+`development` / `not certified`): every line byte-identical to 5C.4l's;
+no measurement problem; T8 passes after the per-kind correction found by
+the first run; T5a passes on 200 seeds, T5b 0.33 at +2.1 points, 0 at +3.
+
+**Tested:** the auditor's witnesses as regression tests and their own
+eight files through the reader, 37 mutations (36 caught, one
+equivalent, caught in combination), the full uncached suite, vet, gofmt
+and the replay fixtures.
+
+---
+
 ## V0.2 Slice 5C.4l — order provenance, inherited safety and reserved protocol closure (0.2.0-dev.23)
 
 This slice remediates the independent 5C.4k audit (d06cdb9, committed

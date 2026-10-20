@@ -132,26 +132,28 @@ These are stated, not assumed.
   is NO GO. It needs only the outcomes of one record, so neither the
   contract nor provenance can close it without an authority for the
   link.
-  * **Bearing on the confirmatory run:** none. Its records are
-    constructed in process by the harness and judged without being
-    written or edited in between.
-  * **Bearing on other evaluations:** any evaluation of records that an
-    adversary could edit (a file-based evaluation) relies on the record
-    digests the harness commits.
-  * **Options for the owner**, each a decision rather than an
-    implementation detail:
-    1. accept it as a stated limitation, with the reliance on harness
-       provenance written into the protocol (as now);
-    2. attribute post-horizon studies conservatively: for each priority
-       and modality, the absolute cohort takes the worst-delayed
-       post-horizon studies, as many as there are orders wanted by the
-       horizon and served after it (the swap cannot change that count).
-       This is link-independent but a clinical-policy change: it can
-       charge an order wanted after the horizon with another's delay;
-    3. widen the absolute cohort to every study acquired by the end of
-       observation, also a policy change;
-    4. authenticate the link outside the record (a harness-signed record
-       digest at production), an architectural change.
+  * **Bearing on the confirmatory run.** *Correction (5C.4n, audit
+    5C.4m M1, M3):* this read "none: its records are constructed in
+    process and judged without being written or edited in between".
+    The records were, but the 5C.4l adjudication then read the run's
+    measurement summaries back from an editable file, which could
+    replace the clinical evidence altogether. Slice 5C.4n certifies in
+    the execution itself, before anything is written
+    (`../clinical-5c4n/reserved-validation-protocol.md` §8).
+  * **Bearing on other evaluations:** any evaluation of records that
+    could be edited.
+  * **Owner decision (2026-10-20), recorded in 5C.4n.** The limitation
+    is accepted **only for trusted in-process evaluation**. The v5
+    evaluator is not approved to certify externally editable, imported
+    or untrusted records without authenticated study-order provenance;
+    any future evaluation of such records needs an authenticated
+    order-to-study mapping or an equivalent independently trusted event
+    history. The clinical-policy alternatives listed here in 5C.4l
+    (conservative attribution, a wider absolute cohort) are deferred and
+    not pursued: the safety cohort, severity thresholds and attribution
+    rules are not changed to address the limitation.
+    `TestStudySwapLimitation` stays, documenting that the evaluator
+    cannot detect the manipulation.
 
 ## 3. Inherited orders (K2)
 
@@ -265,7 +267,15 @@ changed to accommodate it.
 (`sim-access-5c4l.json` against `../clinical-5c4j/sim-access-5c4j.json`:
 every per-seed field equal): the records satisfy the contract with
 inherited work, every seed is valid, and the clinical results, gates and
-statuses are unchanged. `TestDemandExogenousAcrossPlans` now checks every
+statuses are unchanged.
+  * **Correction (5C.4n, audit 5C.4m M6):** "every seed is valid" was
+    not established by these records. The validation helper recorded
+    them without the scenario's fingerprint, which the candidate's
+    integrity check refuses (`scenario  is not the policy's`). The
+    helper now records the scenario's fingerprint and refuses any record
+    that fails integrity; regenerated so, the access and follow-up
+    evidence is byte-identical (`../clinical-5c4n/`), and every record
+    passes integrity. `TestDemandExogenousAcrossPlans` now checks every
 order of the record, inherited included, with its ID and request, under
 three plans: identical.
 * **Replay:** 0.2.0-dev.22 is registered (`mini-seed52-dev22`); replay
