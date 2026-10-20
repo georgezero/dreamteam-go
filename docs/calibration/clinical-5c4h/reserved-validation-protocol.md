@@ -1,5 +1,9 @@
 # Slice 5C.4h: reserved-stream confirmatory protocol (proposed)
 
+> **Superseded** by `../clinical-5c4j/reserved-validation-protocol.md`
+> (Slice 5C.4j, after the independent 5C.4i audit). It is kept as it was
+> proposed and was never locked or run.
+
 This is the one confirmatory clinical calibration before v0.2-eval-5 is
 frozen. It supersedes `../clinical-5c4f/reserved-validation-protocol.md`
 and closes audit findings G1–G3

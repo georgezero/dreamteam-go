@@ -332,13 +332,18 @@ func captureName(w string) string {
 
 // observationNeeded is how far a record must be observed: every cohort
 // closed (the horizon and T180, plus the closure), the settlement window
-// after the horizon, and the backlog block covering the horizon sampled.
+// after the horizon, the clinical follow-up (followUpDays), and the
+// backlog block covering the horizon sampled.
 func observationNeeded(p *Policy, r *Record) int64 {
 	t180 := r.TakeoverSec + int64(p.Horizons.ValidationDays)*daySec
 	need := max(r.HorizonEndSec, t180) + p.Horizons.ClosureMin*60
 	// The dated settlement test: every obligation recognized by the
 	// horizon falls due within settlementDays and must be seen paid.
 	need = max(need, r.HorizonEndSec+int64(p.Finance.SettlementDays)*daySec)
+	// The clinical follow-up of orders wanted by the horizon (5C.4j).
+	if c := p.Clinical; c != nil && c.FollowUpDays > 0 {
+		need = max(need, r.HorizonEndSec+int64(c.FollowUpDays)*daySec)
+	}
 	if day, ok := coverDay(p, r); ok {
 		need = max(need, r.TakeoverSec+int64(day)*daySec)
 	}

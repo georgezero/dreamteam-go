@@ -19,7 +19,7 @@ type EvalRecorder struct {
 	w          *World
 	rec        eval.Record
 	studies    []int // inherited (unfinished at the takeover) and later studies, by index
-	inhOrders  []int // orders open at the takeover
+	inhOrders  []int // orders open at the takeover, or no-shows due to rebook
 	nOrders0   int   // orders existing at the takeover
 	retainer0  int64
 	reads0     int64
@@ -94,10 +94,23 @@ func (w *World) newEvalRecorder(plan, planSHA256, fingerprint string, seed int64
 			r.studies = append(r.studies, si)
 		}
 	}
+	// A no-show whose call for a new date is already queued is still an
+	// inherited obligation: it may be served after the takeover (Slice
+	// 5C.4j, the order–study contract).
+	rebook := map[int]bool{}
+	for _, ev := range w.eng.PendingEvents() {
+		if ev.Kind == kindNoShowRebook {
+			rebook[int(ev.A)] = true
+		}
+	}
 	for oi := range st.dem.orders {
 		switch st.dem.orders[oi].state {
 		case orderBooked, orderRecall, orderVisit:
 			r.inhOrders = append(r.inhOrders, oi)
+		case orderNoShow:
+			if rebook[oi] {
+				r.inhOrders = append(r.inhOrders, oi)
+			}
 		}
 	}
 	r.retainer0 = st.fin.led.bal[acctRemoteRetainer]

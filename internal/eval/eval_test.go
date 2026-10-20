@@ -128,7 +128,7 @@ func TestInsufficientCohortsIdentified(t *testing.T) {
 	// Observation stopping before the tail cohort closes leaves studies
 	// undecided: insufficient, never a pass, and it is an integrity failure.
 	short := base("A", 902)
-	short.observeShort = 30*daySec + 20*hour
+	short.observeShort, short.followUp = 30*daySec+20*hour, 0 // the v4 observation
 	sr := short.record()
 	sr.Studies = append(sr.Studies, Study{Priority: "routine", Modality: "XR", AcquiredSec: short.tailEnd() - hour})
 	m = Measure(p, &sr)

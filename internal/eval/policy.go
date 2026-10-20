@@ -279,6 +279,23 @@ type Clinical struct {
 	// observation ends is not yet observable, and makes the seed's safety
 	// insufficient (clinicalPlan). Empty: studies acquired by the horizon.
 	SafetyCohort string `json:"safetyCohort,omitempty"`
+	// FollowUpDays (Slice 5C.4j, owner decision on audit 5C.4i I3): every
+	// record is observed at least this many calendar days past the
+	// horizon (beside the policy's other observation needs), so that an
+	// order wanted by the horizon and imaged within its access limit has
+	// its absolute reporting deadline within the follow-up: at least
+	// access limit + reporting target + absolute limit for every priority
+	// (equality allowed: a report due exactly at the end of observation
+	// and unfinished stays not yet observable, never a pass). Only with
+	// the safetyCohort ordersByHorizon. 0: no clinical follow-up beyond
+	// the other needs (5C.4h).
+	FollowUpDays int `json:"followUpDays,omitempty"`
+	// OrderStudyIntegrity (Slice 5C.4j, audit 5C.4i I2): "contract"
+	// enforces the order–study contract for new work (checkOrderStudies);
+	// only with the safetyCohort ordersByHorizon. Empty: the 5C.4h link
+	// check alone (a post-horizon study names exactly one order of its
+	// priority).
+	OrderStudyIntegrity string `json:"orderStudyIntegrity,omitempty"`
 	// LostDemand (modified option B): when set, lost and left orders leave
 	// the timeliness cohorts (counted apart as lost) and the demand the
 	// candidate leaves unimaged is gated against the paired baseline's
@@ -330,8 +347,15 @@ const (
 	PartitionCalendar = "calendar"
 	// PartialCountCeiling and SafetyOrdersByHorizon: Slice 5C.4h's
 	// boundary rules (Clinical.PartialWindows, Clinical.SafetyCohort).
-	PartialCountCeiling   = "countCeiling"
+	PartialCountCeiling = "countCeiling"
+	// PartialRateCeiling (Slice 5C.4j, owner decision on audit 5C.4i I1):
+	// every nonempty partial window fails when its observed severe
+	// fraction exceeds the rate, whatever its size; one at or below the
+	// rate and below the minimum is not judged.
+	PartialRateCeiling    = "rateCeiling"
 	SafetyOrdersByHorizon = "ordersByHorizon"
+	// IntegrityContract: Clinical.OrderStudyIntegrity's value (5C.4j).
+	IntegrityContract = "contract"
 )
 
 // LoadPolicy reads and validates a policy file; the digest is the SHA-256
@@ -583,10 +607,23 @@ func (c *Clinical) validate(p *Policy) error {
 		return fmt.Errorf("clinical weeklyPartition %q: %s, or empty for pooled blocks", c.WeeklyPartition, PartitionCalendar)
 	case c.WeeklyPartition != "" && !weekly:
 		return fmt.Errorf("clinical weeklyPartition: only with maxWeeklySevereRate")
-	case c.PartialWindows != "" && (c.PartialWindows != PartialCountCeiling || c.WeeklyPartition != PartitionCalendar):
-		return fmt.Errorf("clinical partialWindows %q: %s with the calendar partition only, or empty", c.PartialWindows, PartialCountCeiling)
+	case c.PartialWindows != "" && (c.PartialWindows != PartialCountCeiling && c.PartialWindows != PartialRateCeiling || c.WeeklyPartition != PartitionCalendar):
+		return fmt.Errorf("clinical partialWindows %q: %s or %s with the calendar partition only, or empty", c.PartialWindows, PartialRateCeiling, PartialCountCeiling)
 	case c.SafetyCohort != "" && c.SafetyCohort != SafetyOrdersByHorizon:
 		return fmt.Errorf("clinical safetyCohort %q: %s, or empty for the studies acquired by the horizon", c.SafetyCohort, SafetyOrdersByHorizon)
+	case c.OrderStudyIntegrity != "" && (c.OrderStudyIntegrity != IntegrityContract || c.SafetyCohort != SafetyOrdersByHorizon):
+		return fmt.Errorf("clinical orderStudyIntegrity %q: %s with the safetyCohort %s only, or empty", c.OrderStudyIntegrity, IntegrityContract, SafetyOrdersByHorizon)
+	case c.FollowUpDays != 0 && c.SafetyCohort != SafetyOrdersByHorizon:
+		return fmt.Errorf("clinical followUpDays: only with the safetyCohort %s", SafetyOrdersByHorizon)
+	case c.FollowUpDays < 0 || c.FollowUpDays > 366:
+		return fmt.Errorf("clinical followUpDays %d: 0 to 366", c.FollowUpDays)
+	}
+	if c.FollowUpDays > 0 {
+		for _, q := range Priorities {
+			if need := c.AccessLimitMin[q] + p.Scenario.TATTargetMin[q] + c.AbsoluteMaxPastDueMin[q]; int64(c.FollowUpDays)*1440 < need {
+				return fmt.Errorf("clinical followUpDays %d: shorter than %s's access limit, reporting target and absolute limit (%d min)", c.FollowUpDays, q, need)
+			}
+		}
 	}
 	if c.InheritedFrom != "takeover" && c.InheritedFrom != "own" {
 		return fmt.Errorf("clinical inheritedFrom %q: takeover or own", c.InheritedFrom)

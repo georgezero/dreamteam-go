@@ -7,6 +7,61 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 Slice 5C.4j — clinical safety and reserved protocol remediation (0.2.0-dev.22)
+
+This slice remediates the independent 5C.4i audit (4bead43, committed
+verbatim before any change), under the owner's decisions of 2026-10-19
+(`docs/calibration/clinical-5c4j/`). The maintainer's response is
+`docs/audits/slice-5c4i-boundary-safety-lock-readiness-audit-response.md`.
+* **Not locked, not run, not frozen, not reviewed.** The independent
+  5C.4k review comes next.
+* **Registers 0.2.0-dev.21** for replay (`mini-seed51-dev21`).
+* **v0.2-eval-4 is byte-identical.** The 5C.4d, 5C.4e, 5C.4f and 5C.4h
+  candidates keep their own rules, from their exact bytes.
+* **Nothing reserved was run:** no strategy, reference or holdout seed,
+  unseal record or PCG(20261201, ·) stream.
+
+**Clinical policy** (candidate SHA-256 `9efa6e63…29e7c`):
+* **I1, partial windows** (`partialWindows: rateCeiling`). Every
+  nonempty partial window fails above a 5% observed severe rate,
+  whatever its size. At or below 5% with fewer than 100 acquisitions it
+  is NOT_JUDGED. 5/6, 5/10, 5/50, 5/99 and 1/6 were GO and are now
+  NO GO on the full 40-seed evaluation; 5/100 and 0/6 stay GO.
+* **I2, the order–study contract** (`orderStudyIntegrity: contract`).
+  Unique study IDs; one order per study, with the same request, served
+  and resolved at the acquisition; one study per served new order.
+  Inherited work is exempt. The audit's three bypasses are now INVALID.
+* **I3, a 45-day follow-up** (`followUpDays: 45`), observed by every
+  recorder. Equality at the limit passes, a report due exactly at E and
+  unfinished stays INSUFFICIENT, and nothing is fabricated.
+* **I4, prefix-stable fidelity draws.** Observing longer changes no
+  earlier outcome, in the fidelity model or in the simulator.
+
+**Adjudicator:**
+* **I5:** coverage is checked before judgment: exact groups, the
+  remainder, replicates, seeds, validity and scanner errors.
+* **I6:** raw T7 insufficiency; T2G per priority; witnesses judged by
+  their targeted rule; W-ID-CHANGED moves the wanted time.
+* **I7:** an exact binomial T5 prediction; the approved tolerances are
+  pinned in the manifest (version 2).
+
+**Development checks** (PCG(20261021, ·), seeds 901–910):
+* **Results.** Every judged criterion passes. T5b at +2.1 points: 0.31
+  (tolerance 0.40); at +3: 0.
+* **False rejection.** 0 of 28 stable groups rejected; 0 of 1,120
+  stable seeds failed the partial-window ceiling. Not material.
+* **Simulator.** Routine reports not yet observable fall from 22 to 3.
+  A recorder defect exposed by the contract was repaired: no-shows at
+  the takeover with a rebooking queued.
+
+**Tested:** the audit's witnesses as regression tests; 24 mutations, all
+caught; the full uncached suite, vet, gofmt and the replay fixtures.
+
+**Next:** the independent 5C.4k review. Protocol lock only if clean,
+then one reserved run. Reserved calibration and the freeze stay NO GO.
+
+---
+
 ## V0.2 Slice 5C.4h — reserved protocol closure and clinical boundary safety (0.2.0-dev.21)
 
 This slice is the remediation of the independent 5C.4g audit (c55f3cb,

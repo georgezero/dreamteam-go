@@ -163,7 +163,9 @@ func TestSimulatorAccessValidation(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			var losses []sim.LossDiagnosis
-			rec := recordBaselineProbe(pol4, cfg, seed, func(d sim.LossDiagnosis) { losses = append(losses, d) })
+			// Recorded under the candidate: its observation includes the
+			// clinical follow-up (followUpDays, Slice 5C.4j).
+			rec := recordBaselineProbe(cand, cfg, seed, func(d sim.LossDiagnosis) { losses = append(losses, d) })
 			res[i] = accessOf(t, cand, grid, rec, losses)
 			recs[i] = rec
 		}()
@@ -196,8 +198,8 @@ func TestSimulatorAccessValidation(t *testing.T) {
 	// The probe only observes: the first seed's record is the same without
 	// it.
 	var probed []sim.LossDiagnosis
-	a, _ := json.Marshal(recordBaseline(pol4, cfg, seeds[0]))
-	b, _ := json.Marshal(recordBaselineProbe(pol4, cfg, seeds[0], func(d sim.LossDiagnosis) { probed = append(probed, d) }))
+	a, _ := json.Marshal(recordBaseline(cand, cfg, seeds[0]))
+	b, _ := json.Marshal(recordBaselineProbe(cand, cfg, seeds[0], func(d sim.LossDiagnosis) { probed = append(probed, d) }))
 	if string(a) != string(b) || len(probed) == 0 {
 		t.Fatalf("the loss probe changed the record (%d diagnoses)", len(probed))
 	}
@@ -340,6 +342,9 @@ func accessOf(t *testing.T, cand *eval.Policy, grid map[string][]int64, rec eval
 			p := *cand
 			p.Clinical = &c
 			m := eval.Measure(&p, &rec)
+			if m.Clinical == nil {
+				t.Fatalf("seed %d: no clinical measures: %v", rec.Seed, m.Integrity)
+			}
 			a := m.Clinical.Access[eval.WinGated][q]
 			cell := accessCell{LimitMin: lim, Wanted: a.Wanted, Timely: a.Timely, Untimely: a.Untimely, Withdrawn: a.Withdrawn, Undecided: a.Undecided, Lost: a.Lost,
 				Fraction: float64(a.Timely) / float64(max(1, a.Timely+a.Untimely)), UntimelyBy: map[string]int64{}}

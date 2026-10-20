@@ -206,7 +206,7 @@ func delayOrders(q string, from, to, later int64, limit int) func(b synth, r *Re
 			}
 			for j := range r.Orders {
 				o := &r.Orders[j]
-				if o.Priority == q && o.ResolvedSec == s.AcquiredSec {
+				if o.Priority == q && (o.ID == s.Order || s.Order == "" && o.ResolvedSec == s.AcquiredSec) {
 					o.FirstApptSec += later
 					o.ResolvedSec += later
 				}

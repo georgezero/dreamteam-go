@@ -14,7 +14,9 @@ import (
 // (docs/audits/slice-5c4g-final-clinical-policy-audit.md G4), each
 // favourable under the 5C.4f candidate and not under the revision; the
 // allowance interaction (G5); the reporting repairs (G6). Synthetic
-// fixtures only.
+// fixtures only. The partial-window witnesses here are the 5C.4h count
+// ceiling's, judged under the 5C.4h candidate; the 5C.4j rate ceiling's
+// are in remediation_5c4j_test.go.
 
 // candidate5c4fPath is the 5C.4f candidate (no count ceiling, the
 // absolute limits over studies acquired by the horizon), kept byte for
@@ -93,7 +95,7 @@ func addSoon(n int) func(b synth, r *Record) {
 			for i := range r.Captures {
 				r.Captures[i].OrderOutcomes = append(r.Captures[i].OrderOutcomes, OutServed)
 			}
-			r.Studies = append(r.Studies, Study{ID: "X", Order: id, Priority: "soon", Modality: "CT", AcquiredSec: at, EnteredSec: at,
+			r.Studies = append(r.Studies, Study{ID: "X" + id, Order: id, Priority: "soon", Modality: "CT", AcquiredSec: at, EnteredSec: at,
 				ClaimedSec: at + 60, ReadStartSec: at + 60, FinalSec: at + hour})
 		}
 		slices.SortStableFunc(r.Studies, func(x, y Study) int { return int(x.AcquiredSec - y.AcquiredSec) })
@@ -132,7 +134,7 @@ func TestPartialWindowConcentration(t *testing.T) {
 	if severe != 640 {
 		t.Fatalf("%d severe in the partial weeks", severe)
 	}
-	p, d := candidatePolicy(t)
+	p, d := candidate5c4hPolicy(t)
 	pr, c = boundaryCase(t, p, d, addSoon(18), harm)
 	ws = pr.PerSeed[0].Measures.Clinical.WeeklySevere["soon"]
 	if w := ws.Weeks[0]; w.Status != Fail || ws.PartialFailing != 1 || ws.PartialCeiling == nil || *ws.PartialCeiling != 5 || ws.Failing != 1 {
@@ -155,7 +157,7 @@ func TestPartialWindowConcentration(t *testing.T) {
 // complete windows are unchanged (99 insufficient, 6 of 100 failing).
 // The 5C.4f candidate leaves every partial window below 100 not judged.
 func TestPartialWindowCeiling(t *testing.T) {
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4hPolicy(t)
 	old, _ := candidate5c4fPolicy(t)
 	for _, x := range []struct {
 		name     string
@@ -192,7 +194,7 @@ func TestPartialWindowCeiling(t *testing.T) {
 func TestPartialWindowNoJudgedWindow(t *testing.T) {
 	r := blockRecord("soon", []int64{bwTake}, []int{30}, []int{2})
 	r.HorizonEndSec = bwTake + 20*daySec // the leading week and part of one block
-	p, _ := candidatePolicy(t)
+	p, _ := candidate5c4hPolicy(t)
 	ws := weeklySevereCalendar(p.Clinical, r, r.HorizonEndSec+40*daySec)["soon"]
 	if ws.Blocks != 0 || !ws.NoJudgedWindow || !ws.Insufficient || ws.InsufficientWeeks != 0 || statuses(ws) != "not_judged not_judged" {
 		t.Fatalf("%s %+v", statuses(ws), ws)
@@ -213,7 +215,7 @@ func TestPartialWindowNoJudgedWindow(t *testing.T) {
 
 // The passing gate discloses the partial windows it did not judge.
 func TestPartialWindowDisclosed(t *testing.T) {
-	p, d := candidatePolicy(t)
+	p, d := candidate5c4hPolicy(t)
 	pr, c := boundaryCase(t, p, d, nil, nil)
 	if c.Verdict != GO {
 		t.Fatalf("%s %v", c.Verdict, c.Reasons)
@@ -567,25 +569,40 @@ func TestUnavailableFractions(t *testing.T) {
 
 // T7's raw count: a seed failing timely access and lacking evidence on a
 // soon block is FAIL in the joint rule, and still listed by gate as
-// insufficient.
+// insufficient; so is a seed whose soon gate fails on another block
+// (audit 5C.4i I6: the gate's own failure must not hide the window's
+// missing evidence). The second soon block is thinned below 100 by moving
+// 69 of its acquisitions, with their orders, into the third.
 func TestRawInsufficiencyByGate(t *testing.T) {
 	p, d := candidatePolicy(t)
-	pr, _ := boundaryCase(t, p, d, nil, func(b synth, r *Record) {
-		if r.Seed != 6 {
-			return
+	thin := func(r *Record) {
+		var ids []string
+		for _, s := range r.Studies {
+			if s.Priority == "soon" && s.AcquiredSec >= firstMonday+28*daySec && s.AcquiredSec < firstMonday+56*daySec && len(ids) < 69 {
+				ids = append(ids, s.Order)
+			}
 		}
-		// Most of the second soon block's studies gone (complete, below
-		// 100); 30 urgent orders imaged 10 days late.
-		from, to := firstMonday+28*daySec, firstMonday+56*daySec
-		r.Studies = slices.DeleteFunc(r.Studies, func(s Study) bool {
-			return s.Priority == "soon" && s.AcquiredSec >= from && s.AcquiredSec < to-3*daySec
-		})
-		delayOrders("urgent", 0, 30, 10*daySec, 30)(b, r)
+		for _, id := range ids {
+			j := slices.IndexFunc(r.Orders, func(o Order) bool { return o.ID == id })
+			moveAcquisition(r, j, firstMonday+56*daySec+hour, 0)
+		}
+	}
+	pr, _ := boundaryCase(t, p, d, nil, func(b synth, r *Record) {
+		switch r.Seed {
+		case 6:
+			thin(r)
+			delayOrders("urgent", 0, 30, 10*daySec, 30)(b, r)
+		case 7:
+			thin(r)
+			lateReports("soon", firstMonday+56*daySec, firstMonday+84*daySec, 13, 30*hour)(b, r)
+		}
 	})
 	key := GateSevereWeek + " " + WinGated + " soon"
-	if !slices.Contains(pr.ClinicalJoint.FailingSeeds, 6) || slices.Contains(pr.ClinicalJoint.InsufficientSeeds, 6) ||
-		!slices.Equal(pr.ClinicalInsufficient[key], []int64{6}) {
-		t.Fatalf("%+v %v", pr.ClinicalJoint, pr.ClinicalInsufficient)
+	ws := pr.PerSeed[6].Measures.Clinical.WeeklySevere["soon"]
+	if !pr.Valid || !slices.Contains(pr.ClinicalJoint.FailingSeeds, 6) || !slices.Contains(pr.ClinicalJoint.FailingSeeds, 7) ||
+		ws.InsufficientWeeks != 1 || ws.Failing != 1 || gateStatus(pr, 7, GateSevereWeek, WinGated, "soon") != Fail ||
+		!slices.Equal(pr.ClinicalInsufficient[key], []int64{6, 7}) {
+		t.Fatalf("%v %+v %v", pr.Integrity, pr.ClinicalJoint, pr.ClinicalInsufficient)
 	}
 }
 

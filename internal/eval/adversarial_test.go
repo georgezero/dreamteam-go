@@ -786,7 +786,7 @@ func TestDatedFunding(t *testing.T) {
 	}
 	// Observation stopping before the horizon's obligations fall due:
 	// the record is not evidence.
-	pr, c = eval(func(s int64) synth { x := base("B", s); x.observeShort = daySec; return x }, nil)
+	pr, c = eval(func(s int64) synth { x := base("B", s); x.observeShort, x.followUp = daySec, 0; return x }, nil)
 	if pr.Valid || c.Verdict != INVALID {
 		t.Fatalf("truncated: valid %v %s", pr.Valid, c.Verdict)
 	}
@@ -847,7 +847,9 @@ func TestRecordIntegrity(t *testing.T) {
 		"remote reports' fees":    func(r *Record) { r.Captures[1].Money.RemoteReadsCents++ },
 	}
 	for want, breakIt := range cases {
-		r := base("B", 901).record()
+		b := base("B", 901)
+		b.followUp = 0 // observed exactly as the v4 policy needs
+		r := b.record()
 		breakIt(&r)
 		m := Measure(p, &r)
 		if !strings.Contains(strings.Join(m.Integrity, "\n"), want) {

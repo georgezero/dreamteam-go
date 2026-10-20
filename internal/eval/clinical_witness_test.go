@@ -112,16 +112,40 @@ func urgentOrders(r *Record, from, to int64) []int {
 	return out
 }
 
-// dropStudy removes the study acquired when order i was resolved (its
-// order no longer imaged).
+// dropStudy removes order i's study (its order no longer imaged): the
+// study its link names, or, for a record without links, the one acquired
+// when the order was resolved.
 func dropStudy(r *Record, i int) {
-	at := r.Orders[i].ResolvedSec
-	r.Studies = slices.DeleteFunc(r.Studies, func(s Study) bool { return s.Priority == r.Orders[i].Priority && s.AcquiredSec == at })
+	o := &r.Orders[i]
+	at := o.ResolvedSec
+	r.Studies = slices.DeleteFunc(r.Studies, func(s Study) bool {
+		if s.Order != "" {
+			return s.Order == o.ID
+		}
+		return s.Priority == o.Priority && s.AcquiredSec == at
+	})
 }
 
-// resolveAs makes order i end as out at `at` (0: unresolved), its study
-// dropped.
+// resolveAs makes order i end as out at `at` (0: unresolved). Served, its
+// study moves with its imaging (the order–study contract: one study,
+// acquired at the order's resolution); otherwise its study is dropped.
 func resolveAs(r *Record, i int, out string, at int64) {
+	if out == OutServed && at != 0 {
+		o := &r.Orders[i]
+		k := slices.IndexFunc(r.Studies, func(s Study) bool { return s.Order == o.ID })
+		if k < 0 {
+			k = len(r.Studies)
+			r.Studies = append(r.Studies, Study{ID: "S" + o.ID, Order: o.ID, Priority: o.Priority, Modality: o.Modality, AcquiredSec: at})
+		}
+		s := &r.Studies[k]
+		s.AcquiredSec, s.EnteredSec = at, at
+		s.ClaimedSec, s.ReadStartSec = at+60, at+60
+		s.FinalSec = at + hour
+		slices.SortStableFunc(r.Studies, func(x, y Study) int { return int(x.AcquiredSec - y.AcquiredSec) })
+		o.ResolvedSec = at
+		r.Captures[len(r.Captures)-1].OrderOutcomes[i] = out
+		return
+	}
 	dropStudy(r, i)
 	o := &r.Orders[i]
 	o.ResolvedSec = at
@@ -348,6 +372,16 @@ func TestWitnessObservationBoundaries(t *testing.T) {
 	add(Order{ID: "B2", Priority: "urgent", Modality: "CT", ReceivedSec: H, WantedSec: H + hour, FirstApptSec: H + 3*hour, ResolvedSec: H + 3*hour}, OutServed)
 	add(Order{ID: "B3", Priority: "urgent", Modality: "CT", ReceivedSec: H - 2*hour, WantedSec: H - hour}, OutOpen)
 	add(Order{ID: "B4", Priority: "urgent", Modality: "CT", ReceivedSec: t0 - daySec, WantedSec: t0 - 12*hour, FirstApptSec: t0 + hour, ResolvedSec: t0 + hour}, OutServed)
+	// The served new orders' studies (the order–study contract); B4 is
+	// inherited work, exempt.
+	for _, x := range []struct {
+		id string
+		at int64
+	}{{"B1", H + 10*hour}, {"B2", H + 3*hour}} {
+		r.Studies = append(r.Studies, Study{ID: "S" + x.id, Order: x.id, Priority: "urgent", Modality: "CT", AcquiredSec: x.at, EnteredSec: x.at,
+			ClaimedSec: x.at + 60, ReadStartSec: x.at + 60, FinalSec: x.at + 1800})
+	}
+	slices.SortStableFunc(r.Studies, func(x, y Study) int { return int(x.AcquiredSec - y.AcquiredSec) })
 	resync(b, &r)
 	m := Measure(p, &r)
 	if len(m.Integrity) > 0 {

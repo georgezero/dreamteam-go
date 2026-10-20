@@ -1,7 +1,7 @@
 {
  "schema": "dreamteam.evalpolicy/v5",
  "id": "v0.2-eval-5-candidate",
- "status": "PROPOSAL, not in force and not frozen (Slice 5C.4h, 2026-10-19): the owner's modified option B with Gate B as an empirical benchmark acceptance rule without a population-confidence claim, its approved per-seed safeguard, volume-aware severity windows (no urgent weekly gate; soon fixed four-week calendar blocks; routine fixed calendar weeks; docs/calibration/clinical-5c4f/), and the boundary-safety revision (a count ceiling on partial windows; the absolute limits over every study of an order wanted by the horizon; docs/calibration/clinical-5c4h/), for renewed independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
+ "status": "PROPOSAL, not in force and not frozen (Slice 5C.4j, 2026-10-19): the owner's modified option B with Gate B as an empirical benchmark acceptance rule without a population-confidence claim, its approved per-seed safeguard, volume-aware severity windows (no urgent weekly gate; soon fixed four-week calendar blocks; routine fixed calendar weeks; docs/calibration/clinical-5c4f/), the boundary-safety revision (the absolute limits over every study of an order wanted by the horizon; docs/calibration/clinical-5c4h/) and its remediation (an observed 5% severe-rate ceiling on every nonempty partial window, the order-study integrity contract, a 45-day follow-up; docs/calibration/clinical-5c4j/), for renewed independent review and the reserved-stream validation; values marked provisional or owner approval required there may change before v0.2-eval-5 is frozen",
  "effective": "none: v0.2-eval-4 stays in force",
  "notes": [
   "Candidate only. The clinical section implements docs/evaluation/proposals/v5-clinical-acceptance.md with the values of docs/calibration/clinical-5c4b/acceptance-design.md; every other rule is v0.2-eval-4 unchanged, except the sampled persistent age check, reported only (v5 replaces it with the exact absolute limits)."
@@ -158,7 +158,7 @@
    "rule": "clinical (new)",
    "finding": "audit docs/audits/slice-5c3-eval4-framework-audit.md: severe report delays, a report 348 h past due, thirty urgent patients a month late and separate allowances all passed v0.2-eval-4",
    "was": "none",
-   "now": "absolute past-due limits at zero tolerance over every study acquired by the horizon or of an order wanted by it, a study not yet observable when observation ends leaving safety insufficient; the severe-delay rate; the severe rate in each fixed calendar window (soon four-week blocks, routine weeks; no urgent weekly gate), a partial boundary window below the minimum failing when it holds more severe reports than a minimum window may; timely access over served, open and late-cancelled eligible orders from the original wanted time; lost, left and patient-ended demand against the paired baseline as an empirical benchmark acceptance (no population-confidence claim) with a per-seed safeguard; the maximum wait reported; one shared seed allowance"
+   "now": "absolute past-due limits at zero tolerance over every study acquired by the horizon or of an order wanted by it, observed through a 45-day follow-up, a study not yet observable when observation ends leaving safety insufficient; the order-study integrity contract; the severe-delay rate; the severe rate in each fixed calendar window (soon four-week blocks, routine weeks; no urgent weekly gate), every nonempty partial boundary window failing above the rate whatever its size; timely access over served, open and late-cancelled eligible orders from the original wanted time; lost, left and patient-ended demand against the paired baseline as an empirical benchmark acceptance (no population-confidence claim) with a per-seed safeguard; the maximum wait reported; one shared seed allowance"
   },
   {
    "rule": "backlog.informationalChecks (persistent)",
@@ -400,8 +400,10 @@
    "soon": 100,
    "routine": 100
   },
-  "partialWindows": "countCeiling",
+  "partialWindows": "rateCeiling",
   "safetyCohort": "ordersByHorizon",
+  "followUpDays": 45,
+  "orderStudyIntegrity": "contract",
   "accessLimitMin": {
    "urgent": 2880,
    "soon": 10080,

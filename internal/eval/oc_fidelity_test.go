@@ -231,6 +231,13 @@ type ocFidelity struct {
 	// the same modalities (Slice 5C.4h). Off: the committed model, whose
 	// study modality is drawn at acquisition from the booking stream.
 	ExogenousModality bool `json:"exogenousModality,omitempty"`
+	// PrefixStable: each study's documentation and read times are drawn
+	// from its own order's identity (a salt from the booking stream mixed
+	// with the order's index), not from the booking stream after every
+	// order of the observation, so that a longer observation leaves every
+	// earlier draw and outcome as it was (Slice 5C.4j, audit 5C.4i I4).
+	// Off: the committed model.
+	PrefixStable bool `json:"prefixStableDraws,omitempty"`
 }
 
 func (q ocFidelity) origin() int64 { return cmp.Or(q.Takeover, t0) }
@@ -412,10 +419,15 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 	E := rec.ObservedUntilSec
 	// The exogenous modalities' salt: one demand draw, the same for both
 	// plans of a pair.
-	var salt uint64
+	var salt, bsalt uint64
 	if q.ExogenousModality {
 		salt = rd.Uint64()
 	}
+	if q.PrefixStable {
+		bsalt = rb.Uint64()
+	}
+	// unit is a uniform in [0, 1) from a 64-bit mix.
+	unit := func(x uint64) float64 { return float64(splitmix64(x)>>11) / (1 << 53) }
 	modalityOf := func(q string, u float64) string {
 		tot := 0
 		for _, m := range simModalities {
@@ -507,6 +519,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		k     int
 		order string
 		mod   string // exogenous modality (ExogenousModality)
+		idx   int    // the order's index (PrefixStable)
 	}
 	var acqs []acq
 	var resolved []int64
@@ -555,7 +568,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 			// The order's ID, unique in the record, links its study (5C.4h).
 			mod := "XR"
 			if q.ExogenousModality {
-				mod = modalityOf(pri, float64(splitmix64(salt+uint64(len(rec.Orders)))>>11)/(1<<53))
+				mod = modalityOf(pri, unit(salt+uint64(len(rec.Orders))))
 			}
 			o := Order{ID: "o" + strconv.Itoa(len(rec.Orders)), Origin: strconv.Itoa(len(rec.Orders)), Priority: pri, Modality: mod, ReceivedSec: recv, WantedSec: wanted}
 			bookDay, found := 0, false
@@ -593,7 +606,7 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 					}
 				case appt <= E:
 					out, res = OutServed, appt
-					acqs = append(acqs, acq{appt, k, o.ID, mod})
+					acqs = append(acqs, acq{appt, k, o.ID, mod, len(rec.Orders)})
 				}
 			}
 			rec.Orders = append(rec.Orders, o)
@@ -624,9 +637,16 @@ func (q ocFidelity) recordPaired(rd, rb ocRNG, pol *Policy) (*Record, fidBusy) {
 		if !qf.ExogenousModality {
 			mod = modalityOf(q, rb.Float64())
 		}
-		entered := a.at + int64(tableDraw(p.EntrySec[mod], rb.Float64()))
-		rec.Studies = append(rec.Studies, Study{ID: "s", Order: a.order, Priority: q, Modality: mod, AcquiredSec: a.at, EnteredSec: entered})
-		info = append(info, fidStudy{mod, tableDraw(p.ReadSec[mod], rb.Float64())})
+		ue, ur := 0.0, 0.0
+		if qf.PrefixStable {
+			ue, ur = unit(bsalt+2*uint64(a.idx)), unit(bsalt+2*uint64(a.idx)+1)
+		} else {
+			ue = rb.Float64()
+			ur = rb.Float64()
+		}
+		entered := a.at + int64(tableDraw(p.EntrySec[mod], ue))
+		rec.Studies = append(rec.Studies, Study{ID: "s" + a.order, Order: a.order, Priority: q, Modality: mod, AcquiredSec: a.at, EnteredSec: entered})
+		info = append(info, fidStudy{mod, tableDraw(p.ReadSec[mod], ur)})
 	}
 	// Studies enter the worklist in entry order.
 	order := make([]int, len(rec.Studies))
@@ -1431,7 +1451,7 @@ func TestOCFidelityModelUnchanged(t *testing.T) {
 				rec.Orders[j].Origin, rec.Orders[j].ID = "", "o"
 			}
 			for j := range rec.Studies {
-				rec.Studies[j].Order = ""
+				rec.Studies[j].ID, rec.Studies[j].Order = "s", ""
 			}
 			raw, _ := json.Marshal(struct {
 				R *Record

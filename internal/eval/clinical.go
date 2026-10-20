@@ -146,6 +146,11 @@ type WeeklySevere struct {
 	// NoJudgedWindow, when no window was judged and none is insufficient
 	// (the gate is then insufficient, never a vacuous pass).
 	PartialCeiling *int64 `json:"partialSevereCeiling,omitempty"`
+	// PartialRule: under partialWindows rateCeiling (Slice 5C.4j), every
+	// nonempty partial window below the minimum fails when its own severe
+	// fraction exceeds the rate (an observed safety ceiling, not an
+	// estimate); PartialFailing and NoJudgedWindow as above.
+	PartialRule    string `json:"partialRule,omitempty"`
 	PartialFailing int    `json:"partialFailingWeeks,omitempty"`
 	NoJudgedWindow bool   `json:"noJudgedWindow,omitempty"`
 }
@@ -577,7 +582,10 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 			continue
 		}
 		bpRate, minCohort := bp(c.MaxWeeklySevereRate[q]), c.MinWeeklyCohort[q]
-		ceiling := c.PartialWindows == PartialCountCeiling
+		ceiling, rated := c.PartialWindows == PartialCountCeiling, c.PartialWindows == PartialRateCeiling
+		if rated {
+			ws.PartialRule = PartialRateCeiling
+		}
 		if ceiling {
 			// The most severe a window of the minimum size may hold.
 			n := bpRate * minCohort / 10_000
@@ -602,7 +610,7 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 				w.Status = Insufficient
 				ws.InsufficientWeeks++
 				continue
-			case w.Acquired < minCohort && ceiling && rateAbove(w.Severe, minCohort, bpRate):
+			case w.Acquired < minCohort && (ceiling && rateAbove(w.Severe, minCohort, bpRate) || rated && w.Acquired > 0 && rateAbove(w.Severe, w.Acquired, bpRate)):
 				// More severe reports than a compliant window of the
 				// minimum size could hold: a failure whatever the volume
 				// missing at the boundary (audit G4.1).
@@ -627,7 +635,7 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 			}
 		}
 		ws.Insufficient = ws.InsufficientWeeks > 0
-		if ceiling && ws.Blocks == 0 && !ws.Insufficient {
+		if (ceiling || rated) && ws.Blocks == 0 && !ws.Insufficient {
 			ws.NoJudgedWindow, ws.Insufficient = true, true
 		}
 		if worst >= 0 {
@@ -638,6 +646,16 @@ func weeklySevereCalendar(c *Clinical, r *Record, E int64) map[string]*WeeklySev
 		}
 	}
 	return out
+}
+
+// partialWithin states, in a reason, that the not-judged partial windows
+// were within the partial-window rule: the count ceiling (5C.4h) or the
+// rate (5C.4j: which never establishes that the window was safe).
+func partialWithin(ws *WeeklySevere) string {
+	if ws.PartialCeiling != nil {
+		return fmt.Sprintf("each within the count ceiling of %d severe", *ws.PartialCeiling)
+	}
+	return "each at or below the rate (too few to establish it)"
 }
 
 // calendarWindows names a calendar partition's windows in a reason.
@@ -693,27 +711,29 @@ func classifyAccess(a *AccessCohort, o *Order, out string, from, limit, E int64)
 // priority to be a known one and every capture's order outcome to be a
 // known outcome, a resolved order's final one terminal (served, lost,
 // left or patient): missing or unknown evidence is INVALID, never a
-// default. Under the safetyCohort ordersByHorizon (Slice 5C.4h) every
-// study acquired after the horizon must name exactly one order of the
-// record, of its priority: without it the absolute limits' cohort cannot
-// be decided. It reports whether the record can be measured clinically.
+// default.
+//
+// Under the safetyCohort ordersByHorizon every study acquired after the
+// horizon names exactly one order of the record, of its priority (Slice
+// 5C.4h); with orderStudyIntegrity "contract" the whole order–study
+// contract for new work holds (Slice 5C.4j, audit 5C.4i I2), so that no
+// reporting obligation can be dropped, duplicated or moved between
+// cohorts (checkOrderStudies). It reports whether the record can be
+// measured clinically.
 func checkClinicalRecord(c *Clinical, r *Record, caps map[string]*Capture, bad func(string, ...any)) bool {
 	ok := true
-	if c.SafetyCohort == SafetyOrdersByHorizon {
-		ids := map[string]int{}
+	switch end := caps["end"]; {
+	case c.OrderStudyIntegrity == IntegrityContract && end != nil && len(end.OrderOutcomes) == len(r.Orders):
+		ok = checkOrderStudies(r, end, bad)
+	case c.SafetyCohort == SafetyOrdersByHorizon:
+		ids, pri := map[string]int{}, map[string]string{}
 		for i := range r.Orders {
 			ids[r.Orders[i].ID]++
-		}
-		pri := map[string]string{}
-		for i := range r.Orders {
 			pri[r.Orders[i].ID] = r.Orders[i].Priority
 		}
 		for i := range r.Studies {
 			s := &r.Studies[i]
-			if s.AcquiredSec <= r.HorizonEndSec {
-				continue
-			}
-			if ids[s.Order] != 1 || pri[s.Order] != s.Priority {
+			if s.AcquiredSec > r.HorizonEndSec && (ids[s.Order] != 1 || pri[s.Order] != s.Priority) {
 				bad("study %s: acquired after the horizon without exactly one order of its priority (%q)", s.ID, s.Order)
 				ok = false
 				break
@@ -839,13 +859,16 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 			case ws.Partition == PartitionCalendar && ws.Failing > 0:
 				g.Status, g.Reason = Fail, fmt.Sprintf("%d of %d judged %s above the rate; worst %d of %d, %s to %s",
 					ws.Failing, ws.Blocks, calendarWindows(ws), ws.WorstSevere, ws.WorstAcquired, ws.WorstFrom, ws.WorstTo)
-				if ws.PartialFailing > 0 {
+				switch {
+				case ws.PartialFailing > 0 && ws.PartialCeiling != nil:
 					g.Reason += fmt.Sprintf("; %d partial windows below the minimum with more than the %d severe a minimum window may hold",
 						ws.PartialFailing, *ws.PartialCeiling)
+				case ws.PartialFailing > 0:
+					g.Reason += fmt.Sprintf("; %d partial windows below the minimum with an observed severe fraction above the rate", ws.PartialFailing)
 				}
 			case ws.Partition == PartitionCalendar && ws.NoJudgedWindow:
-				g.Status, g.Reason, g.Undecided = Insufficient, fmt.Sprintf("no window judged: %d partial %s below the minimum cohort of %d, none above the count ceiling of %d severe",
-					ws.NotJudgedWeeks, calendarWindows(ws), c.MinWeeklyCohort[q], *ws.PartialCeiling), true
+				g.Status, g.Reason, g.Undecided = Insufficient, fmt.Sprintf("no window judged: %d partial %s below the minimum cohort of %d, %s",
+					ws.NotJudgedWeeks, calendarWindows(ws), c.MinWeeklyCohort[q], partialWithin(ws)), true
 			case ws.Partition == PartitionCalendar && ws.Insufficient:
 				g.Status, g.Reason = Insufficient, fmt.Sprintf("%d of %d complete %s below the minimum cohort of %d",
 					ws.InsufficientWeeks, len(ws.Weeks)-ws.PartialWeeks, calendarWindows(ws), c.MinWeeklyCohort[q])
@@ -857,10 +880,10 @@ func clinicalGates(p *Policy, m *SeedMeasures) []SeedGate {
 				if ws.WorstFrom != "" {
 					g.Reason += fmt.Sprintf(" (%s to %s)", ws.WorstFrom, ws.WorstTo)
 				}
-			case ws.PartialCeiling != nil && ws.NotJudgedWeeks > 0:
+			case (ws.PartialCeiling != nil || ws.PartialRule != "") && ws.NotJudgedWeeks > 0:
 				// Disclosed, never counted as passing windows.
-				g.Reason = fmt.Sprintf("%d judged %s pass; %d partial windows below the minimum not judged, each within the count ceiling of %d severe",
-					ws.Blocks, calendarWindows(ws), ws.NotJudgedWeeks, *ws.PartialCeiling)
+				g.Reason = fmt.Sprintf("%d judged %s pass; %d partial windows below the minimum not judged, %s",
+					ws.Blocks, calendarWindows(ws), ws.NotJudgedWeeks, partialWithin(ws))
 			}
 		default:
 			g.Value, g.Num = float64(cm.WorstWeekSevere[q]), cm.WorstWeekSevere[q]
@@ -962,7 +985,22 @@ func clinicalPlan(p *Policy, pr *PlanReport) {
 			pr.ClinicalInsufficient[key] = append(pr.ClinicalInsufficient[key], s.Seed)
 		}
 		for _, g := range append(slices.Clone(s.Gates), s.ClinicalGates...) {
-			if g.PerSeed && role(p, g.Window) == "gated" && g.Status == Insufficient {
+			// A severity-window gate's evaluability is read from its windows
+			// (below): a failing window must not hide another's missing
+			// evidence (audit 5C.4i I6).
+			if g.PerSeed && role(p, g.Window) == "gated" && g.Status == Insufficient && g.Gate != GateSevereWeek {
+				note(g.Gate + " " + g.Window + " " + g.Stratum)
+			}
+		}
+		if c := s.Measures.Clinical; c != nil {
+			for _, q := range Priorities {
+				if ws := c.WeeklySevere[q]; ws != nil && ws.Insufficient {
+					note(GateSevereWeek + " " + WinGated + " " + q)
+				}
+			}
+		}
+		for _, g := range s.ClinicalGates {
+			if g.Gate == GateSevereWeek && g.Status == Insufficient && (s.Measures.Clinical == nil || s.Measures.Clinical.WeeklySevere[g.Stratum] == nil) {
 				note(g.Gate + " " + g.Window + " " + g.Stratum)
 			}
 		}
@@ -1039,4 +1077,67 @@ func clinicalReasons(cand *PlanReport, j *JointGate) []string {
 		}
 	}
 	return why
+}
+
+// checkOrderStudies is the order–study contract for new work:
+//   - every study acquired after the takeover has a unique ID and names
+//     exactly one order of the record, of its priority and modality,
+//     whose final outcome is served and whose resolution is that
+//     acquisition;
+//   - no two studies name the same order;
+//   - every order received after the takeover and served has exactly one
+//     such study.
+//
+// Inherited work is exempt where the records cannot reconcile it: a
+// study acquired at or before the takeover (its order may have been
+// resolved before it and be absent), and an order received at or before
+// the takeover and served after it without a post-takeover study.
+func checkOrderStudies(r *Record, end *Capture, bad func(string, ...any)) bool {
+	t0 := r.TakeoverSec
+	byID := map[string][]int{}
+	for i := range r.Orders {
+		byID[r.Orders[i].ID] = append(byID[r.Orders[i].ID], i)
+	}
+	linked := map[int]int{} // order index → its post-takeover studies
+	ids := map[string]bool{}
+	for i := range r.Studies {
+		s := &r.Studies[i]
+		if s.AcquiredSec <= t0 {
+			continue
+		}
+		if ids[s.ID] {
+			bad("study %s: its ID repeats", s.ID)
+			return false
+		}
+		ids[s.ID] = true
+		os := byID[s.Order]
+		if len(os) != 1 {
+			bad("study %s: names %d orders (%q), not exactly one", s.ID, len(os), s.Order)
+			return false
+		}
+		o := &r.Orders[os[0]]
+		switch {
+		case o.Priority != s.Priority || o.Modality != s.Modality:
+			bad("study %s: its order %s asked for %s %s, not %s %s", s.ID, o.ID, o.Priority, o.Modality, s.Priority, s.Modality)
+			return false
+		case end.OrderOutcomes[os[0]] != OutServed:
+			bad("study %s: its order %s ended %q, not served", s.ID, o.ID, end.OrderOutcomes[os[0]])
+			return false
+		case o.ResolvedSec != s.AcquiredSec:
+			bad("study %s: acquired at %d, its order %s imaged at %d", s.ID, s.AcquiredSec, o.ID, o.ResolvedSec)
+			return false
+		}
+		if linked[os[0]]++; linked[os[0]] > 1 {
+			bad("order %s: more than one study", o.ID)
+			return false
+		}
+	}
+	for i := range r.Orders {
+		o := &r.Orders[i]
+		if o.ReceivedSec > t0 && end.OrderOutcomes[i] == OutServed && linked[i] != 1 {
+			bad("order %s: served with no study", o.ID)
+			return false
+		}
+	}
+	return true
 }

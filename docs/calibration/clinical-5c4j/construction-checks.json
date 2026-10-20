@@ -1,0 +1,6194 @@
+{
+ "schema": "dreamteam.reserved-construction-checks/v1",
+ "source": "internal/eval/reserved_manifest_test.go TestReservedManifestRun on the development family PCG(20261021, ·), never the reserved family; judged by TestReservedCriteria (reservedCriteria)",
+ "manifest": "docs/calibration/clinical-5c4j/scenario-manifest.json (version 2)",
+ "note": "Evaluator 0.2.0-dev.22, candidate 9efa6e63f38de9cfbfdb829ac1a82eff114d6e5c523d32df5d46f53b8c429e7c, observed 45 days past the horizon, prefix-stable fidelity draws. Development construction and operating-characteristic checks only. Their criterion statuses on 1 or 5 groups are not the protocol's (which judge 25 or 62 groups); T2 is inconclusive below 200 harmed seeds and T8 lists every scenario absent from a pass.",
+ "passes": [
+  {
+   "name": "construction",
+   "seedsPerScenario": 40,
+   "scenarios": "all 49",
+   "criteria": {
+    "T1": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "bonferroniInterval": [
+        0,
+        0.9937499999999999
+       ],
+       "byRule": {},
+       "groups": 1,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-B85": {
+       "bonferroniInterval": [
+        0,
+        0.9937499999999999
+       ],
+       "byRule": {},
+       "groups": 1,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-C85": {
+       "bonferroniInterval": [
+        0,
+        0.9937499999999999
+       ],
+       "byRule": {},
+       "groups": 1,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-Cs85": {
+       "bonferroniInterval": [
+        0,
+        0.9937499999999999
+       ],
+       "byRule": {},
+       "groups": 1,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0,
+       "rejected": 0
+      }
+     }
+    },
+    "T2": {
+     "status": "inconclusive",
+     "detail": {
+      "allowancePrediction": 0.371,
+      "detection": 1,
+      "flagged": 15,
+      "harmed": 15,
+      "lower95": 0.8189637274779153,
+      "note": "seeds share their demand across scenarios (paired demand): pooled per-seed counts are not independent binomial trials; intervals are reported for orientation only",
+      "rejection": {
+       "H15": {
+        "byRule": {
+         "caseSelection": 1
+        },
+        "groups": 1,
+        "rejected": 1
+       },
+       "H20": {
+        "byRule": {
+         "allowance": 1,
+         "caseSelection": 1,
+         "gateB:urgent": 1
+        },
+        "groups": 1,
+        "rejected": 1
+       },
+       "OH15": {
+        "byRule": {
+         "caseSelection": 1
+        },
+        "groups": 1,
+        "rejected": 1
+       },
+       "OH20": {
+        "byRule": {},
+        "groups": 1,
+        "rejected": 0
+       },
+       "SHOCK": {
+        "byRule": {
+         "caseSelection": 1,
+         "gateB:urgent": 1
+        },
+        "groups": 1,
+        "rejected": 1
+       }
+      }
+     }
+    },
+    "T2-conformance": {
+     "status": "pass",
+     "detail": {
+      "holds": true
+     }
+    },
+    "T2G": {
+     "status": "pass",
+     "detail": {
+      "D-85": {
+       "groups": 1,
+       "material": true,
+       "maxIncrease": 0.0003118927322191994,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0.00048631400172828516,
+        "soon": 0.1948107075584326
+       },
+       "worstSoonMedianMin": 3900
+      },
+      "IK-85": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.019973149444395443,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0
+       },
+       "worstSoonMedianMin": 892
+      },
+      "IK-92": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.02002023549112914,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0
+       },
+       "worstSoonMedianMin": 909
+      },
+      "IL10-85": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.004578138678291011,
+       "rejected": 0,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0
+       },
+       "worstSoonMedianMin": 892
+      },
+      "IL10-92": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.0032243104563956363,
+       "rejected": 0,
+       "severeShare": {
+        "routine": 0,
+        "soon": 5.308700960874874e-05
+       },
+       "worstSoonMedianMin": 909
+      },
+      "IL40-85": {
+       "groups": 1,
+       "material": true,
+       "maxIncrease": 0.5443030467363129,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0
+       },
+       "worstSoonMedianMin": 808
+      },
+      "K-85": {
+       "groups": 1,
+       "material": true,
+       "maxIncrease": 0,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0.010346748733186533
+       },
+       "worstSoonMedianMin": 3400
+      },
+      "K-92": {
+       "groups": 1,
+       "material": true,
+       "maxIncrease": 0,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0.0004040237775475009,
+        "soon": 0.0683536245722925
+       },
+       "worstSoonMedianMin": 3774
+      },
+      "L10-85": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.0003237093530003352,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0.0003183783927197474
+       },
+       "worstSoonMedianMin": 903
+      },
+      "L10-92": {
+       "groups": 1,
+       "material": false,
+       "maxIncrease": 0.0004772035555458198,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0.006021220159151194
+       },
+       "worstSoonMedianMin": 2399
+      },
+      "L20-85": {
+       "groups": 1,
+       "material": true,
+       "maxIncrease": 0.0005148663393344244,
+       "rejected": 1,
+       "severeShare": {
+        "routine": 0,
+        "soon": 0.0226030668010824
+       },
+       "worstSoonMedianMin": 3487
+      }
+     }
+    },
+    "T3": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "bonferroniUpper": 0.12804370180992913,
+       "seeds": 40,
+       "upper95": {
+        "routine": 0.07215752450551477,
+        "soon": 0.07215752450551477,
+        "urgent": 0.07215752450551477
+       },
+       "violatingSeeds": {}
+      },
+      "S-B85": {
+       "bonferroniUpper": 0.12804370180992913,
+       "seeds": 40,
+       "upper95": {
+        "routine": 0.07215752450551477,
+        "soon": 0.07215752450551477,
+        "urgent": 0.07215752450551477
+       },
+       "violatingSeeds": {}
+      },
+      "S-C85": {
+       "bonferroniUpper": 0.12804370180992913,
+       "seeds": 40,
+       "upper95": {
+        "routine": 0.07215752450551477,
+        "soon": 0.07215752450551477,
+        "urgent": 0.07215752450551477
+       },
+       "violatingSeeds": {}
+      },
+      "S-Cs85": {
+       "bonferroniUpper": 0.12804370180992913,
+       "seeds": 40,
+       "upper95": {
+        "routine": 0.07215752450551477,
+        "soon": 0.07215752450551477,
+        "urgent": 0.07215752450551477
+       },
+       "violatingSeeds": {}
+      }
+     }
+    },
+    "T4": {
+     "status": "pass",
+     "detail": {
+      "W-ACC-LATE": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-ACCESS65": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-HORIZON": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-ID-CHANGED": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-ID-REMOVED": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-ID-REPEATED": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-LOST30": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-MARGIN-ABOVE": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-MARGIN-AT": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-PARTIAL": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-PAT30": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-PENDING": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-ROUT-348": {
+       "groups": 1,
+       "met": 1
+      },
+      "W-URG-LATE": {
+       "groups": 1,
+       "met": 1
+      }
+     }
+    },
+    "T5a": {
+     "status": "inconclusive",
+     "detail": {
+      "NM0": {
+       "accepted": 20,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 20,
+       "groupMean": 1,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 1,
+       "rate": 1
+      },
+      "NM1": {
+       "accepted": 20,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 20,
+       "groupMean": 1,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 1,
+       "rate": 1
+      },
+      "NM2": {
+       "accepted": 14,
+       "clusterSE": 0,
+       "conforms": false,
+       "evaluations": 20,
+       "groupMean": 0.7,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0.5076,
+       "rate": 0.7
+      },
+      "NM2.1": {
+       "accepted": 7,
+       "clusterSE": 0,
+       "conforms": false,
+       "evaluations": 20,
+       "groupMean": 0.35,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0.29735,
+       "rate": 0.35
+      },
+      "NM3": {
+       "accepted": 0,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 20,
+       "groupMean": 0,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0,
+       "rate": 0
+      }
+     }
+    },
+    "T5b": {
+     "status": "pass",
+     "detail": {
+      "rate2.1": 0.35,
+      "rate3": 0,
+      "tolerance2.1": 0.4,
+      "tolerance3": 0.01
+     }
+    },
+    "T6": {
+     "status": "pass",
+     "detail": {
+      "flagged": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "interval95": {
+       "routine": [
+        0,
+        0.022791749455466526
+       ],
+       "soon": [
+        0,
+        0.022791749455466526
+       ],
+       "urgent": [
+        0,
+        0.022791749455466526
+       ]
+      },
+      "limit": 19,
+      "note": "seeds share their demand across scenarios (paired demand): pooled per-seed counts are not independent binomial trials; intervals are reported for orientation only",
+      "seeds": 160
+     }
+    },
+    "T7": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "groups": 1,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0
+      },
+      "S-B85": {
+       "groups": 1,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0
+      },
+      "S-C85": {
+       "groups": 1,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0
+      },
+      "S-Cs85": {
+       "groups": 1,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.9749999999999999
+       ],
+       "limit": 0
+      }
+     }
+    },
+    "T8": {
+     "status": "pass",
+     "detail": {}
+    }
+   },
+   "groups": {
+    "S-A85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267144
+       ],
+       "soon": [
+        0,
+        37694
+       ],
+       "urgent": [
+        0,
+        6272
+       ]
+      }
+     }
+    ],
+    "S-B85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000466,
+       "soon": 0,
+       "urgent": -0.000318
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266465
+       ],
+       "soon": [
+        0,
+        37802
+       ],
+       "urgent": [
+        1,
+        6095
+       ]
+      }
+     }
+    ],
+    "S-C85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000251,
+       "soon": 0,
+       "urgent": -0.000162
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265578
+       ],
+       "soon": [
+        0,
+        37565
+       ],
+       "urgent": [
+        0,
+        6183
+       ]
+      }
+     }
+    ],
+    "S-Cs85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000761,
+       "soon": 0,
+       "urgent": -0.000832
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266080
+       ],
+       "soon": [
+        0,
+        37103
+       ],
+       "urgent": [
+        1,
+        6155
+       ]
+      }
+     }
+    ],
+    "S-A92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000823,
+       "soon": 0,
+       "urgent": -0.000141
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 3,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "breach_rate T90 soon": 2,
+       "breach_rate tail soon": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267306
+       ],
+       "soon": [
+        4,
+        37701
+       ],
+       "urgent": [
+        3,
+        6270
+       ]
+      }
+     }
+    ],
+    "S-B92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000785,
+       "soon": 0,
+       "urgent": -0.000612
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 4,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1,
+       "breach_rate tail soon": 1,
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266422
+       ],
+       "soon": [
+        6,
+        37795
+       ],
+       "urgent": [
+        1,
+        6095
+       ]
+      }
+     }
+    ],
+    "S-C92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000538,
+       "soon": 0,
+       "urgent": 0.00018
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265664
+       ],
+       "soon": [
+        0,
+        37567
+       ],
+       "urgent": [
+        5,
+        6178
+       ]
+      }
+     }
+    ],
+    "S-Cs92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000699,
+       "soon": 0,
+       "urgent": 1.6e-05
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1,
+       "breach_rate tail soon": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265883
+       ],
+       "soon": [
+        1,
+        37106
+       ],
+       "urgent": [
+        0,
+        6163
+       ]
+      }
+     }
+    ],
+    "Wg85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9.2e-05,
+       "soon": 0,
+       "urgent": -0.000182
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "partial_window_ceiling soon": 28,
+       "severe_delay_rate T90 soon": 20,
+       "severe_delay_rate tail soon": 15,
+       "severe_delays_in_a_week gated soon": 40,
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue urgent": 28
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267338
+       ],
+       "soon": [
+        1883,
+        37687
+       ],
+       "urgent": [
+        54,
+        6268
+       ]
+      }
+     }
+    ],
+    "WgU85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000368,
+       "soon": 0,
+       "urgent": -0.000644
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 39,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "partial_window_ceiling soon": 22,
+       "severe_delay_rate T90 soon": 14,
+       "severe_delay_rate tail soon": 4,
+       "severe_delays_in_a_week gated soon": 39
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue urgent": 30
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267141
+       ],
+       "soon": [
+        1692,
+        37698
+       ],
+       "urgent": [
+        53,
+        6269
+       ]
+      }
+     }
+    ],
+    "R085": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000415,
+       "soon": 0,
+       "urgent": -0.000146
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "breach_rate gated urgent": 1,
+       "partial_window_ceiling soon": 29,
+       "severe_delay_rate T90 soon": 28,
+       "severe_delay_rate tail soon": 15,
+       "severe_delays_in_a_week gated soon": 40
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue urgent": 25
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267469
+       ],
+       "soon": [
+        1963,
+        37698
+       ],
+       "urgent": [
+        145,
+        6272
+       ]
+      }
+     }
+    ],
+    "L10-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000264,
+       "soon": 0,
+       "urgent": 0.000324
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 4,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1,
+       "breach_rate tail routine": 1,
+       "breach_rate tail soon": 4
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue urgent": 1
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267251
+       ],
+       "soon": [
+        12,
+        37691
+       ],
+       "urgent": [
+        4,
+        6267
+       ]
+      }
+     }
+    ],
+    "L20-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000797,
+       "soon": 0,
+       "urgent": 0.000515
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 10,
+       "breach_rate T90 routine": 5,
+       "breach_rate T90 soon": 2,
+       "breach_rate tail routine": 32,
+       "breach_rate tail soon": 40,
+       "partial_window_ceiling soon": 1,
+       "severe_delay_rate T90 soon": 1,
+       "severe_delay_rate tail soon": 10,
+       "severe_delays_in_a_week gated soon": 31
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 30,
+       "pastDue urgent": 6
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267279
+       ],
+       "soon": [
+        852,
+        37694
+       ],
+       "urgent": [
+        17,
+        6271
+       ]
+      }
+     }
+    ],
+    "D-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000222,
+       "soon": 0,
+       "urgent": 0.000312
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 27,
+       "breach_rate T90 routine": 40,
+       "breach_rate T90 soon": 40,
+       "breach_rate gated urgent": 31,
+       "breach_rate tail routine": 40,
+       "breach_rate tail soon": 40,
+       "partial_window_ceiling soon": 16,
+       "severe_delay_rate T90 soon": 38,
+       "severe_delay_rate tail soon": 39,
+       "severe_delays_in_a_week gated routine": 1,
+       "severe_delays_in_a_week gated soon": 40
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 40,
+       "pastDue urgent": 23
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        130,
+        267317
+       ],
+       "soon": [
+        7343,
+        37693
+       ],
+       "urgent": [
+        53,
+        6271
+       ]
+      }
+     }
+    ],
+    "K-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.001078,
+       "soon": 0,
+       "urgent": -0.000306
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 39,
+       "breach_rate tail routine": 21,
+       "breach_rate tail soon": 40,
+       "partial_window_ceiling soon": 1,
+       "severe_delay_rate tail soon": 5,
+       "severe_delays_in_a_week gated soon": 15
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 24,
+       "pastDue urgent": 3
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267658
+       ],
+       "soon": [
+        390,
+        37693
+       ],
+       "urgent": [
+        13,
+        6273
+       ]
+      }
+     }
+    ],
+    "IL10-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000248,
+       "soon": 0,
+       "urgent": 0.004578
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266280
+       ],
+       "soon": [
+        0,
+        37666
+       ],
+       "urgent": [
+        1,
+        6225
+       ]
+      }
+     }
+    ],
+    "IK-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 5.9e-05,
+       "soon": 0,
+       "urgent": 0.019973
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 5,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 5
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        260536
+       ],
+       "soon": [
+        0,
+        37562
+       ],
+       "urgent": [
+        1,
+        6113
+       ]
+      }
+     }
+    ],
+    "IL40-85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "gateB:routine",
+       "allowance",
+       "pooled",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "fail",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.073108,
+       "soon": 0,
+       "urgent": 0.544303
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access T90 routine": 40,
+       "timely_access T90 soon": 1,
+       "timely_access gated urgent": 40,
+       "timely_access tail routine": 40,
+       "timely_access tail soon": 10
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 39,
+       "soon": 0,
+       "urgent": 40
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        201897
+       ],
+       "soon": [
+        0,
+        36801
+       ],
+       "urgent": [
+        4,
+        2861
+       ]
+      }
+     }
+    ],
+    "L10-92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000477,
+       "soon": 0,
+       "urgent": -0.000482
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 39,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 4,
+       "breach_rate T90 routine": 1,
+       "breach_rate T90 soon": 13,
+       "breach_rate tail routine": 12,
+       "breach_rate tail soon": 39,
+       "severe_delays_in_a_week gated soon": 10
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 10,
+       "pastDue urgent": 3
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267256
+       ],
+       "soon": [
+        227,
+        37700
+       ],
+       "urgent": [
+        12,
+        6273
+       ]
+      }
+     }
+    ],
+    "K-92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000251,
+       "soon": 0,
+       "urgent": -0.000356
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 40,
+       "breach_rate T90 routine": 1,
+       "breach_rate T90 soon": 17,
+       "breach_rate gated urgent": 7,
+       "breach_rate tail routine": 40,
+       "breach_rate tail soon": 40,
+       "partial_window_ceiling soon": 27,
+       "severe_delay_rate tail soon": 37,
+       "severe_delays_in_a_week gated routine": 2,
+       "severe_delays_in_a_week gated soon": 38
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 40,
+       "pastDue urgent": 13
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        108,
+        267311
+       ],
+       "soon": [
+        2577,
+        37701
+       ],
+       "urgent": [
+        22,
+        6274
+       ]
+      }
+     }
+    ],
+    "IL10-92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000245,
+       "soon": 0,
+       "urgent": 0.003224
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266394
+       ],
+       "soon": [
+        2,
+        37674
+       ],
+       "urgent": [
+        3,
+        6229
+       ]
+      }
+     }
+    ],
+    "IK-92": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "allowance",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.000154,
+       "soon": 0,
+       "urgent": 0.02002
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 5,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 5
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        260914
+       ],
+       "soon": [
+        0,
+        37562
+       ],
+       "urgent": [
+        2,
+        6115
+       ]
+      }
+     }
+    ],
+    "H10": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000415,
+       "soon": 0,
+       "urgent": 0.010535
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 4,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 4
+      },
+      "harmedSeeds": 4,
+      "harmedFlagged": 4,
+      "injected": 67,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267277
+       ],
+       "soon": [
+        0,
+        37696
+       ],
+       "urgent": [
+        1,
+        6202
+       ]
+      }
+     }
+    ],
+    "H15": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000204,
+       "soon": 0,
+       "urgent": 0.011455
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 3,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 3
+      },
+      "harmedSeeds": 3,
+      "harmedFlagged": 3,
+      "injected": 74,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267413
+       ],
+       "soon": [
+        0,
+        37697
+       ],
+       "urgent": [
+        1,
+        6199
+       ]
+      }
+     }
+    ],
+    "H20": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "allowance",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.00033,
+       "soon": 0,
+       "urgent": 0.025431
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 5,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 5
+      },
+      "harmedSeeds": 5,
+      "harmedFlagged": 5,
+      "injected": 162,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267305
+       ],
+       "soon": [
+        0,
+        37702
+       ],
+       "urgent": [
+        0,
+        6112
+       ]
+      }
+     }
+    ],
+    "SHOCK": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.000587,
+       "soon": 0,
+       "urgent": 0.025329
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {
+       "breach_rate gated urgent": 1,
+       "severe_delay_rate gated urgent": 1,
+       "timely_access gated urgent": 1
+      },
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 1
+      },
+      "harmedSeeds": 1,
+      "harmedFlagged": 1,
+      "injected": 163,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267474
+       ],
+       "soon": [
+        0,
+        37696
+       ],
+       "urgent": [
+        3,
+        6107
+       ]
+      }
+     }
+    ],
+    "OH10": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -1.2e-05,
+       "soon": 0,
+       "urgent": -0.048856
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 1,
+      "harmedFlagged": 0,
+      "injected": 26,
+      "baselineInjected": 328,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267247
+       ],
+       "soon": [
+        0,
+        37706
+       ],
+       "urgent": [
+        3,
+        6247
+       ]
+      }
+     }
+    ],
+    "OH15": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000662,
+       "soon": 0,
+       "urgent": -0.031909
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 4,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 4
+      },
+      "harmedSeeds": 4,
+      "harmedFlagged": 4,
+      "injected": 126,
+      "baselineInjected": 328,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267593
+       ],
+       "soon": [
+        0,
+        37700
+       ],
+       "urgent": [
+        1,
+        6146
+       ]
+      }
+     }
+    ],
+    "OH20": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000317,
+       "soon": 0,
+       "urgent": -0.03988
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 2
+      },
+      "harmedSeeds": 2,
+      "harmedFlagged": 2,
+      "injected": 79,
+      "baselineInjected": 328,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267436
+       ],
+       "soon": [
+        0,
+        37695
+       ],
+       "urgent": [
+        1,
+        6188
+       ]
+      }
+     }
+    ],
+    "NM0": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     }
+    ],
+    "NM1": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.010453
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 65,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     }
+    ],
+    "NM2": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.01976
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 124,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 14
+     }
+    ],
+    "NM2.1": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.022658
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 141,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 7
+     }
+    ],
+    "NM3": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.027882
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 175,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     }
+    ],
+    "HV": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.001889,
+       "soon": 0,
+       "urgent": 0.011184
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 12,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {
+       "severe_delays_in_a_week gated soon": 12
+      },
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 13,
+      "harmedFlagged": 0,
+      "injected": 68,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        212019
+       ],
+       "soon": [
+        0,
+        30400
+       ],
+       "urgent": [
+        0,
+        4847
+       ]
+      }
+     }
+    ],
+    "W-URG-LATE": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled",
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000647,
+       "soon": 0,
+       "urgent": 0.000304
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 40,
+       "breach_rate gated urgent": 40,
+       "severe_delay_rate gated urgent": 40
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue urgent": 40
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 2860,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267113
+       ],
+       "soon": [
+        0,
+        37704
+       ],
+       "urgent": [
+        2824,
+        6270
+       ]
+      }
+     }
+    ],
+    "W-ROUT-348": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 6.9e-05,
+       "soon": 0,
+       "urgent": -0.000178
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1,
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue routine": 40
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 40,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        40,
+        267317
+       ],
+       "soon": [
+        0,
+        37696
+       ],
+       "urgent": [
+        0,
+        6275
+       ]
+      }
+     }
+    ],
+    "W-ACC-LATE": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance",
+       "pooled"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000872,
+       "soon": 0,
+       "urgent": -0.000197
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 40
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 1200,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267377
+       ],
+       "soon": [
+        0,
+        37704
+       ],
+       "urgent": [
+        0,
+        6274
+       ]
+      }
+     }
+    ],
+    "W-LOST30": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "allowance",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.001582,
+       "soon": 0,
+       "urgent": 0.192745
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 40
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 40,
+      "injected": 1200,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267550
+       ],
+       "soon": [
+        0,
+        37707
+       ],
+       "urgent": [
+        2,
+        5077
+       ]
+      }
+     }
+    ],
+    "W-PAT30": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "allowance",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.000654,
+       "soon": 0,
+       "urgent": 0.192633
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 40
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 40,
+      "injected": 1200,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267230
+       ],
+       "soon": [
+        0,
+        37693
+       ],
+       "urgent": [
+        0,
+        5074
+       ]
+      }
+     }
+    ],
+    "W-ID-REMOVED": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "gateB:soon",
+       "gateB:routine"
+      ],
+      "gateB": {
+       "routine": "insufficient",
+       "soon": "insufficient",
+       "urgent": "insufficient"
+      },
+      "increase": {
+       "routine": 0.000654,
+       "soon": 0,
+       "urgent": -5e-06
+      },
+      "matchedSeeds": {
+       "routine": 39,
+       "soon": 39,
+       "urgent": 39
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 1,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 1,
+      "harmedFlagged": 0,
+      "injected": 1,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267320
+       ],
+       "soon": [
+        0,
+        37698
+       ],
+       "urgent": [
+        1,
+        6267
+       ]
+      }
+     }
+    ],
+    "W-ID-REPEATED": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "gateB:soon",
+       "gateB:routine"
+      ],
+      "gateB": {
+       "routine": "insufficient",
+       "soon": "insufficient",
+       "urgent": "insufficient"
+      },
+      "increase": {
+       "routine": -0.000794,
+       "soon": 0,
+       "urgent": -0.000387
+      },
+      "matchedSeeds": {
+       "routine": 39,
+       "soon": 39,
+       "urgent": 39
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 1,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 1,
+      "harmedFlagged": 0,
+      "injected": 1,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267311
+       ],
+       "soon": [
+        0,
+        37693
+       ],
+       "urgent": [
+        2,
+        6273
+       ]
+      }
+     }
+    ],
+    "W-ID-CHANGED": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "insufficient"
+      },
+      "increase": {
+       "routine": -0.000634,
+       "soon": 0,
+       "urgent": 0.00033
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 39
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 1,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 1,
+      "harmedFlagged": 0,
+      "injected": 1,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267362
+       ],
+       "soon": [
+        0,
+        37701
+       ],
+       "urgent": [
+        1,
+        6269
+       ]
+      }
+     }
+    ],
+    "W-PARTIAL": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "allowance"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -7.5e-05,
+       "soon": 0,
+       "urgent": 0.00052
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 40,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "partial_window_ceiling soon": 40,
+       "severe_delay_rate T90 soon": 38,
+       "severe_delays_in_a_week gated soon": 40
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 1519,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267339
+       ],
+       "soon": [
+        1519,
+        37698
+       ],
+       "urgent": [
+        1,
+        6268
+       ]
+      }
+     }
+    ],
+    "W-HORIZON": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "safety"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000656,
+       "soon": 0,
+       "urgent": -0.00016
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {
+       "pastDue soon": 40
+      },
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 40,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267286
+       ],
+       "soon": [
+        0,
+        37648
+       ],
+       "urgent": [
+        1,
+        6270
+       ]
+      }
+     }
+    ],
+    "W-PENDING": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "pending"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.001347,
+       "soon": 0,
+       "urgent": -0.000334
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 40,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 40,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267653
+       ],
+       "soon": [
+        0,
+        37653
+       ],
+       "urgent": [
+        2,
+        6272
+       ]
+      }
+     }
+    ],
+    "W-MARGIN-ABOVE": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent",
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0.023783
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 149,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267097
+       ],
+       "soon": [
+        0,
+        37701
+       ],
+       "urgent": [
+        3,
+        6119
+       ]
+      }
+     }
+    ],
+    "W-MARGIN-AT": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0.017345
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 109,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267648
+       ],
+       "soon": [
+        0,
+        37703
+       ],
+       "urgent": [
+        1,
+        6163
+       ]
+      }
+     }
+    ],
+    "W-ACCESS65": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "caseSelection"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.0001,
+       "soon": 0,
+       "urgent": -0.000177
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 4086,
+      "baselineInjected": 4086,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267301
+       ],
+       "soon": [
+        0,
+        37690
+       ],
+       "urgent": [
+        0,
+        2195
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "name": "operatingCharacteristics",
+   "seedsPerScenario": 200,
+   "scenarios": "S-A85, S-B85, S-C85, S-Cs85, NM0, NM1, NM2, NM2.1, NM3",
+   "criteria": {
+    "T1": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "bonferroniInterval": [
+        0,
+        0.6376101681611519
+       ],
+       "byRule": {},
+       "groups": 5,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-B85": {
+       "bonferroniInterval": [
+        0,
+        0.6376101681611519
+       ],
+       "byRule": {},
+       "groups": 5,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-C85": {
+       "bonferroniInterval": [
+        0,
+        0.6376101681611519
+       ],
+       "byRule": {},
+       "groups": 5,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0,
+       "rejected": 0
+      },
+      "S-Cs85": {
+       "bonferroniInterval": [
+        0,
+        0.6376101681611519
+       ],
+       "byRule": {},
+       "groups": 5,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0,
+       "rejected": 0
+      }
+     }
+    },
+    "T2": {
+     "status": "inconclusive",
+     "detail": {
+      "allowancePrediction": 0.371,
+      "detection": 0,
+      "flagged": 0,
+      "harmed": 0,
+      "lower95": 0,
+      "note": "seeds share their demand across scenarios (paired demand): pooled per-seed counts are not independent binomial trials; intervals are reported for orientation only",
+      "rejection": {
+       "H15": {
+        "byRule": {},
+        "groups": 0,
+        "rejected": 0
+       },
+       "H20": {
+        "byRule": {},
+        "groups": 0,
+        "rejected": 0
+       },
+       "OH15": {
+        "byRule": {},
+        "groups": 0,
+        "rejected": 0
+       },
+       "OH20": {
+        "byRule": {},
+        "groups": 0,
+        "rejected": 0
+       },
+       "SHOCK": {
+        "byRule": {},
+        "groups": 0,
+        "rejected": 0
+       }
+      }
+     }
+    },
+    "T2-conformance": {
+     "status": "pass",
+     "detail": {
+      "holds": true
+     }
+    },
+    "T2G": {
+     "status": "pass",
+     "detail": {
+      "D-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "IK-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "IK-92": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "IL10-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "IL10-92": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "IL40-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "K-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "K-92": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "L10-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "L10-92": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      },
+      "L20-85": {
+       "groups": 0,
+       "material": false,
+       "maxIncrease": 0,
+       "rejected": 0,
+       "severeShare": {},
+       "worstSoonMedianMin": 0
+      }
+     }
+    },
+    "T3": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "bonferroniUpper": 0.027031133381319628,
+       "seeds": 200,
+       "upper95": {
+        "routine": 0.01486703923127225,
+        "soon": 0.01486703923127225,
+        "urgent": 0.01486703923127225
+       },
+       "violatingSeeds": {}
+      },
+      "S-B85": {
+       "bonferroniUpper": 0.027031133381319628,
+       "seeds": 200,
+       "upper95": {
+        "routine": 0.01486703923127225,
+        "soon": 0.01486703923127225,
+        "urgent": 0.01486703923127225
+       },
+       "violatingSeeds": {}
+      },
+      "S-C85": {
+       "bonferroniUpper": 0.027031133381319628,
+       "seeds": 200,
+       "upper95": {
+        "routine": 0.01486703923127225,
+        "soon": 0.01486703923127225,
+        "urgent": 0.01486703923127225
+       },
+       "violatingSeeds": {}
+      },
+      "S-Cs85": {
+       "bonferroniUpper": 0.027031133381319628,
+       "seeds": 200,
+       "upper95": {
+        "routine": 0.01486703923127225,
+        "soon": 0.01486703923127225,
+        "urgent": 0.01486703923127225
+       },
+       "violatingSeeds": {}
+      }
+     }
+    },
+    "T4": {
+     "status": "pass",
+     "detail": {
+      "W-ACC-LATE": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-ACCESS65": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-HORIZON": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-ID-CHANGED": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-ID-REMOVED": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-ID-REPEATED": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-LOST30": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-MARGIN-ABOVE": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-MARGIN-AT": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-PARTIAL": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-PAT30": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-PENDING": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-ROUT-348": {
+       "groups": 0,
+       "met": 0
+      },
+      "W-URG-LATE": {
+       "groups": 0,
+       "met": 0
+      }
+     }
+    },
+    "T5a": {
+     "status": "pass",
+     "detail": {
+      "NM0": {
+       "accepted": 100,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 100,
+       "groupMean": 1,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 1,
+       "rate": 1
+      },
+      "NM1": {
+       "accepted": 100,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 100,
+       "groupMean": 1,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 1,
+       "rate": 1
+      },
+      "NM2": {
+       "accepted": 56,
+       "clusterSE": 0.05099019513592784,
+       "conforms": true,
+       "evaluations": 100,
+       "groupMean": 0.5599999999999999,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0.50824,
+       "rate": 0.56
+      },
+      "NM2.1": {
+       "accepted": 31,
+       "clusterSE": 0.036742346141747664,
+       "conforms": true,
+       "evaluations": 100,
+       "groupMean": 0.30999999999999994,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0.30299,
+       "rate": 0.31
+      },
+      "NM3": {
+       "accepted": 0,
+       "clusterSE": 0,
+       "conforms": true,
+       "evaluations": 100,
+       "groupMean": 0,
+       "note": "500 evaluations are 25 groups × 20 replicates: the cluster standard error, not a binomial interval, measures them",
+       "predicted": 0,
+       "rate": 0
+      }
+     }
+    },
+    "T5b": {
+     "status": "pass",
+     "detail": {
+      "rate2.1": 0.31,
+      "rate3": 0,
+      "tolerance2.1": 0.4,
+      "tolerance3": 0.01
+     }
+    },
+    "T6": {
+     "status": "pass",
+     "detail": {
+      "flagged": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "interval95": {
+       "routine": [
+        0,
+        0.00460048452074574
+       ],
+       "soon": [
+        0,
+        0.00460048452074574
+       ],
+       "urgent": [
+        0,
+        0.00460048452074574
+       ]
+      },
+      "limit": 19,
+      "note": "seeds share their demand across scenarios (paired demand): pooled per-seed counts are not independent binomial trials; intervals are reported for orientation only",
+      "seeds": 800
+     }
+    },
+    "T7": {
+     "status": "pass",
+     "detail": {
+      "S-A85": {
+       "groups": 5,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0
+      },
+      "S-B85": {
+       "groups": 5,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0
+      },
+      "S-C85": {
+       "groups": 5,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0
+      },
+      "S-Cs85": {
+       "groups": 5,
+       "groupsByGate": {},
+       "insufficient": 0,
+       "interval95": [
+        0,
+        0.5218237501049812
+       ],
+       "limit": 0
+      }
+     }
+    },
+    "T8": {
+     "status": "pass",
+     "detail": {}
+    }
+   },
+   "groups": {
+    "S-A85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267144
+       ],
+       "soon": [
+        0,
+        37694
+       ],
+       "urgent": [
+        0,
+        6272
+       ]
+      }
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": -2e-06
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267906
+       ],
+       "soon": [
+        0,
+        37369
+       ],
+       "urgent": [
+        1,
+        6078
+       ]
+      }
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": -0.000359
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267907
+       ],
+       "soon": [
+        0,
+        37180
+       ],
+       "urgent": [
+        1,
+        6176
+       ]
+      }
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.000679
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267192
+       ],
+       "soon": [
+        0,
+        37416
+       ],
+       "urgent": [
+        1,
+        6061
+       ]
+      }
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": -0.000301
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267835
+       ],
+       "soon": [
+        0,
+        37685
+       ],
+       "urgent": [
+        0,
+        6164
+       ]
+      }
+     }
+    ],
+    "S-B85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000466,
+       "soon": 0,
+       "urgent": -0.000318
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266465
+       ],
+       "soon": [
+        0,
+        37802
+       ],
+       "urgent": [
+        1,
+        6095
+       ]
+      }
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000324,
+       "soon": 0,
+       "urgent": -0.000317
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266273
+       ],
+       "soon": [
+        0,
+        37106
+       ],
+       "urgent": [
+        1,
+        6172
+       ]
+      }
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000211,
+       "soon": 0,
+       "urgent": -0.00069
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265692
+       ],
+       "soon": [
+        0,
+        37531
+       ],
+       "urgent": [
+        1,
+        6084
+       ]
+      }
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00025,
+       "soon": 0,
+       "urgent": -0.000198
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266493
+       ],
+       "soon": [
+        0,
+        37657
+       ],
+       "urgent": [
+        1,
+        6141
+       ]
+      }
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.00014,
+       "soon": 0,
+       "urgent": -3.4e-05
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265682
+       ],
+       "soon": [
+        0,
+        37418
+       ],
+       "urgent": [
+        1,
+        6025
+       ]
+      }
+     }
+    ],
+    "S-C85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000251,
+       "soon": 0,
+       "urgent": -0.000162
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265578
+       ],
+       "soon": [
+        0,
+        37565
+       ],
+       "urgent": [
+        0,
+        6183
+       ]
+      }
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000825,
+       "soon": 0,
+       "urgent": -0.000452
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267377
+       ],
+       "soon": [
+        0,
+        37594
+       ],
+       "urgent": [
+        1,
+        6171
+       ]
+      }
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -3.3e-05,
+       "soon": 0,
+       "urgent": -2.2e-05
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1,
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        268648
+       ],
+       "soon": [
+        0,
+        37437
+       ],
+       "urgent": [
+        3,
+        6173
+       ]
+      }
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -5.4e-05,
+       "soon": 0,
+       "urgent": -0.000114
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267004
+       ],
+       "soon": [
+        0,
+        37554
+       ],
+       "urgent": [
+        0,
+        6112
+       ]
+      }
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000382,
+       "soon": 0,
+       "urgent": 0.0002
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        267335
+       ],
+       "soon": [
+        0,
+        37130
+       ],
+       "urgent": [
+        1,
+        6010
+       ]
+      }
+     }
+    ],
+    "S-Cs85": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000761,
+       "soon": 0,
+       "urgent": -0.000832
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266080
+       ],
+       "soon": [
+        0,
+        37103
+       ],
+       "urgent": [
+        1,
+        6155
+       ]
+      }
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -2.4e-05,
+       "soon": 0,
+       "urgent": -0.00015
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265895
+       ],
+       "soon": [
+        0,
+        37495
+       ],
+       "urgent": [
+        1,
+        6081
+       ]
+      }
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000242,
+       "soon": 0,
+       "urgent": 0.000198
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 2,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 2
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266605
+       ],
+       "soon": [
+        0,
+        37438
+       ],
+       "urgent": [
+        0,
+        6068
+       ]
+      }
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.000334,
+       "soon": 0,
+       "urgent": -0.000539
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "backlog_stability": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        265940
+       ],
+       "soon": [
+        0,
+        37906
+       ],
+       "urgent": [
+        2,
+        6043
+       ]
+      }
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 3.3e-05,
+       "soon": 0,
+       "urgent": -0.000107
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 1,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {
+       "timely_access gated urgent": 1
+      },
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "severeAcquired": {
+       "routine": [
+        0,
+        266907
+       ],
+       "soon": [
+        0,
+        37275
+       ],
+       "urgent": [
+        1,
+        6139
+       ]
+      }
+     }
+    ],
+    "NM0": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": -2e-06
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": -0.000359
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.000679
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": -0.000301
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 0,
+      "harmedFlagged": 0,
+      "injected": 0,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     }
+    ],
+    "NM1": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.010453
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 65,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": 0.012079
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 74,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": 0.009272
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 60,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.011043
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 63,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": 0.008193
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 53,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 20
+     }
+    ],
+    "NM2": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.01976
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 124,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 14
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": 0.01895
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 116,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 11
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": 0.020395
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 129,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 9
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.018281
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 106,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 9
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": false,
+      "rules": [],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "pass"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": 0.018113
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 114,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 13
+     }
+    ],
+    "NM2.1": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.022658
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 141,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 7
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": 0.021828
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 131,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 5
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": 0.020452
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 129,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 7
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.022478
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 132,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 4
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": 0.021339
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 133,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 8
+     }
+    ],
+    "NM3": [
+     {
+      "group": 0,
+      "seeds": [
+       0,
+       39
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 9e-05,
+       "soon": 0,
+       "urgent": 0.027882
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 175,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     },
+     {
+      "group": 1,
+      "seeds": [
+       40,
+       79
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -0.000618,
+       "soon": 0,
+       "urgent": 0.029576
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 177,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     },
+     {
+      "group": 2,
+      "seeds": [
+       80,
+       119
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": -8.8e-05,
+       "soon": 0,
+       "urgent": 0.027669
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 173,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     },
+     {
+      "group": 3,
+      "seeds": [
+       120,
+       159
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.00038,
+       "soon": 0,
+       "urgent": 0.029141
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 173,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     },
+     {
+      "group": 4,
+      "seeds": [
+       160,
+       199
+      ],
+      "valid": true,
+      "rejected": true,
+      "rules": [
+       "gateB:urgent"
+      ],
+      "gateB": {
+       "routine": "pass",
+       "soon": "pass",
+       "urgent": "fail"
+      },
+      "increase": {
+       "routine": 0.00033,
+       "soon": 0,
+       "urgent": 0.032121
+      },
+      "matchedSeeds": {
+       "routine": 40,
+       "soon": 40,
+       "urgent": 40
+      },
+      "allowanceFailing": 0,
+      "allowanceInsufficient": 0,
+      "failingSeedsByGate": {},
+      "rawInsufficientSeedsByGate": {},
+      "violatingSeedsByLimit": {},
+      "pendingSeeds": 0,
+      "safeguardFlags": {
+       "routine": 0,
+       "soon": 0,
+       "urgent": 0
+      },
+      "harmedSeeds": 40,
+      "harmedFlagged": 0,
+      "injected": 201,
+      "baselineInjected": 0,
+      "constructionErrors": [],
+      "replicates": 20,
+      "gateBUrgentPass": 0
+     }
+    ]
+   }
+  }
+ ]
+}

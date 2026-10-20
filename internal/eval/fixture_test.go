@@ -48,8 +48,12 @@ type synth struct {
 	inherited               int   // inherited unfinished routine studies
 	teleOnlyOf, apptSHA     string
 	observeShort            int64 // end observation this much earlier (seconds)
-	horizon                 int64 // the common horizon, seconds after t0 (0: this record's own tail end)
-	payables                int64 // obligations at every capture and sample (cents)
+	// followUp: days observed past the horizon at least (the v5
+	// candidate's clinical follow-up, Slice 5C.4j); 45 by default, 0 for
+	// the v0.2-eval-4 neutrality input (its records as they were).
+	followUp int
+	horizon  int64 // the common horizon, seconds after t0 (0: this record's own tail end)
+	payables int64 // obligations at every capture and sample (cents)
 	// late: extra soon CT referrals a seed, received and wanted on the
 	// given days, resolved (with out) an hour after resolve (open when out
 	// is OutOpen).
@@ -91,7 +95,7 @@ func base(plan string, seed int64) synth {
 		breachPM:  map[string]int{"urgent": 100, "soon": 200, "routine": 30},
 		neverPM:   map[string]int{},
 		declinePM: map[string]int{},
-		profitPD:  10_000, cashPD: 5_000, cash0: 1_000_000, apptSHA: "same"}
+		profitPD:  10_000, cashPD: 5_000, cash0: 1_000_000, apptSHA: "same", followUp: 45}
 }
 
 // tailEnd is the record's common horizon.
@@ -119,7 +123,7 @@ func (s synth) observedUntil() int64 {
 		fixturePolicy = p
 	}
 	r := &Record{TakeoverSec: t0, TakeoverDate: t0Date, HorizonEndSec: s.tailEnd()}
-	return observationNeeded(fixturePolicy, r) - s.observeShort
+	return max(observationNeeded(fixturePolicy, r), r.HorizonEndSec+int64(s.followUp)*daySec) - s.observeShort
 }
 
 func (s synth) money(at int64) Money {
@@ -199,7 +203,7 @@ func (s synth) record() Record {
 					continue
 				}
 				outs = append(outs, served{acq, OutServed})
-				st := Study{ID: "S", Order: o.ID, Priority: q, Modality: mods[q], AcquiredSec: acq, EnteredSec: acq}
+				st := Study{ID: "S" + o.ID, Order: o.ID, Priority: q, Modality: mods[q], AcquiredSec: acq, EnteredSec: acq}
 				tg := testTargets[q] * 60
 				tat := tg / 2
 				if pm(i, s.seed, s.breachPMAt(q, acq)) {

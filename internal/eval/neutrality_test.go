@@ -18,7 +18,7 @@ func neutralityInput() Input {
 	mk := func(plan string, f func(s *synth)) []Record {
 		return records(10, func(seed int64) synth {
 			s := base(plan, seed)
-			s.profitNoise = 500
+			s.profitNoise, s.followUp = 500, 0
 			f(&s)
 			return s
 		})

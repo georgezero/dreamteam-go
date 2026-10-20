@@ -355,13 +355,28 @@ func TestGateNoncomparableDemand(t *testing.T) {
 		!hasReason(c, "not paired") {
 		t.Fatalf("moved receipts: %+v %v", g, c.Reasons)
 	}
-	_, c = clinicalCaseAB(t, p, d, nil, func(b synth, r *Record) {
-		for _, i := range urgentOrders(r, 20, 50) {
-			r.Orders[i].Priority = "routine"
+	// Relabelled requests (the orders and their studies routine): the
+	// demand is not the baseline's in either priority.
+	relabel := func(studies bool) func(b synth, r *Record) {
+		return func(b synth, r *Record) {
+			for _, i := range urgentOrders(r, 20, 50) {
+				r.Orders[i].Priority = "routine"
+				for j := range r.Studies {
+					if studies && r.Studies[j].Order == r.Orders[i].ID {
+						r.Studies[j].Priority = "routine"
+					}
+				}
+			}
 		}
-	})
+	}
+	_, c = clinicalCaseAB(t, p, d, nil, relabel(true))
 	if lostDemandOf(c, "urgent").Status != Insufficient || lostDemandOf(c, "routine").Status != Insufficient || c.Verdict != NOGO {
 		t.Fatalf("relabelled: %+v", c.LostDemand)
+	}
+	// The orders alone relabelled, their studies still urgent: the
+	// order–study contract makes the record INVALID (Slice 5C.4j).
+	if _, c = clinicalCaseAB(t, p, d, nil, relabel(false)); c.Verdict != INVALID {
+		t.Fatalf("orders alone relabelled: %s", c.Verdict)
 	}
 }
 
