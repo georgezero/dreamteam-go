@@ -7,6 +7,43 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 release-gate blocker fixes — audit 5C.4o O1 and O2 (0.2.0-dev.25)
+
+The focused release-gate audit 5C.4o (36d34f2, committed verbatim before
+any change) found M1, M3 and M6 closed and returned NO GO on two
+certification-critical findings. Under the owner's stopping rule only
+those were fixed and only their checks rerun. The maintainer's response
+is `docs/audits/slice-5c4o-release-gate-audit-response.md`.
+* **Not locked, not run, not frozen.** The owner decides whether the
+  fixes close the gate; no further broad audit is scheduled.
+* **Unchanged:** the clinical policy, the manifest, the simulator, the
+  thresholds, the trust boundary and the reserved seed protocol.
+* **Registers 0.2.0-dev.24** for replay (`mini-seed52-dev24`).
+* **Nothing reserved was run.**
+
+**Fixed:**
+* **O1:** each line's Gate B is reconciled with its own measurements by
+  the candidate's rule (`gateBReconciles`): decided statuses need every
+  pair matched and, for urgent, a difference on every pair; differences,
+  safeguard flags, deteriorated seeds, increase and status must be the
+  rule's computation on them, exactly. Near-margin replicates need a
+  difference on every pair; no pair injects more than it served or left
+  unimaged; a hidden pair construction error is refused. Every relation
+  held on all 664 genuine development lines first.
+* **O2:** the reader refuses anything after a line's JSON value.
+* **O3 (documentation):** the "failing exit" and survivor-equivalence
+  claims are narrowed in place; the lock recipe names the two refusal
+  assertions the lock inverts.
+
+**Tested:** the auditor's fixtures (their O1 cases and trailing file now
+refused); each witness on an otherwise consistent line
+(`TestReleaseGateMeasurements`, `TestReleaseGateReader`); the genuine
+development lines re-read with no measurement problem and the same
+verdicts; 49 mutations (48 caught; the survivor the documented T5a guard); the full uncached suite, vet, gofmt and
+replay through dev.24.
+
+---
+
 ## V0.2 Slice 5C.4n — final certification pipeline remediation (0.2.0-dev.24)
 
 This slice remediates the independent 5C.4m audit (c456c94, committed

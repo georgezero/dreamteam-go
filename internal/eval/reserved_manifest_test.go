@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"maps"
 	"math"
 	"math/rand/v2"
@@ -17,6 +18,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 
 	"github.com/georgezero/dreamteam-go/internal/version"
@@ -716,7 +718,7 @@ const protocolPath = "../../docs/calibration/clinical-5c4n/reserved-validation-p
 var certifiedInputs = []struct{ Role, Path, SHA256 string }{
 	{"candidate", candidatePath, "83d481b7040b69d78a58de68afc938a588b5b37ba396438509f38c56ca163948"},
 	{"manifest", manifestPath, "250bc7fc835d99140212505e0e79f74f2da1484dbe856fea6a5b93eec9153ef4"},
-	{"protocol", protocolPath, "7ab8988122688d563d0dbb5ba521256d7001c206b44d9be03c25fe213907af33"},
+	{"protocol", protocolPath, "094bdab86eca795223f748be72e862ea4815c3156cfdd6d6a577ca104a658bad"},
 	{"policyInForce", "../../" + PolicyPath, "4e277c7263dcff7ddabe63741beb44abfc9a46d3bc23f6b6418715b58ffb6fb3"},
 	{"simProfile", simProfilePath, "ac8621889813a2d582b4b19674f04871c5711d27d0ac1620839ba01df4596100"},
 }
@@ -1273,6 +1275,71 @@ func manCoverage(m *manifestDoc, lines []groupResult, seeds func(*manScenario) i
 	return out
 }
 
+// lineGateB is the candidate's Gate B rule, which a line's urgent
+// measurements are reconciled with (nil when it cannot be read).
+var lineGateB = sync.OnceValue(func() *LostDemand {
+	p, _, err := LoadPolicy(candidatePath)
+	if err != nil || p.Clinical == nil {
+		return nil
+	}
+	return p.Clinical.LostDemand
+})
+
+// gateBReconciles: a line's Gate B is the rule's computation on its own
+// measurements (audit 5C.4o O1). A PASS or FAIL is decided on every pair,
+// matched; urgent's on every pair's difference, at least the rule's
+// seeds. Each difference is its counts', exactly; urgent's increase is
+// their mean; its deteriorated seeds are those above the per-seed
+// safeguard; its status is the mean's against the margin.
+func gateBReconciles(g *groupResult, bad func(string, ...any)) {
+	ld := lineGateB()
+	if ld == nil || ld.Rule != "empirical" {
+		bad("Gate B's rule unavailable: the line cannot be reconciled")
+		return
+	}
+	n := len(g.Pairs)
+	for _, q := range Priorities {
+		if st := g.GateB[q]; (st == Pass || st == Fail) && g.Matched[q] != n {
+			bad("Gate B %s %s with %d of %d pairs matched", q, st, g.Matched[q], n)
+		}
+	}
+	var diffs []float64
+	var det []int64
+	for _, d := range g.UrgentSeeds {
+		if d.Orders <= 0 {
+			continue // refused above
+		}
+		if d.Difference != float64(d.Candidate-d.Baseline)/float64(d.Orders) {
+			bad("urgent seed %d: difference %v is not its counts' (%d − %d) / %d", d.Seed, d.Difference, d.Candidate, d.Baseline, d.Orders)
+		}
+		over := mul(d.Candidate-d.Baseline, 10_000).Cmp(mul(bp(ld.MaxSeedIncrease["urgent"]), d.Orders)) > 0
+		if d.Deteriorated != over {
+			bad("urgent seed %d: deteriorated %v, its counts say %v", d.Seed, d.Deteriorated, over)
+		}
+		if over {
+			det = append(det, d.Seed)
+		}
+		diffs = append(diffs, d.Difference)
+	}
+	want := 0.0
+	if len(diffs) > 0 {
+		want, _ = meanSD(diffs)
+	}
+	if g.Increase["urgent"] != want {
+		bad("Gate B urgent: increase %v, its seed differences' mean %v", g.Increase["urgent"], want)
+	}
+	if got := slices.Sorted(slices.Values(g.Deteriorated["urgent"])); !slices.Equal(got, slices.Sorted(slices.Values(det))) {
+		bad("Gate B urgent: deteriorated seeds %v, its seed differences' %v", got, det)
+	}
+	if st := g.GateB["urgent"]; st == Pass || st == Fail {
+		if len(g.UrgentSeeds) != n || n < ld.MinSeeds {
+			bad("Gate B urgent %s on %d seed differences of %d pairs", st, len(g.UrgentSeeds), n)
+		} else if (st == Pass) != meanAtMost(g.UrgentSeeds, bp(ld.MaxIncrease["urgent"])) {
+			bad("Gate B urgent %s, its seed differences' mean says otherwise", st)
+		}
+	}
+}
+
 // lineRules are the rules a group can be rejected by (protocol §3).
 var lineRules = []string{"integrity", "provenance", "gateB:urgent", "gateB:soon", "gateB:routine", "allowance", "pooled", "safety", "pending", "caseSelection"}
 
@@ -1292,6 +1359,9 @@ func lineProblems(s *manScenario, g *groupResult) []string {
 		pairs[int64(p.Seed)] = true
 		if p.Injected < 0 || p.BaseInj < 0 || p.Eligible < 0 || p.BaseEligible < 0 || p.Served < 0 || p.Served > p.Eligible || !finite(p.Volume) {
 			bad("seed %d: construction counts out of range", p.Seed)
+		}
+		if p.Error != "" {
+			bad("seed %d: a construction error not among the line's", p.Seed) // audit 5C.4o
 		}
 	}
 	// seeds: every seed one of the group's pairs, and named once unless
@@ -1350,15 +1420,23 @@ func lineProblems(s *manScenario, g *groupResult) []string {
 	if len(us) > g.Matched["urgent"] {
 		bad("%d urgent seed differences, %d matched seeds", len(us), g.Matched["urgent"])
 	}
+	gateBReconciles(g, bad)
 	if s.Replicates > 0 {
 		// T5's prediction reads every seed's difference and its served
-		// orders.
-		if len(us) == 0 {
-			bad("no urgent seed difference: T5's prediction has nothing to draw")
+		// orders: the group's own seeds, all of them (protocol §5).
+		if len(us) != n {
+			bad("%d urgent seed differences of %d pairs: T5's prediction needs every pair", len(us), n)
+		}
+		diff := map[int64]SeedDifference{}
+		for _, d := range g.UrgentSeeds {
+			diff[d.Seed] = d
 		}
 		for _, p := range g.Pairs {
 			if s.Candidate.Inject != nil && p.Served == 0 {
 				bad("seed %d: no served order recorded for the injection", p.Seed)
+			}
+			if d, ok := diff[int64(p.Seed)]; ok && (p.Injected > p.Served || int64(p.Injected) > d.Candidate) {
+				bad("seed %d: %d injected orders, %d served before it, %d unimaged after it", p.Seed, p.Injected, p.Served, d.Candidate)
 			}
 		}
 		return out
@@ -2037,6 +2115,10 @@ func analyzeFile(m *manifestDoc, path string) (map[string]criterion, []string, e
 		if err := dec.Decode(&g); err != nil {
 			return nil, nil, fmt.Errorf("line %d: %v", len(lines)+1, err)
 		}
+		// One value a line, and nothing after it (audit 5C.4o O2).
+		if _, err := dec.Token(); err != io.EOF {
+			return nil, nil, fmt.Errorf("line %d: data after the line's value", len(lines)+1)
+		}
 		lines = append(lines, g)
 	}
 	if err := sc.Err(); err != nil {
@@ -2098,10 +2180,8 @@ func fakeRun(m *manifestDoc) []groupResult {
 					p := pairInfo{Seed: i}
 					if s.Replicates > 0 {
 						p.Eligible, p.Served = 30, 25
-						if i == lo { // one seed's difference: enough to predict, quick to draw
-							x.UrgentSeeds = append(x.UrgentSeeds, SeedDifference{Seed: int64(i), Orders: 30, Candidate: 3, Baseline: 3})
-						}
 					}
+					x.UrgentSeeds = append(x.UrgentSeeds, SeedDifference{Seed: int64(i), Orders: 30, Candidate: 3, Baseline: 3})
 					if in := s.Candidate.Inject; in != nil && in.HarmProbability == 0 && (!in.GroupFirstOnly || i%40 == 0) {
 						p.Harmed = true
 						if in.Kind == "count" {
@@ -2117,13 +2197,78 @@ func fakeRun(m *manifestDoc) []groupResult {
 					unmatched := map[string][]string{"idRemove": Priorities, "idRepeat": Priorities, "idChange": {"urgent"}}[c.Kind]
 					for _, q := range unmatched {
 						x.Matched[q]--
+						x.GateB[q] = Insufficient // not paired: no decision
+					}
+					if slices.Contains(unmatched, "urgent") {
+						x.UrgentSeeds = x.UrgentSeeds[1:] // no difference on an unmatched seed
 					}
 				}
+				if x.Remainder {
+					// Fewer seeds than the rule's: no Gate B decision.
+					for _, q := range Priorities {
+						x.GateB[q] = Insufficient
+					}
+				}
+				gateBUrgent(&x)
 				lines = append(lines, x)
 			}
 		}
 	}
 	return lines
+}
+
+// gateBUrgent sets a fixture line's urgent Gate B measurements to the
+// rule's computation on its seed differences, its status kept (audit
+// 5C.4o O1): each difference, its safeguard flag, the deteriorated seeds
+// and the increase.
+func gateBUrgent(x *groupResult) {
+	ld := lineGateB()
+	var diffs []float64
+	x.Deteriorated["urgent"] = nil
+	for i := range x.UrgentSeeds {
+		d := &x.UrgentSeeds[i]
+		d.Difference = float64(d.Candidate-d.Baseline) / float64(d.Orders)
+		d.Deteriorated = mul(d.Candidate-d.Baseline, 10_000).Cmp(mul(bp(ld.MaxSeedIncrease["urgent"]), d.Orders)) > 0
+		if d.Deteriorated {
+			x.Deteriorated["urgent"] = append(x.Deteriorated["urgent"], d.Seed)
+		}
+		diffs = append(diffs, d.Difference)
+	}
+	x.Increase["urgent"] = 0
+	if len(diffs) > 0 {
+		x.Increase["urgent"], _ = meanSD(diffs)
+	}
+}
+
+// flagUrgent makes seed deteriorate in a fixture line's urgent Gate B: a
+// difference of 0.20, above the per-seed safeguard, with the measurements
+// and a decided status following from it (gateBUrgent).
+func flagUrgent(x *groupResult, seed int64) {
+	for i := range x.UrgentSeeds {
+		if x.UrgentSeeds[i].Seed == seed {
+			x.UrgentSeeds[i].Candidate = x.UrgentSeeds[i].Baseline + 6
+		}
+	}
+	gateBUrgent(x)
+	if st := x.GateB["urgent"]; (st == Pass || st == Fail) && !meanAtMost(x.UrgentSeeds, bp(lineGateB().MaxIncrease["urgent"])) {
+		x.GateB["urgent"] = Fail
+		if !slices.Contains(x.Rules, "gateB:urgent") {
+			x.Rejected, x.Rules = true, append(x.Rules, "gateB:urgent")
+		}
+	}
+}
+
+// failUrgent makes a fixture line's urgent Gate B FAIL as the rule does:
+// 0.10 a seed, above the margin and at the per-seed safeguard.
+func failUrgent(x *groupResult) {
+	for j := range x.UrgentSeeds {
+		x.UrgentSeeds[j].Candidate = x.UrgentSeeds[j].Baseline + 3
+	}
+	gateBUrgent(x)
+	x.GateB["urgent"] = Fail
+	if !slices.Contains(x.Rules, "gateB:urgent") {
+		x.Rejected, x.Rules = true, append(x.Rules, "gateB:urgent")
+	}
 }
 
 // witnessesMet makes a fake run's witnesses meet their expectations.
@@ -2148,7 +2293,7 @@ func witnessesMet(ls []groupResult) {
 		case "W-ACC-LATE":
 			x.Rejected, x.Rules, x.Failing, x.FailingByGate = true, []string{"allowance"}, all(x), map[string][]int64{GateTimelyAccess + " gated urgent": all(x)}
 		case "W-LOST30", "W-PAT30", "W-MARGIN-ABOVE":
-			x.Rejected, x.Rules, x.GateB["urgent"] = true, []string{"gateB:urgent"}, Fail
+			failUrgent(x)
 		case "W-ID-REMOVED", "W-ID-REPEATED", "W-ID-CHANGED":
 			x.Rejected, x.Rules, x.GateB["urgent"], x.UnmatchedUrgent = true, []string{"provenance", "gateB:urgent"}, Insufficient, x.Pairs[0].Seed
 			x.Provenance = []int64{int64(x.Pairs[0].Seed)}
@@ -2213,14 +2358,14 @@ func TestReservedCriteriaRules(t *testing.T) {
 		})},
 		{"T6 19 flags", "T6", Pass, edit(func(ls []groupResult) {
 			for g := range 19 {
-				find(ls, "S-C85", g, 0).Deteriorated["urgent"] = []int64{int64(40 * g)}
+				flagUrgent(find(ls, "S-C85", g, 0), int64(40*g))
 			}
 		})},
 		{"T6 20 flags, one in a remainder", "T6", Fail, edit(func(ls []groupResult) {
 			for g := range 19 {
-				find(ls, "S-C85", g, 0).Deteriorated["urgent"] = []int64{int64(40 * g)}
+				flagUrgent(find(ls, "S-C85", g, 0), int64(40*g))
 			}
-			find(ls, "S-C85", 62, 0).Deteriorated["urgent"] = []int64{2480}
+			flagUrgent(find(ls, "S-C85", 62, 0), 2480)
 		})},
 		{"T3 one violation in a remainder", "T3", Fail, edit(func(ls []groupResult) {
 			find(ls, "S-Cs85", 62, 0).Violations = map[string][]int64{"pastDue soon": {2490}}
@@ -2280,15 +2425,14 @@ func TestReservedCriteriaRules(t *testing.T) {
 					ls[i].Pairs[j].Harmed = true
 					if k < flagged {
 						s := int64(ls[i].Pairs[j].Seed)
-						ls[i].Deteriorated["urgent"] = append(ls[i].Deteriorated["urgent"], s)
+						flagUrgent(&ls[i], s)
 						ls[i].Failing = append(ls[i].Failing, s)
 					}
 				}
 				k++
 			}
-			ls[i].Rejected = len(ls[i].Failing) > 4
-			if ls[i].Rejected {
-				ls[i].Rules = []string{"allowance"}
+			if len(ls[i].Failing) > 4 {
+				ls[i].Rejected, ls[i].Rules = true, append(ls[i].Rules, "allowance")
 			}
 		}
 		return ls
@@ -2334,7 +2478,7 @@ func TestReservedCriteriaRules(t *testing.T) {
 		"W-ID-REPEATED with provenance failing on two seeds": func(x *groupResult) {
 			x.Provenance = []int64{int64(x.Pairs[0].Seed), int64(x.Pairs[1].Seed)}
 		},
-		"W-ACCESS65 with Gate B failing":                func(x *groupResult) { x.GateB["urgent"] = Fail },
+		"W-ACCESS65 with Gate B failing":                failUrgent,
 		"W-ACCESS65 without the disclosed loss":         func(x *groupResult) { x.Fractions = nil },
 		"W-ACCESS65 disclosing a loss below 65 percent": func(x *groupResult) { x.Fractions = map[string][2]float64{"urgent": {0.3, 0.66}} },
 	} {
@@ -2358,7 +2502,7 @@ func TestReservedCriteriaRules(t *testing.T) {
 			lim := map[string]int{"NM2.1": n21, "NM3": n3}[ls[i].Scenario]
 			if ls[i].Scenario == "NM2.1" || ls[i].Scenario == "NM3" {
 				if k[ls[i].Scenario] >= lim {
-					ls[i].GateB["urgent"] = Fail
+					failUrgent(&ls[i])
 				}
 				k[ls[i].Scenario]++
 			}

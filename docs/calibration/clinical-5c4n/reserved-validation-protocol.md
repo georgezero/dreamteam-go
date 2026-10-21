@@ -181,12 +181,24 @@ PCG(F = **20261201**, ·).
     the access claims; the severe and acquired studies of each priority
     (severe at most acquired); one worst soon delay a pair, none
     negative; the unimaged fractions within [0, 1]; for a near-margin
-    replicate, at least one urgent seed difference with positive orders
-    and a served count for every pair. Every seed a line names is one of
-    the group's pairs, named once (a seed pending in two priorities is
-    named twice, its form). The decision agrees with its rules (rejected
-    exactly when a known rule is listed, none twice). **A missing
-    measurement is never read as zero.**
+    replicate, an urgent seed difference with positive orders for
+    **every** pair, a served count for every pair, and no pair with more
+    injected orders than it served or than its candidate left unimaged.
+    Every seed a line names is one of the group's pairs, named once (a
+    seed pending in two priorities is named twice, its form); no pair
+    carries a construction error the line does not. The decision agrees
+    with its rules (rejected exactly when a known rule is listed, none
+    twice). **A missing measurement is never read as zero.**
+  * **Gate B reconciled with its own measurements** (`gateBReconciles`,
+    audit 5C.4o O1), by the candidate's rule (empirical, §3): a PASS or
+    FAIL in any priority is decided with every pair matched; urgent's
+    PASS or FAIL with a seed difference on every pair and at least the
+    rule's 40 seeds; each difference is its counts' (c − b) ÷ n,
+    exactly; each seed's safeguard flag, and the deteriorated seeds, are
+    those above the per-seed limit, exactly; urgent's increase is the
+    differences' mean; urgent's status is the mean's against the margin,
+    exactly. Soon and routine keep no per-seed differences in a line, so
+    only their matched pairs and status are reconciled.
 
   A criterion any of whose scenarios fails these checks is INCONCLUSIVE
   unless it already FAILs. Missing, duplicated, malformed, truncated,
@@ -625,11 +637,15 @@ The execution itself verifies, before it constructs anything:
   error, never a default (audit 5C.4m M4).
 
 **What the lock commit changes, and nothing else:** `familyAllowed`
-accepts F = 20261201; this document's status reads LOCKED; and the
+accepts F = 20261201; the two assertions of its refusal become
+assertions of its admission, constructing nothing on it
+(`TestReservedManifestRefusesReserved`, and the last check of
+`TestCertifiedExecutionSmall`; audit 5C.4o O3), so that every committed
+test passes at the lock; this document's status reads LOCKED; and the
 protocol digest in `certifiedInputs` is re-pinned to the locked
 document. Nothing in the evaluator, the adjudicator, the fidelity model,
-the manifest or the candidate changes between the 5C.4o audit and the
-lock.
+the manifest or the candidate changes between the release-gate audit
+and the lock.
 
 **The run** (the test binary built at the lock commit, one process,
 memory-capped):
@@ -673,8 +689,11 @@ logged and written by that process. The invocation must read
 (`DT_MANIFEST_IN`, `DT_CRITERIA_OUT`) re-reads a lines file for
 analysis; its output always reads `non-certifying analysis` and
 `not certified`. Malformed settings, or a truncated, malformed or
-unreadable file, fail before anything is written; an incomplete file is
-analyzed, written and reported as a failure.
+unreadable file (including anything after a line's single JSON value:
+audit 5C.4o O2), fail before anything is written; an incomplete file is
+analyzed, written and reported as a failure. A complete, internally
+consistent file is analyzed and exits normally: its `certification`,
+`not certified`, is what decides, never the exit (audit 5C.4o O3).
 
 **Committed afterwards, unchanged:** both output files with their
 SHA-256 digests, the run's log (the test's output, with the

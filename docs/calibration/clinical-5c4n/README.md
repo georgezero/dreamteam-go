@@ -8,6 +8,11 @@ release-gate audit. The evaluator is 0.2.0-dev.24. The maintainer's
 response is
 `docs/audits/slice-5c4m-provenance-protocol-lock-audit-response.md`.
 
+* **Amended by the release-gate fixes** (0.2.0-dev.25, audit 5C.4o O1
+  and O2: Gate B reconciled with its own measurements; nothing after a
+  line's value): `certification.md` §8. The development lines below
+  re-read under the fixes with no measurement problem and the same
+  verdicts.
 * **Not locked, not run, not frozen.**
 * **Nothing reserved was run.** No reference or holdout seed, unseal
   record or reserved stream PCG(20261201, ·) was used; the build refuses

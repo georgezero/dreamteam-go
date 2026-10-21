@@ -190,7 +190,45 @@ slot grid takes the larger capacity, so inherited bookings can differ.
 invalidated; it is documented in protocol §7 and must be repaired before
 the model serves such a practice. No scope was added for it.
 
-## 8. What this slice does not claim
+## 8. The release-gate fixes (audit 5C.4o, 0.2.0-dev.25)
+
+The release-gate audit (`docs/audits/slice-5c4o-release-gate-audit.md`)
+found M1, M3 and M6 closed and two certification-critical gaps in M2 and
+M4. Under the owner's stopping rule only those were fixed; nothing in
+the trust boundary, the clinical policy, the manifest or the seed
+protocol changed.
+
+* **O1, measurements present but partial or contradictory.** §2's checks
+  were of shape, not of agreement: a line could keep one urgent seed
+  difference of forty, state a difference its counts contradict, state
+  a 90-point increase under a PASS, inject more orders than a pair
+  served, or carry a pair construction error the line did not, and pass.
+  Each line's Gate B is now reconciled with its own measurements by the
+  candidate's rule (`gateBReconciles`): a PASS or FAIL is decided with
+  every pair matched, urgent's with a difference on every pair; each
+  difference is its counts', each safeguard flag and the deteriorated
+  seeds follow from them, the increase is their mean and the status is
+  the mean's against the margin, exactly. A near-margin replicate
+  carries a difference for every pair, and no pair injects more than it
+  served or left unimaged. Every relation held on all 664 genuine lines
+  of the development runs before it was adopted, and they still pass.
+  Soon and routine keep no per-seed differences in a line, so only their
+  matched pairs and status are reconciled.
+* **O2, data after a line's value.** The reader decoded one value a line
+  and ignored the rest; it now refuses anything but whitespace after it.
+* **O3, documentation.** A complete, consistent fabricated file exits
+  normally and is `not certified`: the certification decides, not the
+  exit (protocol §8). The T5a survivor is equivalent only for the pinned
+  manifest's validated inputs. The lock recipe now names the two test
+  assertions of the reserved family's refusal that the lock inverts.
+  Each is corrected in place.
+
+The test fixtures that stood in for runs (`fakeRun`, `fabricatedRun`)
+carried one urgent seed difference a line for speed; they now carry the
+rule's own computation (`gateBUrgent`, `failUrgent`, `flagUrgent`), so
+the criteria tests exercise consistent lines.
+
+## 9. What this slice does not claim
 
 * **Not audited.** The focused 5C.4o release-gate audit comes next.
 * **No lock, reserved draw, freeze or activation.** Nothing ran on

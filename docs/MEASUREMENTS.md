@@ -679,5 +679,15 @@ stream was run.
 | Certified execution, all 49 scenarios × 40 seeds, development family PCG(20261021, ·) (construction, judgment, adjudication and certification in one process) | `systemd-run --user --scope -p MemoryMax=6G … DT_MANIFEST_OUT=… DT_CRITERIA_OUT=… DT_MANIFEST_SEEDS=40 eval.test -test.run TestReservedManifestRun` | first run 2,524 s, peak 1.15 GB (T8 INCONCLUSIVE: the per-kind correction); repeated on the corrected build 2,428 s, peak 1.11 GB, exit 0; lines byte-identical to 5C.4l's (5C.4l: 2,370 s) |
 | Stable and near-margin scenarios × 200 seeds | the same with `DT_MANIFEST_SEEDS=200 DT_MANIFEST_SCENARIOS=…` | 4,099 s, peak 1.15 GB; exit 1 on the 40 scenarios not run, as specified; lines byte-identical to 5C.4l's |
 | The 5C.4m auditor's eight witness files through the reader, three settings each | `DT_MANIFEST_IN=… eval.test -test.run TestReservedCriteria` | every one a failing exit, none certified; malformed seed settings refused before output |
-| Mutation checks: 37 (M1, M2, M4, M6 and the 5C.4l set re-targeted) | `python3 mutate4n.py` (scratch) | 36 of 37 caught on the final code, 704 s; the survivor is equivalent (the T5a guard behind the completeness check; the two removed together are caught) |
+| Mutation checks: 37 (M1, M2, M4, M6 and the 5C.4l set re-targeted) | `python3 mutate4n.py` (scratch) | 36 of 37 caught on the final code, 704 s; the survivor is equivalent (the T5a guard behind the completeness check; the two removed together are caught). Correction (audit 5C.4o O3): equivalent only for the pinned manifest's validated inputs, not universally |
 | Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 120m` | 2,870 s wall (eval 2,009 s, sim 578 s, session 190 s, cmd 49 s), peak 984 MB; every package passes; vet and gofmt clean |
+
+## 2026-10-20 — V0.2 release-gate blocker fixes, audit 5C.4o (same machine; heavy runs alone, memory-capped)
+
+| Measurement | Command | Result |
+|---|---|---|
+| The auditor's fixtures against this build | their `zz_audit_o_test.go` in a disposable copy, `go test -run 'TestAuditO…'` | the O1 cases and hidden construction error no longer all-PASS; the trailing file refused at line 3904 |
+| Release-gate regressions | `go test ./internal/eval -run '^TestReleaseGate'` | pass, 27 s |
+| The 5C.4n development lines (664) re-read by this build | `DT_MANIFEST_IN=… eval.test -test.run TestReservedCriteria` | no measurement problem; 40 seeds exit 0, criteria identical; 200 seeds only the 40 scenarios not run, verdicts identical (T5a's NM2.1 prediction differs in the 17th digit: map-order summation) |
+| Mutation checks: 49 (the 5C.4n set and 13 new) | `python3 mutate4o.py` (scratch) | 44 of 49 in the full run (5,166 s); the 5 touched by the final merge rerun, 4 caught; the survivor the documented T5a guard |
+| Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,431 s wall (eval 2,585 s, sim 570 s, session 199 s, cmd 43 s), peak 1.27 GB; every package passes; vet and gofmt clean |

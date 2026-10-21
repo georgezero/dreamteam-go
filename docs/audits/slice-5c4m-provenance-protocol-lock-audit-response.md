@@ -65,6 +65,11 @@ All on this machine, one heavy job at a time, memory-capped
   analysis`, `not certified`, a failing exit
   (`TestFabricatedResultsCannotCertify`, under three settings). The
   fabricated file also fails 38,102 measurement checks.
+  * **Correction (audit 5C.4o O3):** "a failing exit" holds for the
+    5C.4m file, whose measurements are incomplete, not for every
+    fabricated file. A complete, internally consistent fabricated file
+    is analyzed and exits normally; it is `not certified`. The
+    certification, not the exit, is what decides (protocol §8).
 * **The auditor's eight files** (fabricated, duplicated, invalid,
   missing replicate, missing scenario, truncated at a line boundary,
   truncated mid-line, empty), each under three settings: every one a
@@ -85,6 +90,14 @@ All on this machine, one heavy job at a time, memory-capped
   code: 36 caught; the survivor is equivalent (T5a's no-prediction
   guard sits behind the completeness check, which already refuses a
   near-margin line without seed differences; removing both is caught).
+  * **Correction (audit 5C.4o O3):** equivalent only for the pinned
+    manifest's validated inputs, not universally. The guard is redundant
+    there because every near-margin scenario has replicates and every
+    validated replicate carries seed differences. On a malformed input
+    with other nonconformance its absence changes T5a from INCONCLUSIVE
+    to FAIL (neither confirms); and on an alternate manifest with a T5
+    scenario of no replicates it would matter, though such a manifest
+    fails the execution's manifest pin.
 * **Full uncached suite**, one package at a time: every package passes
   (2,870 s); vet and gofmt clean; replay through dev.23 exact.
 

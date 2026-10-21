@@ -30,14 +30,15 @@ func fabricatedRun(m *manifestDoc) []groupResult {
 		switch {
 		case slices.Contains(s.Criteria, "T2"):
 			for j := range min(3, len(x.Pairs)) {
-				seed := int64(x.Pairs[j].Seed)
 				x.Pairs[j].Harmed = true
-				x.Deteriorated["urgent"] = append(x.Deteriorated["urgent"], seed)
-				x.Failing = append(x.Failing, seed)
+				x.UrgentSeeds[j].Candidate = 9 // 0.20: above the per-seed safeguard
+				x.Failing = append(x.Failing, int64(x.Pairs[j].Seed))
 			}
+			gateBUrgent(x)
 		case s.Replicates > 0 && s.Candidate.Inject != nil:
-			x.UrgentSeeds[0].Baseline, x.UrgentSeeds[0].Candidate, x.UrgentSeeds[0].Difference = 0, 30, 1
+			x.UrgentSeeds[0].Baseline, x.UrgentSeeds[0].Candidate = 0, 30
 			x.GateB["urgent"], x.Rejected, x.Rules = Fail, true, []string{"gateB:urgent"}
+			gateBUrgent(x)
 		}
 	}
 	return ls
