@@ -34,8 +34,8 @@ import (
 
 const manifestPath = "../../docs/calibration/clinical-5c4l/scenario-manifest.json"
 
-// reservedFamily is the confirmatory calibration's family, never run by
-// this build.
+// reservedFamily is the confirmatory calibration's family, run once,
+// from the lock commit (protocol §8).
 const reservedFamily = 20261201
 
 // devManifestFamily is the construction checks' family.
@@ -659,12 +659,10 @@ func provenanceSeeds(p *Policy, base, cand []Record) []int64 {
 	return out
 }
 
-// familyAllowed refuses the reserved family: this build is not the lock
-// commit.
+// familyAllowed admits the reserved family: this build is the lock
+// commit (protocol §8, LOCKED). Its one run needs the owner's separate
+// authorization.
 func familyAllowed(F uint64) error {
-	if F == reservedFamily {
-		return fmt.Errorf("the reserved family PCG(20261201, ·) is not authorized in this build")
-	}
 	return nil
 }
 
@@ -718,7 +716,7 @@ const protocolPath = "../../docs/calibration/clinical-5c4n/reserved-validation-p
 var certifiedInputs = []struct{ Role, Path, SHA256 string }{
 	{"candidate", candidatePath, "83d481b7040b69d78a58de68afc938a588b5b37ba396438509f38c56ca163948"},
 	{"manifest", manifestPath, "250bc7fc835d99140212505e0e79f74f2da1484dbe856fea6a5b93eec9153ef4"},
-	{"protocol", protocolPath, "094bdab86eca795223f748be72e862ea4815c3156cfdd6d6a577ca104a658bad"},
+	{"protocol", protocolPath, "12d1eda4f8543e64cdbf1d5118339b65bc6a620e8ee3f6cb01dfd974d0c91a0d"},
 	{"policyInForce", "../../" + PolicyPath, "4e277c7263dcff7ddabe63741beb44abfc9a46d3bc23f6b6418715b58ffb6fb3"},
 	{"simProfile", simProfilePath, "ac8621889813a2d582b4b19674f04871c5711d27d0ac1620839ba01df4596100"},
 }
@@ -2547,9 +2545,10 @@ func TestBinomialCDF(t *testing.T) {
 	}
 }
 
-// The harness refuses the reserved family, and any other runs.
+// At the lock the harness admits the reserved family, and any other
+// runs (protocol §8: the refusal's assertion, inverted; nothing runs).
 func TestReservedManifestRefusesReserved(t *testing.T) {
-	if familyAllowed(reservedFamily) == nil || familyAllowed(devManifestFamily) != nil || familyAllowed(1) != nil {
+	if familyAllowed(reservedFamily) != nil || familyAllowed(devManifestFamily) != nil || familyAllowed(1) != nil {
 		t.Fatal("family check")
 	}
 }

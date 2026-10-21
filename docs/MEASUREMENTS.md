@@ -700,3 +700,11 @@ stream was run.
 | Trusted development execution twice: NM2 and NM2.1, 80 seeds (2 groups × 20 replicates) | `DT_MANIFEST_SEEDS=80 DT_MANIFEST_SCENARIOS=NM2,NM2.1 … eval.test -test.run TestReservedManifestRun` | 531 s and 527 s, peak 1.13 GB; lines (`9d827c5f…08df`) and adjudications (`47e5e8de…41f0`) byte-identical; `development` / `not certified`; exit 1 on the 47 scenarios not run, as specified |
 | Determinism regression | `go test ./internal/eval -run TestAdjudicationDeterministic` | passes, 64 s; fails with map order restored |
 | Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,469 s wall (eval 2,619 s, sim 562 s, session 202 s, cmd 43 s), peak 1.28 GB; every package passes; vet and gofmt clean |
+
+## 2026-10-21 — V0.2 v5 protocol lock (same machine; heavy runs alone, memory-capped)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Full uncached suite on the lock tree (the protocol's precondition), no `DT_*` set | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,478 s wall (eval 2,638 s, sim 563 s, session 200 s, cmd 46 s), peak 1.24 GB; every package passes; vet and gofmt clean |
+| The pinned test binary | `GOTOOLCHAIN=local CGO_ENABLED=0 go test -c -trimpath ./internal/eval` | SHA-256 `5edee74d…130d`, the same from the working tree and from a `git archive` elsewhere |
+| The pinned binary on the development family (W-HORIZON, 40 seeds) | `DT_MANIFEST_SEEDS=40 DT_MANIFEST_SCENARIOS=W-HORIZON … eval.test -test.run TestReservedManifestRun` | records `sourceSHA256` `5cd6a438…588b`, engine 0.2.0-dev.26 and the five pinned inputs; `development` / `not certified`; exit 1 on the 48 scenarios not run |

@@ -533,9 +533,10 @@ func TestCertifiedExecutionSmall(t *testing.T) {
 	if r["T4"].Status == Pass {
 		t.Error("T4 PASS with thirteen witness scenarios not run")
 	}
-	// The reserved family is refused before anything runs.
-	if err := familyAllowed(reservedFamily); err == nil {
-		t.Fatal("the reserved family is allowed in this build")
+	// At the lock the reserved family is admitted (protocol §8: the
+	// refusal's assertion, inverted); nothing is constructed on it here.
+	if err := familyAllowed(reservedFamily); err != nil {
+		t.Fatalf("the reserved family is refused at the lock: %v", err)
 	}
 }
 

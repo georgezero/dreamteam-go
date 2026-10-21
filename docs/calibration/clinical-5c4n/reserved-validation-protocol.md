@@ -1,4 +1,4 @@
-# Slice 5C.4n: reserved-stream confirmatory protocol (proposed)
+# Slice 5C.4n: reserved-stream confirmatory protocol (locked)
 
 This is the one confirmatory clinical calibration before v0.2-eval-5 is
 frozen. It supersedes `../clinical-5c4l/reserved-validation-protocol.md`
@@ -39,7 +39,12 @@ certification scope (below).
 >   thresholds and attribution rules are not changed to address this
 >   limitation.
 
-**Status: PROPOSED, NOT LOCKED, NOT RUN.** Locking needs:
+**Status: LOCKED (2026-10-21), NOT RUN.** The lock record is
+`../clinical-v5-lock/LOCK.md`. The owner gave a conditional GO after the
+5C.4o audit: O1 and O2 closed by targeted remediation and checks, not
+independently re-audited, and a deterministic adjudication output fixed
+before the lock. The reserved run needs the owner's separate
+authorization. Locking needed:
 
 1. **The focused 5C.4o release-gate audit passes.** Its questions:
    can fabricated measurements certify; can missing measurements pass;
@@ -51,8 +56,8 @@ certification scope (below).
    separate step.
 
 The reserved run is then executed once. Nothing in this protocol has
-run on the reserved family, and this build's harness refuses to run it
-(`familyAllowed`).
+run on the reserved family. From the lock commit the harness admits it
+(`familyAllowed`), for the one authorized run.
 
 **Owner direction (2026-10-19, 2026-10-20).** A failed confirmatory run
 is a documented **NO GO**. It is never followed by threshold tuning on
@@ -613,13 +618,14 @@ After any reserved result they cannot be changed (§6).
   unaffected. It must be repaired before the model serves such a
   practice.
 
-## 8. Execution (pinned; documented, not run)
+## 8. Execution (locked; not run)
 
 The confirmatory run is executed once, from the lock commit, by one
 process that constructs, judges, adjudicates and certifies, and writes
 its files only after the certification is decided (audit 5C.4m M1).
-**It has not been run, and this build refuses the reserved family**
-(`familyAllowed`).
+**It has not been run.** From the lock commit the harness admits the
+reserved family (`familyAllowed`); the run needs the owner's separate
+authorization.
 
 **Before the run** (each a precondition, checked and recorded):
 * the lock commit is the checked-out tree, clean (`git status` empty);

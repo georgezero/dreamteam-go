@@ -7,6 +7,32 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 v5 protocol lock (0.2.0-dev.26, lock commit; NOT RUN)
+
+The prospective confirmatory protocol for v0.2-eval-5 is locked, on the
+owner's conditional GO after the 5C.4o release-gate audit. The lock
+record is `docs/calibration/clinical-v5-lock/LOCK.md`, with
+`lock.sha256` beside it.
+* **Not run, not frozen, not activated.** The reserved run needs the
+  owner's separate authorization.
+* **The lock changes only what protocol §8 provides:** `familyAllowed`
+  admits PCG(20261201, ·); the two refusal assertions become admission
+  assertions, constructing nothing; the protocol's status statements
+  read LOCKED; its digest is re-pinned (`12d1eda4…0a0d`).
+* **Pinned:** parent `7bf1ed6`; `sourceSHA256` `5cd6a438…588b`; the
+  test binary built with `-trimpath`, `CGO_ENABLED=0`, go1.27.1
+  linux/arm64, `5edee74d…130d` (reproducible across checkouts); the
+  candidate, manifest, protocol, policy in force and simulator profile;
+  the command, 3,904 lines, T1–T8, the T5b tolerances, the trusted
+  in-process scope with the study-swap limitation, one execution, the
+  failure handling and no post-run tuning.
+* **Verified:** every committed test passes at the lock tree; the
+  pinned binary, run on the development family only, records the pinned
+  source digest, inputs and engine and reads `development` /
+  `not certified`. Nothing ran on the reserved family.
+
+---
+
 ## V0.2 deterministic adjudication output, before the protocol lock (0.2.0-dev.26)
 
 The owner accepted O1 and O2 as closed on the targeted remediation
