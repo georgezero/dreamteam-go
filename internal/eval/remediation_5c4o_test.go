@@ -1,6 +1,7 @@
 package eval
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -154,5 +155,44 @@ func TestReleaseGateReader(t *testing.T) {
 	r, bad, err := analyzeFile(m, p)
 	if err != nil || len(bad) > 0 || r["certification"].Status != "not certified" {
 		t.Errorf("trailing whitespace: %v, %d problems, %s", err, len(bad), r["certification"].Status)
+	}
+}
+
+// The adjudication's bytes do not depend on map iteration (owner's lock
+// condition): repeated adjudications of the same lines serialize
+// identically. Each near-margin group gets its own natural differences,
+// so its prediction differs from the others' and the order of their sum
+// shows.
+func TestAdjudicationDeterministic(t *testing.T) {
+	m := loadManifest(t)
+	tol, err := manifestTolerances(m)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ls := fakeRun(m)
+	witnessesMet(ls)
+	for i := range ls {
+		if g := &ls[i]; manScenarioOf(m, g.Scenario).Replicates > 0 {
+			for j := range g.Group % 7 {
+				g.UrgentSeeds[j].Candidate++
+			}
+			gateBUrgent(g)
+		}
+	}
+	full := func(s *manScenario) int { return s.Seeds }
+	if bad := coverageProblems(m, ls, full); len(bad) > 0 {
+		t.Fatalf("the varied lines are inconsistent: %v", bad[0])
+	}
+	var first []byte
+	for range 6 {
+		raw, err := json.MarshalIndent(reservedCriteria(m, ls, tol, full), "", " ")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if first == nil {
+			first = raw
+		} else if !bytes.Equal(raw, first) {
+			t.Fatal("two adjudications of the same lines serialize differently")
+		}
 	}
 }

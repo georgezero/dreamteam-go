@@ -82,6 +82,10 @@ All on this machine, one heavy job at a time, memory-capped
   cluster standard errors plus 0.02), but the adjudication file's bytes
   are not reproducible to the last digit. Left as found under the
   stopping rule; the lock or the run report should record it.
+  * **Fixed before the lock (0.2.0-dev.26), at the owner's direction:**
+    the predictions are summed in group order. The value is now 0.34404
+    on every adjudication; no formula, threshold or verdict changed
+    (`TestAdjudicationDeterministic`).
 
 ## What this response does not claim
 

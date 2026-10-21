@@ -1808,7 +1808,10 @@ func reservedCriteria(m *manifestDoc, lines []groupResult, tol t5Tolerance, seed
 		}
 		var gm []float64
 		pm := 0.0
-		for k, x := range means {
+		// In group order, so that the sums, and the output's bytes, do not
+		// depend on map iteration.
+		for _, k := range slices.Sorted(maps.Keys(means)) {
+			x := means[k]
 			gm = append(gm, x[0]/x[1])
 			pm += pred[k] / float64(len(means))
 		}

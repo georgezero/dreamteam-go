@@ -7,6 +7,26 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 deterministic adjudication output, before the protocol lock (0.2.0-dev.26)
+
+The owner accepted O1 and O2 as closed on the targeted remediation
+(conditional GO for the lock) and required one change first: no output
+byte may depend on Go's map iteration order.
+* **The change:** T5a sums its group predictions, and lists its group
+  means, in group order instead of map order. No formula, threshold,
+  policy, manifest, seed family, simulation behaviour or certification
+  rule changed. NM2.1's 200-seed prediction now reads 0.34404 on every
+  adjudication (it varied in the 17th digit).
+* **Registers 0.2.0-dev.25** for replay (`mini-seed52-dev25`).
+* **Tested:** `TestAdjudicationDeterministic` (fails with map order
+  restored); the 200-seed development lines re-read three times and two
+  trusted 80-seed development executions (NM2, NM2.1), each
+  byte-identical, `development` / `not certified`; the full uncached
+  suite, vet, gofmt and replay through dev.25.
+* **Not locked, not run, not frozen.** The lock is a separate commit.
+
+---
+
 ## V0.2 release-gate blocker fixes — audit 5C.4o O1 and O2 (0.2.0-dev.25)
 
 The focused release-gate audit 5C.4o (36d34f2, committed verbatim before

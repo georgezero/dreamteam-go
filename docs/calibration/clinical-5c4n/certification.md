@@ -228,6 +228,12 @@ carried one urgent seed difference a line for speed; they now carry the
 rule's own computation (`gateBUrgent`, `failUrgent`, `flagUrgent`), so
 the criteria tests exercise consistent lines.
 
+**Deterministic output (0.2.0-dev.26).** At the owner's direction before
+the lock, T5a's group predictions and group means are taken in group
+order, not Go's map iteration order, so that an adjudication's bytes do
+not vary from run to run. The formula is unchanged; only the order of a
+floating-point sum is fixed (`TestAdjudicationDeterministic`).
+
 ## 9. What this slice does not claim
 
 * **Not audited.** The focused 5C.4o release-gate audit comes next.

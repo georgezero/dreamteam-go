@@ -691,3 +691,12 @@ stream was run.
 | The 5C.4n development lines (664) re-read by this build | `DT_MANIFEST_IN=… eval.test -test.run TestReservedCriteria` | no measurement problem; 40 seeds exit 0, criteria identical; 200 seeds only the 40 scenarios not run, verdicts identical (T5a's NM2.1 prediction differs in the 17th digit: map-order summation) |
 | Mutation checks: 49 (the 5C.4n set and 13 new) | `python3 mutate4o.py` (scratch) | 44 of 49 in the full run (5,166 s); the 5 touched by the final merge rerun, 4 caught; the survivor the documented T5a guard |
 | Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,431 s wall (eval 2,585 s, sim 570 s, session 199 s, cmd 43 s), peak 1.27 GB; every package passes; vet and gofmt clean |
+
+## 2026-10-21 — V0.2 deterministic adjudication output, before the lock (same machine; heavy runs alone, memory-capped)
+
+| Measurement | Command | Result |
+|---|---|---|
+| The 200-seed development lines re-read three times | `DT_MANIFEST_IN=… eval.test -test.run TestReservedCriteria` | three byte-identical adjudications, SHA-256 `2457d656…3889`; NM2.1's prediction 0.34404 |
+| Trusted development execution twice: NM2 and NM2.1, 80 seeds (2 groups × 20 replicates) | `DT_MANIFEST_SEEDS=80 DT_MANIFEST_SCENARIOS=NM2,NM2.1 … eval.test -test.run TestReservedManifestRun` | 531 s and 527 s, peak 1.13 GB; lines (`9d827c5f…08df`) and adjudications (`47e5e8de…41f0`) byte-identical; `development` / `not certified`; exit 1 on the 47 scenarios not run, as specified |
+| Determinism regression | `go test ./internal/eval -run TestAdjudicationDeterministic` | passes, 64 s; fails with map order restored |
+| Full uncached suite, one package at a time | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,469 s wall (eval 2,619 s, sim 562 s, session 202 s, cmd 43 s), peak 1.28 GB; every package passes; vet and gofmt clean |
