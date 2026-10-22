@@ -5,6 +5,91 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.2.0 — practice design
+
+You can now change how the practice is staffed and read, and see whether
+your plan is better than doing nothing.
+
+**Five staffing and reading actions** (staff screen `m`, or batches in an
+actions file). Each one is validated and previewed, and it replays exactly.
+* **Hire** from a fixed offer table, at a standard or premium rate. The
+  premium buys a shorter recruiting lead. The recruiting fee, paid
+  onboarding and 40 hours of training (24 for the desk) come before any
+  patient capacity.
+* **Terminate**, with at least 14 days' notice at contract pay and two
+  weeks' severance.
+* **Set rosters**: dated weekly or fortnightly patterns, from a Monday at
+  least 14 days ahead.
+* **Set a radiologist's site reading allocation** (30–100%), from at least
+  14 days ahead.
+* **Contract teleradiology** (`standard-v1`): weeknight, Saturday and
+  Sunday windows, urgent or all studies, monthly retainers and per-read
+  fees, and a 30-day minimum term on cancellation.
+
+Batches are atomic. A refused action carries a stable code and changes
+nothing. Displaced bookings are rebooked or lost, and the preview names
+them first.
+
+**Employment obligations.**
+* Contracts are inferred for the existing staff at the takeover.
+* Contracted hours are guaranteed, whatever is rostered.
+* Weekly overtime premium applies above 40 actual hours.
+* Severance and vendor costs are posted and settled in the double-entry
+  ledger.
+
+**The `sustainable` scenario.**
+* The established practice at ×1.30 referral demand, with 12-minute X-ray
+  slots and a full-time evening MR technologist.
+* Shared XR/CT staffing, near break-even (≈+0.5% mean T90 margin).
+* Reorganizing it is the game. The measured lead staffing earned ≈+2.8% at
+  this demand, but getting there costs recruiting, notice, severance and
+  training, and is not promised.
+
+**The T90 evaluation** (summary screen `e`, `tab` twice, or
+`dreamteam t90 FILE`).
+* Your decisions before day 90 are judged against no action, on the same
+  scenario and seed, by the frozen evaluation policy in force,
+  v0.2-eval-4.
+* **The metric vector** shows profit, margin, cash, the funding gap, served
+  and lost demand, and report breaches and turnaround by priority. Your
+  plan, the baseline and the difference are side by side, with no weighted
+  score.
+* **The service gates** show pass, fail or insufficient against the
+  policy's limits, with their counts.
+* **The plan gates and the policy's verdict** follow, with its reasons.
+* Days not yet played are marked as projected, the post-day-90 tail as
+  fixed-policy, and unfinished work as incomplete.
+* The report is the canonical evaluation runner's, byte for byte.
+
+**Sessions.**
+* Session v2 records action batches with their results.
+* Saves from V0.1 and from every V0.2 development build replay with
+  their digests verified.
+* The V0.1 golden references are unchanged.
+
+**Known limitations** (`README.md`).
+* TUI actions are committed one at a time, without showing the stable
+  code; rostered and worked hours are not in the staff table.
+* The T90 evaluation covers the sustainable scenario only.
+* The Pi 4's 90-day headless run (≈3.3–3.9 s) keeps V0.1's waiver.
+* No operations-control actions, disruptions or agent interface yet: V0.3
+  is next.
+* The clinical candidate policy v0.2-eval-5 completed its confirmatory
+  evaluation with a NO GO and is not part of this release
+  (`docs/calibration/clinical-v5-closure/`).
+
+**Validation** (`docs/v02-acceptance/`).
+* All five actions are verified through the simulator, API, sessions,
+  headless runs and the TUI.
+* Save, replay and determinism hold across amd64 and arm64.
+* All 7 golden references and all 25 earlier session fixtures pass.
+* The race detector finds no race.
+* 150 × 90-day runs check every invariant after every transaction; 720-day
+  turnover and roster churn pass.
+* The full uncached suite passes.
+
+---
+
 ## V0.1.0 — first playable release
 
 A deterministic simulation and terminal game of an outpatient radiology

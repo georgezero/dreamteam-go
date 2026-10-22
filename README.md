@@ -7,9 +7,10 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.1** (`0.1.0`) is the release; `main` is V0.2 development
-(`0.2.0-dev.2`: hiring and termination, see below and
-`docs/V0.2_DESIGN.md` §5.7). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
+Status: **V0.2** (`0.2.0`, practice design) is the current release:
+staffing, rosters, reading allocation and teleradiology actions, a
+sustainable scenario and the T90 evaluation of your plan. Release notes:
+`docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
@@ -21,6 +22,7 @@ Raspberry Pi 4; CI covers linux/amd64, linux/arm64 and darwin/arm64).
 
     go run ./cmd/dreamteam                 # play: the established practice, seed 1
     go run ./cmd/dreamteam -seed 7         # another seed: same practice, different patients
+    go run ./cmd/dreamteam -scenario sustainable   # the practice you can make sustainable
     go build -o dreamteam ./cmd/dreamteam  # or build once
 
 The game opens paused on the takeover briefing (Tuesday 06:00). Press
@@ -39,9 +41,9 @@ time for the keys.
 | `d` `b` `h` | dashboard · takeover briefing · daily history |
 | `s` `p` `w` | schedule · patients · radiology worklist |
 | `l` `f` `a` | event log · finance · actions |
-| `m` | staff: hire, terminate and edit rosters, with a preview (V0.2 development) |
+| `m` | staff: hire, terminate, rosters, reading allocation and teleradiology, with a preview |
 | `↑↓` `j` `k` `←→` `t` | move, scroll, page days (`t`: today) |
-| `tab` / `!` | next filter or view / log severity filter |
+| `tab` / `!` | next filter or view (on the summary: the day, since takeover, the T90 evaluation) / log severity filter |
 | `enter` / `esc` | open or submit / back |
 | `ctrl+s` `ctrl+o` `ctrl+v` | save · reload the saved session · verify it by replay |
 | `?` | help |
@@ -67,9 +69,10 @@ Three actions, from the actions screen (`a`):
 Patients already admitted are always served, after closing if necessary
 (with the overtime it costs); nobody is sent home because of the clock.
 
-### Hiring and termination (V0.2 development)
+### Staffing and reading coverage (V0.2)
 
-From the staff screen (`m`), or as `hire` and `terminate` actions:
+Five actions, from the staff screen (`m`) one at a time with a preview,
+or as batches in an actions file (below):
 
 * **Hire** from a fixed offer table (XR, CT, XR+CT, US or MR technologist,
   front desk) at a standard or premium rate. The premium rate buys a
@@ -108,16 +111,62 @@ From the staff screen (`m`), or as `hire` and `terminate` actions:
     independent.
   * In the staff screen, enter on a roster row opens the roster editor.
 
+* **Change a radiologist's reading allocation** (`set_reading_allocation`):
+  the share of an employed salaried radiologist's paid time spent reading
+  for the practice, from 30% to 100%, from a date at least 14 days ahead.
+  It changes their reading blocks and the salary charged to the practice.
+* **Contract teleradiology** (`contract_teleradiology`): a remote reading
+  contract on the `standard-v1` plan for weeknights, Saturday and/or
+  Sunday, for urgent studies or all, from at least 14 days ahead.
+  * Monthly retainers: weeknights $1,500, Saturday $800, Sunday $800.
+  * Per finalized read: XR $12, US $30, CT $45, MR $60, +20% for a study
+    claimed from 22:00 to 08:00.
+  * Open-ended until cancelled; a cancellation ends it at least 30 days
+    ahead and at least 30 days after it starts. Contracts never overlap
+    and share the practice's two remote lanes.
+
 A batch containing any of these actions is atomic: one invalid item refuses
 the whole batch, and the bookings affected are reconciled once, against the
 batch's final staffing (so two employees can swap shifts without
-displacing anyone).
+displacing anyone). A refused action has a stable code (for example
+`notice_too_short`, `allocation_out_of_band`, `request_conflict`) and a
+message, and changes nothing.
+
+### The T90 evaluation: did your decisions help? (V0.2)
+
+On the summary screen (`e`, then `tab` twice) or with
+`dreamteam t90 FILE`, your plan (every decision before day 90) is
+evaluated against doing nothing, on the same scenario and seed, by the
+frozen evaluation policy in force (`v0.2-eval-4`, `docs/evaluation/`):
+
+* **Metric vector**, for your plan, no action and the difference:
+  operating profit and margin, net revenue, profit on days 31–90, cash at
+  day 90 and the lowest cash, the funding gap, the share of due demand
+  served, lost and still-open orders, and report breaches, turnaround and
+  unfinished reports for urgent, soon and routine studies, remote reading.
+  There is no weighted score.
+* **Service gates**: each priority's report-breach rate against the
+  policy's limit, by window, as pass, fail or insufficient (too few
+  studies to decide), with its counts. The deciding gates set your
+  plan's service; the others are reported.
+* **Plan gates and verdict**: service, backlog, solvency, funding and case
+  selection, and the policy's verdict (GO, CONDITIONAL GO or NO GO) with
+  its reasons, on your seed.
+
+Days you have not played yet are **projected**: your plan as it stands,
+with no further decision. After day 90 both plans run with no decision
+(the evaluation tail); tail and day-180 values describe that fixed
+policy, not your later play. The evaluation runs two ~200-day
+simulations (about 40 s on a Raspberry Pi; the game goes on meanwhile).
+It is defined for the `sustainable` scenario. The clinical candidate
+policy v0.2-eval-5 was not approved and plays no part in it.
 
 ## Scenarios
 
 | ID | Practice |
 |---|---|
 | `established` (**default**: the struggling practice) | DreamTeam Imaging Center: four rooms (XR, US, CT, MR), four technologists (two sharing XR and CT, one US, one MR), a front-desk clerk and an operations manager, two radiologists; open weekdays 08:00–20:00 and Saturdays 10:00–18:00 (XR and CT). 180 days of history before the takeover. A **struggling, capacity-constrained practice**: demand ≈1,650 a month, ≈1,300–1,380 exams, operating margin around −12% to −14%. See `docs/calibration/step-18-report.md`. |
+| `sustainable` | The same practice at ×1.30 referral demand with 12-minute X-ray slots and a full-time evening MR technologist (Alex): shared XR/CT staffing near break-even (≈+0.5% mean T90 margin). Reorganizing it is your task; the evaluated Step 0C lead staffing earned ≈+2.8% at this demand, but reaching it costs recruiting, notice, severance and training (`docs/V0.2_DESIGN.md` §5.6, §18). The T90 evaluation is defined for this scenario. Its internal id is `established` (the evaluation policy pins its exact bytes); results show its distinct fingerprint `e8718dbd…`. |
 | `mini` | The same practice with no history: a short opening schedule and an empty past, for tests and quick looks. |
 
     dreamteam scenario list
@@ -136,6 +185,8 @@ Every run is reproducible from its scenario, seed and actions.
     dreamteam run -days 7 -log events.jsonl            # the observable event log, one JSON object per line
     dreamteam replay run.session.json                  # rebuild and check every digest
     dreamteam verify run.session.json                  # the same, quietly
+    dreamteam t90 run.session.json                     # the T90 evaluation (sustainable scenario)
+    dreamteam t90 run.session.json -format json        # with the policy's full report
 
 An actions file is a list of timestamped batches:
 
@@ -188,14 +239,14 @@ state, run). Loading it replays from scratch; a mismatch is reported, never
 silently accepted. This build writes `dreamteam.session/v2`. It still loads
 v1 files: those from earlier builds replay with their outcomes verified,
 and saving such a session writes a v2 file that keeps the v1 record as its
-verified prefix. Saves from the previous development build (0.2.0-dev.2)
-replay with every digest verified, with that build's actions, and are kept
-the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
+verified prefix. Saves from every V0.2 development build (0.2.0-dev.2 to
+0.2.0-dev.27) replay with every digest verified, with that build's
+actions, and are kept the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
 · 3 replay failure · 4 golden mismatch · 5 incompatible.
 
-Golden references in `testdata/golden/` pin four V0.1 runs and two V0.2
-runs (hire and terminate; roster changes); see its README for checking and
-(deliberately) regenerating them.
+Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
+runs (hire and terminate; roster changes; reading allocation); see its
+README for checking and (deliberately) regenerating them.
 
 ## Development
 
@@ -222,30 +273,37 @@ of `session` and `api` only), `internal/api` (observations and actions),
 | `docs/TUI_DESIGN.md` | screens and controls |
 | `docs/ROADMAP.md` | milestones V0.1–V0.6, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
+| `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
+| `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.1)
+## Known limitations (V0.2)
 
-* One practice, three actions. No hiring, roster or template editing,
-  equipment failures, staff absences, rescheduling or overbooking actions
-  (V0.2 and later).
-* The default practice loses money by design; a better-staffed preset that
-  can reach a 6–12% margin is the next scenario milestone.
-* Urgent studies acquired after the last reading block wait for the next
-  morning (or Monday): V0.1 has no action to add evening or weekend reading
-  coverage.
-* Save and load are keyboard-only (`ctrl+s`, `ctrl+o`); there is no file
-  picker. No mouse support.
-* On a Raspberry Pi 4, `run -days 90` takes about 3.3 s (about 1.1 s on a
-  Cortex-A76): the Pi 4's CPU has no SHA-256 instructions, and every keyed
-  draw is hashed. The 2 s target is waived for the Pi 4 in V0.1 (an
-  accepted deviation; the RNG is kept). Interactive play meets its targets.
-  See `docs/MEASUREMENTS.md`.
-* The default practice usually starts with an empty reading worklist: it is
-  short of imaging capacity, not reporting capacity (an accepted
-  deviation from the original V0.1 criterion; a reporting-constrained
-  scenario is future work).
+* **Terminal UI:** actions are previewed and committed one at a time
+  (batches of several actions are headless only); a refused action shows
+  its message but not its stable code; the staff table shows contracted
+  hours, not rostered and worked hours; displacements are shown in the
+  preview, not afterwards; teleradiology always uses the one catalog plan
+  (`standard-v1`).
+* The T90 evaluation is defined for the `sustainable` scenario only, and
+  judges one seed: the policy's statistical classifications are designed
+  for many seeds.
+* The long-run invariant tests cover the V0.1, staffing and roster plans;
+  reading allocation and teleradiology are covered by the suite and the
+  golden references.
+* No operations-control actions yet (reassign, call in, send home,
+  templates, rescheduling, maintenance), disruptions, or an agent
+  interface: V0.3 and later (`docs/ROADMAP.md`).
+* On a Raspberry Pi 4, `run -days 90` takes about 3.3–3.9 s (about 1.1 s
+  on a Cortex-A76): the Pi 4's CPU has no SHA-256 instructions and every
+  keyed draw is hashed. The 2 s target stays waived for the Pi 4 (V0.1's
+  accepted deviation). See `docs/MEASUREMENTS.md`.
+* Save and load are keyboard-only (`ctrl+s`, `ctrl+o`); no file picker,
+  no mouse.
+* The `established` practice loses money by design and usually starts
+  with an empty reading worklist (V0.1's accepted deviations); the
+  `sustainable` scenario is the one to manage toward a profit.

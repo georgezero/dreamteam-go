@@ -7,6 +7,18 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2.0 — release
+
+The V0.2 practice-design release, on the owner's decision after the
+acceptance pass and the completion of F1 and F2. Release preparation
+only: the version (0.2.0), the replay registration of 0.2.0-dev.27
+(`mini-seed52-dev27`), README, release notes and roadmap. No change to
+mechanics, randomness, scenarios, actions, accounting, evaluation or
+replay. The documented P2 limitations are accepted as nonblocking
+(`README.md`). Next: V0.3, the agent interface.
+
+---
+
 ## V0.2 completion — the T90 evaluation view and the bundled sustainable scenario (0.2.0-dev.27)
 
 The V0.2 acceptance pass (16e5751) found two promised deliverables not

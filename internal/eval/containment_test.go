@@ -36,6 +36,16 @@ var holdoutReach = map[string][]string{
 		"internal/eval/eval_test.go:synthHoldout",
 		"internal/sim/holdout_protocol_test.go:TestHoldoutRecordersGuarded", // the synthetic fixture's
 	},
+	// Regenerating seeds from a manifest's bytes: only the two readers.
+	"decodeHoldout": {
+		"internal/eval/holdout.go:LoadHoldout",
+		"internal/eval/holdout.go:GuardManifest", // an error, never the seeds
+	},
+	// The guard on the game's embedded manifest: only the T90 evaluation,
+	// which refuses a holdout seed before running anything.
+	"GuardManifest": {
+		"internal/session/t90.go:T90Job",
+	},
 	// The repository's own paths with the repository as root: only the
 	// sealed checks, the canonical run and the synthetic fixture.
 	"Authorize:RepoPaths": {
@@ -87,7 +97,7 @@ func TestHoldoutContainment(t *testing.T) {
 					}
 				case *ast.CallExpr:
 					switch name := callName(x); name {
-					case "LoadHoldout":
+					case "LoadHoldout", "decodeHoldout", "GuardManifest":
 						found[name] = append(found[name], where)
 					case "Authorize":
 						for _, a := range x.Args {
@@ -96,7 +106,7 @@ func TestHoldoutContainment(t *testing.T) {
 							}
 						}
 					case "HoldoutSeeds":
-						if where == "internal/eval/holdout.go:LoadHoldout" || where == "internal/eval/eval_test.go:TestGuardSeeds" {
+						if where == "internal/eval/holdout.go:decodeHoldout" || where == "internal/eval/eval_test.go:TestGuardSeeds" {
 							break // the manifest's own label; a synthetic manifest's label, altered
 						}
 						if lit, ok := x.Args[0].(*ast.BasicLit); ok {

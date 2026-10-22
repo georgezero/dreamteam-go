@@ -8,7 +8,15 @@ headless use and TUI"). Not a clinical evaluation: the v5 confirmation
 is closed (`../calibration/clinical-v5-closure/`) and the shipped binary
 does not import the evaluation package at all.
 
-**Recommendation: CONDITIONAL GO.** No P0 and no defect in an
+**Update (2026-10-21, owner decision): F1 and F2 built before the
+release** (0.2.0-dev.27, eb003a1): the T90 evaluation is visible in the
+TUI and through `dreamteam t90`, equal to the canonical runner's report
+byte for byte, and `sustainable` is a bundled scenario resolving to the
+evaluation policy's exact scenario. Their acceptance is in
+`docs/PROGRESS.md` (V0.2 completion) and the release notes. The P2
+findings are accepted as nonblocking and listed in `README.md`.
+
+**Recommendation at the time of this pass: CONDITIONAL GO.** No P0 and no defect in an
 implemented feature was found. Two V0.2 contract deliverables are not
 built (§2, F1 and F2); releasing needs the owner either to move them out
 of V0.2 or to have them built first. Nothing was changed or fixed in

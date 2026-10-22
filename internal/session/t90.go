@@ -115,11 +115,7 @@ func (s *Session) T90Job() (*T90Job, error) {
 		return nil, ErrT90Scenario
 	}
 	// A holdout seed is evaluated only by the canonical runner.
-	h, hs, err := eval.DecodeHoldout("holdout-v0.2.json", evaluation.Holdout)
-	if err != nil {
-		return nil, err
-	}
-	if err := eval.GuardSeeds([]int64{s.seed}, h, hs); err != nil {
+	if err := eval.GuardManifest(evaluation.Holdout, []int64{s.seed}); err != nil {
 		return nil, err
 	}
 	start := s.w.StartTime()

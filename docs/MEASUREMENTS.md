@@ -718,3 +718,18 @@ stream was run.
 | Session T90 and sustainable tests | `go test ./internal/session -run 'T90|SustainableDeterministic'` | pass, 104 s |
 | CLI agreement | `go test ./cmd/dreamteam -run T90Command` | pass, 121 s |
 | TUI view | `go test ./internal/tui` | pass, 80 s |
+
+## 2026-10-21 — V0.2.0 release (this Pi and horo)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Full uncached suite, one package at a time (release tree) | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,896 s wall (eval 2,665 s, sim 639 s, session 326 s, cmd 162 s, tui 78 s), peak 1.29 GB; every package passes; vet and gofmt clean |
+| Race detector, every shipped package (amd64, horo) | `go test -race -count=1 ./cmd/... ./internal/{api,rng,scenario,session,sim,simtime,tui}/... ./scenarios/... ./docs/...` | pass, no race, 1,127 s |
+| Session fixtures | `dreamteam verify` on every `testdata/sessions/*.session.json` | 27 of 27 verified |
+| Golden references | `dreamteam run … -golden … -golden-migrations … -allow-engine-mismatch -verify-replay` | 7 of 7 "outcomes identical" |
+| Builds | `CGO_ENABLED=0 go build ./cmd/dreamteam` for linux/arm64, linux/amd64, darwin/arm64, darwin/amd64 | all build |
+
+The first release-tree suite run failed `TestHoldoutContainment`: the
+T90 view's holdout guard regenerated seeds outside the reviewed sites.
+It was replaced by `eval.GuardManifest` (an error, never the seeds),
+tracked by the containment test, before the run above.

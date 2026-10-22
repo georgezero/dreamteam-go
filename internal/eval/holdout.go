@@ -107,11 +107,22 @@ func LoadHoldout(path string) (*Holdout, []int64, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	return DecodeHoldout(path, raw)
+	return decodeHoldout(path, raw)
 }
 
-// DecodeHoldout is LoadHoldout for a manifest's bytes; name labels errors.
-func DecodeHoldout(name string, raw []byte) (*Holdout, []int64, error) {
+// GuardManifest is GuardSeeds with a holdout manifest's bytes (the game's
+// embedded copy): an error, never the seeds.
+func GuardManifest(raw []byte, seeds []int64) error {
+	h, hs, err := decodeHoldout("the embedded holdout manifest", raw)
+	if err != nil {
+		return err
+	}
+	return GuardSeeds(seeds, h, hs)
+}
+
+// decodeHoldout reads a manifest's bytes and regenerates its seeds, which
+// must match its digest; name labels errors.
+func decodeHoldout(name string, raw []byte) (*Holdout, []int64, error) {
 	var h Holdout
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.DisallowUnknownFields()
