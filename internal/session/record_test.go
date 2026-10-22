@@ -312,10 +312,10 @@ func TestCorruptAndIncompatibleFiles(t *testing.T) {
 	}
 	// A build that is not registered gets no such allowance.
 	p = copyFile(t, good)
-	rewriteV1(t, p, func(r *Record) { r.Engine, r.Digests.State = "0.3.0", strings.Repeat("1", 64) })
-	check("unregistered engine", p, ErrIncompatible, "recorded by 0.3.0")
+	rewriteV1(t, p, func(r *Record) { r.Engine, r.Digests.State = "9.9.9", strings.Repeat("1", 64) })
+	check("unregistered engine", p, ErrIncompatible, "recorded by 9.9.9")
 	if _, _, err := Load(p, ReplayOptions{AllowEngineMismatch: true}); !errors.Is(err, ErrMismatch) {
-		t.Errorf("state digest mismatch from 0.3.0: %v", err)
+		t.Errorf("state digest mismatch from 9.9.9: %v", err)
 	}
 	// A recorded result that the rules do not reproduce.
 	p = copyFile(t, good)

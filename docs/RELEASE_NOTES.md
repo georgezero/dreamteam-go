@@ -5,6 +5,99 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.3.0 — the agent interface
+
+An external program can now run a DreamTeam practice: discover the
+actions, observe, act, advance time, save, replay and ask for the T90
+evaluation, through a deterministic JSON protocol over the same session
+API the game uses.
+
+**`dreamteam agent --stdio`** (`dreamteam.agent/v1`,
+`docs/AGENT_PROTOCOL.md`).
+* **Format.** One JSON request per line in, one JSON response per line
+  out. Ids are echoed, error codes are stable, serialization is fixed,
+  and only responses go to stdout.
+* **Operations:**
+  * `hello`;
+  * `observe`: in full, or as named `sections`, or `compact`, listed by
+    `sections`;
+  * `actions`: every action type with its JSON Schema, constraints and
+    current targets;
+  * `validate` and `preview` (for the staffing actions);
+  * `apply`: atomic; a refused batch changes nothing, not even a digest;
+  * `advance`: by minutes, to a time, to the next visible event, or to
+    the end of the day;
+  * `save` and `digests`;
+  * `t90`.
+* **Observation projections** are cut from the full observation's own
+  JSON. `compact` leaves out four declared record listings and counts
+  them, ≈75% smaller.
+* **`t90`** is the same evaluation as `dreamteam t90`. It is explicit
+  only (never part of `observe`), read-only and draws no randomness.
+  Sessions saved by V0.2.0 are evaluated with their earlier decisions.
+* **Determinism.** Identical requests give byte-identical responses, and
+  a saved agent session replays headlessly (`dreamteam verify`).
+* **Scripted runner.** `dreamteam agent -policy noop|greedy` exercises
+  the protocol in process.
+
+**Reference Python client** (`clients/python/`, standard library only).
+It runs a complete session through `dreamteam agent --stdio` as a
+subprocess, then checks the save with `dreamteam verify` and `dreamteam
+t90`. CI runs it on linux/amd64, linux/arm64 and darwin/arm64 and
+compares its transcript byte for byte.
+
+**Fixes.**
+* **The T90 view in a continued session.** A session saved by an
+  earlier build is now evaluated with its earlier decisions, when they
+  replay under the current action rules. This preserves the T90
+  evaluation of sessions saved by V0.2.0.
+* **CI.** It had been failing since the V0.2 Step 0C commit, on two
+  defects of its own:
+  * the golden step lacked the migration manifest;
+  * a neutrality test held only on arm64.
+
+  Both are fixed, and CI is green on every platform.
+
+**Numerical change on arm64.** The evaluation now rounds each product
+before a sum, because arm64 fuses multiply-add and amd64 does not.
+* T90 output is byte-identical across platforms.
+* arm64 T90 statistics (design effects, Wilson and t interval bounds,
+  dispersion) can differ in their last digit from V0.2.0's. amd64's are
+  unchanged.
+* No status, verdict, rule, policy or simulation outcome changed.
+* In developer-only multi-seed evaluations, the joint service gate's
+  exact Clopper–Pearson bound still goes through the Go math library and
+  can differ in its last digit between processor families.
+
+**Compatibility.**
+* No change to mechanics, randomness, scenarios, actions or accounting.
+* All V0.1 and V0.2 golden references give identical outcomes.
+* Saves from V0.1, every V0.2 build, V0.2.0 and the V0.3 development
+  builds replay with their digests verified.
+* The evaluation policy in force is still v0.2-eval-4. The clinical
+  candidate v0.2-eval-5 is closed, not approved, and plays no part.
+
+**Known limitations** (`README.md`).
+* `t90` takes about 40 s on a Raspberry Pi.
+* Previews cover the staffing actions only.
+* The transport is stdio only: no HTTP, no model integration, no agent
+  scoring or benchmark yet.
+* The roadmap's V0.3 operations-control actions (reassign, call-in,
+  send-home, templates, rescheduling, maintenance, disruptions) remain
+  planned.
+
+**Validation.**
+* The full uncached suite passes on linux/arm64 and linux/amd64.
+* The race detector finds no race on any shipped package.
+* vet and gofmt are clean.
+* Every session fixture replays, and every golden reference is
+  identical.
+* The external Python client passes.
+* CI is green across all three platforms and the cross-platform
+  comparison.
+
+---
+
 ## V0.2.0 — practice design
 
 You can now change how the practice is staffed and read, and see whether

@@ -7,11 +7,12 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.2** (`0.2.0`, practice design) is the current release:
-staffing, rosters, reading allocation and teleradiology actions, a
-sustainable scenario and the T90 evaluation of your plan. `main` is V0.3
-development (`0.3.0-dev.2`: the agent interface, `docs/AGENT_PROTOCOL.md`;
-not yet released). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
+Status: **V0.3** (`0.3.0`, the agent interface) is the current release:
+an external program can run the practice through a deterministic JSON
+protocol (`docs/AGENT_PROTOCOL.md`), with a reference Python client. It
+builds on V0.2 (`0.2.0`, practice design: staffing, rosters, reading
+allocation and teleradiology actions, a sustainable scenario and the T90
+evaluation of your plan). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
@@ -189,7 +190,7 @@ Every run is reproducible from its scenario, seed and actions.
     dreamteam t90 run.session.json                     # the T90 evaluation (sustainable scenario)
     dreamteam t90 run.session.json -format json        # with the policy's full report
 
-### Agent interface (V0.3 development)
+### Agent interface (V0.3)
 
 `dreamteam agent --stdio` runs a session for an external program: one
 JSON request per line on stdin, one JSON response per line on stdout.
@@ -304,7 +305,28 @@ of `session` and `api` only), `internal/api` (observations and actions),
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.2)
+## Known limitations (V0.3)
+
+* **Agent interface:**
+  * `t90` runs two ~200-day simulations, about 40 s on a Raspberry Pi.
+  * Previews cover the five staffing actions; `validate` checks every
+    action.
+  * The protocol is stdio only: no HTTP or WebSocket transport, no model
+    integration, no benchmark scoring.
+* **Cross-platform numbers:**
+  * T90 output, the agent protocol and the golden runs are
+    byte-identical on linux/amd64, linux/arm64 and darwin/arm64.
+  * Since V0.3 the evaluation rounds each product before a sum, so arm64
+    T90 statistics (design effects, interval bounds) can differ in their
+    last digit from V0.2.0's. Statuses, verdicts and simulation outcomes
+    are unchanged.
+  * In the developer-only multi-seed evaluations, the joint service
+    gate's exact Clopper–Pearson bound can still differ in its last digit
+    between processor families.
+
+The V0.2 limitations below still apply.
+
+### From V0.2
 
 * **Terminal UI:** actions are previewed and committed one at a time
   (batches of several actions are headless only); a refused action shows
@@ -319,8 +341,8 @@ of `session` and `api` only), `internal/api` (observations and actions),
   reading allocation and teleradiology are covered by the suite and the
   golden references.
 * No operations-control actions yet (reassign, call in, send home,
-  templates, rescheduling, maintenance) or disruptions: V0.3 and later
-  (`docs/ROADMAP.md`). The agent interface is in development on `main`.
+  templates, rescheduling, maintenance) or disruptions: planned
+  (`docs/ROADMAP.md`).
 * On a Raspberry Pi 4, `run -days 90` takes about 3.3–3.9 s (about 1.1 s
   on a Cortex-A76): the Pi 4's CPU has no SHA-256 instructions and every
   keyed draw is hashed. The 2 s target stays waived for the Pi 4 (V0.1's

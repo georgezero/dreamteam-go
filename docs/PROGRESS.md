@@ -7,6 +7,24 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.3.0 — release
+
+The V0.3 release on the owner's decision: the agent interface (V0.3a and
+V0.3b). Release preparation only:
+* the version (0.3.0) and the replay registration of 0.3.0-dev.2
+  (`mini-seed52-v032`);
+* README, release notes, roadmap and protocol status;
+* a test fix: the session test of an unregistered engine named 0.3.0,
+  which is now this build, so it names 9.9.9 instead.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation or replay. The documented limitations are accepted as
+nonblocking: `t90`'s run time on a Pi, staffing-only previews, and the
+multi-seed bound's last digit across processor families. Next: an agent
+evaluation harness.
+
+---
+
 ## V0.3b — external agent usability (0.3.0-dev.2)
 
 The second V0.3 slice, on the owner's decision after V0.3a: the protocol
