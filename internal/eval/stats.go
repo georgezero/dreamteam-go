@@ -58,6 +58,12 @@ type Interval struct {
 	Defined bool    `json:"defined"`
 }
 
+// Every product added to or subtracted from something below is rounded
+// first (float64(x*y)): the Go spec lets a compiler fuse x*y+z into one
+// operation, which arm64 does and amd64 does not, so without the rounding
+// the reported statistics would differ in their last digits between
+// platforms. The conversion makes them round alike everywhere.
+
 // pairedT is the mean of paired differences with its Student t 95%
 // interval (df = n − 1).
 func pairedT(xs []float64) Interval {
@@ -75,9 +81,9 @@ func pairedT(xs []float64) Interval {
 	}
 	var ss float64
 	for _, x := range xs {
-		ss += (x - m) * (x - m)
+		ss += float64((x - m) * (x - m))
 	}
-	h := tQuantile975(n-1) * math.Sqrt(ss/float64(n-1)/float64(n))
+	h := float64(tQuantile975(n-1) * math.Sqrt(ss/float64(n-1)/float64(n)))
 	return Interval{N: n, Mean: m, Lo: m - h, Hi: m + h, Defined: true}
 }
 
@@ -90,7 +96,7 @@ func wilson(k, n int) Interval {
 	p := float64(k) / float64(n)
 	nn := float64(n)
 	c := (p + z*z/(2*nn)) / (1 + z*z/nn)
-	h := z / (1 + z*z/nn) * math.Sqrt(p*(1-p)/nn+z*z/(4*nn*nn))
+	h := float64(z / (1 + z*z/nn) * math.Sqrt(float64(p*(1-p))/nn+z*z/(4*nn*nn)))
 	return Interval{N: n, Mean: p, Lo: max(0, c-h), Hi: min(1, c+h), Defined: true}
 }
 
@@ -111,7 +117,7 @@ func tQuantile975(df int) float64 {
 
 // tCDF is P(T ≤ t) for t ≥ 0.
 func tCDF(t, df float64) float64 {
-	return 1 - 0.5*betaInc(df/2, 0.5, df/(df+t*t))
+	return 1 - float64(0.5*betaInc(df/2, 0.5, df/(df+float64(t*t))))
 }
 
 // betaInc is the regularized incomplete beta function I_x(a, b).
@@ -125,18 +131,18 @@ func betaInc(a, b, x float64) float64 {
 	la, _ := math.Lgamma(a + b)
 	lb, _ := math.Lgamma(a)
 	lc, _ := math.Lgamma(b)
-	front := math.Exp(la - lb - lc + a*math.Log(x) + b*math.Log(1-x))
+	front := math.Exp(la - lb - lc + float64(a*math.Log(x)) + float64(b*math.Log(1-x)))
 	if x < (a+1)/(a+b+2) {
 		return front * betaCF(a, b, x) / a
 	}
-	return 1 - front*betaCF(b, a, 1-x)/b
+	return 1 - float64(front*betaCF(b, a, 1-x))/b
 }
 
 // betaCF is the continued fraction for the incomplete beta function
 // (modified Lentz).
 func betaCF(a, b, x float64) float64 {
 	const tiny = 1e-300
-	c, d := 1.0, 1-(a+b)*x/(a+1)
+	c, d := 1.0, 1-float64((a+b)*x)/(a+1)
 	if math.Abs(d) < tiny {
 		d = tiny
 	}
@@ -144,8 +150,8 @@ func betaCF(a, b, x float64) float64 {
 	h := d
 	for m := 1; m <= 300; m++ {
 		fm := float64(m)
-		aa := fm * (b - fm) * x / ((a + 2*fm - 1) * (a + 2*fm))
-		d = 1 + aa*d
+		aa := fm * (b - fm) * x / ((a + float64(2*fm) - 1) * (a + float64(2*fm)))
+		d = 1 + float64(aa*d)
 		if math.Abs(d) < tiny {
 			d = tiny
 		}
@@ -155,8 +161,8 @@ func betaCF(a, b, x float64) float64 {
 		}
 		d = 1 / d
 		h *= d * c
-		aa = -(a + fm) * (a + b + fm) * x / ((a + 2*fm) * (a + 2*fm + 1))
-		d = 1 + aa*d
+		aa = -(a + fm) * (a + b + fm) * x / ((a + float64(2*fm)) * (a + float64(2*fm) + 1))
+		d = 1 + float64(aa*d)
 		if math.Abs(d) < tiny {
 			d = tiny
 		}
@@ -195,7 +201,7 @@ func designEffect(gs []clusterGroup) float64 {
 			continue
 		}
 		k, n, ss2 = k+1, n+g.n, ss2+g.n*g.n
-		sumResid += float64(g.ones) - float64(g.n)*g.centre
+		sumResid += float64(g.ones) - float64(float64(g.n)*g.centre)
 	}
 	if k < 2 || n <= k {
 		return 0
@@ -208,16 +214,17 @@ func designEffect(gs []clusterGroup) float64 {
 		}
 		p := float64(g.ones) / float64(g.n)
 		d := p - g.centre - mean
-		ssb += float64(g.n) * d * d
-		ssw += float64(g.n) * p * (1 - p)
+		ssb += float64(float64(g.n) * d * d)
+		ssw += float64(float64(g.n) * p * (1 - p))
 	}
 	msb, msw := ssb/float64(k-1), ssw/float64(n-k)
 	n0 := (float64(n) - float64(ss2)/float64(n)) / float64(k-1)
-	if msb+(n0-1)*msw <= 0 {
+	den := msb + float64((n0-1)*msw)
+	if den <= 0 {
 		return 0
 	}
-	rho := (msb - msw) / (msb + (n0-1)*msw)
-	return 1 + (float64(n)/float64(k)-1)*rho
+	rho := (msb - msw) / den
+	return 1 + float64((float64(n)/float64(k)-1)*rho)
 }
 
 // clusterEffects are a cohort's design effects by practice-local day (the
@@ -293,11 +300,11 @@ func clusterRobustRate(ones, ns []int64) Interval {
 	}
 	var ss float64
 	for i := range ns {
-		e := float64(ones[i]) - r*float64(ns[i])
-		ss += e * e
+		e := float64(ones[i]) - float64(r*float64(ns[i]))
+		ss += float64(e * e)
 	}
 	se := math.Sqrt(float64(k)/float64(k-1)*ss) / float64(sn)
-	h := tQuantile975(k-1) * se
+	h := float64(tQuantile975(k-1) * se)
 	return Interval{N: k, Mean: r, Lo: max(0, r-h), Hi: min(1, r+h), Defined: true}
 }
 

@@ -14,7 +14,7 @@ Each version is a playable build. Nothing ships as "framework only".
 |---|---|---|
 | **V0.1** (released, `v0.1.0`) | Engine + playable TUI: a typical Tuesday at an established practice | — |
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
-| **V0.3** (in development: V0.3a agent interface on `main`) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
+| **V0.3** (in development: the agent interface, V0.3a and V0.3b, on `main`; unreleased) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** | Financial management: claims, denials, statements, monthly close and financing | V0.2 obligations; V0.3 controls |
 | **V0.5** | Growth: equipment, extended hours, referrals, New Practice, progression and richer workforce dynamics | V0.3, V0.4 |
 | **V0.6** | WebUI/SQLite, benchmark framework, managed-practice harness, comparisons and automation levels | V0.3 API, V0.4 statements, V0.5 growth benchmarks |

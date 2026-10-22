@@ -219,6 +219,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.26": batchModeDev26,  // V0.2 deterministic adjudication output and the v5 protocol lock: this build's action set and rules
 	"0.2.0-dev.27": batchModeDev27,  // V0.2 completion (the T90 view, the sustainable scenario): this build's action set and rules
 	"0.2.0":        batchModeV020,   // the V0.2.0 release: this build's action set and rules
+	"0.3.0-dev.1":  batchModeV031,   // V0.3a (the agent interface): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

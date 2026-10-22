@@ -94,7 +94,7 @@ func meanSD(xs []float64) (mean, sd float64) {
 	}
 	ss := 0.0
 	for _, x := range xs {
-		ss += (x - mean) * (x - mean)
+		ss += float64((x - mean) * (x - mean)) // rounded: no fused multiply-add (stats.go)
 	}
 	return mean, math.Sqrt(ss / float64(len(xs)-1))
 }

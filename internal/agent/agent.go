@@ -21,6 +21,7 @@ import (
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
+	"github.com/georgezero/dreamteam-go/internal/eval"
 	"github.com/georgezero/dreamteam-go/internal/session"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 	"github.com/georgezero/dreamteam-go/internal/version"
@@ -41,6 +42,14 @@ const (
 	ErrSaveFailed     = "save_failed"
 	ErrUnsavable      = "unsavable"
 	ErrDiverged       = "apply_diverged" // never expected: a validated batch was refused on apply
+	// V0.3b.
+	ErrUnknownSection = "unknown_section"
+	// t90: the evaluation is not available for this session (the same
+	// cases as dreamteam t90).
+	ErrT90Scenario   = "t90_unsupported_scenario" // the policy is defined for the sustainable scenario only
+	ErrT90Rules      = "t90_earlier_rules"        // continues a session recorded under earlier action rules
+	ErrT90NotStarted = "t90_not_started"
+	ErrT90Sealed     = "t90_sealed_seed" // a seed of the sealed evaluation holdout
 )
 
 // Request is one request: an id the response echoes (a string or a
@@ -78,7 +87,7 @@ func argErr(field, f string, a ...any) *Error {
 }
 
 // Ops lists the operations, in the order of the specification.
-var Ops = []string{"hello", "observe", "actions", "validate", "preview", "apply", "advance", "save", "digests"}
+var Ops = []string{"hello", "observe", "sections", "actions", "validate", "preview", "apply", "advance", "save", "digests", "t90"}
 
 // Handler serves one session. Requests are handled one at a time, in
 // order; a Handler is not safe for concurrent use.
@@ -178,6 +187,16 @@ func (h *Handler) dispatch(req Request) (any, *Error) {
 		return h.hello(), nil
 	case "observe":
 		return h.observe(req.Args)
+	case "sections":
+		if e := args(req.Args, &struct{}{}); e != nil {
+			return nil, e
+		}
+		return sectionList(), nil
+	case "t90":
+		if e := args(req.Args, &struct{}{}); e != nil {
+			return nil, e
+		}
+		return h.t90()
 	case "actions":
 		if e := args(req.Args, &struct{}{}); e != nil {
 			return nil, e
@@ -243,10 +262,13 @@ func (h *Handler) hello() Hello {
 }
 
 // observe: the session's observation, with up to recentLog log entries
-// (default 20, at most 2,000).
+// (default 20, at most 2,000); with sections or compact, a projection of
+// it (observe.go).
 func (h *Handler) observe(raw json.RawMessage) (any, *Error) {
 	a := struct {
-		RecentLog *int `json:"recentLog"`
+		RecentLog *int     `json:"recentLog"`
+		Sections  []string `json:"sections"`
+		Compact   bool     `json:"compact"`
 	}{}
 	if e := args(raw, &a); e != nil {
 		return nil, e
@@ -258,9 +280,77 @@ func (h *Handler) observe(raw json.RawMessage) (any, *Error) {
 		}
 		n = *a.RecentLog
 	}
-	return struct {
-		Observation api.Observation `json:"observation"`
-	}{h.s.Observe(n)}, nil
+	if a.Sections == nil && !a.Compact {
+		return struct {
+			Observation api.Observation `json:"observation"`
+		}{h.s.Observe(n)}, nil
+	}
+	if a.Sections != nil && len(a.Sections) == 0 {
+		return nil, argErr("sections", "sections, when given, names at least one section")
+	}
+	p, e := project(h.s.Observe(n), a.Sections, a.Compact)
+	if e != nil {
+		return nil, e
+	}
+	return p, nil
+}
+
+// SectionList is what observe can select: the sections, the header
+// always included, and what compact leaves out.
+type SectionList struct {
+	Sections     []Section `json:"sections"`
+	Header       []string  `json:"header"`
+	CompactOmits []struct {
+		Path string `json:"path"`
+		What string `json:"what"`
+	} `json:"compactOmits"`
+}
+
+func sectionList() SectionList {
+	l := SectionList{Sections: Sections(), Header: headerKeys}
+	for _, o := range compactOmits {
+		l.CompactOmits = append(l.CompactOmits, struct {
+			Path string `json:"path"`
+			What string `json:"what"`
+		}{o.Path, o.What})
+	}
+	return l
+}
+
+// Evaluated is a T90 evaluation of the session as it stands: which
+// session (scenario and seed), and session.T90's evaluation, the same as
+// dreamteam t90's for the saved session.
+type Evaluated struct {
+	Scenario struct {
+		Ref         string `json:"ref,omitempty"`
+		ID          string `json:"id"`
+		Fingerprint string `json:"fingerprint"`
+	} `json:"scenario"`
+	Seed       int64        `json:"seed"`
+	Evaluation *session.T90 `json:"evaluation"`
+}
+
+// t90 evaluates the session's plan by the policy in force (session.T90):
+// two fresh worlds, the session untouched.
+func (h *Handler) t90() (any, *Error) {
+	t, err := h.s.T90()
+	switch {
+	case errors.Is(err, session.ErrT90Scenario):
+		return nil, &Error{Code: ErrT90Scenario, Message: err.Error()}
+	case errors.Is(err, session.ErrT90Rules):
+		return nil, &Error{Code: ErrT90Rules, Message: err.Error()}
+	case errors.Is(err, session.ErrT90Started):
+		return nil, &Error{Code: ErrT90NotStarted, Message: err.Error()}
+	case errors.Is(err, eval.ErrSealed):
+		return nil, &Error{Code: ErrT90Sealed, Message: err.Error()}
+	case errors.Is(err, session.ErrUnsavable):
+		return nil, &Error{Code: ErrUnsavable, Message: err.Error()}
+	case err != nil:
+		return nil, &Error{Code: "internal_error", Message: err.Error()}
+	}
+	r := Evaluated{Seed: h.s.Seed(), Evaluation: t}
+	r.Scenario.Ref, r.Scenario.ID, r.Scenario.Fingerprint = h.Ref, h.s.ScenarioID(), h.s.Fingerprint()
+	return r, nil
 }
 
 // batch reads a batch: one to 64 actions, decoded strictly.

@@ -823,7 +823,7 @@ func dispersion(gs []SeedGate) float64 {
 	for _, g := range gs {
 		if g.defined() {
 			x := float64(g.Num)/float64(g.Den) - p
-			ss += x * x
+			ss += float64(x * x) // rounded: no fused multiply-add (stats.go)
 		}
 	}
 	return (ss / float64(k-1)) / (p * (1 - p) * invN / float64(k))

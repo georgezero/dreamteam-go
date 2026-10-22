@@ -10,7 +10,7 @@ AI-agent benchmark.
 Status: **V0.2** (`0.2.0`, practice design) is the current release:
 staffing, rosters, reading allocation and teleradiology actions, a
 sustainable scenario and the T90 evaluation of your plan. `main` is V0.3
-development (`0.3.0-dev.1`: the agent interface, `docs/AGENT_PROTOCOL.md`;
+development (`0.3.0-dev.2`: the agent interface, `docs/AGENT_PROTOCOL.md`;
 not yet released). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
@@ -192,13 +192,22 @@ Every run is reproducible from its scenario, seed and actions.
 ### Agent interface (V0.3 development)
 
 `dreamteam agent --stdio` runs a session for an external program: one
-JSON request per line on stdin, one JSON response per line on stdout
-(observe, the action catalog with schemas and targets, validate,
-preview, atomic apply, advance, save, digests). It is a thin client of
-the same session API, deterministic, and shows only what a player sees.
-`docs/AGENT_PROTOCOL.md` is the specification.
+JSON request per line on stdin, one JSON response per line on stdout.
+The operations:
+* observe, in full or as sections or a compact projection;
+* the action catalog, with schemas and targets;
+* validate, preview and atomic apply;
+* advance, save and digests;
+* the T90 evaluation, on request.
+
+It is a thin client of the same session API, deterministic, and shows
+only what a player sees. `docs/AGENT_PROTOCOL.md` is the specification;
+`clients/python/` is a reference client (standard library only).
 
     echo '{"id":1,"op":"hello"}' | dreamteam agent --stdio -scenario sustainable -seed 7
+    printf '%s\n' '{"id":1,"op":"observe","args":{"sections":["worklist","alerts"],"compact":true}}' \
+      | dreamteam agent --stdio -scenario sustainable -seed 7
+    python3 clients/python/example_session.py --binary ./dreamteam --days 5 --t90
     dreamteam agent -policy greedy -days 30 -scenario sustainable -transcript t.jsonl   # a scripted check
 
 An actions file is a list of timestamped batches:

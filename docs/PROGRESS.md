@@ -7,6 +7,51 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.3b — external agent usability (0.3.0-dev.2)
+
+The second V0.3 slice, on the owner's decision after V0.3a: the protocol
+made practical for agents outside the process. Not released.
+* **`t90`:** the T90 evaluation of the session as it stands, by the
+  policy in force (session.T90), the same as `dreamteam t90`. It is only
+  ever explicit (never in `observe`) and read-only: no digest changes
+  and no randomness is drawn. Stable refusals for unsupported scenarios,
+  earlier action rules, not started, sealed seeds.
+* **Observation projections:** `observe` takes `sections` and `compact`,
+  and the new `sections` op lists what can be selected. A projection is
+  cut from the full observation's own JSON (keys left out, order kept),
+  so it can show nothing new. `compact` leaves out four declared record
+  listings and counts them (≈116 KB → ≈29 KB). Without options, observe
+  is byte-for-byte as before.
+* **The reference Python client** (`clients/python/`, standard library
+  only): a complete session through a real subprocess, checked by
+  `dreamteam verify` and `dreamteam t90`; run by the Go suite and in CI,
+  where its transcript is compared across platforms.
+* **Cross-platform statistics.** T90 reports differed between arm64 and
+  amd64 in the last digit of some reported statistics (design effects,
+  Wilson bounds): arm64 fuses multiply-add, amd64 does not. The
+  evaluation now rounds every product before a sum (`float64(x*y)`, as
+  the Go spec provides). amd64's values are unchanged; arm64's now equal
+  them, so arm64 T90 output differs in those digits from V0.2.0's. No
+  status, verdict or rule changed.
+* **Compatibility:** the V0.3a transcript replays byte for byte except
+  hello's engine and ops. Registers 0.3.0-dev.1 for replay
+  (`mini-seed52-v031`).
+* **CI had been failing since V0.2 Step 0C, on two defects of its own,
+  found here and fixed:**
+  * The golden step compared without the migration manifest that the
+    documented check uses (`testdata/golden/README.md`), so the
+    deliberate state-schema change of V0.2 Slice 1 read as a mismatch
+    on arm64 and macOS. It now passes `-golden-migrations`.
+  * `TestV4Neutrality` pinned an arm64 digest that never held on amd64.
+    It now pins one digest per processor family. The remaining
+    difference is the multi-seed joint gate's exact bound, through the
+    Go math library, in the last digit; every status is the same.
+  
+  The local gates (the full suite on arm64, race on amd64, goldens with
+  the manifest, replays) had passed throughout.
+
+---
+
 ## V0.3a — the deterministic agent interface (0.3.0-dev.1)
 
 The first V0.3 slice: `dreamteam agent --stdio`, a JSON protocol over

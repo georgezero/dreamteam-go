@@ -5,7 +5,8 @@ DreamTeam practice. It is a thin layer over the session API, the same
 API the terminal game and the headless runs use. It adds no simulation
 behaviour and shows an agent only what the game shows a player.
 
-Status: **development (0.3.0-dev.1)**, not yet released.
+Status: **development (0.3.0-dev.2: V0.3a, and V0.3b's `t90`, `sections`
+and observation projections)**, not yet released.
 
 ## 1. Transport
 
@@ -69,7 +70,8 @@ Response:
 | Op | Args | Result | Changes the session |
 |---|---|---|---|
 | `hello` | — | protocol, engine version, scenario (`ref`, `id`, `name`, `fingerprint`), seed, the ops, the clock | no |
-| `observe` | `recentLog` (0–2000, default 20) | `observation`: the game's observation (`dreamteam.observation/v1`): practice, rooms, staff, desk, demand, flow, worklist, finance, teleradiology, today's metrics, alerts, policies, actions, extensions, the recent log | no |
+| `observe` | `recentLog` (0–2000, default 20); optional `sections` (names, §3.1) and `compact` (true) | `observation`: the game's observation (`dreamteam.observation/v1`): practice, rooms, staff, desk, demand, flow, worklist, finance, teleradiology, today's metrics, alerts, policies, actions, extensions, the recent log. With `sections` or `compact`: a projection of it (§3.1) | no |
+| `sections` | — | the observation's sections (name, type, fields, whether always included, what compact leaves out), the header, and the compact omissions | no |
 | `actions` | — | the action catalog: batch rules, and for each action type its JSON Schema, constraints and current targets (§4) | no |
 | `validate` | `actions`: a batch | `valid`, and each action's result (accepted, unchanged or refused with the simulator's code and message) | no |
 | `preview` | `actions`: a batch of V0.2 staffing actions | `preview`: the session's staffing preview: each result, hires, terminations, roster and allocation changes, teleradiology, slots opened and closed, displaced bookings, guaranteed and forecast costs | no |
@@ -77,6 +79,7 @@ Response:
 | `advance` | exactly one of `minutes` (1–527,040, optional `stopOnAlert`), `to` (a later practice-local `YYYY-MM-DDTHH:MM:SS`, within 366 days), `next` (`"visible"` or `"end_of_day"`) | `reason` (`reached`, `alert`, `visible`, `horizon`) and the clock | yes: time only |
 | `save` | `path` | `path`, the number of decision batches recorded, the clock | writes the session file |
 | `digests` | — | the clock | no |
+| `t90` | — | the T90 evaluation of the session as it stands (§3.2): `scenario` (`ref`, `id`, `fingerprint`), `seed`, `evaluation` | no |
 
 **`advance`** uses the session's own semantics:
 
@@ -86,6 +89,69 @@ Response:
 * `next: "visible"`: run to the next observable log entry, searching up
   to 7 days (`horizon` if none).
 * `next: "end_of_day"`: finish today's operations.
+
+### 3.1 Observation projections
+
+Without `sections` or `compact`, `observe` returns the full observation,
+exactly as before. With either, it returns a projection of that same
+observation. It is cut from the full observation's own JSON, so it can
+show nothing the full observation does not, and every value it shows is
+the full observation's (the same bytes, in the same order):
+
+```json
+{"id":1,"op":"observe","args":{"sections":["worklist","alerts","staff"],"compact":true}}
+→ {"observation":{"schema":…,"time":…,"day":…,"weekday":…,"date":…,"clock":…,"staff":[…],"worklist":{…},"alerts":{…}},
+   "sections":["schema","time","day","weekday","date","clock","staff","worklist","alerts"],"compact":true,
+   "omitted":{"alerts.resolved":20,"worklist.recent":50}}
+```
+
+* **`sections`:** the top-level keys of the observation, as `sections`
+  lists them: `practice`, `rooms`, `staff`, `desk`, `demand`, `flow`,
+  `worklist`, `finance`, `teleradiology`, `today`, `alerts`, `policies`,
+  `actions`, `extensions`, `logTotal`, `recentLog`, and the header. The
+  header (`schema`, `time`, `day`, `weekday`, `date`, `clock`) is always
+  included. Each section's fields are those of its type in
+  `internal/api` (`sections` lists them). An unknown name is
+  `unknown_section`, a repeated one `invalid_args`; neither changes
+  anything.
+* **`compact`:** leaves out four record listings, which are history, not
+  current state, and reports how many entries each had in `omitted`:
+  * `finance.claims.openClaims`: the open claims one by one (the counts
+    and aging stay);
+  * `finance.journal`: the latest journal entries (totals and balances
+    stay);
+  * `worklist.recent`: the latest finalized reports (the unread and
+    reading items, with urgent and overdue flags, stay);
+  * `alerts.resolved`: the resolved alerts (the active ones stay).
+  
+  Everything else stays, including every count, rate, aggregate, active
+  alert and unread study. On the sustainable scenario at day 22 the full
+  observation is ≈116 KB and the compact one ≈29 KB.
+
+### 3.2 The T90 evaluation
+
+`t90` evaluates the session's plan by the evaluation policy in force
+(`v0.2-eval-4`), exactly as `dreamteam t90` does for the saved session:
+
+* **What is compared:** the decisions before day 90, against no action
+  on the same seed.
+* **What it returns:** the metric vector, every service gate (pass, fail
+  or insufficient), the plan gates and the verdict, under `evaluation`
+  (the same object as `dreamteam t90 -format json`).
+* **Projection:** `evaluation.projected` is true while the session has
+  not reached day 90. Days not yet played are then your plan as it
+  stands, with no further decision. After day 90 both plans run with no
+  decision (the evaluation tail).
+* **Explicit only.** It is never part of `observe`; an agent gets
+  evaluation results only by asking. It runs two fresh ~200-day
+  simulations (about 40 s on a Raspberry Pi), so it is not for every
+  step.
+* **Read-only.** It changes nothing, not a digest, and draws nothing
+  from the session: the session goes on exactly as one never evaluated.
+* **Where it is defined:** for the `sustainable` scenario only. Sessions
+  saved by V0.2.0 are evaluated with their earlier decisions. A
+  refusal is a stable code: `t90_unsupported_scenario`,
+  `t90_earlier_rules`, `t90_not_started` or `t90_sealed_seed`.
 
 **`apply` is atomic.** The batch is validated first and applied only if
 every action is valid. A refused batch changes nothing: not the state,
@@ -144,6 +210,11 @@ result with the simulator's code (for example `notice_too_short`,
 | `save_failed` | the file could not be written |
 | `unsavable` | the session has no scenario file to record |
 | `apply_diverged` | a validated batch was refused on apply (never expected; it would be a defect) |
+| `unknown_section` | `observe` named a section that does not exist |
+| `t90_unsupported_scenario` | `t90` on a scenario the evaluation policy is not defined for (it is defined for `sustainable`) |
+| `t90_earlier_rules` | `t90` on a session continuing one recorded under earlier action rules |
+| `t90_not_started` | `t90` before play has started |
+| `t90_sealed_seed` | `t90` on a seed of the sealed evaluation holdout |
 
 A failed request changes nothing, and the session continues.
 
@@ -214,8 +285,43 @@ dreamteam agent -policy greedy -days 30 -scenario sustainable -seed 909 \
 Its SHA-256 is `5bf803a2ca8005f929b7ddeaa18abaa5de8a7582ff0a70f683baf13e124e451b`,
 and the session it saves verifies with run digest `da6a61c3…0d`.
 
-## 9. Not in V0.3a
+## 9. The reference Python client
+
+`clients/python/` is a standard-library client: `dreamteam_agent.py`
+(the `AgentClient` class: launches `dreamteam agent --stdio`, sends
+requests with stable ids, checks every response's protocol and id, raises
+`ProtocolError` with the stable code) and `example_session.py`, a complete
+session:
+
+```
+go build -o dreamteam ./cmd/dreamteam
+python3 clients/python/example_session.py --binary ./dreamteam --days 5 --t90 --transcript t.jsonl
+```
+
+It observes, validates, previews, applies, advances, saves and requests
+T90, then checks the save with `dreamteam verify` and `dreamteam t90`.
+Its transcript is byte-identical run to run and across linux/arm64 and
+linux/amd64 (CI compares it on linux/amd64, linux/arm64 and darwin/arm64).
+
+## 10. Compatibility and determinism
+
+* **Unchanged requests, unchanged responses.** A V0.3a request gets the
+  same response, byte for byte, except `hello`, whose `engine` and `ops`
+  name the build (`TestLegacyTranscript` replays the committed V0.3a
+  transcript).
+* **Platforms.** The evaluation's reported statistics (design effects,
+  interval bounds, dispersion) round every product before a sum, so they
+  agree across processors. Before 0.3.0-dev.2 they could differ in the
+  last digit or two between arm64 and amd64, with every status and
+  verdict the same. A `t90` response and the reference client's
+  transcript are byte-identical on linux/arm64 and linux/amd64, and CI
+  compares the transcript on darwin/arm64 too. One known exception
+  remains outside the protocol's T90: a multi-seed evaluation's exact
+  Clopper–Pearson bound on the joint service gate goes through the Go
+  math library and can differ in its last digit between processor
+  families.
+
+## 11. Not in V0.3
 
 No HTTP or WebSocket transport, no model or LLM integration, no benchmark
-scoring, no new actions. The T90 evaluation is not an operation yet
-(`dreamteam t90` evaluates a saved session).
+scoring or leaderboard, no new actions.

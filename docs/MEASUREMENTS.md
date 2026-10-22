@@ -746,3 +746,19 @@ tracked by the containment test, before the run above.
 | After the continued-session T90 fix: every package using the session, uncached | `go test -count=1 -p 1 ./cmd/... ./internal/{agent,session,sim,tui,scenario}/...` | 1,403 s; every package passes |
 | Race detector (amd64, horo) | `go test -race -count=1` on every shipped package, then the changed ones | pass, no race (1,141 s; 733 s) |
 | Session fixtures and builds | `dreamteam verify` on every fixture; `CGO_ENABLED=0 go build` for linux and darwin, arm64 and amd64 | 29 of 29 verified; 4 of 4 build; 7 golden references identical |
+
+## 2026-10-22 — V0.3b external agent usability (this Pi and horo)
+
+| Measurement | Command | Result |
+|---|---|---|
+| Observation sizes, sustainable seed 905, day 22 | `observe` / `{"compact":true}` / `{"sections":[worklist,alerts,staff]}` / both | 115,573 / 28,864 / 20,156 / 4,927 bytes |
+| `t90` through the protocol | `{"op":"t90"}` | ≈38 s (two ~200-day simulations) |
+| T90 across processors (3 sessions) | `dreamteam t90 -format json` on linux/arm64 and linux/amd64 | before: 101 floats differed in the last digit (≤ 3.8e-16 relative), no status; after: byte-identical |
+| Python client, 5 days with T90 (twice on arm64, once on amd64) | `python3 clients/python/example_session.py --days 5 --t90` | 79 s; transcript `3b8755a0…bbd` identical every time, Python 3.11 and 3.13 |
+| V0.3b agent tests | `go test ./internal/agent -run 'Legacy|Projections|T90Op'` | pass, 176 s |
+| Python client from the Go suite | `go test ./cmd/dreamteam -run PythonClient` | pass, 159 s |
+| v0.2-eval-4 neutrality digest by architecture | `go test ./internal/eval -run TestV4Neutrality` on linux/arm64 and linux/amd64 | amd64 `8c1b0076…` (unchanged since dev.16; the old arm64 pin had never held there); arm64 `c492dbc8…` after rounding; only the joint gate's Clopper–Pearson bound still differs (last digit) |
+| Full uncached suite, linux/arm64 (V0.3b tree) | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 4,385 s; every package passes |
+| Full suite and vet (all build tags), linux/amd64 (horo) | `go vet ./...` (default, calibration, acceptance); `go test ./... -count=1` | 527 s; every package passes, vet clean |
+| Race detector, every shipped package (amd64) | `go test -race -count=1 …` | pass, no race, 1,173 s |
+| Session fixtures, golden references (the CI step's form), builds | `dreamteam verify`; `run … -golden-migrations MIGRATIONS.json -golden …`; `CGO_ENABLED=0 go build` | 30 of 30; 7 of 7 identical; 4 of 4 |

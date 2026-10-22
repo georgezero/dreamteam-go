@@ -428,3 +428,9 @@ with `-scenario sustainable -seed 906 -days 40 -actions
 testdata/sessions/sustainable-seed906-v020.actions.json`: a sustainable
 session saved by the release, which this build continues and evaluates
 (`internal/session/t90_test.go`, `TestT90EarlierEngineSession`).
+
+The V0.3a file was made from 9bc3e34 (0.3.0-dev.1) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v031.actions.json`
+(the same batches as the 5C.4l file's). 0.3.0-dev.2 replays it in batch
+mode `v0.3_dev1` with every digest verified
+(`internal/session/v031_test.go`).

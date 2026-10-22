@@ -128,6 +128,7 @@ const (
 	batchModeDev26      = "v0.2_dev26"
 	batchModeDev27      = "v0.2_dev27"
 	batchModeV020       = "v0.2.0"
+	batchModeV031       = "v0.3_dev1"
 	batchModeCurrent    = ""
 )
 
@@ -452,14 +453,14 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27 || mode == batchModeV020
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27 || mode == batchModeV020 || mode == batchModeV031
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
 func dev5Rules(mode string) bool {
-	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27 && mode != batchModeV020
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27 && mode != batchModeV020 && mode != batchModeV031
 }
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1

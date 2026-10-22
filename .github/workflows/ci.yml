@@ -36,8 +36,10 @@ jobs:
       - name: Test
         run: go test ./... -count=1 -timeout 30m
       - name: Golden references
-        # Outcomes and digests against the pinned references (the engine
-        # name may lag a version bump; the comparison reports it).
+        # Outcomes and digests against the pinned references, through the
+        # documented migration manifest (testdata/golden/README.md): the
+        # state digest's schema changed in V0.2 Slice 1, and the manifest
+        # records it. The engine name may lag a version bump.
         shell: bash
         run: |
           set -euo pipefail
@@ -46,13 +48,25 @@ jobs:
           cd testdata/golden
           check() {
             f=$1; shift
-            ../../dt run "$@" -verify-replay -format json -allow-engine-mismatch -golden "$f" > "../../out/$f"
+            ../../dt run "$@" -verify-replay -format json -allow-engine-mismatch -golden-migrations MIGRATIONS.json -golden "$f" > "../../out/$f"
             echo "$f: outcomes identical"
           }
           check established-seed1-7d.json -scenario established -seed 1 -days 7
           check established-seed1-90d.json -scenario established -seed 1 -days 90
           check mini-seed1-7d.json -scenario mini -seed 1 -days 7
           check established-seed1-7d-actions.json -scenario established -seed 1 -days 7 -actions established-7d.actions.json
+      - name: Python agent client
+        # The reference client runs a session through dreamteam agent
+        # --stdio as a subprocess (protocol, apply, advance, save, t90),
+        # then checks the save with dreamteam verify and dreamteam t90.
+        # Its transcript is compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 --version
+          cd out
+          python3 -I ../clients/python/example_session.py --binary ../dt --days 5 --t90 --transcript agent-python.jsonl
+          rm -f python-client.session.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
@@ -70,7 +84,7 @@ jobs:
         run: |
           set -eu
           ls results
-          for f in results/results-ubuntu-latest/*.json; do
+          for f in results/results-ubuntu-latest/*; do
             n=$(basename "$f")
             for os in ubuntu-24.04-arm macos-latest; do
               cmp "$f" "results/results-$os/$n"
