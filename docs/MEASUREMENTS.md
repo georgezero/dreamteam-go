@@ -733,3 +733,16 @@ The first release-tree suite run failed `TestHoldoutContainment`: the
 T90 view's holdout guard regenerated seeds outside the reviewed sites.
 It was replaced by `eval.GuardManifest` (an error, never the seeds),
 tracked by the containment test, before the run above.
+
+## 2026-10-22 — V0.3a agent interface (this Pi)
+
+| Measurement | Command | Result |
+|---|---|---|
+| 30 days through the protocol, no-op policy (sustainable, seed 909) | `dreamteam agent -policy noop -days 30 …` | 21 s, 65 MB; 31 requests and the save |
+| 30 days, greedy policy (observes daily) | `dreamteam agent -policy greedy -days 30 …` | 22 s, 69 MB; 72 requests, 4 batches applied; transcript 3.7 MB, reproduced byte for byte |
+| One observation response | `observe` | ≈112 KB at day 2 (the game's full observation) |
+| Agent tests | `go test ./internal/agent` | pass, 123 s |
+| Full uncached suite (V0.3a tree) | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,997 s (eval 2,641 s, sim 629 s, session 331 s, cmd 165 s, agent 120 s, tui 76 s); every package passes; vet and gofmt clean |
+| After the continued-session T90 fix: every package using the session, uncached | `go test -count=1 -p 1 ./cmd/... ./internal/{agent,session,sim,tui,scenario}/...` | 1,403 s; every package passes |
+| Race detector (amd64, horo) | `go test -race -count=1` on every shipped package, then the changed ones | pass, no race (1,141 s; 733 s) |
+| Session fixtures and builds | `dreamteam verify` on every fixture; `CGO_ENABLED=0 go build` for linux and darwin, arm64 and amd64 | 29 of 29 verified; 4 of 4 build; 7 golden references identical |

@@ -30,6 +30,9 @@ var (
 	ErrT90Scenario = errors.New("the T90 evaluation is defined for the sustainable scenario only")
 	// ErrT90Started: nothing to evaluate before the takeover.
 	ErrT90Started = errors.New("the T90 evaluation needs play to have started")
+	// ErrT90Rules: the session continues one recorded by a build whose
+	// decisions replay under other action rules than this build's.
+	ErrT90Rules = errors.New("the T90 evaluation needs decisions under this build's action rules; this session continues one recorded under earlier rules")
 )
 
 // T90 is the practice's management evaluation under the evaluation policy
@@ -104,15 +107,17 @@ func (s *Session) T90Job() (*T90Job, error) {
 	if s.src == nil {
 		return nil, ErrUnsavable
 	}
-	if s.legacy != nil {
-		return nil, ErrT90Scenario // v1 sessions are on the V0.1 scenarios
-	}
 	p, digest, err := t90Policy()
 	if err != nil {
 		return nil, err
 	}
 	if s.fp != p.Scenario.Fingerprint {
 		return nil, ErrT90Scenario
+	}
+	// A continued session's earlier decisions are part of the plan: they
+	// are re-applied with this build's rules, which must be theirs.
+	if s.legacy != nil && !currentRules(s.legacy.BatchMode) {
+		return nil, ErrT90Rules
 	}
 	// A holdout seed is evaluated only by the canonical runner.
 	if err := eval.GuardManifest(evaluation.Holdout, []int64{s.seed}); err != nil {
@@ -126,13 +131,13 @@ func (s *Session) T90Job() (*T90Job, error) {
 	if err != nil {
 		return nil, err
 	}
-	rec, err := s.Record()
+	all, err := s.batches(false)
 	if err != nil {
 		return nil, err
 	}
 	j := &T90Job{cfg: cfg, fp: s.fp, seed: s.seed, cal: s.Calendar(), start: start, now: s.Now(),
 		t90: start.Add(simtime.Duration(p.Horizons.PrimaryDays) * simtime.Day), p: p, digest: digest}
-	for _, b := range rec.Batches {
+	for _, b := range all {
 		if simtime.Time(b.AtSec) < j.t90 {
 			j.plan = append(j.plan, b)
 		} else {

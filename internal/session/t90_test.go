@@ -1,6 +1,7 @@
 package session
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -181,5 +182,49 @@ func TestSustainableDeterministic(t *testing.T) {
 	s, rep, err := Replay(r, ReplayOptions{})
 	if err != nil || !rep.OK || s.Digests() != a.Digests() {
 		t.Fatalf("replay: %v %s", err, repString(rep))
+	}
+}
+
+// A sustainable session saved by the V0.2.0 release, continued by this
+// build, is evaluated with its earlier decisions: the same evaluation as
+// the same plan played here.
+func TestT90EarlierEngineSession(t *testing.T) {
+	if testing.Short() {
+		t.Skip("runs four 200-day worlds")
+	}
+	const fixture = "../../testdata/sessions/sustainable-seed906-v020.session.json"
+	l, rep, err := Load(fixture, ReplayOptions{})
+	if err != nil || !rep.OK || l.legacy == nil || l.legacy.Engine != "0.2.0" {
+		t.Fatalf("%v %s", err, repString(rep))
+	}
+	got, err := l.T90()
+	if err != nil {
+		t.Fatal(err)
+	}
+	n, err := Open("sustainable", 906)
+	if err != nil {
+		t.Fatal(err)
+	}
+	n.Apply(api.Action{Type: api.ActSetReadingAllocation, Op: "set", Employee: "E07", Effective: "2026-10-27", SiteAllocationBP: 6250},
+		api.Action{Type: api.ActSetReadingAllocation, Op: "set", Employee: "E08", Effective: "2026-10-27", SiteAllocationBP: 5250})
+	n.AdvanceTo(n.Now().Add(40 * simtime.Day))
+	want, err := n.T90()
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, _ := json.Marshal(got)
+	b, _ := json.Marshal(want)
+	if string(a) != string(b) || got.Decisions != 1 {
+		t.Fatalf("the continued session's evaluation differs (%d decisions)", got.Decisions)
+	}
+}
+
+// Only prefixes recorded under this build's action rules are re-applied.
+func TestT90PrefixRules(t *testing.T) {
+	for mode, want := range map[string]bool{batchModeLegacy: false, batchModeSlice2: false, batchModeSlice3: false, batchModeSlice4: false,
+		batchModeDev6: false, batchModeDev7: false, batchModeDev8: true, batchModeDev26: true, batchModeV020: true} {
+		if currentRules(mode) != want {
+			t.Errorf("%s: %v", mode, !want)
+		}
 	}
 }

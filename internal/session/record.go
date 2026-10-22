@@ -127,6 +127,7 @@ const (
 	batchModeDev25      = "v0.2_dev25"
 	batchModeDev26      = "v0.2_dev26"
 	batchModeDev27      = "v0.2_dev27"
+	batchModeV020       = "v0.2.0"
 	batchModeCurrent    = ""
 )
 
@@ -220,23 +221,46 @@ func (s *Session) Record() (*Record, error) {
 		StartSec:  int64(s.w.StartTime()), Start: cal.ISO(s.w.StartTime()),
 		UntilSec: int64(s.Now()), Until: cal.ISO(s.Now()), Legacy: s.legacy,
 		Digests: s.Digests(), Summary: s.summary()}
+	if r.Batches, err = s.batches(true); err != nil {
+		return nil, err
+	}
+	r.Checksum = r.checksum()
+	return r, nil
+}
+
+// batches is every decision batch played, with its results, in order;
+// withoutPrefix leaves out those of a continued earlier session's prefix
+// (kept as its own record).
+func (s *Session) batches(withoutPrefix bool) ([]Batch, error) {
+	cal := s.Calendar()
+	var out []Batch
 	for _, res := range s.w.ActionLog() {
-		if s.legacy != nil && res.Batch <= s.legacy.LastBatch {
-			continue // in the v1 prefix
+		if withoutPrefix && s.legacy != nil && res.Batch <= s.legacy.LastBatch {
+			continue // in the prefix
 		}
-		if n := len(r.Batches); n == 0 || r.Batches[n-1].Batch != res.Batch {
+		if n := len(out); n == 0 || out[n-1].Batch != res.Batch {
 			at, err := cal.ParseISO(res.Time)
 			if err != nil {
 				return nil, err
 			}
-			r.Batches = append(r.Batches, Batch{Batch: res.Batch, AtSec: int64(at), Time: res.Time})
+			out = append(out, Batch{Batch: res.Batch, AtSec: int64(at), Time: res.Time})
 		}
-		b := &r.Batches[len(r.Batches)-1]
+		b := &out[len(out)-1]
 		b.Actions = append(b.Actions, res.Action)
 		b.Results = append(b.Results, res)
 	}
-	r.Checksum = r.checksum()
-	return r, nil
+	return out, nil
+}
+
+// currentRules reports whether a prefix's batches replay with this
+// build's action set and rules (applyBatches' default): every V0.2 build
+// from 0.2.0-dev.8 on, and the releases since.
+func currentRules(mode string) bool {
+	switch mode {
+	case batchModeLegacy, batchModeSlice2, batchModeSlice3, batchModeSlice4, batchModeDev6, batchModeDev7:
+		return false
+	}
+	return true
 }
 
 // checksum is the SHA-256 of the canonical JSON with Checksum empty.
@@ -428,14 +452,14 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27 || mode == batchModeV020
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
 func dev5Rules(mode string) bool {
-	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27 && mode != batchModeV020
 }
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1

@@ -40,6 +40,9 @@ func t90Cmd(args []string, stdout, stderr io.Writer) int {
 	case errors.Is(err, session.ErrT90Scenario):
 		fmt.Fprintln(stderr, "dreamteam:", err, "(dreamteam -scenario sustainable)")
 		return exitIncompatible
+	case errors.Is(err, session.ErrT90Rules):
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		return exitIncompatible
 	case errors.Is(err, eval.ErrSealed), errors.Is(err, session.ErrT90Started):
 		fmt.Fprintln(stderr, "dreamteam:", err)
 		return exitInvalid

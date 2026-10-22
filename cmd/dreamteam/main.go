@@ -34,6 +34,8 @@ func main() {
 		os.Exit(replayCmd(args, os.Stdout, os.Stderr, true))
 	case "t90":
 		os.Exit(t90Cmd(args, os.Stdout, os.Stderr))
+	case "agent":
+		os.Exit(agentCmd(args, os.Stdin, os.Stdout, os.Stderr))
 	case "version":
 		fmt.Println("dreamteam", version.String())
 	case "help", "-h", "--help":
@@ -66,6 +68,13 @@ func usage() {
                                                    service gates and verdict of the evaluation
                                                    policy in force, against no action on the same
                                                    seed; days not yet played are projected
+  dreamteam agent --stdio [-scenario ID|FILE] [-seed N] [-load FILE]
+                                                   the agent protocol (docs/AGENT_PROTOCOL.md): one
+                                                   JSON request per line on stdin, one JSON response
+                                                   per line on stdout; diagnostics on stderr
+  dreamteam agent -policy noop|greedy [-days N] [-transcript FILE] [-save FILE] [...]
+                                                   a scripted policy through the same protocol (an
+                                                   interface check, not a strategy)
   OUTPUT (run, replay):
     -format text|json       text summary (default) or the canonical result JSON on stdout
                             (-summary is an alias)

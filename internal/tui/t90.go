@@ -104,6 +104,8 @@ func t90ErrText(err error) string {
 	switch {
 	case errors.Is(err, session.ErrT90Scenario):
 		return "Not available here: the evaluation policy is defined for the sustainable scenario (dreamteam -scenario sustainable)."
+	case errors.Is(err, session.ErrT90Rules):
+		return "Not available for this session: it continues one recorded under an earlier build's action rules."
 	case errors.Is(err, session.ErrT90Started):
 		return "Nothing to evaluate yet: start play (space) first."
 	case errors.Is(err, eval.ErrSealed):

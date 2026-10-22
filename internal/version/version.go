@@ -1,6 +1,7 @@
 // Package version identifies the running build. Number advances with each
 // roadmap step (0.1.0-dev.N while V0.1 step N is the latest, 0.2.0-dev.N for
-// V0.2 step N; a further .M marks a remediation pass on that step), so a
+// V0.2 step N, 0.3.0-dev.N for V0.3 step N; a further .M marks a
+// remediation pass on that step), so a
 // player can tell which step a binary contains. Releases drop the -dev
 // suffix.
 package version
@@ -8,7 +9,7 @@ package version
 import "runtime/debug"
 
 // Number is the release number.
-const Number = "0.2.0"
+const Number = "0.3.0-dev.1"
 
 // String returns the version with the source commit when the binary was
 // built from a git checkout ("0.1.0-dev.8 (72b9c91)", "+dirty" when the

@@ -7,6 +7,46 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.3a — the deterministic agent interface (0.3.0-dev.1)
+
+The first V0.3 slice: `dreamteam agent --stdio`, a JSON protocol over
+the session API (`docs/AGENT_PROTOCOL.md`), on the owner's decision after
+the V0.2.0 release. Not released.
+* **Transport-independent.** `internal/agent.Handler.Handle` turns one
+  request into one response, as bytes; `ServeLines` carries them one per
+  line over stdin and stdout. Only responses go to stdout.
+* **Operations:** `hello`, `observe` (the game's observation), `actions`
+  (a JSON Schema, constraints and current targets for every action type,
+  read from the offer table and the session's views), `validate`,
+  `preview` (the staffing preview), `apply` (atomic: a batch is applied
+  only if every action is valid, so a refused batch changes no digest),
+  `advance` (minutes, to a time, to the next visible event, to the end
+  of the day: the session's own semantics), `save`, `digests`.
+* **Stable error codes**; invalid JSON, unknown ops and bad arguments
+  never stop the process or change the session; ids are echoed.
+* **A scripted runner** (`dreamteam agent -policy noop|greedy`) drives
+  the same protocol in process, from protocol JSON only.
+* **No simulation change.** Registers 0.2.0 (the release) for replay
+  (`mini-seed52-v020`).
+* **A V0.2 defect fixed: the T90 evaluation of a continued session.**
+  V0.2's T90 view refused any session continued from an earlier build
+  ("defined for the sustainable scenario only"), which under this build
+  would have meant every sustainable session saved by the V0.2.0
+  release. A continued session is now evaluated with its earlier
+  decisions when they replay under this build's action rules (every
+  build from 0.2.0-dev.8 on), and refused with an accurate message
+  otherwise. The evaluation of a V0.2.0-saved session equals that of the
+  same plan played here (`sustainable-seed906-v020`,
+  `TestT90EarlierEngineSession`).
+* **Tested:** 30-day noop and greedy sessions valid line by line,
+  byte-identical when repeated, saved and replayed; every action type
+  discovered and applied from the catalog's targets; invalid batches,
+  validate and preview leave every digest unchanged; the agent and the
+  session API reach the same states, the observation byte for byte;
+  stdout carries only responses, one per request, in order.
+
+---
+
 ## V0.2.0 — release
 
 The V0.2 practice-design release, on the owner's decision after the

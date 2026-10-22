@@ -9,8 +9,9 @@ AI-agent benchmark.
 
 Status: **V0.2** (`0.2.0`, practice design) is the current release:
 staffing, rosters, reading allocation and teleradiology actions, a
-sustainable scenario and the T90 evaluation of your plan. Release notes:
-`docs/RELEASE_NOTES.md`. Everything is synthetic:
+sustainable scenario and the T90 evaluation of your plan. `main` is V0.3
+development (`0.3.0-dev.1`: the agent interface, `docs/AGENT_PROTOCOL.md`;
+not yet released). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
@@ -188,6 +189,18 @@ Every run is reproducible from its scenario, seed and actions.
     dreamteam t90 run.session.json                     # the T90 evaluation (sustainable scenario)
     dreamteam t90 run.session.json -format json        # with the policy's full report
 
+### Agent interface (V0.3 development)
+
+`dreamteam agent --stdio` runs a session for an external program: one
+JSON request per line on stdin, one JSON response per line on stdout
+(observe, the action catalog with schemas and targets, validate,
+preview, atomic apply, advance, save, digests). It is a thin client of
+the same session API, deterministic, and shows only what a player sees.
+`docs/AGENT_PROTOCOL.md` is the specification.
+
+    echo '{"id":1,"op":"hello"}' | dreamteam agent --stdio -scenario sustainable -seed 7
+    dreamteam agent -policy greedy -days 30 -scenario sustainable -transcript t.jsonl   # a scripted check
+
 An actions file is a list of timestamped batches:
 
 ```json
@@ -275,6 +288,7 @@ of `session` and `api` only), `internal/api` (observations and actions),
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
+| `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3 development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
@@ -296,8 +310,8 @@ of `session` and `api` only), `internal/api` (observations and actions),
   reading allocation and teleradiology are covered by the suite and the
   golden references.
 * No operations-control actions yet (reassign, call in, send home,
-  templates, rescheduling, maintenance), disruptions, or an agent
-  interface: V0.3 and later (`docs/ROADMAP.md`).
+  templates, rescheduling, maintenance) or disruptions: V0.3 and later
+  (`docs/ROADMAP.md`). The agent interface is in development on `main`.
 * On a Raspberry Pi 4, `run -days 90` takes about 3.3–3.9 s (about 1.1 s
   on a Cortex-A76): the Pi 4's CPU has no SHA-256 instructions and every
   keyed draw is hashed. The 2 s target stays waived for the Pi 4 (V0.1's

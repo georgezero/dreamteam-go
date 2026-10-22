@@ -412,3 +412,19 @@ the 5C.4l file's).
 mode `v0.2_dev27` with every digest verified (`earlier_build_exact`). It
 continues with the file embedded as the new record's prefix
 (`internal/session/dev27_test.go`).
+
+The V0.2.0 file was made from the v0.2.0 tag (e7a4f9c) with `-scenario
+mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-v020.actions.json` (the same batches as the
+5C.4l file's).
+
+0.3.0-dev.1 has the same action set and rules, so the file replays in
+batch mode `v0.2.0` with every digest verified (`earlier_build_exact`).
+It continues with the file embedded as the new record's prefix
+(`internal/session/v020_test.go`).
+
+`sustainable-seed906-v020.session.json` was made by the v0.2.0 release
+with `-scenario sustainable -seed 906 -days 40 -actions
+testdata/sessions/sustainable-seed906-v020.actions.json`: a sustainable
+session saved by the release, which this build continues and evaluates
+(`internal/session/t90_test.go`, `TestT90EarlierEngineSession`).
