@@ -126,6 +126,14 @@ type Model struct {
 	sumOffset int64
 	day       api.DaySummary
 	eval      api.Evaluation
+	// The T90 view: the last evaluation (or why there is none), whether
+	// one is running, its line scroll, and the session's plan when it was
+	// taken (its time and action count, to mark a result stale).
+	t90       *session.T90
+	t90Err    error
+	t90Busy   bool
+	t90Scroll int
+	t90Taken  t90Point
 	// Actions screen: cursor row, minutes per employee, the policy
 	// choices, and the last submission's result.
 	actSel           int
@@ -288,6 +296,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 		return m, tick()
+	case t90Msg:
+		m.t90, m.t90Err, m.t90Busy, m.t90Scroll = msg.res, msg.err, false, 0
+		return m, nil
 	case tea.KeyPressMsg:
 		cmd := m.key(msg.String())
 		if m.running && !m.ticking && cmd == nil {
@@ -314,6 +325,11 @@ func (m *Model) key(k string) tea.Cmd {
 	if m.sessionKey(k) {
 		m.refresh()
 		return nil
+	}
+	if m.screen == screenSummary && m.sumView == sumT90 {
+		if cmd, ok := m.t90Key(k); ok {
+			return cmd
+		}
 	}
 	if m.screenKey(k) {
 		m.refresh()

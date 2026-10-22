@@ -9,12 +9,13 @@ import (
 
 // The end-of-day summary (TUI_DESIGN §4.10): `e` runs today's operations to
 // their close and shows the day; ←→ page through earlier days; tab shows
-// the evaluation window since the takeover.
+// the evaluation window since the takeover, then the T90 evaluation.
 
 // sumViews are the summary screen's views.
 const (
 	sumDay = iota
 	sumWindow
+	sumT90
 	numSumViews
 )
 
@@ -73,8 +74,11 @@ func staffUtil(ops api.PeriodMetrics) (tech, read string) {
 // summaryBody renders the summary screen. Below 110 columns every line
 // uses its short form, so the day fits 80×24 without truncation.
 func (m *Model) summaryBody(w, n int) []string {
-	if m.sumView == sumWindow {
+	switch m.sumView {
+	case sumWindow:
 		return m.windowBody(w, n)
+	case sumT90:
+		return m.t90Body(w, n)
 	}
 	d := m.day
 	ops := d.Ops
@@ -292,7 +296,7 @@ func (m *Model) windowBody(w, n int) []string {
 			rp.BacklogStart, rp.BacklogEnd)))
 	add("Overtime", fmt.Sprintf("%s (%s) · alerts raised %d", dur(ops.Workforce.OvertimeSec), usd(ops.Workforce.OvertimeCostCents),
 		ops.Alerts.Warn+ops.Alerts.Alert))
-	lines = append(lines, dimStyle.Render(" Measurements only; scoring comes later · baseline "+b.Digest[:12]))
+	lines = append(lines, dimStyle.Render(" Measurements as played · tab: T90 evaluation · baseline "+b.Digest[:12]))
 	if len(lines) > n {
 		lines = lines[:n]
 	}

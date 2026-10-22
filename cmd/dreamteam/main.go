@@ -32,6 +32,8 @@ func main() {
 		os.Exit(replayCmd(args, os.Stdout, os.Stderr, false))
 	case "verify":
 		os.Exit(replayCmd(args, os.Stdout, os.Stderr, true))
+	case "t90":
+		os.Exit(t90Cmd(args, os.Stdout, os.Stderr))
 	case "version":
 		fmt.Println("dreamteam", version.String())
 	case "help", "-h", "--help":
@@ -59,6 +61,11 @@ func usage() {
                                                    rebuild a saved session from its scenario,
                                                    seed and actions; report every mismatch
   dreamteam verify FILE [-allow-engine-mismatch]   the same, quietly: "ok <run digest>"
+  dreamteam t90 FILE [-format text|json]         the T90 evaluation of a saved session's plan
+                                                   (the sustainable scenario): the metric vector,
+                                                   service gates and verdict of the evaluation
+                                                   policy in force, against no action on the same
+                                                   seed; days not yet played are projected
   OUTPUT (run, replay):
     -format text|json       text summary (default) or the canonical result JSON on stdout
                             (-summary is an alias)

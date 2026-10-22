@@ -216,6 +216,7 @@ var earlierV2Engines = map[string]string{
 	"0.2.0-dev.23": batchModeDev23,  // V0.2 Slice 5C.4l (order provenance, inherited safety and reserved protocol closure): this build's action set and rules
 	"0.2.0-dev.24": batchModeDev24,  // V0.2 Slice 5C.4n (final certification pipeline remediation): this build's action set and rules
 	"0.2.0-dev.25": batchModeDev25,  // V0.2 release-gate blocker fixes (audit 5C.4o O1, O2): this build's action set and rules
+	"0.2.0-dev.26": batchModeDev26,  // V0.2 deterministic adjudication output and the v5 protocol lock: this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

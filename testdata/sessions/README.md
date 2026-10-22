@@ -391,3 +391,14 @@ batch mode `v0.2_dev25` with every digest verified
 (`earlier_build_exact`). It continues with the file embedded as the new
 record's prefix (`internal/session/dev25_test.go`). Before 0.2.0-dev.25
 was registered this build refused it as an engine mismatch.
+
+The V0.2 completion file was made from 16e5751 (the V0.2 acceptance
+record, whose code is 0.2.0-dev.26's) with `-scenario mini -seed 52 -days
+45 -actions testdata/sessions/mini-seed52-dev26.actions.json` (the same
+batches as the 5C.4l file's).
+
+0.2.0-dev.27 has the same action set and rules, so the file replays in
+batch mode `v0.2_dev26` with every digest verified
+(`earlier_build_exact`). It continues with the file embedded as the new
+record's prefix (`internal/session/dev26_test.go`). Before 0.2.0-dev.26
+was registered this build refused it as an engine mismatch.

@@ -57,7 +57,10 @@ func (m *Model) render() string {
 		}
 	case screenSummary:
 		body = m.summaryBody(w, h-3)
-		hints = " ←→ day  t today  tab day/since takeover  enter dashboard  h history  f finance  space run  q quit"
+		hints = " ←→ day  t today  tab day/since takeover/T90  enter dashboard  h history  f finance  space run  q quit"
+		if m.sumView == sumT90 {
+			hints = " enter evaluate  ↑↓ scroll  tab day  d dash  space run  q quit"
+		}
 	case screenHistory:
 		body = m.historyBody(w, h-3)
 		hints = " ↑↓ scroll  b briefing  d dash  f finance  space run  q quit"

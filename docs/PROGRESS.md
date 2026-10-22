@@ -7,6 +7,40 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.2 completion — the T90 evaluation view and the bundled sustainable scenario (0.2.0-dev.27)
+
+The V0.2 acceptance pass (16e5751) found two promised deliverables not
+built; the owner decided to build both before the release.
+* **F2 — `sustainable` is a bundled scenario.** `scenarios/sustainable.json`
+  is the Step 0C shared-staffing control at ×1.30 demand (V0.2_DESIGN
+  §5.6, `W130-SHR-MRft`): the established practice with that experiment's
+  overlay, byte for byte. By the owner's decision its internal id stays
+  `established`, so it keeps the fingerprint the evaluation policy in
+  force pins (`e8718dbd…`); it is listed and chosen as `sustainable`.
+* **F1 — the T90 evaluation is visible.** `dreamteam t90 FILE` and the
+  summary screen's third view (`tab`) evaluate the player's plan under
+  v0.2-eval-4, embedded byte for byte: the plan's decisions before T90
+  and the no-action baseline on the same seed, both run with no further
+  decision to the observation end, judged by `eval.Evaluate`. They show
+  the metric vector with the baseline and the difference, every service
+  gate (pass, fail or insufficient, with its counts and limit), the plan
+  gates and the verdict, and say what is projected (days not yet played),
+  what is the fixed-policy tail and what is incomplete. No rule is added;
+  "scoring comes later" is gone. Defined for the sustainable scenario
+  only; holdout seeds are refused, as by every harness.
+* **No engine change:** the evaluation recorder moved unchanged from a
+  test file into `internal/sim`; every golden and replay fixture is
+  unchanged.
+* **Registers 0.2.0-dev.26** for replay (`mini-seed52-dev26`).
+* **Tested:** the game's report equals the canonical development
+  runner's byte for byte (`TestT90MatchesCanonicalRunner`); pass, fail and
+  insufficient gates each displayed as decided; projected vs measured;
+  the session unchanged by evaluating; the CLI, the session and the TUI
+  view identical; other scenarios refused; the sustainable scenario
+  deterministic and replayed, its fingerprint the policy's.
+
+---
+
 ## V0.2 v5 protocol lock (0.2.0-dev.26, lock commit; NOT RUN)
 
 The prospective confirmatory protocol for v0.2-eval-5 is locked, on the

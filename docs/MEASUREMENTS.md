@@ -708,3 +708,13 @@ stream was run.
 | Full uncached suite on the lock tree (the protocol's precondition), no `DT_*` set | `systemd-run --user --scope -p MemoryMax=6G … go test -count=1 -p 1 ./... -timeout 150m` | 3,478 s wall (eval 2,638 s, sim 563 s, session 200 s, cmd 46 s), peak 1.24 GB; every package passes; vet and gofmt clean |
 | The pinned test binary | `GOTOOLCHAIN=local CGO_ENABLED=0 go test -c -trimpath ./internal/eval` | SHA-256 `5edee74d…130d`, the same from the working tree and from a `git archive` elsewhere |
 | The pinned binary on the development family (W-HORIZON, 40 seeds) | `DT_MANIFEST_SEEDS=40 DT_MANIFEST_SCENARIOS=W-HORIZON … eval.test -test.run TestReservedManifestRun` | records `sourceSHA256` `5cd6a438…588b`, engine 0.2.0-dev.26 and the five pinned inputs; `development` / `not certified`; exit 1 on the 48 scenarios not run |
+
+## 2026-10-21 — V0.2 completion: T90 view and sustainable scenario (this Pi)
+
+| Measurement | Command | Result |
+|---|---|---|
+| One T90 evaluation (the plan and the baseline, two ~200-day worlds) | `dreamteam t90 FILE` | 38 s |
+| Canonical-runner equality | `go test ./internal/sim -run T90MatchesCanonicalRunner` | pass, 67 s |
+| Session T90 and sustainable tests | `go test ./internal/session -run 'T90|SustainableDeterministic'` | pass, 104 s |
+| CLI agreement | `go test ./cmd/dreamteam -run T90Command` | pass, 121 s |
+| TUI view | `go test ./internal/tui` | pass, 80 s |

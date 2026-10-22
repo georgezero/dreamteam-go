@@ -107,21 +107,26 @@ func LoadHoldout(path string) (*Holdout, []int64, error) {
 	if err != nil {
 		return nil, nil, err
 	}
+	return DecodeHoldout(path, raw)
+}
+
+// DecodeHoldout is LoadHoldout for a manifest's bytes; name labels errors.
+func DecodeHoldout(name string, raw []byte) (*Holdout, []int64, error) {
 	var h Holdout
 	dec := json.NewDecoder(bytes.NewReader(raw))
 	dec.DisallowUnknownFields()
 	if err := dec.Decode(&h); err != nil {
-		return nil, nil, fmt.Errorf("%s: %w", path, err)
+		return nil, nil, fmt.Errorf("%s: %w", name, err)
 	}
 	if h.Schema != HoldoutSchema {
-		return nil, nil, fmt.Errorf("%s: schema %q", path, h.Schema)
+		return nil, nil, fmt.Errorf("%s: schema %q", name, h.Schema)
 	}
 	seeds, err := HoldoutSeeds(h.Label, h.Count, h.Lo, h.Hi, h.Excluded)
 	if err != nil {
 		return nil, nil, err
 	}
 	if d := seedsDigest(seeds); d != h.SeedsSHA256 {
-		return nil, nil, fmt.Errorf("%s: seeds digest %s, manifest %s", path, d, h.SeedsSHA256)
+		return nil, nil, fmt.Errorf("%s: seeds digest %s, manifest %s", name, d, h.SeedsSHA256)
 	}
 	return &h, seeds, nil
 }

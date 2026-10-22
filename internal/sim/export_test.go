@@ -47,36 +47,6 @@ func (w *World) Orders() []OrderInfo {
 	return out
 }
 
-// ApptInfo is one appointment, active or cancelled.
-type ApptInfo struct {
-	ID, Order, Exam string
-	Room            int
-	Day             int64
-	Span            Span
-	Cancelled       bool
-	State           string
-	BookedAt        simtime.Time
-	EndedAt         simtime.Time
-	Visit           int
-	// V0.2: behavioral attempt, replacement placement, the no-show lead
-	// basis and the confirmation flag.
-	Attempt, Placement, NoShowLead int64
-	Confirmed                      bool
-}
-
-// Appointments lists every appointment ever booked.
-func (w *World) Appointments() []ApptInfo {
-	var out []ApptInfo
-	for i, a := range w.st.dem.appts {
-		s := w.st.dem.days[a.day].rooms[a.room][a.slot]
-		out = append(out, ApptInfo{ID: apptID(i), Order: orderID(a.order), Exam: w.st.cfg.Catalog[w.st.dem.orders[a.order].exam].Code,
-			Room: a.room, Day: a.day, Span: s.Span, Cancelled: a.state == apptCancelled,
-			State: apptStateNames[a.state], BookedAt: a.bookedAt, EndedAt: a.endedAt, Visit: a.visit,
-			Attempt: a.attempt, Placement: a.placement, NoShowLead: a.noShowLead, Confirmed: a.confirmed})
-	}
-	return out
-}
-
 // VisitInfo is one visit.
 type VisitInfo struct {
 	ID, Order  string
@@ -321,9 +291,6 @@ func (w *World) ForceDeniedClaims() { w.st.fin.forceDenied = func(int) bool { re
 
 // OverheadForTest exposes the overtime cost recorded so far (all days).
 func (w *World) OvertimeCostTotal() int64 { return w.st.dem.flowTotal.otCost }
-
-// Check runs the state invariants now.
-func (w *World) Check() error { return w.st.CheckInvariants() }
 
 // DrawChargeLag returns the latent charge lag (business days) for an origin key.
 func (w *World) DrawChargeLag(origin [4]int64) int64 {
