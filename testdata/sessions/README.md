@@ -439,3 +439,9 @@ The V0.3b file was made from 4207607 (0.3.0-dev.2) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v032.actions.json`
 (the same batches as the 5C.4l file's). 0.3.0 replays it in batch mode
 `v0.3_dev2` with every digest verified (`internal/session/v032_test.go`).
+
+The V0.3 release file was made by the v0.3.0 release (2075480) with
+`-scenario mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-v030.actions.json` (the same batches as the
+5C.4l file's). 0.4.0-dev.1 replays it in batch mode `v0.3.0` with every
+digest verified (`internal/session/v030_test.go`).

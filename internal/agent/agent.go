@@ -18,6 +18,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path/filepath"
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
@@ -96,6 +97,10 @@ type Handler struct {
 	// Ref is the scenario reference the session was opened with (a
 	// bundled ID or a file), reported by hello.
 	Ref string
+	// Dir, when set, is the directory a relative save path is resolved
+	// in (default: the process's working directory). The response
+	// reports the path as given.
+	Dir string
 }
 
 // New returns a handler for s.
@@ -569,7 +574,11 @@ func (h *Handler) save(raw json.RawMessage) (any, *Error) {
 	if a.Path == "" {
 		return nil, argErr("path", "path is required")
 	}
-	if err := h.s.Save(a.Path); err != nil {
+	path := a.Path
+	if h.Dir != "" && !filepath.IsAbs(path) {
+		path = filepath.Join(h.Dir, path)
+	}
+	if err := h.s.Save(path); err != nil {
 		if errors.Is(err, session.ErrUnsavable) {
 			return nil, &Error{Code: ErrUnsavable, Message: err.Error()}
 		}

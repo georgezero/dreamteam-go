@@ -17,6 +17,9 @@ patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
+In development (unreleased): **V0.4**, the agent evaluation harness
+(`dreamteam benchmark`, `docs/BENCHMARK.md`).
+
 ## Quick start
 
 Requires Go 1.26 or later. Runs on Linux and macOS (developed on a
@@ -267,6 +270,22 @@ verified prefix. Saves from every V0.2 development build (0.2.0-dev.2 to
 actions, and are kept the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
 · 3 replay failure · 4 golden mismatch · 5 incompatible.
 
+### Agent evaluation harness (V0.4a, in development)
+
+`dreamteam benchmark run CONFIG` plays every policy of a configuration on
+every scenario and seed through the agent protocol: the same initial state,
+horizon and decision cadence for each. A policy sees the session only
+through the protocol's read and check operations; the harness applies its
+batches, advances time, saves and asks for T90. Every saved session is
+replayed and measured with the simulator's own canonical result, and the
+results directory is hashed in a manifest. `dreamteam benchmark report`
+compares the runs (per run, per policy, paired with a baseline; no
+composite score), and `dreamteam benchmark verify` checks the hashes,
+replays the sessions and rebuilds the results. Built-in policies: `noop`,
+`greedy` (the V0.3 demonstration) and `rules` (a modest rule-based
+baseline). Specification: `docs/BENCHMARK.md`; the development run:
+`docs/benchmark/v04a-smoke/`.
+
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
 README for checking and (deliberately) regenerating them.
@@ -285,7 +304,8 @@ Layout: `internal/sim` (engine and domain), `internal/session` (sessions,
 records, replay, results), `internal/tui` (Bubble Tea terminal UI, a client
 of `session` and `api` only), `internal/api` (observations and actions),
 `internal/scenario`, `internal/rng` (keyed, platform-independent draws),
-`cmd/dreamteam`.
+`internal/agent` (the agent protocol), `internal/bench` (the evaluation
+harness), `cmd/dreamteam`.
 
 ## Documents
 
@@ -298,7 +318,8 @@ of `session` and `api` only), `internal/api` (observations and actions),
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
-| `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3 development) |
+| `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
+| `docs/BENCHMARK.md` | the agent evaluation harness (V0.4 development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |

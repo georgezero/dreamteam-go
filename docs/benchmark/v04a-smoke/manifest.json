@@ -1,0 +1,696 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v04a-smoke",
+ "engine": "0.4.0-dev.1",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "afac0d35fd9e91127f4ac5e2e12892b7fb7597af5d6afc0da92c8735eb6ac3d7"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "greedy",
+   "version": "1",
+   "description": "the V0.3 protocol demonstration (agent.Greedy): raises one radiologist's site reading allocation by 5 points whenever the oldest unread study is over a day old; not a strategy"
+  },
+  {
+   "id": "rules",
+   "version": "1",
+   "description": "a modest rule-based baseline: reading allocation follows the reading backlog with hysteresis, every change validated and previewed first"
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40401-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40401-noop/run.json",
+     "sha256": "92965eff560a72047d9590704c025f9cedcac81e87997457622bc7ec96379147"
+    },
+    {
+     "path": "runs/sustainable-s40401-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40401-noop/transcript.jsonl",
+     "sha256": "bf78704ad9043d0ac12522e4d643eefc7c19c8e52a88b96f7ef0ed7ebf1d1d30"
+    },
+    {
+     "path": "runs/sustainable-s40401-noop/session.json",
+     "sha256": "a1be19cce938125682605e41d78352aba5dcf5d9b61cf76fd53d1825c1df56c2"
+    },
+    {
+     "path": "runs/sustainable-s40401-noop/result.json",
+     "sha256": "f88ac73377851e0fd48f46c6b93fca5ca2f2ee0b8b4b2b309968101875170ed5"
+    },
+    {
+     "path": "runs/sustainable-s40401-noop/t90.json",
+     "sha256": "aa64c72fbc66655be504d8984d90171fcb545452e98f21dae5c85b81fabdf641"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40401-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40401-greedy/run.json",
+     "sha256": "abd688c6f9938c7c21d9835eadb30bfc961ed0f6fdfa7bc564885af6200f5a38"
+    },
+    {
+     "path": "runs/sustainable-s40401-greedy/decisions.json",
+     "sha256": "a72d05ade5f55510b2551349afb2547bd189bddac52e2cea6ef067e71767691c"
+    },
+    {
+     "path": "runs/sustainable-s40401-greedy/transcript.jsonl",
+     "sha256": "792f83ef105d738880d1e1849a798310b935160f5545517c3c542a64f44c0757"
+    },
+    {
+     "path": "runs/sustainable-s40401-greedy/session.json",
+     "sha256": "708395b38f06e0beffd8a117502d065c5f8ecfaf1d00f68a1a5f69e06ebaadfb"
+    },
+    {
+     "path": "runs/sustainable-s40401-greedy/result.json",
+     "sha256": "cf823ecd54966da9c172cc141fd2318ebf10ea8027913e994cc72a41af77c9f7"
+    },
+    {
+     "path": "runs/sustainable-s40401-greedy/t90.json",
+     "sha256": "2c67246757f443eac1d407ca067429318bd65ecb8ad6602cc014a783965368bf"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40401-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40401-rules/run.json",
+     "sha256": "81ff0736b0c930f21d683a784e6fa5c50f4bf78ea0fde9d113b52a6637929744"
+    },
+    {
+     "path": "runs/sustainable-s40401-rules/decisions.json",
+     "sha256": "f4bb86bdce1de0de03331343d172b7ba8af9080d227923c62cc21ec45b9d465a"
+    },
+    {
+     "path": "runs/sustainable-s40401-rules/transcript.jsonl",
+     "sha256": "6122392ca18c20f60b6a1ceed39d0c3bf8cf1ca71e9ef7b837c06adb3a0d81ea"
+    },
+    {
+     "path": "runs/sustainable-s40401-rules/session.json",
+     "sha256": "5f770d3bb1158afa327abe8e98de9f34c101a87510823b577a5079c990902b17"
+    },
+    {
+     "path": "runs/sustainable-s40401-rules/result.json",
+     "sha256": "3642c1e7a34264faf68cb9c3994822874cd28dc6b6c5f237087e4b40454348a5"
+    },
+    {
+     "path": "runs/sustainable-s40401-rules/t90.json",
+     "sha256": "e58c44ec13fe804052fcc90435eaf80c5f02146636d9dfa1932c55aac246eed1"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40402-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40402-noop/run.json",
+     "sha256": "f5a717b83de1812bebd703c1e6b3504701dab9d8a34fc037c77e45474923b2f1"
+    },
+    {
+     "path": "runs/sustainable-s40402-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40402-noop/transcript.jsonl",
+     "sha256": "bde70a7afa8a02440ba05398410aa6c62221ceb733e9c86146086a57c697f547"
+    },
+    {
+     "path": "runs/sustainable-s40402-noop/session.json",
+     "sha256": "d6d2da25c6bbe393f92cbe347a82cdfaace25990cdf64e23344aa5512fa29c6b"
+    },
+    {
+     "path": "runs/sustainable-s40402-noop/result.json",
+     "sha256": "215dcdc5fbc401d92e2638badf40a1068f0ddbd9c694f7a8ac82a194fdd5fc31"
+    },
+    {
+     "path": "runs/sustainable-s40402-noop/t90.json",
+     "sha256": "fb3389ef9080d1078e68cb0846b28165c2bb03723f18758d2bd57e62c684784f"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40402-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40402-greedy/run.json",
+     "sha256": "484b48c6af60c2b5e07fee82016dc2c0e529602725169795d5d5a30cd7687d0f"
+    },
+    {
+     "path": "runs/sustainable-s40402-greedy/decisions.json",
+     "sha256": "ad78e1a01c4715e2b1bdaa05c9f0737ce475e4c549d6d32f1d1b18ab78a293ac"
+    },
+    {
+     "path": "runs/sustainable-s40402-greedy/transcript.jsonl",
+     "sha256": "d4308c21c45469dbe0a197ec809589dcf58b0c5fd64070823571204a023374ba"
+    },
+    {
+     "path": "runs/sustainable-s40402-greedy/session.json",
+     "sha256": "374ecc5170970a3ff9580efff2057c9fc582ccc1e9cdbb7b9e5594b93b36de7c"
+    },
+    {
+     "path": "runs/sustainable-s40402-greedy/result.json",
+     "sha256": "e7f62e81ea0f38e60e23321da7b3fe0960980d526f7cd103e108b42459edeaf0"
+    },
+    {
+     "path": "runs/sustainable-s40402-greedy/t90.json",
+     "sha256": "6ede6d9811574ddebf82d562dbca91c2fe3606c29d487d437ed63e26835bd4c3"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40402-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40402-rules/run.json",
+     "sha256": "834b20fe7809e066827828e7844dc5d0cb312ee41ff87d040f7ad1cd5c56cce0"
+    },
+    {
+     "path": "runs/sustainable-s40402-rules/decisions.json",
+     "sha256": "0cb1d15550cf1c077a4227e0642b0f2db0e30928e7dbed8de96b3c84a63a5ad6"
+    },
+    {
+     "path": "runs/sustainable-s40402-rules/transcript.jsonl",
+     "sha256": "688bfd7dadbc0612120acb927674f7e0a5ac0fc0363afc71447afde6a0a30a51"
+    },
+    {
+     "path": "runs/sustainable-s40402-rules/session.json",
+     "sha256": "8bf3b318d4635b97372edbdfd5f5f025511a71f7bd81ccd7e02be97486f8f63f"
+    },
+    {
+     "path": "runs/sustainable-s40402-rules/result.json",
+     "sha256": "f0aafb5b54b8c6dae79b4b297e43014c9201279cec106f212033cddc2e7c9e36"
+    },
+    {
+     "path": "runs/sustainable-s40402-rules/t90.json",
+     "sha256": "5c7ada59cf40af6e38ffe62f89d44ae6e352404b356dc2c5a6b18ee03e5c4abc"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40403-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40403-noop/run.json",
+     "sha256": "758e88ab5d05c4d4c5ae54b2d3c9ed871cbfef9e93f3af028aed6b51bc740198"
+    },
+    {
+     "path": "runs/sustainable-s40403-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40403-noop/transcript.jsonl",
+     "sha256": "e2f16b3064be982bb53590b3cbb983fe31626d0430795933ace5ac97ca5df8da"
+    },
+    {
+     "path": "runs/sustainable-s40403-noop/session.json",
+     "sha256": "5f397e96f595bd56e4849aab04c0eecd7387b092545c5d45d9d1bf4f8b983801"
+    },
+    {
+     "path": "runs/sustainable-s40403-noop/result.json",
+     "sha256": "d8ae0e9e26679831b8512917ecc1203a043498b92d849445aa64c97ae2822f00"
+    },
+    {
+     "path": "runs/sustainable-s40403-noop/t90.json",
+     "sha256": "b5621407907a54ca7afa5499a91abd76d582728c79f1dc7494a5c28ef7833087"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40403-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40403-greedy/run.json",
+     "sha256": "178d33173798ee57614bb251bce2777836cbd58198e5ee651456d775fb23d932"
+    },
+    {
+     "path": "runs/sustainable-s40403-greedy/decisions.json",
+     "sha256": "367d0170d8ddc352cb4ba646f4c262385a4ba0f311b8b463ee50cfefe532e5ea"
+    },
+    {
+     "path": "runs/sustainable-s40403-greedy/transcript.jsonl",
+     "sha256": "02f5382cfc9fd851eae98be8124bcd0d8a0a19492c4159302156753c026c872c"
+    },
+    {
+     "path": "runs/sustainable-s40403-greedy/session.json",
+     "sha256": "8cdfb2c0073a918010b70109dc760003309d42df6c80c1e6c7b79b6d99a67a87"
+    },
+    {
+     "path": "runs/sustainable-s40403-greedy/result.json",
+     "sha256": "da156320ff354142bdaa922213c17eb8b9296cbad221118473db0021648b4aa6"
+    },
+    {
+     "path": "runs/sustainable-s40403-greedy/t90.json",
+     "sha256": "b036d14f38f3ec2e6a245b89501d6c60cdb397eec30374b3ab680a4f598472b6"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40403-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40403-rules/run.json",
+     "sha256": "4d52588b1b55e4dbaa9768c0a8e937124d2f07da7f004ed57e868dfc357ca2f1"
+    },
+    {
+     "path": "runs/sustainable-s40403-rules/decisions.json",
+     "sha256": "542db42f2e74cf963b1adbd874e122b99e0812b709376be21448091a12f95526"
+    },
+    {
+     "path": "runs/sustainable-s40403-rules/transcript.jsonl",
+     "sha256": "e18ebb6d58ccbfa2783c729be044fe87f69946774aa1dd997152bfb010835b0a"
+    },
+    {
+     "path": "runs/sustainable-s40403-rules/session.json",
+     "sha256": "95fba5769303e95bb9d8b4aaabb4be74ea28095d34c1c3499859aa5c4ec5897d"
+    },
+    {
+     "path": "runs/sustainable-s40403-rules/result.json",
+     "sha256": "38457e208504bd8dcb364f0fc2e57dbe5d8af3e83833417c6a9ca4c4790b246b"
+    },
+    {
+     "path": "runs/sustainable-s40403-rules/t90.json",
+     "sha256": "017adffac3589b248de0294684aec6903958549c623d908f70fbc46d889f61fb"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40404-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40404-noop/run.json",
+     "sha256": "2a425c7817d8b83ffed3ab564becf24f4cf164c85d60256cb03dd97f5b64fe27"
+    },
+    {
+     "path": "runs/sustainable-s40404-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40404-noop/transcript.jsonl",
+     "sha256": "0e33ee46cc89705180dd71f37bc233de50334944049a74f08e76f15259c68f65"
+    },
+    {
+     "path": "runs/sustainable-s40404-noop/session.json",
+     "sha256": "905d582314f78a3cb7c3fc882192de944b0fd0c6a9b5cb0c63b02736c5162cf8"
+    },
+    {
+     "path": "runs/sustainable-s40404-noop/result.json",
+     "sha256": "cbdbedf260643990965ab6239ac0c4e8063da34f2358bf1531d5f8289b158f60"
+    },
+    {
+     "path": "runs/sustainable-s40404-noop/t90.json",
+     "sha256": "036bb01e15d1b69f5cc811f6722f68a87917dc58b5ef18ed0cc70477b873f9a8"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40404-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40404-greedy/run.json",
+     "sha256": "c5588c42d2cbe3273e56af3a6d59e05165f1ac4c845d616cbd375e9126dcef04"
+    },
+    {
+     "path": "runs/sustainable-s40404-greedy/decisions.json",
+     "sha256": "367d0170d8ddc352cb4ba646f4c262385a4ba0f311b8b463ee50cfefe532e5ea"
+    },
+    {
+     "path": "runs/sustainable-s40404-greedy/transcript.jsonl",
+     "sha256": "bbcd8de82dd5faf33845b806056569ab4055d12c773c4bf4ecf0711f327f5554"
+    },
+    {
+     "path": "runs/sustainable-s40404-greedy/session.json",
+     "sha256": "b3edbb2eee4128d7bb84682d6e84836409d760d295b744122b6247b3f190bd1d"
+    },
+    {
+     "path": "runs/sustainable-s40404-greedy/result.json",
+     "sha256": "7144a775b57c213aeb738683732fb07027731f29d5dcb280e090b290d25fcf5b"
+    },
+    {
+     "path": "runs/sustainable-s40404-greedy/t90.json",
+     "sha256": "168c89cb390b2ae6625bb22a801a542e0acb9d5df051904bc38c46f1e6658c8f"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40404-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40404-rules/run.json",
+     "sha256": "dc6b5622679d1f76fd81523278a0c4259583c1182abeee3dc73e3e118380a2dd"
+    },
+    {
+     "path": "runs/sustainable-s40404-rules/decisions.json",
+     "sha256": "542db42f2e74cf963b1adbd874e122b99e0812b709376be21448091a12f95526"
+    },
+    {
+     "path": "runs/sustainable-s40404-rules/transcript.jsonl",
+     "sha256": "ac7f277b85acbf14747ead6a2ca84df141371803fb78d6fbb5c133be63e795b7"
+    },
+    {
+     "path": "runs/sustainable-s40404-rules/session.json",
+     "sha256": "b0a6954428987643f45beb2f2bf6e6dcd6b5ba02485315cd41188ea9bbe2f7fa"
+    },
+    {
+     "path": "runs/sustainable-s40404-rules/result.json",
+     "sha256": "3786eda8f0b9d2f4dbb87ae4740539b30f65c19cb243c206892049064c00147a"
+    },
+    {
+     "path": "runs/sustainable-s40404-rules/t90.json",
+     "sha256": "a3c3a4397ac2175251e75c344a4047b1beb1d2870a8f5ad32d01403e2c0d1c1f"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40405-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40405-noop/run.json",
+     "sha256": "ed85a868b6f19a8649f57b4be659e03a8d5e50b55da100b2dbc638576224fb58"
+    },
+    {
+     "path": "runs/sustainable-s40405-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40405-noop/transcript.jsonl",
+     "sha256": "1b1ab0f6f63410d04aeade17eecc87c76e4c850a891b85f395fd8de9fb38e440"
+    },
+    {
+     "path": "runs/sustainable-s40405-noop/session.json",
+     "sha256": "5f0938ca0de27cce25390db4d73b5bad0dc39694a501c240269bee126930c565"
+    },
+    {
+     "path": "runs/sustainable-s40405-noop/result.json",
+     "sha256": "c1712c53fc21f0e8e5242b69073d247968ed8c6cb1c4905c683673f18b9b3562"
+    },
+    {
+     "path": "runs/sustainable-s40405-noop/t90.json",
+     "sha256": "56b162fb35e0a4ca4210504427623a99d38ed0d4d4d786a163fcbf818746ecdf"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40405-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40405-greedy/run.json",
+     "sha256": "0e154ba6faac072e3601700656fea7e9112f884ad4b278eec6f3760cda51ae48"
+    },
+    {
+     "path": "runs/sustainable-s40405-greedy/decisions.json",
+     "sha256": "367d0170d8ddc352cb4ba646f4c262385a4ba0f311b8b463ee50cfefe532e5ea"
+    },
+    {
+     "path": "runs/sustainable-s40405-greedy/transcript.jsonl",
+     "sha256": "6c205384ec2aeee819891b6532e7f740ecbed55f73c5dd64da6e2e30ec9bc643"
+    },
+    {
+     "path": "runs/sustainable-s40405-greedy/session.json",
+     "sha256": "29119d1735f36b86becd486d7ea442aa1026ec68d84db6d00e7cf94d568b77a0"
+    },
+    {
+     "path": "runs/sustainable-s40405-greedy/result.json",
+     "sha256": "52869ae3713b91b0308e22ec5a9a217be5be16f62be88f4bc1a56f5392c5f00d"
+    },
+    {
+     "path": "runs/sustainable-s40405-greedy/t90.json",
+     "sha256": "d128b61449b964bf8e6f95494baee0be497ca1ebcb9d5a7ad5c6ad3081305efa"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40405-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40405-rules/run.json",
+     "sha256": "e1251a50d475b0b7100f1469edbeedd3c67f709b9d7affa98397b9ea8c8e6ac7"
+    },
+    {
+     "path": "runs/sustainable-s40405-rules/decisions.json",
+     "sha256": "542db42f2e74cf963b1adbd874e122b99e0812b709376be21448091a12f95526"
+    },
+    {
+     "path": "runs/sustainable-s40405-rules/transcript.jsonl",
+     "sha256": "ebe177a43e4e6a122ee5804204d788fae353b6d47f18526a2cdda8b1805b723d"
+    },
+    {
+     "path": "runs/sustainable-s40405-rules/session.json",
+     "sha256": "d6c0f0f3789f246b912c3cb2ccc1abc933a6dae60c927c29e4a7c8071195a8a0"
+    },
+    {
+     "path": "runs/sustainable-s40405-rules/result.json",
+     "sha256": "d67723bf3b31512b9b9ee22e4cdb39901aaa3324b4d47e97d874f32d47d81b90"
+    },
+    {
+     "path": "runs/sustainable-s40405-rules/t90.json",
+     "sha256": "d263859eb196b97dcf6d2a418a6528fd9f9fe1eb3fdf9e35a0ab116ac504bf38"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "cc1c48a366570446d7be3f0f7e32f7c373f0a4e3b5bb32df04ea50870003166c"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "30c53047226a650892d04b4298cc069bc244113c103d90a6d7e2b9a2908f6557"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json"
+ ]
+}

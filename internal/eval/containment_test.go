@@ -41,10 +41,13 @@ var holdoutReach = map[string][]string{
 		"internal/eval/holdout.go:LoadHoldout",
 		"internal/eval/holdout.go:GuardManifest", // an error, never the seeds
 	},
-	// The guard on the game's embedded manifest: only the T90 evaluation,
-	// which refuses a holdout seed before running anything.
+	// The guard on the game's embedded manifest: only the T90 evaluation
+	// and the benchmark configuration (V0.4a), each of which refuses a
+	// holdout seed before running anything. Both get an error that counts
+	// the seeds refused, never which they are.
 	"GuardManifest": {
 		"internal/session/t90.go:T90Job",
+		"internal/bench/config.go:Validate",
 	},
 	// The repository's own paths with the repository as root: only the
 	// sealed checks, the canonical run and the synthetic fixture.

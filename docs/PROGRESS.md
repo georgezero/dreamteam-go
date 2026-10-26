@@ -7,6 +7,117 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.4a — the agent evaluation harness (0.4.0-dev.1)
+
+Owner decision 2026-10-26: V0.3.0 is accepted and closed. V0.4 is the
+agent evaluation harness; V0.6 keeps the full benchmark. Scope: compare
+policies fairly and reproducibly through the released agent protocol,
+with no new scoring rule.
+
+**Built.**
+
+* **`internal/bench`, the harness** (`docs/BENCHMARK.md`).
+  * A versioned configuration (`dreamteam.benchmark/v1`), validated
+    before anything runs. It needs explicit seeds and a seed plan. It
+    refuses reference seeds 1001–1020 and sealed holdout seeds (the
+    holdout guard gives an error only).
+  * The **gate**: a policy reaches the session only through the
+    protocol's read and check operations (hello, observe, sections,
+    actions, validate, preview, digests). apply, advance, save and t90
+    are the harness's, and the gate answers them `not_permitted` without
+    touching the session.
+  * **One fresh session and policy per run.** For each run the harness
+    applies the policy's batches, advances at the configured cadence,
+    saves, and asks for T90 where it applies. It then replays the saved
+    session and writes its canonical result: `dreamteam replay
+    -format json`, byte for byte.
+  * **Metrics** are 32 values read by path from that result, with no
+    conversion. Failures are classified (`policy_error`,
+    `protocol_error`, `evaluation_error`, `replay_error`,
+    `harness_error`). Refusals, protocol errors and denied requests are
+    counted.
+  * **Results.** A results directory with a manifest of SHA-256 hashes,
+    in which only `timing.json` is nondeterministic. A report (text and
+    JSON) with five parts:
+    1. runs;
+    2. initial conditions;
+    3. per-policy minimum, median and maximum;
+    4. paired differences with the baseline, separating same decisions
+       and identical outcomes from different decisions, plus counts of
+       higher, lower and equal;
+    5. failures and replay.
+  * **Verification**: hashes and no unlisted files, replay, the result
+    rebuilt, metrics, the decisions against the session's batches, the
+    report rebuilt, and optionally T90 recomputed.
+* **CLI**: `dreamteam benchmark run CONFIG [-out DIR]`, `report RESULTS
+  [-format text|json]`, `verify RESULTS [-t90]`.
+* **Policies**: `noop`, `greedy` (the V0.3 demonstration, unchanged) and
+  `rules` version 1. Rules keeps the reading allocation in step with the
+  backlog, with hysteresis: it raises past 24 h oldest unread and lowers
+  after three decision points at 8 h or less. Each change is validated
+  and previewed first. The thresholds were fixed before any run.
+* **`internal/agent`**: `Client.H` is an `Exchanger` interface (a handler
+  or the gate), with optional string id prefixes and `Requests()`.
+  `Handler.Dir` resolves a relative save path, so transcripts carry no
+  absolute path. The protocol's behaviour is unchanged.
+* **Replay registration.** The v0.3.0 release is registered for replay:
+  batch mode `v0.3.0`, fixture `mini-seed52-v030` recorded by the
+  v0.3.0 binary built from the tag. The MIGRATIONS entry is added.
+* **Holdout containment.** The containment test reviews the new
+  `GuardManifest` call (bench config validation).
+
+**Development run** (`docs/benchmark/v04a-smoke/`):
+* sustainable, seeds 40401–40405, three policies, 30 days, T90;
+* the seeds were committed alone (b9cc0b6) before any run on them;
+* 15 of 15 runs completed; every session replayed and matched its
+  decisions; initial conditions are identical per seed;
+* the Pi (arm64) and horo (amd64) gave the same `manifest.json`
+  (`81ecfaa1…`), so every deterministic file is byte-identical;
+* `verify -t90` passed all 171 checks.
+
+Findings, not claims:
+* greedy and rules made the same four allocation changes per seed in a
+  different order, so with the 14-day lead time their 30-day outcomes are
+  nearly identical;
+* both finalized more reports, with lower TAT and fewer breaches than
+  noop, on 5 of 5 seeds, with mixed profit;
+* T90 (v0.2-eval-4, projected) gives CONDITIONAL GO on 2 seeds and NO GO
+  on 3.
+
+**Tests.** `internal/bench` covers:
+* configuration validation;
+* the gate;
+* byte-identical reruns;
+* initial conditions;
+* isolation: a run's files do not depend on the other policies or their
+  order;
+* the policy's view: the transcript shows only permitted ops;
+* policy errors and panics: classified, files verify, the other runs go
+  on;
+* metrics against the result;
+* rules' validate→preview→apply order;
+* tamper detection.
+
+`cmd/dreamteam` checks:
+* T90 equals `dreamteam t90` (v0.2-eval-4, projected);
+* `result.json` equals `dreamteam replay -format json`;
+* `verify -t90`, report JSON, write-once output and a tampered file;
+* invalid configurations (exit 2, nothing written) and usage errors.
+
+Mutation check: an open gate fails three tests.
+
+**Limitations** (BENCHMARK.md §10):
+* built-in policies only; the external-process adapter is designed but
+  not built;
+* `hello` shows the seed, which an external agent with the binary could
+  use to simulate ahead;
+* there is no feedback between batches within a decision point;
+* a 30-day horizon sees only reading changes set in the first 16 days;
+* T90 takes about 40 s per run on a Pi;
+* rules is not yet distinct from greedy on this scenario.
+
+---
+
 ## V0.3.0 — release
 
 The V0.3 release on the owner's decision: the agent interface (V0.3a and

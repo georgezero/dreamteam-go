@@ -36,6 +36,8 @@ func main() {
 		os.Exit(t90Cmd(args, os.Stdout, os.Stderr))
 	case "agent":
 		os.Exit(agentCmd(args, os.Stdin, os.Stdout, os.Stderr))
+	case "benchmark":
+		os.Exit(benchmarkCmd(args, os.Stdout, os.Stderr))
 	case "version":
 		fmt.Println("dreamteam", version.String())
 	case "help", "-h", "--help":
@@ -75,6 +77,13 @@ func usage() {
   dreamteam agent -policy noop|greedy [-days N] [-transcript FILE] [-save FILE] [...]
                                                    a scripted policy through the same protocol (an
                                                    interface check, not a strategy)
+  dreamteam benchmark run CONFIG [-out DIR]        run a benchmark (docs/BENCHMARK.md): every policy
+                                                   on every scenario and seed through the agent
+                                                   protocol, each session saved, replayed and measured
+  dreamteam benchmark report RESULTS [-format text|json]
+                                                   compare a results directory's runs
+  dreamteam benchmark verify RESULTS [-t90]        check a results directory's hashes, replay its
+                                                   sessions and rebuild its results and report
   OUTPUT (run, replay):
     -format text|json       text summary (default) or the canonical result JSON on stdout
                             (-summary is an alias)

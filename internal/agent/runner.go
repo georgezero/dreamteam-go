@@ -8,20 +8,35 @@ import (
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 )
 
+// Exchanger answers one request's bytes with one response's bytes: a
+// Handler, or anything standing between a client and one (V0.4a: the
+// benchmark harness's gate, which passes a policy's permitted requests on).
+type Exchanger interface {
+	Handle(line []byte) []byte
+}
+
 // Client drives a Handler through the protocol's bytes only, as an
 // external agent would: it builds requests, numbers them, and reads the
 // responses. A transcript, when set, receives every request and response
-// line.
+// line. With IDPrefix, ids are strings (the prefix and the number), so
+// two clients of one session can be told apart in a shared transcript.
 type Client struct {
-	H          *Handler
+	H          Exchanger
 	Transcript io.Writer
+	IDPrefix   string
 	next       int
 }
+
+// Requests is the number of requests sent.
+func (c *Client) Requests() int { return c.next }
 
 // Call sends one request and decodes the result into out (when not nil).
 func (c *Client) Call(op string, args any, out any) error {
 	c.next++
 	req := map[string]any{"id": c.next, "op": op}
+	if c.IDPrefix != "" {
+		req["id"] = fmt.Sprintf("%s%d", c.IDPrefix, c.next)
+	}
 	if args != nil {
 		req["args"] = args
 	}

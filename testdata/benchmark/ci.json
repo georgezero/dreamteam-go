@@ -1,0 +1,14 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "ci",
+ "description": "A small benchmark CI runs on every platform: its manifest is compared byte for byte across platforms. Not a performance check.",
+ "scenarios": ["mini", "sustainable"],
+ "seeds": [7],
+ "seedPlan": "A fixed test seed; not a development or evaluation seed.",
+ "days": 3,
+ "cadence": {"everyDays": 1, "at": "07:00"},
+ "policies": ["noop", "greedy", "rules"],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {"t90": true}
+}
