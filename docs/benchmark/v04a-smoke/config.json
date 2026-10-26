@@ -1,0 +1,14 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v04a-smoke",
+ "description": "V0.4a harness smoke test: the three initial policies on the bundled sustainable scenario, five fresh development seeds, 30 days. A check that the harness works, not a policy-performance claim.",
+ "scenarios": ["sustainable"],
+ "seeds": [40401, 40402, 40403, 40404, 40405],
+ "seedPlan": "Chosen 2026-10-26, before any benchmark run: the five consecutive integers from 40401, none of which appears as a seed anywhere in the repository (40404 appears only as an unrelated value in two V0.2 result files). Not reference seeds (1001-1020), not the V0.2 development seeds (901-910), not drawn from any reserved stream; the sealed holdout guard accepts them.",
+ "days": 30,
+ "cadence": {"everyDays": 1, "at": "07:00"},
+ "policies": ["noop", "greedy", "rules"],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {"t90": true}
+}
