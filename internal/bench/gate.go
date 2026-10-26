@@ -31,6 +31,7 @@ const ErrNotPermitted = "not_permitted"
 type gate struct {
 	h      agent.Exchanger
 	denied int
+	errors int // requests passed on and answered with an error
 }
 
 func (g *gate) Handle(line []byte) []byte {
@@ -38,7 +39,7 @@ func (g *gate) Handle(line []byte) []byte {
 	dec := json.NewDecoder(bytes.NewReader(line))
 	dec.DisallowUnknownFields()
 	if !json.Valid(line) || dec.Decode(&req) != nil || req.Op == "" || slices.Contains(PolicyOps, req.Op) {
-		return g.h.Handle(line)
+		return g.pass(line)
 	}
 	id := json.RawMessage("null")
 	if len(req.ID) > 0 {
@@ -50,11 +51,23 @@ func (g *gate) Handle(line []byte) []byte {
 			json.Compact(&b, req.ID)
 			id = b.Bytes()
 		default: // an id the handler refuses
-			return g.h.Handle(line)
+			return g.pass(line)
 		}
 	}
 	g.denied++
 	out, _ := json.Marshal(agent.Response{Protocol: agent.Protocol, ID: id, Error: &agent.Error{Code: ErrNotPermitted,
 		Message: fmt.Sprintf("a benchmark policy may call %v; %q is the harness's", PolicyOps, req.Op), Field: "op"}})
+	return out
+}
+
+// pass hands a request to the handler and counts an error response.
+func (g *gate) pass(line []byte) []byte {
+	out := g.h.Handle(line)
+	var r struct {
+		OK bool `json:"ok"`
+	}
+	if json.Unmarshal(out, &r) != nil || !r.OK {
+		g.errors++
+	}
 	return out
 }

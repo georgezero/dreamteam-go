@@ -15,7 +15,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.1** (released, `v0.1.0`) | Engine + playable TUI: a typical Tuesday at an established practice | — |
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
-| **V0.4** (in development: V0.4a built, 0.4.0-dev.1; owner decision 2026-10-26) | Agent evaluation harness: policies compared on identical scenarios and seeds through the agent protocol, decisions and outcomes recorded, replay verified ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
+| **V0.4** (in development: V0.4a accepted at 0.4.0-dev.1; V0.4b built, 0.4.0-dev.2; owner decisions 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** | Growth: equipment, extended hours, referrals, New Practice, progression and richer workforce dynamics | V0.3, V0.4 |
 | **V0.6** | WebUI/SQLite, benchmark framework, managed-practice harness, comparisons and automation levels | V0.3 API, V0.4 statements, V0.5 growth benchmarks |
 

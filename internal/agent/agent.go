@@ -101,6 +101,19 @@ type Handler struct {
 	// in (default: the process's working directory). The response
 	// reports the path as given.
 	Dir string
+	// Benchmark, when set, marks a session played under the benchmark
+	// harness (V0.4b): hello withholds the seed and describes the
+	// benchmark's contract instead. Nothing else changes.
+	Benchmark *Benchmark
+}
+
+// Benchmark is what hello tells a policy playing under the benchmark
+// harness: the seed is withheld, the operations it may call, and the
+// decision contract it answers in (docs/BENCHMARK.md).
+type Benchmark struct {
+	SeedWithheld bool     `json:"seedWithheld"`
+	PermittedOps []string `json:"permittedOps"`
+	Decision     string   `json:"decision"`
 }
 
 // New returns a handler for s.
@@ -250,9 +263,12 @@ type Hello struct {
 		Name        string `json:"name"`
 		Fingerprint string `json:"fingerprint"`
 	} `json:"scenario"`
-	Seed  int64    `json:"seed"`
-	Ops   []string `json:"ops"`
-	Clock Clock    `json:"clock"`
+	// Seed is absent under a benchmark harness (Benchmark is there
+	// instead).
+	Seed      *int64     `json:"seed,omitempty"`
+	Ops       []string   `json:"ops"`
+	Benchmark *Benchmark `json:"benchmark,omitempty"`
+	Clock     Clock      `json:"clock"`
 }
 
 func (h *Hello) setScenario(s *session.Session) {
@@ -260,7 +276,11 @@ func (h *Hello) setScenario(s *session.Session) {
 }
 
 func (h *Handler) hello() Hello {
-	r := Hello{Protocol: Protocol, Engine: version.Number, Seed: h.s.Seed(), Ops: Ops, Clock: h.clock()}
+	r := Hello{Protocol: Protocol, Engine: version.Number, Ops: Ops, Benchmark: h.Benchmark, Clock: h.clock()}
+	if h.Benchmark == nil {
+		seed := h.s.Seed()
+		r.Seed = &seed
+	}
 	r.setScenario(h.s)
 	r.Scenario.Ref = h.Ref
 	return r

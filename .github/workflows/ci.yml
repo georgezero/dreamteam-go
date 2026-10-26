@@ -69,14 +69,16 @@ jobs:
           rm -f python-client.session.json
       - name: Benchmark harness
         # A small benchmark (testdata/benchmark/ci.json): every run through
-        # the agent protocol, verified with T90 recomputed. Its manifest
-        # (every deterministic file's SHA-256) is compared across platforms
-        # below.
+        # the agent protocol, the reference Python policy as an external
+        # process, verified with T90 recomputed, then rerun and compared
+        # with its manifest. The manifest (every deterministic file's
+        # SHA-256) is compared across platforms below.
         shell: bash
         run: |
           set -euo pipefail
           ./dt benchmark run testdata/benchmark/ci.json -out bench > /dev/null
           ./dt benchmark verify bench -t90 | tail -1
+          ./dt benchmark reproduce bench -out bench-again 2> /dev/null | tail -1
           cp bench/manifest.json out/benchmark-manifest.json
       - uses: actions/upload-artifact@v7
         with:

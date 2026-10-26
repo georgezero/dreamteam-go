@@ -46,9 +46,13 @@ type Config struct {
 	SeedPlan string  `json:"seedPlan"`
 	// Days is the horizon: decision points run from the first cadence
 	// time after the takeover for Days days.
-	Days     int      `json:"days"`
-	Cadence  Cadence  `json:"cadence"`
+	Days    int     `json:"days"`
+	Cadence Cadence `json:"cadence"`
+	// Policies are built-in policies' IDs and External policies' IDs.
 	Policies []string `json:"policies"`
+	// External are external policy processes (V0.4b), named in Policies
+	// by their IDs.
+	External []ExternalPolicy `json:"external,omitempty"`
 	// Baseline is the policy the others are paired with in the report.
 	Baseline   string     `json:"baseline"`
 	Output     string     `json:"output"` // relative to the configuration file's directory
@@ -60,6 +64,22 @@ type Config struct {
 type Cadence struct {
 	EveryDays int    `json:"everyDays"`
 	At        string `json:"at"`
+}
+
+// ExternalPolicy is a policy run as a separate process (V0.4b), speaking
+// the policy protocol (dreamteam.benchmark-policy/v1) on its standard
+// input and output. Command is its program and arguments: an element that
+// begins with "./" or "../" is a file relative to the directory the
+// benchmark is run from (its SHA-256 goes in the manifest); every other
+// element is passed as it is, and a program without a path is looked up
+// in PATH. TimeoutSeconds bounds each decision point and the exit after
+// the last one.
+type ExternalPolicy struct {
+	ID             string   `json:"id"`
+	Version        string   `json:"version"`
+	Description    string   `json:"description"`
+	Command        []string `json:"command"`
+	TimeoutSeconds int      `json:"timeoutSeconds"`
 }
 
 // Evaluation options. T90 asks for the T90 evaluation of each run where
@@ -133,7 +153,7 @@ func (c *Config) Validate() error {
 	case !clockPattern.MatchString(c.Cadence.At):
 		return bad("cadence.at must be a practice-local time HH:MM, not %q", c.Cadence.At)
 	case len(c.Policies) == 0:
-		return bad("policies: at least one policy (%v)", PolicyIDs())
+		return bad("policies: at least one policy (%v, or an external policy)", PolicyIDs())
 	case !slices.Contains(c.Policies, c.Baseline):
 		return bad("baseline %q must be one of the policies %v", c.Baseline, c.Policies)
 	case c.Output == "" || filepath.IsAbs(c.Output):
@@ -162,13 +182,52 @@ func (c *Config) Validate() error {
 	if err := eval.GuardManifest(evaluation.Holdout, c.Seeds); err != nil {
 		return bad("seeds: %v", err)
 	}
+	for i, x := range c.External {
+		switch {
+		case !idPattern.MatchString(x.ID):
+			return bad("external[%d].id %q must be 1–64 lowercase letters, digits, dots or hyphens", i, x.ID)
+		case slices.Contains(PolicyIDs(), x.ID):
+			return bad("external[%d].id %q is a built-in policy's", i, x.ID)
+		case slices.ContainsFunc(c.External[:i], func(y ExternalPolicy) bool { return y.ID == x.ID }):
+			return bad("external[%d].id %q is listed twice", i, x.ID)
+		case x.Version == "" || x.Description == "":
+			return bad("external[%d] (%s): version and description are required", i, x.ID)
+		case len(x.Command) == 0 || x.Command[0] == "":
+			return bad("external[%d] (%s): command names the program and its arguments", i, x.ID)
+		case x.TimeoutSeconds < 1 || x.TimeoutSeconds > 3600:
+			return bad("external[%d] (%s): timeoutSeconds must be 1–3600, not %d", i, x.ID, x.TimeoutSeconds)
+		case !slices.Contains(c.Policies, x.ID):
+			return bad("external[%d] (%s) is not one of the policies %v", i, x.ID, c.Policies)
+		}
+	}
 	for i, p := range c.Policies {
-		if _, ok := lookupPolicy(p); !ok {
-			return bad("policies[%d] %q is not a policy %v", i, p, PolicyIDs())
+		if _, ok := c.policy(p); !ok {
+			return bad("policies[%d] %q is not a policy %v or an external one", i, p, PolicyIDs())
 		}
 		if slices.Contains(c.Policies[:i], p) {
 			return bad("policies[%d] %q is listed twice", i, p)
 		}
 	}
 	return nil
+}
+
+// policy finds a policy by ID: a built-in one, or one of External (with
+// no constructor: an external policy is a process, started per run).
+func (c *Config) policy(id string) (PolicySpec, bool) {
+	if p, ok := lookupPolicy(id); ok {
+		return p, true
+	}
+	i := slices.IndexFunc(c.External, func(x ExternalPolicy) bool { return x.ID == id })
+	if i < 0 {
+		return PolicySpec{}, false
+	}
+	x := c.External[i]
+	return PolicySpec{ID: x.ID, Version: x.Version, Description: x.Description,
+		External: &ExternalSpec{Command: x.Command, TimeoutSeconds: x.TimeoutSeconds}}, true
+}
+
+// ref is a policy's ID and version.
+func (c *Config) ref(id string) PolicyRef {
+	spec, _ := c.policy(id)
+	return PolicyRef{spec.ID, spec.Version}
 }

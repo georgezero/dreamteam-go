@@ -79,6 +79,28 @@ func TestBenchmarkCommand(t *testing.T) {
 		t.Fatal("report -format json differs from report.json")
 	}
 
+	// A rerun of the recorded configuration reproduces every
+	// deterministic file; a manifest that records another hash fails.
+	out.Reset()
+	again := filepath.Join(dir, "again")
+	if code := benchmarkCmd([]string{"reproduce", res, "-out", again}, &out, &errb); code != exitOK || !strings.Contains(out.String(), "ok    manifest.json byte-identical") {
+		t.Fatalf("reproduce: exit %d\n%s", code, out.String())
+	}
+	m, _ := os.ReadFile(filepath.Join(again, "manifest.json"))
+	var man struct {
+		Runs []struct {
+			Files []struct{ Path, SHA256 string }
+		}
+	}
+	json.Unmarshal(m, &man)
+	sum := man.Runs[0].Files[4].SHA256 // result.json
+	os.WriteFile(filepath.Join(again, "manifest.json"), bytes.Replace(m, []byte(sum), bytes.Repeat([]byte("0"), 64), 1), 0o644)
+	out.Reset()
+	if code := benchmarkCmd([]string{"reproduce", again, "-out", filepath.Join(dir, "third")}, &out, &errb); code != exitReplay ||
+		!strings.Contains(out.String(), "FAIL  file runs/sustainable-s77-greedy/result.json") || !strings.Contains(out.String(), "FAIL  manifest.json byte-identical") {
+		t.Fatalf("reproduce against a changed manifest: exit %d\n%s", code, out.String())
+	}
+
 	// Results are written once.
 	errb.Reset()
 	if code := benchmarkCmd([]string{"run", cfg}, &out, &errb); code != exitError || !strings.Contains(errb.String(), "not empty") {
@@ -105,7 +127,7 @@ func TestBenchmarkCommandErrors(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(dir, "results")); !os.IsNotExist(err) {
 		t.Fatal("an invalid configuration wrote results")
 	}
-	for _, args := range [][]string{nil, {"run"}, {"bogus"}, {"report"}, {"report", dir, "-format", "xml"}, {"verify"}} {
+	for _, args := range [][]string{nil, {"run"}, {"bogus"}, {"report"}, {"report", dir, "-format", "xml"}, {"verify"}, {"reproduce"}} {
 		if code := benchmarkCmd(args, &out, &errb); code != exitInvalid {
 			t.Errorf("%v: exit %d", args, code)
 		}

@@ -69,7 +69,7 @@ Response:
 
 | Op | Args | Result | Changes the session |
 |---|---|---|---|
-| `hello` | — | protocol, engine version, scenario (`ref`, `id`, `name`, `fingerprint`), seed, the ops, the clock | no |
+| `hello` | — | protocol, engine version, scenario (`ref`, `id`, `name`, `fingerprint`), seed, the ops, the clock. Under the benchmark harness only (V0.4b), the seed is withheld and a `benchmark` object says so ([BENCHMARK.md](BENCHMARK.md) §3, §11); every other session's `hello` is unchanged | no |
 | `observe` | `recentLog` (0–2000, default 20); optional `sections` (names, §3.1) and `compact` (true) | `observation`: the game's observation (`dreamteam.observation/v1`): practice, rooms, staff, desk, demand, flow, worklist, finance, teleradiology, today's metrics, alerts, policies, actions, extensions, the recent log. With `sections` or `compact`: a projection of it (§3.1) | no |
 | `sections` | — | the observation's sections (name, type, fields, whether always included, what compact leaves out), the header, and the compact omissions | no |
 | `actions` | — | the action catalog: batch rules, and for each action type its JSON Schema, constraints and current targets (§4) | no |

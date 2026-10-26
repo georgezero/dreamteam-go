@@ -7,6 +7,150 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.4b — external agent benchmarking (0.4.0-dev.2)
+
+Owner decision 2026-10-26: V0.4a is accepted at 2ab3564. V0.4b scope:
+1. an external policy process adapter;
+2. benchmark seeds hidden from agents;
+3. a fresh 90-day development comparison;
+4. a reproduce command, if straightforward.
+
+No new built-in baseline.
+
+**Built.**
+
+* **External policies** (`internal/bench/external.go`,
+  `docs/BENCHMARK.md` §4).
+  * A configuration declares them under `external`: ID, version,
+    description, command, timeout. `./` and `../` command files are
+    resolved from the run directory, and their SHA-256 goes in the
+    manifest.
+  * One fresh process per run, in an empty working directory outside the
+    results, removed afterwards.
+  * The policy protocol (`dreamteam.benchmark-policy/v1`), JSON lines
+    over stdio:
+    * the harness sends `decide` and `end` turns;
+    * the policy sends agent/v1 requests, each answered in order through
+      the same gate as a built-in policy's;
+    * the policy ends each turn with `{"decision":{"batches":[…]}}`.
+  * A per-decision timeout, which also covers the exit after `end`.
+    Standard error is captured separately (`stderr.txt`, kept and
+    listed, not hashed).
+  * Failures are classified: `policy_crash` (could not start, ended
+    early, exit status not 0), `policy_timeout`, and `policy_error` (a
+    decision that cannot be read). The process is killed and reaped, and
+    the other runs go on. Requests the protocol refuses are counted as
+    request errors (a new count, for built-in policies too).
+  * No HTTP or sockets. apply, advance, save and t90 stay the harness's.
+* **Seed privacy.**
+  * `agent.Handler.Benchmark` is set by the harness. `hello` then omits
+    the seed and carries `benchmark: {seedWithheld, permittedOps,
+    decision}`.
+  * Every other session's `hello` is byte-for-byte unchanged (the Python
+    client's run digest is unchanged).
+  * The seed stays in the harness's own evidence.
+  * The trust boundary (BENCHMARK.md §11): this stops disclosure through
+    the protocol only. External policies are trusted development
+    participants, not sandboxed. No OS-level isolation is claimed.
+* **`clients/python/reference_policy.py`** (`python-ref` version 1):
+  * standard library only and protocol only;
+  * a weekly review (decision points 0, 7, 14, …) that raises one site
+    reading allocation by 5 points, validated first, when the oldest
+    unfinished study is over 24 h old;
+  * a refused proposal is passed over, a protocol error means no change
+    that turn, and the process exits 0 after `end`.
+
+  It was fixed before any run and committed with the configuration.
+* **`dreamteam benchmark reproduce RESULTS [-out DIR]`**
+  (`internal/bench/reproduce.go`). It reruns the recorded `config.json`
+  and compares engine, policies, policy files, metric definitions, run
+  statuses, every hashed file and `manifest.json`. Timing and standard
+  error are not compared. Exit codes: 0 identical, 3 different, 1 not
+  rerunnable (another engine).
+* **Report**: external policies are marked; request errors are added to
+  the counts table.
+* **Replay registration**: 0.4.0-dev.1 (batch mode `v0.4_dev1`, fixture
+  `mini-seed52-v041` recorded by the 2ab3564 binary), with its
+  MIGRATIONS entry.
+* **CI**: the benchmark step includes `python-ref` and runs `reproduce`.
+  Its manifest, the external policy's runs included, is compared across
+  linux/amd64, linux/arm64 and darwin/arm64.
+
+**Development comparison** (`docs/benchmark/v04b-dev/`):
+* sustainable, seeds 40501–40505, noop, greedy, rules and python-ref,
+  90 days, T90;
+* configuration and policy committed first (0853bcc);
+* 20 of 20 completed and replayed, decisions matched, identical initial
+  conditions per seed;
+* no failures, refusals, protocol errors, denied requests or request
+  errors.
+
+| Machine | Result |
+|---|---|
+| Pi (arm64, Python 3.11) | 2,094 s; `manifest.json` `dd957074…`; verify -t90 226 of 226 |
+| horo (amd64, Python 3.13) | the same `manifest.json`; verify -t90 226 of 226; `reproduce` 147 of 147 |
+
+Findings, not claims:
+* **python-ref never acted.** Its weekly reviews fall on Tuesdays, while
+  the backlog passes 24 h only on Sunday and Monday mornings. Its runs
+  equal noop's ("same decisions, identical outcome"). The rule is not
+  changed.
+* **Greedy and rules made the same 12 raises per seed in the opposite
+  order.** Rules never lowered. At 90 days their outcomes differ
+  slightly on every seed (TAT p90 by 1–20 min, breaches by 0–13; profit
+  equal within $1). The 90-day horizon does not make them meaningfully
+  different.
+* **Against noop, 5 of 5 seeds:** much lower TAT and fewer breaches, net
+  revenue +$0.5k to +$5.3k, expense about +$33k, profit −$27k to −$33k.
+* **T90 at day 90 (not projected) is NO GO for all 20 runs.** noop and
+  python-ref fail service reliability; greedy and rules fail solvency.
+
+**Compatibility.**
+* The V0.4a configuration reruns on 0.4.0-dev.2. All 15 runs have the
+  same initial and final digests, metrics, decisions and T90 verdicts
+  as V0.4a's, and verify passes 156 of 156.
+* The V0.3 Python client passes against 0.4.0-dev.2 with the same run
+  digest (`948f6ad0…`). Its transcript is V0.4a's apart from the engine
+  version.
+
+**Tests.** `internal/bench`:
+* `TestExternalPolicy`: a real subprocess (the test binary as a helper).
+  It checks counts (denied 4, request errors 1), byte-identical reruns,
+  the manifest's policy entry, `stderr.txt` listed as nondeterministic,
+  verify, and that no working directory is left.
+* `TestExternalPolicyFailures`: crash, hang (timeout), a malformed
+  decision, a process that does not exit, a non-zero exit, and a missing
+  policy file refused before running. Each is classified at the right
+  decision point, the files verify, and the noop run beside them is
+  byte-identical to its run alone.
+* `TestSeedIsWithheld`: a built-in probe and an external process call
+  every permitted operation, failing calls included, on two scenarios.
+  No response carries the seed's digits; `hello` says it is withheld;
+  the process's arguments, environment and working directory do not
+  contain it; `run.json` keeps it; a non-benchmark `hello` still
+  reports it.
+* `TestPythonReferencePolicy`: completes, verifies, two runs identical,
+  its file hash recorded, standard error empty.
+
+`cmd/dreamteam`: `reproduce` matches a fresh rerun, and a manifest that
+records another hash fails (exit 3). `internal/session`: the
+0.4.0-dev.1 fixture replays and continues.
+
+Mutation checks: a `hello` that reports the seed under the harness, and
+an external policy whose requests bypass the gate, each fail
+`TestSeedIsWithheld` and `TestExternalPolicy`.
+
+**Limitations** (BENCHMARK.md §12):
+* external policies are trusted, not isolated: a policy could read
+  local files or search for the seed from the digests;
+* timeouts are wall-clock and include the harness's time;
+* only the started process is killed on failure;
+* no feedback within a decision point;
+* all acting policies use one lever, and python-ref's weekly timing
+  never met its trigger here.
+
+---
+
 ## V0.4a — the agent evaluation harness (0.4.0-dev.1)
 
 Owner decision 2026-10-26: V0.3.0 is accepted and closed. V0.4 is the
@@ -106,7 +250,7 @@ Findings, not claims:
 
 Mutation check: an open gate fails three tests.
 
-**Limitations** (BENCHMARK.md §10):
+**Limitations** (BENCHMARK.md, known limitations):
 * built-in policies only; the external-process adapter is designed but
   not built;
 * `hello` shows the seed, which an external agent with the binary could

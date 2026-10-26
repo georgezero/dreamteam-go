@@ -63,6 +63,11 @@ type ManifestRun struct {
 // runFiles are a run's files, in manifest order (those that exist).
 var runFiles = []string{FileRun, FileDecisions, FileTranscript, FileSession, FileResult, FileT90}
 
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 func hashFile(dir, rel string) (FileHash, error) {
 	raw, err := os.ReadFile(filepath.Join(dir, rel))
 	if err != nil {
@@ -73,7 +78,7 @@ func hashFile(dir, rel string) (FileHash, error) {
 }
 
 // finish writes the report and the manifest.
-func finish(c *Config, dir string, recs []*RunRecord) (*Manifest, error) {
+func finish(c *Config, dir string, recs []*RunRecord, specs []PolicySpec) (*Manifest, error) {
 	r := BuildReport(c, recs)
 	if err := writeJSON(filepath.Join(dir, FileReportJSON), r); err != nil {
 		return nil, err
@@ -87,12 +92,14 @@ func finish(c *Config, dir string, recs []*RunRecord) (*Manifest, error) {
 	if m.Config, err = hashFile(dir, FileConfig); err != nil {
 		return nil, err
 	}
-	for _, p := range c.Policies {
-		spec, _ := lookupPolicy(p)
-		m.Policies = append(m.Policies, spec)
-	}
+	m.Policies = specs
 	for _, rec := range recs {
 		mr := ManifestRun{ID: rec.ID, Status: rec.Status}
+		// An external policy's standard error: kept, not hashed (it is
+		// the process's own output, outside the protocol).
+		if rel := filepath.ToSlash(filepath.Join("runs", rec.ID, FileStderr)); fileExists(filepath.Join(dir, rel)) {
+			m.Nondeterministic = append(m.Nondeterministic, rel)
+		}
 		for _, f := range runFiles {
 			rel := filepath.Join("runs", rec.ID, f)
 			if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {
@@ -165,6 +172,7 @@ type Report struct {
 	Cadence   Cadence     `json:"cadence"`
 	Policies  []PolicyRef `json:"policies"`
 	Baseline  string      `json:"baseline"`
+	External  []string    `json:"external,omitempty"` // the policies that are external processes
 	Note      string      `json:"note"`
 
 	Runs     []RunRow      `json:"runs"`
@@ -284,8 +292,10 @@ func BuildReport(c *Config, recs []*RunRecord) *Report {
 		Scenarios: c.Scenarios, Seeds: c.Seeds, Days: c.Days, Cadence: c.Cadence, Baseline: c.Baseline, Note: reportNote,
 		Initial: []Initial{}, Summary: []PolicyStats{}, Pairs: []Pair{}, Counts: []PairCount{}, Failures: []Failed{}, Status: []StatusCount{}}
 	for _, p := range c.Policies {
-		spec, _ := lookupPolicy(p)
-		r.Policies = append(r.Policies, PolicyRef{spec.ID, spec.Version})
+		r.Policies = append(r.Policies, c.ref(p))
+	}
+	for _, x := range c.External {
+		r.External = append(r.External, x.ID)
 	}
 	find := func(scen string, seed int64, policy string) *RunRecord {
 		for _, rec := range recs {
@@ -342,7 +352,7 @@ func BuildReport(c *Config, recs []*RunRecord) *Report {
 		}
 	}
 	for _, p := range c.Policies {
-		st := PolicyStats{Policy: refOf(p), Metrics: []Spread{}}
+		st := PolicyStats{Policy: c.ref(p), Metrics: []Spread{}}
 		vals := map[string][]int64{}
 		for _, rec := range recs {
 			if rec.Policy.ID != p {
@@ -432,11 +442,6 @@ func BuildReport(c *Config, recs []*RunRecord) *Report {
 	return r
 }
 
-func refOf(id string) PolicyRef {
-	spec, _ := lookupPolicy(id)
-	return PolicyRef{spec.ID, spec.Version}
-}
-
 // Text is the report as plain text.
 func (r *Report) Text() string {
 	var b strings.Builder
@@ -444,6 +449,9 @@ func (r *Report) Text() string {
 	pols := make([]string, len(r.Policies))
 	for i, x := range r.Policies {
 		pols[i] = x.ID + "@" + x.Version
+		if slices.Contains(r.External, x.ID) {
+			pols[i] += " (external)"
+		}
 	}
 	p("DreamTeam benchmark %s · engine %s · %s\n", r.Benchmark, r.Engine, r.Protocol)
 	p("scenarios %s · seeds %s · %d days · decisions every %d day(s) at %s\n", strings.Join(r.Scenarios, ", "), joinInts(r.Seeds), r.Days, r.Cadence.EveryDays, r.Cadence.At)
@@ -565,7 +573,7 @@ func (r *Report) Text() string {
 	}
 	table(&b, rows)
 	p("\n")
-	rows = [][]string{{"policy", "decision points", "batches", "applied", "refused", "protocol errors", "denied requests"}}
+	rows = [][]string{{"policy", "decision points", "batches", "applied", "refused", "protocol errors", "denied requests", "request errors"}}
 	for _, pol := range r.Policies {
 		var n Counts
 		for _, x := range r.Runs {
@@ -576,10 +584,11 @@ func (r *Report) Text() string {
 				n.Refused += x.Counts.Refused
 				n.ProtocolErrors += x.Counts.ProtocolErrors
 				n.Denied += x.Counts.Denied
+				n.RequestErrors += x.Counts.RequestErrors
 			}
 		}
 		rows = append(rows, []string{pol.ID, fmt.Sprint(n.DecisionPoints), fmt.Sprint(n.Batches), fmt.Sprint(n.Applied),
-			fmt.Sprint(n.Refused), fmt.Sprint(n.ProtocolErrors), fmt.Sprint(n.Denied)})
+			fmt.Sprint(n.Refused), fmt.Sprint(n.ProtocolErrors), fmt.Sprint(n.Denied), fmt.Sprint(n.RequestErrors)})
 	}
 	table(&b, rows)
 	for _, f := range r.Failures {

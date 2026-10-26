@@ -8,6 +8,14 @@ Standard library only (Python 3.9 or later). The protocol is
   `ProtocolError` (with the stable `code`, `message`, `field`, `index`).
   It raises `TransportError` if the server breaks the protocol: no
   response, invalid JSON, another protocol, or another request's id.
+* `reference_policy.py`: the reference external benchmark policy
+  (`python-ref`, version 1). `dreamteam benchmark run` starts it as a
+  process per run; it speaks the policy protocol
+  (`dreamteam.benchmark-policy/v1`, `docs/BENCHMARK.md` §4) on its
+  standard input and output: a weekly review that raises one site reading
+  allocation, validated first, when the oldest unfinished study is over a
+  day old. Run it as `python3 -I -B ./clients/python/reference_policy.py`
+  from the repository root (the benchmark configuration's command).
 * `example_session.py`: a complete session from outside. It reads hello,
   the sections and the catalog; observes compactly and by sections;
   checks that an invalid batch changes nothing; validates, previews and

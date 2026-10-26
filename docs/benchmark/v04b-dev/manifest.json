@@ -1,0 +1,871 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v04b-dev",
+ "engine": "0.4.0-dev.2",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "ed6406b9698a0e3cc2584bab683351dfcec068b0874eb58d974c2dcfeb5a62f4"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "greedy",
+   "version": "1",
+   "description": "the V0.3 protocol demonstration (agent.Greedy): raises one radiologist's site reading allocation by 5 points whenever the oldest unread study is over a day old; not a strategy"
+  },
+  {
+   "id": "rules",
+   "version": "1",
+   "description": "a modest rule-based baseline: reading allocation follows the reading backlog with hysteresis, every change validated and previewed first"
+  },
+  {
+   "id": "python-ref",
+   "version": "1",
+   "description": "the reference external policy (clients/python/reference_policy.py): a weekly review that raises one site reading allocation by 5 points, validated first, when the oldest unfinished study is over a day old; not a strategy",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./clients/python/reference_policy.py"
+    ],
+    "timeoutSeconds": 120,
+    "files": [
+     {
+      "path": "./clients/python/reference_policy.py",
+      "sha256": "72292464857f3d3bb93061330573f34405ac628baf5af2dc81133ead850c5d40"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40501-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40501-noop/run.json",
+     "sha256": "32a7095f2b4cf0f070f300c2c5c997e3ca80952c252727a19068ddce802dfd0e"
+    },
+    {
+     "path": "runs/sustainable-s40501-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40501-noop/transcript.jsonl",
+     "sha256": "b6fc8e477123c854420b461ad108e0aa303f1c5fae593416cc03a9e6090a4dff"
+    },
+    {
+     "path": "runs/sustainable-s40501-noop/session.json",
+     "sha256": "cbb4f65e34ccfdf7f6eecd13096e3f801049d7d82a8dba5074729436b4afb471"
+    },
+    {
+     "path": "runs/sustainable-s40501-noop/result.json",
+     "sha256": "f2120a6fc0cc97df52d823eacddaa8c71bf78cfdb006f55028a8d6763184c79b"
+    },
+    {
+     "path": "runs/sustainable-s40501-noop/t90.json",
+     "sha256": "08bb8200582d3d57e94661e713e43e4d1d654026f5baad9e82dc573803448d3b"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40501-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40501-greedy/run.json",
+     "sha256": "51877f119a41759b70fbf50e6622eee5d086862d18729bc3bccc4f1a910042c8"
+    },
+    {
+     "path": "runs/sustainable-s40501-greedy/decisions.json",
+     "sha256": "07bb4938d8eeca3684e21418d723d6a1d32da8e95aab7063a0e518b1aeab6f35"
+    },
+    {
+     "path": "runs/sustainable-s40501-greedy/transcript.jsonl",
+     "sha256": "9630b35a4d522b609d17255d813574d3329dfd78514a21c320de6317a9627665"
+    },
+    {
+     "path": "runs/sustainable-s40501-greedy/session.json",
+     "sha256": "ec27583992cbd126610fe11b71f9ee217134fb3d58675a0f46119ebcdc128dc5"
+    },
+    {
+     "path": "runs/sustainable-s40501-greedy/result.json",
+     "sha256": "36b113ea3376c6884ace09de71e218b3b2a1356b3b59abae6d755fa00d39971c"
+    },
+    {
+     "path": "runs/sustainable-s40501-greedy/t90.json",
+     "sha256": "c25bcbb0c9c282b562220800e691b06c91f6f57a6eb425ab8f66ec65562566b0"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40501-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40501-rules/run.json",
+     "sha256": "056724c329934a46b794b415997c7b5fb86393db24373629f6913944ef1df71d"
+    },
+    {
+     "path": "runs/sustainable-s40501-rules/decisions.json",
+     "sha256": "0790cec34445fe5b6267d105a8fadce70694116f4745816cdbb3207b01dd2ff2"
+    },
+    {
+     "path": "runs/sustainable-s40501-rules/transcript.jsonl",
+     "sha256": "01149e5dee21a62e85537bf1cd3bccf023055c65c15d82e3028e974611f36c95"
+    },
+    {
+     "path": "runs/sustainable-s40501-rules/session.json",
+     "sha256": "3f4dd67999b77f3c6af678df02f2dfbe123c9ae206493aab2cb31fbbb0e98717"
+    },
+    {
+     "path": "runs/sustainable-s40501-rules/result.json",
+     "sha256": "8ddce3aa7919553de6c23172e1ed14c16fc3359411b5143af2d4cdc556d93c8d"
+    },
+    {
+     "path": "runs/sustainable-s40501-rules/t90.json",
+     "sha256": "5319d70551bf714261ca12635b9c59f61e408c2891b34c20e1c6e07bb4e08386"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40501-python-ref",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40501-python-ref/run.json",
+     "sha256": "bfffd18379e9c1d7b0db64b4241f19899dc6e556305b42a42594248671dfc89f"
+    },
+    {
+     "path": "runs/sustainable-s40501-python-ref/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40501-python-ref/transcript.jsonl",
+     "sha256": "beb19be9211d8f06552459fc9e634828715578f3b0942b997e5b48ac0c4a3948"
+    },
+    {
+     "path": "runs/sustainable-s40501-python-ref/session.json",
+     "sha256": "cbb4f65e34ccfdf7f6eecd13096e3f801049d7d82a8dba5074729436b4afb471"
+    },
+    {
+     "path": "runs/sustainable-s40501-python-ref/result.json",
+     "sha256": "f2120a6fc0cc97df52d823eacddaa8c71bf78cfdb006f55028a8d6763184c79b"
+    },
+    {
+     "path": "runs/sustainable-s40501-python-ref/t90.json",
+     "sha256": "08bb8200582d3d57e94661e713e43e4d1d654026f5baad9e82dc573803448d3b"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40502-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40502-noop/run.json",
+     "sha256": "965fac94e140a878a6bda2af4b345879bfdc6900c46b55efe62fd5d3b29c6f3f"
+    },
+    {
+     "path": "runs/sustainable-s40502-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40502-noop/transcript.jsonl",
+     "sha256": "fdd788190193b43e73108fd07c4f1ff97610a6f4577e6bb9c7790370a387f762"
+    },
+    {
+     "path": "runs/sustainable-s40502-noop/session.json",
+     "sha256": "9f1a3749442a716b1106a5d408b8b97f7026800f19a9d40eb05f593a2454b79c"
+    },
+    {
+     "path": "runs/sustainable-s40502-noop/result.json",
+     "sha256": "9f781104cdee05032a1dedfa18c10bb14cc08a63dc24abc0a5a45746d01b4570"
+    },
+    {
+     "path": "runs/sustainable-s40502-noop/t90.json",
+     "sha256": "b19404d1dc9477f2c3ac9f924876c50f6b32382e7fae38c57fd71f4d8b170695"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40502-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40502-greedy/run.json",
+     "sha256": "6d8eee9dfc8b5fa1d89138ead8ce5856ef24d9ac04172f5d969363491ce1061d"
+    },
+    {
+     "path": "runs/sustainable-s40502-greedy/decisions.json",
+     "sha256": "7eac13f834810a519ccf62eed3ca1a627ae60704b99dea288d79d419335e03cc"
+    },
+    {
+     "path": "runs/sustainable-s40502-greedy/transcript.jsonl",
+     "sha256": "5fc3a19e612052bdbc1b13ca97d087d8f6fca4abf2d87348677e9bc35878c710"
+    },
+    {
+     "path": "runs/sustainable-s40502-greedy/session.json",
+     "sha256": "c7d9c204c1a59302306755638000be6853364dfee95626e012a19afc8106170f"
+    },
+    {
+     "path": "runs/sustainable-s40502-greedy/result.json",
+     "sha256": "d79fddb74bdfd2f70eb5d5b14e7f01803b37266ef12d49635423aeac60f38bf0"
+    },
+    {
+     "path": "runs/sustainable-s40502-greedy/t90.json",
+     "sha256": "1b408372288779cd8a1d275d1a41d3e4adaa0648dfb8acca2ac5334c6eff56f4"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40502-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40502-rules/run.json",
+     "sha256": "9292c266c21c2685de974940715295593b1bf3fc8e81a3cd17c1a09deedacb49"
+    },
+    {
+     "path": "runs/sustainable-s40502-rules/decisions.json",
+     "sha256": "483427fa9b8c29654c20f9547ebca7c3808e0004c64ff5899cbcd0f4298e3ba5"
+    },
+    {
+     "path": "runs/sustainable-s40502-rules/transcript.jsonl",
+     "sha256": "31f5ecd6630b1768e66f2db9e4f8d05df7e29691b051e01692b6d8cf7774f49d"
+    },
+    {
+     "path": "runs/sustainable-s40502-rules/session.json",
+     "sha256": "16deae1d31f9bded16d1a1b40b4d4a4c0135663687c67f3e63bb27d696698bdb"
+    },
+    {
+     "path": "runs/sustainable-s40502-rules/result.json",
+     "sha256": "8485d336705880788fcba82c30367a2732f800809288795d2c65dc9fd342b381"
+    },
+    {
+     "path": "runs/sustainable-s40502-rules/t90.json",
+     "sha256": "3d666435de5e59fca92cb6fec863ec9de69483c32f01a73c3ae5262e03beae20"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40502-python-ref",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40502-python-ref/run.json",
+     "sha256": "69ffce3fd1bbda0f92a8756b14bf0c176c0bdee9b29258ac03f57e8f3281a905"
+    },
+    {
+     "path": "runs/sustainable-s40502-python-ref/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40502-python-ref/transcript.jsonl",
+     "sha256": "2934ebfc57dd0260836f50ec86db42ea4c29480ef6ab5962658a6a9af2fbd1e8"
+    },
+    {
+     "path": "runs/sustainable-s40502-python-ref/session.json",
+     "sha256": "9f1a3749442a716b1106a5d408b8b97f7026800f19a9d40eb05f593a2454b79c"
+    },
+    {
+     "path": "runs/sustainable-s40502-python-ref/result.json",
+     "sha256": "9f781104cdee05032a1dedfa18c10bb14cc08a63dc24abc0a5a45746d01b4570"
+    },
+    {
+     "path": "runs/sustainable-s40502-python-ref/t90.json",
+     "sha256": "b19404d1dc9477f2c3ac9f924876c50f6b32382e7fae38c57fd71f4d8b170695"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40503-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40503-noop/run.json",
+     "sha256": "d57cdce85a6b18438ceb7db51eb91de74a3f8b2f97b73115bbdb0b8899d98881"
+    },
+    {
+     "path": "runs/sustainable-s40503-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40503-noop/transcript.jsonl",
+     "sha256": "c0552b12f1be620b0a212369d8a3b0eb26ae867f8acfb3299942b8b277d7bd7e"
+    },
+    {
+     "path": "runs/sustainable-s40503-noop/session.json",
+     "sha256": "f4f9e696181d606b2274eb787acd4037fe730bb6ad809195462f868abbd6ec55"
+    },
+    {
+     "path": "runs/sustainable-s40503-noop/result.json",
+     "sha256": "3a9a4d9ac3550a8bf6a9be1fe078490789dd0904d97dc725590c9ae4a96322c5"
+    },
+    {
+     "path": "runs/sustainable-s40503-noop/t90.json",
+     "sha256": "40683faf916b0c30c07ac47b6caacb7b53c0cb51b4c7bf6c5cd8008eef11eb43"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40503-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40503-greedy/run.json",
+     "sha256": "c12da7db9f200a340d6ffc4fcb37d5c5c031012514348fbb3eb591021c28dbb2"
+    },
+    {
+     "path": "runs/sustainable-s40503-greedy/decisions.json",
+     "sha256": "de62c381060d31a21278a749421227c55fc9ba716dba7b20e40c54cfd74b3641"
+    },
+    {
+     "path": "runs/sustainable-s40503-greedy/transcript.jsonl",
+     "sha256": "52644a5ff7a8d4a54b56d840c2ff4ce82c8d321ded196f6b0acf6ad32d2b460d"
+    },
+    {
+     "path": "runs/sustainable-s40503-greedy/session.json",
+     "sha256": "783d5e804034f8859eff718136eada26fd5d40658de0ceb704aad1e68b86a552"
+    },
+    {
+     "path": "runs/sustainable-s40503-greedy/result.json",
+     "sha256": "b008aad94d4c6076fcc5ba159d76b82a698c88f7b6d6d28ed7213d8ce4d86bd1"
+    },
+    {
+     "path": "runs/sustainable-s40503-greedy/t90.json",
+     "sha256": "f2bbfaf54f2799f2910fc9ff2c222db70c4705514c22fcc6cb485e629f4ee248"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40503-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40503-rules/run.json",
+     "sha256": "d5076128c181daa83d21a0291211b86abda4d4dd0b9d69c587a3e0ab9c8ebbb3"
+    },
+    {
+     "path": "runs/sustainable-s40503-rules/decisions.json",
+     "sha256": "cb6f95827acbd1308478f452da70c18e7d2275b1b866574ef2856e12acd03820"
+    },
+    {
+     "path": "runs/sustainable-s40503-rules/transcript.jsonl",
+     "sha256": "fbe7aaca81e7a75ed31389f87af736c0c05deee527051996606825aa8e669a91"
+    },
+    {
+     "path": "runs/sustainable-s40503-rules/session.json",
+     "sha256": "5562da0b4f68851de210859fbdb6fb11b683235d89c63602046d9ce49353fb18"
+    },
+    {
+     "path": "runs/sustainable-s40503-rules/result.json",
+     "sha256": "e0df3fb8ca43b2f496528444a77da89bbb0b925002f55972c840c3e293b8d247"
+    },
+    {
+     "path": "runs/sustainable-s40503-rules/t90.json",
+     "sha256": "bc4b6b85e83459d25e8cd579404250c94345d139b5b13c5f33a24e37d33b2e3c"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40503-python-ref",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40503-python-ref/run.json",
+     "sha256": "12064b3311e0ff51e4b6102cfa9d12f9dae057bf4706eb71dd6e667bc31fc028"
+    },
+    {
+     "path": "runs/sustainable-s40503-python-ref/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40503-python-ref/transcript.jsonl",
+     "sha256": "2fd423592d1348e4ac655d5b4f5aaa6b48ed00c69204347a778e27e621664754"
+    },
+    {
+     "path": "runs/sustainable-s40503-python-ref/session.json",
+     "sha256": "f4f9e696181d606b2274eb787acd4037fe730bb6ad809195462f868abbd6ec55"
+    },
+    {
+     "path": "runs/sustainable-s40503-python-ref/result.json",
+     "sha256": "3a9a4d9ac3550a8bf6a9be1fe078490789dd0904d97dc725590c9ae4a96322c5"
+    },
+    {
+     "path": "runs/sustainable-s40503-python-ref/t90.json",
+     "sha256": "40683faf916b0c30c07ac47b6caacb7b53c0cb51b4c7bf6c5cd8008eef11eb43"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40504-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40504-noop/run.json",
+     "sha256": "2e50228ae7c8807f204fb160600f6fe3ed2e991d343d34cd75a84a597b9bb7fe"
+    },
+    {
+     "path": "runs/sustainable-s40504-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40504-noop/transcript.jsonl",
+     "sha256": "e0453f6ad15b1cd1c3a4ff2d49390ca91d32903d476081abd07584ff3869fb5d"
+    },
+    {
+     "path": "runs/sustainable-s40504-noop/session.json",
+     "sha256": "ad31d97f7ddf2ae0df3f3162114c53add8ee40acf4507c794502819380ecf456"
+    },
+    {
+     "path": "runs/sustainable-s40504-noop/result.json",
+     "sha256": "e0a9775d920da72cf602ae10feadc9e986235fdf9a55b3179adc80a8729539b9"
+    },
+    {
+     "path": "runs/sustainable-s40504-noop/t90.json",
+     "sha256": "7320c494d8d58a3f3eb67a1b084b2b5d85b12e81749453b7d50b9be0b4711166"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40504-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40504-greedy/run.json",
+     "sha256": "2d85fd00740e711b76a9606acfabee8839a4a31a3c323e2e7da12d6a7742232b"
+    },
+    {
+     "path": "runs/sustainable-s40504-greedy/decisions.json",
+     "sha256": "aa5e8dbc0e369a2da395db4a19e17037dff21201f50b96c689c3134deff4589d"
+    },
+    {
+     "path": "runs/sustainable-s40504-greedy/transcript.jsonl",
+     "sha256": "32b4b504610e62bfe50d492f32493c0be3dd23b812f4cf881cdaeabb890c5ba1"
+    },
+    {
+     "path": "runs/sustainable-s40504-greedy/session.json",
+     "sha256": "9a91393cd5691b91aa50a02210aafe70b4e955f077ea88289717ccc9b4f0224f"
+    },
+    {
+     "path": "runs/sustainable-s40504-greedy/result.json",
+     "sha256": "cac6c5dd84aa42beeb9ad449ebd78200737dbfedab4ec91ddefd7ef23ea5b1da"
+    },
+    {
+     "path": "runs/sustainable-s40504-greedy/t90.json",
+     "sha256": "4cdca18115eb18ac615e8637cda95c700761ddb7f66194d12d98d4763e50ca20"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40504-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40504-rules/run.json",
+     "sha256": "270af9eed6663838cd4b2d26b58ca99a5e1a4ed29ef912681a48de966989f109"
+    },
+    {
+     "path": "runs/sustainable-s40504-rules/decisions.json",
+     "sha256": "a405312279246184db3e7dc0e5ef1c41bd469c26284216692444f179f5fea505"
+    },
+    {
+     "path": "runs/sustainable-s40504-rules/transcript.jsonl",
+     "sha256": "838ccb5121cb17f7fc1bc0de5dd79043564918232cd212093d4fbb073b28824c"
+    },
+    {
+     "path": "runs/sustainable-s40504-rules/session.json",
+     "sha256": "f296ab376503ddc59007446ddc55b0bcef1bf3b364a2e7316f8c4c6284ea48b3"
+    },
+    {
+     "path": "runs/sustainable-s40504-rules/result.json",
+     "sha256": "5ff04f206f0814bf02996381018cab8bfa92be840d84e7313d499aba0dcb4569"
+    },
+    {
+     "path": "runs/sustainable-s40504-rules/t90.json",
+     "sha256": "1806cf72b3e38d9a5fc84e563a3f1b4881705a76fdd1c0c5fc62858ddfbb81a5"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40504-python-ref",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40504-python-ref/run.json",
+     "sha256": "8896e2d1df814549a0d716de4800cb27c31a352d8b094d8d68d539b8923defde"
+    },
+    {
+     "path": "runs/sustainable-s40504-python-ref/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40504-python-ref/transcript.jsonl",
+     "sha256": "f8553b137bec1c67dda2f668403ad97d9b2496ffd6ce74891c2edbd0058ef841"
+    },
+    {
+     "path": "runs/sustainable-s40504-python-ref/session.json",
+     "sha256": "ad31d97f7ddf2ae0df3f3162114c53add8ee40acf4507c794502819380ecf456"
+    },
+    {
+     "path": "runs/sustainable-s40504-python-ref/result.json",
+     "sha256": "e0a9775d920da72cf602ae10feadc9e986235fdf9a55b3179adc80a8729539b9"
+    },
+    {
+     "path": "runs/sustainable-s40504-python-ref/t90.json",
+     "sha256": "7320c494d8d58a3f3eb67a1b084b2b5d85b12e81749453b7d50b9be0b4711166"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40505-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40505-noop/run.json",
+     "sha256": "7dff11436ee2b2f0ae8dd873f3d7e416ac07976c2acf413f99b928664d30779a"
+    },
+    {
+     "path": "runs/sustainable-s40505-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40505-noop/transcript.jsonl",
+     "sha256": "1b50d5887034182bb0a568abda30e963aa79251b188e77f0baa69f3665dcbb8f"
+    },
+    {
+     "path": "runs/sustainable-s40505-noop/session.json",
+     "sha256": "1ed3344ed636101c154950d4f1f5fa798bce960fc9e15307905bc0d5dc055728"
+    },
+    {
+     "path": "runs/sustainable-s40505-noop/result.json",
+     "sha256": "5def06ad7a322e5eae6238ab4301c843658f958e63b1a8afbb48bd3d9eb85f39"
+    },
+    {
+     "path": "runs/sustainable-s40505-noop/t90.json",
+     "sha256": "9a0b1fc952bd71b9ae649d4155790a022fdb6e068246ced7de83d540adbd876c"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40505-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40505-greedy/run.json",
+     "sha256": "91b35fc9924e963fa98913dfbb9ebe81cd1026551922a37a5fbcda24a3db7bc5"
+    },
+    {
+     "path": "runs/sustainable-s40505-greedy/decisions.json",
+     "sha256": "cdcb18241fc1f87a1b8428f73812d902e108d90851ba7701044865c786b25a24"
+    },
+    {
+     "path": "runs/sustainable-s40505-greedy/transcript.jsonl",
+     "sha256": "a34ac3f379939c7189f3f5009caa163d06c0017044f09aa5c45b79af05be5ade"
+    },
+    {
+     "path": "runs/sustainable-s40505-greedy/session.json",
+     "sha256": "2c0af649b26c439cb8fa2b1e021db8a344c81f90791fd933a748da113f49360d"
+    },
+    {
+     "path": "runs/sustainable-s40505-greedy/result.json",
+     "sha256": "97294bd09971dde5306e7b5f5ca7a1427312452d1bc7288595bd0bfb8bebd736"
+    },
+    {
+     "path": "runs/sustainable-s40505-greedy/t90.json",
+     "sha256": "cc461b23f17b8167d6a9f8423f4c3f8228f37d1e3a85ae135338e421628b10e9"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40505-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40505-rules/run.json",
+     "sha256": "fee0fe131cb07aedcc99948b6c7819270b414b643b57ca04245d6eed5f2e3e01"
+    },
+    {
+     "path": "runs/sustainable-s40505-rules/decisions.json",
+     "sha256": "03592774d1f2825344f6f5b2343b254dea1b8f4f102fecbf10f837b067730aef"
+    },
+    {
+     "path": "runs/sustainable-s40505-rules/transcript.jsonl",
+     "sha256": "423fb7fd66d00c24f78bfde16a50d7ddc832c0c1fc0a23c2af0ecff94f560ab1"
+    },
+    {
+     "path": "runs/sustainable-s40505-rules/session.json",
+     "sha256": "bbc6346060ac46234648b270b08e922884cda04bcb75d225290668dc2b592481"
+    },
+    {
+     "path": "runs/sustainable-s40505-rules/result.json",
+     "sha256": "33b36a5f80e7952d305cdc0ae93b0bcf1acc3e3dd1739da1c995c840e6eb5b57"
+    },
+    {
+     "path": "runs/sustainable-s40505-rules/t90.json",
+     "sha256": "5c6ccbef306edff7443148f7f74b43bdfc5162498bf2e726f8d62d8bda5617c6"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40505-python-ref",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40505-python-ref/run.json",
+     "sha256": "875c2a2fafd7e017ed2e6eeddbcd9ea24efb459f1c14ebec262e429680c1d9c5"
+    },
+    {
+     "path": "runs/sustainable-s40505-python-ref/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40505-python-ref/transcript.jsonl",
+     "sha256": "232119b719ab0aa8f38b8da5b14304e7f71d40e653bf209be9c135e6b7b61644"
+    },
+    {
+     "path": "runs/sustainable-s40505-python-ref/session.json",
+     "sha256": "1ed3344ed636101c154950d4f1f5fa798bce960fc9e15307905bc0d5dc055728"
+    },
+    {
+     "path": "runs/sustainable-s40505-python-ref/result.json",
+     "sha256": "5def06ad7a322e5eae6238ab4301c843658f958e63b1a8afbb48bd3d9eb85f39"
+    },
+    {
+     "path": "runs/sustainable-s40505-python-ref/t90.json",
+     "sha256": "9a0b1fc952bd71b9ae649d4155790a022fdb6e068246ced7de83d540adbd876c"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "09906f8e85f127c5d455911e6ca6d81da54ac6f24f2baa35cd64139ced39b03e"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "8f009d284f879b6d62b5eed0196fabcde0f9a4bcac45bdfcffc515805a839a33"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/sustainable-s40501-python-ref/stderr.txt",
+  "runs/sustainable-s40502-python-ref/stderr.txt",
+  "runs/sustainable-s40503-python-ref/stderr.txt",
+  "runs/sustainable-s40504-python-ref/stderr.txt",
+  "runs/sustainable-s40505-python-ref/stderr.txt"
+ ]
+}

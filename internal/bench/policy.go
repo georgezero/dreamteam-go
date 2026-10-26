@@ -13,9 +13,9 @@ import (
 // save or evaluate. A new instance plays each run, so nothing a policy
 // keeps between decisions outlives its run.
 //
-// An external policy process can stand in for a built-in one by
-// implementing the same exchange: it is handed the gated connection at
-// each decision point and answers with its batches (docs/BENCHMARK.md §4).
+// An external policy process (V0.4b, external.go) stands in for a
+// built-in one through the same exchange: at each decision point its
+// requests go through the gate, and it answers with its batches.
 
 // PolicySpec identifies a policy: its ID, a version that changes whenever
 // its behaviour does, what it does, and a constructor for one run.
@@ -23,7 +23,18 @@ type PolicySpec struct {
 	ID          string              `json:"id"`
 	Version     string              `json:"version"`
 	Description string              `json:"description"`
+	External    *ExternalSpec       `json:"external,omitempty"`
 	New         func() agent.Policy `json:"-"`
+}
+
+// ExternalSpec is an external policy as the manifest records it: its
+// command as configured, its timeout, and the SHA-256 of each file the
+// command names ("./" or "../").
+type ExternalSpec struct {
+	Command        []string   `json:"command"`
+	TimeoutSeconds int        `json:"timeoutSeconds"`
+	Files          []FileHash `json:"files"`
+	argv           []string   // the command, files made absolute
 }
 
 // policies are the built-in policies, in a stable order.

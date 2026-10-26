@@ -25,7 +25,7 @@ const RunSchema = "dreamteam.benchmark-run/v1"
 // stopped it; its files are written as far as it got.
 const (
 	StatusCompleted  = "completed"
-	StatusPolicy     = "policy_error"     // the policy returned an error or panicked
+	StatusPolicy     = "policy_error"     // the policy returned an error or panicked, or its decision could not be read
 	StatusProtocol   = "protocol_error"   // the harness's own request failed (advance, save, digests)
 	StatusEvaluation = "evaluation_error" // T90 failed other than as not applicable
 	StatusReplay     = "replay_error"     // the saved session did not replay, or its record differs from the decisions
@@ -91,7 +91,9 @@ type Failure struct {
 // Counts are a run's protocol traffic. Refused batches are batches the
 // session found invalid (nothing applied); protocol errors are batches the
 // protocol could not read (not JSON, an unknown field, a bad size); denied
-// are policy requests the gate refused.
+// are policy requests the gate refused; request errors are the policy's
+// other requests answered with an error (a malformed request, bad
+// arguments).
 type Counts struct {
 	DecisionPoints int `json:"decisionPoints"`
 	Batches        int `json:"batches"`
@@ -101,6 +103,7 @@ type Counts struct {
 	ProtocolErrors int `json:"protocolErrors"`
 	PolicyRequests int `json:"policyRequests"`
 	Denied         int `json:"denied"`
+	RequestErrors  int `json:"requestErrors"`
 }
 
 // Replay is the saved session's replay verification (session.Load).
@@ -176,13 +179,16 @@ func Matrix(c *Config, raw []byte, dir string, progress io.Writer) (*Manifest, e
 	if err := os.WriteFile(filepath.Join(dir, FileConfig), raw, 0o644); err != nil {
 		return nil, err
 	}
+	specs, err := c.prepare()
+	if err != nil {
+		return nil, err
+	}
 	var recs []*RunRecord
 	timing := Timing{Note: "wall-clock seconds: not deterministic, not in the manifest's hashes"}
 	for _, scen := range c.Scenarios {
 		for _, seed := range c.Seeds {
-			for _, pid := range c.Policies {
-				spec, _ := lookupPolicy(pid)
-				id := runID(scen, seed, pid)
+			for _, spec := range specs {
+				id := runID(scen, seed, spec.ID)
 				rd := filepath.Join(dir, "runs", id)
 				if err := os.MkdirAll(rd, 0o755); err != nil {
 					return nil, err
@@ -201,7 +207,7 @@ func Matrix(c *Config, raw []byte, dir string, progress io.Writer) (*Manifest, e
 			}
 		}
 	}
-	m, err := finish(c, dir, recs)
+	m, err := finish(c, dir, recs, specs)
 	if err != nil {
 		return nil, err
 	}
@@ -242,6 +248,7 @@ func runOne(c *Config, scen string, seed int64, spec PolicySpec, dir string) *Ru
 	}
 	h := agent.New(s)
 	h.Ref, h.Dir = scen, dir
+	h.Benchmark = &agent.Benchmark{SeedWithheld: true, PermittedOps: PolicyOps, Decision: PolicyProtocol}
 	tf, err := os.Create(filepath.Join(dir, FileTranscript))
 	if err != nil {
 		fail(StatusHarness, 0, "", err)
@@ -250,11 +257,24 @@ func runOne(c *Config, scen string, seed int64, spec PolicySpec, dir string) *Ru
 	tw := bufio.NewWriter(tf)
 	hc := &agent.Client{H: h, Transcript: tw, IDPrefix: "h"}
 	g := &gate{h: h}
-	pc := &agent.Client{H: g, Transcript: tw, IDPrefix: "p"}
+	var pl player
+	if spec.External != nil {
+		pl = newExternal(spec, g, tw)
+	} else {
+		pl = &builtin{p: spec.New(), c: &agent.Client{H: g, Transcript: tw, IDPrefix: "p"}}
+	}
 
 	decisions := []Decision{}
-	play(c, spec.New(), hc, pc, rec, &decisions, fail)
-	rec.Counts.PolicyRequests, rec.Counts.Denied = pc.Requests(), g.denied
+	play(c, pl, hc, rec, &decisions, fail)
+	if err := pl.finish(rec.Status == StatusCompleted, dir); err != nil {
+		var pf *policyFailure
+		if errors.As(err, &pf) {
+			fail(pf.class, rec.Counts.DecisionPoints, "", err)
+		} else {
+			fail(StatusHarness, 0, "", err)
+		}
+	}
+	rec.Counts.PolicyRequests, rec.Counts.Denied, rec.Counts.RequestErrors = pl.requests(), g.denied, g.errors
 
 	var final agent.Clock
 	if err := hc.Call("digests", nil, &final); err != nil {
@@ -284,7 +304,7 @@ func runOne(c *Config, scen string, seed int64, spec PolicySpec, dir string) *Ru
 // play runs the decision points: the first at the cadence time on or
 // after the takeover, then every day the clock moves to the next cadence
 // time, the policy deciding every EveryDays days.
-func play(c *Config, p agent.Policy, hc, pc *agent.Client, rec *RunRecord, decisions *[]Decision, fail func(string, int, string, error)) {
+func play(c *Config, p player, hc *agent.Client, rec *RunRecord, decisions *[]Decision, fail func(string, int, string, error)) {
 	var hello agent.Hello
 	if err := hc.Call("hello", nil, &hello); err != nil {
 		fail(StatusProtocol, 0, "", fmt.Errorf("hello: %w", err))
@@ -307,11 +327,16 @@ func play(c *Config, p agent.Policy, hc, pc *agent.Client, rec *RunRecord, decis
 		if d%c.Cadence.EveryDays == 0 {
 			dec := Decision{Point: rec.Counts.DecisionPoints, Time: at, Batches: []Submitted{}}
 			rec.Counts.DecisionPoints++
-			bs, err := decide(p, pc)
+			bs, err := p.decide(dec.Point)
 			if err != nil {
 				dec.Error = err.Error()
 				*decisions = append(*decisions, dec)
-				fail(StatusPolicy, dec.Point, at, err)
+				class := StatusPolicy
+				var pf *policyFailure
+				if errors.As(err, &pf) {
+					class = pf.class
+				}
+				fail(class, dec.Point, at, err)
 				return
 			}
 			for _, b := range bs {
@@ -330,6 +355,27 @@ func play(c *Config, p agent.Policy, hc, pc *agent.Client, rec *RunRecord, decis
 		at = next
 	}
 }
+
+// player is a run's policy as the harness plays it: a built-in policy
+// with its gated client, or an external policy process.
+type player interface {
+	decide(point int) ([][]json.RawMessage, error)
+	// finish ends the policy after the run (completed: it ran to the
+	// end), keeping what it leaves in the run's directory.
+	finish(completed bool, dir string) error
+	requests() int
+}
+
+// builtin is a built-in policy and its client, which reaches the session
+// through the gate.
+type builtin struct {
+	p agent.Policy
+	c *agent.Client
+}
+
+func (b *builtin) decide(int) ([][]json.RawMessage, error) { return decide(b.p, b.c) }
+func (b *builtin) finish(bool, string) error               { return nil }
+func (b *builtin) requests() int                           { return b.c.Requests() }
 
 // decide asks the policy, turning a panic into an error.
 func decide(p agent.Policy, c *agent.Client) (bs [][]json.RawMessage, err error) {

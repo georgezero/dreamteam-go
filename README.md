@@ -270,21 +270,27 @@ verified prefix. Saves from every V0.2 development build (0.2.0-dev.2 to
 actions, and are kept the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
 · 3 replay failure · 4 golden mismatch · 5 incompatible.
 
-### Agent evaluation harness (V0.4a, in development)
+### Agent evaluation harness (V0.4, in development)
 
 `dreamteam benchmark run CONFIG` plays every policy of a configuration on
 every scenario and seed through the agent protocol: the same initial state,
 horizon and decision cadence for each. A policy sees the session only
-through the protocol's read and check operations; the harness applies its
-batches, advances time, saves and asks for T90. Every saved session is
-replayed and measured with the simulator's own canonical result, and the
-results directory is hashed in a manifest. `dreamteam benchmark report`
-compares the runs (per run, per policy, paired with a baseline; no
-composite score), and `dreamteam benchmark verify` checks the hashes,
-replays the sessions and rebuilds the results. Built-in policies: `noop`,
-`greedy` (the V0.3 demonstration) and `rules` (a modest rule-based
-baseline). Specification: `docs/BENCHMARK.md`; the development run:
-`docs/benchmark/v04a-smoke/`.
+through the protocol's read and check operations, and under the harness the
+seed is withheld; the harness applies its batches, advances time, saves and
+asks for T90. A policy is built in (`noop`, `greedy`, the V0.3
+demonstration, and `rules`, a modest rule-based baseline) or an external
+program run as a separate process per run, speaking JSON lines over stdio
+(V0.4b; the reference is `clients/python/reference_policy.py`). Every saved
+session is replayed and measured with the simulator's own canonical result,
+and the results directory is hashed in a manifest. `dreamteam benchmark
+report` compares the runs (per run, per policy, paired with a baseline; no
+composite score), `dreamteam benchmark verify` checks the hashes, replays
+the sessions and rebuilds the results, and `dreamteam benchmark reproduce`
+reruns the configuration and compares every deterministic file. External
+policies are trusted development participants: the harness withholds the
+seed from the protocol but does not sandbox them. Specification:
+`docs/BENCHMARK.md`; the development runs: `docs/benchmark/v04a-smoke/`
+(30 days) and `docs/benchmark/v04b-dev/` (90 days, with the Python policy).
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its

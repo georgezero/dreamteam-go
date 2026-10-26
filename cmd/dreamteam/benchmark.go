@@ -13,7 +13,8 @@ import (
 
 const benchmarkUsage = `usage: dreamteam benchmark run CONFIG [-out DIR]
        dreamteam benchmark report RESULTS [-format text|json]
-       dreamteam benchmark verify RESULTS [-t90]`
+       dreamteam benchmark verify RESULTS [-t90]
+       dreamteam benchmark reproduce RESULTS [-out DIR]`
 
 // benchmarkCmd is the agent evaluation harness (docs/BENCHMARK.md): run a
 // configuration's matrix of policies, scenarios and seeds through the
@@ -30,6 +31,8 @@ func benchmarkCmd(args []string, stdout, stderr io.Writer) int {
 		return benchmarkReport(args[1:], stdout, stderr)
 	case "verify":
 		return benchmarkVerify(args[1:], stdout, stderr)
+	case "reproduce":
+		return benchmarkReproduce(args[1:], stdout, stderr)
 	}
 	fmt.Fprintf(stderr, "dreamteam benchmark: unknown subcommand %q\n%s\n", args[0], benchmarkUsage)
 	return exitInvalid
@@ -108,6 +111,50 @@ func benchmarkReport(args []string, stdout, stderr io.Writer) int {
 	return exitOK
 }
 
+// benchmarkReproduce reruns a results directory's configuration and
+// compares the deterministic files with its manifest, one line per check.
+// Exit 0: identical; 3: something differs; 1: the rerun could not be made.
+func benchmarkReproduce(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("benchmark reproduce", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	out := fs.String("out", "", "where the rerun's results go (default: RESULTS.reproduce)")
+	pos, err := parseFlags(fs, args)
+	if err != nil || len(pos) != 1 {
+		fmt.Fprintln(stderr, benchmarkUsage)
+		return exitInvalid
+	}
+	dir := *out
+	if dir == "" {
+		dir = filepath.Clean(pos[0]) + ".reproduce"
+	}
+	fmt.Fprintf(stderr, "rerunning %s into %s\n", pos[0], dir)
+	checks, err := bench.Reproduce(pos[0], dir, stderr)
+	if err != nil {
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		return exitError
+	}
+	return printChecks(stdout, checks, "(a rerun compared with the recorded manifest; timing and standard error are not compared)")
+}
+
+// printChecks prints one line per check and a summary. Exit 0: every
+// check passed; 3: one failed.
+func printChecks(stdout io.Writer, checks []bench.Check, note string) int {
+	failed := 0
+	for _, c := range checks {
+		if c.OK {
+			fmt.Fprintf(stdout, "ok    %s\n", c.What)
+		} else {
+			failed++
+			fmt.Fprintf(stdout, "FAIL  %s: %s\n", c.What, c.Note)
+		}
+	}
+	fmt.Fprintf(stdout, "%d checks, %d failed %s\n", len(checks), failed, note)
+	if failed > 0 {
+		return exitReplay
+	}
+	return exitOK
+}
+
 // benchmarkVerify prints one line per check. Exit 0: every check passed;
 // 3: one failed.
 func benchmarkVerify(args []string, stdout, stderr io.Writer) int {
@@ -124,18 +171,5 @@ func benchmarkVerify(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "dreamteam:", err)
 		return exitError
 	}
-	failed := 0
-	for _, c := range checks {
-		if c.OK {
-			fmt.Fprintf(stdout, "ok    %s\n", c.What)
-		} else {
-			failed++
-			fmt.Fprintf(stdout, "FAIL  %s: %s\n", c.What, c.Note)
-		}
-	}
-	fmt.Fprintf(stdout, "%d checks, %d failed (an integrity check of these files, not an independent certification)\n", len(checks), failed)
-	if failed > 0 {
-		return exitReplay
-	}
-	return exitOK
+	return printChecks(stdout, checks, "(an integrity check of these files, not an independent certification)")
 }

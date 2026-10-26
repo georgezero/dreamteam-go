@@ -84,6 +84,8 @@ func usage() {
                                                    compare a results directory's runs
   dreamteam benchmark verify RESULTS [-t90]        check a results directory's hashes, replay its
                                                    sessions and rebuild its results and report
+  dreamteam benchmark reproduce RESULTS [-out DIR] rerun a results directory's configuration and
+                                                   compare every deterministic file with its manifest
   OUTPUT (run, replay):
     -format text|json       text summary (default) or the canonical result JSON on stdout
                             (-summary is an alias)

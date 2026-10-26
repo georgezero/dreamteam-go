@@ -1,0 +1,146 @@
+DreamTeam benchmark v04b-dev · engine 0.4.0-dev.2 · dreamteam.agent/v1
+scenarios sustainable · seeds 40501, 40502, 40503, 40504, 40505 · 90 days · decisions every 1 day(s) at 07:00
+policies noop@1, greedy@1, rules@1, python-ref@1 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                            status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90    breaches  overtime    alerts  T90
+sustainable-s40501-noop        completed  0/0/0         ok      $12,702   $748,007     836   4,696  1,031 min  484       14,369 min  345     NO GO · v0.2-eval-4
+sustainable-s40501-greedy      completed  12/0/0        ok      -$20,018  $748,517     836   4,696  804 min    305       14,369 min  342     NO GO · v0.2-eval-4
+sustainable-s40501-rules       completed  12/0/0        ok      -$20,018  $748,517     836   4,696  792 min    300       14,369 min  342     NO GO · v0.2-eval-4
+sustainable-s40501-python-ref  completed  0/0/0         ok      $12,702   $748,007     836   4,696  1,031 min  484       14,369 min  345     NO GO · v0.2-eval-4
+sustainable-s40502-noop        completed  0/0/0         ok      $15,406   $751,369     681   4,689  1,299 min  673       13,124 min  329     NO GO · v0.2-eval-4
+sustainable-s40502-greedy      completed  12/0/0        ok      -$11,951  $756,705     681   4,689  847 min    319       13,124 min  325     NO GO · v0.2-eval-4
+sustainable-s40502-rules       completed  12/0/0        ok      -$11,951  $756,717     681   4,689  828 min    306       13,124 min  325     NO GO · v0.2-eval-4
+sustainable-s40502-python-ref  completed  0/0/0         ok      $15,406   $751,369     681   4,689  1,299 min  673       13,124 min  329     NO GO · v0.2-eval-4
+sustainable-s40503-noop        completed  0/0/0         ok      -$3,499   $728,148     776   4,630  984 min    402       11,777 min  325     NO GO · v0.2-eval-4
+sustainable-s40503-greedy      completed  12/0/0        ok      -$33,874  $731,682     776   4,630  781 min    289       11,777 min  318     NO GO · v0.2-eval-4
+sustainable-s40503-rules       completed  12/0/0        ok      -$33,874  $731,703     776   4,630  777 min    284       11,777 min  318     NO GO · v0.2-eval-4
+sustainable-s40503-python-ref  completed  0/0/0         ok      -$3,499   $728,148     776   4,630  984 min    402       11,777 min  325     NO GO · v0.2-eval-4
+sustainable-s40504-noop        completed  0/0/0         ok      $16,982   $751,704     865   4,701  1,107 min  512       12,989 min  323     NO GO · v0.2-eval-4
+sustainable-s40504-greedy      completed  12/0/0        ok      -$13,868  $753,658     865   4,701  876 min    335       12,989 min  318     NO GO · v0.2-eval-4
+sustainable-s40504-rules       completed  12/0/0        ok      -$13,868  $753,658     865   4,701  863 min    329       12,989 min  318     NO GO · v0.2-eval-4
+sustainable-s40504-python-ref  completed  0/0/0         ok      $16,982   $751,704     865   4,701  1,107 min  512       12,989 min  323     NO GO · v0.2-eval-4
+sustainable-s40505-noop        completed  0/0/0         ok      -$6,462   $726,415     883   4,584  1,048 min  472       12,458 min  323     NO GO · v0.2-eval-4
+sustainable-s40505-greedy      completed  12/0/0        ok      -$37,618  $729,821     883   4,584  828 min    290       12,458 min  321     NO GO · v0.2-eval-4
+sustainable-s40505-rules       completed  12/0/0        ok      -$37,619  $729,821     883   4,584  827 min    290       12,458 min  321     NO GO · v0.2-eval-4
+sustainable-s40505-python-ref  completed  0/0/0         ok      -$6,462   $726,415     883   4,584  1,048 min  472       12,458 min  323     NO GO · v0.2-eval-4
+
+2. Initial conditions (same scenario and seed)
+
+scenario     seed   runs  start                state digest   identical
+sustainable  40501  4     2026-10-13T06:00:00  82b7dde2815e…  yes
+sustainable  40502  4     2026-10-13T06:00:00  a95419b5fc14…  yes
+sustainable  40503  4     2026-10-13T06:00:00  9da7439507e5…  yes
+sustainable  40504  4     2026-10-13T06:00:00  e84402da22de…  yes
+sustainable  40505  4     2026-10-13T06:00:00  ab8503a0823c…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (5/5)                          greedy@1 (5/5)                        rules@1 (5/5)                         python-ref@1 (5/5)
+netRevenueCents         $726,415 / $748,007 / $751,704        $729,821 / $748,517 / $756,705        $729,821 / $748,517 / $756,717        $726,415 / $748,007 / $751,704
+operatingExpenseCents   $731,646 / $734,722 / $735,963        $765,556 / $767,525 / $768,656        $765,577 / $767,526 / $768,668        $731,646 / $734,722 / $735,963
+operatingProfitCents    -$6,462 / $12,702 / $16,982           -$37,618 / -$20,018 / -$11,951        -$37,619 / -$20,018 / -$11,951        -$6,462 / $12,702 / $16,982
+operatingCashFlowCents  -$68,542 / -$65,216 / -$61,463        -$98,907 / -$94,820 / -$89,029        -$98,908 / -$94,404 / -$89,033        -$68,542 / -$65,216 / -$61,463
+minCashCents            $48,642 / $53,680 / $58,502           $41,589 / $46,349 / $52,605           $41,848 / $46,349 / $52,840           $48,642 / $53,680 / $58,502
+shortfallCents          $0 / $0 / $0                          $0 / $0 / $0                          $0 / $0 / $0                          $0 / $0 / $0
+ordersReceived          5,459 / 5,524 / 5,681                 5,459 / 5,524 / 5,681                 5,459 / 5,524 / 5,681                 5,459 / 5,524 / 5,681
+ordersLost              681 / 836 / 883                       681 / 836 / 883                       681 / 836 / 883                       681 / 836 / 883
+examsCompleted          4,584 / 4,689 / 4,701                 4,584 / 4,689 / 4,701                 4,584 / 4,689 / 4,701                 4,584 / 4,689 / 4,701
+reportsFinal            4,572 / 4,665 / 4,691                 4,588 / 4,693 / 4,697                 4,588 / 4,693 / 4,697                 4,572 / 4,665 / 4,691
+tatP50Sec               109 min / 130 min / 195 min           36 min / 43 min / 49 min              35 min / 42 min / 48 min              109 min / 130 min / 195 min
+tatP90Sec               984 min / 1,048 min / 1,299 min       781 min / 828 min / 876 min           777 min / 827 min / 863 min           984 min / 1,048 min / 1,299 min
+tatOverTarget           425 / 496 / 709                       296 / 311 / 345                       291 / 306 / 339                       425 / 496 / 709
+tatBreaches             402 / 484 / 673                       289 / 305 / 335                       284 / 300 / 329                       402 / 484 / 673
+backlogEnd              15 / 24 / 38                          8 / 10 / 12                           8 / 10 / 12                           15 / 24 / 38
+waitToExamP50Sec        20 min / 21 min / 22 min              20 min / 21 min / 22 min              20 min / 21 min / 22 min              20 min / 21 min / 22 min
+waitToExamP90Sec        70 min / 76 min / 81 min              70 min / 76 min / 81 min              70 min / 76 min / 81 min              70 min / 76 min / 81 min
+waitsOver30             1,560 / 1,614 / 1,697                 1,560 / 1,614 / 1,697                 1,560 / 1,614 / 1,697                 1,560 / 1,614 / 1,697
+displacedAppointments   –                                     –                                     –                                     –
+overtimeSec             11,777 min / 12,989 min / 14,369 min  11,777 min / 12,989 min / 14,369 min  11,777 min / 12,989 min / 14,369 min  11,777 min / 12,989 min / 14,369 min
+heldOver                130 / 141 / 148                       130 / 141 / 148                       130 / 141 / 148                       130 / 141 / 148
+skippedBreaks           0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+noCoverage              0 / 1 / 2                             0 / 1 / 2                             0 / 1 / 2                             0 / 1 / 2
+alertsRaisedWarn        1,322 / 1,337 / 1,394                 1,258 / 1,321 / 1,365                 1,257 / 1,320 / 1,364                 1,322 / 1,337 / 1,394
+alertsRaisedAlert       323 / 325 / 345                       318 / 321 / 342                       318 / 321 / 342                       323 / 325 / 345
+alertsActiveAtEnd       2 / 2 / 2                             2 / 2 / 2                             2 / 2 / 2                             2 / 2 / 2
+daysBelowZero           0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+actionsAttempted        0 / 0 / 0                             12 / 12 / 12                          12 / 12 / 12                          0 / 0 / 0
+actionsAccepted         0 / 0 / 0                             12 / 12 / 12                          12 / 12 / 12                          0 / 0 / 0
+actionsRejected         0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario     seed   policy      decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime  Δalerts
+sustainable  40501  greedy      different  different  -$32,719  +$511         0      0       -227 min  -179       0 min      -3
+sustainable  40502  greedy      different  different  -$27,357  +$5,336       0      0       -452 min  -354       0 min      -4
+sustainable  40503  greedy      different  different  -$30,375  +$3,535       0      0       -204 min  -113       0 min      -7
+sustainable  40504  greedy      different  different  -$30,850  +$1,954       0      0       -231 min  -177       0 min      -5
+sustainable  40505  greedy      different  different  -$31,157  +$3,406       0      0       -220 min  -182       0 min      -2
+sustainable  40501  rules       different  different  -$32,719  +$511         0      0       -240 min  -184       0 min      -3
+sustainable  40502  rules       different  different  -$27,357  +$5,349       0      0       -472 min  -367       0 min      -4
+sustainable  40503  rules       different  different  -$30,375  +$3,556       0      0       -207 min  -118       0 min      -7
+sustainable  40504  rules       different  different  -$30,850  +$1,954       0      0       -245 min  -183       0 min      -5
+sustainable  40505  rules       different  different  -$31,157  +$3,406       0      0       -221 min  -182       0 min      -2
+sustainable  40501  python-ref  same       identical  $0        $0            0      0       0 min     0          0 min      0
+sustainable  40502  python-ref  same       identical  $0        $0            0      0       0 min     0          0 min      0
+sustainable  40503  python-ref  same       identical  $0        $0            0      0       0 min     0          0 min      0
+sustainable  40504  python-ref  same       identical  $0        $0            0      0       0 min     0          0 min      0
+sustainable  40505  python-ref  same       identical  $0        $0            0      0       0 min     0          0 min      0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  greedy     rules      python-ref
+netRevenueCents         5 / 0 / 0  5 / 0 / 0  0 / 0 / 5
+operatingExpenseCents   5 / 0 / 0  5 / 0 / 0  0 / 0 / 5
+operatingProfitCents    0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+operatingCashFlowCents  0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+minCashCents            0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+shortfallCents          0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+ordersReceived          0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+ordersLost              0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+examsCompleted          0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+reportsFinal            5 / 0 / 0  5 / 0 / 0  0 / 0 / 5
+tatP50Sec               0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+tatP90Sec               0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+tatOverTarget           0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+tatBreaches             0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+backlogEnd              0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+waitToExamP50Sec        0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+waitToExamP90Sec        0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+waitsOver30             0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+displacedAppointments   0 / 0 / 0  0 / 0 / 0  0 / 0 / 0
+overtimeSec             0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+heldOver                0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+skippedBreaks           0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+noCoverage              0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+alertsRaisedWarn        0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+alertsRaisedAlert       0 / 5 / 0  0 / 5 / 0  0 / 0 / 5
+alertsActiveAtEnd       0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+daysBelowZero           0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+actionsAttempted        5 / 0 / 0  5 / 0 / 0  0 / 0 / 5
+actionsAccepted         5 / 0 / 0  5 / 0 / 0  0 / 0 / 5
+actionsRejected         0 / 0 / 5  0 / 0 / 5  0 / 0 / 5
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  20
+
+policy      decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop        450              0        0        0        0                0                0
+greedy      450              60       60       0        0                0                0
+rules       450              60       60       0        0                0                0
+python-ref  450              0        0        0        0                0                0
+
+6. Replay verification
+
+20 of 20 saved sessions replayed with every digest verified; 20 of 20 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

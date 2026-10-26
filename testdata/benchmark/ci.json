@@ -1,13 +1,22 @@
 {
  "schema": "dreamteam.benchmark/v1",
  "id": "ci",
- "description": "A small benchmark CI runs on every platform: its manifest is compared byte for byte across platforms. Not a performance check.",
+ "description": "A small benchmark CI runs on every platform, the reference external Python policy included (run from the repository root): its manifest is compared byte for byte across platforms. Not a performance check.",
  "scenarios": ["mini", "sustainable"],
  "seeds": [7],
  "seedPlan": "A fixed test seed; not a development or evaluation seed.",
  "days": 3,
  "cadence": {"everyDays": 1, "at": "07:00"},
- "policies": ["noop", "greedy", "rules"],
+ "policies": ["noop", "greedy", "rules", "python-ref"],
+ "external": [
+  {
+   "id": "python-ref",
+   "version": "1",
+   "description": "the reference external policy (clients/python/reference_policy.py)",
+   "command": ["python3", "-I", "-B", "./clients/python/reference_policy.py"],
+   "timeoutSeconds": 120
+  }
+ ],
  "baseline": "noop",
  "output": "results",
  "evaluation": {"t90": true}
