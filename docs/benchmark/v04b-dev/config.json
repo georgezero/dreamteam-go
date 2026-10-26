@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v04b-dev",
+ "description": "V0.4b development comparison: the no-op baseline, the two built-in policies and the reference external Python policy on the bundled sustainable scenario, five fresh development seeds, 90 days. A demonstration of external execution over a longer horizon, not a confirmatory benchmark or a policy-performance claim. Run from the repository root.",
+ "scenarios": ["sustainable"],
+ "seeds": [40501, 40502, 40503, 40504, 40505],
+ "seedPlan": "Chosen 2026-10-26, before any run on them and without reference to the V0.4a results: the five consecutive integers from 40501, the next unused block after V0.4a's 40401-40405. None appears in the repository outside protocol transcripts. Not reference seeds (1001-1020), not the V0.2 development seeds (901-910), not V0.4a's seeds, not drawn from any reserved stream; the sealed holdout guard accepts them.",
+ "days": 90,
+ "cadence": {"everyDays": 1, "at": "07:00"},
+ "policies": ["noop", "greedy", "rules", "python-ref"],
+ "external": [
+  {
+   "id": "python-ref",
+   "version": "1",
+   "description": "the reference external policy (clients/python/reference_policy.py): a weekly review that raises one site reading allocation by 5 points, validated first, when the oldest unfinished study is over a day old; not a strategy",
+   "command": ["python3", "-I", "-B", "./clients/python/reference_policy.py"],
+   "timeoutSeconds": 120
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {"t90": true}
+}
