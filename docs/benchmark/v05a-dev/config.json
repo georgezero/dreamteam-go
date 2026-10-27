@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v05a-dev",
+ "description": "V0.5a integration smoke test: the external LLM agent (agents/llm, live, one local model) beside the no-op baseline on the bundled sustainable scenario, one fresh development seed, 7 days, daily decisions. It shows that a model can take part in a complete, replayable session; it is not a performance benchmark. Run from the repository root with DREAMTEAM_LLM_BASE_URL set.",
+ "scenarios": ["sustainable"],
+ "seeds": [40601],
+ "seedPlan": "Chosen 2026-10-27, before any run on it and without reference to earlier results: 40601, the next unused block after V0.4a's 40401-40405 and V0.4b's 40501-40505. It appears nowhere else in the repository. Not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream; the sealed holdout guard accepts it.",
+ "days": 7,
+ "cadence": {"everyDays": 1, "at": "07:00"},
+ "policies": ["noop", "llm"],
+ "external": [
+  {
+   "id": "llm",
+   "version": "1",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent v1, prompt llm-agent-prompt/v1), live, with the model and limits of docs/benchmark/v05a-dev/llm-settings.json; stateless, one validated batch at most per decision point",
+   "command": ["python3", "-I", "-B", "./agents/llm/llm_agent.py", "--settings", "./docs/benchmark/v05a-dev/llm-settings.json"],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {"t90": false}
+}
