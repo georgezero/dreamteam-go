@@ -1,0 +1,20 @@
+{
+ "schema": "dreamteam.llm-agent-settings/v1",
+ "description": "V0.5b live smoke test: a local OpenAI-compatible server (its address in DREAMTEAM_LLM_BASE_URL, never committed); no API key is needed, one is read from DREAMTEAM_LLM_API_KEY if set. The same model as V0.5a's smoke test, kept so that the slice changes the agent, not the model; no prices are configured, as a local model has no billing. Memory, observation, catalog and details settings are the defaults, stated.",
+ "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+ "baseUrlEnv": "DREAMTEAM_LLM_BASE_URL",
+ "apiKeyEnv": "DREAMTEAM_LLM_API_KEY",
+ "requestTimeoutSeconds": 300,
+ "temperature": 0,
+ "maxOutputTokens": 2048,
+ "maxRetries": 1,
+ "decisionBudgetSeconds": 900,
+ "responseFormat": "json_object",
+ "maxPromptChars": 200000,
+ "observation": "summary",
+ "catalog": "guided",
+ "allowDetails": true,
+ "memoryDecisions": 6,
+ "memoryMetricPoints": 6,
+ "memoryMaxChars": 6000
+}

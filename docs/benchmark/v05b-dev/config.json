@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v05b-dev",
+ "description": "V0.5b integration smoke test: the LLM agent with bounded memory, action guidance and targeted prompts (agents/llm, llm-agent 2, live, one local model) beside the no-op baseline on the bundled sustainable scenario, one fresh development seed, 14 days, daily decisions. It shows that the agent takes part in a complete, replayable session with its memory carried across decision points; it is not a performance benchmark and not a model comparison. Run from the repository root with DREAMTEAM_LLM_BASE_URL set.",
+ "scenarios": ["sustainable"],
+ "seeds": [40701],
+ "seedPlan": "Chosen 2026-10-27, before any run on it and without reference to earlier results: 40701, the next unused block after V0.4a's 40401-40405, V0.4b's 40501-40505 and V0.5a's 40601. It appears nowhere else in the repository. Not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream; the sealed holdout guard accepts it.",
+ "days": 14,
+ "cadence": {"everyDays": 1, "at": "07:00"},
+ "policies": ["noop", "llm"],
+ "external": [
+  {
+   "id": "llm",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1), live, with the model and limits of docs/benchmark/v05b-dev/llm-settings.json; bounded memory within the run, an operations and a staffing batch at most per decision point",
+   "command": ["python3", "-I", "-B", "./agents/llm/llm_agent.py", "--settings", "./docs/benchmark/v05b-dev/llm-settings.json"],
+   "timeoutSeconds": 3600
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {"t90": false}
+}
