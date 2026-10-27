@@ -17,7 +17,7 @@ import (
 // protocol, policies (and an external policy's files) and metric
 // definitions, and every deterministic file's SHA-256. The
 // nondeterministic files (timing.json, an external policy's standard
-// error) are not compared. An external policy's command is resolved from
+// error and evidence) are not compared. An external policy's command is resolved from
 // the directory Reproduce runs in, as benchmark run resolves it.
 func Reproduce(dir, out string, progress io.Writer) ([]Check, error) {
 	m, c, _, err := LoadResults(dir)

@@ -133,7 +133,7 @@ func benchmarkReproduce(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "dreamteam:", err)
 		return exitError
 	}
-	return printChecks(stdout, checks, "(a rerun compared with the recorded manifest; timing and standard error are not compared)")
+	return printChecks(stdout, checks, "(a rerun compared with the recorded manifest; timing, standard error and policy evidence are not compared)")
 }
 
 // printChecks prints one line per check and a summary. Exit 0: every

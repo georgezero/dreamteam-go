@@ -456,3 +456,9 @@ The V0.4b file was made from 1a88857 (0.4.0-dev.2) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v042.actions.json`
 (the same batches as the 5C.4l file's). 0.4.0 replays it in batch mode
 `v0.4_dev2` with every digest verified (`internal/session/v042_test.go`).
+
+The V0.4 release file was made by the v0.4.0 release (ced3acb) with
+`-scenario mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-v040.actions.json` (the same batches as the
+5C.4l file's). 0.5.0-dev.1 replays it in batch mode `v0.4.0` with every
+digest verified (`internal/session/v040_test.go`).

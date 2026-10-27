@@ -19,6 +19,11 @@ patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
+In development (unreleased): **V0.5**, LLM agents. V0.5a adds an
+external LLM agent that manages the practice through the benchmark
+harness with any OpenAI-compatible model server (`agents/llm/`,
+`docs/LLM_AGENT.md`).
+
 ## Quick start
 
 Requires Go 1.26 or later. Runs on Linux and macOS (developed on a
@@ -291,6 +296,22 @@ seed from the protocol but does not sandbox them. Specification:
 `docs/BENCHMARK.md`; the development runs: `docs/benchmark/v04a-smoke/`
 (30 days) and `docs/benchmark/v04b-dev/` (90 days, with the Python policy).
 
+### LLM agent (V0.5a, in development)
+
+`agents/llm/llm_agent.py` asks a language model how to manage the
+practice. It runs as an external benchmark policy, a separate process per
+run, and calls any OpenAI-compatible chat completions API: a local server
+or a hosted one. At each decision point it reads the compact public
+observation and the action catalog, asks the model for a strict JSON
+decision (`{"reason": …, "actions": […]}`), validates it through the
+protocol and submits it only if it is valid. It retries a bounded number
+of times, then decides no change. Every model exchange (prompt, raw
+reply, token usage, latency, errors) is kept in the run's
+`policy-evidence/`, with no secrets. A recorded decision sequence replays
+through the agent without the model and reproduces the live run's
+outcome exactly. Settings, decision format, evidence and replay:
+`docs/LLM_AGENT.md`; the live smoke test: `docs/benchmark/v05a-dev/`.
+
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
 README for checking and (deliberately) regenerating them.
@@ -310,7 +331,8 @@ records, replay, results), `internal/tui` (Bubble Tea terminal UI, a client
 of `session` and `api` only), `internal/api` (observations and actions),
 `internal/scenario`, `internal/rng` (keyed, platform-independent draws),
 `internal/agent` (the agent protocol), `internal/bench` (the evaluation
-harness), `cmd/dreamteam`.
+harness), `cmd/dreamteam`; `clients/python` (the protocol client and the
+reference policy) and `agents/llm` (the LLM agent).
 
 ## Documents
 
@@ -325,6 +347,7 @@ harness), `cmd/dreamteam`.
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
+| `docs/LLM_AGENT.md` | the LLM agent: setup, settings, decisions, evidence, replay (V0.5a development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
@@ -332,6 +355,11 @@ harness), `cmd/dreamteam`.
 | `docs/reviews/` | external design reviews and their resolutions |
 
 ## Known limitations (V0.4)
+
+The V0.5a LLM agent, in development, has its own (`docs/LLM_AGENT.md` §9):
+it is stateless (no memory, no planning), submits at most one batch per
+decision point, and its live runs are not reproducible (recorded runs
+replay exactly).
 
 * **Agent evaluation harness** (`docs/BENCHMARK.md` §12):
   * External policies are trusted development participants, not

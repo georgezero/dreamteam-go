@@ -36,6 +36,16 @@ const (
 	maxStderr        = 1 << 20 // bytes of standard error kept
 	FileStderr       = "stderr.txt"
 	policyWorkPrefix = "dreamteam-policy-"
+
+	// An external policy's own evidence (V0.5a): the regular files it
+	// leaves under EvidenceDir in its working directory are kept in the
+	// run's FileEvidence directory, up to maxEvidence bytes and
+	// maxEvidenceFiles files. They are the process's own output, outside
+	// the protocol: listed in the manifest, not hashed.
+	EvidenceDir      = "evidence"
+	FileEvidence     = "policy-evidence"
+	maxEvidence      = 64 << 20
+	maxEvidenceFiles = 1000
 )
 
 // The statuses of an external policy's failures (a built-in policy's
@@ -346,8 +356,8 @@ func drain(c chan line) {
 
 // finish ends the process after the run: after a completed run, the end
 // turn, then the exit (status 0) within the timeout; otherwise it is
-// stopped. Its standard error is kept in dir, and its working directory
-// removed.
+// stopped. Its standard error and evidence files are kept in dir, and its
+// working directory removed.
 func (x *external) finish(completed bool, dir string) error {
 	var fail error
 	if x.started && !x.done && completed {
@@ -377,7 +387,11 @@ func (x *external) finish(completed bool, dir string) error {
 		}
 	}
 	x.stop()
-	werr := os.WriteFile(filepath.Join(dir, FileStderr), x.stderr.bytes(), 0o644)
+	var werr error
+	if x.work != "" {
+		werr = keepEvidence(filepath.Join(x.work, EvidenceDir), filepath.Join(dir, FileEvidence), &x.stderr)
+	}
+	werr = errors.Join(werr, os.WriteFile(filepath.Join(dir, FileStderr), x.stderr.bytes(), 0o644))
 	if x.work != "" {
 		werr = errors.Join(werr, os.RemoveAll(x.work))
 	}
@@ -385,6 +399,41 @@ func (x *external) finish(completed bool, dir string) error {
 		return werr
 	}
 	return fail
+}
+
+// keepEvidence copies the regular files under src (symbolic links and
+// other special files are passed over) to dst, within the limits; what
+// does not fit is named on the run's standard error. No src: nothing.
+func keepEvidence(src, dst string, notes io.Writer) error {
+	if st, err := os.Lstat(src); err != nil || !st.IsDir() {
+		return nil
+	}
+	var size int64
+	var files int
+	return filepath.WalkDir(src, func(p string, d os.DirEntry, err error) error {
+		if err != nil || !d.Type().IsRegular() {
+			return nil
+		}
+		rel, _ := filepath.Rel(src, p)
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+		if files+1 > maxEvidenceFiles || size+info.Size() > maxEvidence {
+			fmt.Fprintf(notes, "\n[policy evidence not kept: %s (over %d files or %d bytes)]\n", filepath.ToSlash(rel), maxEvidenceFiles, maxEvidence)
+			return nil
+		}
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			return nil
+		}
+		files, size = files+1, size+int64(len(raw))
+		out := filepath.Join(dst, rel)
+		if err := os.MkdirAll(filepath.Dir(out), 0o755); err != nil {
+			return err
+		}
+		return os.WriteFile(out, raw, 0o644)
+	})
 }
 
 // capped keeps the first maxStderr bytes written to it.

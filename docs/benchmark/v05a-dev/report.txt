@@ -1,0 +1,108 @@
+DreamTeam benchmark v05a-dev · engine 0.5.0-dev.1 · dreamteam.agent/v1
+scenarios sustainable · seeds 40601 · 7 days · decisions every 1 day(s) at 07:00
+policies noop@1, llm@1 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                      status     appl/ref/err  replay  profit   net revenue  lost  exams  TAT p90  breaches  overtime  alerts  T90
+sustainable-s40601-noop  completed  0/0/0         ok      -$2,830  $56,713      62    354    911 min  22        484 min   17      not requested
+sustainable-s40601-llm   completed  2/0/0         ok      -$2,983  $56,622      62    358    906 min  20        790 min   17      not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario     seed   runs  start                state digest   identical
+sustainable  40601  2     2026-10-13T06:00:00  6ad4ecf4ecf7…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (1/1)                    llm@1 (1/1)
+netRevenueCents         $56,713 / $56,713 / $56,713     $56,622 / $56,622 / $56,622
+operatingExpenseCents   $59,543 / $59,543 / $59,543     $59,605 / $59,605 / $59,605
+operatingProfitCents    -$2,830 / -$2,830 / -$2,830     -$2,983 / -$2,983 / -$2,983
+operatingCashFlowCents  $7,007 / $7,007 / $7,007        $7,007 / $7,007 / $7,007
+minCashCents            $126,702 / $126,702 / $126,702  $126,702 / $126,702 / $126,702
+shortfallCents          $0 / $0 / $0                    $0 / $0 / $0
+ordersReceived          450 / 450 / 450                 450 / 450 / 450
+ordersLost              62 / 62 / 62                    62 / 62 / 62
+examsCompleted          354 / 354 / 354                 358 / 358 / 358
+reportsFinal            362 / 362 / 362                 366 / 366 / 366
+tatP50Sec               99 min / 99 min / 99 min        97 min / 97 min / 97 min
+tatP90Sec               911 min / 911 min / 911 min     906 min / 906 min / 906 min
+tatOverTarget           22 / 22 / 22                    20 / 20 / 20
+tatBreaches             22 / 22 / 22                    20 / 20 / 20
+backlogEnd              1 / 1 / 1                       1 / 1 / 1
+waitToExamP50Sec        20 min / 20 min / 20 min        20 min / 20 min / 20 min
+waitToExamP90Sec        60 min / 60 min / 60 min        60 min / 60 min / 60 min
+waitsOver30             118 / 118 / 118                 117 / 117 / 117
+displacedAppointments   –                               –
+overtimeSec             484 min / 484 min / 484 min     790 min / 790 min / 790 min
+heldOver                7 / 7 / 7                       7 / 7 / 7
+skippedBreaks           0 / 0 / 0                       0 / 0 / 0
+noCoverage              0 / 0 / 0                       1 / 1 / 1
+alertsRaisedWarn        80 / 80 / 80                    80 / 80 / 80
+alertsRaisedAlert       17 / 17 / 17                    17 / 17 / 17
+alertsActiveAtEnd       0 / 0 / 0                       0 / 0 / 0
+daysBelowZero           0 / 0 / 0                       0 / 0 / 0
+actionsAttempted        0 / 0 / 0                       3 / 3 / 3
+actionsAccepted         0 / 0 / 0                       3 / 3 / 3
+actionsRejected         0 / 0 / 0                       0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario     seed   policy  decisions  outcome    Δprofit  Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime  Δalerts
+sustainable  40601  llm     different  different  -$153    -$91          0      +4      -5 min    -2         +307 min   0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  llm
+netRevenueCents         0 / 1 / 0
+operatingExpenseCents   1 / 0 / 0
+operatingProfitCents    0 / 1 / 0
+operatingCashFlowCents  0 / 0 / 1
+minCashCents            0 / 0 / 1
+shortfallCents          0 / 0 / 1
+ordersReceived          0 / 0 / 1
+ordersLost              0 / 0 / 1
+examsCompleted          1 / 0 / 0
+reportsFinal            1 / 0 / 0
+tatP50Sec               0 / 1 / 0
+tatP90Sec               0 / 1 / 0
+tatOverTarget           0 / 1 / 0
+tatBreaches             0 / 1 / 0
+backlogEnd              0 / 0 / 1
+waitToExamP50Sec        0 / 1 / 0
+waitToExamP90Sec        0 / 0 / 1
+waitsOver30             0 / 1 / 0
+displacedAppointments   0 / 0 / 0
+overtimeSec             1 / 0 / 0
+heldOver                0 / 0 / 1
+skippedBreaks           0 / 0 / 1
+noCoverage              1 / 0 / 0
+alertsRaisedWarn        0 / 0 / 1
+alertsRaisedAlert       0 / 0 / 1
+alertsActiveAtEnd       0 / 0 / 1
+daysBelowZero           0 / 0 / 1
+actionsAttempted        1 / 0 / 0
+actionsAccepted         1 / 0 / 0
+actionsRejected         0 / 0 / 1
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  2
+
+policy  decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop    7                0        0        0        0                0                0
+llm     7                2        2        0        0                0                0
+
+6. Replay verification
+
+2 of 2 saved sessions replayed with every digest verified; 2 of 2 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

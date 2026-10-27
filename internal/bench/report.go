@@ -100,6 +100,14 @@ func finish(c *Config, dir string, recs []*RunRecord, specs []PolicySpec) (*Mani
 		if rel := filepath.ToSlash(filepath.Join("runs", rec.ID, FileStderr)); fileExists(filepath.Join(dir, rel)) {
 			m.Nondeterministic = append(m.Nondeterministic, rel)
 		}
+		// Its evidence files (V0.5a), likewise.
+		filepath.WalkDir(filepath.Join(dir, "runs", rec.ID, FileEvidence), func(p string, d os.DirEntry, err error) error {
+			if err == nil && !d.IsDir() {
+				rel, _ := filepath.Rel(dir, p)
+				m.Nondeterministic = append(m.Nondeterministic, filepath.ToSlash(rel))
+			}
+			return nil
+		})
 		for _, f := range runFiles {
 			rel := filepath.Join("runs", rec.ID, f)
 			if _, err := os.Stat(filepath.Join(dir, rel)); err != nil {

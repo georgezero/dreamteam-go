@@ -7,6 +7,101 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.5a — the external LLM agent (0.5.0-dev.1)
+
+Owner decision 2026-10-27: V0.4.0 accepted at ced3acb; V0.5 re-slotted
+from growth to LLM agents (growth deferred, V0.6 the full agent
+benchmark). V0.5a: one minimal model-agnostic LLM agent that takes part
+through the existing policy protocol as a separate process.
+
+**Built.**
+* **The agent** (`agents/llm/llm_agent.py`, llm-agent v1; spec
+  `docs/LLM_AGENT.md`). Standard library Python, an OpenAI-compatible chat
+  completions client.
+  * **Settings** (`dreamteam.llm-agent-settings/v1`): the model and base
+    URL, given directly or by environment variable; the API key from the
+    environment only; timeout, temperature, output tokens, retries,
+    decision budget, response format, prompt bound, optional system
+    prompt file.
+  * **Each decision point:** `digests`, the compact observation, the
+    catalog; a bounded prompt (`llm-agent-prompt/v1`); a strict
+    `{"reason", "actions"}` reply; catalog types checked; the batch
+    validated through the protocol and submitted only if valid; bounded
+    retries with the error fed back; no action on failure.
+  * **Stateless:** no memory, no planning, one batch at most.
+* **Evidence:** `agent.json`, `model.jsonl` (every request payload, raw
+  response, usage, latency, error), `decisions.jsonl` and `summary.json`,
+  without secrets.
+* **Replay mode** (`--replay FILE…`): recorded decisions submitted without
+  a model, each matched to its decision point and all five digests;
+  several recordings are matched by their first digests.
+* **Harness:** an external policy's `evidence/` files are kept in the
+  run's `policy-evidence/` (≤1,000 files, ≤64 MiB, regular files only),
+  listed in the manifest as nondeterministic and not hashed. No other
+  harness, protocol, scoring or simulator change; manifests of configurations
+  without evidence are unchanged.
+* **Version:** 0.5.0-dev.1; 0.4.0 registered for replay
+  (`mini-seed52-v040`, batch mode `v0.4.0`).
+* **Roadmap re-slot**; CI runs the agent's unit tests and replays the smoke
+  test's recorded decisions on every platform.
+
+**Mock acceptance** (`internal/bench/llm_agent_test.go`, a deterministic
+mock OpenAI-compatible server; ten behaviours; `TestLLMAgentMock`,
+`TestLLMAgentReplay`):
+* every run completes;
+* the agent asks only for hello, digests, observe, actions and validate,
+  and the gate denies nothing;
+* a no-action reply is no change, and a valid raise is applied, from a
+  plain or fenced reply and on a retry;
+* prose, an unknown action, a refused allocation, an extra field, a slow
+  server and HTTP 500 each get exactly one retry, then no action, with
+  nothing applied;
+* the evidence is kept and listed;
+* the stand-in API key reaches the server and appears in no result file;
+* a replay calls no model and reproduces the live runs' decisions,
+  sessions, results and digests; another run's or a tampered recording
+  is refused (`policy_crash`).
+
+The Python unit tests (11) cover the settings, parsing, endpoint, prompt
+bound and replay matching.
+
+**Live smoke test** (`docs/benchmark/v05a-dev/`; config, settings and agent
+committed first in b5ac92f; sustainable, seed 40601, 7 days, noop and the
+agent with `Qwen3.6-35B-A3B-oQ4e-mtp` on a local server):
+* both runs completed, and `verify` passed 24 of 24;
+* 7 decisions: 5 no action, 2 batches (3 shift extensions), all valid when
+  submitted;
+* 2 proposals refused by `validate` (`past_date`, `after_close`) were each
+  corrected on the one retry;
+* 9 model calls: 202,084 prompt and 1,225 completion tokens, mean latency
+  5.1 s.
+
+**Replay:** byte-identical decisions, sessions, results and final digests
+to the live run; reproduce 19 of 19; manifest byte-identical on
+linux/arm64 and linux/amd64 (Python 3.11 and 3.13).
+
+**Validation:**
+* the full uncached suite passes on linux/arm64 (3,632 s) and linux/amd64
+  (532 s);
+* race passes on the affected packages (bench, agent, session,
+  cmd/dreamteam): 0 data races;
+* vet (all tags) and gofmt are clean;
+* 35 of 35 session fixtures replay, including the new 0.4.0 fixture;
+* golden references are identical;
+* the Python agent's unit tests pass on Python 3.11 and 3.13, and the
+  Python client and reference policy are unchanged;
+* the CI benchmark passes verify (86/86) and reproduce (59/59); its 48
+  files equal v0.4.0's apart from the engine version;
+* cross-builds succeed for five targets.
+
+**Known limitations** (`docs/LLM_AGENT.md` §9): stateless; one batch per
+decision point (V0.1 and staffing actions cannot share one); live runs
+are not reproducible; about 22,000 prompt tokens per decision; a trusted
+process; no cost accounting beyond tokens and latency; one model, one
+seed, 7 days: not a measure of decision quality.
+
+---
+
 ## V0.4.0 — release
 
 The V0.4 release on the owner's decision (2026-10-26): V0.4b accepted at

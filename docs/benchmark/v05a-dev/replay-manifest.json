@@ -1,0 +1,318 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v05a-replay",
+ "engine": "0.5.0-dev.1",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "2016a4d0adb8c8ebbdb5b77b96384573710f2140255590ae13d03fd31e70bd8d"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "llm",
+   "version": "1",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent v1) in replay mode: the live smoke test's recorded decisions, each checked against its decision point and digests; no model is called",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--replay",
+     "./docs/benchmark/v05a-dev/llm-decisions.jsonl"
+    ],
+    "timeoutSeconds": 120,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "888d9be0fdca76d70caaacba07674ee06e9f11b49cf1bafbb5dc550d8007f071"
+     },
+     {
+      "path": "./docs/benchmark/v05a-dev/llm-decisions.jsonl",
+      "sha256": "681a9c139084a90c2f415d0cae81b6e7fcbb9c943014c9743126e8263c06d9ea"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40601-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40601-noop/run.json",
+     "sha256": "f23ca4e142141da38a8f69d7c3f5b157ee2bd3196d5da11c038378ac5202f801"
+    },
+    {
+     "path": "runs/sustainable-s40601-noop/decisions.json",
+     "sha256": "a32600f51cb353d1b0b28250b9218e2c40b3e61b304aa2a91aac21ca34064d97"
+    },
+    {
+     "path": "runs/sustainable-s40601-noop/transcript.jsonl",
+     "sha256": "268ac63fa87b2cabdcf8a825f1127c43dacad31f27f53c3b0dec403d6d10aa0d"
+    },
+    {
+     "path": "runs/sustainable-s40601-noop/session.json",
+     "sha256": "37c6e3d7daab0dccf46f44a64ad67fd640828ced8552ef70c1516d13796abd3a"
+    },
+    {
+     "path": "runs/sustainable-s40601-noop/result.json",
+     "sha256": "209d082c5b0f777f25df1306a0aae7ffe22045c1ef36914cdd2de359ecf6ce51"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40601-llm",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40601-llm/run.json",
+     "sha256": "3b82fccee241d70c4b230b663a369087bc6ba58631f7e43fb56e37a5557ac377"
+    },
+    {
+     "path": "runs/sustainable-s40601-llm/decisions.json",
+     "sha256": "681742f42cda7431225c788b8ca6a9cce1ffe65845f1cfb73d48062f356d7468"
+    },
+    {
+     "path": "runs/sustainable-s40601-llm/transcript.jsonl",
+     "sha256": "959cfd58343f56592a62b3ca9b659cceca8e039740c4c161634bdc4d083603d5"
+    },
+    {
+     "path": "runs/sustainable-s40601-llm/session.json",
+     "sha256": "6ddc31e4f2b6a41c2b53c583a5e1e7fea3220e8a127e785ba410834f812f6b96"
+    },
+    {
+     "path": "runs/sustainable-s40601-llm/result.json",
+     "sha256": "6d3fad4749ec9eda1ad8be124caf4bb89024ab051a7a1017d8e56bd4f0622ab6"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "5d8d63fc4472fa3e85d56ed92db1d7c0c05228420c704c0748098941a5cc1e31"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "a49f2809d55aa19399729f4a036e2add9b6a2cd54b7d4185ef2cb20ba6671c94"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/sustainable-s40601-llm/stderr.txt",
+  "runs/sustainable-s40601-llm/policy-evidence/agent.json",
+  "runs/sustainable-s40601-llm/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40601-llm/policy-evidence/summary.json"
+ ]
+}

@@ -16,8 +16,15 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
-| **V0.5** | Growth: equipment, extended hours, referrals, New Practice, progression and richer workforce dynamics | V0.3, V0.4 |
-| **V0.6** | WebUI/SQLite, benchmark framework, managed-practice harness, comparisons and automation levels | V0.3 API, V0.4 statements, V0.5 growth benchmarks |
+| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1; owner decision 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; model evidence recorded, recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
+| **V0.6** | Agent benchmark: agents evaluated systematically across models, scenarios, seeds and baselines; WebUI/SQLite, the managed-practice harness and automation levels remain planned here (§7) | V0.5 agents |
+| **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
+
+**Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
+and V0.6 is the full agent benchmark. V0.5 builds one LLM agent that manages
+a practice through the existing interface; V0.6 evaluates agents across
+models, scenarios, seeds and baselines. Growth is kept as a deferred
+milestone, not removed.
 
 **V0.2–V0.6: proposed in V0.2 design draft 2, pending the Step 0 gate** (first
 sweep 2026-10-14 and Step 0B 2026-10-15 did not pass; Step 0C 2026-10-15, a
@@ -414,7 +421,33 @@ Acceptance
   financing; cash-flow ties to cash. Scenario-specific calibration holds over
   six months; contribution views reveal measured capacity opportunities.
 
-## 6. V0.5 — Growth and progression
+## 5a. V0.5 — LLM agents
+
+**Owner decision 2026-10-27.** One model-agnostic LLM agent first: get one
+local model making valid management decisions before memory, planning or
+more benchmark infrastructure.
+
+* **V0.5a (0.5.0-dev.1): the external LLM agent** (`agents/llm/`,
+  [LLM_AGENT.md](LLM_AGENT.md)). A separate process speaking
+  `dreamteam.benchmark-policy/v1`; it calls a model through an
+  OpenAI-compatible API (no provider-specific dependency). Stateless: each
+  decision uses the current compact observation and the action catalog. A
+  strict `{"reason", "actions"}` decision, validated through the protocol
+  before submission; bounded retries; no action on failure. Every model
+  exchange recorded (not hashed); recorded decisions replay through the
+  protocol without the model and give the live run's simulator outcome
+  exactly. Tested against a mock server; one live 7-day smoke test.
+* **Later slices** (owner decisions): memory across decision points,
+  multi-action planning, a distinct baseline, cost tracking, fresh
+  development seeds chosen prospectively.
+
+Acceptance (V0.5a): the agent takes part in a complete, replayable session:
+valid structured decisions, no unauthorized operation, no action when
+none is warranted, failures that change nothing.
+
+## 6. Growth and progression (formerly V0.5; deferred)
+
+**Owner decision 2026-10-27: deferred to a future milestone, not removed.**
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
@@ -440,6 +473,10 @@ Acceptance
   referrals and finances without erasing workforce or patient obligations.
 
 ## 7. V0.6 — WebUI, benchmarks and managed practice
+
+**Owner decision 2026-10-27: V0.6 is the full agent benchmark**, evaluating
+agents across models, scenarios, seeds and baselines. The language-model
+agent itself (item 3) starts in V0.5, over stdio.
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
@@ -516,7 +553,7 @@ code, and neither replaces imaging-specific data.
 |---|---|---|---|
 | V0.1 step 18 | Spreadsheet (xlsx) | **P&L calibration workbook**: monthly volume × payer mix × rates − payroll − fixed − variable costs, with one input sheet per profitability preset. Lets assumptions be tuned and sanity-checked without running the sim | `docs/calibration/pnl-model.xlsx`; inputs mirror scenario JSON keys |
 | V0.4 | Anthropic **Finance** plugin (journal entries, reconciliation, statements, variance analysis, month-end close) | review ledger design, close procedure, statement reconciliation | review notes in a turn report; fixes in `sim` |
-| V0.5 | Anthropic **financial-analysis** plugin (DCF, three-statement models) | valuation proxy, lease-vs-buy, expansion payback | investment-case notes; parameters in scenario JSON |
+| Growth (formerly V0.5) | Anthropic **financial-analysis** plugin (DCF, three-statement models) | valuation proxy, lease-vs-buy, expansion payback | investment-case notes; parameters in scenario JSON |
 
 Limits: these plugins are general corporate finance. Imaging-specific numbers
 (reimbursement, denial rates, days in A/R, staffing ratios, radiologist

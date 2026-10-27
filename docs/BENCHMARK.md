@@ -14,6 +14,9 @@ Status: released in V0.4.0. V0.4a built the harness; V0.4b added
 external policy processes (§4), withheld the seed from every policy (§3,
 §11) and added `reproduce` (§8). The policy protocol
 `dreamteam.benchmark-policy/v1` is versioned and stable for V0.4.
+V0.5a (0.5.0-dev.1, in development) keeps an external policy's own
+evidence files (§4, §8) for the LLM agent ([LLM_AGENT.md](LLM_AGENT.md));
+the protocol is unchanged.
 
 ## 1. Commands
 
@@ -252,6 +255,13 @@ closes the policy's input. The policy must then exit with status 0.
 * **Standard error.** The process's standard error is captured
   separately, up to 1 MiB, in the run's `stderr.txt`. It is kept but not
   hashed: it is the process's own output, outside the protocol.
+* **Evidence (V0.5a).** The regular files the process leaves under
+  `evidence/` in its working directory are copied, after the process has
+  ended, to the run's `policy-evidence/` directory, up to 1,000 files and
+  64 MiB; what does not fit is named on `stderr.txt`. Symbolic links are
+  not followed. Like standard error, these files are kept, listed in the
+  manifest and not hashed. The LLM agent records its model exchanges
+  there.
 * **Failures** are classified, the process is stopped (killed if it
   still runs) and reaped, and the other runs go on:
 
@@ -425,11 +435,13 @@ The noop policy's T90 compares no action with no action.
       result.json        the replayed session's canonical result
       t90.json           the protocol's t90 response (when evaluated)
       stderr.txt         an external policy's standard error (not hashed)
+      policy-evidence/   an external policy's own evidence files (V0.5a; not
+                         hashed)
     timing.json          wall-clock seconds per run (not hashed)
 
 **Guarantees:**
-* Every file except `timing.json` and `stderr.txt` is deterministic,
-  given deterministic policies. Identical configurations and policy
+* Every file except `timing.json`, `stderr.txt` and `policy-evidence/`
+  is deterministic, given deterministic policies. Identical configurations and policy
   versions on the same engine give byte-identical files, `manifest.json`
   included. A rerun into another directory can be compared file by file,
   or by its manifest alone.
@@ -439,8 +451,8 @@ The noop policy's T90 compares no action with no action.
   interpreter's version. A timeout depends on the machine's speed, so a
   run that times out is not reproducible.
 * No hashed file holds an absolute path or a wall-clock time.
-  `timing.json` and `stderr.txt` are listed in the manifest as
-  nondeterministic and are not hashed.
+  `timing.json`, `stderr.txt` and the files in `policy-evidence/` are
+  listed in the manifest as nondeterministic and are not hashed.
 * Every number is an integer or the simulator's own value, so the files
   do not depend on the machine.
 
@@ -468,8 +480,8 @@ the following with RESULTS' manifest:
 
 It requires the engine that recorded the results. Like `run`, it
 resolves an external policy's files from the directory it is run from.
-Timing and standard error are not compared. The V0.4a smoke run, for
-example:
+Timing, standard error and policy evidence are not compared. The V0.4a
+smoke run, for example:
 
     dreamteam benchmark run docs/benchmark/v04a-smoke/config.json -out A
     dreamteam benchmark reproduce A

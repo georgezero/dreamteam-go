@@ -80,6 +80,19 @@ jobs:
           ./dt benchmark verify bench -t90 | tail -1
           ./dt benchmark reproduce bench -out bench-again 2> /dev/null | tail -1
           cp bench/manifest.json out/benchmark-manifest.json
+      - name: LLM agent
+        # The agent's unit tests, then the V0.5a smoke test's recorded model
+        # decisions replayed through the protocol without any model
+        # (docs/benchmark/v05a-dev/replay.json), verified and rerun. The
+        # replay's manifest is compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s agents/llm 2>&1 | tail -1
+          ./dt benchmark run docs/benchmark/v05a-dev/replay.json -out llm-replay > /dev/null
+          ./dt benchmark verify llm-replay | tail -1
+          ./dt benchmark reproduce llm-replay -out llm-replay-again 2> /dev/null | tail -1
+          cp llm-replay/manifest.json out/llm-replay-manifest.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
