@@ -16,7 +16,7 @@ external policy processes (§4), withheld the seed from every policy (§3,
 `dreamteam.benchmark-policy/v1` is versioned and stable for V0.4.
 V0.5a (0.5.0-dev.1, in development) keeps an external policy's own
 evidence files (§4, §8) for the LLM agent ([LLM_AGENT.md](LLM_AGENT.md));
-the protocol is unchanged.
+the protocol is unchanged. V0.5b (0.5.0-dev.2) changes only the LLM agent.
 
 ## 1. Commands
 

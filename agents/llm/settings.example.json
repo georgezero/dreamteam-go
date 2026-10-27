@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.llm-agent-settings/v1",
- "description": "An example: the model and the server's address come from the environment; an API key, only if the server needs one, from DREAMTEAM_LLM_API_KEY. See docs/LLM_AGENT.md.",
+ "description": "An example: the model and the server's address come from the environment; an API key, only if the server needs one, from DREAMTEAM_LLM_API_KEY. The prompt and memory settings are the defaults. Add \"pricing\": {\"currency\": \"USD\", \"inputPerMillion\": …, \"outputPerMillion\": …} for an estimated cost. See docs/LLM_AGENT.md.",
  "modelEnv": "DREAMTEAM_LLM_MODEL",
  "baseUrlEnv": "DREAMTEAM_LLM_BASE_URL",
  "apiKeyEnv": "DREAMTEAM_LLM_API_KEY",
@@ -8,5 +8,11 @@
  "temperature": 0,
  "maxOutputTokens": 2048,
  "maxRetries": 1,
- "decisionBudgetSeconds": 600
+ "decisionBudgetSeconds": 600,
+ "observation": "summary",
+ "catalog": "guided",
+ "allowDetails": true,
+ "memoryDecisions": 6,
+ "memoryMetricPoints": 6,
+ "memoryMaxChars": 6000
 }

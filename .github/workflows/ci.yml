@@ -81,18 +81,24 @@ jobs:
           ./dt benchmark reproduce bench -out bench-again 2> /dev/null | tail -1
           cp bench/manifest.json out/benchmark-manifest.json
       - name: LLM agent
-        # The agent's unit tests, then the V0.5a smoke test's recorded model
-        # decisions replayed through the protocol without any model
-        # (docs/benchmark/v05a-dev/replay.json), verified and rerun. The
-        # replay's manifest is compared across platforms below.
+        # The agent's unit tests, then the smoke tests' recorded model
+        # decisions replayed through the protocol without any model:
+        # V0.5a's (a version 1 recording, docs/benchmark/v05a-dev) and
+        # V0.5b's (version 2: the memory and prompt are rebuilt and checked
+        # at every decision point, docs/benchmark/v05b-dev), each verified
+        # and rerun. The replays' manifests are compared across platforms
+        # below.
         shell: bash
         run: |
           set -euo pipefail
           python3 -B -m unittest discover -s agents/llm 2>&1 | tail -1
-          ./dt benchmark run docs/benchmark/v05a-dev/replay.json -out llm-replay > /dev/null
-          ./dt benchmark verify llm-replay | tail -1
-          ./dt benchmark reproduce llm-replay -out llm-replay-again 2> /dev/null | tail -1
-          cp llm-replay/manifest.json out/llm-replay-manifest.json
+          for v in v05a v05b; do
+            ./dt benchmark run docs/benchmark/$v-dev/replay.json -out llm-replay-$v > /dev/null
+            ./dt benchmark verify llm-replay-$v | tail -1
+            ./dt benchmark reproduce llm-replay-$v -out llm-replay-$v-again 2> /dev/null | tail -1
+          done
+          cp llm-replay-v05a/manifest.json out/llm-replay-manifest.json
+          cp llm-replay-v05b/manifest.json out/llm-replay-v05b-manifest.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

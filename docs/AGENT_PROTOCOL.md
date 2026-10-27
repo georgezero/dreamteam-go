@@ -160,7 +160,10 @@ was refused. A batch is 1–64 actions, applied at the current time:
 
 * **V0.2 staffing actions** (`hire`, `terminate`, `set_roster`,
   `set_reading_allocation`, `contract_teleradiology`) form one atomic
-  unit and cannot share a batch with V0.1 actions (`mixed_batch`).
+  unit and cannot share a batch with V0.1 actions (`mixed_batch`). This
+  is a deliberate invariant of the two validation models (V0.2_DESIGN
+  §5.7). To make both kinds of change at one time, send two batches; a
+  benchmark decision may hold several ([LLM_AGENT.md](LLM_AGENT.md) §7).
 * **V0.1 actions** (`extend_shift`, `set_walkin_policy`,
   `set_worklist_policy`) are checked one by one, so two extensions for
   the same employee and day must go in separate batches

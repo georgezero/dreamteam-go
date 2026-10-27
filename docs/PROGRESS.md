@@ -7,6 +7,150 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.5b — memory, action guidance and cost reporting (0.5.0-dev.2)
+
+Owner decision 2026-10-27: V0.5a accepted at 3104e67. V0.5b improves the
+LLM agent without changing simulator behaviour, the protocol or scoring.
+No multi-model comparison (V0.5c).
+
+**Built** (`agents/llm/llm_agent.py`, llm-agent 2; spec
+`docs/LLM_AGENT.md`; agent, tests and smoke-test configuration declared in
+e30aacf):
+* **Bounded memory** (`llm-agent-memory/v1`, §6):
+  * what it holds:
+    - the agent's recent decisions in full, the earlier ones as totals;
+    - the `validate` refusals it met, with their messages;
+    - each decision's applied outcome, from the next observation's action
+      log;
+    - metric rows at recent decision points;
+    - the pending changes the observation and catalog show;
+  * derived only from public observations, the catalog and the agent's own
+    records;
+  * bounded by decisions, rows and characters (default 6,000);
+  * in the process only, so empty at the start of every run.
+* **Targeted prompt** (`llm-agent-prompt/v2`, §4):
+  * contents:
+    - the time, operating hours and scheduled close;
+    - active problems;
+    - the memory;
+    - a summarized observation;
+    - for every action type, its fields (its JSON Schema in one line),
+      the catalog's rules, the earliest and latest dates and lead times
+      from its targets (shown as days from today), and the targets;
+  * where no date is given, the prompt says so;
+  * every cut is named, and the model may ask once for details: full
+    catalog entries, or left-out paths from the compact or full
+    observation;
+  * `observation: compact` and `catalog: full` restore V0.5a's content;
+  * on V0.5a's seven recorded observations: 59% fewer characters and 56%
+    fewer tokens (the server's counts: 21,850–23,016 to 9,465–9,936).
+* **Mixed actions** (§7):
+  * the investigation: `mixed_batch` is a deliberate session invariant
+    (atomic staffing batches versus sequential V0.1 batches,
+    V0.2_DESIGN §5.7), not a transport, validation or implementation gap;
+  * kept unchanged, and documented in LLM_AGENT §7 and AGENT_PROTOCOL §3;
+  * the agent now splits a reply into an operations batch and a staffing
+    batch, validates each and submits both at one decision point (the
+    decision's documented list of batches);
+  * the two are not one atomic unit.
+* **Usage and cost** (§9; `summary.json`, `usage.txt`):
+  * the model;
+  * requests, retries and details requests;
+  * tokens, as reported, estimated or unknown;
+  * mean, median and maximum latency, and total inference time;
+  * valid, refused and fallback decisions;
+  * an estimated cost from configured prices per million tokens, labelled
+    as an estimate;
+  * no endpoint and no secrets.
+* **Replay** (§8):
+  * a version 2 recording's memory and prompt are rebuilt at every decision
+    point and checked against their recorded SHA-256;
+  * V0.5a recordings replay as before;
+  * other memory or prompt versions are refused with an explicit
+    `version incompatible` error.
+* **Version:** 0.5.0-dev.2; 0.5.0-dev.1 registered for replay
+  (`mini-seed52-v051`, batch mode `v0.5_dev1`).
+* **CI:** replays both smoke tests' recordings on every platform and
+  compares their manifests.
+
+**Mock acceptance** (`internal/bench/llm_agent_test.go`, twelve mock
+behaviours; the owner's ten tests):
+1. **The memory updates:** each decision and its applied outcome are carried
+   to the next point; refusals and pending allocation changes are shown.
+2. **It stays bounded:** a 90-day mock run keeps it at most 1,479 of 1,500
+   characters, and a 120-point unit test within 6,000.
+3. **It resets:** it is empty at the start of every run.
+4. **Pending changes come from public data only:** pending versions and
+   staff dates come from the catalog and observation, and fields the
+   observation does not have never appear.
+5. **Invalid actions still fail safely:** each failure gets exactly one retry,
+   then no action, with nothing applied.
+6. **Constraints appear:** dates, lead times, operating hours, caps and batch
+   rules are in the prompt (unit tests on the recorded observation).
+7. **Filtering keeps every action:** every type and every field is in the
+   prompt, details return full catalog entries and a path from the full
+   observation, and `catalog: full` includes the JSON.
+8. **Usage totals are correct:** they match the mock's counts.
+9. **Cost estimates are correct:** they match the configured prices.
+10. **Replay stays byte-identical:**
+    * decisions, sessions, results, digests and the memory at every point
+      match the live runs;
+    * tampered digests and a tampered memory hash are refused;
+    * another memory format is refused.
+
+Mixed operations and staffing actions were applied as two batches at one
+decision point. Python unit tests: 26.
+
+**Live smoke test** (`docs/benchmark/v05b-dev/`; sustainable, seed 40701,
+14 days, noop and the agent with V0.5a's model on a local server):
+* both runs completed, and `verify` passed 24 of 24;
+* 14 decisions:
+  * 6 with actions: 6 batches, 17 actions, all accepted;
+  * 7 no action;
+  * 1 fallback (a reply cut off at the output limit, then a refused
+    retry);
+* `validate` caught every refused proposal. The model re-proposed an
+  `after_close` extension at points 3, 6 and 7, although its memory held
+  that refusal;
+* no staffing action and no details request;
+* the memory grew to 5,976 characters and stayed under its 6,000 bound;
+* 20 requests: 236,061 prompt and 8,797 completion tokens, all
+  reported (first attempts 9,613–12,506 prompt tokens, memory included);
+  mean latency 4.3 s, median 4.0 s.
+
+**Replay:**
+* byte-identical decisions, sessions, results and final digests to the
+  live run, and an identical memory at all 14 points;
+* two replays are identical, and reproduce passed 19 of 19;
+* the manifest is byte-identical on linux/arm64 and linux/amd64 (Python
+  3.11 and 3.13);
+* the V0.5a recording still replays byte-identically to its live run.
+
+**Validation:**
+* the full uncached suite passes on linux/arm64 (about 3,720 s) and
+  linux/amd64 (532 s);
+* race passes on bench, agent, session and cmd/dreamteam: 0 data races;
+* vet (all tags) and gofmt are clean;
+* 36 of 36 session fixtures verify, including the new 0.5.0-dev.1 fixture;
+* golden references are identical;
+* the Python unit tests pass on Python 3.11 and 3.13;
+* the CI benchmark passes verify (86/86) and reproduce (59/59); its 48
+  files equal 0.5.0-dev.1's apart from the engine version (and the session
+  checksums and manifest hashes that cover it);
+* cross-builds succeed for five targets.
+
+**Known limitations** (`docs/LLM_AGENT.md` §12):
+* the memory is bounded, informs rather than enforces, and has no
+  planning behind it;
+* outcomes are read from the action log;
+* the operations and staffing batches are not one atomic unit;
+* summaries can omit what matters (details on request);
+* live runs are not reproducible;
+* cost is an estimate from configured prices;
+* one model, one seed, 14 days.
+
+---
+
 ## V0.5a — the external LLM agent (0.5.0-dev.1)
 
 Owner decision 2026-10-27: V0.4.0 accepted at ced3acb; V0.5 re-slotted

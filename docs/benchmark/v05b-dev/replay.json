@@ -1,0 +1,42 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v05b-replay",
+ "description": "V0.5b recorded-decision replay: the LLM agent's decisions from the live smoke test (docs/benchmark/v05b-dev/llm-decisions.jsonl) submitted again through the protocol by the agent's replay mode, without any model, beside the no-op baseline, under the smoke test's scenario, seed, horizon and cadence. At every decision point the agent rebuilds its memory and prompt from the run and checks them against the recording. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "scenarios": [
+  "sustainable"
+ ],
+ "seeds": [
+  40701
+ ],
+ "seedPlan": "The V0.5b smoke test's seed (docs/benchmark/v05b-dev/config.json), so that the recorded decisions belong to the run.",
+ "days": 14,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  "noop",
+  "llm"
+ ],
+ "external": [
+  {
+   "id": "llm",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2) in replay mode: the live smoke test's recorded decisions, each checked against its decision point and digests, with the memory and prompt rebuilt and checked against their recorded SHA-256; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--replay",
+    "./docs/benchmark/v05b-dev/llm-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

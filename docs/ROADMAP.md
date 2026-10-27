@@ -16,7 +16,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
-| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1; owner decision 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; model evidence recorded, recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
+| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1, accepted; V0.5b, memory, action guidance and cost reporting, 0.5.0-dev.2; owner decisions 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** | Agent benchmark: agents evaluated systematically across models, scenarios, seeds and baselines; WebUI/SQLite, the managed-practice harness and automation levels remain planned here (§7) | V0.5 agents |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
@@ -437,13 +437,35 @@ more benchmark infrastructure.
   exchange recorded (not hashed); recorded decisions replay through the
   protocol without the model and give the live run's simulator outcome
   exactly. Tested against a mock server; one live 7-day smoke test.
-* **Later slices** (owner decisions): memory across decision points,
-  multi-action planning, a distinct baseline, cost tracking, fresh
-  development seeds chosen prospectively.
+  Accepted by the owner (2026-10-27, 3104e67).
+* **V0.5b (0.5.0-dev.2): memory, action guidance and cost reporting**
+  (llm-agent 2; owner decision 2026-10-27). No simulator, protocol or
+  scoring change.
+  * Bounded memory within a run, from public observations and the agent's
+    own decisions only (`llm-agent-memory/v1`).
+  * A targeted prompt (`llm-agent-prompt/v2`): the time and operating
+    hours, active problems, a summarized observation, and every action type
+    with its fields, rules, earliest dates and lead times. What is left out
+    is named, and the model may ask once for details. 56% fewer tokens on
+    the same recorded observations.
+  * Operations and staffing actions in one reply, submitted as two
+    validated batches at one decision point. The `mixed_batch` invariant is
+    kept and documented (LLM_AGENT §7).
+  * Per-run usage (reported, estimated and unknown tokens; latency) and an
+    estimated cost from configured prices.
+  * Replay rebuilds and checks the memory and prompt. V0.5a recordings
+    replay; other versions are refused explicitly.
+  * Mock tests, including a 90-day memory bound; one live 14-day smoke
+    test.
+* **V0.5c** (next, owner decision): the first small multi-model
+  development comparison, two or three local models on fresh seeds
+  declared beforehand. Then V0.5.0. The full benchmark framework is V0.6.
 
 Acceptance (V0.5a): the agent takes part in a complete, replayable session:
 valid structured decisions, no unauthorized operation, no action when
-none is warranted, failures that change nothing.
+none is warranted, failures that change nothing. V0.5b: the agent keeps a
+bounded, public-only memory across decision points and a smaller prompt
+with explicit constraints, and its runs still replay exactly.
 
 ## 6. Growth and progression (formerly V0.5; deferred)
 

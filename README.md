@@ -22,7 +22,8 @@ decisions and produces no clinical content.
 In development (unreleased): **V0.5**, LLM agents. V0.5a adds an
 external LLM agent that manages the practice through the benchmark
 harness with any OpenAI-compatible model server (`agents/llm/`,
-`docs/LLM_AGENT.md`).
+`docs/LLM_AGENT.md`). V0.5b gives it a bounded memory within a run, action
+guidance, a smaller targeted prompt, and usage and cost reporting.
 
 ## Quick start
 
@@ -296,7 +297,7 @@ seed from the protocol but does not sandbox them. Specification:
 `docs/BENCHMARK.md`; the development runs: `docs/benchmark/v04a-smoke/`
 (30 days) and `docs/benchmark/v04b-dev/` (90 days, with the Python policy).
 
-### LLM agent (V0.5a, in development)
+### LLM agent (V0.5, in development)
 
 `agents/llm/llm_agent.py` asks a language model how to manage the
 practice. It runs as an external benchmark policy, a separate process per
@@ -309,8 +310,21 @@ of times, then decides no change. Every model exchange (prompt, raw
 reply, token usage, latency, errors) is kept in the run's
 `policy-evidence/`, with no secrets. A recorded decision sequence replays
 through the agent without the model and reproduces the live run's
-outcome exactly. Settings, decision format, evidence and replay:
-`docs/LLM_AGENT.md`; the live smoke test: `docs/benchmark/v05a-dev/`.
+outcome exactly.
+
+Since V0.5b the agent:
+* keeps a bounded memory of its own decisions, the refusals it met and
+  what followed them, reset for every run;
+* sees each action's fields, rules, earliest dates and lead times beside
+  the operating hours, in a prompt about 56% smaller (it can ask for
+  details it was not shown);
+* may combine operations and staffing actions, submitted as two validated
+  batches;
+* reports its model usage and an estimated cost (`usage.txt`).
+
+Settings, prompt, memory, decision format, evidence, usage and replay:
+`docs/LLM_AGENT.md`; the live smoke tests: `docs/benchmark/v05a-dev/` and
+`docs/benchmark/v05b-dev/`.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -347,7 +361,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
-| `docs/LLM_AGENT.md` | the LLM agent: setup, settings, decisions, evidence, replay (V0.5a development) |
+| `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5 development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
@@ -356,10 +370,13 @@ reference policy) and `agents/llm` (the LLM agent).
 
 ## Known limitations (V0.4)
 
-The V0.5a LLM agent, in development, has its own (`docs/LLM_AGENT.md` §9):
-it is stateless (no memory, no planning), submits at most one batch per
-decision point, and its live runs are not reproducible (recorded runs
-replay exactly).
+The V0.5 LLM agent, in development, has its own (`docs/LLM_AGENT.md` §12):
+* its memory is bounded and holds only its own recent decisions;
+* it does no planning;
+* operations and staffing actions go in two batches, not one atomic unit;
+* its prompt is a summary (details on request);
+* cost is an estimate from configured prices;
+* its live runs are not reproducible (recorded runs replay exactly).
 
 * **Agent evaluation harness** (`docs/BENCHMARK.md` §12):
   * External policies are trusted development participants, not
