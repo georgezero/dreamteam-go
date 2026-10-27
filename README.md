@@ -7,18 +7,17 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.3** (`0.3.0`, the agent interface) is the current release:
-an external program can run the practice through a deterministic JSON
-protocol (`docs/AGENT_PROTOCOL.md`), with a reference Python client. It
-builds on V0.2 (`0.2.0`, practice design: staffing, rosters, reading
+Status: **V0.4** (`0.4.0`, the agent evaluation harness) is the current
+release: agent policies, built in or separate processes, are compared
+reproducibly on identical scenarios and seeds (`dreamteam benchmark`,
+`docs/BENCHMARK.md`). It builds on V0.3 (`0.3.0`, the agent interface: an
+external program runs the practice through a deterministic JSON protocol,
+`docs/AGENT_PROTOCOL.md`, with a reference Python client) and V0.2 (`0.2.0`, practice design: staffing, rosters, reading
 allocation and teleradiology actions, a sustainable scenario and the T90
 evaluation of your plan). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
-
-In development (unreleased): **V0.4**, the agent evaluation harness
-(`dreamteam benchmark`, `docs/BENCHMARK.md`).
 
 ## Quick start
 
@@ -270,7 +269,7 @@ verified prefix. Saves from every V0.2 development build (0.2.0-dev.2 to
 actions, and are kept the same way when continued. Exit codes: 0 ok · 1 error · 2 invalid input
 · 3 replay failure · 4 golden mismatch · 5 incompatible.
 
-### Agent evaluation harness (V0.4, in development)
+### Agent evaluation harness (V0.4)
 
 `dreamteam benchmark run CONFIG` plays every policy of a configuration on
 every scenario and seed through the agent protocol: the same initial state,
@@ -325,14 +324,34 @@ harness), `cmd/dreamteam`.
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
-| `docs/BENCHMARK.md` | the agent evaluation harness (V0.4 development) |
+| `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.3)
+## Known limitations (V0.4)
+
+* **Agent evaluation harness** (`docs/BENCHMARK.md` §12):
+  * External policies are trusted development participants, not
+    OS-sandboxed processes.
+  * Seed withholding prevents disclosure through the benchmark protocol,
+    not arbitrary local inspection (files, the binary, a brute-force
+    search from the digests).
+  * Per-decision timeouts are wall-clock and not deterministic; a run
+    that times out is not reproducible.
+  * A failed external process is killed and reaped, but children it
+    started may be left running.
+  * A policy gets no feedback between its batches at one decision point.
+  * The policies are demonstrations: all three acting ones use only the
+    reading allocation. In the 90-day development matrix the reference
+    Python policy never acted (its weekly review missed the backlog
+    threshold); `greedy` and `rules` improved reporting but added about
+    $33,000 of cost; all 20 runs received T90 NO GO. These are
+    development observations, not confirmatory performance claims.
+
+### From V0.3
 
 * **Agent interface:**
   * `t90` runs two ~200-day simulations, about 40 s on a Raspberry Pi.

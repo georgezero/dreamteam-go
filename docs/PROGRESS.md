@@ -7,6 +7,32 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.4.0 — release
+
+The V0.4 release on the owner's decision (2026-10-26): V0.4b accepted at
+1a88857, no further implementation slice. The agent evaluation harness
+(V0.4a and V0.4b). Release preparation only:
+* the version (0.4.0) and the replay registration of 0.4.0-dev.2
+  (`mini-seed52-v042`, batch mode `v0.4_dev2`);
+* README, release notes, roadmap, progress and the benchmark
+  specification's status and limitations.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, replay, the harness, the policies or the policy protocol.
+`python-ref` v1 is unchanged. The 90-day development matrix is not rerun:
+the release changes no code it exercises, and CI runs the benchmark
+configuration (verify and reproduce) on every platform.
+
+The documented limitations are accepted as nonblocking (`docs/BENCHMARK.md`
+§12): trusted, unsandboxed external policies; seed withholding through
+the protocol only; wall-clock timeouts; children of a failed policy;
+`python-ref` v1 never acting in the development matrix; `greedy` and
+`rules` trading about $33,000 of cost for faster reporting; T90 NO GO on
+all 20 development runs. Development comparisons are not confirmatory
+performance claims. Next: the owner's V0.5 decision.
+
+---
+
 ## V0.4b — external agent benchmarking (0.4.0-dev.2)
 
 Owner decision 2026-10-26: V0.4a is accepted at 2ab3564. V0.4b scope:

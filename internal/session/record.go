@@ -132,6 +132,7 @@ const (
 	batchModeV032       = "v0.3_dev2"
 	batchModeV030       = "v0.3.0"
 	batchModeV041       = "v0.4_dev1"
+	batchModeV042       = "v0.4_dev2"
 	batchModeCurrent    = ""
 )
 
@@ -456,14 +457,14 @@ func decodeV2(raw []byte) (*Record, error) {
 
 // earlierMode reports whether mode is a registered earlier V0.2 build's.
 func earlierMode(mode string) bool {
-	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27 || mode == batchModeV020 || mode == batchModeV031 || mode == batchModeV032 || mode == batchModeV030 || mode == batchModeV041
+	return mode == batchModeSlice2 || mode == batchModeSlice3 || mode == batchModeSlice4 || mode == batchModeDev6 || mode == batchModeDev7 || mode == batchModeDev8 || mode == batchModeDev9 || mode == batchModeDev10 || mode == batchModeDev11 || mode == batchModeDev12 || mode == batchModeDev13 || mode == batchModeDev14 || mode == batchModeDev15 || mode == batchModeDev16 || mode == batchModeDev17 || mode == batchModeDev18 || mode == batchModeDev19 || mode == batchModeDev20 || mode == batchModeDev21 || mode == batchModeDev22 || mode == batchModeDev23 || mode == batchModeDev24 || mode == batchModeDev25 || mode == batchModeDev26 || mode == batchModeDev27 || mode == batchModeV020 || mode == batchModeV031 || mode == batchModeV032 || mode == batchModeV030 || mode == batchModeV041 || mode == batchModeV042
 }
 
 // dev5Rules reports whether a record's batches replay under the reading
 // and allocation rules of 0.2.0-dev.5 and earlier (sim.SetDev5Rules):
 // those of every build before 0.2.0-dev.6.
 func dev5Rules(mode string) bool {
-	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27 && mode != batchModeV020 && mode != batchModeV031 && mode != batchModeV032 && mode != batchModeV030 && mode != batchModeV041
+	return mode != batchModeCurrent && mode != batchModeDev6 && mode != batchModeDev7 && mode != batchModeDev8 && mode != batchModeDev9 && mode != batchModeDev10 && mode != batchModeDev11 && mode != batchModeDev12 && mode != batchModeDev13 && mode != batchModeDev14 && mode != batchModeDev15 && mode != batchModeDev16 && mode != batchModeDev17 && mode != batchModeDev18 && mode != batchModeDev19 && mode != batchModeDev20 && mode != batchModeDev21 && mode != batchModeDev22 && mode != batchModeDev23 && mode != batchModeDev24 && mode != batchModeDev25 && mode != batchModeDev26 && mode != batchModeDev27 && mode != batchModeV020 && mode != batchModeV031 && mode != batchModeV032 && mode != batchModeV030 && mode != batchModeV041 && mode != batchModeV042
 }
 
 // batchMode is how a record's own batches apply: a v1 record's V0.1

@@ -5,6 +5,99 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.4.0 — the agent evaluation harness
+
+Agent policies can now be compared reproducibly: built-in policies or
+independently running programs play the same scenarios and seeds through
+the agent protocol, and every decision and outcome is recorded, replayed
+and verified (`docs/BENCHMARK.md`).
+
+**`dreamteam benchmark`**
+* `run CONFIG` plays every scenario × seed × policy of a configuration,
+  with the same initial state, horizon and decision cadence for each.
+  The harness alone applies batches, advances time, saves and evaluates
+  T90; each run has its own session (and process, for an external
+  policy).
+* `report` compares the runs: per run, per policy, and paired with a
+  baseline. The metrics are the simulator's own operational and
+  financial measurements. There is no composite score and no ranking.
+* `verify` checks the manifest's hashes, replays every saved session,
+  rebuilds the results and the report, and with `-t90` recomputes T90
+  (the existing v4 evaluation, v0.2-eval-4).
+* `reproduce` reruns the recorded configuration and compares every
+  deterministic file and the manifest byte for byte.
+
+**Policies.**
+* Built in: `noop` (the baseline), `greedy` and `rules`.
+* **External policies** run as a fresh process per run, in an empty
+  working directory, speaking the versioned
+  `dreamteam.benchmark-policy/v1` protocol (JSON lines over stdio). Each
+  request goes through the public-agent capability gate, which permits
+  only reads and checks. The per-decision timeout is configurable, and
+  standard error is captured separately.
+* **Failures** are classified (`policy_crash`, `policy_timeout`,
+  `policy_error`). The process is killed and reaped, and the other runs
+  go on. Refused, denied and malformed requests are counted.
+* **Seed withholding.** Under the harness, `hello` omits the seed and
+  says `seedWithheld`; no permitted response contains it. Outside the
+  harness, `hello` is unchanged.
+* **Reference Python policy** `python-ref` v1
+  (`clients/python/reference_policy.py`, standard library only).
+
+**Recorded evidence.** Each run keeps its protocol transcript, decisions,
+saved session, canonical result and T90. The manifest records the
+engine, protocol, policies (with an external program's SHA-256), metric
+definitions and the hash of every deterministic file.
+
+**Development results** (`docs/benchmark/v04b-dev/`: sustainable
+scenario, five seeds, 90 days, four policies, 20 runs). All runs
+completed and replayed. The results are byte-identical on linux/arm64
+and linux/amd64 and across Python versions. They are development
+observations, not confirmatory performance claims:
+* `python-ref` v1 never acted. Its weekly review missed the backlog
+  threshold, so its runs equal `noop`'s. It is kept unchanged.
+* `greedy` and `rules` improved reporting against `noop` (TAT p90 204–472
+  minutes lower). They also cost about $33,000 more, and operating
+  profit was $27,357–$32,719 lower. 90 days does not separate them.
+* All 20 runs received T90 NO GO.
+
+**Compatibility.**
+* No change to mechanics, randomness, scenarios, actions, accounting or
+  the evaluation.
+* All golden references give identical outcomes.
+* Saves from V0.1, V0.2, V0.3 and the V0.4 development builds replay
+  with their digests verified.
+* The agent protocol `dreamteam.agent/v1` is unchanged outside the
+  harness. The V0.3 Python client's transcript is identical apart from
+  the engine version.
+
+**Known limitations** (`docs/BENCHMARK.md` §12).
+* External policies are trusted development participants, not
+  OS-sandboxed processes.
+* Seed withholding prevents disclosure through the benchmark protocol,
+  not arbitrary local inspection.
+* Wall-clock timeouts are not deterministic; a run that times out is not
+  reproducible.
+* A failed external process may leave child processes running.
+* A policy gets no feedback between its batches at one decision point.
+* The policies are demonstrations, and all three acting ones use one
+  lever (the reading allocation). No LLM agent is provided.
+* T90 takes about 40 s per run on a Raspberry Pi 4.
+
+**Validation.**
+* The full uncached suite passes on linux/arm64 and linux/amd64.
+* The race detector finds no race.
+* vet and gofmt are clean.
+* Every session fixture replays, and every golden reference is
+  identical.
+* The Python client and the Python reference policy pass.
+* Benchmark verify and reproduce pass.
+* Cross-builds succeed for five targets.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
+---
+
 ## V0.3.0 — the agent interface
 
 An external program can now run a DreamTeam practice: discover the

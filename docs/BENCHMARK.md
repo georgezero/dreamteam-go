@@ -10,9 +10,10 @@ It is product infrastructure, not a scoring system. It adds no scoring
 rule, no composite score and no ranking. Its outcomes are the
 simulator's own measurements. It uses no clinical v5 or v6 policy.
 
-Status: V0.4b, development (0.4.0-dev.2). Not released. V0.4a built the
-harness; V0.4b adds external policy processes (§4), withholds the seed
-from every policy (§3, §11) and adds `reproduce` (§8).
+Status: released in V0.4.0. V0.4a built the harness; V0.4b added
+external policy processes (§4), withheld the seed from every policy (§3,
+§11) and added `reproduce` (§8). The policy protocol
+`dreamteam.benchmark-policy/v1` is versioned and stable for V0.4.
 
 ## 1. Commands
 
@@ -547,21 +548,26 @@ withheld or derived seed scheme; that is a later requirement.
 
 ## 12. Known limitations (V0.4)
 
-* **Trusted participants only.** See §11. An external policy can read
-  the harness's files and could infer the seed by brute force from the
-  binary and the digests.
+* **Trusted participants only.** External policies are trusted
+  development participants, not OS-sandboxed processes (§11).
+* **Seed withholding covers the protocol only.** It prevents disclosure
+  through the benchmark protocol, not arbitrary local inspection: an
+  external policy can read the harness's files and could infer the seed
+  by brute force from the binary and the digests.
 * **No feedback within a decision point.** A policy's batches are
   applied together after its decision. It cannot observe the effect of
   one batch before submitting the next at the same decision point.
 * **Lead times.** A reading allocation takes effect at least 14 days
   after it is set. In a 30-day run, an allocation change affects at most
   the last 16 days; hence the V0.4b development run's 90 days.
-* **Timeouts are wall-clock.** They include the harness's own time to
-  answer requests, so a slow machine needs a generous timeout. A run
-  that times out is not reproducible.
-* **One process tree level.** On failure the harness kills the policy
-  process it started. A process that starts children of its own must
-  stop them itself.
+* **Timeouts are wall-clock and not deterministic.** They include the
+  harness's own time to answer requests, so a slow machine needs a
+  generous timeout. Whether a slow policy times out can differ between
+  machines and runs, and a run that times out is not reproducible.
+* **Failed processes may leave children running.** On failure the
+  harness kills and reaps the policy process it started, not processes
+  that one started. A policy that starts children of its own must stop
+  them itself.
 * **T90 is slow.** It runs two ~200-day simulations, about 40 s per run
   on a Raspberry Pi 4.
 * **Scenarios.** Configurations name bundled scenarios only.
@@ -574,3 +580,22 @@ withheld or derived seed scheme; that is a later requirement.
   reading allocation.
 * **No LLM integration.** An LLM agent would be one more external
   process, but none is provided.
+
+The V0.4b development matrix (`docs/benchmark/v04b-dev/`) also showed:
+* **`python-ref` v1 never acted.** Its weekly review (decision points 0,
+  7, 14, …, all Tuesdays there) missed the backlog threshold, which was
+  passed only on Sunday and Monday mornings. Its runs equal `noop`'s.
+  It is kept unchanged as v1: decision cadence matters even when the
+  rule is reasonable. A different schedule would be a new policy, not a
+  correction of these results.
+* **`greedy` and `rules` improve reporting but substantially increase
+  costs.** Against `noop` over 90 days, on all five seeds, TAT p90 fell
+  by 204–472 minutes and breaches by 113–367, while expense rose by about
+  $33,000 and operating profit fell by $27,357–$32,719.
+* **All 20 development runs received T90 NO GO**: `noop` and
+  `python-ref` on service reliability, `greedy` and `rules` on solvency.
+  The harness evaluates policies reproducibly; it does not make them
+  succeed.
+* **Development comparisons are not confirmatory performance claims.**
+  Five seeds, fixed in advance and now examined, support no claim, and
+  the next comparison should use fresh seeds chosen prospectively.
