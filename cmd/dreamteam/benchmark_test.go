@@ -139,3 +139,45 @@ func TestBenchmarkCommandErrors(t *testing.T) {
 		t.Errorf("verify without a manifest: exit %d", code)
 	}
 }
+
+// benchmark suite run: an entry of the committed suite on the mini-sized
+// horizon, the contract report printed and reported again; an invalid
+// suite run exits 2 before anything runs.
+func TestBenchmarkSuiteCommand(t *testing.T) {
+	dir := t.TempDir()
+	suite, err := filepath.Abs("../../docs/benchmark/suite/dreamteam-dev-1.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	rel, _ := filepath.Rel(dir, suite)
+	run := `{"schema": "dreamteam.benchmark-suite-run/v1", "id": "cli", "description": "test", "suite": "` + filepath.ToSlash(rel) + `",
+ "entries": ["stable"], "seeds": [78], "seedPlan": "test", "days": 2, "policies": ["noop", "conservative"],
+ "baseline": "noop", "output": "out", "evaluation": {"t90": false}}`
+	cfg := filepath.Join(dir, "run.json")
+	os.WriteFile(cfg, []byte(run), 0o644)
+	var out, errb bytes.Buffer
+	if code := benchmarkCmd([]string{"suite", "run", cfg}, &out, &errb); code != exitOK || !strings.Contains(out.String(), "complete: 2 of 2 runs") {
+		t.Fatalf("suite run: %d\n%s\n%s", code, out.String(), errb.String())
+	}
+	res := filepath.Join(dir, "out")
+	out.Reset()
+	if code := benchmarkCmd([]string{"report", res}, &out, &errb); code != exitOK || !strings.Contains(out.String(), "dreamteam.benchmark-contract/v1") {
+		t.Fatalf("report: %d\n%s", code, out.String())
+	}
+	out.Reset()
+	if code := benchmarkCmd([]string{"report", res, "-harness"}, &out, &errb); code != exitOK || !strings.Contains(out.String(), "DreamTeam benchmark cli") {
+		t.Fatalf("report -harness: %d\n%s", code, out.String())
+	}
+	out.Reset()
+	if code := benchmarkCmd([]string{"verify", res}, &out, &errb); code != exitOK || !strings.Contains(out.String(), "contract report rebuilt") {
+		t.Fatalf("verify: %d\n%s", code, out.String())
+	}
+	bad := filepath.Join(dir, "bad.json")
+	os.WriteFile(bad, []byte(strings.Replace(run, `"stable"`, `"no-such-entry"`, 1)), 0o644)
+	if code := benchmarkCmd([]string{"suite", "run", bad}, &out, &errb); code != exitInvalid {
+		t.Fatalf("invalid suite run: %d", code)
+	}
+	if code := benchmarkCmd([]string{"suite"}, &out, &errb); code != exitInvalid {
+		t.Fatalf("suite without run: %d", code)
+	}
+}

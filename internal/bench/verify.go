@@ -3,6 +3,7 @@ package bench
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -49,6 +50,7 @@ func Verify(dir string, opts VerifyOptions) ([]Check, error) {
 	listed = append(listed, m.Nondeterministic...)
 	hashes := []FileHash{m.Config}
 	hashes = append(hashes, m.Reports...)
+	hashes = append(hashes, m.Suite...)
 	for _, r := range m.Runs {
 		hashes = append(hashes, r.Files...)
 	}
@@ -135,7 +137,53 @@ func Verify(dir string, opts VerifyOptions) ([]Check, error) {
 		err = fmt.Errorf("%s differs from the report of the run records", FileReportText)
 	}
 	add("report.txt rebuilt from the run records", err)
+	if len(m.Suite) > 0 {
+		verifySuite(dir, m, recs, add)
+	}
 	return out, nil
+}
+
+// verifySuite checks a suite run's own files: the suite file still
+// matches the bundled scenarios (every fingerprint as recorded), the
+// configuration is the suite run's expansion, every run is of an entry's
+// scenario with its fingerprint, and the contract report rebuilds from the
+// run records.
+func verifySuite(dir string, m *Manifest, recs []*RunRecord, add func(string, error)) {
+	sr, err := LoadSuiteResults(dir, m)
+	add("suite run decodes; every entry's scenario has its recorded fingerprint", err)
+	if err != nil {
+		return
+	}
+	cfg, err := os.ReadFile(filepath.Join(dir, FileConfig))
+	if err == nil && !bytes.Equal(cfg, sr.ConfigRaw) {
+		err = fmt.Errorf("%s is not the expansion of %s", FileConfig, FileSuiteRun)
+	}
+	add("config.json is the suite run's expansion", err)
+	fps := map[string]string{}
+	for _, e := range sr.Entries {
+		fps[e.Scenario] = e.Fingerprint
+	}
+	err = nil
+	for _, rec := range recs {
+		if fp, ok := fps[rec.Scenario.Ref]; !ok || (rec.Scenario.Fingerprint != "" && rec.Scenario.Fingerprint != fp) {
+			err = errors.Join(err, fmt.Errorf("%s: scenario %s fingerprint %s, suite %s", rec.ID, rec.Scenario.Ref, rec.Scenario.Fingerprint, fp))
+		}
+	}
+	add("every run's scenario fingerprint is its suite entry's", err)
+	k, err := BuildContract(sr, dir, recs)
+	if err == nil {
+		want, _ := json.MarshalIndent(k, "", " ")
+		var got []byte
+		if got, err = os.ReadFile(filepath.Join(dir, FileContractJSON)); err == nil && !bytes.Equal(got, append(want, '\n')) {
+			err = fmt.Errorf("%s differs from the contract report of the run records", FileContractJSON)
+		}
+		if err == nil {
+			if got, err = os.ReadFile(filepath.Join(dir, FileContractText)); err == nil && string(got) != k.Text() {
+				err = fmt.Errorf("%s differs from the contract report of the run records", FileContractText)
+			}
+		}
+	}
+	add("contract report rebuilt from the run records", err)
 }
 
 // verifyT90 recomputes the T90 evaluation of a run's saved session and

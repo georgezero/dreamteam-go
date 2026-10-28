@@ -1,8 +1,12 @@
 # DreamTeam benchmark scenario suite and evaluation contract (V0.6a)
 
-Status: V0.6a, development. Not released. The suite is `dreamteam-dev`,
-version 1 ([benchmark/suite/dreamteam-dev-1.json](benchmark/suite/dreamteam-dev-1.json));
-the contract is `dreamteam.benchmark-contract/v1` (§3).
+Status: V0.6b, development (0.6.0-dev.2). Not released. The suite is
+`dreamteam-dev`, version 1
+([benchmark/suite/dreamteam-dev-1.json](benchmark/suite/dreamteam-dev-1.json));
+the contract is `dreamteam.benchmark-contract/v1` (§3). V0.6a defined them;
+V0.6b runs a suite in one command and reports it under the contract (§9),
+adds a financially conservative baseline (§7) and a demand diagnostic
+(§8).
 
 This document defines what DreamTeam's agent benchmark measures:
 * five practices, each a different management problem;
@@ -265,10 +269,9 @@ already in the harness's files.
 | Paired comparisons by scenario and seed | `report.json` `pairs[]` (policy minus baseline) |
 | Missing metrics | Listed per §3 |
 
-V0.6a produces this view with `docs/benchmark/v06a-dev/analyze.py` from
-the harness's files. Building it into `dreamteam benchmark report`
-(fingerprints in the report, dimension grouping, action categories) is
-V0.6b's.
+V0.6a produced this view with `docs/benchmark/v06a-dev/analyze.py`. Since
+V0.6b, `dreamteam benchmark suite run` writes it as the contract report
+and `dreamteam benchmark report` prints it (§9).
 
 ## 6. Known limitations
 
@@ -294,6 +297,214 @@ V0.6b's.
     and the base profile's December decline absorbs part of the growth.
   * Financial pressure and staffing shortage both lose money with no
     action; they differ in expenses, lost demand, overtime and waits.
+* **The conservative baseline cannot invest its way out of a loss.** Its
+  profit guardrail forbids raising reading capacity while the trailing 30
+  days lose money, even when the loss comes from unbilled reports in the
+  backlog (§7).
 * **Design used seed 1.** The scenarios' intended conditions were checked
   with no-action runs on seed 1 before the characterization seeds were
   declared ([v06a-dev/PROTOCOL.md](benchmark/v06a-dev/PROTOCOL.md) §3).
+
+## 7. The conservative baseline (`conservative`, version 1)
+
+A built-in policy (`internal/bench/conservative.go`), added in V0.6b
+beside `noop`, `greedy` and `rules`, which are unchanged. Its purpose is
+to avoid unnecessary spending while still responding to a sustained
+reporting problem, and to choose no action otherwise. Its rules and
+thresholds were fixed and committed before it ran on any development or
+suite seed. They were not derived from the V0.6a results.
+
+**What it reads** (public, through the agent gate; no seed, no hidden
+state):
+* the compact observation's `worklist.oldestMin` (age of the oldest
+  unfinished study);
+* `finance.cashCents`;
+* `finance.trailing30.operatingProfitCents`;
+* the date;
+* the action catalog's `set_reading_allocation` targets (allocation in
+  effect, scenario allocation, maximum, earliest effective date, pending
+  changes);
+* the staffing preview's `beforeSalary30Cents` and `afterSalary30Cents`
+  (the change's salary with benefits per 30 days).
+
+**Its one lever** is the site reading allocation, the only one the
+existing baselines use, so that what differs is the decision rule, not the
+action set.
+
+**At each decision point, in order:**
+
+| Step | Rule |
+|---|---|
+| Track | Counts the consecutive decision points with the oldest unfinished study over 24 hours (*pressure*) and at most 8 hours (*clear*) |
+| Wait | Does nothing while any radiologist's allocation change is pending, or within 14 days of the effective date of its own last change |
+| Step back | If an allocation is above its scenario level and either the trailing-30-day operating profit is below zero or *clear* has lasted 7 decision points: the radiologist furthest above it loses 5 points, never below the scenario level |
+| Raise | If *pressure* has lasted 3 decision points, cash is at least $50,000, the trailing-30-day operating profit is at least zero, and no more than 5 points are already in effect above the scenario levels in all: the radiologist with the lowest allocation in effect and room to grow gains 5 points from the earliest lawful date, but only if the trailing-30-day profit less the preview's added salary per 30 days stays at or above zero |
+| Otherwise | No action |
+
+Every change is checked with `validate` and the staffing `preview` and is
+submitted only if valid, accepted and displacing no booked patient. At
+most one change per decision point.
+
+**Guardrails, summarized:**
+* **Financial:** no raise while the practice loses money over the
+  trailing 30 days, none that its own cost would turn into a loss, none
+  below $50,000 cash; steps back when money is lost.
+* **Frequency and size:** one change at a time, 14 days apart (the
+  allocation's notice), at most 5 points above the scenario levels in
+  all.
+* **Lead times:** changes are made from the earliest lawful date, and the
+  next waits until the last has taken effect and run for 14 days.
+
+**Why these numbers:**
+* 24 and 8 hours and 5 points are the `rules` policy's.
+* 3 decision points in a row is three days, so a weekend without reading
+  (Sunday and Monday mornings) is not enough.
+* 7 is a week; 14 days is the allocation's notice.
+* $50,000 and the 5-point cap are round numbers.
+
+**Known behaviour, from its unit-test runs** (test seed 7, not a
+development seed):
+* In the sustainable practice the oldest study passes 24 hours only on
+  Sunday and Monday mornings, so the policy finds no sustained problem
+  and does nothing.
+* Where a backlog makes the practice lose money (revenue is billed on
+  final reports), the profit guardrail forbids the very spending that
+  might restore revenue. That is its stance, not a defect, and is
+  reported as a limitation (§6).
+
+**Tests** (`internal/bench/conservative_test.go`):
+* every rule, threshold and guardrail, one at a time;
+* a test-only overloaded practice (not a suite scenario), where it must
+  raise;
+* the financial-pressure scenario, where it must not;
+* over each run: valid changes only, one per decision point, 14 days
+  apart, within the cap.
+
+## 8. Demand diagnostic (`dreamteam.demand-diagnostic/v1`)
+
+V0.6a's characterization judged demand growth on raw 30-day totals of
+referral orders, which depend on how many weekdays a window holds. That
+check failed on two seeds of three and stays recorded as failed
+([v06a-dev/README.md](benchmark/v06a-dev/README.md)). V0.6b adds a
+separate, prospective diagnostic, declared before its first evaluation
+([v06b-dev/PROTOCOL.md](benchmark/v06b-dev/PROTOCOL.md)).
+
+**What it measures**, for each entry, seed and 30-day window from the
+takeover, per **operating day** (a day the scenario's opening hours are
+not closed; Sunday in every suite scenario):
+
+| Quantity | Source | Kind |
+|---|---|---|
+| Generated demand: referral orders | the result calendar's `orders`, the simulator's count of orders as they arrive, before booking | demand |
+| Generated demand: walk-ins | the calendar's `walkIns` (arrivals) | demand |
+| Completed imaging | the calendar's `exams` | outcome |
+| Lost orders | the calendar's `lost` | outcome |
+
+These are different quantities. Generated demand is never inferred from
+completed imaging or lost orders, which depend on capacity and decisions.
+Orders per weekday (Monday to Friday) are reported as a secondary figure,
+and orders arriving on closed days are counted, not hidden.
+
+**Reliability check (R1).** Generated demand, day by day, must be
+identical across the policies of an entry and seed. If it is not, the
+diagnostic reports that demand depends on decisions and is not a clean
+measure.
+
+**Declared conditions,** for the demand-growth entry with no action:
+* **G1:** referral orders per operating day are higher in days 61–90 than
+  in days 1–30, on every seed.
+* **G2:** the ratio of demand growth's referral orders per operating day
+  to reporting backlog's (same seed and window) rises from days 1–30 to
+  days 61–90, and is above 1 in days 31–60 and 61–90, on every seed.
+
+**Script:** `docs/benchmark/v06b-dev/demand_diagnostic.py RESULTS` reads a
+suite run's results (its contract report, results and saved sessions).
+Nothing in the simulator or the scenarios changes.
+
+## 9. Running a suite and the contract report
+
+**A suite run** is a configuration (`dreamteam.benchmark-suite-run/v1`)
+naming a suite file and choosing from it:
+
+| Field | Meaning |
+|---|---|
+| `schema`, `id`, `description` | As a benchmark configuration |
+| `suite` | The suite file, relative to the configuration's directory |
+| `entries` | Suite entry IDs to run, in order (default: all, in the suite's order) |
+| `seeds`, `seedPlan` | Development seeds, and how they were chosen; the sealed holdout guard applies |
+| `days`, `cadence` | Horizon and decision cadence (default: the suite's) |
+| `policies`, `external`, `baseline` | As a benchmark configuration |
+| `output`, `evaluation` | As a benchmark configuration; T90 is evaluated only where the evaluation policy in force applies |
+
+    dreamteam benchmark suite run docs/benchmark/v06b-dev/suite-run.json -out results
+    dreamteam benchmark report results                # the contract report
+    dreamteam benchmark report results -harness       # the harness's own report
+    dreamteam benchmark report results -format json   # the contract report as JSON
+    dreamteam benchmark verify results [-t90]
+    dreamteam benchmark reproduce results
+
+**How it runs.** The runner checks the suite file before anything runs:
+* its header and dimensions;
+* every selected entry's bundled scenario against the recorded
+  fingerprint;
+* T90 claimed exactly where the evaluation policy in force applies.
+
+It then expands the suite run into an ordinary benchmark configuration
+(`config.json` in the results) and plays it through the V0.4 harness, the
+same code as `benchmark run`. Every run's files, and the harness's
+`report.json` and `report.txt`, are byte for byte those of `benchmark run`
+on that configuration (`TestSuiteRunIsTheMatrix`).
+
+**Results** add four files to an ordinary results directory, all hashed in
+the manifest's `suite` list:
+
+| File | Contents |
+|---|---|
+| `suite-run.json` | The suite-run configuration, verbatim |
+| `suite.json` | The suite file, verbatim |
+| `contract.json` | The contract report (`dreamteam.benchmark-contract/v1`) |
+| `contract.txt` | The same, as text |
+
+**Exit status** (as `benchmark run`):
+* 0: every run completed;
+* 1: a run failed, or the results could not be written;
+* 2: the configuration or suite is invalid, and nothing ran.
+
+A failed run is recorded and classified like any other. The contract
+report then says `"status": "partial"`, lists the failed runs, and its
+text opens with `PARTIAL SUITE: k of N runs completed`. An interrupted
+run leaves no manifest, so its directory is not a results directory at
+all.
+
+**Verify and reproduce.** `benchmark verify` adds, for a suite run:
+* the suite files' hashes;
+* the suite file still matching the bundled scenarios;
+* `config.json` being the expansion of `suite-run.json`;
+* every run's scenario fingerprint being its entry's;
+* the contract report rebuilt from the run records.
+
+`benchmark reproduce` reruns the suite run from its stored files and
+compares every file, the suite files included. Ordinary results gain no
+`suite` field, so their manifests are unchanged.
+
+**The contract report** (`contract.json`):
+
+| Field | Contents |
+|---|---|
+| `schema`, `engine`, `suite` (`id`, `version`, `split`), `suiteRun` | Identity |
+| `status`, `expectedRuns`, `completedRuns`, `failedRuns` | Completeness |
+| `seeds`, `days`, `cadence`, `policies` (id and version), `baseline` | The matrix |
+| `entries[]` | Entry ID, version, category, bundled scenario, fingerprint, T90 applicability; per seed the starting state (`stateDigest`), how many runs started from it, and whether all did identically |
+| `missing` | The contract's missing measures, from the suite file |
+| `runs[]` | Per run: entry, scenario, fingerprint, seed, policy, horizon, starting-state digest, status, replay verification, actions (operations, staffing, by type, in refused batches), T90 (applicability, status, verdict, classification), and the six `dimensions`, each metric with its recorded `value` or `absent` and the reason |
+| `pairs[]` | Per entry, seed and policy against the baseline: per dimension, policy − baseline for every integer metric (`null` when either is absent or a ratio), and the difference in operations and staffing actions |
+
+`contract.txt` shows the same content in ten sections:
+* scenarios and starting states;
+* runs;
+* the six dimensions (minimum, median and maximum over completed runs per
+  entry and policy);
+* paired differences (median and range over seeds);
+* missing measures, and every metric absent in any run with its reason.
+
+Nothing is combined: no score, weighting, leaderboard or ranking.

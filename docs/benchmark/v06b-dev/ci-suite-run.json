@@ -1,0 +1,22 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v06b-ci",
+ "description": "V0.6b suite-runner smoke test for CI: the development suite's five entries with the four built-in policies on the first V0.6b seed for 21 days, no T90; the manifest (with the contract report) is compared across platforms. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-1.json",
+ "seeds": [
+  41001
+ ],
+ "seedPlan": "Chosen 2026-10-28 and committed with the V0.6b protocol, the conservative baseline and the demand diagnostic (docs/benchmark/v06b-dev/PROTOCOL.md) before any run on them: the next unused block 41001-41003 after V0.6a's 40901-40903. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "policies": [
+  "noop",
+  "greedy",
+  "rules",
+  "conservative"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ },
+ "days": 21
+}

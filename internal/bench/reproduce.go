@@ -31,7 +31,16 @@ func Reproduce(dir, out string, progress io.Writer) ([]Check, error) {
 	if err != nil {
 		return nil, err
 	}
-	n, err := Matrix(c, raw, out, progress)
+	sr, err := LoadSuiteResults(dir, m)
+	if err != nil {
+		return nil, err
+	}
+	var n *Manifest
+	if sr != nil {
+		n, err = RunSuite(sr, out, progress)
+	} else {
+		n, err = Matrix(c, raw, out, progress)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +63,7 @@ func Reproduce(dir, out string, progress io.Writer) ([]Check, error) {
 			order = append(order, h.Path)
 		}
 	}
-	for _, h := range m.Reports {
+	for _, h := range append(append([]FileHash(nil), m.Reports...), m.Suite...) {
 		recorded[h.Path] = h.SHA256
 	}
 	for _, r := range m.Runs {
@@ -69,7 +78,7 @@ func Reproduce(dir, out string, progress io.Writer) ([]Check, error) {
 			order = append(order, h.Path)
 		}
 	}
-	for _, h := range m.Reports {
+	for _, h := range append(append([]FileHash(nil), m.Reports...), m.Suite...) {
 		order = append(order, h.Path)
 	}
 	for _, r := range n.Runs {
@@ -78,7 +87,7 @@ func Reproduce(dir, out string, progress io.Writer) ([]Check, error) {
 			rerun[h.Path] = h.SHA256
 		}
 	}
-	for _, h := range n.Reports {
+	for _, h := range append(append([]FileHash(nil), n.Reports...), n.Suite...) {
 		note(h)
 		rerun[h.Path] = h.SHA256
 	}

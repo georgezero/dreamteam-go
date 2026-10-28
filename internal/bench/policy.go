@@ -45,6 +45,8 @@ var policies = []PolicySpec{
 		New: func() agent.Policy { return agent.Greedy{} }},
 	{ID: "rules", Version: "1", Description: "a modest rule-based baseline: reading allocation follows the reading backlog with hysteresis, every change validated and previewed first",
 		New: func() agent.Policy { return &Rules{} }},
+	{ID: "conservative", Version: "1", Description: "a financially conservative baseline (V0.6b): raises a site reading allocation only after three days in a row with the oldest unfinished study over a day old, within a 5-point cap, a $50,000 cash floor and the trailing 30 days' operating profit after the change's cost; waits 14 days after each change; steps back when that profit is negative or the backlog has been clear for a week",
+		New: func() agent.Policy { return &Conservative{} }},
 }
 
 // PolicyIDs lists the built-in policies' IDs.

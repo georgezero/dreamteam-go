@@ -20,14 +20,19 @@ the protocol is unchanged. V0.5b (0.5.0-dev.2) changes only the LLM agent.
 V0.5c (0.5.0-dev.3) changes nothing in the harness; its development
 evaluation ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)) adds
 four replay configurations that CI runs. Released in V0.5.0 with the
-policy protocol unchanged. V0.6a (0.6.0-dev.1, in development) adds a
-scenario suite and an evaluation contract on top of the harness, unchanged
-([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)).
+policy protocol unchanged. V0.6a (0.6.0-dev.1) adds a scenario suite and an
+evaluation contract on top of the harness, unchanged
+([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)). V0.6b (0.6.0-dev.2, in
+development) adds suite runs and the contract report, and a fourth
+built-in policy, `conservative` (§4 of this document's policy table;
+[BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). Ordinary benchmarks and
+their files are unchanged.
 
 ## 1. Commands
 
     dreamteam benchmark run CONFIG [-out DIR]
-    dreamteam benchmark report RESULTS [-format text|json]
+    dreamteam benchmark suite run SUITE-RUN [-out DIR]
+    dreamteam benchmark report RESULTS [-format text|json] [-harness]
     dreamteam benchmark verify RESULTS [-t90]
     dreamteam benchmark reproduce RESULTS [-out DIR]
 
@@ -50,6 +55,11 @@ Exit codes:
 | 2 | The configuration is invalid. |
 
 `report` rebuilds the report from a results directory's run records.
+
+`suite run` (V0.6b) runs a versioned scenario suite's entries through the
+same harness and adds the contract report. For a suite run's results,
+`report` prints the contract report, or the harness's own report with
+`-harness`. See [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §9.
 
 `verify` checks a results directory (§9). It prints one line per check
 and exits 0 when every check passes and 3 when one fails.
@@ -177,6 +187,7 @@ the same gate.
 | `noop` | 1 | Never submits an action. |
 | `greedy` | 1 | The V0.3 protocol demonstration (`agent.Greedy`), unchanged. When the oldest unread study is over a day old, it raises the first radiologist with room and no pending change by 5 points of site reading allocation. It is not a strategy. |
 | `rules` | 1 | The rule-based baseline below. |
+| `conservative` | 1 | The financially conservative baseline (V0.6b): raises a site reading allocation only for a backlog sustained three days, when the practice can afford it, within a cap, and steps back when money is lost or the backlog has cleared. Specified in [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7. |
 
 V0.4b adds no built-in policy. Its reference external policy is
 `python-ref` (§4).

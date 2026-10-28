@@ -168,6 +168,12 @@ func runID(scen string, seed int64, policy string) string {
 // an error means the results could not be written (a failed run is not
 // one: it is recorded and classified).
 func Matrix(c *Config, raw []byte, dir string, progress io.Writer) (*Manifest, error) {
+	return matrix(c, raw, dir, progress, nil)
+}
+
+// matrix is Matrix, for a suite run when sr is not nil: its files are
+// written first, and the contract report with the manifest.
+func matrix(c *Config, raw []byte, dir string, progress io.Writer, sr *SuiteRun) (*Manifest, error) {
 	if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
 		return nil, fmt.Errorf("output %s is not empty: results are written once", dir)
 	} else if err != nil && !errors.Is(err, os.ErrNotExist) {
@@ -178,6 +184,14 @@ func Matrix(c *Config, raw []byte, dir string, progress io.Writer) (*Manifest, e
 	}
 	if err := os.WriteFile(filepath.Join(dir, FileConfig), raw, 0o644); err != nil {
 		return nil, err
+	}
+	if sr != nil {
+		if err := os.WriteFile(filepath.Join(dir, FileSuiteRun), sr.RunRaw, 0o644); err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(dir, FileSuite), sr.SuiteRaw, 0o644); err != nil {
+			return nil, err
+		}
 	}
 	specs, err := c.prepare()
 	if err != nil {
@@ -207,7 +221,7 @@ func Matrix(c *Config, raw []byte, dir string, progress io.Writer) (*Manifest, e
 			}
 		}
 	}
-	m, err := finish(c, dir, recs, specs)
+	m, err := finish(c, dir, recs, specs, sr)
 	if err != nil {
 		return nil, err
 	}

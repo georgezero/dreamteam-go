@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v06b-development",
+ "description": "V0.6b development matrix (docs/benchmark/v06b-dev/PROTOCOL.md): every entry of the development suite with the existing no-op, greedy and rules policies, unchanged, and the new conservative baseline, three fresh development seeds, the suite's 90 days and daily cadence, T90 where it applies. It demonstrates the suite runner, the contract report, the conservative baseline and the demand diagnostic; it is not a policy comparison, a benchmark result or a ranking. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-1.json",
+ "seeds": [
+  41001,
+  41002,
+  41003
+ ],
+ "seedPlan": "Chosen 2026-10-28 and committed with the V0.6b protocol, the conservative baseline and the demand diagnostic (docs/benchmark/v06b-dev/PROTOCOL.md) before any run on them: the next unused block 41001-41003 after V0.6a's 40901-40903. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "policies": [
+  "noop",
+  "greedy",
+  "rules",
+  "conservative"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": true
+ }
+}

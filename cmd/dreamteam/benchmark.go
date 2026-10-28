@@ -6,13 +6,15 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 	"path/filepath"
 
 	"github.com/georgezero/dreamteam-go/internal/bench"
 )
 
 const benchmarkUsage = `usage: dreamteam benchmark run CONFIG [-out DIR]
-       dreamteam benchmark report RESULTS [-format text|json]
+       dreamteam benchmark suite run SUITE-RUN [-out DIR]
+       dreamteam benchmark report RESULTS [-format text|json] [-harness]
        dreamteam benchmark verify RESULTS [-t90]
        dreamteam benchmark reproduce RESULTS [-out DIR]`
 
@@ -27,6 +29,12 @@ func benchmarkCmd(args []string, stdout, stderr io.Writer) int {
 	switch args[0] {
 	case "run":
 		return benchmarkRun(args[1:], stdout, stderr)
+	case "suite":
+		if len(args) > 1 && args[1] == "run" {
+			return benchmarkSuiteRun(args[2:], stdout, stderr)
+		}
+		fmt.Fprintln(stderr, benchmarkUsage)
+		return exitInvalid
 	case "report":
 		return benchmarkReport(args[1:], stdout, stderr)
 	case "verify":
@@ -83,19 +91,92 @@ func benchmarkRun(args []string, stdout, stderr io.Writer) int {
 	return exitOK
 }
 
+// benchmarkSuiteRun runs a suite run (V0.6b): the suite's selected
+// entries through the harness, then the contract report. Exit codes as
+// benchmark run: 0 every run completed; 1 a run failed (the contract
+// report says the suite is partial) or the results could not be written;
+// 2 the configuration or the suite is invalid (nothing ran).
+func benchmarkSuiteRun(args []string, stdout, stderr io.Writer) int {
+	fs := flag.NewFlagSet("benchmark suite run", flag.ContinueOnError)
+	fs.SetOutput(stderr)
+	out := fs.String("out", "", "results directory (default: the configuration's output, relative to its file)")
+	pos, err := parseFlags(fs, args)
+	if err != nil || len(pos) != 1 {
+		fmt.Fprintln(stderr, benchmarkUsage)
+		return exitInvalid
+	}
+	sr, err := bench.LoadSuiteRun(pos[0])
+	if err != nil {
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		if errors.Is(err, bench.ErrConfig) {
+			return exitInvalid
+		}
+		return exitError
+	}
+	dir := *out
+	if dir == "" {
+		dir = filepath.Join(filepath.Dir(pos[0]), sr.Config.Output)
+	}
+	c := sr.Config
+	fmt.Fprintf(stderr, "suite %s version %d, run %s: %d entries × %d seeds × %d policies = %d runs into %s\n", sr.Suite.ID,
+		sr.Suite.Version, c.ID, len(c.Scenarios), len(c.Seeds), len(c.Policies), len(c.Scenarios)*len(c.Seeds)*len(c.Policies), dir)
+	m, err := bench.RunSuite(sr, dir, stderr)
+	if err != nil {
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		return exitError
+	}
+	raw, err := os.ReadFile(filepath.Join(dir, bench.FileContractText))
+	if err != nil {
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		return exitError
+	}
+	stdout.Write(raw)
+	for _, r := range m.Runs {
+		if r.Status != bench.StatusCompleted {
+			return exitError
+		}
+	}
+	return exitOK
+}
+
+// benchmarkReport prints a results directory's report. For a suite run's
+// results it is the contract report (dreamteam.benchmark-contract/v1)
+// unless -harness asks for the harness's own report.
 func benchmarkReport(args []string, stdout, stderr io.Writer) int {
 	fs := flag.NewFlagSet("benchmark report", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	format := fs.String("format", "text", "text or json")
+	harness := fs.Bool("harness", false, "for a suite run, the harness's report instead of the contract report")
 	pos, err := parseFlags(fs, args)
 	if err != nil || len(pos) != 1 || (*format != "text" && *format != "json") {
 		fmt.Fprintln(stderr, benchmarkUsage)
 		return exitInvalid
 	}
-	_, c, recs, err := bench.LoadResults(pos[0])
+	m, c, recs, err := bench.LoadResults(pos[0])
 	if err != nil {
 		fmt.Fprintln(stderr, "dreamteam:", err)
 		return exitError
+	}
+	if sr, err := bench.LoadSuiteResults(pos[0], m); err != nil {
+		fmt.Fprintln(stderr, "dreamteam:", err)
+		return exitError
+	} else if sr != nil && !*harness {
+		k, err := bench.BuildContract(sr, pos[0], recs)
+		if err != nil {
+			fmt.Fprintln(stderr, "dreamteam:", err)
+			return exitError
+		}
+		if *format == "json" {
+			raw, err := json.MarshalIndent(k, "", " ")
+			if err != nil {
+				fmt.Fprintln(stderr, "dreamteam:", err)
+				return exitError
+			}
+			fmt.Fprintf(stdout, "%s\n", raw)
+			return exitOK
+		}
+		fmt.Fprint(stdout, k.Text())
+		return exitOK
 	}
 	r := bench.BuildReport(c, recs)
 	if *format == "json" {

@@ -34,18 +34,25 @@ const (
 // every deterministic file. Identical configurations and policy versions
 // on the same engine give byte-identical manifests.
 type Manifest struct {
-	Schema           string        `json:"schema"`
-	Benchmark        string        `json:"benchmark"`
-	Engine           string        `json:"engine"`
-	Protocol         string        `json:"protocol"`
-	Config           FileHash      `json:"config"`
-	Policies         []PolicySpec  `json:"policies"`
-	PolicyOps        []string      `json:"policyOps"`
-	Metrics          []Metric      `json:"metrics"`
-	Runs             []ManifestRun `json:"runs"`
-	Reports          []FileHash    `json:"reports"`
-	Nondeterministic []string      `json:"nondeterministic"`
+	Schema    string        `json:"schema"`
+	Benchmark string        `json:"benchmark"`
+	Engine    string        `json:"engine"`
+	Protocol  string        `json:"protocol"`
+	Config    FileHash      `json:"config"`
+	Policies  []PolicySpec  `json:"policies"`
+	PolicyOps []string      `json:"policyOps"`
+	Metrics   []Metric      `json:"metrics"`
+	Runs      []ManifestRun `json:"runs"`
+	Reports   []FileHash    `json:"reports"`
+	// Suite are a suite run's own files (V0.6b): the suite-run
+	// configuration and the suite file, verbatim, and the contract report.
+	// Absent for an ordinary benchmark.
+	Suite            []FileHash `json:"suite,omitempty"`
+	Nondeterministic []string   `json:"nondeterministic"`
 }
+
+// suiteFiles are a suite run's own files, in manifest order.
+var suiteFiles = []string{FileSuiteRun, FileSuite, FileContractJSON, FileContractText}
 
 // FileHash is a file (relative to the results directory) and its SHA-256.
 type FileHash struct {
@@ -78,7 +85,7 @@ func hashFile(dir, rel string) (FileHash, error) {
 }
 
 // finish writes the report and the manifest.
-func finish(c *Config, dir string, recs []*RunRecord, specs []PolicySpec) (*Manifest, error) {
+func finish(c *Config, dir string, recs []*RunRecord, specs []PolicySpec, sr *SuiteRun) (*Manifest, error) {
 	r := BuildReport(c, recs)
 	if err := writeJSON(filepath.Join(dir, FileReportJSON), r); err != nil {
 		return nil, err
@@ -127,6 +134,25 @@ func finish(c *Config, dir string, recs []*RunRecord, specs []PolicySpec) (*Mani
 			return nil, err
 		}
 		m.Reports = append(m.Reports, h)
+	}
+	if sr != nil {
+		k, err := BuildContract(sr, dir, recs)
+		if err != nil {
+			return nil, err
+		}
+		if err := writeJSON(filepath.Join(dir, FileContractJSON), k); err != nil {
+			return nil, err
+		}
+		if err := os.WriteFile(filepath.Join(dir, FileContractText), []byte(k.Text()), 0o644); err != nil {
+			return nil, err
+		}
+		for _, f := range suiteFiles {
+			h, err := hashFile(dir, f)
+			if err != nil {
+				return nil, err
+			}
+			m.Suite = append(m.Suite, h)
+		}
 	}
 	return m, writeJSON(filepath.Join(dir, FileManifest), m)
 }

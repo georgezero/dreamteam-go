@@ -484,3 +484,8 @@ The V0.5 release file was made from 9d748dc (0.5.0) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v050.actions.json`
 (the same batches as the 5C.4l file's). 0.6.0-dev.1 replays it in batch
 mode `v0.5.0` with every digest verified (`internal/session/v050_test.go`).
+
+The V0.6a file was made from a1afb41 (0.6.0-dev.1) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v061.actions.json`
+(the same batches as the 5C.4l file's). 0.6.0-dev.2 replays it in batch
+mode `v0.6_dev1` with every digest verified (`internal/session/v061_test.go`).
