@@ -297,6 +297,12 @@ and `dreamteam benchmark report` prints it (§9).
     and the base profile's December decline absorbs part of the growth.
   * Financial pressure and staffing shortage both lose money with no
     action; they differ in expenses, lost demand, overtime and waits.
+* **The conservative baseline never acted in the V0.6b development matrix**
+  ([v06b-dev/README.md](benchmark/v06b-dev/README.md)). Its service signal,
+  the oldest unfinished study at the 07:00 decision point, passed 24 hours
+  on at most two mornings in a row (after the day with no reading), so it
+  found no sustained problem in any scenario. The baselines therefore
+  still offer two behaviours: no action, and twelve allocation raises.
 * **The conservative baseline cannot invest its way out of a loss.** Its
   profit guardrail forbids raising reading capacity while the trailing 30
   days lose money, even when the loss comes from unbilled reports in the

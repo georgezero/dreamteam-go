@@ -7,6 +7,115 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.6b — benchmark suite runner and standard reports (0.6.0-dev.2)
+
+Owner decision 2026-10-28:
+* V0.6a accepted (CI green on a1afb41), demand growth provisionally and
+  financial pressure as limited;
+* insolvency mechanics and demand shocks deferred until after V0.6.0;
+* V0.6b makes the suite easy to run, verify and interpret, with one new,
+  distinct baseline and a prospective demand diagnostic;
+* no new mechanics.
+
+**Declared first** (8556766, before any run on seeds 41001–41003): the
+code, the conservative baseline, the diagnostic, the protocol and
+configurations, version 0.6.0-dev.2 (0.6.0-dev.1 registered for replay:
+`mini-seed52-v061`, batch mode `v0.6_dev1`).
+
+**Built:**
+* **`dreamteam benchmark suite run`** (`internal/bench/suite.go`):
+  * a suite-run configuration (`dreamteam.benchmark-suite-run/v1`) is
+    checked: every entry's scenario against its recorded fingerprint, and
+    T90 applicability;
+  * it is expanded into an ordinary benchmark configuration and played
+    through the V0.4 harness; run files and harness reports are byte for
+    byte `benchmark run`'s;
+  * the results add `suite-run.json`, `suite.json`, `contract.json` and
+    `contract.txt`, hashed in the manifest's new optional `suite` list
+    (ordinary manifests unchanged);
+  * a failed run makes the suite `partial`, stated in the report;
+  * exit status as `benchmark run`.
+* **The contract report** (`internal/bench/contract.go`,
+  `dreamteam.benchmark-contract/v1`):
+  * per run: entry, scenario and fingerprint, policy and version, seed,
+    horizon, starting-state digest, replay status, actions by category and
+    type, T90 applicability and verdict, and the six dimensions with
+    absent values marked and explained;
+  * paired differences against the baseline;
+  * starting-state identity per entry and seed;
+  * missing measures.
+
+  `benchmark report` prints it for suite results (`-harness` for the
+  harness's own). `verify` checks the suite files, fingerprints, the
+  expansion and the rebuilt report; `reproduce` reruns from the stored
+  files.
+* **`conservative` v1** (`internal/bench/conservative.go`; specification
+  BENCHMARK_SUITE §7):
+  * raises a site reading allocation only after three days in a row with
+    the oldest study over 24 hours;
+  * guardrails: trailing-30-day profit at or above zero after the
+    change's added salary (from the preview), cash at least $50,000, at
+    most 5 points above the scenario levels, 14 days between changes;
+  * steps back when profit is negative or the backlog has been clear for
+    a week.
+
+  `noop`, `greedy` and `rules` are unchanged.
+* **`dreamteam.demand-diagnostic/v1`**
+  (`docs/benchmark/v06b-dev/demand_diagnostic.py`): generated demand
+  (referral orders as they arrive, and walk-ins), completed exams and lost
+  orders per operating day by 30-day window. It checks that generated
+  demand is independent of policy (R1), and has declared conditions G1
+  and G2. V0.6a's failed check stays recorded.
+* **Tests:**
+  * suite run equals the standalone matrix, verifies, reproduces, catches
+    tampering;
+  * partial suites;
+  * invalid suite runs;
+  * committed suite runs load through the holdout guard;
+  * every conservative rule and guardrail, and its run behaviour;
+  * the CLI.
+
+**Development matrix** (60 runs, 76 min on the Pi): complete; `verify -t90` 578 of 578;
+`reproduce` on linux/amd64 383 of 383, and a fresh linux/amd64 run's
+manifest and contract report byte-identical to the Pi's. CI's suite-run
+smoke test is byte-identical on three platforms.
+* **Conservative:** no action in all 15 runs, identical to no action.
+  The oldest study never passed 24 hours on three mornings in a row (at
+  most two: Sunday and Monday). The trailing-30-day profit was negative at
+  12–90 of 90 points.
+* **Demand diagnostic:** R1 holds on 15 of 15 entry-seed pairs; G1 and G2
+  hold on all three seeds. Under demand growth, orders per operating day
+  rose 2–11% while completed exams stayed flat and lost orders rose.
+* **The other baselines:** `greedy` and `rules` as in V0.6a.
+
+**Gates:**
+* Focused first: `internal/bench` (suite runner, contract, conservative,
+  committed configurations), `internal/scenario`, `cmd/dreamteam` (the
+  suite command, goldens, migrations) and the session registration, on
+  the Pi.
+* Full default Go suite on linux/amd64: every package passes.
+* Race on linux/amd64: `internal/bench`, `internal/scenario`,
+  `internal/session`, `internal/agent`, `cmd/dreamteam` pass.
+* vet (three tag sets) and gofmt: clean.
+* Python agent tests: pass.
+* Five cross-builds.
+* Session fixtures and golden references: identical outcomes under
+  0.6.0-dev.2.
+* CI green on the declaration commit, including the suite-run smoke
+  test byte-identical on three platforms.
+* The clinical evaluation suites, unaffected, were not run.
+
+**Limitations:**
+* `conservative` v1's service signal (the oldest study at 07:00) does not
+  see the suite's soon and urgent breaches, so the baselines still offer
+  only two behaviours;
+* its profit guardrail cannot fund capacity whose shortage causes the
+  loss;
+* three development seeds;
+* no LLM agent run.
+
+---
+
 ## V0.6a — benchmark scenario suite and evaluation contract (0.6.0-dev.1)
 
 Owner decision 2026-10-28: V0.5.0 accepted and closed; V0.6a establishes

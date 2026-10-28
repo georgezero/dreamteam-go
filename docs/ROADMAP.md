@@ -17,7 +17,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
-| **V0.6** (in development: V0.6a, the benchmark scenario suite and evaluation contract, 0.6.0-dev.1; owner decision 2026-10-28) | V0.5 agents |
+| **V0.6** (in development: V0.6a, the benchmark scenario suite and evaluation contract, 0.6.0-dev.1, accepted; V0.6b, the suite runner and standard reports, 0.6.0-dev.2; owner decisions 2026-10-28) | V0.5 agents |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -540,8 +540,18 @@ foundation; no second benchmark engine.
   reporting contract; a baseline characterization with no action, `greedy`
   and `rules` on three declared seeds
   ([benchmark/v06a-dev/](benchmark/v06a-dev/README.md)).
-* **V0.6b:** benchmark runner and reporting: standardized multi-scenario
-  comparisons.
+* **V0.6a** accepted (owner, 2026-10-28; CI green on a1afb41): demand
+  growth provisionally, financial pressure as limited. Insolvency
+  mechanics and dated demand shocks deferred until after V0.6.0.
+* **V0.6b (0.6.0-dev.2): suite runner and standard reports.**
+  * `dreamteam benchmark suite run` and the contract report
+    (`dreamteam.benchmark-contract/v1`) on the harness, unchanged;
+  * a financially conservative built-in baseline, `conservative` v1;
+  * a prospective demand diagnostic, `dreamteam.demand-diagnostic/v1`;
+  * a 60-run development matrix
+    ([benchmark/v06b-dev/](benchmark/v06b-dev/README.md)).
+
+  `conservative` v1 took no action in any run there.
 * **V0.6c:** frozen agents evaluated across the suite.
 * **V0.6.0:** a documented, reproducible benchmark.
 

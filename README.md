@@ -23,7 +23,8 @@ not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
 In development (unreleased): **V0.6**, the agent benchmark. V0.6a defines a
-suite of five practice scenarios and an evaluation contract
+suite of five practice scenarios and an evaluation contract; V0.6b runs a
+suite in one command and reports it under that contract
 (`docs/BENCHMARK_SUITE.md`).
 
 ## Quick start
@@ -336,8 +337,11 @@ reporting backlog), `bench-demand-growth`, `bench-staffing-shortage` and
 `bench-stable`. An evaluation contract reports every run on six dimensions
 of existing metrics (operations, finance, staffing and capacity, service
 reliability, sustainability, actions), with no score or ranking, and T90
-only where its policy applies. `docs/BENCHMARK_SUITE.md`; the baseline
-characterization: `docs/benchmark/v06a-dev/`.
+only where its policy applies. `dreamteam benchmark suite run` (V0.6b)
+runs a suite in one command and writes that contract report; a fourth
+built-in baseline, `conservative`, spends only within financial
+guardrails. `docs/BENCHMARK_SUITE.md`; the characterizations:
+`docs/benchmark/v06a-dev/`, `docs/benchmark/v06b-dev/`.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
