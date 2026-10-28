@@ -612,6 +612,59 @@ func TestLLMAgentReplay(t *testing.T) {
 	}
 }
 
+// memoryDecisions 0, the V0.5c memory-off control: the prompt carries no
+// earlier decision point, and a replay rebuilds the same memory.
+func TestLLMAgentMemoryOff(t *testing.T) {
+	m := llmSetup(t)
+	c := externalConfig(t, llmPolicy(t, "llm", "mixed", map[string]any{"memoryDecisions": 0}))
+	c.Evaluation.T90 = false
+	live := runMatrix(t, c)
+	_, _, recs, err := LoadResults(live)
+	if err != nil {
+		t.Fatal(err)
+	}
+	r := recs[1]
+	ev := filepath.Join(live, "runs", r.ID, FileEvidence)
+	if r.Status != StatusCompleted || r.Counts.Applied == 0 {
+		t.Fatalf("%s: %s %+v", r.ID, r.Status, r.Counts)
+	}
+	mem := readJSONL[agentMemory](t, filepath.Join(ev, "memory.jsonl"))
+	if len(mem) != r.Counts.DecisionPoints || len(mem) < 2 {
+		t.Fatalf("%d memories, %d decision points", len(mem), r.Counts.DecisionPoints)
+	}
+	for _, x := range mem {
+		if !strings.HasPrefix(x.Text, "MEMORY (llm-agent-memory/v1): off in this run") ||
+			strings.Contains(x.Text, "point ") || strings.Contains(x.Text, "Metrics") {
+			t.Errorf("point %d: %q", x.Point, x.Text)
+		}
+	}
+	calls := m.count("mixed")
+	c2 := externalConfig(t, ExternalPolicy{ID: "llm", Version: "1", Description: "the LLM agent, replayed",
+		Command:        []string{"python3", "-I", "-B", "./agents/llm/llm_agent.py", "--replay", filepath.Join(ev, "decisions.jsonl")},
+		TimeoutSeconds: 60})
+	c2.Evaluation.T90 = false
+	a := runMatrix(t, c2)
+	if m.count("mixed") != calls {
+		t.Fatal("the replay called the model")
+	}
+	_, _, again, err := LoadResults(a)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if again[1].Status != StatusCompleted || again[1].Final.Digests != r.Final.Digests {
+		t.Fatalf("replay: %s", again[1].Status)
+	}
+	rm := readJSONL[agentMemory](t, filepath.Join(a, "runs", r.ID, FileEvidence, "memory.jsonl"))
+	if len(rm) != len(mem) {
+		t.Fatalf("memory %d live, %d replayed", len(mem), len(rm))
+	}
+	for k := range mem {
+		if mem[k] != rm[k] {
+			t.Errorf("memory at point %d differs", k)
+		}
+	}
+}
+
 // The memory stays within its bound over 90 daily decision points, with
 // actions at many of them; the run completes and verifies.
 func TestLLMAgentMemoryBounded(t *testing.T) {

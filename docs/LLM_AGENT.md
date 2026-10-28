@@ -120,7 +120,7 @@ loads unchanged.
 | `observation` | `summary` | `summary`: the observation summarized (§4.3); `compact`: the whole compact observation, as in V0.5a. |
 | `catalog` | `guided` | `guided`: the action guidance only (§4.4); `full`: the guidance and the full catalog JSON. |
 | `allowDetails` | true | Whether the model may ask once per decision point for full details (§5). |
-| `memoryDecisions` | 6 | 0–50: recent decisions kept in full in the memory (§6). |
+| `memoryDecisions` | 6 | 0–50: recent decisions kept in full in the memory (§6). 0 turns the memory off (§6). |
 | `memoryMetricPoints` | 6 | 0–30: metric rows kept. |
 | `memoryMaxChars` | 6000 | 500–50000: the memory text's bound. |
 | `pricing` | none | `{"currency": "USD", "inputPerMillion": n, "outputPerMillion": n}`: prices per million tokens, for the estimated cost (§9). |
@@ -394,6 +394,19 @@ refusals and 12 pending lines. The rendered text is at most
 
 The size does not grow with the run's length. A 90-day mock run stays
 within a 1,500-character limit, and a 120-point unit test within 6,000.
+
+**Memory off.** With `memoryDecisions` 0 (since V0.5c, for its
+memory-off control), the MEMORY section says the memory is off.
+* **What it carries:** nothing from earlier decision points: no
+  decisions, totals, refusals or metric rows, whatever
+  `memoryMetricPoints` says.
+* **What it keeps:** the pending changes, which come from the current
+  observation and catalog.
+* **What else changes:** nothing; the rest of the prompt is unchanged.
+* **Before V0.5c:** 0 kept the earlier decisions as totals, with the
+  refusals and metric rows.
+* **Memory on:** unchanged, byte for byte; the V0.5b recording's replay
+  checks it at every point.
 
 ## 7. Operations and staffing actions at one decision point
 

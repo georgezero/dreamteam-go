@@ -1,0 +1,72 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v05c-stage-a",
+ "description": "V0.5c development evaluation, Stage A (integration: one seed, 7 days, every model) (docs/benchmark/v05c-dev/PLAN.md): the frozen LLM agent with local models beside the no-op baseline on the bundled sustainable scenario, daily decisions at 07:00. A development comparison, not a benchmark result: no composite score, no ranking. Run from the repository root with DREAMTEAM_LLM_BASE_URL set.",
+ "scenarios": [
+  "sustainable"
+ ],
+ "seeds": [
+  40801
+ ],
+ "seedPlan": "Chosen 2026-10-27 and committed in the V0.5c plan (docs/benchmark/v05c-dev/PLAN.md) before any run on them: the next unused block 40801-40805 after V0.4a's 40401-40405, V0.4b's 40501-40505, V0.5a's 40601 and V0.5b's 40701, assigned in order: 40801 Stage A; 40802, 40803, 40804 Stages B and C; 40805 Stage D. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream; the sealed holdout guard accepts them.",
+ "days": 7,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  "noop",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b",
+  "gemma4-31b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-31b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-31B-it-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-gemma4-31b.json",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-31b.json"
+   ],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

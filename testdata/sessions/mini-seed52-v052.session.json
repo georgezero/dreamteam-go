@@ -1,0 +1,2223 @@
+{
+ "schema": "dreamteam.session/v2",
+ "engine": "0.5.0-dev.2",
+ "scenario": {
+  "id": "mini",
+  "name": "DreamTeam Imaging Center",
+  "fingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+  "resolved": {
+   "schema": "dreamteam.scenario/v1",
+   "id": "mini",
+   "name": "DreamTeam Imaging Center",
+   "family": "mini",
+   "startDate": "2026-10-13",
+   "startTime": "06:00",
+   "warmupDays": 0,
+   "rotaWeekA": "2026-10-12",
+   "openingCashCents": 15000000,
+   "hours": {
+    "Fri": [
+     "08:00",
+     "20:00"
+    ],
+    "Mon": [
+     "08:00",
+     "20:00"
+    ],
+    "Sat": [
+     "10:00",
+     "18:00"
+    ],
+    "Sun": null,
+    "Thu": [
+     "08:00",
+     "20:00"
+    ],
+    "Tue": [
+     "08:00",
+     "20:00"
+    ],
+    "Wed": [
+     "08:00",
+     "20:00"
+    ]
+   },
+   "rooms": [
+    {
+     "id": "R1",
+     "modality": "XR",
+     "name": "X-ray 1"
+    },
+    {
+     "id": "R2",
+     "modality": "US",
+     "name": "Ultrasound 1"
+    },
+    {
+     "id": "R3",
+     "modality": "CT",
+     "name": "CT 1"
+    },
+    {
+     "id": "R4",
+     "modality": "MR",
+     "name": "MRI 1"
+    }
+   ],
+   "employees": [
+    {
+     "id": "E01",
+     "name": "Jordan",
+     "role": "front_desk",
+     "skills": [
+      "registration"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 2100
+     },
+     "roster": {
+      "Fri": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "12:00",
+         "12:30"
+        ]
+       ],
+       "assignment": "desk"
+      },
+      "Mon": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "12:00",
+         "12:30"
+        ]
+       ],
+       "assignment": "desk"
+      },
+      "Thu": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "12:00",
+         "12:30"
+        ]
+       ],
+       "assignment": "desk"
+      },
+      "Tue": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "12:00",
+         "12:30"
+        ]
+       ],
+       "assignment": "desk"
+      },
+      "Wed": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "12:00",
+         "12:30"
+        ]
+       ],
+       "assignment": "desk"
+      }
+     }
+    },
+    {
+     "id": "E02",
+     "name": "Taylor",
+     "role": "ops_manager",
+     "skills": [
+      "registration"
+     ],
+     "pay": {
+      "type": "salaried",
+      "rateCents": 9500000
+     },
+     "roster": {
+      "Fri": {
+       "start": "08:00",
+       "end": "17:00",
+       "assignment": "admin"
+      },
+      "Mon": {
+       "start": "08:00",
+       "end": "17:00",
+       "assignment": "admin"
+      },
+      "Thu": {
+       "start": "08:00",
+       "end": "17:00",
+       "assignment": "admin"
+      },
+      "Tue": {
+       "start": "08:00",
+       "end": "17:00",
+       "assignment": "admin"
+      },
+      "Wed": {
+       "start": "08:00",
+       "end": "17:00",
+       "assignment": "admin"
+      }
+     }
+    },
+    {
+     "id": "E03",
+     "name": "Riley",
+     "role": "technologist",
+     "skills": [
+      "XR",
+      "CT"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 3600
+     },
+     "roster": {
+      "Fri": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "11:30",
+         "12:00"
+        ]
+       ],
+       "assignment": "R1",
+       "covers": [
+        {
+         "room": "R3",
+         "until": "11:30"
+        }
+       ]
+      },
+      "Mon": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "11:30",
+         "12:00"
+        ]
+       ],
+       "assignment": "R1",
+       "covers": [
+        {
+         "room": "R3"
+        }
+       ]
+      },
+      "Thu": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "11:30",
+         "12:00"
+        ]
+       ],
+       "assignment": "R1",
+       "covers": [
+        {
+         "room": "R3",
+         "until": "11:30"
+        }
+       ]
+      },
+      "Tue": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "11:30",
+         "12:00"
+        ]
+       ],
+       "assignment": "R1",
+       "covers": [
+        {
+         "room": "R3",
+         "until": "11:30"
+        }
+       ]
+      },
+      "Wed": {
+       "start": "07:45",
+       "end": "16:15",
+       "breaks": [
+        [
+         "11:30",
+         "12:00"
+        ]
+       ],
+       "assignment": "R1",
+       "covers": [
+        {
+         "room": "R3",
+         "until": "11:30"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "id": "E04",
+     "name": "Sam",
+     "role": "technologist",
+     "skills": [
+      "CT",
+      "XR"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 4000
+     },
+     "roster": {
+      "Fri": {
+       "start": "11:30",
+       "end": "20:00",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ],
+       "assignment": "R3",
+       "covers": [
+        {
+         "room": "R1",
+         "from": "16:15"
+        }
+       ]
+      },
+      "Sat": {
+       "start": "10:00",
+       "end": "18:00",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R3",
+       "covers": [
+        {
+         "room": "R1"
+        }
+       ]
+      },
+      "Thu": {
+       "start": "11:30",
+       "end": "20:00",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ],
+       "assignment": "R3",
+       "covers": [
+        {
+         "room": "R1",
+         "from": "16:15"
+        }
+       ]
+      },
+      "Tue": {
+       "start": "11:30",
+       "end": "20:00",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ],
+       "assignment": "R3",
+       "covers": [
+        {
+         "room": "R1",
+         "from": "16:15"
+        }
+       ]
+      },
+      "Wed": {
+       "start": "11:30",
+       "end": "20:00",
+       "breaks": [
+        [
+         "15:30",
+         "16:00"
+        ]
+       ],
+       "assignment": "R3",
+       "covers": [
+        {
+         "room": "R1",
+         "from": "16:15"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "id": "E05",
+     "name": "Casey",
+     "role": "technologist",
+     "skills": [
+      "MR"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 4500
+     },
+     "roster": {
+      "Fri": {
+       "start": "08:00",
+       "end": "16:30",
+       "breaks": [
+        [
+         "12:30",
+         "13:00"
+        ]
+       ],
+       "assignment": "R4"
+      },
+      "Mon": {
+       "start": "08:00",
+       "end": "16:30",
+       "breaks": [
+        [
+         "12:30",
+         "13:00"
+        ]
+       ],
+       "assignment": "R4"
+      },
+      "Thu": {
+       "start": "08:00",
+       "end": "16:30",
+       "breaks": [
+        [
+         "12:30",
+         "13:00"
+        ]
+       ],
+       "assignment": "R4"
+      },
+      "Tue": {
+       "start": "08:00",
+       "end": "16:30",
+       "breaks": [
+        [
+         "12:30",
+         "13:00"
+        ]
+       ],
+       "assignment": "R4"
+      },
+      "Wed": {
+       "start": "08:00",
+       "end": "16:30",
+       "breaks": [
+        [
+         "12:30",
+         "13:00"
+        ]
+       ],
+       "assignment": "R4"
+      }
+     }
+    },
+    {
+     "id": "E06",
+     "name": "Morgan",
+     "role": "technologist",
+     "skills": [
+      "US"
+     ],
+     "pay": {
+      "type": "hourly",
+      "rateCents": 4400
+     },
+     "roster": {
+      "Fri": {
+       "start": "09:30",
+       "end": "18:00",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      },
+      "Mon": {
+       "start": "09:30",
+       "end": "18:00",
+       "weeks": "A",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      },
+      "Sat": {
+       "start": "10:00",
+       "end": "18:00",
+       "weeks": "B",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      },
+      "Thu": {
+       "start": "09:30",
+       "end": "18:00",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      },
+      "Tue": {
+       "start": "09:30",
+       "end": "18:00",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      },
+      "Wed": {
+       "start": "09:30",
+       "end": "18:00",
+       "breaks": [
+        [
+         "13:30",
+         "14:00"
+        ]
+       ],
+       "assignment": "R2"
+      }
+     }
+    },
+    {
+     "id": "E07",
+     "name": "Dr. Avery",
+     "role": "radiologist",
+     "skills": [],
+     "pay": {
+      "type": "salaried",
+      "rateCents": 48000000
+     },
+     "siteAllocationBP": 6000,
+     "roster": {
+      "Fri": {
+       "start": "07:30",
+       "end": "16:00",
+       "assignment": "reading"
+      },
+      "Mon": {
+       "start": "07:30",
+       "end": "16:00",
+       "assignment": "reading"
+      },
+      "Sat": {
+       "start": "10:00",
+       "end": "14:00",
+       "weeks": "A",
+       "assignment": "reading",
+       "location": "remote"
+      },
+      "Thu": {
+       "start": "07:30",
+       "end": "16:00",
+       "assignment": "reading"
+      },
+      "Tue": {
+       "start": "07:30",
+       "end": "16:00",
+       "assignment": "reading"
+      },
+      "Wed": {
+       "start": "07:30",
+       "end": "16:00",
+       "assignment": "reading"
+      }
+     }
+    },
+    {
+     "id": "E08",
+     "name": "Dr. Blake",
+     "role": "radiologist",
+     "skills": [],
+     "pay": {
+      "type": "salaried",
+      "rateCents": 48000000
+     },
+     "siteAllocationBP": 5000,
+     "roster": {
+      "Fri": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "reading"
+      },
+      "Mon": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "reading"
+      },
+      "Sat": {
+       "start": "10:00",
+       "end": "14:00",
+       "weeks": "B",
+       "assignment": "reading",
+       "location": "remote"
+      },
+      "Thu": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "reading"
+      },
+      "Tue": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "reading"
+      },
+      "Wed": {
+       "start": "11:30",
+       "end": "20:00",
+       "assignment": "reading"
+      }
+     }
+    }
+   ],
+   "policies": {
+    "walkIn": "accept_if_gap",
+    "worklist": "urgent_then_fifo",
+    "late": "fit_in",
+    "graceMin": 15,
+    "overtimeAllowanceMin": 15,
+    "maxShiftHours": 12,
+    "contrastSupervision": "on_site",
+    "booking": "first_fit",
+    "bookingHorizonDays": 120,
+    "bookingNoticeMin": 60,
+    "earlyStartMin": 10,
+    "startEarly": true,
+    "breakDeferMaxMin": 60,
+    "weeklyOvertimeHours": 40,
+    "overtimeFactorBP": 15000,
+    "tatTargetMin": {
+     "routine": 1440,
+     "soon": 240,
+     "urgent": 60
+    }
+   },
+   "catalog": [
+    {
+     "code": "XR_CHEST_2V",
+     "name": "Chest 2V",
+     "modality": "XR",
+     "category": "XR_15",
+     "contrast": false,
+     "walkInEligible": true,
+     "roomTimeSec": {
+      "p0": 300,
+      "p100": 900,
+      "p50": 480
+     },
+     "readSec": {
+      "p0": 90,
+      "p100": 240,
+      "p50": 150
+     },
+     "techExtraSec": {
+      "p0": 60,
+      "p100": 300,
+      "p50": 120
+     },
+     "baseRateCents": 4500,
+     "supplyCostCents": 300
+    },
+    {
+     "code": "XR_EXTREMITY",
+     "name": "Extremity",
+     "modality": "XR",
+     "category": "XR_15",
+     "contrast": false,
+     "walkInEligible": true,
+     "roomTimeSec": {
+      "p0": 360,
+      "p100": 1080,
+      "p50": 600
+     },
+     "readSec": {
+      "p0": 120,
+      "p100": 300,
+      "p50": 180
+     },
+     "techExtraSec": {
+      "p0": 60,
+      "p100": 300,
+      "p50": 120
+     },
+     "baseRateCents": 4500,
+     "supplyCostCents": 300
+    },
+    {
+     "code": "XR_SPINE",
+     "name": "Spine",
+     "modality": "XR",
+     "category": "XR_15",
+     "contrast": false,
+     "walkInEligible": true,
+     "roomTimeSec": {
+      "p0": 420,
+      "p100": 1200,
+      "p50": 660
+     },
+     "readSec": {
+      "p0": 120,
+      "p100": 300,
+      "p50": 180
+     },
+     "techExtraSec": {
+      "p0": 60,
+      "p100": 300,
+      "p50": 150
+     },
+     "baseRateCents": 4500,
+     "supplyCostCents": 300
+    },
+    {
+     "code": "US_ABD_COMPLETE",
+     "name": "Abdomen complete",
+     "modality": "US",
+     "category": "US_45",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1500,
+      "p100": 3120,
+      "p50": 2280
+     },
+     "readSec": {
+      "p0": 240,
+      "p100": 540,
+      "p50": 360
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 17000,
+     "supplyCostCents": 800
+    },
+    {
+     "code": "US_PELVIS",
+     "name": "Pelvis",
+     "modality": "US",
+     "category": "US_45",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1500,
+      "p100": 3120,
+      "p50": 2280
+     },
+     "readSec": {
+      "p0": 240,
+      "p100": 540,
+      "p50": 360
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 15500,
+     "supplyCostCents": 800
+    },
+    {
+     "code": "US_VENOUS",
+     "name": "Venous duplex",
+     "modality": "US",
+     "category": "US_45",
+     "contrast": false,
+     "walkInEligible": true,
+     "roomTimeSec": {
+      "p0": 1500,
+      "p100": 3120,
+      "p50": 2160
+     },
+     "readSec": {
+      "p0": 240,
+      "p100": 540,
+      "p50": 360
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 16000,
+     "supplyCostCents": 800
+    },
+    {
+     "code": "US_THYROID",
+     "name": "Thyroid",
+     "modality": "US",
+     "category": "US_30",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1080,
+      "p100": 2160,
+      "p50": 1560
+     },
+     "readSec": {
+      "p0": 240,
+      "p100": 480,
+      "p50": 330
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 480,
+      "p50": 240
+     },
+     "baseRateCents": 14000,
+     "supplyCostCents": 800
+    },
+    {
+     "code": "US_RENAL",
+     "name": "Renal",
+     "modality": "US",
+     "category": "US_30",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1080,
+      "p100": 2160,
+      "p50": 1560
+     },
+     "readSec": {
+      "p0": 240,
+      "p100": 480,
+      "p50": 330
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 480,
+      "p50": 240
+     },
+     "baseRateCents": 14000,
+     "supplyCostCents": 800
+    },
+    {
+     "code": "CT_HEAD_WO",
+     "name": "Head w/o",
+     "modality": "CT",
+     "category": "CT_15",
+     "contrast": false,
+     "walkInEligible": true,
+     "roomTimeSec": {
+      "p0": 480,
+      "p100": 1200,
+      "p50": 720
+     },
+     "readSec": {
+      "p0": 360,
+      "p100": 900,
+      "p50": 540
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 480,
+      "p50": 240
+     },
+     "baseRateCents": 16000,
+     "supplyCostCents": 1500
+    },
+    {
+     "code": "CT_CHEST_WO",
+     "name": "Chest w/o",
+     "modality": "CT",
+     "category": "CT_15",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 540,
+      "p100": 1260,
+      "p50": 780
+     },
+     "readSec": {
+      "p0": 420,
+      "p100": 900,
+      "p50": 600
+     },
+     "techExtraSec": {
+      "p0": 120,
+      "p100": 480,
+      "p50": 240
+     },
+     "baseRateCents": 16000,
+     "supplyCostCents": 1500
+    },
+    {
+     "code": "CT_ABD_PEL_WC",
+     "name": "Abd/pelvis w/ contrast",
+     "modality": "CT",
+     "category": "CT_30C",
+     "contrast": true,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1080,
+      "p100": 2400,
+      "p50": 1560
+     },
+     "readSec": {
+      "p0": 600,
+      "p100": 1200,
+      "p50": 840
+     },
+     "techExtraSec": {
+      "p0": 60,
+      "p100": 420,
+      "p50": 180
+     },
+     "baseRateCents": 26000,
+     "supplyCostCents": 5000
+    },
+    {
+     "code": "CT_CHEST_WC",
+     "name": "Chest w/ contrast",
+     "modality": "CT",
+     "category": "CT_30C",
+     "contrast": true,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 960,
+      "p100": 2160,
+      "p50": 1440
+     },
+     "readSec": {
+      "p0": 480,
+      "p100": 1080,
+      "p50": 720
+     },
+     "techExtraSec": {
+      "p0": 60,
+      "p100": 420,
+      "p50": 180
+     },
+     "baseRateCents": 26000,
+     "supplyCostCents": 5000
+    },
+    {
+     "code": "MR_BRAIN_WO",
+     "name": "Brain w/o",
+     "modality": "MR",
+     "category": "MR_45",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1800,
+      "p100": 3300,
+      "p50": 2520
+     },
+     "readSec": {
+      "p0": 600,
+      "p100": 1500,
+      "p50": 960
+     },
+     "techExtraSec": {
+      "p0": 180,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 26000,
+     "supplyCostCents": 2000
+    },
+    {
+     "code": "MR_LSPINE_WO",
+     "name": "L-spine w/o",
+     "modality": "MR",
+     "category": "MR_45",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1800,
+      "p100": 3300,
+      "p50": 2520
+     },
+     "readSec": {
+      "p0": 600,
+      "p100": 1500,
+      "p50": 960
+     },
+     "techExtraSec": {
+      "p0": 180,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 26000,
+     "supplyCostCents": 2000
+    },
+    {
+     "code": "MR_KNEE_WO",
+     "name": "Knee w/o",
+     "modality": "MR",
+     "category": "MR_45",
+     "contrast": false,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 1800,
+      "p100": 3240,
+      "p50": 2400
+     },
+     "readSec": {
+      "p0": 600,
+      "p100": 1500,
+      "p50": 900
+     },
+     "techExtraSec": {
+      "p0": 180,
+      "p100": 600,
+      "p50": 300
+     },
+     "baseRateCents": 26000,
+     "supplyCostCents": 2000
+    },
+    {
+     "code": "MR_BRAIN_WWO",
+     "name": "Brain w/wo contrast",
+     "modality": "MR",
+     "category": "MR_60C",
+     "contrast": true,
+     "walkInEligible": false,
+     "roomTimeSec": {
+      "p0": 2700,
+      "p100": 4200,
+      "p50": 3420
+     },
+     "readSec": {
+      "p0": 720,
+      "p100": 1500,
+      "p50": 1080
+     },
+     "techExtraSec": {
+      "p0": 180,
+      "p100": 720,
+      "p50": 360
+     },
+     "baseRateCents": 38000,
+     "supplyCostCents": 8000
+    }
+   ],
+   "templates": {
+    "R1": [
+     {
+      "days": [
+       "Mon",
+       "Tue",
+       "Wed",
+       "Thu",
+       "Fri"
+      ],
+      "slots": [
+       {
+        "start": "08:00",
+        "lenMin": 15,
+        "count": 48,
+        "category": "XR_15"
+       }
+      ]
+     },
+     {
+      "days": [
+       "Sat"
+      ],
+      "slots": [
+       {
+        "start": "10:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "10:30",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "11:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "11:30",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "12:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "12:30",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "13:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "14:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "14:30",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "15:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "15:30",
+        "lenMin": 15,
+        "category": "XR_15"
+       },
+       {
+        "start": "16:00",
+        "lenMin": 15,
+        "category": "XR_15"
+       }
+      ]
+     }
+    ],
+    "R2": [
+     {
+      "days": [
+       "Mon",
+       "Tue",
+       "Wed",
+       "Thu",
+       "Fri"
+      ],
+      "slots": [
+       {
+        "start": "09:30",
+        "lenMin": 45,
+        "count": 2,
+        "category": "US_45"
+       },
+       {
+        "start": "11:00",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "11:30",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "12:15",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "12:45",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "14:00",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "14:45",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "15:15",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "16:00",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "16:30",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "17:15",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "18:00",
+        "lenMin": 45,
+        "count": 2,
+        "category": "US_45"
+       },
+       {
+        "start": "19:30",
+        "lenMin": 30,
+        "category": "US_30"
+       }
+      ]
+     },
+     {
+      "days": [
+       "Sat"
+      ],
+      "slots": [
+       {
+        "start": "10:00",
+        "lenMin": 45,
+        "count": 2,
+        "category": "US_45"
+       },
+       {
+        "start": "11:30",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "12:00",
+        "lenMin": 45,
+        "count": 2,
+        "category": "US_45"
+       },
+       {
+        "start": "14:00",
+        "lenMin": 45,
+        "category": "US_45"
+       },
+       {
+        "start": "14:45",
+        "lenMin": 30,
+        "category": "US_30"
+       },
+       {
+        "start": "15:15",
+        "lenMin": 45,
+        "category": "US_45"
+       }
+      ]
+     }
+    ],
+    "R3": [
+     {
+      "days": [
+       "Mon",
+       "Tue",
+       "Wed",
+       "Thu",
+       "Fri"
+      ],
+      "slots": [
+       {
+        "start": "08:00",
+        "lenMin": 15,
+        "count": 16,
+        "category": "CT_15"
+       },
+       {
+        "start": "12:00",
+        "lenMin": 30,
+        "count": 7,
+        "category": "CT_30C"
+       },
+       {
+        "start": "16:00",
+        "lenMin": 15,
+        "count": 8,
+        "category": "CT_15"
+       },
+       {
+        "start": "18:00",
+        "lenMin": 30,
+        "count": 4,
+        "category": "CT_30C"
+       }
+      ]
+     },
+     {
+      "days": [
+       "Sat"
+      ],
+      "slots": [
+       {
+        "start": "10:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "11:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "12:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "14:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "15:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "16:15",
+        "lenMin": 15,
+        "category": "CT_15"
+       },
+       {
+        "start": "17:00",
+        "lenMin": 15,
+        "category": "CT_15"
+       }
+      ]
+     }
+    ],
+    "R4": [
+     {
+      "days": [
+       "Mon",
+       "Tue",
+       "Wed",
+       "Thu",
+       "Fri"
+      ],
+      "slots": [
+       {
+        "start": "08:00",
+        "lenMin": 45,
+        "count": 2,
+        "category": "MR_45"
+       },
+       {
+        "start": "09:30",
+        "lenMin": 60,
+        "category": "MR_60C"
+       },
+       {
+        "start": "10:30",
+        "lenMin": 45,
+        "count": 2,
+        "category": "MR_45"
+       },
+       {
+        "start": "13:00",
+        "lenMin": 60,
+        "category": "MR_60C"
+       },
+       {
+        "start": "14:00",
+        "lenMin": 45,
+        "count": 3,
+        "category": "MR_45"
+       },
+       {
+        "start": "16:30",
+        "lenMin": 45,
+        "count": 4,
+        "category": "MR_45"
+       }
+      ]
+     }
+    ]
+   },
+   "referralSources": [
+    {
+     "id": "SRC1",
+     "name": "Northside Primary Care",
+     "kind": "primary_care",
+     "baseDailyMilliOrders": 24000,
+     "priorityMixBP": {
+      "routine": 8500,
+      "soon": 1200,
+      "urgent": 300
+     },
+     "examMix": {
+      "CT_ABD_PEL_WC": 6,
+      "CT_CHEST_WO": 8,
+      "CT_HEAD_WO": 6,
+      "MR_BRAIN_WO": 4,
+      "MR_LSPINE_WO": 4,
+      "US_ABD_COMPLETE": 10,
+      "US_RENAL": 4,
+      "US_THYROID": 6,
+      "US_VENOUS": 4,
+      "XR_CHEST_2V": 30,
+      "XR_EXTREMITY": 10,
+      "XR_SPINE": 8
+     }
+    },
+    {
+     "id": "SRC2",
+     "name": "Lakeview Orthopedics",
+     "kind": "orthopedics",
+     "baseDailyMilliOrders": 12000,
+     "priorityMixBP": {
+      "routine": 9000,
+      "soon": 900,
+      "urgent": 100
+     },
+     "examMix": {
+      "MR_KNEE_WO": 20,
+      "MR_LSPINE_WO": 15,
+      "XR_EXTREMITY": 45,
+      "XR_SPINE": 15
+     }
+    },
+    {
+     "id": "SRC3",
+     "name": "Riverside Women's Health",
+     "kind": "ob_gyn",
+     "baseDailyMilliOrders": 6000,
+     "priorityMixBP": {
+      "routine": 9000,
+      "soon": 1000,
+      "urgent": 0
+     },
+     "examMix": {
+      "US_ABD_COMPLETE": 15,
+      "US_PELVIS": 70,
+      "US_THYROID": 15
+     }
+    },
+    {
+     "id": "SRC4",
+     "name": "Cedar Oncology",
+     "kind": "oncology",
+     "baseDailyMilliOrders": 5000,
+     "priorityMixBP": {
+      "routine": 7000,
+      "soon": 2500,
+      "urgent": 500
+     },
+     "examMix": {
+      "CT_ABD_PEL_WC": 40,
+      "CT_CHEST_WC": 40,
+      "MR_BRAIN_WWO": 20
+     }
+    },
+    {
+     "id": "SRC5",
+     "name": "Eastgate Urgent Care",
+     "kind": "urgent_care",
+     "baseDailyMilliOrders": 7000,
+     "priorityMixBP": {
+      "routine": 4000,
+      "soon": 3500,
+      "urgent": 2500
+     },
+     "examMix": {
+      "CT_HEAD_WO": 15,
+      "US_VENOUS": 10,
+      "XR_CHEST_2V": 40,
+      "XR_EXTREMITY": 35
+     }
+    },
+    {
+     "id": "SRC6",
+     "name": "Other referrers",
+     "kind": "other",
+     "baseDailyMilliOrders": 9000,
+     "priorityMixBP": {
+      "routine": 8000,
+      "soon": 1500,
+      "urgent": 500
+     },
+     "examMix": {
+      "CT_ABD_PEL_WC": 25,
+      "CT_CHEST_WO": 20,
+      "CT_HEAD_WO": 25,
+      "MR_BRAIN_WO": 15,
+      "MR_BRAIN_WWO": 10,
+      "XR_CHEST_2V": 5
+     }
+    }
+   ],
+   "demand": {
+    "hourProfileBP": {
+     "07": 400,
+     "08": 900,
+     "09": 1100,
+     "10": 1100,
+     "11": 1000,
+     "12": 700,
+     "13": 900,
+     "14": 1000,
+     "15": 1000,
+     "16": 900,
+     "17": 600,
+     "18": 400
+    },
+    "weekdayFactorBP": {
+     "Fri": 10000,
+     "Mon": 11000,
+     "Sat": 2500,
+     "Sun": 0,
+     "Thu": 10000,
+     "Tue": 10000,
+     "Wed": 10000
+    },
+    "seasonFactorBP": [
+     10500,
+     10000,
+     10000,
+     10000,
+     9800,
+     9500,
+     9000,
+     9200,
+     10000,
+     10200,
+     10000,
+     9300
+    ],
+    "leadTimeDays": {
+     "p0": 0,
+     "p100": 181,
+     "p30": 4,
+     "p70": 15,
+     "p8": 1,
+     "p92": 61
+    },
+    "windowMixBP": {
+     "afternoon": 2000,
+     "any": 4000,
+     "evening": 1500,
+     "morning": 2500
+    }
+   },
+   "behavior": {
+    "waitToleranceDays": {
+     "routine": {
+      "p0": 5,
+      "p100": 60,
+      "p50": 21
+     },
+     "soon": {
+      "p0": 1,
+      "p100": 10,
+      "p50": 4
+     },
+     "urgent": {
+      "p0": 0,
+      "p100": 2,
+      "p50": 0
+     }
+    },
+    "cancellation": {
+     "ppm": 90000,
+     "leadHours": {
+      "p0": 2,
+      "p100": 720,
+      "p55": 72
+     },
+     "rebookPPM": 500000
+    },
+    "noShow": {
+     "basePPM": {
+      "CT": 60000,
+      "MR": 80000,
+      "US": 70000,
+      "XR": 40000
+     },
+     "perTenDaysLeadPPM": 5000,
+     "maxLeadPPM": 60000,
+     "rebookPPM": 400000
+    },
+    "arrivalClasses": [
+     {
+      "name": "early",
+      "weightBP": 6000,
+      "fromMin": -25,
+      "toMin": -5
+     },
+     {
+      "name": "on time",
+      "weightBP": 2800,
+      "fromMin": -5,
+      "toMin": 5
+     },
+     {
+      "name": "late",
+      "weightBP": 900,
+      "fromMin": 5,
+      "toMin": 20
+     },
+     {
+      "name": "very late",
+      "weightBP": 300,
+      "fromMin": 20,
+      "toMin": 45
+     }
+    ],
+    "walkInPatienceMin": {
+     "p0": 30,
+     "p100": 120,
+     "p50": 60
+    },
+    "registration": {
+     "scheduledSec": {
+      "p0": 180,
+      "p100": 420,
+      "p50": 300
+     },
+     "walkInSec": {
+      "p0": 360,
+      "p100": 720,
+      "p50": 540
+     },
+     "opsFactorBP": 12500,
+     "selfRegFactorBP": 15000
+    }
+   },
+   "walkIns": {
+    "dailyMilli": 9500,
+    "hourProfileBP": {
+     "08": 500,
+     "09": 800,
+     "10": 1300,
+     "11": 1300,
+     "12": 800,
+     "13": 700,
+     "14": 700,
+     "15": 800,
+     "16": 1100,
+     "17": 1100,
+     "18": 600,
+     "19": 300
+    },
+    "weekdayFactorBP": {
+     "Fri": 10000,
+     "Mon": 10000,
+     "Sat": 7000,
+     "Sun": 0,
+     "Thu": 10000,
+     "Tue": 10000,
+     "Wed": 10000
+    },
+    "priorityMixBP": {
+     "routine": 8500,
+     "soon": 1500,
+     "urgent": 0
+    },
+    "examMix": {
+     "CT_HEAD_WO": 8,
+     "US_VENOUS": 12,
+     "XR_CHEST_2V": 40,
+     "XR_EXTREMITY": 30,
+     "XR_SPINE": 10
+    }
+   },
+   "openingSchedule": [
+    {
+     "time": "08:00",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "08:15",
+     "room": "R1",
+     "exam": "XR_EXTREMITY",
+     "source": "SRC2"
+    },
+    {
+     "time": "08:45",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "priority": "soon",
+     "source": "SRC5"
+    },
+    {
+     "time": "09:00",
+     "room": "R1",
+     "exam": "XR_SPINE",
+     "source": "SRC2"
+    },
+    {
+     "time": "09:30",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "10:00",
+     "room": "R1",
+     "exam": "XR_EXTREMITY",
+     "source": "SRC2"
+    },
+    {
+     "time": "10:15",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "10:45",
+     "room": "R1",
+     "exam": "XR_SPINE",
+     "source": "SRC1"
+    },
+    {
+     "time": "11:15",
+     "room": "R1",
+     "exam": "XR_EXTREMITY",
+     "source": "SRC5"
+    },
+    {
+     "time": "12:30",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "13:00",
+     "room": "R1",
+     "exam": "XR_EXTREMITY",
+     "source": "SRC2"
+    },
+    {
+     "time": "13:45",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "14:30",
+     "room": "R1",
+     "exam": "XR_SPINE",
+     "source": "SRC2"
+    },
+    {
+     "time": "15:15",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC6"
+    },
+    {
+     "time": "16:30",
+     "room": "R1",
+     "exam": "XR_EXTREMITY",
+     "source": "SRC5"
+    },
+    {
+     "time": "17:30",
+     "room": "R1",
+     "exam": "XR_CHEST_2V",
+     "source": "SRC1"
+    },
+    {
+     "time": "09:30",
+     "room": "R2",
+     "exam": "US_ABD_COMPLETE",
+     "source": "SRC1"
+    },
+    {
+     "time": "10:15",
+     "room": "R2",
+     "exam": "US_PELVIS",
+     "source": "SRC3"
+    },
+    {
+     "time": "11:00",
+     "room": "R2",
+     "exam": "US_THYROID",
+     "source": "SRC3"
+    },
+    {
+     "time": "11:30",
+     "room": "R2",
+     "exam": "US_PELVIS",
+     "source": "SRC3"
+    },
+    {
+     "time": "12:15",
+     "room": "R2",
+     "exam": "US_RENAL",
+     "source": "SRC1"
+    },
+    {
+     "time": "12:45",
+     "room": "R2",
+     "exam": "US_ABD_COMPLETE",
+     "source": "SRC1"
+    },
+    {
+     "time": "14:00",
+     "room": "R2",
+     "exam": "US_VENOUS",
+     "source": "SRC5"
+    },
+    {
+     "time": "14:45",
+     "room": "R2",
+     "exam": "US_THYROID",
+     "source": "SRC1"
+    },
+    {
+     "time": "15:15",
+     "room": "R2",
+     "exam": "US_PELVIS",
+     "source": "SRC3"
+    },
+    {
+     "time": "16:30",
+     "room": "R2",
+     "exam": "US_ABD_COMPLETE",
+     "source": "SRC3"
+    },
+    {
+     "time": "09:15",
+     "room": "R3",
+     "exam": "CT_HEAD_WO",
+     "source": "SRC6"
+    },
+    {
+     "time": "08:30",
+     "room": "R3",
+     "exam": "CT_CHEST_WO",
+     "source": "SRC1"
+    },
+    {
+     "time": "11:00",
+     "room": "R3",
+     "exam": "CT_HEAD_WO",
+     "priority": "urgent",
+     "source": "SRC5"
+    },
+    {
+     "time": "09:45",
+     "room": "R3",
+     "exam": "CT_CHEST_WO",
+     "source": "SRC6"
+    },
+    {
+     "time": "10:30",
+     "room": "R3",
+     "exam": "CT_HEAD_WO",
+     "source": "SRC1"
+    },
+    {
+     "time": "12:00",
+     "room": "R3",
+     "exam": "CT_ABD_PEL_WC",
+     "priority": "soon",
+     "source": "SRC4"
+    },
+    {
+     "time": "12:30",
+     "room": "R3",
+     "exam": "CT_CHEST_WC",
+     "source": "SRC4"
+    },
+    {
+     "time": "13:30",
+     "room": "R3",
+     "exam": "CT_ABD_PEL_WC",
+     "source": "SRC6"
+    },
+    {
+     "time": "14:30",
+     "room": "R3",
+     "exam": "CT_CHEST_WC",
+     "source": "SRC4"
+    },
+    {
+     "time": "16:00",
+     "room": "R3",
+     "exam": "CT_HEAD_WO",
+     "source": "SRC6"
+    },
+    {
+     "time": "16:45",
+     "room": "R3",
+     "exam": "CT_CHEST_WO",
+     "source": "SRC1"
+    },
+    {
+     "time": "18:00",
+     "room": "R3",
+     "exam": "CT_ABD_PEL_WC",
+     "source": "SRC1"
+    },
+    {
+     "time": "18:30",
+     "room": "R3",
+     "exam": "CT_CHEST_WC",
+     "source": "SRC4"
+    },
+    {
+     "time": "08:00",
+     "room": "R4",
+     "exam": "MR_KNEE_WO",
+     "source": "SRC2"
+    },
+    {
+     "time": "08:45",
+     "room": "R4",
+     "exam": "MR_BRAIN_WO",
+     "source": "SRC1"
+    },
+    {
+     "time": "09:30",
+     "room": "R4",
+     "exam": "MR_BRAIN_WWO",
+     "priority": "soon",
+     "source": "SRC4"
+    },
+    {
+     "time": "10:30",
+     "room": "R4",
+     "exam": "MR_LSPINE_WO",
+     "source": "SRC2"
+    },
+    {
+     "time": "11:15",
+     "room": "R4",
+     "exam": "MR_KNEE_WO",
+     "source": "SRC2"
+    },
+    {
+     "time": "13:00",
+     "room": "R4",
+     "exam": "MR_BRAIN_WWO",
+     "source": "SRC6"
+    },
+    {
+     "time": "14:00",
+     "room": "R4",
+     "exam": "MR_LSPINE_WO",
+     "source": "SRC1"
+    },
+    {
+     "time": "15:30",
+     "room": "R4",
+     "exam": "MR_BRAIN_WO",
+     "source": "SRC6"
+    }
+   ],
+   "finance": {
+    "payers": [
+     {
+      "id": "commercial",
+      "name": "Commercial",
+      "mixBP": 4500,
+      "multiplierBP": 16000,
+      "delayDays": [
+       25,
+       60
+      ],
+      "deniedPPM": 70000,
+      "recoveredPPM": 500000,
+      "shortPaidPPM": 50000,
+      "shortMeanBP": 7000
+     },
+     {
+      "id": "medicare",
+      "name": "Medicare",
+      "mixBP": 3500,
+      "multiplierBP": 10000,
+      "delayDays": [
+       14,
+       30
+      ],
+      "deniedPPM": 40000,
+      "recoveredPPM": 600000,
+      "shortPaidPPM": 20000,
+      "shortMeanBP": 8000
+     },
+     {
+      "id": "medicaid",
+      "name": "Medicaid",
+      "mixBP": 1000,
+      "multiplierBP": 7500,
+      "delayDays": [
+       30,
+       75
+      ],
+      "deniedPPM": 90000,
+      "recoveredPPM": 400000,
+      "shortPaidPPM": 40000,
+      "shortMeanBP": 7000
+     },
+     {
+      "id": "self_pay",
+      "name": "Self-pay",
+      "selfPay": true,
+      "mixBP": 1000,
+      "multiplierBP": 9000,
+      "delayDays": [
+       30,
+       120
+      ],
+      "deniedPPM": 500000,
+      "recoveredPPM": 0,
+      "shortPaidPPM": 200000,
+      "shortMeanBP": 5000
+     }
+    ],
+    "chargeLagBusinessDays": [
+     1,
+     3
+    ],
+    "reworkDays": [
+     30,
+     60
+    ],
+    "shortSpreadBP": 1000,
+    "submitTime": "17:00",
+    "paymentTime": "10:00",
+    "benefitsBP": 2500,
+    "billingFeeBP": 500,
+    "perStudyITCents": 300,
+    "payrollAnchor": "2026-10-16",
+    "payrollEveryDays": 14,
+    "fixedMonthly": [
+     {
+      "id": "rent",
+      "name": "Rent \u0026 facility",
+      "account": "facility",
+      "cents": 2200000
+     },
+     {
+      "id": "utilities",
+      "name": "Utilities",
+      "account": "facility",
+      "cents": 700000
+     },
+     {
+      "id": "insurance",
+      "name": "Insurance (liability, property)",
+      "account": "facility",
+      "cents": 400000
+     },
+     {
+      "id": "lease_ct",
+      "name": "CT lease",
+      "account": "equipment",
+      "modality": "CT",
+      "cents": 900000
+     },
+     {
+      "id": "lease_mr",
+      "name": "MR lease",
+      "account": "equipment",
+      "modality": "MR",
+      "cents": 1800000
+     },
+     {
+      "id": "service_mr",
+      "name": "MR service contract",
+      "account": "equipment",
+      "modality": "MR",
+      "cents": 1200000
+     },
+     {
+      "id": "service_ct",
+      "name": "CT service contract",
+      "account": "equipment",
+      "modality": "CT",
+      "cents": 800000
+     },
+     {
+      "id": "service_us",
+      "name": "US service contract",
+      "account": "equipment",
+      "modality": "US",
+      "cents": 150000
+     },
+     {
+      "id": "service_xr",
+      "name": "XR service contract",
+      "account": "equipment",
+      "modality": "XR",
+      "cents": 100000
+     },
+     {
+      "id": "it",
+      "name": "IT, RIS/PACS",
+      "account": "it",
+      "cents": 600000
+     }
+    ]
+   }
+  }
+ },
+ "seed": 52,
+ "epochDate": "2026-10-13",
+ "startSec": 21600,
+ "start": "2026-10-13T06:00:00",
+ "untilSec": 3909600,
+ "until": "2026-11-27T06:00:00",
+ "batches": [
+  {
+   "batch": 1,
+   "atSec": 25200,
+   "time": "2026-10-13T07:00:00",
+   "actions": [
+    {
+     "type": "contract_teleradiology",
+     "requestId": "tele-a",
+     "op": "start",
+     "effective": "2026-11-01",
+     "plan": "standard-v1",
+     "windows": [
+      "saturday",
+      "sunday"
+     ],
+     "scope": "all"
+    }
+   ],
+   "results": [
+    {
+     "id": "X00001",
+     "batch": 1,
+     "time": "2026-10-13T07:00:00",
+     "action": {
+      "type": "contract_teleradiology",
+      "requestId": "tele-a",
+      "op": "start",
+      "effective": "2026-11-01",
+      "plan": "standard-v1",
+      "windows": [
+       "saturday",
+       "sunday"
+      ],
+      "scope": "all"
+     },
+     "ok": true,
+     "code": "accepted",
+     "message": "Teleradiology contract T00001 (standard-v1): saturday, sunday · all priorities · from 2026-11-01, open-ended (earliest end 2026-12-01) · retainer $1,600 a month, accrued daily · per read XR $12.00, US $30.00, CT $45.00, MR $60.00, +20% claimed 22:00–08:00 · two lanes for all contracts, 10m handoff · payable on the 1st.",
+     "effectiveAt": "2026-11-01",
+     "contractId": "T00001"
+    }
+   ]
+  },
+  {
+   "batch": 2,
+   "atSec": 1155600,
+   "time": "2026-10-26T09:00:00",
+   "actions": [
+    {
+     "type": "contract_teleradiology",
+     "op": "cancel",
+     "contract": "T00010",
+     "endDate": "2026-12-20"
+    }
+   ],
+   "results": [
+    {
+     "id": "X00002",
+     "batch": 2,
+     "time": "2026-10-26T09:00:00",
+     "action": {
+      "type": "contract_teleradiology",
+      "op": "cancel",
+      "contract": "T00010",
+      "endDate": "2026-12-20"
+     },
+     "ok": false,
+     "code": "unknown_contract",
+     "message": "No teleradiology contract \"T00010\"."
+    }
+   ]
+  },
+  {
+   "batch": 3,
+   "atSec": 2278800,
+   "time": "2026-11-08T09:00:00",
+   "actions": [
+    {
+     "type": "contract_teleradiology",
+     "op": "cancel",
+     "contract": "T00001",
+     "endDate": "2027-01-31"
+    }
+   ],
+   "results": [
+    {
+     "id": "X00003",
+     "batch": 3,
+     "time": "2026-11-08T09:00:00",
+     "action": {
+      "type": "contract_teleradiology",
+      "op": "cancel",
+      "contract": "T00001",
+      "endDate": "2027-01-31"
+     },
+     "ok": true,
+     "code": "accepted",
+     "message": "Teleradiology contract ending: T00001 ends 2027-01-31 (last covered day 2027-01-30) · retainer $4,322 guaranteed from tomorrow to the end · claims in flight complete at their locked fees.",
+     "effectiveAt": "2027-01-31",
+     "contractId": "T00001"
+    }
+   ]
+  }
+ ],
+ "digests": {
+  "log": "10075cef6bbfa6568abac197517e4a73e90091f3cf4fc419e83a3d56a7598615",
+  "ledger": "3f15a7c88ed1b530eb6be6919297e9e4dc8060afbdbaba6ccb2820b331e61316",
+  "actions": "743f5ce3af6a8d93a46f9070d082ab08794f8095e46b71bed2ba8e139e769847",
+  "state": "8273b6c8ef15fd11fb45bbe67a857895182aba78580880b17c5867b3049e6fb8",
+  "run": "71c9fe45e0f72b7d56709cdc344e2d7ff7f098a2fddcf03208d4285b0d41f8e3"
+ },
+ "summary": {
+  "logEntries": 13884,
+  "ledgerEntries": 4339,
+  "actions": 3,
+  "day": 46,
+  "time": "2026-11-27T06:00:00",
+  "cashCents": -3111051,
+  "examsSinceDay1": 1653
+ },
+ "checksum": "2afca9e4a4898972258d3103a394e18f842f078d4bbc10b341c20ed8af74594f"
+}

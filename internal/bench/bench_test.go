@@ -430,3 +430,27 @@ func TestRulesPolicy(t *testing.T) {
 		t.Fatalf("validate %d, preview %d, apply %d", v, p, a)
 	}
 }
+
+// Every benchmark configuration committed under docs/benchmark validates,
+// sealed holdout guard included, without running anything.
+func TestCommittedConfigs(t *testing.T) {
+	paths, _ := filepath.Glob("../../docs/benchmark/*/*.json")
+	n := 0
+	for _, p := range paths {
+		raw, err := os.ReadFile(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var head struct{ Schema string }
+		if json.Unmarshal(raw, &head) != nil || head.Schema != ConfigSchema {
+			continue
+		}
+		n++
+		if _, _, err := LoadConfig(p); err != nil {
+			t.Error(err)
+		}
+	}
+	if n < 10 {
+		t.Fatalf("%d configurations", n)
+	}
+}

@@ -60,6 +60,25 @@ class Settings(unittest.TestCase):
         s = A.load_settings(p, {"DREAMTEAM_LLM_BASE_URL": "http://localhost:9/v1"})
         self.assertEqual(s["model"], "Qwen3.6-35B-A3B-oQ4e-mtp")
 
+    def test_v05c_settings_identical(self):
+        """The V0.5c settings differ only in the model, and the memory-off
+        control only in memoryDecisions (docs/benchmark/v05c-dev/PLAN.md)."""
+        d = os.path.join(HERE, "..", "..", "docs", "benchmark", "v05c-dev")
+        got = {}
+        for n in ("qwen36-35b-a3b", "gemma4-26b-a4b", "gemma4-31b", "qwen36-35b-a3b-nomem"):
+            with open(os.path.join(d, f"llm-{n}.json"), encoding="utf-8") as f:
+                raw = json.load(f)
+            got[n] = A.load_settings(os.path.join(d, f"llm-{n}.json"), {"DREAMTEAM_LLM_BASE_URL": "http://localhost:9/v1"})
+            self.assertNotIn("baseUrl", raw)
+        same = lambda s: {k: v for k, v in s.items() if k not in ("model", "description")}
+        ref = same(got["qwen36-35b-a3b"])
+        self.assertEqual(ref["maxOutputTokens"], 4096)
+        self.assertEqual(ref["memoryDecisions"], 6)
+        for n in ("gemma4-26b-a4b", "gemma4-31b"):
+            self.assertEqual(same(got[n]), ref, n)
+        self.assertEqual(same(got["qwen36-35b-a3b-nomem"]), dict(ref, memoryDecisions=0))
+        self.assertEqual(got["qwen36-35b-a3b-nomem"]["model"], got["qwen36-35b-a3b"]["model"])
+
     def test_refused(self):
         for obj, msg in [
             ({**BASE, "apiKey": "sk-x"}, "never put in the settings"),
@@ -312,6 +331,30 @@ class MemoryTests(unittest.TestCase):
         b.observe(0, obs_at(1))
         self.assertIn("No earlier decisions in this run.", b.render([]))
         self.assertNotEqual(a.render([]), b.render([]))
+
+    def test_off(self):
+        """memoryDecisions 0 (the V0.5c memory-off control): no earlier
+        decision, refusal or metric reaches the prompt, and the rest of the
+        prompt is the memory-on prompt's."""
+        on, off = A.Memory(6, 6, 6000), A.Memory(0, 6, 6000)
+        for p in range(10):
+            for m in (on, off):
+                m.observe(p, obs_at(1 + p, accepted=p, rejected=1))
+                m.record(rec_at(p, 1 + p, refusals=[{"type": "extend_shift", "code": "after_close",
+                                                     "message": "ends after the close"}]))
+        text = off.render(["set_reading_allocation E07: pending"])
+        self.assertEqual(text, "MEMORY (llm-agent-memory/v1): off in this run (memoryDecisions 0); nothing from "
+                               "earlier decision points is carried over.\nPending changes now (from the observation "
+                               "and catalog):\n- set_reading_allocation E07: pending")
+        for gone in ("after_close", "point 3", "Metrics", "Earlier", "Recent"):
+            self.assertNotIn(gone, text)
+        self.assertIn("after_close", on.render([]))
+        f = fixture()
+        pset = dict(PSET, memoryDecisions=0)
+        a, _ = A.build_prompt(9, f["observation"], f["omitted"], f["catalog"], on.render([]), PSET)
+        b, _ = A.build_prompt(9, f["observation"], f["omitted"], f["catalog"], off.render([]), pset)
+        strip = lambda t: t.replace(on.render([]), "").replace(off.render([]), "")
+        self.assertEqual(strip(a), strip(b))
 
     def test_pending_from_public_data_only(self):
         f = fixture()

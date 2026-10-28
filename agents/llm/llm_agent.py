@@ -918,7 +918,14 @@ class Memory:
     def render(self, pend):
         """The memory text, within max_chars: older entries are folded into
         the totals first, then metric rows, refusals and pending lines are
-        dropped, oldest first; a last resort cuts the text."""
+        dropped, oldest first; a last resort cuts the text. With
+        memoryDecisions 0 the memory is off: nothing from earlier decision
+        points is shown, only the pending changes now."""
+        if not self.n_decisions:
+            return "\n".join([f"MEMORY ({MEMORY_FORMAT}): off in this run (memoryDecisions 0); nothing from "
+                              "earlier decision points is carried over.",
+                              "Pending changes now (from the observation and catalog):"]
+                             + ([f"- {p}" for p in list(pend)[:12]] or ["- none shown"]))[:self.max_chars]
         rows, lessons, pend = list(self.rows), list(self.lessons), list(pend)[:12]
         k = len(self.entries)
         while True:
