@@ -14,12 +14,13 @@ Status: released in V0.4.0. V0.4a built the harness; V0.4b added
 external policy processes (§4), withheld the seed from every policy (§3,
 §11) and added `reproduce` (§8). The policy protocol
 `dreamteam.benchmark-policy/v1` is versioned and stable for V0.4.
-V0.5a (0.5.0-dev.1, in development) keeps an external policy's own
+V0.5a (0.5.0-dev.1) keeps an external policy's own
 evidence files (§4, §8) for the LLM agent ([LLM_AGENT.md](LLM_AGENT.md));
 the protocol is unchanged. V0.5b (0.5.0-dev.2) changes only the LLM agent.
 V0.5c (0.5.0-dev.3) changes nothing in the harness; its development
 evaluation ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)) adds
-four replay configurations that CI runs.
+four replay configurations that CI runs. Released in V0.5.0 with the
+policy protocol unchanged.
 
 ## 1. Commands
 
@@ -561,7 +562,7 @@ OS-level isolation is claimed.
 Benchmarking an untrusted agent would need OS-level isolation and a
 withheld or derived seed scheme; that is a later requirement.
 
-## 12. Known limitations (V0.4)
+## 12. Known limitations (V0.5)
 
 * **Trusted participants only.** External policies are trusted
   development participants, not OS-sandboxed processes (§11).
@@ -593,8 +594,10 @@ withheld or derived seed scheme; that is a later requirement.
   only to the oldest unread study's age. `rules` and `python-ref` are
   simple rules fixed in advance. All three use one lever, the site
   reading allocation.
-* **No LLM integration.** An LLM agent would be one more external
-  process, but none is provided.
+* **LLM agents** (V0.5) are external processes like any other policy.
+  Their live runs are not deterministic, so only their recorded decisions
+  reproduce; their own limitations are in [LLM_AGENT.md](LLM_AGENT.md)
+  §12.
 
 The V0.4b development matrix (`docs/benchmark/v04b-dev/`) also showed:
 * **`python-ref` v1 never acted.** Its weekly review (decision points 0,

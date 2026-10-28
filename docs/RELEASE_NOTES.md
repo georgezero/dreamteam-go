@@ -5,6 +5,116 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.5.0 — LLM agents
+
+A language model can now manage the practice. An external agent asks any
+OpenAI-compatible model server what to do at each decision point. It takes
+part through the V0.4 benchmark harness like any other policy, and its
+decisions are recorded and replay exactly without the model
+(`docs/LLM_AGENT.md`). The simulator, the protocol and scoring are
+unchanged.
+
+**The agent** (`agents/llm/llm_agent.py`, llm-agent 2; standard-library
+Python, one process per run):
+1. **External, OpenAI-compatible.** It calls `chat/completions` on any
+   compatible server, local or remote, with no provider-specific
+   dependency. The address comes from the environment, and an API key only
+   from a named environment variable. A key is never written to the
+   settings or the evidence.
+2. **Structured decisions, validated.** Each reply is a strict
+   `{"reason", "actions"}` object. Every action is checked with the
+   protocol's `validate` before anything is submitted.
+3. **Safe retries and a no-action fallback.** A reply that does not parse,
+   or that `validate` refuses, is retried a bounded number of times with
+   the refusal shown. If no valid decision results, the agent submits
+   nothing; a failure never changes the practice.
+4. **Bounded memory** (`llm-agent-memory/v1`). Within a run the agent
+   remembers its recent decisions, the refusals it met, what was applied
+   and recent metrics, within a fixed size. It is built from public
+   observations and its own records only, and empty at the start of every
+   run. `memoryDecisions` 0 turns it off.
+5. **Compact observations and prompts** (`llm-agent-prompt/v2`). A
+   summarized observation that names what it leaves out, with a request
+   for details once per decision point. 56% fewer tokens than V0.5a's
+   prompt on the same observations.
+6. **Action constraints and guidance.** For every action type: its fields,
+   rules, earliest dates, lead times and targets, beside the operating
+   hours and scheduled close.
+7. **Several batches per decision.** Operations and staffing actions in
+   one reply are submitted as two validated batches at one decision point.
+8. **Usage and cost accounting.** Per run: requests, retries, tokens
+   (reported, estimated or unknown), latency and inference time, and an
+   estimated cost from configured prices, labelled as an estimate.
+9. **Recorded-decision replay.** `--replay` resubmits a recording through
+   the protocol without any model. It rebuilds the memory and prompt at
+   every decision point and checks their SHA-256, giving the live run's
+   decisions, session, result and digests byte for byte. Recordings of
+   other agent versions are refused explicitly.
+
+**10. Multi-model development evaluation** (`docs/benchmark/v05c-dev/`).
+* **Setup:** three local models (Qwen3.6-35B-A3B, Gemma 4 26B-A4B,
+  Gemma 4 31B) through the same frozen agent and settings, on seeds
+  declared before any run.
+* **Stages:** 7 days on one seed; 30 days on three; a memory-off control
+  on those three; 90 days on one.
+* **Completion:** all 26 runs completed with no infrastructure failure.
+  All 18 model recordings replay byte for byte, and CI replays them on
+  three platforms.
+* **Findings** (development observations, not claims):
+  * the model that acted most improved turnaround and breaches against no
+    action, at a lower operating profit: over 90 days TAT p90 fell from
+    980 to 121 minutes and breaches by 295, and profit was $34,565 lower;
+  * the other two models mostly chose no action;
+  * with the memory off, the same model had 85 validation refusals and 55
+    repeated invalid proposals over three seeds, against 20 and 8 with it
+    on.
+
+**Evidence.** The harness keeps an external policy's own evidence in each
+run's `policy-evidence/`, hashed in the manifest as nondeterministic: the
+agent's decisions, the memory at each point, the model exchanges and its
+usage summary. No endpoint and no credential appear.
+
+**Compatibility.**
+* No change to mechanics, randomness, scenarios, actions, accounting,
+  evaluation, scoring or the agent and policy protocols.
+* All golden references give identical outcomes.
+* Saves from V0.1 to V0.4 and from the V0.5 development builds replay with
+  every digest verified.
+* The V0.5a recording (llm-agent 1) still replays.
+
+**Known limitations** (`docs/LLM_AGENT.md` §12):
+* **Live inference is not deterministic.** Even at temperature 0, a rerun
+  may decide differently. Exact replay requires the recording.
+* **Trusted processes.** External agents are trusted participants, not
+  OS-sandboxed.
+* **Not jointly atomic.** An operations batch and a staffing batch at one
+  decision point are two batches, each validated and applied on its own.
+* **Memory informs; it does not enforce.** Models may repeatedly propose
+  invalid actions despite the refusals in their memory; `validate` catches
+  them.
+* **Configuration-dependent.** Model behaviour depends heavily on the
+  prompt, settings and server.
+* **No action.** The tested models frequently chose no action.
+* **Cost of service.** Service improvements sometimes substantially
+  reduced operating profit.
+* **Development results only.** They establish neither model superiority
+  nor generality: one scenario, five seeds, three models, each live run
+  once.
+* **Not validated.** No model or agent is clinically validated or
+  benchmark-certified.
+
+**Validation.**
+* The Go tests of the affected packages pass on linux/arm64.
+* The race detector finds no race (linux/amd64).
+* vet and gofmt are clean.
+* The Python agent tests pass.
+* Every session fixture replays, and every golden reference is identical.
+* Benchmark verify and reproduce pass.
+* Every recorded LLM decision replays byte for byte.
+* Cross-builds succeed for five targets.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
 ## V0.4.0 — the agent evaluation harness
 
 Agent policies can now be compared reproducibly: built-in policies or

@@ -1,4 +1,4 @@
-# DreamTeam LLM agent (V0.5a, V0.5b, V0.5c)
+# DreamTeam LLM agent (V0.5)
 
 `agents/llm/llm_agent.py` is an agent that asks a language model how to
 manage the practice. It is an external benchmark policy
@@ -9,7 +9,7 @@ the model through an OpenAI-compatible chat completions API, so local model
 servers work without a provider-specific dependency. Standard library
 Python only.
 
-Status: V0.5c, development (0.5.0-dev.3). Not released. This is llm-agent
+Status: released in V0.5.0 (V0.5a–V0.5c). This is llm-agent
 version 2: V0.5a's agent (version 1) with bounded memory, action guidance,
 a targeted prompt, operations and staffing actions at one decision point,
 and usage and cost reporting. V0.5c ran it unchanged with three local
@@ -638,7 +638,7 @@ and run record.
   memory off), on linux/amd64, linux/arm64 and darwin/arm64, comparing the
   manifests.
 
-## 12. Known limitations (V0.5c)
+## 12. Known limitations (V0.5)
 
 * **Bounded memory, no planning.** The memory is a short record of the
   agent's own decisions and what followed them. There is no plan, no goal
@@ -670,9 +670,18 @@ and run record.
 * **Trusted process.** Like any external policy, the agent is a trusted
   participant, not sandboxed ([BENCHMARK.md](BENCHMARK.md) §11). Its
   evidence is what it chose to write.
+* **Configuration-dependent.** Model behaviour depends heavily on the
+  prompt, the settings and the server. V0.5c fixed all three and measured
+  nothing else.
 * **Models may not act.** With this prompt, two of V0.5c's three models
   chose no action at most decision points, and their outcomes equal the
   no-op baseline's. The agent cannot tell inaction from judgement.
+* **Service at a financial cost.** Where models acted, turnaround and
+  breaches improved against no action while operating profit fell, by up
+  to $34,565 over 90 days. The agent is not told to weigh that trade-off
+  beyond what the prompt states.
 * **Development only.** V0.5c: three models, five seeds, one scenario, up
   to 90 days, each live run once. It describes those runs; it is not a
-  measure of decision quality or a ranking of models.
+  measure of decision quality or a ranking of models, and establishes
+  neither superiority nor generality. No model or agent is clinically
+  validated or benchmark-certified.

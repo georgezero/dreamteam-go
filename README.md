@@ -7,10 +7,13 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.4** (`0.4.0`, the agent evaluation harness) is the current
-release: agent policies, built in or separate processes, are compared
-reproducibly on identical scenarios and seeds (`dreamteam benchmark`,
-`docs/BENCHMARK.md`). It builds on V0.3 (`0.3.0`, the agent interface: an
+Status: **V0.5** (`0.5.0`, LLM agents) is the current release: an external
+agent lets a language model, on any OpenAI-compatible server, manage the
+practice through the benchmark harness, with its decisions recorded and
+replayed exactly (`agents/llm/`, `docs/LLM_AGENT.md`). It builds on V0.4
+(`0.4.0`, the agent evaluation harness: policies, built in or separate
+processes, compared reproducibly on identical scenarios and seeds,
+`dreamteam benchmark`, `docs/BENCHMARK.md`), V0.3 (`0.3.0`, the agent interface: an
 external program runs the practice through a deterministic JSON protocol,
 `docs/AGENT_PROTOCOL.md`, with a reference Python client) and V0.2 (`0.2.0`, practice design: staffing, rosters, reading
 allocation and teleradiology actions, a sustainable scenario and the T90
@@ -18,15 +21,6 @@ evaluation of your plan). Release notes: `docs/RELEASE_NOTES.md`. Everything is 
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
-
-In development (unreleased): **V0.5**, LLM agents. V0.5a adds an
-external LLM agent that manages the practice through the benchmark
-harness with any OpenAI-compatible model server (`agents/llm/`,
-`docs/LLM_AGENT.md`). V0.5b gives it a bounded memory within a run, action
-guidance, a smaller targeted prompt, and usage and cost reporting. V0.5c
-ran it with three local models on fresh seeds, with a memory-off control:
-a development evaluation whose recorded decisions replay exactly
-(`docs/benchmark/v05c-dev/`).
 
 ## Quick start
 
@@ -300,7 +294,7 @@ seed from the protocol but does not sandbox them. Specification:
 `docs/BENCHMARK.md`; the development runs: `docs/benchmark/v04a-smoke/`
 (30 days) and `docs/benchmark/v04b-dev/` (90 days, with the Python policy).
 
-### LLM agent (V0.5, in development)
+### LLM agent (V0.5)
 
 `agents/llm/llm_agent.py` asks a language model how to manage the
 practice. It runs as an external benchmark policy, a separate process per
@@ -327,8 +321,8 @@ Since V0.5b the agent:
 
 Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/LLM_AGENT.md`; the live smoke tests: `docs/benchmark/v05a-dev/` and
-`docs/benchmark/v05b-dev/`; the multi-model development evaluation:
-`docs/benchmark/v05c-dev/`.
+`docs/benchmark/v05b-dev/`; the multi-model development evaluation, three
+local models with a memory-off control: `docs/benchmark/v05c-dev/`.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -365,22 +359,33 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
-| `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5 development) |
+| `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.4)
+## Known limitations (V0.5)
 
-The V0.5 LLM agent, in development, has its own (`docs/LLM_AGENT.md` §12):
-* its memory is bounded and holds only its own recent decisions;
-* it does no planning;
-* operations and staffing actions go in two batches, not one atomic unit;
-* its prompt is a summary (details on request);
-* cost is an estimate from configured prices;
-* its live runs are not reproducible (recorded runs replay exactly).
+* **LLM agent** (`docs/LLM_AGENT.md` §12):
+  * Live model inference is not deterministic, even at temperature 0;
+    exact replay requires the recording.
+  * External agents are trusted processes, not OS-sandboxed.
+  * Operations and staffing actions at one decision point go in two
+    batches, which are not jointly atomic.
+  * Its memory is bounded, and it does no planning. Models may repeatedly
+    propose invalid actions despite the refusals in their memory.
+  * Model behaviour depends heavily on the prompt and configuration.
+  * In the development evaluation the models frequently chose no action,
+    and service improvements sometimes substantially reduced operating
+    profit (by $34,565 over 90 days in one run).
+  * Cost is an estimate from configured prices.
+  * The development results establish neither model superiority nor
+    generality, and no model or agent is clinically validated or
+    benchmark-certified.
+
+### From V0.4
 
 * **Agent evaluation harness** (`docs/BENCHMARK.md` §12):
   * External policies are trusted development participants, not

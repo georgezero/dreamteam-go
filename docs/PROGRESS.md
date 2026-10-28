@@ -7,6 +7,34 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.5.0 — release
+
+The V0.5 release on the owner's decision (2026-10-28): V0.5c accepted at
+e495789, its CI (run 40643845200) green; no V0.5d and no tuning of the agent
+or the models. LLM agents (V0.5a–V0.5c). Release preparation only:
+* the version (0.5.0) and the replay registration of 0.5.0-dev.3
+  (`mini-seed52-v053`, batch mode `v0.5_dev3`, recorded by a binary built
+  from e495789);
+* README, release notes, roadmap (with the owner's V0.6 starting scope),
+  progress, and the LLM agent's and the benchmark's status and
+  limitations.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, scoring, the harness, the protocols, the agent, its prompt or
+its settings. The 26 live model runs are not rerun: the release changes no
+code they exercise, and CI replays all 18 recordings on every platform.
+The clinical evaluation suites, unaffected, are not rerun.
+
+The documented limitations are accepted as nonblocking (README, LLM_AGENT
+§12): nondeterministic live inference and replay only from recordings;
+trusted, unsandboxed external agents; operations and staffing batches not
+jointly atomic; repeated invalid proposals despite memory; behaviour
+dependent on prompt and configuration; frequent inaction; service bought
+at substantial cost to profit; development results that establish neither
+superiority nor generality. No model is clinically validated or
+benchmark-certified. Next: V0.6a, the benchmark scenario suite and
+evaluation contract.
+
 ## V0.5c — multi-model development evaluation (0.5.0-dev.3)
 
 Owner decision 2026-10-27: V0.5b accepted at d476257. V0.5c runs the frozen

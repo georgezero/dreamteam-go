@@ -16,7 +16,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
-| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1, accepted; V0.5b, memory, action guidance and cost reporting, 0.5.0-dev.2, accepted; V0.5c, multi-model development evaluation, 0.5.0-dev.3; owner decisions 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
+| **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** | Agent benchmark: agents evaluated systematically across models, scenarios, seeds and baselines; WebUI/SQLite, the managed-practice harness and automation levels remain planned here (§7) | V0.5 agents |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
@@ -466,8 +466,10 @@ more benchmark infrastructure.
   seeds; C, the memory-off control (`memoryDecisions` 0, the agent's one
   change) on B's seeds; D, 90 days, one seed. All 26 runs completed with
   no infrastructure failure; all 18 LLM recordings replay byte for byte,
-  in CI on three platforms. No score, ranking or generalization. Awaiting
-  owner review; then V0.5.0. The full benchmark framework is V0.6.
+  in CI on three platforms. No score, ranking or generalization. Accepted
+  by the owner (e495789).
+* **V0.5.0** (released 2026-10-28): V0.5a–V0.5c, with no further slice
+  (no V0.5d, no tuning). The full benchmark framework is V0.6.
 
 Acceptance (V0.5a): the agent takes part in a complete, replayable session:
 valid structured decisions, no unauthorized operation, no action when
@@ -511,6 +513,20 @@ Acceptance
 **Owner decision 2026-10-27: V0.6 is the full agent benchmark**, evaluating
 agents across models, scenarios, seeds and baselines. The language-model
 agent itself (item 3) starts in V0.5, over stdio.
+
+**Owner direction 2026-10-28 (V0.6 starting scope, not yet a plan).** From
+building agents to evaluating their capabilities: operational, financial
+and staffing management, long-term planning, and robustness across
+practice conditions. V0.6a starts with a small suite of distinct practice
+scenarios from documented simulator capabilities (for example financially
+constrained, a reporting backlog, rising demand, staffing shortages, and a
+stable practice where needless intervention is costly), with known initial
+conditions and reproducible seeds, and an evaluation contract. Development
+scenarios are kept apart from held-out benchmark scenarios, and both from
+the sealed clinical holdouts. Releasable with a documented scenario suite,
+reproducible multi-agent evaluation, the existing operational and
+financial metrics and a standard report; no leaderboard, composite score
+or statistical ranking required. Not another round of prompt tuning.
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
