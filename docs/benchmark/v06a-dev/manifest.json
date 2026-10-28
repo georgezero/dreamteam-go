@@ -1,0 +1,1452 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v06a-characterization",
+ "engine": "0.6.0-dev.1",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "e731211e6083d06a01fcf23971684e95b1542737a35ed393b4eff9888861c46b"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "greedy",
+   "version": "1",
+   "description": "the V0.3 protocol demonstration (agent.Greedy): raises one radiologist's site reading allocation by 5 points whenever the oldest unread study is over a day old; not a strategy"
+  },
+  {
+   "id": "rules",
+   "version": "1",
+   "description": "a modest rule-based baseline: reading allocation follows the reading backlog with hysteresis, every change validated and previewed first"
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "bench-financial-pressure-s40901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40901-noop/run.json",
+     "sha256": "dcbc68e8cf25a3f227e67641fa08e0b7c8756091fa443c2b055a97f9c5a36190"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-noop/transcript.jsonl",
+     "sha256": "4463e29d8d950f10900d8236a0d71691672b9e035b009589c4beb0e7f578ffae"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-noop/session.json",
+     "sha256": "6163463860c729ad4a9e5415574aa0b63d26a7fd510ef57c23a6641c34b5ace5"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-noop/result.json",
+     "sha256": "67ac89802269617980813a40a880d3e9da5c075a038a67606f5bd4e3ddba9502"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40901-greedy/run.json",
+     "sha256": "9500592bccceef2919c54f971845b4b62dfca7fba3318de85b378b4c03800cc1"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-greedy/decisions.json",
+     "sha256": "7eac13f834810a519ccf62eed3ca1a627ae60704b99dea288d79d419335e03cc"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-greedy/transcript.jsonl",
+     "sha256": "faed1b13aacb8f7e8193fae332cf3b6580fd076db6d8a6d46f48a0ba13edfcdc"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-greedy/session.json",
+     "sha256": "e43486752ecc99dc74ee7a130b60dd7f71d1ce1604ad2a5bee3f271c99dfdc1c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-greedy/result.json",
+     "sha256": "e5154be875150fadd0fad30da2b4d82df1faa859d1e768b607b899c6f273779e"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40901-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40901-rules/run.json",
+     "sha256": "d914e344124a54bfeeb3bafa5a9af821b408844fdd58489eb7b447a811240263"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-rules/decisions.json",
+     "sha256": "483427fa9b8c29654c20f9547ebca7c3808e0004c64ff5899cbcd0f4298e3ba5"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-rules/transcript.jsonl",
+     "sha256": "d9e4524906f3b4e41dd2130b838774f7dc2d86f3b60be5cbac3cb710a968a229"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-rules/session.json",
+     "sha256": "a1ae82264abdcfc44ff975c96b870e6d22bde43872c2756a3f0a3b3d47fc114a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40901-rules/result.json",
+     "sha256": "231fe8e8b82b8ccdba5243bbce0586d79961b11380b3b3404c1dd54beef6f262"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40902-noop/run.json",
+     "sha256": "5d4c8956a77509c78303f2056c509d28a136be63be1ac1dd6305f59d1dc861f9"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-noop/transcript.jsonl",
+     "sha256": "b16de41a9acdf109f4085dba465d1f1d4784904fa5b28794b6b65e1e80decff8"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-noop/session.json",
+     "sha256": "2fab6f6f7bf4ac9cc8a429e6036412ce42d27ba05444ea682e775eabec78a988"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-noop/result.json",
+     "sha256": "3efd78d86e97ab31e3ffb2866c1c841fd0667fb678233f606c43c2241aa646af"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40902-greedy/run.json",
+     "sha256": "0811a4891389a4a52ae208b9c02e5cc6a51bd2ff7e3e41968e4cd3a8296135a1"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-greedy/decisions.json",
+     "sha256": "72d7a5ca65dfd3863d636fd4e8f7deab338757e7200a2885d2af105770c40f1b"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-greedy/transcript.jsonl",
+     "sha256": "cbf426a92a789baa977a31dbb40c508181344ae917868b4e28d7d65d7c307046"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-greedy/session.json",
+     "sha256": "6d6833a36097d119b2bf62751fbe3aa134a8b28a03673cb6e3f55cc0d6a435c9"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-greedy/result.json",
+     "sha256": "dff858f86c734220f2d3875a0726642c71ca35f934e354c9fdd9bd1ddfdc6738"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40902-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40902-rules/run.json",
+     "sha256": "ec53f27e4d89230eac2fa10b08b0aac650bc60ef7d1bc019e274109af44b4ba3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-rules/decisions.json",
+     "sha256": "f9a674f1a1a4c937f60b22878d2cd2d784a81f39ebcdf103d2ec60e058177af8"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-rules/transcript.jsonl",
+     "sha256": "738163b213d5e5879e9cdf795f23d40de745b5a9be6e5ea54ce9f9552ed34fa8"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-rules/session.json",
+     "sha256": "722d36d348f0b33fa3d86932da734cd0c37e09e534bf79aed9c6bd9327c30a2e"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40902-rules/result.json",
+     "sha256": "e4df6ccc8360381374a1eac878f807f464130145647543b3298e7cfdcf384740"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40903-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40903-noop/run.json",
+     "sha256": "4370107bafc991c051645bc4dacb3141848e3f55d4d8891fd509fb2d6db738d8"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-noop/transcript.jsonl",
+     "sha256": "2308488410358d406faa2a7e92a64a2fa8ff27174d61913fb117233eea5f13a5"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-noop/session.json",
+     "sha256": "94a7cc53d2186a2f8157b9c3df5b7f6dc62a881a1a1791c1495834459be91e00"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-noop/result.json",
+     "sha256": "6f14f23ea78ce27e216f8f1fe98c2c067920e9780ef8687090a86e9a61471ede"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40903-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40903-greedy/run.json",
+     "sha256": "efc6cc37dc8c1c7d1db9385acf6938e5c88d21783d4be8a92dd5359085c5b3a4"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-greedy/decisions.json",
+     "sha256": "aa5e8dbc0e369a2da395db4a19e17037dff21201f50b96c689c3134deff4589d"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-greedy/transcript.jsonl",
+     "sha256": "d4e513b18cc2a17a922f0840033a4f78dbcc6d8529e4d02f0252d546bfff735a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-greedy/session.json",
+     "sha256": "e8360da5d3f6087e620a2130fc9448bff2d7788770cebf3852a7b0310b5053a4"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-greedy/result.json",
+     "sha256": "c693bcb0a8e790d3b2c78142441237eca1d3084b08c8bf1c6bc368da695456a9"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s40903-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s40903-rules/run.json",
+     "sha256": "52487f954b2487587f98ccec69a8626aa3a74fb87cbe84f01b80173d530d8a19"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-rules/decisions.json",
+     "sha256": "483427fa9b8c29654c20f9547ebca7c3808e0004c64ff5899cbcd0f4298e3ba5"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-rules/transcript.jsonl",
+     "sha256": "93aaf26da8841e0685f9608f285efeab26f7b42e036cd59ed4621c846bb7cc0d"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-rules/session.json",
+     "sha256": "911204335f0e43ad2b9a4d8d3c21e03cdf540079c7aacdc351073999d8326c9a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s40903-rules/result.json",
+     "sha256": "e07a433220fa68b9f65f62b347e3b12149b4853718a3d490c1030caecbb465f1"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40901-noop/run.json",
+     "sha256": "0c0bf1fdf1e5938c1241f85f5f9ed66f5a8e2fe7ded4cb12c667641b4f4b7185"
+    },
+    {
+     "path": "runs/sustainable-s40901-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40901-noop/transcript.jsonl",
+     "sha256": "a251c55b52250c416d73b685023d6e9505cc624dec7330291c2b999f203da789"
+    },
+    {
+     "path": "runs/sustainable-s40901-noop/session.json",
+     "sha256": "6aca57ea544cf0d19ed4725008387248be11dd223fecfebb2000aa00f2e3312a"
+    },
+    {
+     "path": "runs/sustainable-s40901-noop/result.json",
+     "sha256": "b42516a75bab518ddde292871eb3ebf380a79fcea42e985718c77183ece6d4e0"
+    },
+    {
+     "path": "runs/sustainable-s40901-noop/t90.json",
+     "sha256": "8a139ea19ea327eecd5592fe9052ca3c75468728bb95597f5ccc11299c7810be"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40901-greedy/run.json",
+     "sha256": "bccfa3d7dee8e453e86add156a9028cae73e3ab5b36b4aefeac1ee14c9fc845e"
+    },
+    {
+     "path": "runs/sustainable-s40901-greedy/decisions.json",
+     "sha256": "de62c381060d31a21278a749421227c55fc9ba716dba7b20e40c54cfd74b3641"
+    },
+    {
+     "path": "runs/sustainable-s40901-greedy/transcript.jsonl",
+     "sha256": "35ddaf25aba198b346e0e7e8b645101c2ace9267392769bda2422d8d9dfa0830"
+    },
+    {
+     "path": "runs/sustainable-s40901-greedy/session.json",
+     "sha256": "1f337d7326a3ec7a0879765b0c9579ae2d70190bca5923b513466234cc309c1b"
+    },
+    {
+     "path": "runs/sustainable-s40901-greedy/result.json",
+     "sha256": "557391c45e0d63409c4be83fb08b3e1ab8c50092d2db861a5a153c8f5372b6fd"
+    },
+    {
+     "path": "runs/sustainable-s40901-greedy/t90.json",
+     "sha256": "0c0b2ef1ccd5a17e653760ff8cfc731e74de219bf4250ecf6ae23f86e53295a1"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40901-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40901-rules/run.json",
+     "sha256": "9fc20aec13c5b438541b2629368e8245629313e957b7809da2108dcd714c6375"
+    },
+    {
+     "path": "runs/sustainable-s40901-rules/decisions.json",
+     "sha256": "cb6f95827acbd1308478f452da70c18e7d2275b1b866574ef2856e12acd03820"
+    },
+    {
+     "path": "runs/sustainable-s40901-rules/transcript.jsonl",
+     "sha256": "924cb4ce3ecb8dcc09e6d59cb3f61f42bcb87127fd8f1203c584e98a715626a0"
+    },
+    {
+     "path": "runs/sustainable-s40901-rules/session.json",
+     "sha256": "1b5a33f91d7addb02ff2b41c28eabf6277ca58abee61443a7c3744feb4042d10"
+    },
+    {
+     "path": "runs/sustainable-s40901-rules/result.json",
+     "sha256": "03adbe2f66aafcab41bb1c39ac17706025a1f3af8cb3d884085349a6212c33b3"
+    },
+    {
+     "path": "runs/sustainable-s40901-rules/t90.json",
+     "sha256": "5bb519f27ecb7b1411f39f27ca0246f40491dc2af95319a38fab9278b0f66450"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40902-noop/run.json",
+     "sha256": "8a49750201831888e5e49e11b770164735e9d545914f5c6f27f654ce5e2b1ef7"
+    },
+    {
+     "path": "runs/sustainable-s40902-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40902-noop/transcript.jsonl",
+     "sha256": "7116a4410ccccfcc3b69bc833e3946982ce976b128e2de5ea58d8e92fc0ab1d4"
+    },
+    {
+     "path": "runs/sustainable-s40902-noop/session.json",
+     "sha256": "cb48d8c137561ae209c579585f0529021e9f49de8836a7a28da2058b03c25875"
+    },
+    {
+     "path": "runs/sustainable-s40902-noop/result.json",
+     "sha256": "5a720409302ea8ae746de3574a664e064806601d3e2286dd2d1a673092c14e5c"
+    },
+    {
+     "path": "runs/sustainable-s40902-noop/t90.json",
+     "sha256": "3e7edeca577196fa7ef4e5edb6200a72f0818c819cecefa91a780b2be7b27a7e"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40902-greedy/run.json",
+     "sha256": "a704f9eeb1f1185bfd0ffe2bf60bedaade14104bd953d812ec97d1f4d00cf389"
+    },
+    {
+     "path": "runs/sustainable-s40902-greedy/decisions.json",
+     "sha256": "de62c381060d31a21278a749421227c55fc9ba716dba7b20e40c54cfd74b3641"
+    },
+    {
+     "path": "runs/sustainable-s40902-greedy/transcript.jsonl",
+     "sha256": "4aef909fdf3e3d0c27c3497ac9c3abda7b2b0933e4698ff0000e89d0fae40036"
+    },
+    {
+     "path": "runs/sustainable-s40902-greedy/session.json",
+     "sha256": "00ede9465f612e6dd92ea946e479a2ba2de9964f9884d0328516b1fda7ff189e"
+    },
+    {
+     "path": "runs/sustainable-s40902-greedy/result.json",
+     "sha256": "bb6975acf2da08f038b3e6212843b75edd68ce57acec98a185cbb1d174180db8"
+    },
+    {
+     "path": "runs/sustainable-s40902-greedy/t90.json",
+     "sha256": "8e619e3cbf43459e6af7f9daf6b736b5f7ed21a8f8fbe92c863dee618adc8808"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40902-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40902-rules/run.json",
+     "sha256": "83d50e8b381bc11f071437082481b5c3647282eeb0b46f9435c9dab496be5118"
+    },
+    {
+     "path": "runs/sustainable-s40902-rules/decisions.json",
+     "sha256": "cb6f95827acbd1308478f452da70c18e7d2275b1b866574ef2856e12acd03820"
+    },
+    {
+     "path": "runs/sustainable-s40902-rules/transcript.jsonl",
+     "sha256": "795652ff7952b1e48be88abe481d57ac453c54463bbef6c9f76f3d3a4d17a4c9"
+    },
+    {
+     "path": "runs/sustainable-s40902-rules/session.json",
+     "sha256": "1c5d41ec4c73e387ac563a6dd5c9af6f00567d872039932a7adad321b2a8c703"
+    },
+    {
+     "path": "runs/sustainable-s40902-rules/result.json",
+     "sha256": "84d404b6d0d15acd389fb4e32f9367199569ecfdabfa05358f880e544b404038"
+    },
+    {
+     "path": "runs/sustainable-s40902-rules/t90.json",
+     "sha256": "f89f04e5e9c97d196ffe63f5c4a2141b755ac0ab48f10ff83a86102733e41f75"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40903-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40903-noop/run.json",
+     "sha256": "cdefaaf688078cd3746c098ab849ae8057078bbf429c38e5b7b423f3be93e2d7"
+    },
+    {
+     "path": "runs/sustainable-s40903-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40903-noop/transcript.jsonl",
+     "sha256": "d348cefe1c190ce34a67b69f60b81c25659754a1a0a5a96588ba0446350b851d"
+    },
+    {
+     "path": "runs/sustainable-s40903-noop/session.json",
+     "sha256": "8b4021264ff5350b603452053c2b5f47982de7dfc18563c441f928f9326c23b1"
+    },
+    {
+     "path": "runs/sustainable-s40903-noop/result.json",
+     "sha256": "55076cb6875c0d9e34a14719bc021785c78a1176682d0689001a8d9ccd279bf6"
+    },
+    {
+     "path": "runs/sustainable-s40903-noop/t90.json",
+     "sha256": "080a29f1016eeebe86ec757c5be882ba932d65295e9d3bba27fd5c54cbff868d"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40903-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40903-greedy/run.json",
+     "sha256": "b95a3dcd8cbe4fc3fd66e98e057bf095c4921691c379b8cf74b0f52a7bb26759"
+    },
+    {
+     "path": "runs/sustainable-s40903-greedy/decisions.json",
+     "sha256": "aa5e8dbc0e369a2da395db4a19e17037dff21201f50b96c689c3134deff4589d"
+    },
+    {
+     "path": "runs/sustainable-s40903-greedy/transcript.jsonl",
+     "sha256": "f9e807ba86e84ac57fb10c8410c3e2976ebe5c58a50d0431b7571a982fae2d47"
+    },
+    {
+     "path": "runs/sustainable-s40903-greedy/session.json",
+     "sha256": "1395f846e1a07cc0b0ed1448f95e69da3534ce0cee43b57b8923d53ae2de5a92"
+    },
+    {
+     "path": "runs/sustainable-s40903-greedy/result.json",
+     "sha256": "0cde9157286931a1c069016102c2308ef5bc29e6e01fc6bc14c4ea196bae3a7c"
+    },
+    {
+     "path": "runs/sustainable-s40903-greedy/t90.json",
+     "sha256": "45d55ee559d1cb83d9a5648c06024d4691527e1997198abe52ff47dcf61cf5c3"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40903-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40903-rules/run.json",
+     "sha256": "a4410ea04a74f188461ad0afb8aefbcd1989ad2437fb0f52ee5adf02d4f48ac6"
+    },
+    {
+     "path": "runs/sustainable-s40903-rules/decisions.json",
+     "sha256": "a405312279246184db3e7dc0e5ef1c41bd469c26284216692444f179f5fea505"
+    },
+    {
+     "path": "runs/sustainable-s40903-rules/transcript.jsonl",
+     "sha256": "a90746590cecc4635f980dc1443d5249ef55a164ff29fa7ef5ca6d0ad20816e1"
+    },
+    {
+     "path": "runs/sustainable-s40903-rules/session.json",
+     "sha256": "d64ff6ed195e335d0bf67e063f045812b9cc6384c4541924958ecb647970b757"
+    },
+    {
+     "path": "runs/sustainable-s40903-rules/result.json",
+     "sha256": "2cfc3b3dbb21fda50854a4f4087aad1ecebd47842a881a038b16bfca47de2d58"
+    },
+    {
+     "path": "runs/sustainable-s40903-rules/t90.json",
+     "sha256": "780b1d06b17f2288a3aea6f1309734d64831da5c3a9b6fe737eb3393abc6b50d"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40901-noop/run.json",
+     "sha256": "f8ef3ac57e9fc51864b473b8feb96ec5518733c22d3970a0f7a4b4ecfbe88e5a"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-noop/transcript.jsonl",
+     "sha256": "413caa44baa251a85cf61da560237f317667d5a141ef8df5f208a4779eb6c214"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-noop/session.json",
+     "sha256": "50eff491a9a7ed0c0159db3df4961dc125a870df91b14b58e4ce37f51a7a71db"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-noop/result.json",
+     "sha256": "1db8be49a9308f48b82562aa53276eb78d9147d697edc7d196f3f3dc5dd69731"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40901-greedy/run.json",
+     "sha256": "226fcba028a9cbd5816ab804fb654bcd6e416a1e4ce236f6ffd04428b9087a3e"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-greedy/decisions.json",
+     "sha256": "de62c381060d31a21278a749421227c55fc9ba716dba7b20e40c54cfd74b3641"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-greedy/transcript.jsonl",
+     "sha256": "d961a194e320065e4225b048f0c67062d906e5de7a9456aadab97ce84b6f6afe"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-greedy/session.json",
+     "sha256": "5f893f1b927161752e1b993602ab50974eccfacbfe869d0c0796826f5edee642"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-greedy/result.json",
+     "sha256": "e24aad314428db9177a2dd9d4cdb89154e38d96ec8d339443d6098948f819a01"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40901-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40901-rules/run.json",
+     "sha256": "165ef6d0dfc46e95d09b1df643625e404d42c4919cb7e43b5f60516efb9e2ec6"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-rules/decisions.json",
+     "sha256": "cb6f95827acbd1308478f452da70c18e7d2275b1b866574ef2856e12acd03820"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-rules/transcript.jsonl",
+     "sha256": "9473375d541695f6d231a811558125c0c36d173cabadd34e3c574942f8153251"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-rules/session.json",
+     "sha256": "6d579f7a14a3ba8c074b9780690043018e1381f9d4dd6bd6e849b70b73889281"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40901-rules/result.json",
+     "sha256": "920ba88495315b923d1cd416d4403b0b704f57f7f89e378f747b97b8b79817b1"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40902-noop/run.json",
+     "sha256": "ab8be749e593e19d53a5ebc475e8f5709dd22db66759f0e87b5750ca6dadb0ca"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-noop/transcript.jsonl",
+     "sha256": "2c8df3212061fa96cb14c8d3c2fda149773a3c045500cb91a90fcc7c9c9c6cd4"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-noop/session.json",
+     "sha256": "0eec90caddb8ca7e31af5234bd222739472510c2841af26c64f9d098beddcd47"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-noop/result.json",
+     "sha256": "fad91148dc287e5265005de828fb123336741d63cd7fa7d1250121d85ff6674c"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40902-greedy/run.json",
+     "sha256": "450c751a3887a74db9892fa185ebbb45b2f9cde923daedb2e8781b32cca00d83"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-greedy/decisions.json",
+     "sha256": "de62c381060d31a21278a749421227c55fc9ba716dba7b20e40c54cfd74b3641"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-greedy/transcript.jsonl",
+     "sha256": "3db1f9c8e586fdc6a58d28e1c5cda3843bd94fa5571f4c7bf4f119927f833e59"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-greedy/session.json",
+     "sha256": "17dab9edec2dfbb05bce256dd19aeb130046196a15f10208f6ac1efb93b26a5b"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-greedy/result.json",
+     "sha256": "549f39b8c4da7e380f89ae2c581bb9955b47b51acc5cb3bb7acc836f0e6dcae8"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40902-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40902-rules/run.json",
+     "sha256": "2c1ea0c919894761b23a7c41634db2dd3e86df078a9ab721b29e1fbb2ed2cbd5"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-rules/decisions.json",
+     "sha256": "cb6f95827acbd1308478f452da70c18e7d2275b1b866574ef2856e12acd03820"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-rules/transcript.jsonl",
+     "sha256": "226c3d754054047e64754a7755686255c76dac6a65fb03e0021bb707c8cf0eff"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-rules/session.json",
+     "sha256": "81cf37e977a28b4daa79043497e8d6be1339ad1bb702e09791a26570bb0d64b7"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40902-rules/result.json",
+     "sha256": "4085ac7abc62948c617ebfa9b1f5aa680d5b0db7947b17ec2f798c2097da9c31"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40903-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40903-noop/run.json",
+     "sha256": "8001d9b1549213397a0ddc89ab272064ce068696fe3cf402d12c266c60e567d1"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-noop/transcript.jsonl",
+     "sha256": "817d280b17e258021fb874ba4379750197b70dde498804182e5dcac5b5808c1c"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-noop/session.json",
+     "sha256": "e08e4df8092473e6e7bd0b9849698555f206fa0a40d11f989f986c40c1083af6"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-noop/result.json",
+     "sha256": "9f8dfd8df795362ad827e4ee5f0edf6e5c7494042ca819b419a6248201abbf2b"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40903-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40903-greedy/run.json",
+     "sha256": "6ec1c56881746ffaa17408df18bd086337ea9b1ad750ad5da4562119e46e93f7"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-greedy/decisions.json",
+     "sha256": "aa5e8dbc0e369a2da395db4a19e17037dff21201f50b96c689c3134deff4589d"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-greedy/transcript.jsonl",
+     "sha256": "400dbe6054544522f3e4df0e90f6b764cb1b4cecd277a7b59541dfea7e4bfbcd"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-greedy/session.json",
+     "sha256": "a1110c2198850f7d7e2b3df1c7daffa37e98135cb4a05966edbc9cb2eb719fb0"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-greedy/result.json",
+     "sha256": "9372354b90621102c9700bde94acb23cd7237431293dbe5c3e4e79b2b559f887"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s40903-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s40903-rules/run.json",
+     "sha256": "57a043b66a01009e7aed92219af25942d0d652f96b825afd19c5d270b9f37db1"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-rules/decisions.json",
+     "sha256": "a405312279246184db3e7dc0e5ef1c41bd469c26284216692444f179f5fea505"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-rules/transcript.jsonl",
+     "sha256": "cd1347aff3f58a818eddc393931b8f880e4d2a59daf0b90de28e166e00e9014b"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-rules/session.json",
+     "sha256": "111453a13cb555ce0b2c5fb464e91cc00f80a8a64674812c01644d9aca2ad7df"
+    },
+    {
+     "path": "runs/bench-demand-growth-s40903-rules/result.json",
+     "sha256": "d87a18e5205921e1359f96c7755908e30d4c7d17938a1f18281d606aa6cdd04d"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40901-noop/run.json",
+     "sha256": "80d95ee3fbc6ce0655a7be513f9b09578c8294486ef368e9670347892cb7f5cb"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-noop/transcript.jsonl",
+     "sha256": "69a4ce001f815b0012e3e07453beb36785a92123049c0d2396b631f17fb84387"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-noop/session.json",
+     "sha256": "5635641ead6670a89bf4995a46a5f463987c0b4136200128e945921f76303361"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-noop/result.json",
+     "sha256": "f54b5222e7a885c2bef45033de21c7208fe6ac013255cdedf6e521577962b23a"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40901-greedy/run.json",
+     "sha256": "11fbf24a2eeb47ca76fa8737bba08e6d20f69909632b038d2ca8660353dcd958"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-greedy/decisions.json",
+     "sha256": "72d7a5ca65dfd3863d636fd4e8f7deab338757e7200a2885d2af105770c40f1b"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-greedy/transcript.jsonl",
+     "sha256": "af32d31d0d8f382fb95716692b7cd36190dca55abe02d6757fd935b6b4f74222"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-greedy/session.json",
+     "sha256": "9a407363173771a0834f4ae8d69e9587feddc6d9f0e31405cdb6183b22aa4c1a"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-greedy/result.json",
+     "sha256": "3737011fccf7b4c24531f75a620c26a885be26d235600d401052e1b49ed9a418"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40901-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40901-rules/run.json",
+     "sha256": "135c4431d134fe8426ab19ef0f893dd88c5573b8bbeaa608a9b57d9312cad813"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-rules/decisions.json",
+     "sha256": "f9a674f1a1a4c937f60b22878d2cd2d784a81f39ebcdf103d2ec60e058177af8"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-rules/transcript.jsonl",
+     "sha256": "d403a144b219a0ce2989ce90677eefac44e81a8a6881929f863f8d25eda6f66c"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-rules/session.json",
+     "sha256": "418606ddeb683f9f002508be5aa51eb17063f9fe7d13c5f80a9536103a0bf21f"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40901-rules/result.json",
+     "sha256": "f8f9a11abc169c9d3f54c3e4c3408df38c0841384a23905e3ec025bf597706d5"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40902-noop/run.json",
+     "sha256": "673b83d4725c61fdfb1a895c64b11fdd754d408fb2a1179793eda7441c7f32a3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-noop/transcript.jsonl",
+     "sha256": "dcb65e79ed4f868a9a448ea6b9211f7f7a9e85e88beaa31fcc90d6ec5d5ccb8c"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-noop/session.json",
+     "sha256": "1446d412d065df41fd7e8bd15b38e12e03b17470883717f5b63a8ca3ab705221"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-noop/result.json",
+     "sha256": "d0dc71e7439de9769c6e8c0e4d51da8b719cd94097e7bdaa24883adc55a75338"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40902-greedy/run.json",
+     "sha256": "cdfead441ff94412464eee090a58d22e27feb3219736989f8d215da19108c3ce"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-greedy/decisions.json",
+     "sha256": "72d7a5ca65dfd3863d636fd4e8f7deab338757e7200a2885d2af105770c40f1b"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-greedy/transcript.jsonl",
+     "sha256": "4853bcbb331c37b5a9098aa343fb36b23c8ab8bd742a108ab3dd531599e747a7"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-greedy/session.json",
+     "sha256": "b41d0e4398f1a5d135807e82edb11742b5303897ff9afa0f60a83808d9997eb7"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-greedy/result.json",
+     "sha256": "72bce4ac6366ed058eff66b582c13e593e80d7d81aa9fbbd331429c7cfa2e292"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40902-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40902-rules/run.json",
+     "sha256": "3fcd383f809d2df086128afe2be35dcfba8c0d5c387edd0c3331ec2b45078262"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-rules/decisions.json",
+     "sha256": "f9a674f1a1a4c937f60b22878d2cd2d784a81f39ebcdf103d2ec60e058177af8"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-rules/transcript.jsonl",
+     "sha256": "bcaa0f07777a29e0671c4cd21ed24e2c81ffa53088e8fd39b5e5171f543625d4"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-rules/session.json",
+     "sha256": "ca7387c3d93ba735f3fa7ca0c4963e7e25ffc5acb48bcf4d0b5daf95061b33fe"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40902-rules/result.json",
+     "sha256": "e2adeec48bd4cc8b0019c951011238c48163175077628722ea4266ac3a298573"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40903-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40903-noop/run.json",
+     "sha256": "0d0ef4d10aad277e679bed05deadb9ead3745c38c1501ecbba2af309b186547c"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-noop/transcript.jsonl",
+     "sha256": "b2d653e8630a875955ea79de5a3929beed969dd76fc5a7c8eb3a118150f91682"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-noop/session.json",
+     "sha256": "8f5483ff79632dee521df73997a1c216e0fd563e877ec0b277857b8c7ad21cec"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-noop/result.json",
+     "sha256": "94fdaa28c97237fe8dc44fb76baba362bb4d37060d28f2c156bc95df2fac18fe"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40903-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40903-greedy/run.json",
+     "sha256": "a79fde36a42ec48e7e3285ab01d4726279209cb7b2c2bdacd1c1c307b6402243"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-greedy/decisions.json",
+     "sha256": "72d7a5ca65dfd3863d636fd4e8f7deab338757e7200a2885d2af105770c40f1b"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-greedy/transcript.jsonl",
+     "sha256": "717e4f5cfe6185539eac3d238546cd81988883b076aed51640a6820710b82883"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-greedy/session.json",
+     "sha256": "24d4013793e7c7f5fb1aaca7c1336986d21a85b703f98b864935dd6a3c9364fe"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-greedy/result.json",
+     "sha256": "8d4c725643833602b4501bd0aee32d1385bcb022e31474f6624f5704749fe9a1"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s40903-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s40903-rules/run.json",
+     "sha256": "0e96a1e7876ec42b876913d7d5481a5e2e45df7fae3eb1e2d0d547b66faab0ae"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-rules/decisions.json",
+     "sha256": "f9a674f1a1a4c937f60b22878d2cd2d784a81f39ebcdf103d2ec60e058177af8"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-rules/transcript.jsonl",
+     "sha256": "7b804b6002e46411acb08e40591a24414fc59548a915c4a85102fb56c5006a99"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-rules/session.json",
+     "sha256": "69c269b710315b5efc36aae13f1872d7f24efe17616b1c37be188a1d5b64df8b"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s40903-rules/result.json",
+     "sha256": "d0875f9d85b44fec75bd82d09fd8a8624447ca8800ff643cee9231846ed8169e"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40901-noop/run.json",
+     "sha256": "1a859999b39d4cc037174e11f6509feecefcc6da0626ac6d113c297d5932519d"
+    },
+    {
+     "path": "runs/bench-stable-s40901-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-stable-s40901-noop/transcript.jsonl",
+     "sha256": "0434d2823ebc7af419857b315fbe6c52e80701e91bf1271ca8e4deaf59699419"
+    },
+    {
+     "path": "runs/bench-stable-s40901-noop/session.json",
+     "sha256": "b96acdce1234d16e94c601ff68a7e1375e48dcf934b3ef1f1689bfc99410b187"
+    },
+    {
+     "path": "runs/bench-stable-s40901-noop/result.json",
+     "sha256": "3fdf419ae13db35ff86c0c9fb090812a2d5cb966b29d771fe9dded9fb8cca740"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40901-greedy/run.json",
+     "sha256": "83b7f1187688750a680baf31779eb023f6d3b308d282ee76b96717c11a9d4005"
+    },
+    {
+     "path": "runs/bench-stable-s40901-greedy/decisions.json",
+     "sha256": "5d91437f0424234cbab66bbe4dcca71fed04a23b4e5056923785bc5dab8719cc"
+    },
+    {
+     "path": "runs/bench-stable-s40901-greedy/transcript.jsonl",
+     "sha256": "83bea2520c9352b9554e7b0496f419fb7eecd8cff52437ba78eae2a13c47a652"
+    },
+    {
+     "path": "runs/bench-stable-s40901-greedy/session.json",
+     "sha256": "c4de6fd2ab6363dbbb93336b8fd6bf8a817fb4ec04254b36bf078c092b137e83"
+    },
+    {
+     "path": "runs/bench-stable-s40901-greedy/result.json",
+     "sha256": "25060d36136931027be3e3e60f3eaceb8f4cdbbddae846f2cbe45faa9844b8cc"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40901-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40901-rules/run.json",
+     "sha256": "948ed86cb9e32a00a981f8234b92d28816816042ed3599029704f25443acb6bb"
+    },
+    {
+     "path": "runs/bench-stable-s40901-rules/decisions.json",
+     "sha256": "19e9c69cef4dc0558904f66e6c87a48983476230a71a3bca46cfcb02fd98672f"
+    },
+    {
+     "path": "runs/bench-stable-s40901-rules/transcript.jsonl",
+     "sha256": "40e531c4ce24650cac7012b7f400686e1bbadb0a568059472a3afdae370d4cdc"
+    },
+    {
+     "path": "runs/bench-stable-s40901-rules/session.json",
+     "sha256": "0b3bc3a1a6674dacf3779d526de66d1c7ad3683b634528a92d04c74088c12448"
+    },
+    {
+     "path": "runs/bench-stable-s40901-rules/result.json",
+     "sha256": "0cfd3813cd3a3de3b42d5725ab78191e4bac02a61a99f34d888d17daf1129004"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40902-noop/run.json",
+     "sha256": "b55303618b1d00c6c425186c844766a744ba39c5b9c72ad70efc959986718b13"
+    },
+    {
+     "path": "runs/bench-stable-s40902-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-stable-s40902-noop/transcript.jsonl",
+     "sha256": "a95dfc9e16194945c444ee84fd03e7c0ae6d79a4e3814bbbfa2155fe61ef431f"
+    },
+    {
+     "path": "runs/bench-stable-s40902-noop/session.json",
+     "sha256": "53a5aa5c0447cbec863dbf722039ea21d449ac57311a50d754b278b0176df86e"
+    },
+    {
+     "path": "runs/bench-stable-s40902-noop/result.json",
+     "sha256": "2d8dda8daf839ac21c00ad5e2a6c5c7a40de317667111dbb31deb0e600b7a50f"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40902-greedy/run.json",
+     "sha256": "5559616836bb715e9c96436368c1fcd892c3cd60ed7ec5c5f544e71237459579"
+    },
+    {
+     "path": "runs/bench-stable-s40902-greedy/decisions.json",
+     "sha256": "591c85119c59e42c76a10a02807e46bb5c02f6e3306343cec8b3a8fea3a828ac"
+    },
+    {
+     "path": "runs/bench-stable-s40902-greedy/transcript.jsonl",
+     "sha256": "f41e41418c443b760dc3bf91b47bca673c1b7f2427c91bd8b7f4e86ee4038401"
+    },
+    {
+     "path": "runs/bench-stable-s40902-greedy/session.json",
+     "sha256": "c5779f889940a3a4490390792a2e9748c20947106b40f0ca791aa35ce7ce5f2e"
+    },
+    {
+     "path": "runs/bench-stable-s40902-greedy/result.json",
+     "sha256": "c80739340b287341904996bb9f4a9d9d67e26a988f4943898b5905d5b102cb0c"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40902-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40902-rules/run.json",
+     "sha256": "3853bb84d6196922e3883b26c8efd7f9edb0098a8e272164fd339fa17187f7f2"
+    },
+    {
+     "path": "runs/bench-stable-s40902-rules/decisions.json",
+     "sha256": "6b191eea654982d2bf66a2ba35b8139eddd6a4cec8d85623bba628d4df09c06f"
+    },
+    {
+     "path": "runs/bench-stable-s40902-rules/transcript.jsonl",
+     "sha256": "7fea38ecc4ca1280fdeb3fafff3275021e3c622a8801e452a524abc50a776437"
+    },
+    {
+     "path": "runs/bench-stable-s40902-rules/session.json",
+     "sha256": "1a1ec676803c11c1c6f6ac8ce829c7845c27df579726797557096ea9eb658ef7"
+    },
+    {
+     "path": "runs/bench-stable-s40902-rules/result.json",
+     "sha256": "92c1ec67f7b6f5c9a3dac2eb107bd201718a2e9c155d098726e0a2c90e4b520a"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40903-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40903-noop/run.json",
+     "sha256": "d911000fb89a2451a79ff6bf81c337d494c89c47ef95533f0caf191846e7af06"
+    },
+    {
+     "path": "runs/bench-stable-s40903-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-stable-s40903-noop/transcript.jsonl",
+     "sha256": "af632148934dc9cd5eccc2e003996015cf83f4e0ca3bf2abd87f8d5cefdd43fa"
+    },
+    {
+     "path": "runs/bench-stable-s40903-noop/session.json",
+     "sha256": "e8d52fc5cdd28a570492a5af8d8d0ade5ea6610eeacfedb4978f6f5439ef82b1"
+    },
+    {
+     "path": "runs/bench-stable-s40903-noop/result.json",
+     "sha256": "d794e70b946bf6d24ac99d99affe2da06457c23cbd1d52dbe59270c83f733241"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40903-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40903-greedy/run.json",
+     "sha256": "6890c1487d7e6788e488c89a10b3dd14fbb337d0ee82803c23e72ff2cd5b8f73"
+    },
+    {
+     "path": "runs/bench-stable-s40903-greedy/decisions.json",
+     "sha256": "b38cd940d4057bf162b0360ee7faef5a041fbba5f4d38da3677eaa72066f24a5"
+    },
+    {
+     "path": "runs/bench-stable-s40903-greedy/transcript.jsonl",
+     "sha256": "93eaebc2aeeca2e334fa279594f86c888a99278a48bc99157514d009b9f3f0db"
+    },
+    {
+     "path": "runs/bench-stable-s40903-greedy/session.json",
+     "sha256": "2cf63fc07906e93bb31c4e94e18ab01b1b04f9c12f7b7d4afde4b169b6c46690"
+    },
+    {
+     "path": "runs/bench-stable-s40903-greedy/result.json",
+     "sha256": "056e4ad64dcad03e5077b8e469f8d591a12b7bd81a71baccf9b9c065ffbc00ad"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s40903-rules",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s40903-rules/run.json",
+     "sha256": "4632162401b2d2f246ce47fd9bdc26708ab5229fef6f56499315f847fc3c5f98"
+    },
+    {
+     "path": "runs/bench-stable-s40903-rules/decisions.json",
+     "sha256": "ba7881fa02b05e12673e7f3415c2d482e98fb8e57f9f70eede0a8a688d40598b"
+    },
+    {
+     "path": "runs/bench-stable-s40903-rules/transcript.jsonl",
+     "sha256": "c5dee776788ce9439ab2fcdf97a73fa9162c8918c88485c07b42eea32007ff6e"
+    },
+    {
+     "path": "runs/bench-stable-s40903-rules/session.json",
+     "sha256": "f957eb02e56c4388fdf8d996aed5a73741fad8c438bf6b1b320e74e48fdeac2e"
+    },
+    {
+     "path": "runs/bench-stable-s40903-rules/result.json",
+     "sha256": "30691d0e16a763d7133dcec1cdf85ef366b8a691c2f88b235a59f44c3a8a829f"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "19095c6e7aa6f5ba7c56b158c01bbd59a5132fd4337f375c395dc3a21ee87e73"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "f053be7d7795c6c689502db9509674e6b3cb2fe38c7f7192dad85bbd752201d7"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json"
+ ]
+}

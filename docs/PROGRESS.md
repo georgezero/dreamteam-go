@@ -7,6 +7,124 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.6a — benchmark scenario suite and evaluation contract (0.6.0-dev.1)
+
+Owner decision 2026-10-28: V0.5.0 accepted and closed; V0.6a establishes
+the benchmark (scenarios, contract, governance) before any large model
+evaluation. The V0.4 harness is reused unchanged. Specification:
+`docs/BENCHMARK_SUITE.md`; characterization: `docs/benchmark/v06a-dev/`.
+
+**Declared first** (a1ce029, before any run on the characterization
+seeds): the scenarios, the suite file, the specification, the
+characterization protocol and configuration, the analysis script, the CI
+smoke test, and version 0.6.0-dev.1 (0.5.0 registered for replay:
+`mini-seed52-v050`, batch mode `v0.5.0`).
+
+**Built:**
+* **Capability inventory** (specification §1): what the scenario format,
+  demand, imaging and reading capacity, staffing, finance, actions and
+  evaluation can and cannot represent. Not supported: demand trends or
+  shocks, an injected starting state, absence or turnover, radiologist
+  hiring, insolvency consequences, T90 beyond the sustainable scenario.
+* **Five development scenarios** (suite `dreamteam-dev` 1), each a bundled
+  scenario from a documented source:
+
+  | Scenario | Built from |
+  |---|---|
+  | `bench-financial-pressure` | Step 0C `W115-SHR-MRft` |
+  | `sustainable` (reporting backlog) | unchanged, so T90 still applies |
+  | `bench-demand-growth` | sustainable, November–January demand at October's ×1.05/×1.10/×1.15 |
+  | `bench-staffing-shortage` | Step 0 `W130` |
+  | `bench-stable` | Step 0C `W130-DED-MRpt-A62` |
+
+  Demand growth and financial pressure are partly supported (month
+  factors as a trend; no insolvency); the smallest extensions are
+  proposed, not built.
+* **Evaluation contract** `dreamteam.benchmark-contract/v1`:
+  * six dimensions of existing metrics, with primary metrics per
+    scenario;
+  * paired differences against no action;
+  * no score, weighting or ranking;
+  * T90 only for the reporting-backlog scenario, `not_applicable`
+    elsewhere;
+  * missing metrics named.
+* **Development and held-out governance:** the held-out set is a future,
+  separately versioned set, created by the owner and committed only as a
+  hash, separate from the clinical holdout. None was created.
+* **Reporting contract:** the standard result fields, mapped to the
+  harness's files; what V0.6b must add.
+* **Tests:**
+  * `TestSuiteScenarios` checks each scenario against its source, its
+    fingerprint, distinctness and T90 applicability;
+  * `TestSuiteDimensions` checks that every contract metric exists;
+  * the bundled-list test now names seven scenarios.
+
+**Design disclosure:** the scenarios' intended conditions were checked
+with no action on seed 1 only. Demand growth failed once and was redefined
+once (relative to October's level). A 5-day test of the script showed that
+demand growth and reporting backlog share their starting state by
+construction; the protocol was corrected before it was committed.
+
+**Characterization** (45 runs: five scenarios × seeds 40901–40903 × noop,
+greedy, rules; 90 days; 57 min on the Pi):
+* all completed and replayed;
+* `verify -t90` 429 of 429;
+* `reproduce` on linux/amd64 286 of 286, and a fresh linux/amd64 run's
+  manifest byte-identical;
+* every scenario's fingerprint differs.
+
+**Observed** (no action, medians):
+
+| Scenario | Profit | Lost | TAT p90 | Breaches |
+|---|---|---|---|---|
+| Financial pressure | −$32.8k | 11% | 855 min | 295 |
+| Reporting backlog | $6.0k | 15% | 1,015 min | 481 |
+| Demand growth | $12.7k | 17% | 1,159 min | 552 |
+| Staffing shortage | −$28.5k | 19% | 741 min | 239 |
+| Stable | $20.9k | 12% | 930 min | 331 |
+
+* **Intended conditions:** four scenarios hold their condition on every
+  seed. Demand growth held on one seed of three: the raw 30-day totals
+  are confounded by weekday counts. Per weekday its demand rose on every
+  seed, about 17% above reporting backlog by days 61–90.
+* **Distinctness:** each pair of scenarios is separated on 4–7 primary
+  metrics.
+* **Baselines:** `greedy` and `rules` made the same 12 allocation raises
+  everywhere (+$32.5k–$34k). The payoff differed by scenario: TAT p90
+  −280 to −378 min under demand growth, −70 to −136 under staffing
+  shortage. In the stable practice the same spend took profit to about
+  break-even.
+* **Cash:** no scenario ran out of cash.
+* **T90:** NO GO for all nine reporting-backlog runs.
+
+**Gates:**
+* Focused first, on the Pi: `internal/scenario`, `internal/bench` (suite,
+  dimensions, committed configurations) and the session registration.
+* Full default Go suite on linux/amd64 (horo): every package passes.
+* Race on horo: `internal/bench`, `internal/scenario`, `internal/session`,
+  `internal/agent`, `cmd/dreamteam` pass.
+* vet (default, calibration and acceptance tags) and gofmt: clean.
+* Python agent tests: pass (unaffected).
+* Scenario validation: all seven bundled scenarios.
+* Session fixtures and golden references: identical outcomes, under
+  0.6.0-dev.1.
+* Benchmark verify and reproduce: as above.
+* Cross-builds: five targets.
+* CI: green on the declaration commit, with the suite smoke test's
+  manifest byte-identical on three platforms.
+* The clinical evaluation suites (calibration and acceptance tags,
+  operating-characteristic runs), unaffected, were not run.
+
+**Limitations:**
+* five practices of one family;
+* the baselines use only the reading allocation, so the staffing and
+  demand challenges are not yet exercised;
+* the sustainability dimension does not discriminate within 90 days;
+* T90 covers one scenario;
+* three development seeds.
+
+---
+
 ## V0.5.0 — release
 
 The V0.5 release on the owner's decision (2026-10-28): V0.5c accepted at

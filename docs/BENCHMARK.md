@@ -20,7 +20,9 @@ the protocol is unchanged. V0.5b (0.5.0-dev.2) changes only the LLM agent.
 V0.5c (0.5.0-dev.3) changes nothing in the harness; its development
 evaluation ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)) adds
 four replay configurations that CI runs. Released in V0.5.0 with the
-policy protocol unchanged.
+policy protocol unchanged. V0.6a (0.6.0-dev.1, in development) adds a
+scenario suite and an evaluation contract on top of the harness, unchanged
+([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)).
 
 ## 1. Commands
 
@@ -586,7 +588,8 @@ withheld or derived seed scheme; that is a later requirement.
   them itself.
 * **T90 is slow.** It runs two ~200-day simulations, about 40 s per run
   on a Raspberry Pi 4.
-* **Scenarios.** Configurations name bundled scenarios only.
+* **Scenarios.** Configurations name bundled scenarios only. The V0.6a
+  suite's scenarios are bundled for that reason.
 * **Isolation of built-in policies is by construction.** The gate and
   one session per run isolate them in the harness's process. The gate
   holds the session's handler in an unexported field.

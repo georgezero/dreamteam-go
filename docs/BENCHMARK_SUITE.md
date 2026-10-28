@@ -285,6 +285,15 @@ V0.6b's.
 * **T90 covers one scenario.**
 * **Development seeds only.** Three characterization seeds show that the
   scenarios differ; they are not enough for statistical claims.
+* **What the characterization found** ([v06a-dev/README.md](benchmark/v06a-dev/README.md)):
+  * No scenario runs out of cash in 90 days with no action, so the
+    sustainability dimension does not yet separate them.
+  * Demand growth adds about 17% demand per weekday over reporting backlog
+    by days 61–90. Its declared within-run condition (raw 30-day totals)
+    held on one seed of three: the last window has two fewer weekdays,
+    and the base profile's December decline absorbs part of the growth.
+  * Financial pressure and staffing shortage both lose money with no
+    action; they differ in expenses, lost demand, overtime and waits.
 * **Design used seed 1.** The scenarios' intended conditions were checked
   with no-action runs on seed 1 before the characterization seeds were
   declared ([v06a-dev/PROTOCOL.md](benchmark/v06a-dev/PROTOCOL.md) §3).

@@ -1,0 +1,195 @@
+DreamTeam benchmark v06a-characterization · engine 0.6.0-dev.1 · dreamteam.agent/v1
+scenarios bench-financial-pressure, sustainable, bench-demand-growth, bench-staffing-shortage, bench-stable · seeds 40901, 40902, 40903 · 90 days · decisions every 1 day(s) at 07:00
+policies noop@1, greedy@1, rules@1 · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                     status     appl/ref/err  replay  profit    net revenue  lost   exams  TAT p90    breaches  overtime    alerts  T90
+bench-financial-pressure-s40901-noop    completed  0/0/0         ok      -$33,690  $690,040     486    4,341  855 min    298       9,500 min   292     not applicable
+bench-financial-pressure-s40901-greedy  completed  12/0/0        ok      -$66,336  $690,050     486    4,341  738 min    251       9,500 min   289     not applicable
+bench-financial-pressure-s40901-rules   completed  12/0/0        ok      -$66,336  $690,071     486    4,341  720 min    247       9,500 min   290     not applicable
+bench-financial-pressure-s40902-noop    completed  0/0/0         ok      -$32,807  $689,108     546    4,247  847 min    293       8,501 min   269     not applicable
+bench-financial-pressure-s40902-greedy  completed  12/0/0        ok      -$65,359  $689,143     546    4,247  740 min    252       8,501 min   263     not applicable
+bench-financial-pressure-s40902-rules   completed  12/0/0        ok      -$65,367  $689,148     546    4,247  719 min    234       8,501 min   264     not applicable
+bench-financial-pressure-s40903-noop    completed  0/0/0         ok      -$24,924  $697,646     549    4,301  873 min    295       8,389 min   280     not applicable
+bench-financial-pressure-s40903-greedy  completed  12/0/0        ok      -$57,635  $697,651     549    4,301  763 min    250       8,389 min   276     not applicable
+bench-financial-pressure-s40903-rules   completed  12/0/0        ok      -$57,553  $697,662     549    4,301  744 min    244       8,389 min   275     not applicable
+sustainable-s40901-noop                 completed  0/0/0         ok      $4,622    $738,530     734    4,660  1,015 min  481       12,461 min  304     NO GO · v0.2-eval-4
+sustainable-s40901-greedy               completed  12/0/0        ok      -$28,704  $739,151     734    4,660  822 min    316       12,461 min  301     NO GO · v0.2-eval-4
+sustainable-s40901-rules                completed  12/0/0        ok      -$28,704  $739,151     734    4,660  818 min    314       12,461 min  301     NO GO · v0.2-eval-4
+sustainable-s40902-noop                 completed  0/0/0         ok      $6,037    $738,448     808    4,538  973 min    393       11,890 min  310     NO GO · v0.2-eval-4
+sustainable-s40902-greedy               completed  12/0/0        ok      -$27,429  $738,898     808    4,538  788 min    285       11,890 min  307     NO GO · v0.2-eval-4
+sustainable-s40902-rules                completed  12/0/0        ok      -$27,429  $738,898     808    4,538  784 min    285       11,890 min  307     NO GO · v0.2-eval-4
+sustainable-s40903-noop                 completed  0/0/0         ok      $16,437   $750,165     814    4,654  1,112 min  519       11,550 min  306     NO GO · v0.2-eval-4
+sustainable-s40903-greedy               completed  12/0/0        ok      -$16,300  $750,181     814    4,654  891 min    334       11,550 min  303     NO GO · v0.2-eval-4
+sustainable-s40903-rules                completed  12/0/0        ok      -$16,300  $750,181     814    4,654  875 min    328       11,550 min  303     NO GO · v0.2-eval-4
+bench-demand-growth-s40901-noop         completed  0/0/0         ok      $10,601   $745,736     963    4,784  1,112 min  552       12,745 min  321     not applicable
+bench-demand-growth-s40901-greedy       completed  12/0/0        ok      -$20,925  $748,158     963    4,784  832 min    314       12,745 min  320     not applicable
+bench-demand-growth-s40901-rules        completed  12/0/0        ok      -$20,925  $748,158     963    4,784  827 min    307       12,745 min  320     not applicable
+bench-demand-growth-s40902-noop         completed  0/0/0         ok      $12,736   $748,467     1,038  4,683  1,176 min  507       13,345 min  332     not applicable
+bench-demand-growth-s40902-greedy       completed  12/0/0        ok      -$15,822  $753,859     1,038  4,683  801 min    285       13,345 min  330     not applicable
+bench-demand-growth-s40902-rules        completed  12/0/0        ok      -$15,822  $753,859     1,038  4,683  797 min    285       13,345 min  331     not applicable
+bench-demand-growth-s40903-noop         completed  0/0/0         ok      $19,852   $755,500     1,045  4,744  1,159 min  585       12,799 min  309     not applicable
+bench-demand-growth-s40903-greedy       completed  12/0/0        ok      -$12,646  $755,735     1,045  4,744  874 min    335       12,799 min  306     not applicable
+bench-demand-growth-s40903-rules        completed  12/0/0        ok      -$12,646  $755,735     1,045  4,744  862 min    332       12,799 min  306     not applicable
+bench-staffing-shortage-s40901-noop     completed  0/0/0         ok      -$31,784  $662,760     1,040  4,409  723 min    230       11,212 min  288     not applicable
+bench-staffing-shortage-s40901-greedy   completed  12/0/0        ok      -$64,332  $662,760     1,040  4,409  653 min    212       11,212 min  288     not applicable
+bench-staffing-shortage-s40901-rules    completed  12/0/0        ok      -$64,332  $662,760     1,040  4,409  610 min    205       11,212 min  288     not applicable
+bench-staffing-shortage-s40902-noop     completed  0/0/0         ok      -$28,511  $665,541     1,076  4,327  741 min    239       10,866 min  281     not applicable
+bench-staffing-shortage-s40902-greedy   completed  12/0/0        ok      -$61,099  $665,507     1,076  4,327  650 min    218       10,866 min  278     not applicable
+bench-staffing-shortage-s40902-rules    completed  12/0/0        ok      -$61,099  $665,507     1,076  4,327  605 min    209       10,866 min  279     not applicable
+bench-staffing-shortage-s40903-noop     completed  0/0/0         ok      -$19,401  $675,972     1,123  4,406  771 min    273       11,033 min  288     not applicable
+bench-staffing-shortage-s40903-greedy   completed  12/0/0        ok      -$51,954  $675,996     1,123  4,406  667 min    232       11,033 min  287     not applicable
+bench-staffing-shortage-s40903-rules    completed  12/0/0        ok      -$51,875  $676,082     1,123  4,406  653 min    227       11,033 min  287     not applicable
+bench-stable-s40901-noop                completed  0/0/0         ok      $20,936   $764,416     594    4,805  909 min    312       9,349 min   257     not applicable
+bench-stable-s40901-greedy              completed  12/0/0        ok      -$11,612  $764,466     594    4,805  745 min    269       9,349 min   257     not applicable
+bench-stable-s40901-rules               completed  12/0/0        ok      -$11,613  $764,466     594    4,805  736 min    260       9,349 min   256     not applicable
+bench-stable-s40902-noop                completed  0/0/0         ok      $17,526   $758,786     684    4,714  930 min    331       8,201 min   226     not applicable
+bench-stable-s40902-greedy              completed  12/0/0        ok      -$15,693  $758,805     684    4,714  732 min    258       8,201 min   219     not applicable
+bench-stable-s40902-rules               completed  12/0/0        ok      -$15,693  $758,805     684    4,714  726 min    256       8,201 min   219     not applicable
+bench-stable-s40903-noop                completed  0/0/0         ok      $33,694   $777,477     656    4,874  987 min    391       8,359 min   235     not applicable
+bench-stable-s40903-greedy              completed  12/0/0        ok      $979      $777,481     656    4,874  757 min    275       8,359 min   229     not applicable
+bench-stable-s40903-rules               completed  12/0/0        ok      $1,061    $777,481     656    4,874  743 min    265       8,359 min   228     not applicable
+
+2. Initial conditions (same scenario and seed)
+
+scenario                  seed   runs  start                state digest   identical
+bench-financial-pressure  40901  3     2026-10-13T06:00:00  7bb5203c04fc…  yes
+bench-financial-pressure  40902  3     2026-10-13T06:00:00  a91f6c381f42…  yes
+bench-financial-pressure  40903  3     2026-10-13T06:00:00  1814f874baa5…  yes
+sustainable               40901  3     2026-10-13T06:00:00  a8685ac046c9…  yes
+sustainable               40902  3     2026-10-13T06:00:00  6986b590bc89…  yes
+sustainable               40903  3     2026-10-13T06:00:00  b15c41a2ed30…  yes
+bench-demand-growth       40901  3     2026-10-13T06:00:00  a8685ac046c9…  yes
+bench-demand-growth       40902  3     2026-10-13T06:00:00  6986b590bc89…  yes
+bench-demand-growth       40903  3     2026-10-13T06:00:00  b15c41a2ed30…  yes
+bench-staffing-shortage   40901  3     2026-10-13T06:00:00  171dd6eb99bb…  yes
+bench-staffing-shortage   40902  3     2026-10-13T06:00:00  4eaa2b6be2d2…  yes
+bench-staffing-shortage   40903  3     2026-10-13T06:00:00  47fc4c6dbcad…  yes
+bench-stable              40901  3     2026-10-13T06:00:00  e2e4befab21d…  yes
+bench-stable              40902  3     2026-10-13T06:00:00  c630bf48b6d3…  yes
+bench-stable              40903  3     2026-10-13T06:00:00  9131166b63bc…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (15/15)                       greedy@1 (15/15)                     rules@1 (15/15)
+netRevenueCents         $662,760 / $738,530 / $777,477       $662,760 / $739,151 / $777,481       $662,760 / $739,151 / $777,481
+operatingExpenseCents   $694,051 / $733,728 / $743,784       $726,605 / $766,481 / $776,502       $726,605 / $766,481 / $776,420
+operatingProfitCents    -$33,690 / $6,037 / $33,694          -$66,336 / -$27,429 / $979           -$66,336 / -$27,429 / $1,061
+operatingCashFlowCents  -$107,923 / -$70,229 / -$32,786      -$136,679 / -$99,113 / -$62,054      -$136,278 / -$99,115 / -$61,984
+minCashCents            $34,689 / $52,020 / $56,402          $5,673 / $41,557 / $55,572           $5,659 / $41,557 / $55,572
+shortfallCents          $0 / $0 / $0                         $0 / $0 / $0                         $0 / $0 / $0
+ordersReceived          4,915 / 5,582 / 6,166                4,915 / 5,582 / 6,166                4,915 / 5,582 / 6,166
+ordersLost              486 / 808 / 1,123                    486 / 808 / 1,123                    486 / 808 / 1,123
+examsCompleted          4,247 / 4,654 / 4,874                4,247 / 4,654 / 4,874                4,247 / 4,654 / 4,874
+reportsFinal            4,237 / 4,645 / 4,879                4,237 / 4,645 / 4,879                4,237 / 4,645 / 4,879
+tatP50Sec               41 min / 108 min / 168 min           26 min / 40 min / 55 min             25 min / 39 min / 55 min
+tatP90Sec               723 min / 930 min / 1,176 min        650 min / 757 min / 891 min          605 min / 743 min / 875 min
+tatOverTarget           238 / 340 / 597                      220 / 277 / 345                      213 / 268 / 342
+tatBreaches             230 / 331 / 585                      212 / 269 / 335                      205 / 260 / 332
+backlogEnd              8 / 11 / 40                          8 / 10 / 11                          8 / 10 / 11
+waitToExamP50Sec        18 min / 19 min / 21 min             18 min / 19 min / 21 min             18 min / 19 min / 21 min
+waitToExamP90Sec        52 min / 67 min / 71 min             52 min / 67 min / 71 min             52 min / 67 min / 71 min
+waitsOver30             1,279 / 1,435 / 1,708                1,279 / 1,435 / 1,708                1,279 / 1,435 / 1,708
+displacedAppointments   –                                    –                                    –
+overtimeSec             8,201 min / 11,033 min / 13,345 min  8,201 min / 11,033 min / 13,345 min  8,201 min / 11,033 min / 13,345 min
+heldOver                103 / 133 / 152                      103 / 133 / 152                      103 / 133 / 152
+skippedBreaks           0 / 0 / 0                            0 / 0 / 0                            0 / 0 / 0
+noCoverage              0 / 0 / 2                            0 / 0 / 2                            0 / 0 / 2
+alertsRaisedWarn        1,138 / 1,300 / 1,391                1,127 / 1,286 / 1,361                1,126 / 1,283 / 1,360
+alertsRaisedAlert       226 / 288 / 332                      219 / 288 / 330                      219 / 288 / 331
+alertsActiveAtEnd       1 / 2 / 2                            1 / 2 / 2                            1 / 2 / 2
+daysBelowZero           0 / 0 / 0                            0 / 0 / 0                            0 / 0 / 0
+actionsAttempted        0 / 0 / 0                            12 / 12 / 12                         12 / 12 / 12
+actionsAccepted         0 / 0 / 0                            12 / 12 / 12                         12 / 12 / 12
+actionsRejected         0 / 0 / 0                            0 / 0 / 0                            0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario                  seed   policy  decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime  Δalerts
+bench-financial-pressure  40901  greedy  different  different  -$32,646  +$10          0      0       -117 min  -47        0 min      -3
+bench-financial-pressure  40902  greedy  different  different  -$32,552  +$35          0      0       -108 min  -41        0 min      -6
+bench-financial-pressure  40903  greedy  different  different  -$32,711  +$4           0      0       -111 min  -45        0 min      -4
+sustainable               40901  greedy  different  different  -$33,326  +$621         0      0       -193 min  -165       0 min      -3
+sustainable               40902  greedy  different  different  -$33,467  +$450         0      0       -184 min  -108       0 min      -3
+sustainable               40903  greedy  different  different  -$32,737  +$16          0      0       -221 min  -185       0 min      -3
+bench-demand-growth       40901  greedy  different  different  -$31,527  +$2,422       0      0       -280 min  -238       0 min      -1
+bench-demand-growth       40902  greedy  different  different  -$28,558  +$5,392       0      0       -374 min  -222       0 min      -2
+bench-demand-growth       40903  greedy  different  different  -$32,498  +$235         0      0       -286 min  -250       0 min      -3
+bench-staffing-shortage   40901  greedy  different  different  -$32,548  $0            0      0       -70 min   -18        0 min      0
+bench-staffing-shortage   40902  greedy  different  different  -$32,588  -$34          0      0       -92 min   -21        0 min      -3
+bench-staffing-shortage   40903  greedy  different  different  -$32,553  +$24          0      0       -105 min  -41        0 min      -1
+bench-stable              40901  greedy  different  different  -$32,548  +$50          0      0       -163 min  -43        0 min      0
+bench-stable              40902  greedy  different  different  -$33,219  +$19          0      0       -198 min  -73        0 min      -7
+bench-stable              40903  greedy  different  different  -$32,715  +$4           0      0       -231 min  -116       0 min      -6
+bench-financial-pressure  40901  rules   different  different  -$32,646  +$31          0      0       -135 min  -51        0 min      -2
+bench-financial-pressure  40902  rules   different  different  -$32,560  +$40          0      0       -129 min  -59        0 min      -5
+bench-financial-pressure  40903  rules   different  different  -$32,629  +$16          0      0       -129 min  -51        0 min      -5
+sustainable               40901  rules   different  different  -$33,326  +$621         0      0       -197 min  -167       0 min      -3
+sustainable               40902  rules   different  different  -$33,467  +$450         0      0       -188 min  -108       0 min      -3
+sustainable               40903  rules   different  different  -$32,737  +$16          0      0       -237 min  -191       0 min      -3
+bench-demand-growth       40901  rules   different  different  -$31,527  +$2,422       0      0       -285 min  -245       0 min      -1
+bench-demand-growth       40902  rules   different  different  -$28,559  +$5,392       0      0       -378 min  -222       0 min      -1
+bench-demand-growth       40903  rules   different  different  -$32,498  +$235         0      0       -297 min  -253       0 min      -3
+bench-staffing-shortage   40901  rules   different  different  -$32,548  $0            0      0       -114 min  -25        0 min      0
+bench-staffing-shortage   40902  rules   different  different  -$32,588  -$34          0      0       -136 min  -30        0 min      -2
+bench-staffing-shortage   40903  rules   different  different  -$32,474  +$110         0      0       -119 min  -46        0 min      -1
+bench-stable              40901  rules   different  different  -$32,548  +$50          0      0       -173 min  -52        0 min      -1
+bench-stable              40902  rules   different  different  -$33,219  +$19          0      0       -204 min  -75        0 min      -7
+bench-stable              40903  rules   different  different  -$32,633  +$4           0      0       -244 min  -126       0 min      -7
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  greedy      rules
+netRevenueCents         13 / 1 / 1  13 / 1 / 1
+operatingExpenseCents   15 / 0 / 0  15 / 0 / 0
+operatingProfitCents    0 / 15 / 0  0 / 15 / 0
+operatingCashFlowCents  0 / 15 / 0  0 / 15 / 0
+minCashCents            0 / 10 / 5  0 / 10 / 5
+shortfallCents          0 / 0 / 15  0 / 0 / 15
+ordersReceived          0 / 0 / 15  0 / 0 / 15
+ordersLost              0 / 0 / 15  0 / 0 / 15
+examsCompleted          0 / 0 / 15  0 / 0 / 15
+reportsFinal            5 / 0 / 10  5 / 0 / 10
+tatP50Sec               0 / 15 / 0  0 / 15 / 0
+tatP90Sec               0 / 15 / 0  0 / 15 / 0
+tatOverTarget           0 / 15 / 0  0 / 15 / 0
+tatBreaches             0 / 15 / 0  0 / 15 / 0
+backlogEnd              0 / 5 / 10  0 / 5 / 10
+waitToExamP50Sec        0 / 0 / 15  0 / 0 / 15
+waitToExamP90Sec        0 / 0 / 15  0 / 0 / 15
+waitsOver30             0 / 0 / 15  0 / 0 / 15
+displacedAppointments   0 / 0 / 0   0 / 0 / 0
+overtimeSec             0 / 0 / 15  0 / 0 / 15
+heldOver                0 / 0 / 15  0 / 0 / 15
+skippedBreaks           0 / 0 / 15  0 / 0 / 15
+noCoverage              0 / 0 / 15  0 / 0 / 15
+alertsRaisedWarn        0 / 15 / 0  0 / 15 / 0
+alertsRaisedAlert       0 / 13 / 2  0 / 14 / 1
+alertsActiveAtEnd       1 / 2 / 12  1 / 2 / 12
+daysBelowZero           0 / 0 / 15  0 / 0 / 15
+actionsAttempted        15 / 0 / 0  15 / 0 / 0
+actionsAccepted         15 / 0 / 0  15 / 0 / 0
+actionsRejected         0 / 0 / 15  0 / 0 / 15
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  45
+
+policy  decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop    1350             0        0        0        0                0                0
+greedy  1350             180      180      0        0                0                0
+rules   1350             180      180      0        0                0                0
+
+6. Replay verification
+
+45 of 45 saved sessions replayed with every digest verified; 45 of 45 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

@@ -22,6 +22,10 @@ patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
+In development (unreleased): **V0.6**, the agent benchmark. V0.6a defines a
+suite of five practice scenarios and an evaluation contract
+(`docs/BENCHMARK_SUITE.md`).
+
 ## Quick start
 
 Requires Go 1.26 or later. Runs on Linux and macOS (developed on a
@@ -324,6 +328,17 @@ Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/benchmark/v05b-dev/`; the multi-model development evaluation, three
 local models with a memory-off control: `docs/benchmark/v05c-dev/`.
 
+### Benchmark scenario suite (V0.6, in development)
+
+Five development scenarios, each a bundled scenario, pose different
+management problems: `bench-financial-pressure`, `sustainable` (the
+reporting backlog), `bench-demand-growth`, `bench-staffing-shortage` and
+`bench-stable`. An evaluation contract reports every run on six dimensions
+of existing metrics (operations, finance, staffing and capacity, service
+reliability, sustainability, actions), with no score or ranking, and T90
+only where its policy applies. `docs/BENCHMARK_SUITE.md`; the baseline
+characterization: `docs/benchmark/v06a-dev/`.
+
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
 README for checking and (deliberately) regenerating them.
@@ -359,6 +374,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
+| `docs/BENCHMARK_SUITE.md` | the benchmark scenario suite, evaluation contract, development and held-out governance (V0.6 development) |
 | `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |

@@ -17,7 +17,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
-| **V0.6** | Agent benchmark: agents evaluated systematically across models, scenarios, seeds and baselines; WebUI/SQLite, the managed-practice harness and automation levels remain planned here (§7) | V0.5 agents |
+| **V0.6** (in development: V0.6a, the benchmark scenario suite and evaluation contract, 0.6.0-dev.1; owner decision 2026-10-28) | V0.5 agents |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -527,6 +527,23 @@ the sealed clinical holdouts. Releasable with a documented scenario suite,
 reproducible multi-agent evaluation, the existing operational and
 financial metrics and a standard report; no leaderboard, composite score
 or statistical ranking required. Not another round of prompt tuning.
+
+**Owner decision 2026-10-28: V0.6 slices.** The V0.4 harness stays the
+foundation; no second benchmark engine.
+* **V0.6a (0.6.0-dev.1): scenario suite and evaluation contract**
+  ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)). Five development scenarios
+  from existing mechanics and documented calibration sources (financial
+  pressure, reporting backlog, demand growth, staffing shortage, stable
+  practice); the contract `dreamteam.benchmark-contract/v1` (six dimensions
+  of existing metrics, no score; T90 only where its policy applies);
+  development and held-out governance (no held-out seeds created); a
+  reporting contract; a baseline characterization with no action, `greedy`
+  and `rules` on three declared seeds
+  ([benchmark/v06a-dev/](benchmark/v06a-dev/README.md)).
+* **V0.6b:** benchmark runner and reporting: standardized multi-scenario
+  comparisons.
+* **V0.6c:** frozen agents evaluated across the suite.
+* **V0.6.0:** a documented, reproducible benchmark.
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
