@@ -19,7 +19,7 @@ var update = flag.Bool("update", false, "rewrite golden files")
 
 func TestBundledScenariosCompile(t *testing.T) {
 	ids := List()
-	if !slices.Equal(ids, []string{"established", "mini", "sustainable"}) || !slices.Contains(ids, Default) {
+	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-financial-pressure", "bench-stable", "bench-staffing-shortage", "established", "mini", "sustainable"}) || !slices.Contains(ids, Default) {
 		t.Fatalf("List() = %v, default %q", ids, Default)
 	}
 	for _, id := range ids {

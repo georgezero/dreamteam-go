@@ -1,0 +1,33 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v06a-characterization",
+ "description": "V0.6a baseline characterization (docs/benchmark/v06a-dev/PROTOCOL.md): the existing no-op, greedy and rules policies, unchanged, on the five scenarios of the development suite dreamteam-dev 1 (docs/benchmark/suite/dreamteam-dev-1.json), three fresh development seeds, 90 days, daily decisions at 07:00, T90 where the evaluation policy in force applies (the reporting-backlog scenario only). It checks that the scenarios are usable and different; it is not a policy comparison, a benchmark result or a ranking. Run from the repository root.",
+ "scenarios": [
+  "bench-financial-pressure",
+  "sustainable",
+  "bench-demand-growth",
+  "bench-staffing-shortage",
+  "bench-stable"
+ ],
+ "seeds": [
+  40901,
+  40902,
+  40903
+ ],
+ "seedPlan": "Chosen 2026-10-28 and committed with the V0.6a suite and protocol (docs/benchmark/v06a-dev/PROTOCOL.md) before any run on them: the next unused block 40901-40903 after V0.4a's 40401-40405, V0.4b's 40501-40505, V0.5a's 40601, V0.5b's 40701 and V0.5c's 40801-40805. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists yet); the sealed clinical holdout guard accepts them. Scenario design used only seed 1 (PROTOCOL.md \u00a73).",
+ "days": 90,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  "noop",
+  "greedy",
+  "rules"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": true
+ }
+}

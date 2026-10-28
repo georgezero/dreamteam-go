@@ -80,6 +80,17 @@ jobs:
           ./dt benchmark verify bench -t90 | tail -1
           ./dt benchmark reproduce bench -out bench-again 2> /dev/null | tail -1
           cp bench/manifest.json out/benchmark-manifest.json
+      - name: Benchmark scenario suite
+        # The V0.6a development suite's five scenarios with the built-in
+        # policies (docs/benchmark/v06a-dev/ci.json), verified and rerun.
+        # The manifest is compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          ./dt benchmark run docs/benchmark/v06a-dev/ci.json -out suite > /dev/null
+          ./dt benchmark verify suite | tail -1
+          ./dt benchmark reproduce suite -out suite-again 2> /dev/null | tail -1
+          cp suite/manifest.json out/suite-manifest.json
       - name: LLM agent
         # The agent's unit tests, then the smoke tests' recorded model
         # decisions replayed through the protocol without any model:
