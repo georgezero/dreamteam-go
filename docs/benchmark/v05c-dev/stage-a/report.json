@@ -1,0 +1,2686 @@
+{
+ "schema": "dreamteam.benchmark-report/v1",
+ "benchmark": "v05c-stage-a",
+ "engine": "0.5.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "scenarios": [
+  "sustainable"
+ ],
+ "seeds": [
+  40801
+ ],
+ "days": 7,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1"
+  },
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2"
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2"
+  },
+  {
+   "id": "gemma4-31b",
+   "version": "2"
+  }
+ ],
+ "baseline": "noop",
+ "external": [
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b",
+  "gemma4-31b"
+ ],
+ "note": "Development seeds: a harness check, not a performance claim. Metrics are the simulator's own (the replayed session's dreamteam.result/v1) and, where it applies, the T90 evaluation of the policy in force. No composite score, ranking or significance test. Spreads are the minimum, median (the lower middle value) and maximum over completed runs; paired differences are policy minus baseline on the same scenario and seed.",
+ "runs": [
+  {
+   "id": "sustainable-s40801-noop",
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "status": "completed",
+   "counts": {
+    "decisionPoints": 7,
+    "batches": 0,
+    "actions": 0,
+    "applied": 0,
+    "refused": 0,
+    "protocolErrors": 0,
+    "policyRequests": 0,
+    "denied": 0,
+    "requestErrors": 0
+   },
+   "replayVerified": true,
+   "actionsMatchSession": true,
+   "finalRunDigest": "77490c7bb3be255a515246fffcdc6e5f4cc1cfb354780f6ed5c4987c50961626",
+   "t90": {
+    "status": "not_requested"
+   },
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "value": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": -599559
+    },
+    {
+     "name": "margin",
+     "value": {
+      "den": 5324616,
+      "num": -599559
+     }
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": -420851
+    },
+    {
+     "name": "minCashCents",
+     "value": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 438
+    },
+    {
+     "name": "ordersLost",
+     "value": 62
+    },
+    {
+     "name": "lostRate",
+     "value": {
+      "den": 438,
+      "num": 62
+     }
+    },
+    {
+     "name": "examsCompleted",
+     "value": 335
+    },
+    {
+     "name": "reportsFinal",
+     "value": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 22
+    },
+    {
+     "name": "tatBreaches",
+     "value": 22
+    },
+    {
+     "name": "backlogEnd",
+     "value": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "value": 88
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 44868
+    },
+    {
+     "name": "heldOver",
+     "value": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 0
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40801-qwen36-35b-a3b",
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "2"
+   },
+   "status": "completed",
+   "counts": {
+    "decisionPoints": 7,
+    "batches": 1,
+    "actions": 3,
+    "applied": 1,
+    "refused": 0,
+    "protocolErrors": 0,
+    "policyRequests": 26,
+    "denied": 0,
+    "requestErrors": 0
+   },
+   "replayVerified": true,
+   "actionsMatchSession": true,
+   "finalRunDigest": "8e1cca8b2e18e54b20565d1758da80e07e657a2c46ba7e77afb905d16686a6b8",
+   "t90": {
+    "status": "not_requested"
+   },
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "value": 5416426
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 5953683
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": -537257
+    },
+    {
+     "name": "margin",
+     "value": {
+      "den": 5416426,
+      "num": -537257
+     }
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": -420851
+    },
+    {
+     "name": "minCashCents",
+     "value": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 438
+    },
+    {
+     "name": "ordersLost",
+     "value": 58
+    },
+    {
+     "name": "lostRate",
+     "value": {
+      "den": 438,
+      "num": 58
+     }
+    },
+    {
+     "name": "examsCompleted",
+     "value": 343
+    },
+    {
+     "name": "reportsFinal",
+     "value": 347
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 4823
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 50882
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 22
+    },
+    {
+     "name": "tatBreaches",
+     "value": 22
+    },
+    {
+     "name": "backlogEnd",
+     "value": 1
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 1005
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 4199
+    },
+    {
+     "name": "waitsOver30",
+     "value": 88
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 82886
+    },
+    {
+     "name": "heldOver",
+     "value": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 79
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 3
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 3
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40801-gemma4-26b-a4b",
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "2"
+   },
+   "status": "completed",
+   "counts": {
+    "decisionPoints": 7,
+    "batches": 0,
+    "actions": 0,
+    "applied": 0,
+    "refused": 0,
+    "protocolErrors": 0,
+    "policyRequests": 22,
+    "denied": 0,
+    "requestErrors": 0
+   },
+   "replayVerified": true,
+   "actionsMatchSession": true,
+   "finalRunDigest": "77490c7bb3be255a515246fffcdc6e5f4cc1cfb354780f6ed5c4987c50961626",
+   "t90": {
+    "status": "not_requested"
+   },
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "value": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": -599559
+    },
+    {
+     "name": "margin",
+     "value": {
+      "den": 5324616,
+      "num": -599559
+     }
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": -420851
+    },
+    {
+     "name": "minCashCents",
+     "value": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 438
+    },
+    {
+     "name": "ordersLost",
+     "value": 62
+    },
+    {
+     "name": "lostRate",
+     "value": {
+      "den": 438,
+      "num": 62
+     }
+    },
+    {
+     "name": "examsCompleted",
+     "value": 335
+    },
+    {
+     "name": "reportsFinal",
+     "value": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 22
+    },
+    {
+     "name": "tatBreaches",
+     "value": 22
+    },
+    {
+     "name": "backlogEnd",
+     "value": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "value": 88
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 44868
+    },
+    {
+     "name": "heldOver",
+     "value": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 0
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40801-gemma4-31b",
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": {
+    "id": "gemma4-31b",
+    "version": "2"
+   },
+   "status": "completed",
+   "counts": {
+    "decisionPoints": 7,
+    "batches": 0,
+    "actions": 0,
+    "applied": 0,
+    "refused": 0,
+    "protocolErrors": 0,
+    "policyRequests": 22,
+    "denied": 0,
+    "requestErrors": 0
+   },
+   "replayVerified": true,
+   "actionsMatchSession": true,
+   "finalRunDigest": "77490c7bb3be255a515246fffcdc6e5f4cc1cfb354780f6ed5c4987c50961626",
+   "t90": {
+    "status": "not_requested"
+   },
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "value": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": -599559
+    },
+    {
+     "name": "margin",
+     "value": {
+      "den": 5324616,
+      "num": -599559
+     }
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": -420851
+    },
+    {
+     "name": "minCashCents",
+     "value": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 438
+    },
+    {
+     "name": "ordersLost",
+     "value": 62
+    },
+    {
+     "name": "lostRate",
+     "value": {
+      "den": 438,
+      "num": 62
+     }
+    },
+    {
+     "name": "examsCompleted",
+     "value": 335
+    },
+    {
+     "name": "reportsFinal",
+     "value": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 22
+    },
+    {
+     "name": "tatBreaches",
+     "value": 22
+    },
+    {
+     "name": "backlogEnd",
+     "value": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "value": 88
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 44868
+    },
+    {
+     "name": "heldOver",
+     "value": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 0
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  }
+ ],
+ "initialConditions": [
+  {
+   "scenario": "sustainable",
+   "seed": 40801,
+   "runs": 4,
+   "identical": true,
+   "time": "2026-10-13T06:00:00",
+   "stateDigest": "c2ec133171033d173b293fd919dd8602f3c520352acb051de552359d680c3023"
+  }
+ ],
+ "policySummary": [
+  {
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "runs": 1,
+   "completed": 1,
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "n": 1,
+     "min": 5324616,
+     "median": 5324616,
+     "max": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "n": 1,
+     "min": 5924175,
+     "median": 5924175,
+     "max": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "n": 1,
+     "min": -599559,
+     "median": -599559,
+     "max": -599559
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "n": 1,
+     "min": -420851,
+     "median": -420851,
+     "max": -420851
+    },
+    {
+     "name": "minCashCents",
+     "n": 1,
+     "min": 11597957,
+     "median": 11597957,
+     "max": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "ordersReceived",
+     "n": 1,
+     "min": 438,
+     "median": 438,
+     "max": 438
+    },
+    {
+     "name": "ordersLost",
+     "n": 1,
+     "min": 62,
+     "median": 62,
+     "max": 62
+    },
+    {
+     "name": "examsCompleted",
+     "n": 1,
+     "min": 335,
+     "median": 335,
+     "max": 335
+    },
+    {
+     "name": "reportsFinal",
+     "n": 1,
+     "min": 338,
+     "median": 338,
+     "max": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "n": 1,
+     "min": 4922,
+     "median": 4922,
+     "max": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "n": 1,
+     "min": 51089,
+     "median": 51089,
+     "max": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "tatBreaches",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "backlogEnd",
+     "n": 1,
+     "min": 2,
+     "median": 2,
+     "max": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "n": 1,
+     "min": 1022,
+     "median": 1022,
+     "max": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "n": 1,
+     "min": 4348,
+     "median": 4348,
+     "max": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "n": 1,
+     "min": 88,
+     "median": 88,
+     "max": 88
+    },
+    {
+     "name": "overtimeSec",
+     "n": 1,
+     "min": 44868,
+     "median": 44868,
+     "max": 44868
+    },
+    {
+     "name": "heldOver",
+     "n": 1,
+     "min": 8,
+     "median": 8,
+     "max": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "noCoverage",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "n": 1,
+     "min": 80,
+     "median": 80,
+     "max": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsRejected",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    }
+   ]
+  },
+  {
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "2"
+   },
+   "runs": 1,
+   "completed": 1,
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "n": 1,
+     "min": 5416426,
+     "median": 5416426,
+     "max": 5416426
+    },
+    {
+     "name": "operatingExpenseCents",
+     "n": 1,
+     "min": 5953683,
+     "median": 5953683,
+     "max": 5953683
+    },
+    {
+     "name": "operatingProfitCents",
+     "n": 1,
+     "min": -537257,
+     "median": -537257,
+     "max": -537257
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "n": 1,
+     "min": -420851,
+     "median": -420851,
+     "max": -420851
+    },
+    {
+     "name": "minCashCents",
+     "n": 1,
+     "min": 11597957,
+     "median": 11597957,
+     "max": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "ordersReceived",
+     "n": 1,
+     "min": 438,
+     "median": 438,
+     "max": 438
+    },
+    {
+     "name": "ordersLost",
+     "n": 1,
+     "min": 58,
+     "median": 58,
+     "max": 58
+    },
+    {
+     "name": "examsCompleted",
+     "n": 1,
+     "min": 343,
+     "median": 343,
+     "max": 343
+    },
+    {
+     "name": "reportsFinal",
+     "n": 1,
+     "min": 347,
+     "median": 347,
+     "max": 347
+    },
+    {
+     "name": "tatP50Sec",
+     "n": 1,
+     "min": 4823,
+     "median": 4823,
+     "max": 4823
+    },
+    {
+     "name": "tatP90Sec",
+     "n": 1,
+     "min": 50882,
+     "median": 50882,
+     "max": 50882
+    },
+    {
+     "name": "tatOverTarget",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "tatBreaches",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "backlogEnd",
+     "n": 1,
+     "min": 1,
+     "median": 1,
+     "max": 1
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "n": 1,
+     "min": 1005,
+     "median": 1005,
+     "max": 1005
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "n": 1,
+     "min": 4199,
+     "median": 4199,
+     "max": 4199
+    },
+    {
+     "name": "waitsOver30",
+     "n": 1,
+     "min": 88,
+     "median": 88,
+     "max": 88
+    },
+    {
+     "name": "overtimeSec",
+     "n": 1,
+     "min": 82886,
+     "median": 82886,
+     "max": 82886
+    },
+    {
+     "name": "heldOver",
+     "n": 1,
+     "min": 8,
+     "median": 8,
+     "max": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "noCoverage",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "n": 1,
+     "min": 79,
+     "median": 79,
+     "max": 79
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "n": 1,
+     "min": 3,
+     "median": 3,
+     "max": 3
+    },
+    {
+     "name": "actionsAccepted",
+     "n": 1,
+     "min": 3,
+     "median": 3,
+     "max": 3
+    },
+    {
+     "name": "actionsRejected",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    }
+   ]
+  },
+  {
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "2"
+   },
+   "runs": 1,
+   "completed": 1,
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "n": 1,
+     "min": 5324616,
+     "median": 5324616,
+     "max": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "n": 1,
+     "min": 5924175,
+     "median": 5924175,
+     "max": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "n": 1,
+     "min": -599559,
+     "median": -599559,
+     "max": -599559
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "n": 1,
+     "min": -420851,
+     "median": -420851,
+     "max": -420851
+    },
+    {
+     "name": "minCashCents",
+     "n": 1,
+     "min": 11597957,
+     "median": 11597957,
+     "max": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "ordersReceived",
+     "n": 1,
+     "min": 438,
+     "median": 438,
+     "max": 438
+    },
+    {
+     "name": "ordersLost",
+     "n": 1,
+     "min": 62,
+     "median": 62,
+     "max": 62
+    },
+    {
+     "name": "examsCompleted",
+     "n": 1,
+     "min": 335,
+     "median": 335,
+     "max": 335
+    },
+    {
+     "name": "reportsFinal",
+     "n": 1,
+     "min": 338,
+     "median": 338,
+     "max": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "n": 1,
+     "min": 4922,
+     "median": 4922,
+     "max": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "n": 1,
+     "min": 51089,
+     "median": 51089,
+     "max": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "tatBreaches",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "backlogEnd",
+     "n": 1,
+     "min": 2,
+     "median": 2,
+     "max": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "n": 1,
+     "min": 1022,
+     "median": 1022,
+     "max": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "n": 1,
+     "min": 4348,
+     "median": 4348,
+     "max": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "n": 1,
+     "min": 88,
+     "median": 88,
+     "max": 88
+    },
+    {
+     "name": "overtimeSec",
+     "n": 1,
+     "min": 44868,
+     "median": 44868,
+     "max": 44868
+    },
+    {
+     "name": "heldOver",
+     "n": 1,
+     "min": 8,
+     "median": 8,
+     "max": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "noCoverage",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "n": 1,
+     "min": 80,
+     "median": 80,
+     "max": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsRejected",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    }
+   ]
+  },
+  {
+   "policy": {
+    "id": "gemma4-31b",
+    "version": "2"
+   },
+   "runs": 1,
+   "completed": 1,
+   "metrics": [
+    {
+     "name": "netRevenueCents",
+     "n": 1,
+     "min": 5324616,
+     "median": 5324616,
+     "max": 5324616
+    },
+    {
+     "name": "operatingExpenseCents",
+     "n": 1,
+     "min": 5924175,
+     "median": 5924175,
+     "max": 5924175
+    },
+    {
+     "name": "operatingProfitCents",
+     "n": 1,
+     "min": -599559,
+     "median": -599559,
+     "max": -599559
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "n": 1,
+     "min": -420851,
+     "median": -420851,
+     "max": -420851
+    },
+    {
+     "name": "minCashCents",
+     "n": 1,
+     "min": 11597957,
+     "median": 11597957,
+     "max": 11597957
+    },
+    {
+     "name": "shortfallCents",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "ordersReceived",
+     "n": 1,
+     "min": 438,
+     "median": 438,
+     "max": 438
+    },
+    {
+     "name": "ordersLost",
+     "n": 1,
+     "min": 62,
+     "median": 62,
+     "max": 62
+    },
+    {
+     "name": "examsCompleted",
+     "n": 1,
+     "min": 335,
+     "median": 335,
+     "max": 335
+    },
+    {
+     "name": "reportsFinal",
+     "n": 1,
+     "min": 338,
+     "median": 338,
+     "max": 338
+    },
+    {
+     "name": "tatP50Sec",
+     "n": 1,
+     "min": 4922,
+     "median": 4922,
+     "max": 4922
+    },
+    {
+     "name": "tatP90Sec",
+     "n": 1,
+     "min": 51089,
+     "median": 51089,
+     "max": 51089
+    },
+    {
+     "name": "tatOverTarget",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "tatBreaches",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "backlogEnd",
+     "n": 1,
+     "min": 2,
+     "median": 2,
+     "max": 2
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "n": 1,
+     "min": 1022,
+     "median": 1022,
+     "max": 1022
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "n": 1,
+     "min": 4348,
+     "median": 4348,
+     "max": 4348
+    },
+    {
+     "name": "waitsOver30",
+     "n": 1,
+     "min": 88,
+     "median": 88,
+     "max": 88
+    },
+    {
+     "name": "overtimeSec",
+     "n": 1,
+     "min": 44868,
+     "median": 44868,
+     "max": 44868
+    },
+    {
+     "name": "heldOver",
+     "n": 1,
+     "min": 8,
+     "median": 8,
+     "max": 8
+    },
+    {
+     "name": "skippedBreaks",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "noCoverage",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "n": 1,
+     "min": 80,
+     "median": 80,
+     "max": 80
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "n": 1,
+     "min": 22,
+     "median": 22,
+     "max": 22
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    },
+    {
+     "name": "actionsRejected",
+     "n": 1,
+     "min": 0,
+     "median": 0,
+     "max": 0
+    }
+   ]
+  }
+ ],
+ "pairs": [
+  {
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "decisions": "different",
+   "outcome": "different",
+   "deltas": [
+    {
+     "name": "netRevenueCents",
+     "value": 91810
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 29508
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": 62302
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": 0
+    },
+    {
+     "name": "minCashCents",
+     "value": 0
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 0
+    },
+    {
+     "name": "ordersLost",
+     "value": -4
+    },
+    {
+     "name": "examsCompleted",
+     "value": 8
+    },
+    {
+     "name": "reportsFinal",
+     "value": 9
+    },
+    {
+     "name": "tatP50Sec",
+     "value": -99
+    },
+    {
+     "name": "tatP90Sec",
+     "value": -207
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 0
+    },
+    {
+     "name": "tatBreaches",
+     "value": 0
+    },
+    {
+     "name": "backlogEnd",
+     "value": -1
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": -17
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": -149
+    },
+    {
+     "name": "waitsOver30",
+     "value": 0
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 38018
+    },
+    {
+     "name": "heldOver",
+     "value": 0
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": -1
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 0
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 3
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 3
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  },
+  {
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "decisions": "same",
+   "outcome": "identical",
+   "deltas": [
+    {
+     "name": "netRevenueCents",
+     "value": 0
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 0
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": 0
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": 0
+    },
+    {
+     "name": "minCashCents",
+     "value": 0
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 0
+    },
+    {
+     "name": "ordersLost",
+     "value": 0
+    },
+    {
+     "name": "examsCompleted",
+     "value": 0
+    },
+    {
+     "name": "reportsFinal",
+     "value": 0
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 0
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 0
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 0
+    },
+    {
+     "name": "tatBreaches",
+     "value": 0
+    },
+    {
+     "name": "backlogEnd",
+     "value": 0
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 0
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 0
+    },
+    {
+     "name": "waitsOver30",
+     "value": 0
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 0
+    },
+    {
+     "name": "heldOver",
+     "value": 0
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 0
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 0
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  },
+  {
+   "scenario": "sustainable",
+   "seed": 40801,
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "decisions": "same",
+   "outcome": "identical",
+   "deltas": [
+    {
+     "name": "netRevenueCents",
+     "value": 0
+    },
+    {
+     "name": "operatingExpenseCents",
+     "value": 0
+    },
+    {
+     "name": "operatingProfitCents",
+     "value": 0
+    },
+    {
+     "name": "operatingCashFlowCents",
+     "value": 0
+    },
+    {
+     "name": "minCashCents",
+     "value": 0
+    },
+    {
+     "name": "shortfallCents",
+     "value": 0
+    },
+    {
+     "name": "ordersReceived",
+     "value": 0
+    },
+    {
+     "name": "ordersLost",
+     "value": 0
+    },
+    {
+     "name": "examsCompleted",
+     "value": 0
+    },
+    {
+     "name": "reportsFinal",
+     "value": 0
+    },
+    {
+     "name": "tatP50Sec",
+     "value": 0
+    },
+    {
+     "name": "tatP90Sec",
+     "value": 0
+    },
+    {
+     "name": "tatOverTarget",
+     "value": 0
+    },
+    {
+     "name": "tatBreaches",
+     "value": 0
+    },
+    {
+     "name": "backlogEnd",
+     "value": 0
+    },
+    {
+     "name": "waitToExamP50Sec",
+     "value": 0
+    },
+    {
+     "name": "waitToExamP90Sec",
+     "value": 0
+    },
+    {
+     "name": "waitsOver30",
+     "value": 0
+    },
+    {
+     "name": "displacedAppointments",
+     "value": null
+    },
+    {
+     "name": "overtimeSec",
+     "value": 0
+    },
+    {
+     "name": "heldOver",
+     "value": 0
+    },
+    {
+     "name": "skippedBreaks",
+     "value": 0
+    },
+    {
+     "name": "noCoverage",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedWarn",
+     "value": 0
+    },
+    {
+     "name": "alertsRaisedAlert",
+     "value": 0
+    },
+    {
+     "name": "alertsActiveAtEnd",
+     "value": 0
+    },
+    {
+     "name": "daysBelowZero",
+     "value": 0
+    },
+    {
+     "name": "actionsAttempted",
+     "value": 0
+    },
+    {
+     "name": "actionsAccepted",
+     "value": 0
+    },
+    {
+     "name": "actionsRejected",
+     "value": 0
+    }
+   ]
+  }
+ ],
+ "pairCounts": [
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "netRevenueCents",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "operatingExpenseCents",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "operatingProfitCents",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "operatingCashFlowCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "minCashCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "shortfallCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "ordersReceived",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "ordersLost",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "examsCompleted",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "reportsFinal",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "tatP50Sec",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "tatP90Sec",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "tatOverTarget",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "tatBreaches",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "backlogEnd",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "waitToExamP50Sec",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "waitToExamP90Sec",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "waitsOver30",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "displacedAppointments",
+   "higher": 0,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "overtimeSec",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "heldOver",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "skippedBreaks",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "noCoverage",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "alertsRaisedWarn",
+   "higher": 0,
+   "lower": 1,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "alertsRaisedAlert",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "alertsActiveAtEnd",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "daysBelowZero",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "actionsAttempted",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "actionsAccepted",
+   "higher": 1,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "name": "actionsRejected",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "netRevenueCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "operatingExpenseCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "operatingProfitCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "operatingCashFlowCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "minCashCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "shortfallCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "ordersReceived",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "ordersLost",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "examsCompleted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "reportsFinal",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "tatP50Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "tatP90Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "tatOverTarget",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "tatBreaches",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "backlogEnd",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "waitToExamP50Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "waitToExamP90Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "waitsOver30",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "displacedAppointments",
+   "higher": 0,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "overtimeSec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "heldOver",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "skippedBreaks",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "noCoverage",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "alertsRaisedWarn",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "alertsRaisedAlert",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "alertsActiveAtEnd",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "daysBelowZero",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "actionsAttempted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "actionsAccepted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "name": "actionsRejected",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "netRevenueCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "operatingExpenseCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "operatingProfitCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "operatingCashFlowCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "minCashCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "shortfallCents",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "ordersReceived",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "ordersLost",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "examsCompleted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "reportsFinal",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "tatP50Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "tatP90Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "tatOverTarget",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "tatBreaches",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "backlogEnd",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "waitToExamP50Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "waitToExamP90Sec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "waitsOver30",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "displacedAppointments",
+   "higher": 0,
+   "lower": 0,
+   "equal": 0
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "overtimeSec",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "heldOver",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "skippedBreaks",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "noCoverage",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "alertsRaisedWarn",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "alertsRaisedAlert",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "alertsActiveAtEnd",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "daysBelowZero",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "actionsAttempted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "actionsAccepted",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  },
+  {
+   "policy": "gemma4-31b",
+   "against": "noop",
+   "name": "actionsRejected",
+   "higher": 0,
+   "lower": 0,
+   "equal": 1
+  }
+ ],
+ "failures": [],
+ "statusCounts": [
+  {
+   "status": "completed",
+   "runs": 4
+  }
+ ],
+ "replay": {
+  "runs": 4,
+  "verified": 4,
+  "actionsMatch": 4
+ }
+}

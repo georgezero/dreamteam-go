@@ -7,6 +7,90 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.5c — multi-model development evaluation (0.5.0-dev.3)
+
+Owner decision 2026-10-27: V0.5b accepted at d476257. V0.5c runs the frozen
+agent with several local models on fresh seeds, with one memory-off
+control. No prompt tuning, no new scoring, no simulator, protocol or
+scoring change. Report: `docs/benchmark/v05c-dev/README.md`.
+
+**Declared first** (8c62526, before any run on the seeds): the plan
+(`v05c-plan/1`), the three models, one settings file per model (identical
+but for the model; `maxOutputTokens` 4,096 for all), the four stage
+configurations, seeds 40801–40805, resource limits and stop rules.
+`TestCommittedConfigs` loads every committed configuration through the
+holdout guard.
+
+**Built:**
+* **Memory off:** with `memoryDecisions` 0 the MEMORY section says the
+  memory is off and lists only the pending changes from the current
+  observation. Memory on is byte for byte unchanged (the V0.5b recording
+  replays with every memory and prompt hash matching). Tests:
+  `MemoryTests.test_off`, `TestLLMAgentMemoryOff` (live mock and replay).
+* **Version:** 0.5.0-dev.3; 0.5.0-dev.2 registered for replay
+  (`mini-seed52-v052`, batch mode `v0.5_dev2`).
+* **Evidence:** per stage, the report, manifest, recorded decisions, usage
+  summaries, replay configuration and replay manifest; `analyze.py` and
+  `tables.md` for the planned tables.
+* **CI:** replays all four stages on every platform and compares the
+  manifests.
+
+**Ran** (Raspberry Pi 4, against a local omlx server; one stage at a time):
+
+| Stage | Seeds, days | Runs | Wall clock |
+|---|---|---|---|
+| A | 40801, 7 | 4/4 | 4.9 min |
+| B | 40802–40804, 30 | 12/12 | 77 min |
+| C (memory off) | 40802–40804, 30 | 6/6 | 15 min |
+| D | 40805, 90 | 4/4 | 2 h 33 min |
+
+No infrastructure error, no rerun, no amendment, no horizon shortened.
+
+**Observed** (descriptions of these runs, not claims):
+* Qwen3.6 35B-A3B acted at 5–7 of 30 points per seed, used operations and
+  staffing actions, and repeated refused shift extensions 1–5 times per
+  run; it improved turnaround and breaches against noop on every seed at a
+  lower operating profit (−$161 to −$34,565).
+* Gemma 4 26B-A4B acted only on 40802 and 40805; on 40802 it was refused
+  for teleradiology 13 times, repeatedly, and fell back at 6 points.
+* Gemma 4 31B acted at 2 of 187 points; its outcomes equal noop's
+  elsewhere. Slowest: 22–84 s mean per request.
+* Memory off (Qwen, three seeds): more refusals (14/16/55 against
+  6/5/9), more repeated invalid proposals (11/5/39 against 2/1/5), more
+  accepted actions, and on two seeds about $17,600 less operating profit
+  than noop. No causal claim.
+* No model asked for details. No batch was refused when applied.
+
+**Replay:** all 18 LLM recordings replay without a model (linux/amd64,
+Python 3.13): decisions, sessions, results, memory and final digests
+byte-identical to the live runs; two replays give identical manifests;
+`verify` and `reproduce` pass for every stage.
+
+**Gates:**
+* Python agent tests: 28 OK.
+* `go vet` (default, calibration and acceptance tags) and `gofmt`: clean.
+* Go tests on the Pi: `internal/bench`, `internal/session`, `cmd/dreamteam`
+  (goldens, migrations, committed configurations, memory off): pass.
+* Race (`-race`) on horo: `internal/bench`, `internal/session`,
+  `internal/agent`, `cmd/dreamteam`: pass. The Pi's kernel does not
+  support the race detector.
+* Cross-builds: linux/amd64, linux/arm64, darwin/arm64, darwin/amd64,
+  windows/amd64.
+* CI steps on horo: the four golden references identical; the CI
+  benchmark verifies (86) and reproduces (59); V0.5a, V0.5b and all four
+  V0.5c replays verify and reproduce, and the V0.5c replay manifests equal
+  the committed ones. The V0.5a and V0.5b replay manifests now differ from
+  their committed copies only through the engine name and the agent's
+  hash, as expected; CI compares replays across platforms, not with them.
+* The expensive clinical suites, unaffected, were not rerun.
+
+**Limitations:** one scenario, five seeds, three models on one shared
+server, each live run once; outcomes are the simulator's; the memory
+comparison cannot attribute outcome differences to the memory. See the
+report §11.
+
+---
+
 ## V0.5b — memory, action guidance and cost reporting (0.5.0-dev.2)
 
 Owner decision 2026-10-27: V0.5a accepted at 3104e67. V0.5b improves the

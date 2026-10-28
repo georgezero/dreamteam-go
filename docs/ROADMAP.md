@@ -16,7 +16,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.2** (released, `v0.2.0`) | Practice design: sustainable-scenario gate, five staffing/reading actions, contracts and lifecycle, T90 evaluation | V0.1; Step 0 gate |
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
-| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1, accepted; V0.5b, memory, action guidance and cost reporting, 0.5.0-dev.2; owner decisions 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
+| **V0.5** (in development: V0.5a, the external LLM agent, 0.5.0-dev.1, accepted; V0.5b, memory, action guidance and cost reporting, 0.5.0-dev.2, accepted; V0.5c, multi-model development evaluation, 0.5.0-dev.3; owner decisions 2026-10-27) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** | Agent benchmark: agents evaluated systematically across models, scenarios, seeds and baselines; WebUI/SQLite, the managed-practice harness and automation levels remain planned here (§7) | V0.5 agents |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
@@ -457,15 +457,27 @@ more benchmark infrastructure.
     replay; other versions are refused explicitly.
   * Mock tests, including a 90-day memory bound; one live 14-day smoke
     test.
-* **V0.5c** (next, owner decision): the first small multi-model
-  development comparison, two or three local models on fresh seeds
-  declared beforehand. Then V0.5.0. The full benchmark framework is V0.6.
+  Accepted by the owner (d476257).
+* **V0.5c (0.5.0-dev.3): multi-model development evaluation** (owner
+  decision; [benchmark/v05c-dev/](benchmark/v05c-dev/README.md)). The V0.5b
+  agent frozen; three local models (Qwen3.6 35B-A3B, Gemma 4 26B-A4B,
+  Gemma 4 31B) under identical settings on seeds 40801–40805, declared and
+  committed before any run. Stage A, 7 days, one seed; B, 30 days, three
+  seeds; C, the memory-off control (`memoryDecisions` 0, the agent's one
+  change) on B's seeds; D, 90 days, one seed. All 26 runs completed with
+  no infrastructure failure; all 18 LLM recordings replay byte for byte,
+  in CI on three platforms. No score, ranking or generalization. Awaiting
+  owner review; then V0.5.0. The full benchmark framework is V0.6.
 
 Acceptance (V0.5a): the agent takes part in a complete, replayable session:
 valid structured decisions, no unauthorized operation, no action when
 none is warranted, failures that change nothing. V0.5b: the agent keeps a
 bounded, public-only memory across decision points and a smaller prompt
-with explicit constraints, and its runs still replay exactly.
+with explicit constraints, and its runs still replay exactly. V0.5.0 (owner
+criteria): at least two local models complete sessions through the
+external agent; their decisions are recorded and replayable; outcomes,
+refusals, usage and latency can be compared; memory on and off can be
+compared; existing simulator and benchmark behaviour is unchanged.
 
 ## 6. Growth and progression (formerly V0.5; deferred)
 

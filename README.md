@@ -23,7 +23,10 @@ In development (unreleased): **V0.5**, LLM agents. V0.5a adds an
 external LLM agent that manages the practice through the benchmark
 harness with any OpenAI-compatible model server (`agents/llm/`,
 `docs/LLM_AGENT.md`). V0.5b gives it a bounded memory within a run, action
-guidance, a smaller targeted prompt, and usage and cost reporting.
+guidance, a smaller targeted prompt, and usage and cost reporting. V0.5c
+ran it with three local models on fresh seeds, with a memory-off control:
+a development evaluation whose recorded decisions replay exactly
+(`docs/benchmark/v05c-dev/`).
 
 ## Quick start
 
@@ -324,7 +327,8 @@ Since V0.5b the agent:
 
 Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/LLM_AGENT.md`; the live smoke tests: `docs/benchmark/v05a-dev/` and
-`docs/benchmark/v05b-dev/`.
+`docs/benchmark/v05b-dev/`; the multi-model development evaluation:
+`docs/benchmark/v05c-dev/`.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its

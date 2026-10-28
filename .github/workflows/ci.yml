@@ -85,9 +85,10 @@ jobs:
         # decisions replayed through the protocol without any model:
         # V0.5a's (a version 1 recording, docs/benchmark/v05a-dev) and
         # V0.5b's (version 2: the memory and prompt are rebuilt and checked
-        # at every decision point, docs/benchmark/v05b-dev), each verified
-        # and rerun. The replays' manifests are compared across platforms
-        # below.
+        # at every decision point, docs/benchmark/v05b-dev), and V0.5c's
+        # multi-model evaluation, stage by stage (docs/benchmark/v05c-dev),
+        # each verified and rerun. The replays' manifests are compared
+        # across platforms below.
         shell: bash
         run: |
           set -euo pipefail
@@ -99,6 +100,12 @@ jobs:
           done
           cp llm-replay-v05a/manifest.json out/llm-replay-manifest.json
           cp llm-replay-v05b/manifest.json out/llm-replay-v05b-manifest.json
+          for s in a b c d; do
+            ./dt benchmark run docs/benchmark/v05c-dev/stage-$s-replay.json -out llm-replay-v05c-$s > /dev/null
+            ./dt benchmark verify llm-replay-v05c-$s | tail -1
+            ./dt benchmark reproduce llm-replay-v05c-$s -out llm-replay-v05c-$s-again 2> /dev/null | tail -1
+            cp llm-replay-v05c-$s/manifest.json out/llm-replay-v05c-$s-manifest.json
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

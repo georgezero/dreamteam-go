@@ -1,0 +1,114 @@
+DreamTeam benchmark v05c-stage-d · engine 0.5.0-dev.3 · dreamteam.agent/v1
+scenarios sustainable · seeds 40805 · 90 days · decisions every 1 day(s) at 07:00
+policies noop@1, qwen36-35b-a3b@2 (external), gemma4-26b-a4b@2 (external), gemma4-31b@2 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90  breaches  overtime    alerts  T90
+sustainable-s40805-noop            completed  0/0/0         ok      $2,940    $736,153     814   4,591  980 min  400       12,632 min  303     not requested
+sustainable-s40805-qwen36-35b-a3b  completed  8/0/0         ok      -$31,625  $736,281     811   4,591  121 min  105       13,271 min  301     not requested
+sustainable-s40805-gemma4-26b-a4b  completed  2/0/0         ok      -$10,577  $736,758     814   4,591  873 min  227       12,632 min  303     not requested
+sustainable-s40805-gemma4-31b      completed  0/0/0         ok      $2,940    $736,153     814   4,591  980 min  400       12,632 min  303     not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario     seed   runs  start                state digest   identical
+sustainable  40805  4     2026-10-13T06:00:00  67f631ebbf32…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (1/1)                          qwen36-35b-a3b@2 (1/1)                gemma4-26b-a4b@2 (1/1)                gemma4-31b@2 (1/1)
+netRevenueCents         $736,153 / $736,153 / $736,153        $736,281 / $736,281 / $736,281        $736,758 / $736,758 / $736,758        $736,153 / $736,153 / $736,153
+operatingExpenseCents   $733,213 / $733,213 / $733,213        $767,906 / $767,906 / $767,906        $747,335 / $747,335 / $747,335        $733,213 / $733,213 / $733,213
+operatingProfitCents    $2,940 / $2,940 / $2,940              -$31,625 / -$31,625 / -$31,625        -$10,577 / -$10,577 / -$10,577        $2,940 / $2,940 / $2,940
+operatingCashFlowCents  -$55,712 / -$55,712 / -$55,712        -$87,183 / -$87,183 / -$87,183        -$65,515 / -$65,515 / -$65,515        -$55,712 / -$55,712 / -$55,712
+minCashCents            $58,409 / $58,409 / $58,409           $48,866 / $48,866 / $48,866           $58,409 / $58,409 / $58,409           $58,409 / $58,409 / $58,409
+shortfallCents          $0 / $0 / $0                          $0 / $0 / $0                          $0 / $0 / $0                          $0 / $0 / $0
+ordersReceived          5,635 / 5,635 / 5,635                 5,635 / 5,635 / 5,635                 5,635 / 5,635 / 5,635                 5,635 / 5,635 / 5,635
+ordersLost              814 / 814 / 814                       811 / 811 / 811                       814 / 814 / 814                       814 / 814 / 814
+examsCompleted          4,591 / 4,591 / 4,591                 4,591 / 4,591 / 4,591                 4,591 / 4,591 / 4,591                 4,591 / 4,591 / 4,591
+reportsFinal            4,589 / 4,589 / 4,589                 4,589 / 4,589 / 4,589                 4,599 / 4,599 / 4,599                 4,589 / 4,589 / 4,589
+tatP50Sec               113 min / 113 min / 113 min           36 min / 36 min / 36 min              90 min / 90 min / 90 min              113 min / 113 min / 113 min
+tatP90Sec               980 min / 980 min / 980 min           121 min / 121 min / 121 min           873 min / 873 min / 873 min           980 min / 980 min / 980 min
+tatOverTarget           408 / 408 / 408                       113 / 113 / 113                       227 / 227 / 227                       408 / 408 / 408
+tatBreaches             400 / 400 / 400                       105 / 105 / 105                       227 / 227 / 227                       400 / 400 / 400
+backlogEnd              10 / 10 / 10                          10 / 10 / 10                          0 / 0 / 0                             10 / 10 / 10
+waitToExamP50Sec        21 min / 21 min / 21 min              20 min / 20 min / 20 min              21 min / 21 min / 21 min              21 min / 21 min / 21 min
+waitToExamP90Sec        71 min / 71 min / 71 min              71 min / 71 min / 71 min              71 min / 71 min / 71 min              71 min / 71 min / 71 min
+waitsOver30             1,569 / 1,569 / 1,569                 1,567 / 1,567 / 1,567                 1,569 / 1,569 / 1,569                 1,569 / 1,569 / 1,569
+displacedAppointments   –                                     –                                     –                                     –
+overtimeSec             12,632 min / 12,632 min / 12,632 min  13,271 min / 13,271 min / 13,271 min  12,632 min / 12,632 min / 12,632 min  12,632 min / 12,632 min / 12,632 min
+heldOver                149 / 149 / 149                       150 / 150 / 150                       149 / 149 / 149                       149 / 149 / 149
+skippedBreaks           0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+noCoverage              0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+alertsRaisedWarn        1,319 / 1,319 / 1,319                 1,270 / 1,270 / 1,270                 1,303 / 1,303 / 1,303                 1,319 / 1,319 / 1,319
+alertsRaisedAlert       303 / 303 / 303                       301 / 301 / 301                       303 / 303 / 303                       303 / 303 / 303
+alertsActiveAtEnd       2 / 2 / 2                             2 / 2 / 2                             0 / 0 / 0                             2 / 2 / 2
+daysBelowZero           0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+actionsAttempted        0 / 0 / 0                             9 / 9 / 9                             3 / 3 / 3                             0 / 0 / 0
+actionsAccepted         0 / 0 / 0                             9 / 9 / 9                             3 / 3 / 3                             0 / 0 / 0
+actionsRejected         0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0                             0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario     seed   policy          decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime  Δalerts
+sustainable  40805  qwen36-35b-a3b  different  different  -$34,565  +$128         -3     0       -859 min  -295       +639 min   -2
+sustainable  40805  gemma4-26b-a4b  different  different  -$13,517  +$605         0      0       -107 min  -173       0 min      0
+sustainable  40805  gemma4-31b      same       identical  $0        $0            0      0       0 min     0          0 min      0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  qwen36-35b-a3b  gemma4-26b-a4b  gemma4-31b
+netRevenueCents         1 / 0 / 0       1 / 0 / 0       0 / 0 / 1
+operatingExpenseCents   1 / 0 / 0       1 / 0 / 0       0 / 0 / 1
+operatingProfitCents    0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+operatingCashFlowCents  0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+minCashCents            0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+shortfallCents          0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+ordersReceived          0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+ordersLost              0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+examsCompleted          0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+reportsFinal            0 / 0 / 1       1 / 0 / 0       0 / 0 / 1
+tatP50Sec               0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+tatP90Sec               0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+tatOverTarget           0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+tatBreaches             0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+backlogEnd              0 / 0 / 1       0 / 1 / 0       0 / 0 / 1
+waitToExamP50Sec        0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+waitToExamP90Sec        0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+waitsOver30             0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+displacedAppointments   0 / 0 / 0       0 / 0 / 0       0 / 0 / 0
+overtimeSec             1 / 0 / 0       0 / 0 / 1       0 / 0 / 1
+heldOver                1 / 0 / 0       0 / 0 / 1       0 / 0 / 1
+skippedBreaks           0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+noCoverage              0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+alertsRaisedWarn        0 / 1 / 0       0 / 1 / 0       0 / 0 / 1
+alertsRaisedAlert       0 / 1 / 0       0 / 0 / 1       0 / 0 / 1
+alertsActiveAtEnd       0 / 0 / 1       0 / 1 / 0       0 / 0 / 1
+daysBelowZero           0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+actionsAttempted        1 / 0 / 0       1 / 0 / 0       0 / 0 / 1
+actionsAccepted         1 / 0 / 0       1 / 0 / 0       0 / 0 / 1
+actionsRejected         0 / 0 / 1       0 / 0 / 1       0 / 0 / 1
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  4
+
+policy          decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop            90               0        0        0        0                0                0
+qwen36-35b-a3b  90               8        8        0        0                0                0
+gemma4-26b-a4b  90               2        2        0        0                0                0
+gemma4-31b      90               0        0        0        0                0                0
+
+6. Replay verification
+
+4 of 4 saved sessions replayed with every digest verified; 4 of 4 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

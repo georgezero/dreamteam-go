@@ -1,0 +1,439 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v05c-stage-c",
+ "engine": "0.5.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "3a415c0cd286874ec05c832e0613ba0f0556503aff25580b7fb7344380907dc2"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "qwen36-35b-a3b-nomem",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory off (memoryDecisions 0)), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-qwen36-35b-a3b-nomem.json",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b-nomem.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b-nomem.json",
+      "sha256": "18d642649d62134ca8fdbc79bf4c3bbf75e92d0832ecef727855c83a49fa41b9"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40802-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-noop/run.json",
+     "sha256": "fd9ab6fd11814ba51aa116acd07f92eec27c3c5f538debf42c1e2d83cc8ab705"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/transcript.jsonl",
+     "sha256": "3d151faaa009f21c7d2ff917b965654cbd8541b7fcdc152debb866ec6ad07bdc"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/session.json",
+     "sha256": "ffecfadda485853607d25534a1d3e2a0eee77446fef510173217a49604dd66dc"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/result.json",
+     "sha256": "591b022318aeeb265f2d1523f25f23c4f92258aadd930b369a4bf135beb0dc47"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40802-qwen36-35b-a3b-nomem",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b-nomem/run.json",
+     "sha256": "2216241e6a87df89bb1c7d923415e9c8e0c655e51e5cf4f44a33d5b28cad0ed1"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b-nomem/decisions.json",
+     "sha256": "7d92ea474ee65d324f3c1d5dc73e224d227e5d901210d77b0f39d3250cf3f102"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b-nomem/transcript.jsonl",
+     "sha256": "ca4576e8cb36cd5c1144449bf9559840a723aab348fd3062447214baa99f47ad"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b-nomem/session.json",
+     "sha256": "9dd39e8277fca275ebff5cdf9005546aeaba4ccb8f52aae3d818c067dc7752ad"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b-nomem/result.json",
+     "sha256": "0ee9f37816ae22d25d71d136e6067f1e4e27420b59ccc97c0c464f576162f1ab"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-noop/run.json",
+     "sha256": "f561607887be8e83cf6ef5838e9e72e91943fe26780f2de871f9e3a7a85a7bb4"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/transcript.jsonl",
+     "sha256": "46a16486fb39e4b68cc92525f60a67d59eceb8ca7392bf9389288fd976b58dac"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/session.json",
+     "sha256": "3baa53e0df1f1a44d6905f08541f3cc3b90fa350acf318f0d44cb64314b9c27c"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/result.json",
+     "sha256": "71cabcf307edbd4234a9679f4922ca0b99129ca759e74a69eda22e5f595d21d9"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-qwen36-35b-a3b-nomem",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b-nomem/run.json",
+     "sha256": "d6960480196cc6b4b1aca3f27f10a189172870a9ea276d09456d5abf2d87b2eb"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b-nomem/decisions.json",
+     "sha256": "44c1b71f53dce050f5a68bde0dff3570e991b2ff68c24f9270d0e0486e690c1b"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b-nomem/transcript.jsonl",
+     "sha256": "c0fc00a30053071d9405b7c37d611c2dce637a813ae6a0ac9da7e70163a823f2"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b-nomem/session.json",
+     "sha256": "378dab43fde69d751ce7a704b4609d7a05085ed252d712b80b6540bd49985d71"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b-nomem/result.json",
+     "sha256": "b79ba7ab7f1c2de8ee1f820ce6d6201a5304852ab5dc97d33054fb16cc755bc2"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-noop/run.json",
+     "sha256": "b8344e32d79e92cd69f41fdcebd369101f9a73c61568ae2d2f00622614d74e73"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/transcript.jsonl",
+     "sha256": "fa891929ca018c365ff138c29a8e475a9c59300cc96ff1ee6b7583bffba8c0eb"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/session.json",
+     "sha256": "97d9320136136a5a8d5289675cdd9b195ca92cb265d88a0885e4f7f01fb862a6"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/result.json",
+     "sha256": "86e99ea50412811b47a00456c38dc36e32416c3dc68177c19ac8c462387c057d"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-qwen36-35b-a3b-nomem",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b-nomem/run.json",
+     "sha256": "c5f1b71c861f718d5a6f54b0acff2f5db3cf4d4e77c61b63dd0c7b05686f1b55"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b-nomem/decisions.json",
+     "sha256": "340b06fd0a1e9c0fd32806ac7e065e24151e15fcd569be44ab553856df3ff015"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b-nomem/transcript.jsonl",
+     "sha256": "dad9ff0eceae79ecfa486532b5a871c6a73c547d381191ff34feaa0cfec685f1"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b-nomem/session.json",
+     "sha256": "7943b84c62bd2b96c1ddf0734207af6d555761fc11486ee9e93934a3dc665944"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b-nomem/result.json",
+     "sha256": "6ccc383637dc69fe6c5f1677c286d843d4c87a30d1abcfb148d77c267a34c510"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "4ff976f4f9ecfcfb8e9fd12f992c8bc41fbfbf70960951c700215deec3fe769d"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "d1474efba48decaa99f3f65be3dc4573939b78ae16df1a83bcccc4039830d2c6"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/stderr.txt",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/agent.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/model.jsonl",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/summary.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b-nomem/policy-evidence/usage.txt",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/stderr.txt",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/agent.json",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/model.jsonl",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/summary.json",
+  "runs/sustainable-s40803-qwen36-35b-a3b-nomem/policy-evidence/usage.txt",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/stderr.txt",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/agent.json",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/model.jsonl",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/summary.json",
+  "runs/sustainable-s40804-qwen36-35b-a3b-nomem/policy-evidence/usage.txt"
+ ]
+}

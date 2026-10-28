@@ -1,0 +1,716 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v05c-stage-b-replay",
+ "engine": "0.5.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "016e4afad491f86b073bc704558555d7d0c7998d8b8f1e974b80153e83563121"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2) in replay mode: qwen36-35b-a3b's recorded decisions from stage-b, one recording per seed, each checked against its decision point and digests, with the memory and prompt rebuilt and checked against their recorded SHA-256; no model is called",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40802-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40803-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40804-decisions.jsonl"
+    ],
+    "timeoutSeconds": 300,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40802-decisions.jsonl",
+      "sha256": "ccef742930c2a9d5aae724cc4ab04257ef5b76b7fa5468b243c5af319bd3d277"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40803-decisions.jsonl",
+      "sha256": "a28e74fe4039b0f7431d00a7b1b2d9a4fea82fbd8e876d198d34a6ba0e05d88b"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/qwen36-35b-a3b-s40804-decisions.jsonl",
+      "sha256": "52d449baba376c8f0ffd4c7dca7c56813f760b120e5376b05bbab3936aed3796"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2) in replay mode: gemma4-26b-a4b's recorded decisions from stage-b, one recording per seed, each checked against its decision point and digests, with the memory and prompt rebuilt and checked against their recorded SHA-256; no model is called",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40802-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40803-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40804-decisions.jsonl"
+    ],
+    "timeoutSeconds": 300,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40802-decisions.jsonl",
+      "sha256": "6aaed1eae802a3776cd7e0dd57e66569e617f26a4b5e1869ff96aaaad0ac6264"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40803-decisions.jsonl",
+      "sha256": "dac478f07ad3d19b74f2456a5a4e85d9e931439b6f1f42c2cea13eecf83c1518"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-26b-a4b-s40804-decisions.jsonl",
+      "sha256": "46e7a96abaaca990c730239231fff5faad0d0571ce465bc4e3e03ca30d000645"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gemma4-31b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2) in replay mode: gemma4-31b's recorded decisions from stage-b, one recording per seed, each checked against its decision point and digests, with the memory and prompt rebuilt and checked against their recorded SHA-256; no model is called",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40802-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40803-decisions.jsonl",
+     "--replay",
+     "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40804-decisions.jsonl"
+    ],
+    "timeoutSeconds": 300,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40802-decisions.jsonl",
+      "sha256": "f9bfaca4fac123f9fe78e905a49a3178e2678af0e3553b690078bbbcaa77f02c"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40803-decisions.jsonl",
+      "sha256": "7865dac8ec0cd2f9ac4cdc8dba441fcf25bfda80c946eec46563a145e7d2e708"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/stage-b/gemma4-31b-s40804-decisions.jsonl",
+      "sha256": "bde0c0e1ec7a54290e3866d14c36160144dc341528106dd05484870c5679fd68"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40802-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-noop/run.json",
+     "sha256": "1199ef5c425e20e33dd52c6fd7134996a82d14cac70d67e4ecd7c152ed63f42c"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/transcript.jsonl",
+     "sha256": "3d151faaa009f21c7d2ff917b965654cbd8541b7fcdc152debb866ec6ad07bdc"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/session.json",
+     "sha256": "ffecfadda485853607d25534a1d3e2a0eee77446fef510173217a49604dd66dc"
+    },
+    {
+     "path": "runs/sustainable-s40802-noop/result.json",
+     "sha256": "591b022318aeeb265f2d1523f25f23c4f92258aadd930b369a4bf135beb0dc47"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40802-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b/run.json",
+     "sha256": "680c46a520f4c3993d03d3a212d6a96818c2d954eae6431abb7e3b284532355b"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b/decisions.json",
+     "sha256": "5cd8399a6ba33924a56e37c9e7f92f682be98c4932ecceaa293477d3e523a345"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "96fc1fb2abc4371c9b42de718ee52f246ddadf7c06ebcb8dd7b069a7cc63c672"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b/session.json",
+     "sha256": "6f95d71306e2e22308b1a1e4bc3175f28cd4fbb374f7d55f1d77d4b754cfb8e4"
+    },
+    {
+     "path": "runs/sustainable-s40802-qwen36-35b-a3b/result.json",
+     "sha256": "eb515db1faaeb55aaee031c60bdac414f8c93a8fc1cb097910a41a5a3844e175"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40802-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-gemma4-26b-a4b/run.json",
+     "sha256": "5d5a67b09633999a59fbe8e7fe6e8901f5ec2c21f44b6cc76ada83e616da876a"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-26b-a4b/decisions.json",
+     "sha256": "97f7b02aee2ac01da64c3c5ef1a378e75d88b4ada466d5e74777b0d163dc9276"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "cefc136c53f8faa8abaf43eae75809900297697d5c4534e14349912576dcacb1"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-26b-a4b/session.json",
+     "sha256": "ba191f26bac68e65046204bad2dbeb81a46536d16affd34894be3c4c66caedd0"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-26b-a4b/result.json",
+     "sha256": "4be1442121441babb864b238cc4c7143b8b67c4bea79d0f15d745becc6e8d930"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40802-gemma4-31b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40802-gemma4-31b/run.json",
+     "sha256": "4973486eae60d21a3d974728682e94314336bef984e1d50f8348038f5646c278"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-31b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-31b/transcript.jsonl",
+     "sha256": "ce8738f3af259236063991874d6a5646d8918c55d29e94ed72836bc48a6a059e"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-31b/session.json",
+     "sha256": "ffecfadda485853607d25534a1d3e2a0eee77446fef510173217a49604dd66dc"
+    },
+    {
+     "path": "runs/sustainable-s40802-gemma4-31b/result.json",
+     "sha256": "591b022318aeeb265f2d1523f25f23c4f92258aadd930b369a4bf135beb0dc47"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-noop/run.json",
+     "sha256": "6cb89af38661fc12e473090d6f29c13eb78c3da1bb585394bc545ea441efff98"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/transcript.jsonl",
+     "sha256": "46a16486fb39e4b68cc92525f60a67d59eceb8ca7392bf9389288fd976b58dac"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/session.json",
+     "sha256": "3baa53e0df1f1a44d6905f08541f3cc3b90fa350acf318f0d44cb64314b9c27c"
+    },
+    {
+     "path": "runs/sustainable-s40803-noop/result.json",
+     "sha256": "71cabcf307edbd4234a9679f4922ca0b99129ca759e74a69eda22e5f595d21d9"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b/run.json",
+     "sha256": "53968136fb25c7e2541a220eb667ee7fc867ca7d6a3f5551f6fdc70a779c7b53"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b/decisions.json",
+     "sha256": "72bbffda8b67422a514b5288dafec0d6e745a833d19d9be07ec4edcd6210259e"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "f25ac15f0bb37236eef01649af49cea558c6d53e2bdef80cd5668f44cb92af72"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b/session.json",
+     "sha256": "ac624588dc66d51bb946402536b6a313d9e8ce10effd574eaefeeea3c776b673"
+    },
+    {
+     "path": "runs/sustainable-s40803-qwen36-35b-a3b/result.json",
+     "sha256": "42b71cd48895e52998b787f256b9b7490e032d47cf4971deb9f54da76d0b5482"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-gemma4-26b-a4b/run.json",
+     "sha256": "5a0988dee1872548c403404664584a9effd283ca9f367890602a68ecb1dd7d6a"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-26b-a4b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "2c754cbbb7dc4a4e3c2051cc99c362cf18156aec945679812b3f22decdedfaf2"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-26b-a4b/session.json",
+     "sha256": "3baa53e0df1f1a44d6905f08541f3cc3b90fa350acf318f0d44cb64314b9c27c"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-26b-a4b/result.json",
+     "sha256": "71cabcf307edbd4234a9679f4922ca0b99129ca759e74a69eda22e5f595d21d9"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40803-gemma4-31b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40803-gemma4-31b/run.json",
+     "sha256": "3bc0e8cc370734c69eaf0360ccd056d161afe1d95c90b5098bbbb1c0efc6c796"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-31b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-31b/transcript.jsonl",
+     "sha256": "2c754cbbb7dc4a4e3c2051cc99c362cf18156aec945679812b3f22decdedfaf2"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-31b/session.json",
+     "sha256": "3baa53e0df1f1a44d6905f08541f3cc3b90fa350acf318f0d44cb64314b9c27c"
+    },
+    {
+     "path": "runs/sustainable-s40803-gemma4-31b/result.json",
+     "sha256": "71cabcf307edbd4234a9679f4922ca0b99129ca759e74a69eda22e5f595d21d9"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-noop/run.json",
+     "sha256": "9727d95ba819dc7515c9db4498869dc8574afabbdecf62a9f7ea5fc50d714391"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/transcript.jsonl",
+     "sha256": "fa891929ca018c365ff138c29a8e475a9c59300cc96ff1ee6b7583bffba8c0eb"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/session.json",
+     "sha256": "97d9320136136a5a8d5289675cdd9b195ca92cb265d88a0885e4f7f01fb862a6"
+    },
+    {
+     "path": "runs/sustainable-s40804-noop/result.json",
+     "sha256": "86e99ea50412811b47a00456c38dc36e32416c3dc68177c19ac8c462387c057d"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b/run.json",
+     "sha256": "907aeadd01a4cbe19f7e931c30600f2f18feafecea2154149293fe1b89cbf2ff"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b/decisions.json",
+     "sha256": "ca51c2f68409fb2689466a0863dcd682d3aa4c9c561b8de7778382dcc2a468fb"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "3c065dbc017719b401b9c67e7f7c28556e7c75154f4d8ddec8b9a0359eb05289"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b/session.json",
+     "sha256": "01b3e8d9ad7a8fcecb8f688425c351fc08ed5afcc1118cefb4183de53f6dd88e"
+    },
+    {
+     "path": "runs/sustainable-s40804-qwen36-35b-a3b/result.json",
+     "sha256": "0a3b067163a87e389d8a348d3627178de53c2cd718b302d9a24ade26743cc51a"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-gemma4-26b-a4b/run.json",
+     "sha256": "6623d3aa93bafe1b86c1ca72792dfb5251da251e4451407f3cd5d80c9e07fa80"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-26b-a4b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "0859cf10640ff1bfa3c04016df1b85889015b9f7ef69e2bb6970beaa243e2906"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-26b-a4b/session.json",
+     "sha256": "97d9320136136a5a8d5289675cdd9b195ca92cb265d88a0885e4f7f01fb862a6"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-26b-a4b/result.json",
+     "sha256": "86e99ea50412811b47a00456c38dc36e32416c3dc68177c19ac8c462387c057d"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40804-gemma4-31b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40804-gemma4-31b/run.json",
+     "sha256": "bca6cfd7ae381084dc0480231344a70e181c0fc9f04746f422a3dd4309a45c43"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-31b/decisions.json",
+     "sha256": "bbbca3e6ef33a850d779e1568c71d99ad4226508c9150a2e1a5d635c04f2b544"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-31b/transcript.jsonl",
+     "sha256": "2cc3294a8a61c8e360b45edab5e70a101280af1b660aa4f201c4ec1ff34ac24f"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-31b/session.json",
+     "sha256": "b2484caf0e0d75744eb92540ebf23e49620bf3434ae98e8c1ba16ad5f003cff2"
+    },
+    {
+     "path": "runs/sustainable-s40804-gemma4-31b/result.json",
+     "sha256": "5770d87aefa3206bdc02696a0ecb7775f914ba280c97755b3a8a790264b6311c"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "e1ed215fb0fc8aed73a5868961be9aabdefbd2976a4e6ea7ee01c1f035717141"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "1a2df5908382ce8490f28247091cf7cf742a9e12374bf6d9e5cc395981f5e03d"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b/stderr.txt",
+  "runs/sustainable-s40802-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40802-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40802-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/sustainable-s40802-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/sustainable-s40802-gemma4-26b-a4b/stderr.txt",
+  "runs/sustainable-s40802-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/sustainable-s40802-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40802-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40802-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/sustainable-s40802-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/sustainable-s40802-gemma4-31b/stderr.txt",
+  "runs/sustainable-s40802-gemma4-31b/policy-evidence/agent.json",
+  "runs/sustainable-s40802-gemma4-31b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40802-gemma4-31b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40802-gemma4-31b/policy-evidence/summary.json",
+  "runs/sustainable-s40802-gemma4-31b/policy-evidence/usage.txt",
+  "runs/sustainable-s40803-qwen36-35b-a3b/stderr.txt",
+  "runs/sustainable-s40803-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/sustainable-s40803-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40803-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40803-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/sustainable-s40803-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/sustainable-s40803-gemma4-26b-a4b/stderr.txt",
+  "runs/sustainable-s40803-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/sustainable-s40803-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40803-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40803-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/sustainable-s40803-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/sustainable-s40803-gemma4-31b/stderr.txt",
+  "runs/sustainable-s40803-gemma4-31b/policy-evidence/agent.json",
+  "runs/sustainable-s40803-gemma4-31b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40803-gemma4-31b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40803-gemma4-31b/policy-evidence/summary.json",
+  "runs/sustainable-s40803-gemma4-31b/policy-evidence/usage.txt",
+  "runs/sustainable-s40804-qwen36-35b-a3b/stderr.txt",
+  "runs/sustainable-s40804-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/sustainable-s40804-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40804-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40804-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/sustainable-s40804-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/sustainable-s40804-gemma4-26b-a4b/stderr.txt",
+  "runs/sustainable-s40804-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/sustainable-s40804-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40804-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40804-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/sustainable-s40804-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/sustainable-s40804-gemma4-31b/stderr.txt",
+  "runs/sustainable-s40804-gemma4-31b/policy-evidence/agent.json",
+  "runs/sustainable-s40804-gemma4-31b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40804-gemma4-31b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40804-gemma4-31b/policy-evidence/summary.json",
+  "runs/sustainable-s40804-gemma4-31b/policy-evidence/usage.txt"
+ ]
+}

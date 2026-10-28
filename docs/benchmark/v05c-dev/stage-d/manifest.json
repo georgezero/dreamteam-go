@@ -1,0 +1,439 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v05c-stage-d",
+ "engine": "0.5.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "d7e41e7278a8d999834112025eb7a22b4b6ebb9757a1529e65ec92a2ce9d5b61"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+      "sha256": "e19a47dce948a8acbd3262ef5053b89f1e23c32603860e03628d38b184acbf5d"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+      "sha256": "1a1edae5a492b67a72086bec51faecc8ed0930800bdb6e548412b65fa444aa6a"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gemma4-31b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-31B-it-oQ4e-mtp and the limits of docs/benchmark/v05c-dev/llm-gemma4-31b.json",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-gemma4-31b.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent.py",
+      "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-gemma4-31b.json",
+      "sha256": "69ab353538a14f76142b1cab4470b917138c8437afef76a41122f0d2872bfab5"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "sustainable-s40805-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40805-noop/run.json",
+     "sha256": "22be5e9d2df49a7fb72bc3131af1f9b271af2ef0c2724793aa80fd33271cae04"
+    },
+    {
+     "path": "runs/sustainable-s40805-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40805-noop/transcript.jsonl",
+     "sha256": "7f79da391bd7c54e046902acf99b1f0b4fe3b8c87e9cd6374d00671a4ad40cb3"
+    },
+    {
+     "path": "runs/sustainable-s40805-noop/session.json",
+     "sha256": "c0c5a861f840997743fadab6816f29093ac69156da601ebcec07a0b5f91495f8"
+    },
+    {
+     "path": "runs/sustainable-s40805-noop/result.json",
+     "sha256": "feaf43fa248483a4244ec2b8ba46e330410a77b905ac112d1f045ece43d7dd5a"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40805-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40805-qwen36-35b-a3b/run.json",
+     "sha256": "bc85ba3ca5cc606bffcce30195c5f9463be26ee3cd587e5a097ce2de278d134e"
+    },
+    {
+     "path": "runs/sustainable-s40805-qwen36-35b-a3b/decisions.json",
+     "sha256": "6f5b7321b74d5c24f77bfa3a8fdb43b9824783df924ef9aa8e8e8009582ce9bc"
+    },
+    {
+     "path": "runs/sustainable-s40805-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "40c6c8fda6be5d5d140c52e7a01426f02c42bfa66940cf515f3ee5f5b407c1a0"
+    },
+    {
+     "path": "runs/sustainable-s40805-qwen36-35b-a3b/session.json",
+     "sha256": "3419f2485fcc40f66569845155587d94c63f41133073147aec8660972cc01e0d"
+    },
+    {
+     "path": "runs/sustainable-s40805-qwen36-35b-a3b/result.json",
+     "sha256": "c9bdfd7a6e77035508cdbce6c77e97895ca4165647650daa201d2810525b7198"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40805-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40805-gemma4-26b-a4b/run.json",
+     "sha256": "bc3a6a672fd97776127349797198da0211920fd86155f4f077a8267e9d909a90"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-26b-a4b/decisions.json",
+     "sha256": "80a9002768b03d9b3630d31a15128f9bb6888e311540deebdc9fabe86e9f9951"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "aed79e1bcdf3e291284532f41d7042ae1fb63d33b4937617fe677d656213dcb4"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-26b-a4b/session.json",
+     "sha256": "51a9709fef70b43987bf6a42748951d54c5617329055ca196083ecad51604b72"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-26b-a4b/result.json",
+     "sha256": "52d559a2497266587f5e9873684bf18d088a6a16a02709a54c5657c10263cdcc"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s40805-gemma4-31b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s40805-gemma4-31b/run.json",
+     "sha256": "2c496023046ebdc2800758369ac039508b39fe95ca5e1680d7f8dfe46255fb65"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-31b/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-31b/transcript.jsonl",
+     "sha256": "e118b83386a994023dce1925ab2e35489f4d3cd1eaff857575c47846acd06fe7"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-31b/session.json",
+     "sha256": "c0c5a861f840997743fadab6816f29093ac69156da601ebcec07a0b5f91495f8"
+    },
+    {
+     "path": "runs/sustainable-s40805-gemma4-31b/result.json",
+     "sha256": "feaf43fa248483a4244ec2b8ba46e330410a77b905ac112d1f045ece43d7dd5a"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "80f3910ba57a6bfa4a1603aaca60b77674eec2ddfcc7c507a2ef93b939d91552"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "04b818d05a23d3d47c82aa5518220c3222aaa5fb3ab417ff13dd5d5151dd56d7"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/sustainable-s40805-qwen36-35b-a3b/stderr.txt",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/model.jsonl",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/sustainable-s40805-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/sustainable-s40805-gemma4-26b-a4b/stderr.txt",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/model.jsonl",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/sustainable-s40805-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/sustainable-s40805-gemma4-31b/stderr.txt",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/agent.json",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/decisions.jsonl",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/memory.jsonl",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/model.jsonl",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/summary.json",
+  "runs/sustainable-s40805-gemma4-31b/policy-evidence/usage.txt"
+ ]
+}

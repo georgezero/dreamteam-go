@@ -1,4 +1,4 @@
-# DreamTeam LLM agent (V0.5a, V0.5b)
+# DreamTeam LLM agent (V0.5a, V0.5b, V0.5c)
 
 `agents/llm/llm_agent.py` is an agent that asks a language model how to
 manage the practice. It is an external benchmark policy
@@ -9,10 +9,12 @@ the model through an OpenAI-compatible chat completions API, so local model
 servers work without a provider-specific dependency. Standard library
 Python only.
 
-Status: V0.5b, development (0.5.0-dev.2). Not released. This is llm-agent
+Status: V0.5c, development (0.5.0-dev.3). Not released. This is llm-agent
 version 2: V0.5a's agent (version 1) with bounded memory, action guidance,
 a targeted prompt, operations and staffing actions at one decision point,
-and usage and cost reporting.
+and usage and cost reporting. V0.5c ran it unchanged with three local
+models ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)); its one
+change is that `memoryDecisions` 0 turns the memory off (§6).
 
 ```
 dreamteam benchmark run CONFIG
@@ -87,8 +89,10 @@ Ollama's OpenAI endpoint or a hosted API.
 The smoke tests' files are complete examples:
 [benchmark/v05b-dev/config.json](benchmark/v05b-dev/config.json) and
 [benchmark/v05b-dev/llm-settings.json](benchmark/v05b-dev/llm-settings.json)
-(V0.5b), and [benchmark/v05a-dev/](benchmark/v05a-dev/) (V0.5a, run with
-version 1 of the agent, 3104e67).
+(V0.5b), [benchmark/v05c-dev/](benchmark/v05c-dev/) (V0.5c: one settings
+file per model, and the memory-off control), and
+[benchmark/v05a-dev/](benchmark/v05a-dev/) (V0.5a, run with version 1 of
+the agent, 3104e67).
 
 **Credentials.** An API key is read from the environment variable that
 `apiKeyEnv` names and sent only in the `Authorization` header. A settings
@@ -96,6 +100,32 @@ file that contains `apiKey` is refused, and so is a base URL with a user
 name or password in it. No key appears in the agent's evidence, its
 standard error or anything the harness writes (tested). The usage summary
 names the model only, not the endpoint.
+
+**Configuring a model** (from V0.5c's three local models; guidance, not a
+requirement):
+* **One settings file per model,** identical except for `model`, so that a
+  comparison changes one thing. Fix `maxOutputTokens` for all of them
+  before any run; raise it for all or none. 4,096 was enough for every
+  reply but one in V0.5c; 2,048 cut one off in V0.5b.
+* **Context.** A decision's prompt is about 10,000–12,600 tokens with the
+  memory (sustainable scenario). The server must accept that plus the
+  output limit in one request; V0.5c's server capped requests at 32,768.
+* **Thinking off.** A model whose server setting turns reasoning on spends
+  the output budget before its JSON. Use a model or server setting with it
+  off; the agent does not change server settings.
+* **JSON mode.** `responseFormat: json_object` worked with every V0.5c
+  model. A server that rejects it needs `none`; the agent then parses the
+  reply as text.
+* **Timeouts.** A dense 31B model took about 20–110 s a request on V0.5c's
+  server, where the mixture-of-experts models took about 3–27 s.
+  `requestTimeoutSeconds` 300 and `decisionBudgetSeconds` 900 left room
+  for a retry; the harness's `timeoutSeconds` must exceed the budget.
+* **Probe first.** Send one recorded prompt to each model before any run
+  on a new seed, to find models that fail to load or answer, so that none
+  is replaced after a run (V0.5c's plan, §2).
+* **Record the model:** id, weights, quantization, server version,
+  context cap and sampling defaults. The agent records only the model id
+  and the settings' SHA-256.
 
 ## 2. Settings (`dreamteam.llm-agent-settings/v1`)
 
@@ -602,10 +632,13 @@ and run record.
   ([benchmark/v05a-dev/replay.json](benchmark/v05a-dev/replay.json), a
   version 1 recording, and
   [benchmark/v05b-dev/replay.json](benchmark/v05b-dev/replay.json), a
-  version 2 one with memory checks) on linux/amd64, linux/arm64 and
-  darwin/arm64, comparing the manifests.
+  version 2 one with memory checks), and V0.5c's four stages
+  ([benchmark/v05c-dev/stage-a-replay.json](benchmark/v05c-dev/stage-a-replay.json)
+  to `stage-d-replay.json`: 18 recordings from three models, one with the
+  memory off), on linux/amd64, linux/arm64 and darwin/arm64, comparing the
+  manifests.
 
-## 12. Known limitations (V0.5b)
+## 12. Known limitations (V0.5c)
 
 * **Bounded memory, no planning.** The memory is a short record of the
   agent's own decisions and what followed them. There is no plan, no goal
@@ -613,7 +646,9 @@ and run record.
   as totals.
 * **Memory informs; it does not enforce.** A refusal in the memory does
   not stop the model proposing the same action again. In the V0.5b smoke
-  test it did, and `validate` caught it each time.
+  test it did, and `validate` caught it each time. In V0.5c every model
+  that acted repeated a refused proposal at least once with its memory
+  on; one repeated a teleradiology proposal 13 times in a 30-day run.
 * **Outcomes are read from the action log.** An applied decision's
   outcome is the change in the observation's accepted and refused counts
   and the results with that time. That is exact under the harness, where
@@ -635,6 +670,9 @@ and run record.
 * **Trusted process.** Like any external policy, the agent is a trusted
   participant, not sandboxed ([BENCHMARK.md](BENCHMARK.md) §11). Its
   evidence is what it chose to write.
-* **Development only.** One model, one seed, 14 days: an integration smoke
-  test, not a measure of decision quality, and not a model comparison
-  (V0.5c).
+* **Models may not act.** With this prompt, two of V0.5c's three models
+  chose no action at most decision points, and their outcomes equal the
+  no-op baseline's. The agent cannot tell inaction from judgement.
+* **Development only.** V0.5c: three models, five seeds, one scenario, up
+  to 90 days, each live run once. It describes those runs; it is not a
+  measure of decision quality or a ranking of models.

@@ -1,0 +1,48 @@
+{
+ "schema": "dreamteam.benchmark/v1",
+ "id": "v05c-stage-c-replay",
+ "description": "V0.5c stage-c recorded-decision replay: every live LLM run's recorded decisions (docs/benchmark/v05c-dev/stage-c/) submitted again through the protocol by the agent's replay mode, without any model, beside the no-op baseline, under the stage's scenario, seeds, horizon and cadence. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "scenarios": [
+  "sustainable"
+ ],
+ "seeds": [
+  40802,
+  40803,
+  40804
+ ],
+ "seedPlan": "The seeds of docs/benchmark/v05c-dev/stage-c.json, so that the recorded decisions belong to the runs.",
+ "days": 30,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  "noop",
+  "qwen36-35b-a3b-nomem"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b-nomem",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2) in replay mode: qwen36-35b-a3b-nomem's recorded decisions from stage-c, one recording per seed, each checked against its decision point and digests, with the memory and prompt rebuilt and checked against their recorded SHA-256; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--replay",
+    "./docs/benchmark/v05c-dev/stage-c/qwen36-35b-a3b-nomem-s40802-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v05c-dev/stage-c/qwen36-35b-a3b-nomem-s40803-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v05c-dev/stage-c/qwen36-35b-a3b-nomem-s40804-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

@@ -5,7 +5,8 @@ OpenAI-compatible chat completions API, how to manage the practice. It
 runs as a separate process under `dreamteam benchmark run`. Standard
 library Python only. Version 2 (V0.5b): bounded memory within a run,
 action guidance, a targeted prompt, operations and staffing actions at one
-decision point, and usage and cost reporting.
+decision point, and usage and cost reporting. V0.5c ran it unchanged with
+three local models; with `memoryDecisions` 0 the memory is off.
 
 * `llm_agent.py`: the agent (live and replay modes).
 * `settings.example.json`: settings that take the model and the server's

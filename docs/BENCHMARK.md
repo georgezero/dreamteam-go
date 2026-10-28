@@ -17,6 +17,9 @@ external policy processes (§4), withheld the seed from every policy (§3,
 V0.5a (0.5.0-dev.1, in development) keeps an external policy's own
 evidence files (§4, §8) for the LLM agent ([LLM_AGENT.md](LLM_AGENT.md));
 the protocol is unchanged. V0.5b (0.5.0-dev.2) changes only the LLM agent.
+V0.5c (0.5.0-dev.3) changes nothing in the harness; its development
+evaluation ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)) adds
+four replay configurations that CI runs.
 
 ## 1. Commands
 

@@ -1,0 +1,116 @@
+DreamTeam benchmark v05c-stage-c · engine 0.5.0-dev.3 · dreamteam.agent/v1
+scenarios sustainable · seeds 40802, 40803, 40804 · 30 days · decisions every 1 day(s) at 07:00
+policies noop@1, qwen36-35b-a3b-nomem@2 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                      status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90    breaches  overtime   alerts  T90
+sustainable-s40802-noop                  completed  0/0/0         ok      -$317     $249,767     278   1,599  1,020 min  183       4,046 min  98      not requested
+sustainable-s40802-qwen36-35b-a3b-nomem  completed  17/0/0        ok      -$657     $250,126     277   1,601  1,007 min  169       6,203 min  98      not requested
+sustainable-s40803-noop                  completed  0/0/0         ok      -$2,550   $246,153     312   1,560  949 min    119       3,781 min  103     not requested
+sustainable-s40803-qwen36-35b-a3b-nomem  completed  13/0/0        ok      -$20,297  $250,869     351   1,578  878 min    78        4,900 min  99      not requested
+sustainable-s40804-noop                  completed  0/0/0         ok      -$4,459   $244,879     294   1,584  1,112 min  174       4,346 min  100     not requested
+sustainable-s40804-qwen36-35b-a3b-nomem  completed  6/0/0         ok      -$22,098  $242,225     316   1,564  953 min    117       4,345 min  96      not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario     seed   runs  start                state digest   identical
+sustainable  40802  2     2026-10-13T06:00:00  d3bd73d036a5…  yes
+sustainable  40803  2     2026-10-13T06:00:00  154a1f1a1ce7…  yes
+sustainable  40804  2     2026-10-13T06:00:00  aacdbb94106d…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (3/3)                       qwen36-35b-a3b-nomem@2 (3/3)
+netRevenueCents         $244,879 / $246,153 / $249,767     $242,225 / $250,126 / $250,869
+operatingExpenseCents   $248,703 / $249,338 / $250,085     $250,784 / $264,323 / $271,166
+operatingProfitCents    -$4,459 / -$2,550 / -$317          -$22,098 / -$20,297 / -$657
+operatingCashFlowCents  -$3,829 / -$3,219 / $13,975        -$4,627 / -$3,273 / $13,082
+minCashCents            $52,798 / $55,051 / $62,550        $51,955 / $54,997 / $61,842
+shortfallCents          $0 / $0 / $0                       $0 / $0 / $0
+ordersReceived          1,933 / 1,971 / 1,973              1,933 / 1,971 / 1,973
+ordersLost              278 / 294 / 312                    277 / 316 / 351
+examsCompleted          1,560 / 1,584 / 1,599              1,564 / 1,578 / 1,601
+reportsFinal            1,562 / 1,572 / 1,588              1,573 / 1,592 / 1,593
+tatP50Sec               98 min / 115 min / 158 min         60 min / 101 min / 113 min
+tatP90Sec               949 min / 1,020 min / 1,112 min    878 min / 953 min / 1,007 min
+tatOverTarget           119 / 174 / 183                    78 / 117 / 169
+tatBreaches             119 / 174 / 183                    78 / 117 / 169
+backlogEnd              13 / 13 / 21                       0 / 0 / 11
+waitToExamP50Sec        20 min / 21 min / 22 min           20 min / 21 min / 22 min
+waitToExamP90Sec        62 min / 70 min / 70 min           61 min / 68 min / 70 min
+waitsOver30             517 / 542 / 578                    515 / 540 / 563
+displacedAppointments   –                                  5 / 5 / 222
+overtimeSec             3,781 min / 4,046 min / 4,346 min  4,345 min / 4,900 min / 6,203 min
+heldOver                44 / 45 / 46                       42 / 43 / 44
+skippedBreaks           0 / 0 / 0                          0 / 0 / 0
+noCoverage              0 / 0 / 2                          0 / 0 / 2
+alertsRaisedWarn        430 / 442 / 461                    428 / 438 / 440
+alertsRaisedAlert       98 / 100 / 103                     96 / 98 / 99
+alertsActiveAtEnd       1 / 1 / 1                          0 / 0 / 1
+daysBelowZero           0 / 0 / 0                          0 / 0 / 0
+actionsAttempted        0 / 0 / 0                          11 / 23 / 24
+actionsAccepted         0 / 0 / 0                          11 / 23 / 24
+actionsRejected         0 / 0 / 0                          0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario     seed   policy                decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime   Δalerts
+sustainable  40802  qwen36-35b-a3b-nomem  different  different  -$340     +$359         -1     +2      -13 min   -14        +2,158 min  0
+sustainable  40803  qwen36-35b-a3b-nomem  different  different  -$17,747  +$4,715       +39    +18     -71 min   -41        +1,119 min  -4
+sustainable  40804  qwen36-35b-a3b-nomem  different  different  -$17,639  -$2,654       +22    -20     -159 min  -57        -1 min      -4
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  qwen36-35b-a3b-nomem
+netRevenueCents         2 / 1 / 0
+operatingExpenseCents   3 / 0 / 0
+operatingProfitCents    0 / 3 / 0
+operatingCashFlowCents  0 / 3 / 0
+minCashCents            0 / 3 / 0
+shortfallCents          0 / 0 / 3
+ordersReceived          0 / 0 / 3
+ordersLost              2 / 1 / 0
+examsCompleted          2 / 1 / 0
+reportsFinal            3 / 0 / 0
+tatP50Sec               0 / 3 / 0
+tatP90Sec               0 / 3 / 0
+tatOverTarget           0 / 3 / 0
+tatBreaches             0 / 3 / 0
+backlogEnd              0 / 3 / 0
+waitToExamP50Sec        1 / 2 / 0
+waitToExamP90Sec        0 / 3 / 0
+waitsOver30             0 / 3 / 0
+displacedAppointments   0 / 0 / 0
+overtimeSec             2 / 1 / 0
+heldOver                0 / 3 / 0
+skippedBreaks           0 / 0 / 3
+noCoverage              0 / 0 / 3
+alertsRaisedWarn        0 / 3 / 0
+alertsRaisedAlert       0 / 2 / 1
+alertsActiveAtEnd       0 / 2 / 1
+daysBelowZero           0 / 0 / 3
+actionsAttempted        3 / 0 / 0
+actionsAccepted         3 / 0 / 0
+actionsRejected         0 / 0 / 3
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  6
+
+policy                decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop                  90               0        0        0        0                0                0
+qwen36-35b-a3b-nomem  90               36       36       0        0                0                0
+
+6. Replay verification
+
+6 of 6 saved sessions replayed with every digest verified; 6 of 6 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.
