@@ -1,0 +1,20 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v06c-qualify",
+ "description": "V0.6c phase 1, conservative-v2 qualification check (docs/benchmark/v06c-dev/PLAN.md §2): no action and conservative-v2 on every entry of the development suite, one fresh seed, 90 days (long enough for a raise to take effect and be reviewed), T90 where it applies. A check that the policy acts, not a comparison. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-1.json",
+ "seeds": [
+  41101
+ ],
+ "seedPlan": "Chosen 2026-10-28 and committed in the V0.6c plan (docs/benchmark/v06c-dev/PLAN.md) before any run on them: the next unused blocks after V0.6b's 41001-41003: 41101 for the conservative-v2 qualification check, 41201-41203 for the 30-day comparison, 41301 for the 90-day comparison, fixed before any result of either stage. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "days": 90,
+ "policies": [
+  "noop",
+  "conservative-v2"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": true
+ }
+}

@@ -1,6 +1,6 @@
 # DreamTeam benchmark scenario suite and evaluation contract (V0.6a)
 
-Status: V0.6b, development (0.6.0-dev.2). Not released. The suite is
+Status: V0.6c, development (0.6.0-dev.3). Not released. The suite is
 `dreamteam-dev`, version 1
 ([benchmark/suite/dreamteam-dev-1.json](benchmark/suite/dreamteam-dev-1.json));
 the contract is `dreamteam.benchmark-contract/v1` (§3). V0.6a defined them;
@@ -311,7 +311,9 @@ and `dreamteam benchmark report` prints it (§9).
   with no-action runs on seed 1 before the characterization seeds were
   declared ([v06a-dev/PROTOCOL.md](benchmark/v06a-dev/PROTOCOL.md) §3).
 
-## 7. The conservative baseline (`conservative`, version 1)
+## 7. The conservative baselines
+
+### 7.1 Version 1 (`conservative`, V0.6b)
 
 A built-in policy (`internal/bench/conservative.go`), added in V0.6b
 beside `noop`, `greedy` and `rules`, which are unchanged. Its purpose is
@@ -385,6 +387,111 @@ development seed):
 * the financial-pressure scenario, where it must not;
 * over each run: valid changes only, one per decision point, 14 days
   apart, within the cap.
+
+### 7.2 Version 2 (`conservative-v2`, V0.6c)
+
+Version 1 is kept unchanged under its ID, `conservative`, for
+reproducing V0.6b. It never acted there, because its signal (the oldest
+unfinished study at 07:00) never showed a sustained problem. Version 2 is
+a separate policy, `conservative-v2` version 2
+(`internal/bench/conservative2.go`). Its rules were fixed from operating
+principles and qualified on synthetic observations before it ran on any
+development seed. They were not derived from V0.6a's or V0.6b's results.
+
+**Its service signal is reporting breaches.** The simulator writes a
+public log warning, `S… <priority> report overdue: …`, when an urgent or
+soon study passes its target (60 and 240 minutes). The policy reads the
+log through `observe` (`recentLog`, up to 2,000 entries, with the
+`finance` section, compact). At each decision point it records the urgent
+and soon breaches logged since the previous one; at the first, those of
+the last 24 hours.
+* **Only per-study breaches count:** the alert summaries ("1 urgent report
+  overdue (target 1h)…") do not.
+* **Partial days:** a record is marked partial when the log returned may
+  not reach back to the previous decision point.
+* **No routine signal:** routine breaches are not logged one by one, so
+  version 2 cannot see them.
+
+**What else it reads:**
+* `finance.cashCents`;
+* `finance.trailing30.operatingProfitCents`;
+* the action catalog's `set_reading_allocation` targets;
+* the staffing preview's salary per 30 days before and after a change.
+
+No seed, no hidden state. Its one lever is the site reading allocation,
+as in version 1.
+
+**At each decision point, in order:**
+
+| Step | Rule |
+|---|---|
+| Record | The day's urgent and soon breaches |
+| History | No action until 7 records exist (a week) |
+| Wait | No action while any allocation change is pending, or before 14 days after the effective date of its own last change |
+| Review | 14 days after a raise took effect: breaches per recorded day over those 14 days against the (up to) 14 days before the raise was decided. A fall of at least 25% means the raise helped. Otherwise the raise is stepped back (to the allocation it replaced) and no further raise is made in the run |
+| Step back | An allocation is above its scenario level and either the trailing-30-day operating profit is below zero, or the last 7 records had no urgent breach and soon breaches on at most one day: the radiologist furthest above it loses 5 points, never below the scenario level |
+| Raise | A sustained problem (urgent breaches on at least 3 of the last 7 records, or soon breaches on at least 5), no failed review, no raise awaiting review, cash at least $50,000, trailing-30-day operating profit at least zero, and less than 10 points above the scenario levels in all. The radiologist with the lowest allocation in effect and room to grow gains 5 points from the earliest lawful date, if the trailing-30-day profit less the preview's added salary per 30 days stays at or above zero |
+| Otherwise | No action |
+
+Every change is checked with `validate` and the staffing `preview` and is
+submitted only if valid, accepted and displacing no booked patient. At
+most one change per decision point.
+
+**Why these numbers** (operating principles, not results):
+* **A week of history,** so a decision always sees a whole weekly cycle.
+* **Urgent on 3 of 7 days:** an urgent breach (60 minutes) is serious. A
+  weekend without reading accounts for at most two days in a row (Sunday
+  and Monday), so three days of seven is more than a weekend.
+* **Soon on 5 of 7 days:** most days of the week, so weekday problems and
+  not only the weekend.
+* **Clear:** a week with no urgent breach and at most one day with soon
+  breaches.
+* **Review after 14 days in effect, 25% reduction:** two weeks is the
+  allocation's notice and a full fortnight rota; a quarter is a clear
+  change, not noise.
+* **10 points, $50,000:** two 5-point steps; the floor is version 1's.
+
+**How it differs:**
+
+| Policy | Behaviour |
+|---|---|
+| `noop` | Never acts |
+| `greedy` | Raises whenever the oldest study is over a day old, with no financial check and no review of effect |
+| `rules` | Follows the oldest-study age with hysteresis, with no financial check and no review of effect |
+| `conservative` v1 | Acts only on a three-day run of oldest-study ages over a day; never acted in V0.6b |
+| `conservative-v2` | Acts on a week's priority breaches, only when affordable; measures whether each raise reduced breaches, and undoes and stops raising if not |
+
+**Qualification** (`internal/bench/conservative2_test.go`), with synthetic
+public observations served by a fake protocol endpoint that applies
+submitted changes as the simulator would:
+
+| # | Requirement | Test |
+|---|---|---|
+| 1 | A sustained problem triggers an action | soon breaches every day, urgent on 3 of 7 days, soon on 5 of 7: a raise on day 7 |
+| 2 | A transient problem does not | a weekend's breaches, one bad day, urgent on 2 of 7, soon on 4 of 7: no action in 35 days |
+| 3 | Financial guardrails can prevent spending | a trailing-30-day loss, a raise whose cost would cause one, cash below $50,000: no action; exactly affordable: a raise |
+| 4 | Cooldowns prevent repeated action | nothing before 14 days after a raise takes effect; a pending change elsewhere: no action |
+| 5 | Lead times are respected | every change from the catalog's earliest lawful date |
+| 6 | Stable conditions allow no action | no breach, or breaches one day a week: no action in 60 days; a raise is stepped back once service is clear, or the practice loses money |
+| 7 | Invalid actions never apply | `validate` refusing, or the preview displacing a booked patient: no submission |
+| 8 | No hidden information | only `observe`, `actions`, `validate` and `preview` are called, `observe` only for `finance` and `recentLog` |
+
+**Also tested:**
+* the review: a raise that cut breaches is followed by another, to the
+  cap; one that did not is stepped back and none follows;
+* breaches counted once each;
+* the real simulator's log parsed correctly, alert summaries excluded
+  (sustainable practice, test seed 7).
+
+**Known limitations:**
+* **One lever.** Version 2 can only change the reading allocation. Breaches
+  that arise when no radiologist is rostered (evenings after 20:00,
+  Sundays) cannot be cured that way. Teleradiology would address them, but
+  version 2 does not use it. Its review is meant to detect this and stop.
+* **Partial signal.** Routine breaches are not visible to it, and a busy
+  log can make a day's record partial.
+* **Version 1's guardrail.** The profit guardrail still forbids spending
+  while the trailing 30 days lose money, whatever the cause.
 
 ## 8. Demand diagnostic (`dreamteam.demand-diagnostic/v1`)
 

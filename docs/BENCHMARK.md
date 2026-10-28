@@ -188,6 +188,7 @@ the same gate.
 | `greedy` | 1 | The V0.3 protocol demonstration (`agent.Greedy`), unchanged. When the oldest unread study is over a day old, it raises the first radiologist with room and no pending change by 5 points of site reading allocation. It is not a strategy. |
 | `rules` | 1 | The rule-based baseline below. |
 | `conservative` | 1 | The financially conservative baseline (V0.6b): raises a site reading allocation only for a backlog sustained three days, when the practice can afford it, within a cap, and steps back when money is lost or the backlog has cleared. Specified in [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7. |
+| `conservative-v2` | 2 | The financially conservative baseline, version 2 (V0.6c): acts on a week of urgent and soon report breaches from the public log, within financial guardrails, and reviews whether each raise reduced breaches, undoing it and raising no more if not. Specified in [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7.2. |
 
 V0.4b adds no built-in policy. Its reference external policy is
 `python-ref` (§4).

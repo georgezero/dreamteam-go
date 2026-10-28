@@ -47,6 +47,8 @@ var policies = []PolicySpec{
 		New: func() agent.Policy { return &Rules{} }},
 	{ID: "conservative", Version: "1", Description: "a financially conservative baseline (V0.6b): raises a site reading allocation only after three days in a row with the oldest unfinished study over a day old, within a 5-point cap, a $50,000 cash floor and the trailing 30 days' operating profit after the change's cost; waits 14 days after each change; steps back when that profit is negative or the backlog has been clear for a week",
 		New: func() agent.Policy { return &Conservative{} }},
+	{ID: "conservative-v2", Version: "2", Description: "the financially conservative baseline, version 2 (V0.6c): watches the public log's urgent and soon report breaches; raises a site reading allocation by 5 points only for a problem sustained over a week (urgent breaches on 3 of 7 days or soon breaches on 5), within the trailing 30 days' operating profit after the change's cost, a $50,000 cash floor and a 10-point cap; reviews each raise after 14 days in effect and steps it back, raising no more, if breaches did not fall by a quarter; steps back when money is lost or service has been clear for a week",
+		New: func() agent.Policy { return &ConservativeV2{} }},
 }
 
 // PolicyIDs lists the built-in policies' IDs.

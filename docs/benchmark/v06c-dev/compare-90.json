@@ -1,0 +1,53 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v06c-compare-90",
+ "description": "V0.6c phase 2, the 90-day comparison on one separately declared seed (docs/benchmark/v06c-dev/PLAN.md §3): the same five policies on every entry, 90 days, T90 where it applies. Run only under the plan's conditions. No score, no ranking. Run from the repository root with DREAMTEAM_LLM_BASE_URL set.",
+ "suite": "../suite/dreamteam-dev-1.json",
+ "seeds": [
+  41301
+ ],
+ "seedPlan": "Chosen 2026-10-28 and committed in the V0.6c plan (docs/benchmark/v06c-dev/PLAN.md) before any run on them: the next unused blocks after V0.6b's 41001-41003: 41101 for the conservative-v2 qualification check, 41201-41203 for the 30-day comparison, 41301 for the 90-day comparison, fixed before any result of either stage. None appears elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "days": 90,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json (unchanged)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json (unchanged)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": true
+ }
+}

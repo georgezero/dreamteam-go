@@ -230,6 +230,7 @@ var earlierV2Engines = map[string]string{
 	"0.5.0-dev.3":  batchModeV053,   // V0.5c (the multi-model development evaluation): this build's action set and rules
 	"0.5.0":        batchModeV050,   // the V0.5 release: this build's action set and rules
 	"0.6.0-dev.1":  batchModeV061,   // V0.6a (the benchmark scenario suite): this build's action set and rules
+	"0.6.0-dev.2":  batchModeV062,   // V0.6b (the benchmark suite runner): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.
