@@ -1,0 +1,21 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v07a-ci",
+ "description": "V0.7a smoke test for CI: suite dreamteam-dev version 2 (radiologist overtime paid) with noop, greedy and conservative-v2 on the first V0.7a seed for 21 days, no T90; the manifest (with the contract report) is compared across platforms. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-2.json",
+ "seeds": [
+  41401
+ ],
+ "seedPlan": "The first seed of the V0.7a characterization (docs/benchmark/v07a-dev/PLAN.md), committed before any run on it; a 21-day smoke test, not part of the characterization.",
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ },
+ "days": 21
+}

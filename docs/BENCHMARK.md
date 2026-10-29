@@ -28,8 +28,11 @@ suite runs and the contract report, and a fourth built-in policy,
 [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). V0.6c (0.6.0-dev.3) adds a
 fifth, `conservative-v2` (§7.2 there), and a frozen-agent comparison
 ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)) whose recordings CI
-replays. Released in V0.6.0 with the policy protocol unchanged. Ordinary
-benchmarks and their files are unchanged.
+replays. Released in V0.6.0 with the policy protocol unchanged. V0.7a
+(0.7.0-dev.1, in development) adds suite version 2 with paid radiologist
+overtime ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10); the harness and
+the policy protocol are unchanged. Ordinary benchmarks and their files are
+unchanged.
 
 ## 1. Commands
 

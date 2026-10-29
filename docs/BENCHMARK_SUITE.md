@@ -301,6 +301,10 @@ them follow.
   An agent that extends their shifts gains service for nothing. This can
   materially distort the apparent financial consequences of management
   decisions. It is a simulator-modeling limitation, not fixed in V0.6.0.
+  **V0.7a** adds suite version 2 (§10), which pays radiologist time on
+  duty past the rostered end. Version 1 keeps the historical economics.
+  Even in version 2, an extension adds on-site presence (contrast
+  supervision), not reading blocks.
 * **Financial insolvency has no simulator consequence.** Cash can go
   negative and the practice carries on.
 * **Demand growth uses monthly factors,** not an explicit dated shock

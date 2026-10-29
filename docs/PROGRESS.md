@@ -7,6 +7,108 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.7a — radiologist overtime costing (0.7.0-dev.1)
+
+Owner decision 2026-10-29:
+* V0.6.0 accepted and closed.
+* V0.7 is simulator realism: V0.7a overtime economics, V0.7b solvency,
+  V0.7c re-characterization and frozen-agent evaluation, then V0.7.0.
+* V0.7a starts with a compatibility design review, and is implemented
+  only if historical behaviour can be preserved.
+
+**Design review** ([V0.7_OVERTIME_DESIGN.md](V0.7_OVERTIME_DESIGN.md)):
+* **What the engine already records.** Overtime is the time on duty past
+  the rostered end, recorded per employee and day when they go home. It
+  includes approved extensions and hold-over, and an extension that is
+  never worked records nothing.
+* **What an extension adds.** Radiologist extensions add on-site presence
+  (contrast supervision), not reading blocks.
+* **The model chosen: worked overtime, in the engine's own measure.** It
+  is the same time hourly staff are paid for. Idle time inside an
+  extension is paid, because there is no early release.
+* **The rate.** The salary's hourly equivalent, annual ÷ (52 ×
+  `weeklyOvertimeHours`), straight time, with no new rate parameter.
+* **Compatibility.** A compatible design exists, so implementation went
+  ahead.
+
+**Declared first** (790972c, before any run on seeds 41401–41403):
+* **The scenario policy** `radiologistOvertime`: `"unpaid"` (or omitted,
+  as in every scenario before V0.7), or `"salary_rate"`.
+  * It compiles to finance configuration, outside the state digest.
+  * A first attempt in `Policies` moved every state digest, because the
+    state keeps a digested copy of the operating policies. The historical
+    session tests caught it, and it was moved.
+* **The charge.** Floor per radiologist-day, plus benefits, posted when
+  they go home (entry kind `rad_overtime`) and paid at payroll. The
+  overtime cost metrics include it. The `extend_shift` message gives an
+  estimate.
+* **Five bundled `-ot` variants and suite `dreamteam-dev` version 2.**
+  Version 1 is unchanged, with the same fingerprints.
+* **Tests:**
+  * financial tests (`internal/sim/radovertime_test.go`): no extension; an
+    extension worked, to the cent; two extensions charged once; an
+    extension past close, partly idle; two weeks with two radiologists,
+    every charge reconciled; revenue, salary and hourly wages unchanged;
+    cash after payroll;
+  * a session saved and replayed under `"salary_rate"`, and `"unpaid"`
+    identical to omitted;
+  * scenario validation, and each variant equal to its base except for the
+    policy;
+  * suite version 2.
+* **The characterization plan** (`v07a-plan/1`) and analysis script.
+* **Version.** 0.7.0-dev.1. 0.6.0 is registered for replay
+  (`mini-seed52-v060`, batch mode `v0.6.0`).
+
+**Characterization** ([benchmark/v07a-dev/](benchmark/v07a-dev/README.md);
+`noop`, `greedy` and `conservative-v2`, both suite versions, seeds
+41401–41403, 90 days, 90 runs, all complete):
+* **Hold-over is common, even with no action.** Radiologists are held
+  over (contrast supervision) for 39–69 hours in 90 days. Under version 2
+  that costs $9,035–$15,831, plus benefits.
+* **Profit with no action falls by $11,294–$19,788.** Reporting backlog
+  and demand growth go from near break-even to losses of $5,039–$24,534.
+  The stable practice keeps $4,264–$10,626 instead of $16,349–$26,593.
+* **`noop` and `greedy`** took identical actions, with identical
+  operations, service and revenue. Only money differs.
+* **`conservative-v2`** acted differently in 7 of 15 run pairs:
+  * fewer, later raises and more undos, as its profit guardrail and review
+    respond to the lower profit;
+  * 11–40 more breaches in those runs.
+* **Starting states.** Versions 1 and 2 never start from the identical
+  state: the warm-up's overtime is in version 2's opening accrued payroll
+  ($974–$1,729 of cash).
+* **T90** NO GO for all nine version 1 runs; not applicable in version 2.
+* **Integrity:**
+  * `verify`: 437 of 437 (version 1, with T90) and 419 of 419 (version 2);
+  * `reproduce` on linux/amd64: 290 of 290 and 281 of 281;
+  * `reproduce` on linux/arm64 (Raspberry Pi): 290 of 290 and 281 of 281.
+
+**Gates:**
+* `go test ./...` on linux/amd64: 10 packages pass. That includes:
+  * golden references identical under 0.7.0-dev.1;
+  * every historical session replay, `v060` included;
+  * the committed configurations and seed guards.
+* `go test -race -timeout 90m ./...`: 10 packages pass.
+* `go vet` (default, `calibration` and `acceptance` tags) and `gofmt`:
+  clean.
+* Cross-builds: linux/amd64, linux/arm64, darwin/arm64, darwin/amd64 and
+  windows/amd64.
+* Python tests pass.
+* CI green on the declaration commit. CI now also runs a 21-day suite
+  version 2 smoke test with `verify` and `reproduce` on every platform.
+* The tagged clinical evaluation suites were not rerun (unaffected).
+* No LLM agent was run.
+
+**Limitations:**
+* development seeds and deterministic baselines only;
+* no baseline extends a shift, so agents' response to the cost is V0.7c's;
+* idle time inside an extension is paid;
+* radiologists only (the operations manager's overtime is still unpaid);
+* straight time;
+* still no insolvency consequence (V0.7b).
+
+---
+
 ## V0.6.0 — release: a reproducible benchmark for practice-management agents
 
 Owner decision 2026-10-29:

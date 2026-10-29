@@ -98,6 +98,13 @@ jobs:
           ./dt benchmark reproduce suite-run -out suite-run-again 2> /dev/null | tail -1
           cp suite-run/manifest.json out/suite-run-manifest.json
           cp suite-run/contract.txt out/suite-run-contract.txt
+          # V0.7a: suite version 2, radiologist overtime paid
+          # (docs/benchmark/v07a-dev/ci-suite-run.json).
+          ./dt benchmark suite run docs/benchmark/v07a-dev/ci-suite-run.json -out suite-v2 > /dev/null
+          ./dt benchmark verify suite-v2 | tail -1
+          ./dt benchmark reproduce suite-v2 -out suite-v2-again 2> /dev/null | tail -1
+          cp suite-v2/manifest.json out/suite-v2-manifest.json
+          cp suite-v2/contract.txt out/suite-v2-contract.txt
       - name: LLM agent
         # The agent's unit tests, then the smoke tests' recorded model
         # decisions replayed through the protocol without any model:

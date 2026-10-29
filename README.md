@@ -27,6 +27,13 @@ patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
+In development (unreleased): **V0.7**, simulator realism. V0.7a
+(`0.7.0-dev.1`) makes radiologist overtime cost money in new scenario
+versions. An on-site radiologist's time on duty past the rostered end is
+paid at the salary's hourly rate (`docs/V0.7_OVERTIME_DESIGN.md`), in
+benchmark suite `dreamteam-dev` version 2. Every existing scenario, save
+and result is unchanged (`docs/benchmark/v07a-dev/`).
+
 ## Quick start
 
 Requires Go 1.26 or later. Runs on Linux and macOS (developed on a
@@ -362,6 +369,10 @@ are observations, not a ranking:
 * `greedy` spent $27,000–$34,000 over 90 days in every scenario.
 * Every LLM recording replays exactly, and every applicable T90 was NO GO.
 
+V0.7a (in development) adds suite version 2. It has the same five
+practices with radiologist overtime paid. Version 1 and every V0.6 result
+are unchanged.
+
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
 README for checking and (deliberately) regenerating them.
@@ -419,7 +430,8 @@ reference policy) and `agents/llm` (the LLM agent).
 * **Radiologist shift extensions cost nothing.** Radiologists are
   salaried, so an extension adds no salary cost. This can materially
   distort the apparent financial consequences of decisions. It is a
-  simulator-modeling limitation, not fixed in this release.
+  simulator-modeling limitation, not fixed in this release. V0.7a (in
+  development) pays it in suite version 2.
 * **No insolvency consequence.** Negative cash stops nothing.
 * **Demand growth uses monthly factors,** not a dated shock.
 * **Some metrics are absent:** imaging capacity utilization and trends

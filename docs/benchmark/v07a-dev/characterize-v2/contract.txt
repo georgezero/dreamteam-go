@@ -1,0 +1,290 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 2 (development) · suite run v07a-characterize-v2 · engine 0.7.0-dev.1
+complete: 45 of 45 runs
+seeds 41401, 41402, 41403 · 90 days · decisions every 1 day(s) at 07:00 · policies noop@1, greedy@1, conservative-v2@2 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry               version  scenario                     fingerprint    T90             seed   runs  start          identical
+financial-pressure  2        bench-financial-pressure-ot  43f2729d06c7…  not_applicable  41401  3     e4e23fca967e…  yes
+financial-pressure  2        bench-financial-pressure-ot  43f2729d06c7…  not_applicable  41402  3     1028365b8cf8…  yes
+financial-pressure  2        bench-financial-pressure-ot  43f2729d06c7…  not_applicable  41403  3     211b28d32cdc…  yes
+reporting-backlog   2        sustainable-ot               366c6373c534…  not_applicable  41401  3     dff1dbc11f5f…  yes
+reporting-backlog   2        sustainable-ot               366c6373c534…  not_applicable  41402  3     382ccab68a6a…  yes
+reporting-backlog   2        sustainable-ot               366c6373c534…  not_applicable  41403  3     63a5e4bdb76d…  yes
+demand-growth       2        bench-demand-growth-ot       bc157649d633…  not_applicable  41401  3     dff1dbc11f5f…  yes
+demand-growth       2        bench-demand-growth-ot       bc157649d633…  not_applicable  41402  3     382ccab68a6a…  yes
+demand-growth       2        bench-demand-growth-ot       bc157649d633…  not_applicable  41403  3     63a5e4bdb76d…  yes
+staffing-shortage   2        bench-staffing-shortage-ot   9436e9881ae8…  not_applicable  41401  3     47b8cafdf04a…  yes
+staffing-shortage   2        bench-staffing-shortage-ot   9436e9881ae8…  not_applicable  41402  3     a51f4e392cf4…  yes
+staffing-shortage   2        bench-staffing-shortage-ot   9436e9881ae8…  not_applicable  41403  3     56de649419d7…  yes
+stable              2        bench-stable-ot              5bb6aa652c5b…  not_applicable  41401  3     d6d82bc8cb67…  yes
+stable              2        bench-stable-ot              5bb6aa652c5b…  not_applicable  41402  3     52f458af5cf3…  yes
+stable              2        bench-stable-ot              5bb6aa652c5b…  not_applicable  41403  3     3124bf8a96e2…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry               seed   policy             status     replay  actions o/s/r  T90
+financial-pressure  41401  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure  41401  greedy@1           completed  ok      0/12/0         not_requested
+financial-pressure  41401  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure  41402  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure  41402  greedy@1           completed  ok      0/12/0         not_requested
+financial-pressure  41402  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure  41403  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure  41403  greedy@1           completed  ok      0/12/0         not_requested
+financial-pressure  41403  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog   41401  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog   41401  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog   41401  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog   41402  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog   41402  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog   41402  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog   41403  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog   41403  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog   41403  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth       41401  noop@1             completed  ok      0/0/0          not_requested
+demand-growth       41401  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth       41401  conservative-v2@2  completed  ok      0/1/0          not_requested
+demand-growth       41402  noop@1             completed  ok      0/0/0          not_requested
+demand-growth       41402  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth       41402  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth       41403  noop@1             completed  ok      0/0/0          not_requested
+demand-growth       41403  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth       41403  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage   41401  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage   41401  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage   41401  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage   41402  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage   41402  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage   41402  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage   41403  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage   41403  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage   41403  conservative-v2@2  completed  ok      0/0/0          not_requested
+stable              41401  noop@1             completed  ok      0/0/0          not_requested
+stable              41401  greedy@1           completed  ok      0/12/0         not_requested
+stable              41401  conservative-v2@2  completed  ok      0/2/0          not_requested
+stable              41402  noop@1             completed  ok      0/0/0          not_requested
+stable              41402  greedy@1           completed  ok      0/12/0         not_requested
+stable              41402  conservative-v2@2  completed  ok      0/2/0          not_requested
+stable              41403  noop@1             completed  ok      0/0/0          not_requested
+stable              41403  greedy@1           completed  ok      0/12/0         not_requested
+stable              41403  conservative-v2@2  completed  ok      0/0/0          not_requested
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry               policy           exams                  reports                TAT p50                      TAT p90                            backlog end   wait p50                  wait p90
+financial-pressure  noop             4,212 / 4,229 / 4,275  4,206 / 4,218 / 4,266  51 min / 52 min / 53 min     780 min / 796 min / 809 min        10 / 11 / 13  19 min / 20 min / 20 min  59 min / 63 min / 63 min
+financial-pressure  greedy           4,212 / 4,229 / 4,275  4,206 / 4,218 / 4,266  28 min / 28 min / 29 min     679 min / 703 min / 714 min        10 / 11 / 13  19 min / 20 min / 20 min  59 min / 63 min / 63 min
+financial-pressure  conservative-v2  4,212 / 4,229 / 4,275  4,206 / 4,218 / 4,266  51 min / 52 min / 53 min     780 min / 796 min / 809 min        10 / 11 / 13  19 min / 20 min / 20 min  59 min / 63 min / 63 min
+reporting-backlog   noop             4,537 / 4,542 / 4,620  4,516 / 4,527 / 4,603  97 min / 99 min / 110 min    956 min / 977 min / 1,002 min      18 / 23 / 35  21 min / 21 min / 22 min  66 min / 70 min / 72 min
+reporting-backlog   greedy           4,537 / 4,542 / 4,620  4,528 / 4,536 / 4,624  38 min / 38 min / 41 min     772 min / 803 min / 850 min        9 / 11 / 14   21 min / 21 min / 22 min  66 min / 70 min / 72 min
+reporting-backlog   conservative-v2  4,537 / 4,542 / 4,620  4,516 / 4,527 / 4,603  97 min / 99 min / 110 min    956 min / 977 min / 1,002 min      18 / 23 / 35  21 min / 21 min / 22 min  66 min / 70 min / 72 min
+demand-growth       noop             4,671 / 4,698 / 4,754  4,638 / 4,666 / 4,746  126 min / 141 min / 154 min  1,037 min / 1,100 min / 1,148 min  26 / 34 / 36  21 min / 21 min / 22 min  69 min / 70 min / 70 min
+demand-growth       greedy           4,671 / 4,698 / 4,754  4,664 / 4,689 / 4,758  40 min / 42 min / 45 min     801 min / 811 min / 853 min        10 / 11 / 14  21 min / 21 min / 22 min  69 min / 70 min / 70 min
+demand-growth       conservative-v2  4,671 / 4,698 / 4,754  4,638 / 4,666 / 4,746  126 min / 141 min / 154 min  1,037 min / 1,100 min / 1,148 min  26 / 34 / 36  21 min / 21 min / 22 min  69 min / 70 min / 70 min
+staffing-shortage   noop             4,341 / 4,343 / 4,395  4,331 / 4,332 / 4,382  39 min / 44 min / 44 min     706 min / 723 min / 772 min        10 / 11 / 15  19 min / 19 min / 20 min  68 min / 69 min / 70 min
+staffing-shortage   greedy           4,341 / 4,343 / 4,395  4,331 / 4,332 / 4,383  24 min / 26 min / 26 min     639 min / 646 min / 680 min        10 / 11 / 14  19 min / 19 min / 20 min  68 min / 69 min / 70 min
+staffing-shortage   conservative-v2  4,341 / 4,343 / 4,395  4,331 / 4,332 / 4,382  39 min / 44 min / 44 min     706 min / 723 min / 772 min        10 / 11 / 15  19 min / 19 min / 20 min  68 min / 69 min / 70 min
+stable              noop             4,725 / 4,743 / 4,839  4,743 / 4,749 / 4,835  98 min / 108 min / 113 min   863 min / 889 min / 895 min        11 / 13 / 19  18 min / 19 min / 19 min  56 min / 56 min / 56 min
+stable              greedy           4,725 / 4,743 / 4,839  4,743 / 4,752 / 4,840  48 min / 52 min / 54 min     720 min / 742 min / 748 min        10 / 11 / 14  18 min / 19 min / 19 min  56 min / 56 min / 56 min
+stable              conservative-v2  4,725 / 4,743 / 4,839  4,743 / 4,749 / 4,835  92 min / 100 min / 113 min   841 min / 864 min / 895 min        11 / 13 / 19  18 min / 19 min / 19 min  56 min / 56 min / 56 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry               policy           net revenue                     expenses                        profit                          margin                    op. cash flow
+financial-pressure  noop             $678,667 / $681,386 / $686,353  $732,070 / $733,900 / $737,568  -$53,403 / -$52,514 / -$51,214  -7.9% / -7.7% / -7.5%     -$108,127 / -$101,650 / -$97,871
+financial-pressure  greedy           $678,700 / $681,386 / $686,390  $764,652 / $766,448 / $770,151  -$85,951 / -$85,062 / -$83,761  -12.7% / -12.5% / -12.2%  -$136,634 / -$130,828 / -$126,356
+financial-pressure  conservative-v2  $678,667 / $681,386 / $686,353  $732,070 / $733,900 / $737,568  -$53,403 / -$52,514 / -$51,214  -7.9% / -7.7% / -7.5%     -$108,127 / -$101,650 / -$97,871
+reporting-backlog   noop             $724,975 / $730,204 / $736,000  $749,509 / $752,357 / $752,379  -$24,534 / -$22,175 / -$16,358  -3.4% / -3.0% / -2.2%     -$81,565 / -$75,964 / -$74,497
+reporting-backlog   greedy           $727,439 / $733,827 / $737,548  $783,376 / $785,618 / $786,227  -$55,937 / -$51,791 / -$48,679  -7.7% / -7.1% / -6.6%     -$110,764 / -$106,395 / -$104,867
+reporting-backlog   conservative-v2  $724,975 / $730,204 / $736,000  $749,509 / $752,357 / $752,379  -$24,534 / -$22,175 / -$16,358  -3.4% / -3.0% / -2.2%     -$81,565 / -$75,964 / -$74,497
+demand-growth       noop             $736,548 / $744,348 / $749,176  $752,562 / $754,215 / $755,413  -$16,014 / -$11,066 / -$5,039   -2.2% / -1.5% / -0.7%     -$80,863 / -$75,634 / -$73,720
+demand-growth       greedy           $741,011 / $747,095 / $753,656  $786,480 / $788,126 / $788,684  -$45,470 / -$41,589 / -$34,470  -6.1% / -5.6% / -4.6%     -$109,446 / -$105,051 / -$103,301
+demand-growth       conservative-v2  $736,548 / $744,348 / $749,176  $752,562 / $754,215 / $755,413  -$16,014 / -$11,066 / -$5,039   -2.2% / -1.5% / -0.7%     -$80,863 / -$75,634 / -$73,720
+staffing-shortage   noop             $660,202 / $667,083 / $677,947  $710,828 / $713,806 / $716,135  -$50,625 / -$46,724 / -$38,188  -7.7% / -7.0% / -5.6%     -$102,334 / -$98,290 / -$96,207
+staffing-shortage   greedy           $660,202 / $667,051 / $677,963  $743,376 / $746,369 / $748,700  -$83,173 / -$79,319 / -$70,737  -12.6% / -11.9% / -10.4%  -$131,217 / -$127,468 / -$125,050
+staffing-shortage   conservative-v2  $660,202 / $667,083 / $677,947  $710,828 / $713,806 / $716,135  -$50,625 / -$46,724 / -$38,188  -7.7% / -7.0% / -5.6%     -$102,334 / -$98,290 / -$96,207
+stable              noop             $758,147 / $760,941 / $771,107  $753,471 / $756,677 / $760,482  $4,264 / $4,676 / $10,626       0.6% / 0.6% / 1.4%        -$54,634 / -$51,563 / -$50,854
+stable              greedy           $758,150 / $761,784 / $771,277  $786,023 / $789,967 / $793,700  -$28,184 / -$27,872 / -$22,423  -3.7% / -3.7% / -2.9%     -$82,799 / -$81,142 / -$79,960
+stable              conservative-v2  $758,147 / $760,941 / $771,120  $755,772 / $756,677 / $762,796  $2,374 / $4,264 / $8,324        0.3% / 0.6% / 1.1%        -$54,634 / -$53,608 / -$53,155
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry               policy           orders                 lost                   lost rate              overtime                              held over        skipped breaks  no coverage
+financial-pressure  noop             4,776 / 4,886 / 4,918  496 / 516 / 549        10.4% / 10.6% / 11.2%  8,125 min / 8,368 min / 9,467 min     113 / 114 / 116  0 / 1 / 1       0
+financial-pressure  greedy           4,776 / 4,886 / 4,918  496 / 516 / 549        10.4% / 10.6% / 11.2%  8,125 min / 8,368 min / 9,467 min     113 / 114 / 116  0 / 1 / 1       0
+financial-pressure  conservative-v2  4,776 / 4,886 / 4,918  496 / 516 / 549        10.4% / 10.6% / 11.2%  8,125 min / 8,368 min / 9,467 min     113 / 114 / 116  0 / 1 / 1       0
+reporting-backlog   noop             5,389 / 5,546 / 5,584  734 / 761 / 813        13.6% / 13.7% / 14.6%  11,810 min / 12,215 min / 12,272 min  129 / 130 / 147  0 / 0 / 1       1 / 1 / 2
+reporting-backlog   greedy           5,389 / 5,546 / 5,584  734 / 761 / 813        13.6% / 13.7% / 14.6%  11,810 min / 12,215 min / 12,272 min  129 / 130 / 147  0 / 0 / 1       1 / 1 / 2
+reporting-backlog   conservative-v2  5,389 / 5,546 / 5,584  734 / 761 / 813        13.6% / 13.7% / 14.6%  11,810 min / 12,215 min / 12,272 min  129 / 130 / 147  0 / 0 / 1       1 / 1 / 2
+demand-growth       noop             5,958 / 6,122 / 6,164  919 / 989 / 1,038      15.4% / 16.2% / 16.8%  12,596 min / 12,732 min / 13,151 min  131 / 136 / 147  0 / 0 / 1       0 / 1 / 1
+demand-growth       greedy           5,958 / 6,122 / 6,164  919 / 989 / 1,038      15.4% / 16.2% / 16.8%  12,596 min / 12,732 min / 13,151 min  131 / 136 / 147  0 / 0 / 1       0 / 1 / 1
+demand-growth       conservative-v2  5,958 / 6,122 / 6,164  919 / 989 / 1,038      15.4% / 16.2% / 16.8%  12,596 min / 12,732 min / 13,151 min  131 / 136 / 147  0 / 0 / 1       0 / 1 / 1
+staffing-shortage   noop             5,389 / 5,546 / 5,584  1,005 / 1,020 / 1,106  18.4% / 18.6% / 19.8%  11,224 min / 11,674 min / 11,944 min  132 / 134 / 144  0               0
+staffing-shortage   greedy           5,389 / 5,546 / 5,584  1,005 / 1,020 / 1,106  18.4% / 18.6% / 19.8%  11,224 min / 11,674 min / 11,944 min  132 / 134 / 144  0               0
+staffing-shortage   conservative-v2  5,389 / 5,546 / 5,584  1,005 / 1,020 / 1,106  18.4% / 18.6% / 19.8%  11,224 min / 11,674 min / 11,944 min  132 / 134 / 144  0               0
+stable              noop             5,389 / 5,546 / 5,584  593 / 597 / 632        10.7% / 11.1% / 11.3%  8,401 min / 8,552 min / 9,681 min     125 / 128 / 129  0               0
+stable              greedy           5,389 / 5,546 / 5,584  593 / 597 / 632        10.7% / 11.1% / 11.3%  8,401 min / 8,552 min / 9,681 min     125 / 128 / 129  0               0
+stable              conservative-v2  5,389 / 5,546 / 5,584  593 / 597 / 632        10.7% / 11.1% / 11.3%  8,401 min / 8,552 min / 9,681 min     125 / 128 / 129  0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry               policy           over target      breaches         waits >30              displaced  alerts           alerts at end
+financial-pressure  noop             253 / 285 / 289  245 / 278 / 279  1,325 / 1,331 / 1,402  absent     274 / 280 / 282  2
+financial-pressure  greedy           210 / 251 / 254  202 / 244 / 244  1,325 / 1,331 / 1,402  absent     271 / 273 / 280  3
+financial-pressure  conservative-v2  253 / 285 / 289  245 / 278 / 279  1,325 / 1,331 / 1,402  absent     274 / 280 / 282  2
+reporting-backlog   noop             412 / 427 / 458  398 / 406 / 428  1,537 / 1,542 / 1,706  absent     306 / 313 / 347  2
+reporting-backlog   greedy           299 / 300 / 348  291 / 293 / 338  1,537 / 1,542 / 1,706  absent     305 / 310 / 346  2
+reporting-backlog   conservative-v2  412 / 427 / 458  398 / 406 / 428  1,537 / 1,542 / 1,706  absent     306 / 313 / 347  2
+demand-growth       noop             516 / 522 / 563  483 / 489 / 543  1,643 / 1,664 / 1,778  absent     318 / 330 / 335  2
+demand-growth       greedy           286 / 324 / 329  279 / 314 / 320  1,643 / 1,664 / 1,778  absent     316 / 327 / 334  2
+demand-growth       conservative-v2  516 / 522 / 563  483 / 489 / 543  1,643 / 1,664 / 1,778  absent     318 / 330 / 335  2
+staffing-shortage   noop             249 / 250 / 258  240 / 243 / 247  1,330 / 1,355 / 1,433  absent     275 / 303 / 311  2
+staffing-shortage   greedy           223 / 228 / 238  216 / 219 / 228  1,330 / 1,355 / 1,433  absent     274 / 302 / 311  3
+staffing-shortage   conservative-v2  249 / 250 / 258  240 / 243 / 247  1,330 / 1,355 / 1,433  absent     275 / 303 / 311  2
+stable              noop             316 / 329 / 339  307 / 315 / 329  1,426 / 1,427 / 1,539  absent     239 / 248 / 265  2 / 2 / 3
+stable              greedy           267 / 273 / 290  258 / 263 / 283  1,426 / 1,427 / 1,539  absent     237 / 242 / 257  2 / 2 / 3
+stable              conservative-v2  311 / 327 / 329  302 / 315 / 317  1,426 / 1,427 / 1,539  absent     239 / 248 / 262  2 / 2 / 3
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry               policy           min cash                     shortfall  days < 0
+financial-pressure  noop             $35,725 / $38,581 / $42,996  $0         0
+financial-pressure  greedy           $6,547 / $9,475 / $17,653    $0         0
+financial-pressure  conservative-v2  $35,725 / $38,581 / $42,996  $0         0
+reporting-backlog   noop             $46,234 / $50,502 / $50,544  $0         0
+reporting-backlog   greedy           $30,004 / $35,284 / $39,061  $0         0
+reporting-backlog   conservative-v2  $46,234 / $50,502 / $50,544  $0         0
+demand-growth       noop             $46,234 / $50,502 / $50,544  $0         0
+demand-growth       greedy           $29,643 / $35,644 / $40,088  $0         0
+demand-growth       conservative-v2  $46,234 / $50,502 / $50,544  $0         0
+staffing-shortage   noop             $36,713 / $40,530 / $47,788  $0         0
+staffing-shortage   greedy           $10,861 / $15,347 / $18,610  $0         0
+staffing-shortage   conservative-v2  $36,713 / $40,530 / $47,788  $0         0
+stable              noop             $47,955 / $53,368 / $53,672  $0         0
+stable              greedy           $47,955 / $53,368 / $53,672  $0         0
+stable              conservative-v2  $47,955 / $53,368 / $53,672  $0         0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry               policy           attempted  accepted   rejected  operations  staffing
+financial-pressure  noop             0          0          0         0           0
+financial-pressure  greedy           12         12         0         0           12
+financial-pressure  conservative-v2  0          0          0         0           0
+reporting-backlog   noop             0          0          0         0           0
+reporting-backlog   greedy           12         12         0         0           12
+reporting-backlog   conservative-v2  0          0          0         0           0
+demand-growth       noop             0          0          0         0           0
+demand-growth       greedy           12         12         0         0           12
+demand-growth       conservative-v2  0 / 0 / 1  0 / 0 / 1  0         0           0 / 0 / 1
+staffing-shortage   noop             0          0          0         0           0
+staffing-shortage   greedy           12         12         0         0           12
+staffing-shortage   conservative-v2  0          0          0         0           0
+stable              noop             0          0          0         0           0
+stable              greedy           12         12         0         0           12
+stable              conservative-v2  0 / 2 / 2  0 / 2 / 2  0         0           0 / 2 / 2
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry               policy           seeds  exams  reports         TAT p50                      TAT p90                        backlog end     wait p50  wait p90
+financial-pressure  greedy           3      0      0               -24 min [-25 min, -23 min]   -94 min [-101 min, -93 min]    0               0 min     0 min
+financial-pressure  conservative-v2  3      0      0               0 min                        0 min                          0               0 min     0 min
+reporting-backlog   greedy           3      0      +12 [+9, +21]   -62 min [-69 min, -59 min]   -153 min [-206 min, -151 min]  -12 [-21, -9]   0 min     0 min
+reporting-backlog   conservative-v2  3      0      0               0 min                        0 min                          0               0 min     0 min
+demand-growth       greedy           3      0      +23 [+12, +26]  -99 min [-109 min, -86 min]  -288 min [-295 min, -236 min]  -23 [-26, -12]  0 min     0 min
+demand-growth       conservative-v2  3      0      0               0 min                        0 min                          0               0 min     0 min
+staffing-shortage   greedy           3      0      0 [0, +1]       -17 min [-18 min, -15 min]   -84 min [-93 min, -60 min]     0 [-1, 0]       0 min     0 min
+staffing-shortage   conservative-v2  3      0      0               0 min                        0 min                          0               0 min     0 min
+stable              greedy           3      0      +3 [0, +5]      -56 min [-59 min, -50 min]   -146 min [-147 min, -143 min]  -3 [-5, 0]      0 min     0 min
+stable              conservative-v2  3      0      0               -6 min [-8 min, 0 min]       -22 min [-25 min, 0 min]       0               0 min     0 min
+
+Financial performance
+
+entry               policy           seeds  net revenue                 expenses                       profit                         margin  op. cash flow
+financial-pressure  greedy           3      +$34 [$0, +$36]             +$32,582 [+$32,548, +$32,583]  -$32,548 [-$32,548, -$32,547]  n/a     -$28,506 [-$29,178, -$28,485]
+financial-pressure  conservative-v2  3      $0                          $0                             $0                             n/a     $0
+reporting-backlog   greedy           3      +$2,464 [+$1,549, +$3,624]  +$33,867 [+$33,239, +$33,870]  -$31,403 [-$32,321, -$29,616]  n/a     -$30,370 [-$30,431, -$29,199]
+reporting-backlog   conservative-v2  3      $0                          $0                             $0                             n/a     $0
+demand-growth       greedy           3      +$4,462 [+$2,747, +$4,479]  +$33,910 [+$33,271, +$33,918]  -$29,455 [-$30,524, -$29,431]  n/a     -$29,418 [-$29,581, -$28,583]
+demand-growth       conservative-v2  3      $0                          $0                             $0                             n/a     $0
+staffing-shortage   greedy           3      $0 [-$32, +$16]             +$32,563 [+$32,548, +$32,565]  -$32,549 [-$32,595, -$32,548]  n/a     -$28,882 [-$29,178, -$28,843]
+staffing-shortage   conservative-v2  3      $0                          $0                             $0                             n/a     $0
+stable              greedy           3      +$169 [+$4, +$842]          +$33,219 [+$32,552, +$33,290]  -$32,548 [-$33,049, -$32,448]  n/a     -$29,106 [-$29,580, -$28,165]
+stable              conservative-v2  3      $0 [$0, +$13]               +$2,301 [$0, +$2,314]          -$2,301 [-$2,301, $0]          n/a     -$2,045 [-$2,301, $0]
+
+Staffing and capacity
+
+entry               policy           seeds  orders  lost  lost rate  overtime  held over  skipped breaks  no coverage
+financial-pressure  greedy           3      0       0     n/a        0 min     0          0               0
+financial-pressure  conservative-v2  3      0       0     n/a        0 min     0          0               0
+reporting-backlog   greedy           3      0       0     n/a        0 min     0          0               0
+reporting-backlog   conservative-v2  3      0       0     n/a        0 min     0          0               0
+demand-growth       greedy           3      0       0     n/a        0 min     0          0               0
+demand-growth       conservative-v2  3      0       0     n/a        0 min     0          0               0
+staffing-shortage   greedy           3      0       0     n/a        0 min     0          0               0
+staffing-shortage   conservative-v2  3      0       0     n/a        0 min     0          0               0
+stable              greedy           3      0       0     n/a        0 min     0          0               0
+stable              conservative-v2  3      0       0     n/a        0 min     0          0               0
+
+Service reliability
+
+entry               policy           seeds  over target        breaches           waits >30  displaced  alerts       alerts at end
+financial-pressure  greedy           3      -35 [-43, -34]     -35 [-43, -34]     0          n/a        -3 [-7, -2]  +1
+financial-pressure  conservative-v2  3      0                  0                  0          n/a        0            0
+reporting-backlog   greedy           3      -113 [-127, -110]  -105 [-115, -90]   0          n/a        -1 [-3, -1]  0
+reporting-backlog   conservative-v2  3      0                  0                  0          n/a        0            0
+demand-growth       greedy           3      -234 [-236, -192]  -210 [-223, -169]  0          n/a        -2 [-3, -1]  0
+demand-growth       conservative-v2  3      0                  0                  0          n/a        0            0
+staffing-shortage   greedy           3      -21 [-27, -20]     -21 [-27, -19]     0          n/a        -1 [-1, 0]   +1
+staffing-shortage   conservative-v2  3      0                  0                  0          n/a        0            0
+stable              greedy           3      -49 [-56, -49]     -49 [-52, -46]     0          n/a        -6 [-8, -2]  0
+stable              conservative-v2  3      -5 [-12, 0]        -5 [-12, 0]        0          n/a        0 [-3, 0]    0
+
+Long-term sustainability
+
+entry               policy           seeds  min cash                       shortfall  days < 0
+financial-pressure  greedy           3      -$29,106 [-$29,178, -$25,343]  $0         0
+financial-pressure  conservative-v2  3      $0                             $0         0
+reporting-backlog   greedy           3      -$11,441 [-$20,540, -$10,950]  $0         0
+reporting-backlog   conservative-v2  3      $0                             $0         0
+demand-growth       greedy           3      -$10,590 [-$20,901, -$10,414]  $0         0
+demand-growth       conservative-v2  3      $0                             $0         0
+staffing-shortage   greedy           3      -$25,851 [-$29,178, -$25,183]  $0         0
+staffing-shortage   conservative-v2  3      $0                             $0         0
+stable              greedy           3      $0                             $0         0
+stable              conservative-v2  3      $0                             $0         0
+
+Actions
+
+entry               policy           seeds  attempted   accepted    rejected
+financial-pressure  greedy           3      +12         +12         0
+financial-pressure  conservative-v2  3      0           0           0
+reporting-backlog   greedy           3      +12         +12         0
+reporting-backlog   conservative-v2  3      0           0           0
+demand-growth       greedy           3      +12         +12         0
+demand-growth       conservative-v2  3      0 [0, +1]   0 [0, +1]   0
+staffing-shortage   greedy           3      +12         +12         0
+staffing-shortage   conservative-v2  3      0           0           0
+stable              greedy           3      +12         +12         0
+stable              conservative-v2  3      +2 [0, +2]  +2 [0, +2]  0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 45 run(s): displacedAppointments: none displaced
