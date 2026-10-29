@@ -62,7 +62,8 @@ const StateSchema = "dreamteam.state/v3"
 // encoded only when non-empty (non-nil), after omitTag: fields added to
 // the v3 encoding.
 var omitEmpty = map[string]bool{"employment.Rosters": true, "employment.RosterLog": true,
-	"employment.Allocs": true, "employment.AllocLog": true, "state.tele": true}
+	"employment.Allocs": true, "employment.AllocLog": true, "state.tele": true,
+	"finState.credit": true}
 
 // acctArrays names account-indexed array fields, by "Type.field". Their
 // first numV3Accounts elements encode as the array did under v3; the
@@ -215,21 +216,25 @@ func (d *stateHasher) value(v reflect.Value) {
 	}
 }
 
-// accounts encodes an account-indexed array (acctArrays).
+// accounts encodes an account-indexed array (acctArrays): the v3 chart,
+// then each group appended since (Slice 5B's, V0.7b's) after an omitTag,
+// only when one of its accounts is non-zero.
 func (d *stateHasher) accounts(x reflect.Value) {
 	n := int(numV3Accounts)
 	d.u64(uint64(n))
 	for i := 0; i < n; i++ {
 		d.value(x.Index(i))
 	}
-	for i := n; i < x.Len(); i++ {
-		if !x.Index(i).IsZero() {
-			d.u64(omitTag)
-			d.u64(uint64(x.Len() - n))
-			for ; n < x.Len(); n++ {
-				d.value(x.Index(n))
+	for _, g := range [][2]int{{int(numV3Accounts), int(numV5Accounts)}, {int(numV5Accounts), x.Len()}} {
+		for i := g[0]; i < g[1]; i++ {
+			if !x.Index(i).IsZero() {
+				d.u64(omitTag)
+				d.u64(uint64(g[1] - g[0]))
+				for k := g[0]; k < g[1]; k++ {
+					d.value(x.Index(k))
+				}
+				break
 			}
-			return
 		}
 	}
 }

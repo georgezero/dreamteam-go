@@ -252,6 +252,7 @@ func (st *state) windowMoney() api.WindowMoney {
 	m.APChangeCents = -b.net[acctAP]
 	m.PayrollChangeCents = -b.net[acctAccruedPayroll]
 	m.SeverancePayableChangeCents = -b.net[acctSeverancePayable]
+	m.CreditChangeCents, m.InterestCents = -b.net[acctCreditLine], b.net[acctInterest]
 	m.CashEndCents = ev.base.CashCents + m.CashChangeCents
 	m.MinCashCents = ev.minCash
 	m.ShortfallCents = max(0, -ev.minCash)
@@ -259,6 +260,6 @@ func (st *state) windowMoney() api.WindowMoney {
 	bridge := m.OperatingProfitCents - m.InheritedVarianceCents + m.AllocatedAccrualCents -
 		m.ARChangeCents + m.APChangeCents + m.PayrollChangeCents + m.SeverancePayableChangeCents
 	m.Reconciled = bridge == m.OperatingCashFlowCents &&
-		m.OperatingCashFlowCents+m.CapitalTransfersCents == m.CashChangeCents
+		m.OperatingCashFlowCents+m.CapitalTransfersCents+m.CreditChangeCents == m.CashChangeCents
 	return m
 }

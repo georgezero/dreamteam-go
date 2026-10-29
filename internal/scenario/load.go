@@ -77,6 +77,16 @@ type Finance struct {
 	PayrollAnchor         string      `json:"payrollAnchor"` // a payday
 	PayrollEveryDays      int64       `json:"payrollEveryDays"`
 	FixedMonthly          []FixedCost `json:"fixedMonthly"`
+	// Solvency (V0.7b) turns on the credit line and the funding rule for
+	// discretionary actions (docs/V0.7_SOLVENCY_DESIGN.md). Omitted in
+	// every scenario before V0.7b: cash may go below zero, unenforced.
+	Solvency *Solvency `json:"solvency,omitempty"`
+}
+
+// Solvency is a scenario's credit line (V0.7b). Both fields are required.
+type Solvency struct {
+	CreditLimitCents *int64 `json:"creditLimitCents"` // 0 (no credit) to 100000000
+	CreditRateBP     *int64 `json:"creditRateBP"`     // simple annual interest, 0–5000
 }
 
 // Payer is a payer class and its outcome model.

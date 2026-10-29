@@ -43,12 +43,20 @@ const (
 	// fees, both owed to the vendor through accounts payable.
 	acctRemoteRetainer
 	acctRemoteReads
+	// V0.7b (appended): the credit line's drawn balance and its interest,
+	// both only under a scenario's finance.solvency.
+	acctCreditLine
+	acctInterest
 	numAccounts
 )
 
 // numV3Accounts is the chart the state/v3 encoding was defined with:
 // accounts appended after it are encoded only when non-zero (digest.go).
 const numV3Accounts = acctRemoteRetainer
+
+// numV5Accounts is the chart before V0.7b: the accounts appended after it
+// are encoded, after their own omitTag, only when non-zero (digest.go).
+const numV5Accounts = acctCreditLine
 
 // numLegacyAccounts is the V0.1 chart of accounts: its accounts are
 // always listed; a V0.2 account only once it has a balance (so a run
@@ -89,6 +97,8 @@ var accountInfo = [numAccounts]struct {
 	acctSeverancePayable: {"severance_payable", "Severance payable", kindLiability},
 	acctRemoteRetainer:   {"remote_retainer", "Teleradiology retainers", kindExpense},
 	acctRemoteReads:      {"remote_reads", "Teleradiology read fees", kindExpense},
+	acctCreditLine:       {"credit_line", "Credit line drawn", kindLiability},
+	acctInterest:         {"interest", "Interest on the credit line", kindExpense},
 }
 
 // listed reports whether account a appears in a chart listing.
@@ -131,6 +141,9 @@ const (
 	entRetainer                          // teleradiology retainer for an active day (a: contract×3 + window, b: day)
 	entRemoteRead                        // teleradiology read fee at report final (a: study, b: remote claim)
 	entRadOvertime                       // a salaried radiologist's overtime for a worked day, policy salary_rate (a: employee, b: day)
+	entCreditDraw                        // credit line drawn after a disbursement (a: day, b: 0 payroll, 1 payables, 2+employee severance)
+	entCreditRepay                       // credit line repaid at 00:00 (a: day)
+	entInterest                          // a day's interest on the credit line (a: day)
 )
 
 // entryKey is an entry's idempotency key.
@@ -154,7 +167,7 @@ type dayBook struct {
 	net      [numAccounts]int64
 	byMod    [numAccounts][maxMods]int64
 	receipts int64   // cash in from payments
-	paidOut  int64   // cash out: payroll and payables
+	paidOut  int64   // cash out: payroll and payables (credit draws and repayments are neither)
 	fixed    int64   // expense posted by fixed-cost accruals (and their reversals)
 	items    []int64 // fixed-cost expense by item
 }
@@ -246,7 +259,7 @@ func (l *ledger) book(b *dayBook, key entryKey, kind entryKind, lines []line) {
 		if ln.mod >= 0 {
 			b.byMod[ln.acct][ln.mod] += ln.amt
 		}
-		if ln.acct == acctCash && key.kind != entOpening {
+		if ln.acct == acctCash && key.kind != entOpening && kind != entCreditDraw && kind != entCreditRepay {
 			if ln.amt > 0 {
 				b.receipts += ln.amt
 			} else {
@@ -329,7 +342,7 @@ func (l *ledger) checkDays(opening int64) error {
 		for a := range numAccounts {
 			sum[a] += l.days[d].net[a]
 		}
-		cash += l.days[d].receipts - l.days[d].paidOut
+		cash += l.days[d].receipts - l.days[d].paidOut - l.days[d].net[acctCreditLine]
 	}
 	if sum != l.bal {
 		return fmt.Errorf("ledger: day books %v, balances %v", sum, l.bal)

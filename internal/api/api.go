@@ -741,6 +741,7 @@ type BalanceSheet struct {
 	PayablesCents           int64 `json:"payablesCents"`
 	AccruedPayrollCents     int64 `json:"accruedPayrollCents"`
 	SeverancePayableCents   int64 `json:"severancePayableCents,omitempty"` // V0.2: recognized, not yet paid
+	CreditLineCents         int64 `json:"creditLineCents,omitempty"`       // V0.7b: credit line drawn
 	LiabilitiesCents        int64 `json:"liabilitiesCents"`
 	OpeningCapitalCents     int64 `json:"openingCapitalCents"`
 	HistoryEarningsCents    int64 `json:"historyEarningsCents"`
@@ -784,6 +785,33 @@ type Financing struct {
 	MinCashTime       string `json:"minCashTime,omitempty"`
 	DaysBelowZero     int64  `json:"daysBelowZero"` // days since day 1 that ended with cash < 0
 	CreditLineModeled bool   `json:"creditLineModeled"`
+	// Solvency (V0.7b) is the credit line and funding headroom, only in a
+	// scenario with finance.solvency (then creditLineModeled is true).
+	Solvency *Solvency `json:"solvency,omitempty"`
+}
+
+// Solvency is a practice's credit line and funding headroom (V0.7b,
+// docs/V0.7_SOLVENCY_DESIGN.md). A discretionary commitment is accepted
+// only if it fits in the headroom: cash plus undrawn credit, less current
+// liabilities and commitments already reserved.
+type Solvency struct {
+	CreditLimitCents        int64 `json:"creditLimitCents"`
+	CreditRateBP            int64 `json:"creditRateBP"` // simple annual interest
+	CreditDrawnCents        int64 `json:"creditDrawnCents"`
+	CreditAvailableCents    int64 `json:"creditAvailableCents"`
+	CurrentLiabilitiesCents int64 `json:"currentLiabilitiesCents"` // accrued payroll, payables, severance payable
+	ReservedCents           int64 `json:"reservedCents"`           // accepted commitments not yet accrued
+	FundingHeadroomCents    int64 `json:"fundingHeadroomCents"`
+	InterestChargedCents    int64 `json:"interestChargedCents"` // since the takeover
+}
+
+// Funding is a staffing batch's funding test (V0.7b): its commitments
+// against the funding headroom, under a credit line.
+type Funding struct {
+	CommitmentCents int64  `json:"commitmentCents"`
+	HeadroomCents   int64  `json:"headroomCents"`
+	Funded          bool   `json:"funded"`
+	Basis           string `json:"basis"`
 }
 
 // ModalityMoney is revenue and direct cost for one modality. Direct cost
@@ -914,6 +942,9 @@ type DaySummary struct {
 	// ProFormaCashEndCents is cash end adjusted as if the takeover capital
 	// had been in place throughout (pro forma, not actual).
 	ProFormaCashEndCents int64 `json:"proFormaCashEndCents"`
+	// CreditDrawnEndCents (V0.7b) is the credit line drawn at the end of
+	// the day (omitted when zero).
+	CreditDrawnEndCents int64 `json:"creditDrawnEndCents,omitempty"`
 	// End-of-day balances (or now, for today): what is still owed and
 	// outstanding.
 	ARCents             int64         `json:"arCents"`
@@ -1323,6 +1354,11 @@ type WindowMoney struct {
 	PayrollChangeCents        int64 `json:"payrollChangeCents"`
 	// V0.2: severance recognized less severance paid (omitted when zero).
 	SeverancePayableChangeCents int64 `json:"severancePayableChangeCents,omitempty"`
+	// V0.7b, under a credit line (omitted when zero): the change in the
+	// balance drawn (a financing cash flow, outside operating cash flow)
+	// and the interest charged, part of operating expense.
+	CreditChangeCents int64 `json:"creditChangeCents,omitempty"`
+	InterestCents     int64 `json:"interestCents,omitempty"`
 
 	CashEndCents   int64 `json:"cashEndCents"`
 	MinCashCents   int64 `json:"minCashCents"`
@@ -1558,6 +1594,9 @@ type StaffingPreview struct {
 	Displacements []DisplacementPreview `json:"displacements,omitempty"`
 	Guaranteed    []MoneyLine           `json:"guaranteed,omitempty"`
 	Forecast      []MoneyLine           `json:"forecast,omitempty"`
+	// Funding (V0.7b): the funding test, under a credit line, once every
+	// item is otherwise valid.
+	Funding *Funding `json:"funding,omitempty"`
 }
 
 // HirePreview is a valid hire's terms and timeline.

@@ -1,6 +1,6 @@
 {
  "schema": "dreamteam.golden-migration/v1",
- "engine": "0.7.0-dev.1",
+ "engine": "0.7.0-dev.2",
  "stateSchema": "dreamteam.state/v3",
  "explanation": [
   "V0.2 Slice 1 (employee contracts): the state digest's encoding became dreamteam.state/v2. It added the employment registry (identity, lifecycle stage, employed dates, contract terms) and each hourly employee's weekly guaranteed-pay counters.",
@@ -47,7 +47,8 @@
   "0.6.0-dev.2 (V0.6b, the benchmark suite runner) changes no engine behaviour: the benchmark harness gains suite runs, the contract report and a conservative built-in policy; every reference is reproduced in every field as under 0.6.0-dev.1. A 0.6.0-dev.1 session file replays in batch mode v0.6_dev1: this build's action set and rules, with every digest verified.",
   "0.6.0-dev.3 (V0.6c, conservative v2 and the frozen-agent evaluation) changes no engine behaviour: the benchmark harness gains a fifth built-in policy; every reference is reproduced in every field as under 0.6.0-dev.2. A 0.6.0-dev.2 session file replays in batch mode v0.6_dev2: this build's action set and rules, with every digest verified.",
   "0.6.0 (the V0.6 release) changes no engine behaviour: release documentation and the version only; every reference is reproduced in every field as under 0.6.0-dev.3. A 0.6.0-dev.3 session file replays in batch mode v0.6_dev3: this build's action set and rules, with every digest verified.",
-  "0.7.0-dev.1 (V0.7a, radiologist overtime costing) changes no behaviour of any existing scenario: the new scenario policy radiologistOvertime is omitted, meaning unpaid, everywhere it is not set; every reference is reproduced in every field as under 0.6.0. A 0.6.0 session file replays in batch mode v0.6.0: this build's action set and rules, with every digest verified."
+  "0.7.0-dev.1 (V0.7a, radiologist overtime costing) changes no behaviour of any existing scenario: the new scenario policy radiologistOvertime is omitted, meaning unpaid, everywhere it is not set; every reference is reproduced in every field as under 0.6.0. A 0.6.0 session file replays in batch mode v0.6.0: this build's action set and rules, with every digest verified.",
+  "0.7.0-dev.2 (V0.7b, financial solvency) changes no behaviour of any existing scenario: the new scenario setting finance.solvency is absent everywhere it is not set, and without it no credit line, interest, reservation or funding check exists; every reference is reproduced in every field as under 0.7.0-dev.1. A 0.7.0-dev.1 session file replays in batch mode v0.7_dev1: this build's action set and rules, with every digest verified."
  ],
  "references": {
   "established-seed1-7d.json": {

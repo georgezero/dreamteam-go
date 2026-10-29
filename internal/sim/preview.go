@@ -98,6 +98,14 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 	for _, r := range out.Results {
 		out.OK = out.OK && r.OK
 	}
+	if sv := st.solvency(); sv != nil && slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
+		// The funding test of the batch (V0.7b): known once every item is
+		// otherwise valid.
+		if _, p := st.staffBatch(w.eng, actions, false, v2Actions); p.fund != nil {
+			out.Funding = &api.Funding{CommitmentCents: p.fund.commit, HeadroomCents: p.fund.headroom,
+				Funded: p.fund.commit == 0 || p.fund.commit <= p.fund.headroom, Basis: st.headroomText(sv)}
+		}
+	}
 	if !out.OK || !slices.ContainsFunc(actions, func(a api.Action) bool { return isV2Action(a.Type) }) {
 		return out
 	}
@@ -148,12 +156,7 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 		out.Hires = append(out.Hires, hp)
 		w := t.RateCents * int64(t.Contract.Weekly) / 3600
 		g := w + roundDiv(w*st.cfg.Finance.BenefitsBP, 10_000)
-		var exit int64
-		for d := sp.from; d <= sp.from+NoticeDays; d++ {
-			dd := st.cal.Date(st.cal.StartOfDay(d))
-			exit += t.Contract.DayCents(t.RateCents, st.cfg.RotaWeek(dd), dd.Weekday())
-		}
-		exit += roundDiv(exit*st.cfg.Finance.BenefitsBP, 10_000) + 2*w + roundDiv(2*w*st.cfg.Finance.BenefitsBP, 10_000)
+		exit := st.hireExit(sp)
 		who := offerLabel(t)
 		out.Guaranteed = append(out.Guaranteed,
 			api.MoneyLine{Label: "Recruiting fee · " + who, Cents: sp.fee, When: "recognized now, paid " + date(st.firstOfNextMonth()),
@@ -234,6 +237,20 @@ func (w *World) PreviewStaffing(actions []api.Action) api.StaffingPreview {
 				" have a feasible replacement by capacity. Whether each patient accepts is decided only at commit; lost exams lose their revenue"})
 	}
 	return out
+}
+
+// hireExit is a hire's earliest lawful exit: the contract guarantee from
+// the start to the earliest last day, plus two contracted weeks'
+// severance, with benefits.
+func (st *state) hireExit(sp *hireSpec) int64 {
+	t := &sp.terms
+	w := t.RateCents * int64(t.Contract.Weekly) / 3600
+	var exit int64
+	for d := sp.from; d <= sp.from+NoticeDays; d++ {
+		dd := st.cal.Date(st.cal.StartOfDay(d))
+		exit += t.Contract.DayCents(t.RateCents, st.cfg.RotaWeek(dd), dd.Weekday())
+	}
+	return exit + roundDiv(exit*st.cfg.Finance.BenefitsBP, 10_000) + 2*w + roundDiv(2*w*st.cfg.Finance.BenefitsBP, 10_000)
 }
 
 // firstOfNextMonth is the day index of the next 1st (A/P settlement).

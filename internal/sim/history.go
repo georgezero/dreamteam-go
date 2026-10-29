@@ -96,6 +96,7 @@ func (st *state) daySummary(d int64, now simtime.Time) api.DaySummary {
 	s.CollectionsCents, s.DisbursementsCents = s.Money.CollectionsCents, s.Money.DisbursementsCents
 	bal := led.balAtEnd(d)
 	s.CashEndCents = bal[acctCash]
+	s.CreditDrawnEndCents = -bal[acctCreditLine]
 	s.ARCents, s.APCents, s.AccruedPayrollCents = bal[acctAR], -bal[acctAP], -bal[acctAccruedPayroll]
 	s.ProFormaCashEndCents = s.CashEndCents
 	if st.fin.opened && st.cal.StartOfDay(d+1) <= st.fin.opening.at {

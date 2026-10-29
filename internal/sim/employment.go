@@ -305,6 +305,7 @@ func (st *state) paySeverance(now simtime.Time, day int64) {
 			line{acctSeverancePayable, -1, x.SeveranceCents, -1}, line{acctCash, -1, -x.SeveranceCents, -1})
 		x.Paid = true
 		st.fin.severancePaid += x.SeveranceCents
+		st.drawCredit(now, 2+int64(i), "severance", x.SeveranceCents)
 		st.noteCash(now)
 		st.emit(now, api.Info, "finance", fmt.Sprintf("Severance paid %s to %s", money(x.SeveranceCents), st.staffLabel(i)))
 	}

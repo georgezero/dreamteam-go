@@ -1647,6 +1647,21 @@ and in the log ("owner capital $568,829 added at takeover").
 * No credit line, interest or insolvency is modelled (V0.2). The shortfall
   exists so a negative balance is visible and measurable, never free
   borrowing.
+* **[V0.7b]** Exception, per scenario: under `finance.solvency`
+  ([V0.7_SOLVENCY_DESIGN.md](V0.7_SOLVENCY_DESIGN.md)):
+  * **Credit line.** A disbursement that would leave cash below zero draws
+    on a credit line, up to its limit.
+  * **Interest** on the balance drawn accrues daily to payables. Cash
+    above zero repays the line at midnight.
+  * **Distress.** Cash below zero means the line is fully drawn. That is
+    financial distress, logged at the disbursement. The obligation is
+    still paid.
+  * **Funding rule.** A discretionary commitment (a hire, a salary
+    increase, a teleradiology contract, a paid extension) is refused
+    `insufficient_funds` unless it fits in the funding headroom: cash
+    plus undrawn credit, less current liabilities and the commitments
+    already reserved.
+  * **Credit flows** are financing, outside collections and disbursements.
 
 **Convergence.** The test compares nine-seed means of a 180-day warm-up
 with a 365-day warm-up:
@@ -2055,7 +2070,7 @@ step 14).
 
 | Action | Rejection codes |
 |---|---|
-| `extend_shift` (1–240 min; `date` optional, today or a later day within the booking horizon) | `unknown_employee`, `invalid_minutes`, `invalid_date`, `past_date`, `beyond_horizon`, `not_on_shift`, `gone_home`, `shift_ended` (no retroactive approval), `exceeds_max_shift` (says how much is left), `after_close` (the shift already runs to scheduled close: an extension after close adds no capacity) |
+| `extend_shift` (1–240 min; `date` optional, today or a later day within the booking horizon) | `unknown_employee`, `invalid_minutes`, `invalid_date`, `past_date`, `beyond_horizon`, `not_on_shift`, `gone_home`, `shift_ended` (no retroactive approval), `exceeds_max_shift` (says how much is left), `after_close` (the shift already runs to scheduled close: an extension after close adds no capacity), **[V0.7b]** `insufficient_funds` (a paid extension the funding headroom cannot cover, under `finance.solvency` only) |
 | `set_walkin_policy` (`accept_always`, `accept_if_gap`, `accept_until` + `cutoff`, `schedule_later`) | `unknown_policy`, `invalid_cutoff` |
 | `set_worklist_policy` (`urgent_then_fifo`, `fifo`, `oldest_first`, `shortest_first`) | `unknown_policy`, `invalid_parameters` |
 | any other type | `unknown_action` |

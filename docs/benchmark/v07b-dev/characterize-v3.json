@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v07b-characterize-v3",
+ "description": "V0.7b characterization (docs/benchmark/v07b-dev/PLAN.md): suite dreamteam-dev version 3, the five practices with a $50,000 credit line at 10% (-credit) and with none (-nocredit), each with the funding rule; noop, greedy and conservative-v2; 90 days; paired with version 2's runs on the same practice, seed and policy. No LLM agent. No score, no ranking. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-3.json",
+ "seeds": [
+  41501,
+  41502,
+  41503
+ ],
+ "seedPlan": "Chosen 2026-10-29 and committed in the V0.7b plan (docs/benchmark/v07b-dev/PLAN.md) before any run on them: the next unused block after V0.7a's 41401-41403. None appears as a seed elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them. The same seeds for every suite version, so every run is paired.",
+ "days": 90,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

@@ -59,6 +59,7 @@ type staffOutcome struct {
 	roster    *rosterSpec
 	alloc     *allocSpec
 	tele      *teleSpec
+	fund      *funding // V0.7b: its commitment, under a credit line
 }
 
 // hireSpec is a validated hire, not yet committed.
@@ -104,6 +105,9 @@ type proposal struct {
 	tcons   []teleContract
 	treqs   map[string]bool
 	tcancel map[int]bool
+	// fund is the batch's funding test (V0.7b), set once every item is
+	// valid under a credit line.
+	fund *fundCheck
 }
 
 // staffBatch validates a V0.2 batch and, if do, commits it. known is the
@@ -171,6 +175,11 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 			out[k], fail = o, k
 		}
 	}
+	if fail < 0 && st.solvency() != nil {
+		if k, o := st.checkFunding(p, out); k >= 0 {
+			out[k], fail = o, k
+		}
+	}
 	if fail >= 0 {
 		for k := range out {
 			if k != fail {
@@ -202,6 +211,9 @@ func (st *state) staffBatch(e *Engine, actions []api.Action, do bool, known []st
 	}
 	for k := range out {
 		o := &out[k]
+		if o.code == api.ActionAccepted {
+			st.reserveFunding(o.fund, len(st.actions.log)+k)
+		}
 		switch {
 		case o.code != api.ActionAccepted:
 		case o.hire != nil:

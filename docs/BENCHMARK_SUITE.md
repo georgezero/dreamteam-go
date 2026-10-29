@@ -10,7 +10,8 @@ adds a financially conservative baseline (§7) and a demand diagnostic
 frozen LLM agents across the suite
 ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). V0.7a (0.7.0-dev.1,
 in development) adds suite version 2 with paid radiologist overtime (§10),
-and leaves version 1 unchanged. Every result here
+and leaves version 1 unchanged. V0.7b (0.7.0-dev.2, in development) adds
+suite version 3, with a credit line and a funding rule (§11). Every result here
 is a development result on synthetic practices. It is not clinical
 validation, and it ranks no model or policy.
 
@@ -45,7 +46,7 @@ What the simulator can represent today, from the scenario format
 | **Imaging capacity** | Rooms by modality, opening hours by weekday, appointment templates (slot lengths and categories), technologist rosters with room assignments and cover windows, fortnight rotas, contrast supervision. | A second scanner of a modality in one room, equipment downtime, room or scanner purchase. |
 | **Reading capacity** | Radiologists' rosters (on site or remote) and site reading allocation; worklist policy; teleradiology contracts (an action). | Hiring a radiologist (not in the offer table); reading outside rostered blocks without a contract. No suite scenario has Sunday reading. |
 | **Staffing** | Employees by role and skills, hourly or salaried pay, contracted weekly minutes, overtime rules, maximum shift, breaks. | Absence, sickness, resignation or turnover; staff performance differences. |
-| **Finance** | Payers (mix, multipliers, delays, denials, short payment), charge lag, benefits, billing fee, per-study IT cost, payroll cycle, fixed monthly costs, opening cash. | A credit line or insolvency: cash may go below zero, and the shortfall is tracked (`shortfallCents`, `daysBelowZero`) but has no consequence. Prices and fixed costs do not change during a run. |
+| **Finance** | Payers (mix, multipliers, delays, denials, short payment), charge lag, benefits, billing fee, per-study IT cost, payroll cycle, fixed monthly costs, opening cash; from suite version 3 (V0.7b), a credit line and a funding rule. | In versions 1 and 2, a credit line or insolvency: cash may go below zero, and the shortfall is tracked (`shortfallCents`, `daysBelowZero`) but has no consequence. In version 3, no shutdown or missed payroll. Prices and fixed costs do not change during a run. |
 | **Management actions** and their lead times | `extend_shift` (today), `set_walkin_policy` and `set_worklist_policy` (immediate); `set_reading_allocation` (effective at least 14 days ahead); `contract_teleradiology` (start at least 14 days ahead, a 30-day minimum term, cancellation at least 30 days ahead); `hire` (technologists 28 days' recruiting lead at the standard rate, 21 at the premium rate; front desk 14 or 7; then paid training); `set_roster` (14 days' notice); `terminate` (14 days' notice). | New actions are out of scope. |
 | **Evaluation** | The harness's metrics ([BENCHMARK.md](BENCHMARK.md) §6), the canonical result (`dreamteam.result/v1`) and the T90 evaluation under policy `v0.2-eval-4`. | T90 for any practice other than the bundled sustainable scenario: the policy pins that scenario's fingerprint and the harness reports every other scenario as `not_applicable`. |
 
@@ -305,8 +306,12 @@ them follow.
   duty past the rostered end. Version 1 keeps the historical economics.
   Even in version 2, an extension adds on-site presence (contrast
   supervision), not reading blocks.
-* **Financial insolvency has no simulator consequence.** Cash can go
-  negative and the practice carries on.
+* **Financial insolvency has no simulator consequence** in suite versions
+  1 and 2. Cash can go negative and the practice carries on. **V0.7b** adds
+  suite version 3 (§11), with a credit line, interest and a funding rule
+  for discretionary commitments. Even there, distress has no consequence
+  beyond refusing new commitments: payroll is always paid and nothing
+  shuts down.
 * **Demand growth uses monthly factors,** not an explicit dated shock
   (§2.3, §2.6).
 * **Some important metrics are absent** (§3): imaging capacity
@@ -742,3 +747,44 @@ equivalent ([V0.7_OVERTIME_DESIGN.md](V0.7_OVERTIME_DESIGN.md)).
 * Recorded LLM decisions from V0.5 and V0.6 replay against version 1
   only. Their prompts were built from version 1's observations.
 
+## 11. Suite version 3: financial solvency (V0.7b, in development)
+
+`dreamteam-dev` version 3
+([benchmark/suite/dreamteam-dev-3.json](benchmark/suite/dreamteam-dev-3.json))
+is version 2 with a solvency setting
+([V0.7_SOLVENCY_DESIGN.md](V0.7_SOLVENCY_DESIGN.md)), in two variants.
+
+**The model.**
+* **Credit line.** A disbursement that would leave cash below zero draws
+  on the line, up to its limit. Interest accrues daily, and collections
+  repay the line at midnight.
+* **Distress.** Cash below zero means the line is fully drawn: financial
+  distress, recorded. The obligation is still paid.
+* **Funding rule.** A discretionary commitment (a hire, a salary increase,
+  a teleradiology contract, a paid extension) is refused
+  `insufficient_funds` unless it fits in the funding headroom: cash plus
+  undrawn credit, less current liabilities and commitments already
+  reserved.
+
+**Versioning.**
+* **Entries.** Ten entries: each version 2 entry with `-credit` (a
+  $50,000 credit line at 10% a year) and with `-nocredit` (no credit).
+  * Their scenarios are `<version 2 scenario>-credit` and `-nocredit`.
+  * Each extends the version 2 scenario file, unchanged, and sets only
+    `finance.solvency`. A test checks that nothing else differs.
+* **Fingerprints.** Each scenario has its own, recorded in the suite file
+  and checked by the runner.
+* **Unchanged from version 2:** categories, challenges (with a sentence
+  added), dimensions, missing measures, horizon and cadence. T90 is
+  `not_applicable`.
+
+**Compatibility.**
+* Versions 1 and 2, their scenario files, fingerprints and results are
+  unchanged.
+* While nothing binds (no draw, interest or reservation), a version 3 run
+  encodes exactly as its version 2 run.
+* The V0.7b characterization compares the versions paired by practice,
+  seed and policy ([benchmark/v07b-dev/](benchmark/v07b-dev/PLAN.md)).
+
+**What it does not model:** shutdown, missed payroll, loan products,
+covenants or rate changes (V0.7_SOLVENCY_DESIGN §12).

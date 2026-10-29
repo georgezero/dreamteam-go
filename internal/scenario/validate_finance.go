@@ -102,6 +102,25 @@ func (c *checker) finance(f *File, cfg *sim.Config) {
 		c.fail("finance.payrollEveryDays", "%d is outside 1–31", fin.PayrollEveryDays)
 	}
 	out.PayrollEveryDays = fin.PayrollEveryDays
+	if sv := fin.Solvency; sv != nil {
+		out.Solvency = &sim.SolvencyConfig{}
+		for _, x := range []struct {
+			p      string
+			v      *int64
+			hi     int64
+			assign *int64
+		}{{"finance.solvency.creditLimitCents", sv.CreditLimitCents, 100_000_000, &out.Solvency.CreditLimitCents},
+			{"finance.solvency.creditRateBP", sv.CreditRateBP, 5_000, &out.Solvency.CreditRateBP}} {
+			switch {
+			case x.v == nil:
+				c.fail(x.p, "required")
+			case *x.v < 0 || *x.v > x.hi:
+				c.fail(x.p, "%d is outside 0–%d", *x.v, x.hi)
+			default:
+				*x.assign = *x.v
+			}
+		}
+	}
 
 	var roomMods []string
 	for _, r := range cfg.Rooms {

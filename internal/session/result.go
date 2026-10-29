@@ -109,7 +109,9 @@ type ResultDay struct {
 	CollectionsCents   int64  `json:"collectionsCents"`
 	DisbursementsCents int64  `json:"disbursementsCents"`
 	CashEndCents       int64  `json:"cashEndCents"` // a balance: end of day
-	Alerts             int    `json:"alertsRaised"`
+	// V0.7b: the credit line drawn at the end of the day (omitted when zero).
+	CreditDrawnEndCents int64 `json:"creditDrawnEndCents,omitempty"`
+	Alerts              int   `json:"alertsRaised"`
 }
 
 // ResultWindow is the evaluation window's outcome.
@@ -133,6 +135,9 @@ type ResultBalances struct {
 	EquityCents           int64 `json:"equityCents"`
 	MinCashCents          int64 `json:"minCashCents"` // lowest since day 1
 	DaysBelowZero         int64 `json:"daysBelowZero"`
+	// V0.7b: the credit line and funding headroom, under a scenario's
+	// finance.solvency (omitted otherwise).
+	Solvency *api.Solvency `json:"solvency,omitempty"`
 }
 
 // ResultObligations is what is outstanding at the end.
@@ -203,7 +208,7 @@ func (s *Session) Result(verify bool) (*Result, error) {
 			ReportsFinal: x.ReportsFinal, UnreadAtClose: x.UnreadAtClose, WaitP50Sec: x.Ops.Waits.ToExam.P50Sec,
 			OvertimeSec: x.Ops.Workforce.OvertimeSec, NetRevenueCents: x.NetRevenueCents, ExpenseCents: x.ExpenseCents,
 			ProfitCents: x.OperatingProfitCents, CollectionsCents: x.CollectionsCents, DisbursementsCents: x.DisbursementsCents,
-			CashEndCents: x.CashEndCents, Alerts: x.Ops.Alerts.Warn + x.Ops.Alerts.Alert})
+			CashEndCents: x.CashEndCents, CreditDrawnEndCents: x.CreditDrawnEndCents, Alerts: x.Ops.Alerts.Warn + x.Ops.Alerts.Alert})
 	}
 
 	ops := ev.Ops
@@ -220,7 +225,7 @@ func (s *Session) Result(verify bool) (*Result, error) {
 	r.Balances = ResultBalances{CashCents: f.CashCents, ReceivablesCents: f.ARCents, PayablesCents: f.APCents,
 		AccruedPayrollCents: f.AccruedPayrollCents, SeverancePayableCents: f.BalanceSheet.SeverancePayableCents,
 		EquityCents:  f.BalanceSheet.EquityCents,
-		MinCashCents: f.Financing.MinCashCents, DaysBelowZero: f.Financing.DaysBelowZero}
+		MinCashCents: f.Financing.MinCashCents, DaysBelowZero: f.Financing.DaysBelowZero, Solvency: f.Financing.Solvency}
 	ob := ResultObligations{NextPayroll: f.NextPayroll, NextPayables: f.NextPayables, SeveranceDue: f.SeveranceDue, OpenClaims: f.Claims.Open,
 		ClaimsAging: f.Claims.Aging, Unread: o.Worklist.Unread, Reading: o.Worklist.Reading,
 		RecallList: o.Demand.RecallList, Policies: o.Policies, ApprovedExtensions: o.Extensions}

@@ -348,6 +348,12 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 		return "Payroll paid", ""
 	case entPayAP:
 		return "Accounts payable paid", ""
+	case entCreditDraw:
+		return "Credit line drawn " + dayName(k.a), ""
+	case entCreditRepay:
+		return "Credit line repaid " + dayName(k.a), ""
+	case entInterest:
+		return "Interest on the credit line " + dayName(k.a), ""
 	case entReversal:
 		return "Reversal of " + journalID(int(k.a)), journalID(int(k.a))
 	}
@@ -363,7 +369,8 @@ func (st *state) observeBalance(f *api.Finance, day int64) {
 	b.AssetsCents = b.CashCents + b.ReceivablesCents
 	b.PayablesCents, b.AccruedPayrollCents = -led.bal[acctAP], -led.bal[acctAccruedPayroll]
 	b.SeverancePayableCents = -led.bal[acctSeverancePayable]
-	b.LiabilitiesCents = b.PayablesCents + b.AccruedPayrollCents + b.SeverancePayableCents
+	b.CreditLineCents = st.creditDrawn()
+	b.LiabilitiesCents = b.PayablesCents + b.AccruedPayrollCents + b.SeverancePayableCents + b.CreditLineCents
 	b.OpeningCapitalCents = -led.bal[acctEquity]
 	hist := led.sumDays(0, min(day, st.startDay-1))
 	b.HistoryEarningsCents = netRevenue(&hist) - opex(&hist)
@@ -383,6 +390,9 @@ func (st *state) observeBalance(f *api.Finance, day int64) {
 		fi := &f.Financing
 		fi.ShortfallCents = max(0, -led.bal[acctCash])
 		fi.MinCashCents, fi.MinCashTime = st.fin.minCash, st.cal.ISO(st.fin.minCashAt)
+		if fi.Solvency = st.solvencyView(); fi.Solvency != nil {
+			fi.CreditLineModeled = true
+		}
 		cash := led.cashAtEnd(st.startDay - 1)
 		for d := st.startDay; d < day && d < int64(len(led.days)); d++ { // completed days
 			cash += led.days[d].net[acctCash]

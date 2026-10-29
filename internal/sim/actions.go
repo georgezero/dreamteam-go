@@ -305,6 +305,9 @@ func (st *state) extendShift(e *Engine, a api.Action, do bool) (bool, string, st
 	} else if p := &st.cfg.Policies; st.cfg.Finance.RadOvertimePaid && ec.Role == Radiologist && ec.Pay == Salaried && p.WeeklyHours > 0 {
 		cost = " · ≈" + money(ec.RateCents*int64(d)/(52*int64(p.WeeklyHours))) + " at the salary's hourly rate, if worked"
 	}
+	if ok, why := st.checkExtensionFunds(ec, d); !ok {
+		return false, "insufficient_funds", why
+	}
 	msg := fmt.Sprintf("Shift extended: %s %s until %s (+%s approved overtime%s) · %s %s–%s%s.", name, dateText,
 		st.cal.Clock(end), d, cost, covers, simtime.FormatClock(sh.To), simtime.FormatClock(sh.To+d), opens)
 	if !do {

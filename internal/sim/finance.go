@@ -47,6 +47,17 @@ type FinanceConfig struct {
 	// omitted), such time costs nothing extra, as in every scenario before
 	// V0.7. Configuration, not state: the state digest never sees it.
 	RadOvertimePaid bool
+	// Solvency, if set, is the scenario's credit line and turns on the
+	// funding rule for discretionary actions (V0.7b, solvency.go). Nil in
+	// every scenario before V0.7b. Configuration, not state.
+	Solvency *SolvencyConfig
+}
+
+// SolvencyConfig is a credit line (V0.7b): a fixed limit (0: no credit)
+// and simple annual interest on the balance drawn.
+type SolvencyConfig struct {
+	CreditLimitCents int64
+	CreditRateBP     int64
 }
 
 // PayerConfig is one payer class and its outcome model (§8.2).
@@ -254,6 +265,9 @@ type finState struct {
 	// and whether cash is below zero now (for the one-time alert per dip).
 	minCash   int64
 	minCashAt simtime.Time
+	// V0.7b: the credit line and reserved commitments (solvency.go), nil
+	// until first used.
+	credit *creditState
 }
 
 func (st *state) finDay(day int64) *finDay {
@@ -289,6 +303,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 	date := st.cal.Date(now)
 	led := &st.fin.led
 	st.finDay(day)
+	st.chargeInterest(now, day)
 	if st.isPayday(date) {
 		// The week's guaranteed pay is not final until Sunday's close: it
 		// waits for the next payday after it (employment.go).
@@ -296,6 +311,7 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 			led.mustPost(now, entryKey{kind: entPayroll, a: day}, line{acctAccruedPayroll, -1, -amt, -1}, line{acctCash, -1, amt, -1})
 			st.fin.payrollPaid += -amt
 			st.evalPaid(&st.eval.basePayroll, -amt)
+			st.drawCredit(now, 0, "payroll", -amt)
 			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Payroll paid %s (wages and benefits accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
@@ -310,11 +326,13 @@ func (st *state) financeDayStart(e *Engine, day int64) {
 			st.fin.apPaid += -amt
 			st.paidTele()
 			st.evalPaid(&st.eval.baseAP, -amt)
+			st.drawCredit(now, 1, "bills", -amt)
 			st.noteCash(now)
 			st.emit(now, api.Info, "finance", fmt.Sprintf("Bills paid %s (rent, leases, service, supplies, fees accrued through %s)",
 				money(-amt), st.cal.Date(now-1).String()))
 		}
 	}
+	st.repayCredit(now, day)
 	for i := range st.emps {
 		c := st.emps[i].cfg
 		if c.Pay != Salaried {
@@ -605,9 +623,9 @@ func (st *state) checkFinance() error {
 		return fmt.Errorf("A/R %d, open claims owe %d", led.bal[acctAR], ar)
 	case -led.bal[acctRevenue] != revenue:
 		return fmt.Errorf("revenue %d, claims expected %d", -led.bal[acctRevenue], revenue)
-	case led.bal[acctCash] != st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid:
-		return fmt.Errorf("cash %d, opening adjustment + receipts − disbursements %d", led.bal[acctCash],
-			st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid)
+	case led.bal[acctCash] != st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid+st.creditDrawn():
+		return fmt.Errorf("cash %d, opening adjustment + receipts − disbursements + credit drawn %d", led.bal[acctCash],
+			st.fin.opening.adjustment+st.fin.receipts-st.fin.payrollPaid-st.fin.apPaid-st.fin.severancePaid+st.creditDrawn())
 	case -led.bal[acctEquity] != st.fin.opening.adjustment:
 		return fmt.Errorf("opening equity %d, adjustment %d", -led.bal[acctEquity], st.fin.opening.adjustment)
 	case -led.bal[acctAccruedPayroll] != st.fin.payrollAccrued-st.fin.payrollPaid:
@@ -615,7 +633,7 @@ func (st *state) checkFinance() error {
 	case -led.bal[acctAP] != st.fin.apAccrued-st.fin.apPaid:
 		return fmt.Errorf("payables %d, accrued − paid %d", -led.bal[acctAP], st.fin.apAccrued-st.fin.apPaid)
 	}
-	return nil
+	return st.checkCredit()
 }
 
 // money formats cents as whole dollars with thousands separators.

@@ -11,6 +11,7 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/georgezero/dreamteam-go/internal/sim"
 	"github.com/georgezero/dreamteam-go/internal/simtime"
 	"github.com/georgezero/dreamteam-go/scenarios"
 )
@@ -19,8 +20,11 @@ var update = flag.Bool("update", false, "rewrite golden files")
 
 func TestBundledScenariosCompile(t *testing.T) {
 	ids := List()
-	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-demand-growth-ot", "bench-financial-pressure", "bench-financial-pressure-ot",
-		"bench-stable", "bench-stable-ot", "bench-staffing-shortage", "bench-staffing-shortage-ot", "established", "mini", "sustainable", "sustainable-ot"}) || !slices.Contains(ids, Default) {
+	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-demand-growth-ot", "bench-demand-growth-ot-credit", "bench-demand-growth-ot-nocredit",
+		"bench-financial-pressure", "bench-financial-pressure-ot", "bench-financial-pressure-ot-credit", "bench-financial-pressure-ot-nocredit",
+		"bench-stable", "bench-stable-ot", "bench-stable-ot-credit", "bench-stable-ot-nocredit",
+		"bench-staffing-shortage", "bench-staffing-shortage-ot", "bench-staffing-shortage-ot-credit", "bench-staffing-shortage-ot-nocredit",
+		"established", "mini", "sustainable", "sustainable-ot", "sustainable-ot-credit", "sustainable-ot-nocredit"}) || !slices.Contains(ids, Default) {
 		t.Fatalf("List() = %v, default %q", ids, Default)
 	}
 	for _, id := range ids {
@@ -127,6 +131,10 @@ func TestValidationErrors(t *testing.T) {
 		{`{"policies": {"overtimeFactorBP": 5000}}`, "policies.overtimeFactorBP", "outside"},
 		{`{"policies": {"radiologistOvertime": "double"}}`, "policies.radiologistOvertime", "is not"},
 		{`{"policies": {"radiologistOvertime": "salary_rate", "weeklyOvertimeHours": 0}}`, "policies.radiologistOvertime", "at least 1"},
+		{`{"finance": {"solvency": {"creditRateBP": 1000}}}`, "finance.solvency.creditLimitCents", "required"},
+		{`{"finance": {"solvency": {"creditLimitCents": 0}}}`, "finance.solvency.creditRateBP", "required"},
+		{`{"finance": {"solvency": {"creditLimitCents": -1, "creditRateBP": 0}}}`, "finance.solvency.creditLimitCents", "outside 0–100000000"},
+		{`{"finance": {"solvency": {"creditLimitCents": 0, "creditRateBP": 5001}}}`, "finance.solvency.creditRateBP", "outside 0–5000"},
 		{`{"employees": [{"id": "E08", "roster": {"Tue": {"start": "14:00", "end": "24:00"}}}]}`, "employees[7].roster.Tue", "accounting close"},
 		{`{"behavior": {"registration": {"selfRegFactorBP": 1}}}`, "behavior.registration", "must be 10000–30000"},
 		{`{"catalog": [{"code": "XR_X", "name": "x", "modality": "XR", "category": "XR_15", "techExtraSec": {"p0": 1, "p100": 2}}]}`, "catalog[0].roomTimeSec", "required"},
@@ -339,6 +347,45 @@ func TestRadiologistOvertimePolicy(t *testing.T) {
 		rv, _ := Canonical(v)
 		if string(rv) != string(raw) {
 			t.Fatalf("%s-ot differs from %s beyond the policy", base, base)
+		}
+	}
+}
+
+// V0.7b: the solvency setting. Absent, there is no credit line (every
+// scenario before V0.7b) and the canonical form, so every existing
+// fingerprint, is unchanged. Each -ot-credit / -ot-nocredit variant is
+// its -ot scenario plus the setting; a zero limit is valid.
+func TestSolvencySetting(t *testing.T) {
+	for _, base := range []string{"bench-financial-pressure", "sustainable", "bench-demand-growth", "bench-staffing-shortage", "bench-stable"} {
+		b, err := ResolveFile(base + "-ot")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := Canonical(b)
+		if strings.Contains(string(raw), "solvency") {
+			t.Fatalf("%s-ot: the absent setting appears in the canonical form", base)
+		}
+		if cfg, _ := Resolve(base + "-ot"); cfg.Finance.Solvency != nil {
+			t.Fatalf("%s-ot has a credit line", base)
+		}
+		for _, v := range []struct {
+			suffix      string
+			limit, rate int64
+		}{{"-ot-credit", 5_000_000, 1000}, {"-ot-nocredit", 0, 0}} {
+			f, err := ResolveFile(base + v.suffix)
+			if err != nil {
+				t.Fatal(err)
+			}
+			cfg, err := Resolve(base + v.suffix)
+			if err != nil || cfg.Finance.Solvency == nil || *cfg.Finance.Solvency != (sim.SolvencyConfig{CreditLimitCents: v.limit, CreditRateBP: v.rate}) ||
+				!cfg.Finance.RadOvertimePaid || f.ID != base+v.suffix {
+				t.Fatalf("%s%s: %v %+v", base, v.suffix, err, cfg.Finance.Solvency)
+			}
+			f.ID, f.Name, f.Finance.Solvency = b.ID, b.Name, nil
+			rv, _ := Canonical(f)
+			if string(rv) != string(raw) {
+				t.Fatalf("%s%s differs from %s-ot beyond the setting", base, v.suffix, base)
+			}
 		}
 	}
 }

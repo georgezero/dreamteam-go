@@ -241,3 +241,63 @@ func TestSuiteV2Scenarios(t *testing.T) {
 		}
 	}
 }
+
+// Suite version 3 (V0.7b) is version 2's five practices, each with a
+// $50,000 credit line at 10% (-credit) and with none (-nocredit): the
+// same categories and dimensions, each scenario its version 2 scenario
+// plus the solvency setting, with its recorded fingerprint.
+func TestSuiteV3Scenarios(t *testing.T) {
+	read := func(name string) suiteFile {
+		raw, err := os.ReadFile("../../docs/benchmark/suite/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var s suiteFile
+		if err := json.Unmarshal(raw, &s); err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	v2, v3 := read("dreamteam-dev-2.json"), read("dreamteam-dev-3.json")
+	if v3.Schema != v2.Schema || v3.ID != v2.ID || v3.Version != 3 || v3.Split != "development" || v3.HorizonDays != 90 ||
+		len(v3.Scenarios) != 2*len(v2.Scenarios) || !slices.Equal(v3.Missing, v2.Missing) {
+		t.Fatalf("suite header: %+v", v3)
+	}
+	for k, e := range v3.Scenarios {
+		o := v2.Scenarios[k/2]
+		suffix, limit := "-credit", int64(5_000_000)
+		if k%2 == 1 {
+			suffix, limit = "-nocredit", 0
+		}
+		if e.ID != o.ID+suffix || e.Version != 3 || e.Category != o.Category || e.Scenario != o.Scenario+suffix ||
+			e.Source != "scenarios/"+e.Scenario+".json" || e.T90 != "not_applicable" {
+			t.Fatalf("%s: %+v", e.ID, e)
+		}
+		f, err := scenario.ResolveFile(e.Scenario)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := scenario.Compile(f); err != nil {
+			t.Fatalf("%s: %v", e.ID, err)
+		}
+		if fp, _ := scenario.Fingerprint(f); fp != e.Fingerprint {
+			t.Errorf("%s: fingerprint %s, recorded %s", e.ID, fp, e.Fingerprint)
+		}
+		if sv := f.Finance.Solvency; sv == nil || *sv.CreditLimitCents != limit {
+			t.Fatalf("%s: solvency %+v", e.ID, sv)
+		}
+		b, err := scenario.ResolveFile(o.Scenario)
+		if err != nil {
+			t.Fatal(err)
+		}
+		f.Finance.Solvency = nil
+		if a, b := resolved(t, f, "x", "x"), resolved(t, b, "x", "x"); !reflect.DeepEqual(a, b) {
+			t.Errorf("%s: version 3 differs from version 2 beyond the solvency setting", e.ID)
+		}
+	}
+	for dim, ms := range v2.Dimensions {
+		if !slices.Equal(v3.Dimensions[dim], ms) {
+			t.Errorf("dimension %s differs", dim)
+		}
+	}
+}
