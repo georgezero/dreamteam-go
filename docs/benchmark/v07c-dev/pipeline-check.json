@@ -1,0 +1,56 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v07c-pipeline-check",
+ "description": "V0.7c pipeline check (docs/benchmark/v07c-dev/PLAN.md \u00a72), run before the plan was committed: the five policies on one entry, one seed, 3 days, to check that both models answer under 0.7.0-dev.3 and that the runner, replay and analysis work. Not a result. no action, greedy, conservative-v2 and the two frozen LLM agents (Qwen3.6-35B-A3B, Gemma 4 26B-A4B) on the five -credit entries of suite dreamteam-dev version 3 (radiologist overtime paid; a $50,000 credit line at 10% and the funding rule), daily decisions at 07:00. No score, no ranking. Run from the repository root with DREAMTEAM_LLM_BASE_URL set.",
+ "suite": "../suite/dreamteam-dev-3.json",
+ "entries": [
+  "financial-pressure-credit"
+ ],
+ "seeds": [
+  41600
+ ],
+ "seedPlan": "Chosen 2026-10-29 and committed in the V0.7c plan (docs/benchmark/v07c-dev/PLAN.md) before any run on them: the next unused block after V0.7b's 41501-41503: 41600 for the pipeline check (3 days, one entry; not a result), 41601 and 41602 for stage A, 41701 for stage B, all fixed before any run of either stage. None appeared in the repository before; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "days": 3,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json (unchanged since V0.5c; used in V0.6c)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (agents/llm/llm_agent.py, llm-agent 2, prompt llm-agent-prompt/v2, memory llm-agent-memory/v1, memory on), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json (unchanged since V0.5c; used in V0.6c)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

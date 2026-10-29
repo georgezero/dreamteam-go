@@ -7,6 +7,35 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.7c — frozen agents under overtime and solvency economics (0.7.0-dev.3)
+
+Owner decision 2026-10-29:
+* V0.7b is accepted, once CI on 9e73520 was green (run 40962984422).
+* V0.7c is the last development evaluation before V0.7.0. No simulator
+  mechanic is added.
+
+**Declared before any run** ([plan](benchmark/v07c-dev/PLAN.md),
+`v07c-plan/1`):
+* **Suite:** `dreamteam-dev` version 3, the five `-credit` entries:
+  radiologist overtime paid, a $50,000 credit line at 10%, the funding rule.
+* **Policies:**
+  * `noop`, `greedy` and `conservative-v2`;
+  * the LLM agent (llm-agent 2, prompt v2, memory on) with
+    Qwen3.6-35B-A3B and with Gemma 4 26B-A4B, both with the V0.6c settings,
+    unchanged.
+* **Stages:**
+  * A: seeds 41601 and 41602, 30 days, 50 runs;
+  * B: seed 41701, 90 days, 25 runs, independent of stage A.
+* **Pipeline check:** seed 41600, 3 days, one entry, before the plan. Not
+  a result.
+* **Analysis:** paired with no action. Actions are counted as proposed,
+  refused, accepted and executed, with refusals for funds and what the
+  agents did next.
+* **Version 0.7.0-dev.3:** no engine change. 0.7.0-dev.2 is registered for
+  replay (`mini-seed52-v072`, batch mode `v0.7_dev2`).
+
+**Results:** to follow, after both stages.
+
 ## V0.7b — financial solvency (0.7.0-dev.2)
 
 Owner decision 2026-10-29:
