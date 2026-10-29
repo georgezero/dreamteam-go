@@ -17,7 +17,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.3** (released, `v0.3.0`: the agent interface, by the owner's release contract; the operations-control items below remain planned) | Operations control: scheduling, disruptions, QA/prep, save/load, agent-interface skeleton | V0.2 |
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
-| **V0.6** (in development: V0.6a, the benchmark scenario suite and evaluation contract, 0.6.0-dev.1, accepted; V0.6b, the suite runner and standard reports, 0.6.0-dev.2; owner decisions 2026-10-28) | V0.5 agents |
+| **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
+| **V0.7** (proposed, not approved) | Simulator realism and agent decision-quality evaluation (§7a) | V0.6 benchmark |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -561,7 +562,12 @@ foundation; no second benchmark engine.
     and 90 days (one seed);
   * every LLM run replayed without a model
     ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)).
-* **V0.6.0:** a documented, reproducible benchmark.
+* **V0.6c** accepted and **V0.6.0 released** (owner, 2026-10-29): a
+  documented, reproducible benchmark for practice-management agents. The
+  known limitations are documented prominently
+  ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §6). Unpaid radiologist shift
+  extensions are flagged as a simulator-modeling limitation, not fixed in
+  the release.
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**
 
@@ -590,6 +596,33 @@ Acceptance
   the same service gates, commitment accounting and evaluation tail.
 
 ---
+
+## 7a. V0.7 — simulator realism and agent decision-quality evaluation (proposed)
+
+**Proposed by the owner, 2026-10-29; not approved for implementation.**
+V0.6c showed that an agent can greatly improve reporting while spending
+far more than a practice should tolerate. Before the benchmark grows
+(more models, seeds or scenarios), the simulator should represent the
+financial consequences of management actions faithfully.
+
+Candidate areas, in the owner's order of priority:
+1. **Financial consequences of extended shifts.** Radiologist shift
+   extensions are currently free (salaried staff), which creates
+   unrealistic incentives.
+2. **Financial solvency constraints.** Negative cash should eventually
+   have operational consequences.
+3. **Decision and rationale consistency.** Compare what an agent says it
+   intends with what it submits, and with the financial constraints it
+   can observe.
+4. **Dated demand shocks.** Test whether agents anticipate and respond to
+   changing conditions.
+5. **Staffing absences and turnover:** operational disruptions.
+6. **Agent responses to changing practice conditions.**
+
+The owner suggests beginning with the first two, but only after reviewing
+their impact on historical compatibility and deterministic replay. No
+further model experiments are planned until the simulator's economics are
+improved. Nothing here is implemented in V0.6.0.
 
 ## 8. Testing strategy (all versions)
 

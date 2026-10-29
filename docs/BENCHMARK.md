@@ -25,11 +25,11 @@ evaluation contract on top of the harness, unchanged
 ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)). V0.6b (0.6.0-dev.2) adds
 suite runs and the contract report, and a fourth built-in policy,
 `conservative` (§4 of this document's policy table;
-[BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). V0.6c (0.6.0-dev.3, in
-development) adds a fifth, `conservative-v2` (§7.2 there), and a
-frozen-agent comparison ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md))
-whose recordings CI replays. Ordinary benchmarks and their files are
-unchanged.
+[BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). V0.6c (0.6.0-dev.3) adds a
+fifth, `conservative-v2` (§7.2 there), and a frozen-agent comparison
+([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)) whose recordings CI
+replays. Released in V0.6.0 with the policy protocol unchanged. Ordinary
+benchmarks and their files are unchanged.
 
 ## 1. Commands
 
@@ -579,7 +579,7 @@ OS-level isolation is claimed.
 Benchmarking an untrusted agent would need OS-level isolation and a
 withheld or derived seed scheme; that is a later requirement.
 
-## 12. Known limitations (V0.5)
+## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted
   development participants, not OS-sandboxed processes (§11).
@@ -616,6 +616,10 @@ withheld or derived seed scheme; that is a later requirement.
   Their live runs are not deterministic, so only their recorded decisions
   reproduce; their own limitations are in [LLM_AGENT.md](LLM_AGENT.md)
   §12.
+* **Suites** (V0.6): the scenario suite's and the contract's limitations,
+  including the simulator's unpaid radiologist shift extensions and the
+  absence of any insolvency consequence, are in
+  [BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §6.
 
 The V0.4b development matrix (`docs/benchmark/v04b-dev/`) also showed:
 * **`python-ref` v1 never acted.** Its weekly review (decision points 0,

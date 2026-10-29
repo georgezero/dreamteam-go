@@ -1,6 +1,6 @@
-# DreamTeam benchmark scenario suite and evaluation contract (V0.6a)
+# DreamTeam benchmark scenario suite and evaluation contract (V0.6)
 
-Status: V0.6c, development (0.6.0-dev.3). Not released. The suite is
+Status: released in V0.6.0 (V0.6a–V0.6c). The suite is
 `dreamteam-dev`, version 1
 ([benchmark/suite/dreamteam-dev-1.json](benchmark/suite/dreamteam-dev-1.json));
 the contract is `dreamteam.benchmark-contract/v1` (§3). V0.6a defined them;
@@ -8,7 +8,9 @@ V0.6b runs a suite in one command and reports it under the contract (§9),
 adds a financially conservative baseline (§7) and a demand diagnostic
 (§8). V0.6c adds a second conservative baseline (§7.2) and evaluates two
 frozen LLM agents across the suite
-([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)).
+([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Every result here
+is a development result on synthetic practices. It is not clinical
+validation, and it ranks no model or policy.
 
 This document defines what DreamTeam's agent benchmark measures:
 * five practices, each a different management problem;
@@ -276,6 +278,45 @@ V0.6b, `dreamteam benchmark suite run` writes it as the contract report
 and `dreamteam benchmark report` prints it (§9).
 
 ## 6. Known limitations
+
+The release's limitations, first. The V0.6a–V0.6c findings that led to
+them follow.
+* **Not clinically validated.** The practices are synthetic. They do not
+  reproduce all the economics of real radiology practices.
+* **Limited development seeds.** Three seeds at 30 days and one at 90 in
+  V0.6c. No result generalizes beyond them, and none is a statistical
+  claim.
+* **Two frozen LLM configurations and one prompt version**
+  (`llm-agent-prompt/v2`, the V0.5c settings).
+* **No held-out benchmark execution.** §4 defines the governance. No
+  held-out set has been created or run.
+* **Live inference is nondeterministic.** Exact replay requires the
+  recordings.
+* **External agents are trusted, not OS-sandboxed**
+  ([BENCHMARK.md](BENCHMARK.md) §11).
+* **Radiologist shift extensions have no incremental salary cost.**
+  Radiologists are salaried, so the simulator pays no overtime for them.
+  An agent that extends their shifts gains service for nothing. This can
+  materially distort the apparent financial consequences of management
+  decisions. It is a simulator-modeling limitation, not fixed in V0.6.0.
+* **Financial insolvency has no simulator consequence.** Cash can go
+  negative and the practice carries on.
+* **Demand growth uses monthly factors,** not an explicit dated shock
+  (§2.3, §2.6).
+* **Some important metrics are absent** (§3): imaging capacity
+  utilization, and trends within a run.
+* **Model explanations may contradict submitted actions.** In V0.6c a
+  model described changes it did not submit and misread cents as dollars.
+  A stated reason is not evidence of an action.
+* **LLMs may repeatedly propose invalid actions,** up to 18 times in a
+  run. `validate` refuses each one.
+* **Inference costs were not priced.** Tokens and latency are reported.
+  Latency depends on the local server's load and is not comparable across
+  stages.
+* **`conservative-v2` has been neither optimized nor validated.** It is a
+  declared rule that is distinct from `greedy`.
+* **Intervention rate is not a verdict.** Few interventions are not good
+  in themselves, and many are not bad.
 
 * **Five practices from one family.** All five share the established
   practice's rooms, exams, payers and fixed costs; they differ in demand,

@@ -7,10 +7,15 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.5** (`0.5.0`, LLM agents) is the current release: an external
-agent lets a language model, on any OpenAI-compatible server, manage the
-practice through the benchmark harness, with its decisions recorded and
-replayed exactly (`agents/llm/`, `docs/LLM_AGENT.md`). It builds on V0.4
+Status: **V0.6** (`0.6.0`, the agent benchmark) is the current release: a
+reproducible benchmark for radiology practice-management agents. A suite of
+five practice scenarios runs in one command. Each policy is reported on six
+dimensions against no action, with no score or ranking. Every decision,
+including an LLM agent's, is recorded and replays exactly on any platform
+(`docs/BENCHMARK_SUITE.md`). It is a development benchmark on synthetic
+practices, not a clinically validated one. It builds on V0.5 (`0.5.0`, LLM
+agents: an external agent lets a language model on any OpenAI-compatible
+server manage the practice, `agents/llm/`, `docs/LLM_AGENT.md`), V0.4
 (`0.4.0`, the agent evaluation harness: policies, built in or separate
 processes, compared reproducibly on identical scenarios and seeds,
 `dreamteam benchmark`, `docs/BENCHMARK.md`), V0.3 (`0.3.0`, the agent interface: an
@@ -21,13 +26,6 @@ evaluation of your plan). Release notes: `docs/RELEASE_NOTES.md`. Everything is 
 patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
-
-In development (unreleased): **V0.6**, the agent benchmark. V0.6a defines a
-suite of five practice scenarios and an evaluation contract; V0.6b runs a
-suite in one command and reports it under that contract
-(`docs/BENCHMARK_SUITE.md`); V0.6c adds a second conservative baseline and
-evaluates two frozen local LLM agents across the suite
-(`docs/benchmark/v06c-dev/`).
 
 ## Quick start
 
@@ -331,7 +329,7 @@ Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/benchmark/v05b-dev/`; the multi-model development evaluation, three
 local models with a memory-off control: `docs/benchmark/v05c-dev/`.
 
-### Benchmark scenario suite (V0.6, in development)
+### Benchmark scenario suite (V0.6)
 
 Five development scenarios, each a bundled scenario, pose different
 management problems: `bench-financial-pressure`, `sustainable` (the
@@ -350,6 +348,19 @@ each raise helped. It also runs the first frozen-agent comparison: Qwen3.6
 model. `docs/BENCHMARK_SUITE.md`; the characterizations and the
 comparison: `docs/benchmark/v06a-dev/`, `docs/benchmark/v06b-dev/`,
 `docs/benchmark/v06c-dev/`.
+
+    dreamteam benchmark suite run docs/benchmark/v06b-dev/ci-suite-run.json -out results
+    dreamteam benchmark verify results            # integrity, starting states, the contract report
+    dreamteam benchmark reproduce results -out again   # rerun and compare byte for byte
+
+The V0.6c development findings, from three seeds at 30 days and one at 90,
+are observations, not a ranking:
+* Qwen3.6-35B-A3B often improved reporting at a large financial cost, by
+  up to $137,507 of operating profit over 90 days.
+* Gemma 4 26B-A4B rarely intervened.
+* `conservative-v2` often chose no action within its guardrails.
+* `greedy` spent $27,000–$34,000 over 90 days in every scenario.
+* Every LLM recording replays exactly, and every applicable T90 was NO GO.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -380,13 +391,13 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.6, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.6, proposed V0.7, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
 | `docs/AGENT_PROTOCOL.md` | the agent protocol (V0.3) |
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
-| `docs/BENCHMARK_SUITE.md` | the benchmark scenario suite, evaluation contract, development and held-out governance (V0.6 development) |
+| `docs/BENCHMARK_SUITE.md` | the benchmark scenario suite, evaluation contract, development and held-out governance, the conservative baselines (V0.6) |
 | `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
@@ -394,7 +405,40 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.5)
+## Known limitations (V0.6)
+
+* **Development results only.** V0.6c covers five scenarios, three seeds
+  at 30 days and one at 90, two frozen LLM configurations and one prompt
+  version (`llm-agent-prompt/v2`). No claim of generality or significance
+  is made. A model's low intervention rate is neither good nor bad in
+  itself.
+* **No clinical validation.** Everything is synthetic. The scenarios do
+  not reproduce all the economics of real practices.
+* **No held-out benchmark execution.** The governance is defined; no
+  held-out set exists yet.
+* **Radiologist shift extensions cost nothing.** Radiologists are
+  salaried, so an extension adds no salary cost. This can materially
+  distort the apparent financial consequences of decisions. It is a
+  simulator-modeling limitation, not fixed in this release.
+* **No insolvency consequence.** Negative cash stops nothing.
+* **Demand growth uses monthly factors,** not a dated shock.
+* **Some metrics are absent:** imaging capacity utilization and trends
+  within a run.
+* **LLM agents:**
+  * live inference is nondeterministic, so exact replay needs the
+    recordings;
+  * agents are trusted, not OS-sandboxed;
+  * stated reasons may contradict the submitted actions;
+  * invalid proposals recur;
+  * inference was not priced;
+  * latency depends on server load.
+* **`conservative-v2`** is a declared rule, neither optimized nor
+  validated.
+
+Details: `docs/BENCHMARK_SUITE.md` §6, `docs/benchmark/v06c-dev/README.md`
+§5.
+
+### From V0.5
 
 * **LLM agent** (`docs/LLM_AGENT.md` §12):
   * Live model inference is not deterministic, even at temperature 0;

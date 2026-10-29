@@ -5,6 +5,145 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.6.0 — a reproducible benchmark for practice-management agents
+
+DreamTeam is now a reproducible benchmark for radiology practice-management
+agents. A suite of five practices is run in one command. Every policy is
+reported on six dimensions against no action, and every decision is
+recorded and can be replayed and verified on any platform
+(`docs/BENCHMARK_SUITE.md`, `docs/BENCHMARK.md`). It is a development
+benchmark on synthetic practices, **not a clinically validated one**. The
+simulator, the agent and policy protocols, the LLM agent and its prompt,
+and scoring are unchanged.
+
+**What the benchmark provides:**
+1. **Five benchmark scenarios** (suite `dreamteam-dev`, version 1), each a
+   different management problem. They are financial pressure, reporting
+   backlog (the `sustainable` scenario), demand growth, staffing shortage
+   and a stable practice where intervention is costly.
+2. **Versioned scenario fingerprints.** Each suite entry names its
+   scenario and its fingerprint. The runner checks the fingerprint before
+   anything runs, and confirms that every policy starts from the same
+   state.
+3. **Multi-scenario suite execution.** `dreamteam benchmark suite run`
+   expands a suite-run file (`dreamteam.benchmark-suite-run/v1`) into
+   ordinary harness runs: every entry × seed × policy.
+4. **A six-dimensional reporting contract**
+   (`dreamteam.benchmark-contract/v1`). The dimensions are operations,
+   finance, staffing and capacity, service reliability, sustainability, and
+   actions. Each run is reported on all six, using metrics the simulator
+   already had. There is no composite score, weighting, ranking or
+   leaderboard. Absent metrics are named, not estimated. T90 is reported
+   only where its evaluation policy applies.
+5. **Paired comparisons against no action.** Each policy minus `noop` on
+   the same entry and seed.
+6. **Deterministic policy baselines.** There are five:
+   * `noop`, which never acts;
+   * `greedy` and `rules`, which raise the reading allocation;
+   * `conservative` v1 (V0.6b), the historical baseline;
+   * `conservative-v2` (V0.6c). It acts only on a week of urgent or soon
+     report breaches it can afford, reviews each raise, and steps back.
+     It is a fixed, declared rule, not an optimized policy.
+7. **External LLM agent evaluation.** The V0.5 LLM agent, unchanged
+   (`llm-agent-prompt/v2`), takes part like any other policy.
+8. **Recorded-decision replay.** An LLM run's recorded decisions are
+   resubmitted without any model. The memory and prompt are rebuilt and
+   checked at every decision point, and the result is the live run's,
+   byte for byte.
+9. **Cross-platform reproducibility.** CI runs the suite and replays every
+   committed recording on linux/amd64, linux/arm64 and darwin/arm64. It
+   then compares the manifests byte for byte.
+10. **Development evaluation results** (`docs/benchmark/v06a-dev/`,
+    `v06b-dev/`, `v06c-dev/`), each declared before it ran, and kept as
+    run.
+
+**Development findings** (V0.6c, `docs/benchmark/v06c-dev/`). These come
+from a small number of seeds, scenarios and frozen configurations: five
+scenarios, three seeds at 30 days and one at 90, and two local models
+with one prompt and one set of settings. They are observations, not a
+ranking. They make no claim of generality or statistical significance.
+* **Qwen3.6-35B-A3B** frequently improved reporting metrics at a
+  substantial financial cost. Over 90 days in staffing shortage, TAT p90
+  fell from 761 to 131 minutes and breaches by 67, while operating profit
+  fell by $137,507 against no action.
+* **Gemma 4 26B-A4B** intervened less often. It made one accepted change
+  in 450 decision points over 90 days.
+* **`conservative-v2`** used its financial guardrails and often chose no
+  action. Where it acted, it raised the reading allocation and, in the
+  stable practice, stepped back at its review.
+* **`greedy`** repeatedly raised the reading allocation, at $27,000–
+  $34,000 of profit over 90 days in every scenario.
+* **Replay.** Every evaluated LLM recording (40 runs) reproduced without
+  model access.
+* **T90.** Every applicable T90 evaluation (reporting backlog) returned
+  NO GO.
+* **Explanations.** The models' stated reasons sometimes contradicted
+  their submitted actions, or misread the observation (cents as
+  dollars).
+
+**V0.6a disclosure, unchanged.** The demand-growth scenario's declared
+within-run check (raw 30-day demand totals rising) failed on two of
+three characterization seeds: weekday counts confound the totals. The
+result stands as recorded. V0.6b then declared a demand diagnostic
+(`dreamteam.demand-diagnostic/v1`) prospectively, and on fresh seeds its
+checks held.
+
+**Known limitations.** These matter for any use of the results:
+* **Limited development seeds.** Three seeds at 30 days and one at 90;
+  no statistical claim.
+* **Two frozen LLM configurations,** with **one agent prompt version**
+  (`llm-agent-prompt/v2`).
+* **No clinical validation.** Everything is synthetic. The scenarios do
+  not reproduce all the economics of real radiology practices.
+* **No held-out benchmark execution.** The held-out governance is
+  defined, but no held-out set exists and none was run.
+* **Live inference is nondeterministic,** even at temperature 0.
+  **Exact replay requires the recordings.**
+* **External agents are trusted, not OS-sandboxed.**
+* **Radiologist shift extensions have no incremental salary cost.**
+  Radiologists are salaried in the simulator, so extending their shifts
+  costs nothing. This can materially distort the apparent financial
+  consequences of management decisions. It is a limitation of the
+  simulator's model, not fixed in this release.
+* **Financial insolvency has no simulator consequence.** Negative cash
+  stops nothing.
+* **Demand growth uses monthly factors,** not an explicit dated shock.
+* **Some important metrics are absent:** imaging capacity utilization and
+  trends within a run.
+* **Model explanations may contradict submitted actions.** A stated
+  reason is not evidence of what an agent did.
+* **LLMs may repeatedly propose invalid actions.** `validate` refuses
+  them, but they recur, up to 18 times in one run.
+* **Inference costs were not priced.** Tokens and latency are reported
+  instead.
+* **Cross-stage latency comparisons are affected by server load.**
+* **`conservative-v2` has been neither optimized nor validated.**
+* **Intervention rate is not a verdict.** A model's low intervention rate
+  is neither inherently good nor bad.
+
+**Compatibility.**
+* No change to mechanics, randomness, scenarios, actions, accounting,
+  evaluation, scoring, the protocols, the LLM agent or its prompt.
+* All golden references give identical outcomes.
+* Saves from V0.1 to V0.5 and from every V0.6 development build replay
+  with every digest verified. 0.6.0-dev.3 is registered as batch mode
+  `v0.6_dev3`.
+* Every committed recording, V0.5 and V0.6, still replays.
+
+**Validation.**
+* The full Go test suite passes, and the race detector finds no race (with
+  `-timeout 90m` for the slow packages).
+* vet and gofmt are clean, and the Python agent tests pass.
+* Every session fixture replays, and every golden reference is identical.
+* Suite verify and reproduce pass.
+* Every recorded LLM decision replays byte for byte.
+* Cross-builds succeed for five targets, and the committed seed guards
+  pass.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
+---
+
 ## V0.5.0 — LLM agents
 
 A language model can now manage the practice. An external agent asks any

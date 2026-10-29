@@ -7,6 +7,56 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.6.0 — release: a reproducible benchmark for practice-management agents
+
+Owner decision 2026-10-29:
+* V0.6c accepted (CI green on 132413c);
+* GO for the V0.6.0 release, release-only;
+* no V0.6d, and no tuning of models, prompts, policies, scenarios or
+  metrics;
+* V0.7 proposed as simulator realism and agent decision-quality
+  evaluation (ROADMAP §7a), not approved.
+
+**Changed:**
+* Version 0.6.0. 0.6.0-dev.3 is registered for replay
+  (`mini-seed52-v063`, batch mode `v0.6_dev3`,
+  `internal/session/v063_test.go`).
+* README, release notes, ROADMAP (V0.6 released, V0.7 proposed), and the
+  status and known limitations of BENCHMARK_SUITE (§6 now opens with the
+  release's limitations), BENCHMARK and LLM_AGENT.
+* The development evidence is unchanged, including V0.6a's failed
+  demand-growth check and V0.6b's prospectively declared diagnostic.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, scoring, the harness, the protocols, the policies, the LLM
+agent, its prompt or its settings. No evaluation was rerun.
+
+**Release gates** (linux/amd64 unless noted):
+* Clean release tree.
+* Full default Go suite: all 10 packages with tests pass. The tagged
+  clinical evaluation suites were not rerun (unaffected).
+* Race: `go test -race -timeout 90m ./...` passes.
+* vet (three tag sets) and gofmt: clean.
+* Python agent tests: pass.
+* Historical session replay: every fixture, including
+  `mini-seed52-v063`, replays with every digest verified.
+* Golden references: outcomes identical (four references, through the
+  migration manifest).
+* Suite verify and reproduce: V0.4 CI benchmark, V0.6a suite, V0.6b suite
+  run. 0 failed.
+* Recorded LLM replay: V0.5a, V0.5b, V0.5c stages a–d and the ten V0.6c
+  per-entry replays, each verified and reproduced. 38 of 38 checks
+  passed, 0 failed.
+* Five cross-builds.
+* Committed seed guards (`TestCommittedConfigs`, `TestCommittedSuiteRuns`,
+  the holdout guard): pass.
+* CI on the release commit: green on linux/amd64, linux/arm64 and
+  darwin/arm64, with the cross-platform comparison.
+
+No live LLM evaluation was rerun.
+
+---
+
 ## V0.6c — conservative baseline v2 and frozen-agent evaluation (0.6.0-dev.3)
 
 Owner decision 2026-10-28: V0.6b accepted (CI green on 8bd21a3), with

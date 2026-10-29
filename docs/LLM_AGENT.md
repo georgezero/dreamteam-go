@@ -14,7 +14,10 @@ version 2: V0.5a's agent (version 1) with bounded memory, action guidance,
 a targeted prompt, operations and staffing actions at one decision point,
 and usage and cost reporting. V0.5c ran it unchanged with three local
 models ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)); its one
-change is that `memoryDecisions` 0 turns the memory off (§6).
+change is that `memoryDecisions` 0 turns the memory off (§6). V0.6c ran
+it unchanged again, with two of those models, across the V0.6 scenario
+suite ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Released
+unchanged in V0.6.0.
 
 ```
 dreamteam benchmark run CONFIG
@@ -638,7 +641,7 @@ and run record.
   memory off), on linux/amd64, linux/arm64 and darwin/arm64, comparing the
   manifests.
 
-## 12. Known limitations (V0.5)
+## 12. Known limitations (V0.6)
 
 * **Bounded memory, no planning.** The memory is a short record of the
   agent's own decisions and what followed them. There is no plan, no goal
@@ -685,3 +688,11 @@ and run record.
   measure of decision quality or a ranking of models, and establishes
   neither superiority nor generality. No model or agent is clinically
   validated or benchmark-certified.
+* **Reasons are not evidence of actions** (V0.6c). A model's `reason`
+  sometimes described changes it did not submit: an allocation cut, a
+  contract cancellation. One misread `monthlyRetainerCents` 150000 as
+  "$150k/month". Read the submitted batches, not the reason.
+* **Invalid proposals recur** (V0.6c). Qwen repeated a refused proposal up
+  to 18 times in a 90-day run.
+* **One prompt version.** Every V0.5c and V0.6 result used
+  `llm-agent-prompt/v2` with the V0.5c settings.
