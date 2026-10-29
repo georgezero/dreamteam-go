@@ -1,0 +1,380 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 1 (development) · suite run v06c-compare-90 · engine 0.6.0-dev.3
+complete: 25 of 25 runs
+seeds 41301 · 90 days · decisions every 1 day(s) at 07:00 · policies noop@1, greedy@1, conservative-v2@2, qwen36-35b-a3b@2, gemma4-26b-a4b@2 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry               version  scenario                  fingerprint    T90             seed   runs  start          identical
+financial-pressure  1        bench-financial-pressure  3dcd153bb24c…  not_applicable  41301  5     479206632002…  yes
+reporting-backlog   1        sustainable               e8718dbd1031…  v0.2-eval-4     41301  5     2d54394351a6…  yes
+demand-growth       1        bench-demand-growth       0146ac340d95…  not_applicable  41301  5     2d54394351a6…  yes
+staffing-shortage   1        bench-staffing-shortage   6ef37e929b8d…  not_applicable  41301  5     4a71354f47e4…  yes
+stable              1        bench-stable              d65113896ce5…  not_applicable  41301  5     588ee0330c56…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry               seed   policy             status     replay  actions o/s/r  T90
+financial-pressure  41301  noop@1             completed  ok      0/0/0          not_applicable
+financial-pressure  41301  greedy@1           completed  ok      0/12/0         not_applicable
+financial-pressure  41301  conservative-v2@2  completed  ok      0/0/0          not_applicable
+financial-pressure  41301  qwen36-35b-a3b@2   completed  ok      47/9/0         not_applicable
+financial-pressure  41301  gemma4-26b-a4b@2   completed  ok      0/0/0          not_applicable
+reporting-backlog   41301  noop@1             completed  ok      0/0/0          NO GO
+reporting-backlog   41301  greedy@1           completed  ok      0/12/0         NO GO
+reporting-backlog   41301  conservative-v2@2  completed  ok      0/0/0          NO GO
+reporting-backlog   41301  qwen36-35b-a3b@2   completed  ok      19/0/0         NO GO
+reporting-backlog   41301  gemma4-26b-a4b@2   completed  ok      0/0/0          NO GO
+demand-growth       41301  noop@1             completed  ok      0/0/0          not_applicable
+demand-growth       41301  greedy@1           completed  ok      0/12/0         not_applicable
+demand-growth       41301  conservative-v2@2  completed  ok      0/1/0          not_applicable
+demand-growth       41301  qwen36-35b-a3b@2   completed  ok      36/0/0         not_applicable
+demand-growth       41301  gemma4-26b-a4b@2   completed  ok      0/1/0          not_applicable
+staffing-shortage   41301  noop@1             completed  ok      0/0/0          not_applicable
+staffing-shortage   41301  greedy@1           completed  ok      0/12/0         not_applicable
+staffing-shortage   41301  conservative-v2@2  completed  ok      0/0/0          not_applicable
+staffing-shortage   41301  qwen36-35b-a3b@2   completed  ok      53/8/0         not_applicable
+staffing-shortage   41301  gemma4-26b-a4b@2   completed  ok      0/0/0          not_applicable
+stable              41301  noop@1             completed  ok      0/0/0          not_applicable
+stable              41301  greedy@1           completed  ok      0/12/0         not_applicable
+stable              41301  conservative-v2@2  completed  ok      0/2/0          not_applicable
+stable              41301  qwen36-35b-a3b@2   completed  ok      8/8/0          not_applicable
+stable              41301  gemma4-26b-a4b@2   completed  ok      0/0/0          not_applicable
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry               policy           exams  reports  TAT p50  TAT p90    backlog end  wait p50  wait p90
+financial-pressure  noop             4,323  4,311    57 min   833 min    13           19 min    63 min
+financial-pressure  greedy           4,323  4,311    30 min   714 min    13           19 min    63 min
+financial-pressure  conservative-v2  4,323  4,311    57 min   833 min    13           19 min    63 min
+financial-pressure  qwen36-35b-a3b   4,025  4,013    40 min   726 min    13           21 min    63 min
+financial-pressure  gemma4-26b-a4b   4,323  4,311    57 min   833 min    13           19 min    63 min
+reporting-backlog   noop             4,611  4,600    103 min  976 min    12           21 min    70 min
+reporting-backlog   greedy           4,611  4,600    41 min   798 min    12           21 min    70 min
+reporting-backlog   conservative-v2  4,611  4,600    103 min  976 min    12           21 min    70 min
+reporting-backlog   qwen36-35b-a3b   4,626  4,615    105 min  993 min    12           21 min    69 min
+reporting-backlog   gemma4-26b-a4b   4,611  4,600    103 min  976 min    12           21 min    70 min
+demand-growth       noop             4,755  4,715    160 min  1,217 min  41           21 min    74 min
+demand-growth       greedy           4,755  4,744    43 min   793 min    12           21 min    74 min
+demand-growth       conservative-v2  4,755  4,728    160 min  1,169 min  28           21 min    74 min
+demand-growth       qwen36-35b-a3b   4,768  4,729    160 min  1,219 min  40           21 min    73 min
+demand-growth       gemma4-26b-a4b   4,755  4,756    131 min  1,061 min  0            21 min    74 min
+staffing-shortage   noop             4,383  4,371    45 min   761 min    12           19 min    73 min
+staffing-shortage   greedy           4,383  4,371    27 min   665 min    12           19 min    73 min
+staffing-shortage   conservative-v2  4,383  4,371    45 min   761 min    12           19 min    73 min
+staffing-shortage   qwen36-35b-a3b   4,570  4,555    18 min   131 min    15           16 min    58 min
+staffing-shortage   gemma4-26b-a4b   4,383  4,371    45 min   761 min    12           19 min    73 min
+stable              noop             4,831  4,838    101 min  956 min    12           19 min    55 min
+stable              greedy           4,831  4,838    48 min   704 min    12           19 min    55 min
+stable              conservative-v2  4,831  4,838    92 min   838 min    12           19 min    55 min
+stable              qwen36-35b-a3b   4,810  4,829    26 min   123 min    0            19 min    54 min
+stable              gemma4-26b-a4b   4,831  4,838    101 min  956 min    12           19 min    55 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry               policy           net revenue  expenses  profit     margin  op. cash flow
+financial-pressure  noop             $698,691     $723,700  -$25,009   -3.6%   -$100,023
+financial-pressure  greedy           $698,695     $756,254  -$57,558   -8.2%   -$129,105
+financial-pressure  conservative-v2  $698,691     $723,700  -$25,009   -3.6%   -$100,023
+financial-pressure  qwen36-35b-a3b   $635,312     $704,255  -$68,943   -10.9%  -$95,178
+financial-pressure  gemma4-26b-a4b   $698,691     $723,700  -$25,009   -3.6%   -$100,023
+reporting-backlog   noop             $743,641     $733,219  $10,422    1.4%    -$68,383
+reporting-backlog   greedy           $743,614     $767,132  -$23,518   -3.2%   -$97,906
+reporting-backlog   conservative-v2  $743,641     $733,219  $10,422    1.4%    -$68,383
+reporting-backlog   qwen36-35b-a3b   $746,248     $734,542  $11,706    1.6%    -$67,729
+reporting-backlog   gemma4-26b-a4b   $743,641     $733,219  $10,422    1.4%    -$68,383
+demand-growth       noop             $755,519     $736,164  $19,356    2.6%    -$69,189
+demand-growth       greedy           $762,248     $770,158  -$7,910    -1.0%   -$97,186
+demand-growth       conservative-v2  $758,286     $736,739  $21,547    2.8%    -$69,436
+demand-growth       qwen36-35b-a3b   $757,722     $740,627  $17,096    2.3%    -$71,987
+demand-growth       gemma4-26b-a4b   $763,481     $742,027  $21,454    2.8%    -$71,991
+staffing-shortage   noop             $673,573     $695,097  -$21,524   -3.2%   -$88,592
+staffing-shortage   greedy           $673,548     $727,664  -$54,115   -8.0%   -$117,406
+staffing-shortage   conservative-v2  $673,573     $695,097  -$21,524   -3.2%   -$88,592
+staffing-shortage   qwen36-35b-a3b   $696,342     $855,373  -$159,031  -22.8%  -$228,100
+staffing-shortage   gemma4-26b-a4b   $673,573     $695,097  -$21,524   -3.2%   -$88,592
+stable              noop             $774,072     $743,047  $31,025    4.0%    -$51,965
+stable              greedy           $774,032     $775,662  -$1,630    -0.2%   -$79,873
+stable              conservative-v2  $774,109     $745,386  $28,724    3.7%    -$53,586
+stable              qwen36-35b-a3b   $768,998     $796,666  -$27,668   -3.6%   -$98,282
+stable              gemma4-26b-a4b   $774,072     $743,047  $31,025    4.0%    -$51,965
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry               policy           orders  lost   lost rate  overtime    held over  skipped breaks  no coverage
+financial-pressure  noop             4,878   492    10.1%      8,975 min   122        1               0
+financial-pressure  greedy           4,878   492    10.1%      8,975 min   122        1               0
+financial-pressure  conservative-v2  4,878   492    10.1%      8,975 min   122        1               0
+financial-pressure  qwen36-35b-a3b   4,878   853    17.5%      12,281 min  120        0               0
+financial-pressure  gemma4-26b-a4b   4,878   492    10.1%      8,975 min   122        1               0
+reporting-backlog   noop             5,508   750    13.6%      12,612 min  138        0               0
+reporting-backlog   greedy           5,508   750    13.6%      12,612 min  138        0               0
+reporting-backlog   conservative-v2  5,508   750    13.6%      12,612 min  138        0               0
+reporting-backlog   qwen36-35b-a3b   5,508   736    13.4%      14,298 min  135        0               0
+reporting-backlog   gemma4-26b-a4b   5,508   750    13.6%      12,612 min  138        0               0
+demand-growth       noop             6,109   984    16.1%      13,906 min  146        0               0
+demand-growth       greedy           6,109   984    16.1%      13,906 min  146        0               0
+demand-growth       conservative-v2  6,109   984    16.1%      13,906 min  146        0               0
+demand-growth       qwen36-35b-a3b   6,109   968    15.8%      17,278 min  135        0               0
+demand-growth       gemma4-26b-a4b   6,109   984    16.1%      13,906 min  146        0               0
+staffing-shortage   noop             5,508   1,026  18.6%      11,801 min  136        0               1
+staffing-shortage   greedy           5,508   1,026  18.6%      11,801 min  136        0               1
+staffing-shortage   conservative-v2  5,508   1,026  18.6%      11,801 min  136        0               1
+staffing-shortage   qwen36-35b-a3b   5,508   913    16.6%      15,079 min  130        0               1
+staffing-shortage   gemma4-26b-a4b   5,508   1,026  18.6%      11,801 min  136        0               1
+stable              noop             5,508   589    10.7%      8,801 min   120        0               0
+stable              greedy           5,508   589    10.7%      8,801 min   120        0               0
+stable              conservative-v2  5,508   589    10.7%      8,801 min   120        0               0
+stable              qwen36-35b-a3b   5,508   610    11.1%      9,838 min   125        0               0
+stable              gemma4-26b-a4b   5,508   589    10.7%      8,801 min   120        0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry               policy           over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure  noop             316          305       1,367      absent     274     2
+financial-pressure  greedy           265          254       1,367      absent     269     3
+financial-pressure  conservative-v2  316          305       1,367      absent     274     2
+financial-pressure  qwen36-35b-a3b   240          229       1,321      183        241     2
+financial-pressure  gemma4-26b-a4b   316          305       1,367      absent     274     2
+reporting-backlog   noop             452          441       1,634      absent     324     2
+reporting-backlog   greedy           313          302       1,634      absent     322     2
+reporting-backlog   conservative-v2  452          441       1,634      absent     324     2
+reporting-backlog   qwen36-35b-a3b   463          452       1,636      absent     327     2
+reporting-backlog   gemma4-26b-a4b   452          441       1,634      absent     324     2
+demand-growth       noop             602          563       1,725      absent     346     3
+demand-growth       greedy           306          296       1,725      absent     344     2
+demand-growth       conservative-v2  584          558       1,725      absent     346     2
+demand-growth       qwen36-35b-a3b   591          558       1,703      absent     344     3
+demand-growth       gemma4-26b-a4b   466          466       1,725      absent     345     0
+staffing-shortage   noop             287          277       1,355      absent     324     2
+staffing-shortage   greedy           245          235       1,355      absent     322     2
+staffing-shortage   conservative-v2  287          277       1,355      absent     324     2
+staffing-shortage   qwen36-35b-a3b   223          210       1,153      22         265     3
+staffing-shortage   gemma4-26b-a4b   287          277       1,355      absent     324     2
+stable              noop             366          356       1,470      absent     244     2
+stable              greedy           267          257       1,470      absent     243     2
+stable              conservative-v2  313          303       1,470      absent     242     2
+stable              qwen36-35b-a3b   150          150       1,417      12         244     0
+stable              gemma4-26b-a4b   366          356       1,470      absent     244     2
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry               policy           min cash  shortfall  days < 0
+financial-pressure  noop             $39,878   $0         0
+financial-pressure  greedy           $13,170   $0         0
+financial-pressure  conservative-v2  $39,878   $0         0
+financial-pressure  qwen36-35b-a3b   $37,719   $0         0
+financial-pressure  gemma4-26b-a4b   $39,878   $0         0
+reporting-backlog   noop             $45,055   $0         0
+reporting-backlog   greedy           $42,684   $0         0
+reporting-backlog   conservative-v2  $45,055   $0         0
+reporting-backlog   qwen36-35b-a3b   $44,331   $0         0
+reporting-backlog   gemma4-26b-a4b   $45,055   $0         0
+demand-growth       noop             $45,055   $0         0
+demand-growth       greedy           $43,920   $0         0
+demand-growth       conservative-v2  $45,055   $0         0
+demand-growth       qwen36-35b-a3b   $43,345   $0         0
+demand-growth       gemma4-26b-a4b   $45,055   $0         0
+staffing-shortage   noop             $48,686   $0         0
+staffing-shortage   greedy           $26,043   $0         0
+staffing-shortage   conservative-v2  $48,686   $0         0
+staffing-shortage   qwen36-35b-a3b   -$85,854  $85,854    10
+staffing-shortage   gemma4-26b-a4b   $48,686   $0         0
+stable              noop             $47,058   $0         0
+stable              greedy           $47,058   $0         0
+stable              conservative-v2  $47,058   $0         0
+stable              qwen36-35b-a3b   $39,861   $0         0
+stable              gemma4-26b-a4b   $47,058   $0         0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry               policy           attempted  accepted  rejected  operations  staffing
+financial-pressure  noop             0          0         0         0           0
+financial-pressure  greedy           12         12        0         0           12
+financial-pressure  conservative-v2  0          0         0         0           0
+financial-pressure  qwen36-35b-a3b   56         56        0         47          9
+financial-pressure  gemma4-26b-a4b   0          0         0         0           0
+reporting-backlog   noop             0          0         0         0           0
+reporting-backlog   greedy           12         12        0         0           12
+reporting-backlog   conservative-v2  0          0         0         0           0
+reporting-backlog   qwen36-35b-a3b   19         19        0         19          0
+reporting-backlog   gemma4-26b-a4b   0          0         0         0           0
+demand-growth       noop             0          0         0         0           0
+demand-growth       greedy           12         12        0         0           12
+demand-growth       conservative-v2  1          1         0         0           1
+demand-growth       qwen36-35b-a3b   36         36        0         36          0
+demand-growth       gemma4-26b-a4b   1          1         0         0           1
+staffing-shortage   noop             0          0         0         0           0
+staffing-shortage   greedy           12         12        0         0           12
+staffing-shortage   conservative-v2  0          0         0         0           0
+staffing-shortage   qwen36-35b-a3b   61         61        0         53          8
+staffing-shortage   gemma4-26b-a4b   0          0         0         0           0
+stable              noop             0          0         0         0           0
+stable              greedy           12         12        0         0           12
+stable              conservative-v2  2          2         0         0           2
+stable              qwen36-35b-a3b   16         16        0         8           8
+stable              gemma4-26b-a4b   0          0         0         0           0
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry               policy           seeds  exams  reports  TAT p50   TAT p90   backlog end  wait p50  wait p90
+financial-pressure  greedy           1      0      0        -27 min   -119 min  0            0 min     0 min
+financial-pressure  conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+financial-pressure  qwen36-35b-a3b   1      -298   -298     -17 min   -107 min  0            +1 min    +1 min
+financial-pressure  gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+reporting-backlog   greedy           1      0      0        -62 min   -178 min  0            0 min     0 min
+reporting-backlog   conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+reporting-backlog   qwen36-35b-a3b   1      +15    +15      +3 min    +17 min   0            0 min     0 min
+reporting-backlog   gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+demand-growth       greedy           1      0      +29      -117 min  -423 min  -29          0 min     0 min
+demand-growth       conservative-v2  1      0      +13      0 min     -48 min   -13          0 min     0 min
+demand-growth       qwen36-35b-a3b   1      +13    +14      0 min     +2 min    -1           0 min     -1 min
+demand-growth       gemma4-26b-a4b   1      0      +41      -29 min   -156 min  -41          0 min     0 min
+staffing-shortage   greedy           1      0      0        -17 min   -96 min   0            0 min     0 min
+staffing-shortage   conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+staffing-shortage   qwen36-35b-a3b   1      +187   +184     -27 min   -630 min  +3           -3 min    -15 min
+staffing-shortage   gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+stable              greedy           1      0      0        -53 min   -252 min  0            0 min     0 min
+stable              conservative-v2  1      0      0        -9 min    -117 min  0            0 min     0 min
+stable              qwen36-35b-a3b   1      -21    -9       -76 min   -832 min  -12          0 min     -1 min
+stable              gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+
+Financial performance
+
+entry               policy           seeds  net revenue  expenses   profit     margin  op. cash flow
+financial-pressure  greedy           1      +$5          +$32,554   -$32,549   n/a     -$29,082
+financial-pressure  conservative-v2  1      $0           $0         $0         n/a     $0
+financial-pressure  qwen36-35b-a3b   1      -$63,378     -$19,444   -$43,934   n/a     +$4,845
+financial-pressure  gemma4-26b-a4b   1      $0           $0         $0         n/a     $0
+reporting-backlog   greedy           1      -$27         +$33,913   -$33,940   n/a     -$29,524
+reporting-backlog   conservative-v2  1      $0           $0         $0         n/a     $0
+reporting-backlog   qwen36-35b-a3b   1      +$2,607      +$1,323    +$1,284    n/a     +$653
+reporting-backlog   gemma4-26b-a4b   1      $0           $0         $0         n/a     $0
+demand-growth       greedy           1      +$6,729      +$33,995   -$27,266   n/a     -$27,997
+demand-growth       conservative-v2  1      +$2,766      +$575      +$2,191    n/a     -$247
+demand-growth       qwen36-35b-a3b   1      +$2,203      +$4,463    -$2,260    n/a     -$2,798
+demand-growth       gemma4-26b-a4b   1      +$7,962      +$5,864    +$2,098    n/a     -$2,801
+staffing-shortage   greedy           1      -$25         +$32,567   -$32,591   n/a     -$28,814
+staffing-shortage   conservative-v2  1      $0           $0         $0         n/a     $0
+staffing-shortage   qwen36-35b-a3b   1      +$22,769     +$160,276  -$137,507  n/a     -$139,508
+staffing-shortage   gemma4-26b-a4b   1      $0           $0         $0         n/a     $0
+stable              greedy           1      -$40         +$32,615   -$32,655   n/a     -$27,909
+stable              conservative-v2  1      +$37         +$2,339    -$2,301    n/a     -$1,621
+stable              qwen36-35b-a3b   1      -$5,074      +$53,619   -$58,693   n/a     -$46,317
+stable              gemma4-26b-a4b   1      $0           $0         $0         n/a     $0
+
+Staffing and capacity
+
+entry               policy           seeds  orders  lost  lost rate  overtime    held over  skipped breaks  no coverage
+financial-pressure  greedy           1      0       0     n/a        0 min       0          0               0
+financial-pressure  conservative-v2  1      0       0     n/a        0 min       0          0               0
+financial-pressure  qwen36-35b-a3b   1      0       +361  n/a        +3,306 min  -2         -1              0
+financial-pressure  gemma4-26b-a4b   1      0       0     n/a        0 min       0          0               0
+reporting-backlog   greedy           1      0       0     n/a        0 min       0          0               0
+reporting-backlog   conservative-v2  1      0       0     n/a        0 min       0          0               0
+reporting-backlog   qwen36-35b-a3b   1      0       -14   n/a        +1,686 min  -3         0               0
+reporting-backlog   gemma4-26b-a4b   1      0       0     n/a        0 min       0          0               0
+demand-growth       greedy           1      0       0     n/a        0 min       0          0               0
+demand-growth       conservative-v2  1      0       0     n/a        0 min       0          0               0
+demand-growth       qwen36-35b-a3b   1      0       -16   n/a        +3,372 min  -11        0               0
+demand-growth       gemma4-26b-a4b   1      0       0     n/a        0 min       0          0               0
+staffing-shortage   greedy           1      0       0     n/a        0 min       0          0               0
+staffing-shortage   conservative-v2  1      0       0     n/a        0 min       0          0               0
+staffing-shortage   qwen36-35b-a3b   1      0       -113  n/a        +3,278 min  -6         0               0
+staffing-shortage   gemma4-26b-a4b   1      0       0     n/a        0 min       0          0               0
+stable              greedy           1      0       0     n/a        0 min       0          0               0
+stable              conservative-v2  1      0       0     n/a        0 min       0          0               0
+stable              qwen36-35b-a3b   1      0       +21   n/a        +1,037 min  +5         0               0
+stable              gemma4-26b-a4b   1      0       0     n/a        0 min       0          0               0
+
+Service reliability
+
+entry               policy           seeds  over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure  greedy           1      -51          -51       0          n/a        -5      +1
+financial-pressure  conservative-v2  1      0            0         0          n/a        0       0
+financial-pressure  qwen36-35b-a3b   1      -76          -76       -46        n/a        -33     0
+financial-pressure  gemma4-26b-a4b   1      0            0         0          n/a        0       0
+reporting-backlog   greedy           1      -139         -139      0          n/a        -2      0
+reporting-backlog   conservative-v2  1      0            0         0          n/a        0       0
+reporting-backlog   qwen36-35b-a3b   1      +11          +11       +2         n/a        +3      0
+reporting-backlog   gemma4-26b-a4b   1      0            0         0          n/a        0       0
+demand-growth       greedy           1      -296         -267      0          n/a        -2      -1
+demand-growth       conservative-v2  1      -18          -5        0          n/a        0       -1
+demand-growth       qwen36-35b-a3b   1      -11          -5        -22        n/a        -2      0
+demand-growth       gemma4-26b-a4b   1      -136         -97       0          n/a        -1      -3
+staffing-shortage   greedy           1      -42          -42       0          n/a        -2      0
+staffing-shortage   conservative-v2  1      0            0         0          n/a        0       0
+staffing-shortage   qwen36-35b-a3b   1      -64          -67       -202       n/a        -59     +1
+staffing-shortage   gemma4-26b-a4b   1      0            0         0          n/a        0       0
+stable              greedy           1      -99          -99       0          n/a        -1      0
+stable              conservative-v2  1      -53          -53       0          n/a        -2      0
+stable              qwen36-35b-a3b   1      -216         -206      -53        n/a        0       -2
+stable              gemma4-26b-a4b   1      0            0         0          n/a        0       0
+
+Long-term sustainability
+
+entry               policy           seeds  min cash   shortfall  days < 0
+financial-pressure  greedy           1      -$26,709   $0         0
+financial-pressure  conservative-v2  1      $0         $0         0
+financial-pressure  qwen36-35b-a3b   1      -$2,159    $0         0
+financial-pressure  gemma4-26b-a4b   1      $0         $0         0
+reporting-backlog   greedy           1      -$2,371    $0         0
+reporting-backlog   conservative-v2  1      $0         $0         0
+reporting-backlog   qwen36-35b-a3b   1      -$725      $0         0
+reporting-backlog   gemma4-26b-a4b   1      $0         $0         0
+demand-growth       greedy           1      -$1,136    $0         0
+demand-growth       conservative-v2  1      $0         $0         0
+demand-growth       qwen36-35b-a3b   1      -$1,710    $0         0
+demand-growth       gemma4-26b-a4b   1      $0         $0         0
+staffing-shortage   greedy           1      -$22,643   $0         0
+staffing-shortage   conservative-v2  1      $0         $0         0
+staffing-shortage   qwen36-35b-a3b   1      -$134,540  +$85,854   +10
+staffing-shortage   gemma4-26b-a4b   1      $0         $0         0
+stable              greedy           1      $0         $0         0
+stable              conservative-v2  1      $0         $0         0
+stable              qwen36-35b-a3b   1      -$7,197    $0         0
+stable              gemma4-26b-a4b   1      $0         $0         0
+
+Actions
+
+entry               policy           seeds  attempted  accepted  rejected
+financial-pressure  greedy           1      +12        +12       0
+financial-pressure  conservative-v2  1      0          0         0
+financial-pressure  qwen36-35b-a3b   1      +56        +56       0
+financial-pressure  gemma4-26b-a4b   1      0          0         0
+reporting-backlog   greedy           1      +12        +12       0
+reporting-backlog   conservative-v2  1      0          0         0
+reporting-backlog   qwen36-35b-a3b   1      +19        +19       0
+reporting-backlog   gemma4-26b-a4b   1      0          0         0
+demand-growth       greedy           1      +12        +12       0
+demand-growth       conservative-v2  1      +1         +1        0
+demand-growth       qwen36-35b-a3b   1      +36        +36       0
+demand-growth       gemma4-26b-a4b   1      +1         +1        0
+staffing-shortage   greedy           1      +12        +12       0
+staffing-shortage   conservative-v2  1      0          0         0
+staffing-shortage   qwen36-35b-a3b   1      +61        +61       0
+staffing-shortage   gemma4-26b-a4b   1      0          0         0
+stable              greedy           1      +12        +12       0
+stable              conservative-v2  1      +2         +2        0
+stable              qwen36-35b-a3b   1      +16        +16       0
+stable              gemma4-26b-a4b   1      0          0         0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 22 run(s): displacedAppointments: none displaced

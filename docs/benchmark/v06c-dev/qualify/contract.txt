@@ -1,0 +1,185 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 1 (development) · suite run v06c-qualify · engine 0.6.0-dev.3
+complete: 10 of 10 runs
+seeds 41101 · 90 days · decisions every 1 day(s) at 07:00 · policies noop@1, conservative-v2@2 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry               version  scenario                  fingerprint    T90             seed   runs  start          identical
+financial-pressure  1        bench-financial-pressure  3dcd153bb24c…  not_applicable  41101  2     3c860838bb5f…  yes
+reporting-backlog   1        sustainable               e8718dbd1031…  v0.2-eval-4     41101  2     4e878ed75bfe…  yes
+demand-growth       1        bench-demand-growth       0146ac340d95…  not_applicable  41101  2     4e878ed75bfe…  yes
+staffing-shortage   1        bench-staffing-shortage   6ef37e929b8d…  not_applicable  41101  2     63e4714ec1c2…  yes
+stable              1        bench-stable              d65113896ce5…  not_applicable  41101  2     01099d568ca2…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry               seed   policy             status     replay  actions o/s/r  T90
+financial-pressure  41101  noop@1             completed  ok      0/0/0          not_applicable
+financial-pressure  41101  conservative-v2@2  completed  ok      0/0/0          not_applicable
+reporting-backlog   41101  noop@1             completed  ok      0/0/0          NO GO
+reporting-backlog   41101  conservative-v2@2  completed  ok      0/0/0          NO GO
+demand-growth       41101  noop@1             completed  ok      0/0/0          not_applicable
+demand-growth       41101  conservative-v2@2  completed  ok      0/0/0          not_applicable
+staffing-shortage   41101  noop@1             completed  ok      0/0/0          not_applicable
+staffing-shortage   41101  conservative-v2@2  completed  ok      0/0/0          not_applicable
+stable              41101  noop@1             completed  ok      0/0/0          not_applicable
+stable              41101  conservative-v2@2  completed  ok      0/3/0          not_applicable
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry               policy           exams  reports  TAT p50  TAT p90    backlog end  wait p50  wait p90
+financial-pressure  noop             4,298  4,289    58 min   822 min    10           19 min    64 min
+financial-pressure  conservative-v2  4,298  4,289    58 min   822 min    10           19 min    64 min
+reporting-backlog   noop             4,602  4,602    112 min  963 min    9            21 min    73 min
+reporting-backlog   conservative-v2  4,602  4,602    112 min  963 min    9            21 min    73 min
+demand-growth       noop             4,730  4,720    138 min  1,038 min  19           22 min    70 min
+demand-growth       conservative-v2  4,730  4,720    138 min  1,038 min  19           22 min    70 min
+staffing-shortage   noop             4,403  4,394    42 min   736 min    9            20 min    69 min
+staffing-shortage   conservative-v2  4,403  4,394    42 min   736 min    9            20 min    69 min
+stable              noop             4,825  4,836    108 min  884 min    9            19 min    57 min
+stable              conservative-v2  4,825  4,836    95 min   836 min    9            19 min    57 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry               policy           net revenue  expenses  profit    margin  op. cash flow
+financial-pressure  noop             $683,446     $725,132  -$41,686  -6.1%   -$73,924
+financial-pressure  conservative-v2  $683,446     $725,132  -$41,686  -6.1%   -$73,924
+reporting-backlog   noop             $728,313     $733,199  -$4,886   -0.7%   -$49,100
+reporting-backlog   conservative-v2  $728,313     $733,199  -$4,886   -0.7%   -$49,100
+demand-growth       noop             $744,107     $735,734  $8,373    1.1%    -$48,045
+demand-growth       conservative-v2  $744,107     $735,734  $8,373    1.1%    -$48,045
+staffing-shortage   noop             $662,406     $695,324  -$32,919  -5.0%   -$71,403
+staffing-shortage   conservative-v2  $662,406     $695,324  -$32,919  -5.0%   -$71,403
+stable              noop             $763,454     $745,055  $18,399   2.4%    -$26,641
+stable              conservative-v2  $763,454     $748,425  $15,029   2.0%    -$29,745
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry               policy           orders  lost   lost rate  overtime    held over  skipped breaks  no coverage
+financial-pressure  noop             4,897   526    10.7%      9,735 min   119        0               0
+financial-pressure  conservative-v2  4,897   526    10.7%      9,735 min   119        0               0
+reporting-backlog   noop             5,517   820    14.9%      12,270 min  137        0               0
+reporting-backlog   conservative-v2  5,517   820    14.9%      12,270 min  137        0               0
+demand-growth       noop             6,115   1,073  17.5%      13,090 min  144        0               1
+demand-growth       conservative-v2  6,115   1,073  17.5%      13,090 min  144        0               1
+staffing-shortage   noop             5,517   1,110  20.1%      11,560 min  135        0               0
+staffing-shortage   conservative-v2  5,517   1,110  20.1%      11,560 min  135        0               0
+stable              noop             5,517   642    11.6%      9,937 min   135        0               0
+stable              conservative-v2  5,517   642    11.6%      9,937 min   135        0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry               policy           over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure  noop             280          271       1,391      absent     277     2
+financial-pressure  conservative-v2  280          271       1,391      absent     277     2
+reporting-backlog   noop             423          415       1,647      absent     323     2
+reporting-backlog   conservative-v2  423          415       1,647      absent     323     2
+demand-growth       noop             480          461       1,739      absent     328     1
+demand-growth       conservative-v2  480          461       1,739      absent     328     1
+staffing-shortage   noop             253          244       1,407      absent     273     1
+staffing-shortage   conservative-v2  253          244       1,407      absent     273     1
+stable              noop             299          291       1,540      absent     268     2
+stable              conservative-v2  287          279       1,540      absent     267     2
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry               policy           min cash  shortfall  days < 0
+financial-pressure  noop             $46,495   $0         0
+financial-pressure  conservative-v2  $46,495   $0         0
+reporting-backlog   noop             $50,880   $0         0
+reporting-backlog   conservative-v2  $50,880   $0         0
+demand-growth       noop             $50,880   $0         0
+demand-growth       conservative-v2  $50,880   $0         0
+staffing-shortage   noop             $55,233   $0         0
+staffing-shortage   conservative-v2  $55,233   $0         0
+stable              noop             $52,742   $0         0
+stable              conservative-v2  $52,742   $0         0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry               policy           attempted  accepted  rejected  operations  staffing
+financial-pressure  noop             0          0         0         0           0
+financial-pressure  conservative-v2  0          0         0         0           0
+reporting-backlog   noop             0          0         0         0           0
+reporting-backlog   conservative-v2  0          0         0         0           0
+demand-growth       noop             0          0         0         0           0
+demand-growth       conservative-v2  0          0         0         0           0
+staffing-shortage   noop             0          0         0         0           0
+staffing-shortage   conservative-v2  0          0         0         0           0
+stable              noop             0          0         0         0           0
+stable              conservative-v2  3          3         0         0           3
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry               policy           seeds  exams  reports  TAT p50  TAT p90  backlog end  wait p50  wait p90
+financial-pressure  conservative-v2  1      0      0        0 min    0 min    0            0 min     0 min
+reporting-backlog   conservative-v2  1      0      0        0 min    0 min    0            0 min     0 min
+demand-growth       conservative-v2  1      0      0        0 min    0 min    0            0 min     0 min
+staffing-shortage   conservative-v2  1      0      0        0 min    0 min    0            0 min     0 min
+stable              conservative-v2  1      0      0        -13 min  -49 min  0            0 min     0 min
+
+Financial performance
+
+entry               policy           seeds  net revenue  expenses  profit   margin  op. cash flow
+financial-pressure  conservative-v2  1      $0           $0        $0       n/a     $0
+reporting-backlog   conservative-v2  1      $0           $0        $0       n/a     $0
+demand-growth       conservative-v2  1      $0           $0        $0       n/a     $0
+staffing-shortage   conservative-v2  1      $0           $0        $0       n/a     $0
+stable              conservative-v2  1      $0           +$3,370   -$3,370  n/a     -$3,104
+
+Staffing and capacity
+
+entry               policy           seeds  orders  lost  lost rate  overtime  held over  skipped breaks  no coverage
+financial-pressure  conservative-v2  1      0       0     n/a        0 min     0          0               0
+reporting-backlog   conservative-v2  1      0       0     n/a        0 min     0          0               0
+demand-growth       conservative-v2  1      0       0     n/a        0 min     0          0               0
+staffing-shortage   conservative-v2  1      0       0     n/a        0 min     0          0               0
+stable              conservative-v2  1      0       0     n/a        0 min     0          0               0
+
+Service reliability
+
+entry               policy           seeds  over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure  conservative-v2  1      0            0         0          n/a        0       0
+reporting-backlog   conservative-v2  1      0            0         0          n/a        0       0
+demand-growth       conservative-v2  1      0            0         0          n/a        0       0
+staffing-shortage   conservative-v2  1      0            0         0          n/a        0       0
+stable              conservative-v2  1      -12          -12       0          n/a        -1      0
+
+Long-term sustainability
+
+entry               policy           seeds  min cash  shortfall  days < 0
+financial-pressure  conservative-v2  1      $0        $0         0
+reporting-backlog   conservative-v2  1      $0        $0         0
+demand-growth       conservative-v2  1      $0        $0         0
+staffing-shortage   conservative-v2  1      $0        $0         0
+stable              conservative-v2  1      $0        $0         0
+
+Actions
+
+entry               policy           seeds  attempted  accepted  rejected
+financial-pressure  conservative-v2  1      0          0         0
+reporting-backlog   conservative-v2  1      0          0         0
+demand-growth       conservative-v2  1      0          0         0
+staffing-shortage   conservative-v2  1      0          0         0
+stable              conservative-v2  1      +3         +3        0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 10 run(s): displacedAppointments: none displaced

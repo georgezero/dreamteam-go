@@ -25,7 +25,9 @@ decisions and produces no clinical content.
 In development (unreleased): **V0.6**, the agent benchmark. V0.6a defines a
 suite of five practice scenarios and an evaluation contract; V0.6b runs a
 suite in one command and reports it under that contract
-(`docs/BENCHMARK_SUITE.md`).
+(`docs/BENCHMARK_SUITE.md`); V0.6c adds a second conservative baseline and
+evaluates two frozen local LLM agents across the suite
+(`docs/benchmark/v06c-dev/`).
 
 ## Quick start
 
@@ -340,8 +342,14 @@ reliability, sustainability, actions), with no score or ranking, and T90
 only where its policy applies. `dreamteam benchmark suite run` (V0.6b)
 runs a suite in one command and writes that contract report; a fourth
 built-in baseline, `conservative`, spends only within financial
-guardrails. `docs/BENCHMARK_SUITE.md`; the characterizations:
-`docs/benchmark/v06a-dev/`, `docs/benchmark/v06b-dev/`.
+guardrails. V0.6c adds `conservative-v2`, which acts on a week of urgent
+and soon report breaches, within the same guardrails, and reviews whether
+each raise helped. It also runs the first frozen-agent comparison: Qwen3.6
+35B-A3B and Gemma 4 26B-A4B with no action, `greedy` and
+`conservative-v2` on all five scenarios, every LLM run replayed without a
+model. `docs/BENCHMARK_SUITE.md`; the characterizations and the
+comparison: `docs/benchmark/v06a-dev/`, `docs/benchmark/v06b-dev/`,
+`docs/benchmark/v06c-dev/`.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its

@@ -1,0 +1,54 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v06c-compare-90-replay-reporting-backlog",
+ "description": "V0.6c compare-90 recorded-decision replay, entry reporting-backlog: every completed live LLM run's recorded decisions (docs/benchmark/v06c-dev/compare-90/) submitted again through the protocol by the agent's replay mode, without any model, beside the no-op baseline. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-1.json",
+ "entries": [
+  "reporting-backlog"
+ ],
+ "seeds": [
+  41301
+ ],
+ "seedPlan": "The seeds of docs/benchmark/v06c-dev/compare-90.json, so that the recorded decisions belong to the runs.",
+ "days": 90,
+ "policies": [
+  "noop",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "2",
+   "description": "the LLM agent (llm-agent 2) in replay mode: qwen36-35b-a3b's recorded decisions from compare-90, entry reporting-backlog, one recording per seed; the memory and prompt are rebuilt and checked against their recorded SHA-256; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--replay",
+    "./docs/benchmark/v06c-dev/compare-90/reporting-backlog-qwen36-35b-a3b-s41301-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "2",
+   "description": "the LLM agent (llm-agent 2) in replay mode: gemma4-26b-a4b's recorded decisions from compare-90, entry reporting-backlog, one recording per seed; the memory and prompt are rebuilt and checked against their recorded SHA-256; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent.py",
+    "--replay",
+    "./docs/benchmark/v06c-dev/compare-90/reporting-backlog-gemma4-26b-a4b-s41301-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

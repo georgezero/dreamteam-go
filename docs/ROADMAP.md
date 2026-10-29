@@ -552,7 +552,15 @@ foundation; no second benchmark engine.
     ([benchmark/v06b-dev/](benchmark/v06b-dev/README.md)).
 
   `conservative` v1 took no action in any run there.
-* **V0.6c:** frozen agents evaluated across the suite.
+* **V0.6c (0.6.0-dev.3): conservative baseline v2 and frozen-agent
+  evaluation.**
+  * `conservative-v2`: acts only on sustained breaches it can afford, with
+    a review and retreat;
+  * Qwen3.6-35B-A3B and Gemma 4 26B-A4B (the V0.5 agent, unchanged)
+    against the baselines on all five entries, at 30 days (three seeds)
+    and 90 days (one seed);
+  * every LLM run replayed without a model
+    ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)).
 * **V0.6.0:** a documented, reproducible benchmark.
 
 **Proposed in V0.2 design draft 2, pending the Step 0 gate.**

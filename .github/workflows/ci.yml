@@ -105,8 +105,8 @@ jobs:
         # V0.5b's (version 2: the memory and prompt are rebuilt and checked
         # at every decision point, docs/benchmark/v05b-dev), and V0.5c's
         # multi-model evaluation, stage by stage (docs/benchmark/v05c-dev),
-        # each verified and rerun. The replays' manifests are compared
-        # across platforms below.
+        # each verified and rerun, and V0.6c's frozen-agent comparison. The
+        # replays' manifests are compared across platforms below.
         shell: bash
         run: |
           set -euo pipefail
@@ -123,6 +123,15 @@ jobs:
             ./dt benchmark verify llm-replay-v05c-$s | tail -1
             ./dt benchmark reproduce llm-replay-v05c-$s -out llm-replay-v05c-$s-again 2> /dev/null | tail -1
             cp llm-replay-v05c-$s/manifest.json out/llm-replay-v05c-$s-manifest.json
+          done
+          # V0.6c: the frozen-agent comparison's recorded decisions, one
+          # suite run per stage and entry (docs/benchmark/v06c-dev), each
+          # verified; the manifests are compared across platforms below.
+          for f in docs/benchmark/v06c-dev/compare-*-replay-*.json; do
+            n=$(basename "$f" .json)
+            ./dt benchmark suite run "$f" -out "llm-$n" > /dev/null
+            ./dt benchmark verify "llm-$n" | tail -1
+            cp "llm-$n/manifest.json" "out/llm-$n-manifest.json"
           done
       - uses: actions/upload-artifact@v7
         with:

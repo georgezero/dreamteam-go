@@ -7,6 +7,131 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.6c — conservative baseline v2 and frozen-agent evaluation (0.6.0-dev.3)
+
+Owner decision 2026-10-28: V0.6b accepted (CI green on 8bd21a3), with
+`conservative` v1's inactivity outstanding. V0.6c:
+* adds a second, distinct financially conservative baseline, keeping v1
+  as a historical baseline;
+* evaluates two frozen LLM agents across the suite (Qwen3.6-35B-A3B and
+  Gemma 4 26B-A4B; the V0.5 agent, `llm-agent-prompt/v2`, settings
+  identical except the model).
+
+The LLMs need not outperform the baselines.
+
+**Declared first** (4b9ed5c, CI green, before any run on its seeds):
+* `conservative-v2`, its specification (BENCHMARK_SUITE §7.2) and
+  synthetic qualification;
+* the plan `v06c-plan/1` with every seed, model, setting and stage
+  ([benchmark/v06c-dev/PLAN.md](benchmark/v06c-dev/PLAN.md)), and
+  `analyze.py`;
+* version 0.6.0-dev.3 (0.6.0-dev.2 registered for replay:
+  `mini-seed52-v062`, batch mode `v0.6_dev2`).
+
+No amendment.
+
+**Built:**
+* **`conservative-v2`** (`internal/bench/conservative2.go`):
+  * **Signal:** reads urgent and soon report breaches from the public log
+    once a day, and acts on a sustained problem (urgent on 3 of 7 days, or
+    soon on 5 of 7).
+  * **Guardrails:** trailing-30-day profit at or above zero after the
+    preview's added salary, cash at least $50,000, at most 10 points above
+    the scenario levels, one change at a time, from the earliest lawful
+    date, never displacing a booked patient.
+  * **Review:** 14 days after a raise takes effect it checks whether
+    breaches per day fell by a quarter. If not, it steps the raise back and
+    raises no more.
+  * **Step back:** when the practice loses money or service is clear.
+  * **Qualification:** all eight requirements in
+    `internal/bench/conservative2_test.go`, with synthetic observations
+    from a fake protocol endpoint.
+* **Analysis:** `analyze.py` (tables) and `breaches.py` (the baseline's
+  breach records, read back from its transcripts).
+* **CI** replays the comparison's recorded decisions, one suite run per
+  stage and entry, and compares the manifests on three platforms.
+
+**Phase 1, qualification** (seed 41101, 90 days, no action and
+`conservative-v2`):
+* **Stable:** it acted only here. It raised Dr. Blake 52.5% → 57.5%. The
+  review found the raise had helped, but the practice was losing money,
+  so it stepped back; it raised again a month later.
+  * Paired with no action: profit −$3,370, TAT p90 −49 minutes,
+    breaches −12.
+* **Elsewhere:** sustained problems on 6–57 of 84 points, but the trailing
+  30 days lost money on 79–90 of 90, so the guardrail held. In demand
+  growth the affordability check declined two previewed raises.
+* **Integrity:** `verify -t90` 108 of 108; `reproduce` on linux/amd64 73
+  of 73, manifest byte-identical.
+
+**Phase 2, 30 days** (seeds 41201–41203; noop, greedy, `conservative-v2`,
+Qwen, Gemma; 75 runs in 2 h 50 min):
+* **Completion:** 75 of 75; no failure, no infrastructure error, no rerun.
+* **Qwen:** acted at 108 of 450 decision points (189 changes accepted,
+  116 refusals, 13 fallbacks).
+  * It reduced breaches in 14 of 15 runs.
+  * At a large cost in staffing shortage (−$7,683 to −$30,447, with
+    hires, full radiologist allocations and teleradiology) and once in
+    reporting backlog (−$16,102).
+  * It intervened on every stable seed (−$160 to −$2,923).
+* **Gemma:** acted at 25 points (32 changes, 34 refusals, 13 fallbacks).
+  * No action at all in reporting backlog, and none effective in
+    financial pressure.
+  * Its usual reason: the next scheduled radiologist "should address the
+    immediate backlog".
+  * Staffing shortage: shift extensions and teleradiology, plus repeated
+    refused hires.
+* **`conservative-v2`:** acted in stable on two seeds, and once each in
+  reporting backlog and demand growth (too late to take effect); otherwise
+  held back by its guardrails.
+* **Integrity:** `verify` 689 of 689. Every LLM run (30 of 30) replayed
+  without a model with byte-identical decisions, session, result, memory
+  and final digests; replay manifests byte-identical on a rerun.
+
+**Phase 2, 90 days** (seed 41301; the same five policies; T90 for
+reporting backlog; 25 runs in 4 h 21 min):
+* **Completion:** 25 of 25; no failure, no infrastructure error, no rerun.
+  T90 NO GO for every policy.
+* **Greedy:** its twelve raises cost $27,266–$33,940 in every entry.
+* **`conservative-v2`:**
+  * Stable: raised, then retreated at the review (−$2,301, breaches −53).
+  * Demand growth: raised once (+$2,191, breaches −5).
+  * The other three entries: no action.
+* **Qwen:** 188 changes accepted.
+  * Staffing shortage: −$137,507 for breaches −67, TAT p90 761 → 131
+    minutes and lost orders −113. It kept extending shifts with its reason
+    noting cash of $3,005.
+  * Financial pressure: it terminated a technologist (lost orders +361,
+    −$43,934). Its reasons misstate the teleradiology retainer as
+    "$150k/month" (the observation: 150,000 cents).
+  * Stable: −$58,693 for breaches −206.
+* **Gemma:** one change in 450 decision points: a Sunday teleradiology
+  contract in demand growth (+$2,098, breaches −97).
+* **Integrity:** `verify -t90` 249 of 249. All 10 LLM runs
+  replayed byte-identically; replay manifests identical on a rerun.
+
+**Gates:**
+* Full default Go suite on linux/amd64: every package passes.
+* Race on linux/amd64 (`-timeout 90m`): `internal/bench`,
+  `internal/scenario`, `internal/session`, `internal/agent`,
+  `cmd/dreamteam` pass. The default 10-minute limit is too short under the
+  race detector.
+* vet (three tag sets) and gofmt: clean.
+* Python agent tests: pass.
+* Five cross-builds.
+* Committed configurations load through the holdout guard.
+* CI on the declaration commit green.
+
+**Limitations:**
+* development seeds only (three at 30 days, one at 90);
+* one prompt and one set of settings;
+* radiologist overtime is unpaid in the simulator;
+* no inference cost (no prices configured);
+* `conservative-v2` is mostly held back by its profit guardrail in
+  loss-making entries.
+
+---
+
 ## V0.6b — benchmark suite runner and standard reports (0.6.0-dev.2)
 
 Owner decision 2026-10-28:

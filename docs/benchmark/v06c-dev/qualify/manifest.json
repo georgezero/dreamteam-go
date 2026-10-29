@@ -1,0 +1,527 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v06c-qualify",
+ "engine": "0.6.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "3437d1d2001fab9b37311fc3881ccb87765cf06ec1ee2f75d6a15f0cb7759480"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "conservative-v2",
+   "version": "2",
+   "description": "the financially conservative baseline, version 2 (V0.6c): watches the public log's urgent and soon report breaches; raises a site reading allocation by 5 points only for a problem sustained over a week (urgent breaches on 3 of 7 days or soon breaches on 5), within the trailing 30 days' operating profit after the change's cost, a $50,000 cash floor and a 10-point cap; reviews each raise after 14 days in effect and steps it back, raising no more, if breaches did not fall by a quarter; steps back when money is lost or service has been clear for a week"
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "bench-financial-pressure-s41101-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s41101-noop/run.json",
+     "sha256": "ecb64754c021aeb26f275ee696dede1f349ba3e613ad1e6fc21a1e2d1e170218"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-noop/transcript.jsonl",
+     "sha256": "9dc3fcbc2901ebfaf8896b67751fe75183dd8641c1d5d887982ebe14b2d86149"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-noop/session.json",
+     "sha256": "d6fb508a1d0bad6e89782b212328b49cc00642f59a3d3d134451500bd9d08b46"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-noop/result.json",
+     "sha256": "e67e0f8fbc72c295eff74bfee0fc856580e652157387ecbed9b3c6a7c39268d0"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-s41101-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-s41101-conservative-v2/run.json",
+     "sha256": "a137ed4f24c10332c56597058f17014d67b7edeacca22032ffc84dfbf58d3c4d"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-conservative-v2/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-conservative-v2/transcript.jsonl",
+     "sha256": "5bc095f9d13f9f070d52dc0f96354c913d0c6982f07178a45164dc9eac28d135"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-conservative-v2/session.json",
+     "sha256": "d6fb508a1d0bad6e89782b212328b49cc00642f59a3d3d134451500bd9d08b46"
+    },
+    {
+     "path": "runs/bench-financial-pressure-s41101-conservative-v2/result.json",
+     "sha256": "e67e0f8fbc72c295eff74bfee0fc856580e652157387ecbed9b3c6a7c39268d0"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s41101-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s41101-noop/run.json",
+     "sha256": "34bc8e1955230452146a1753cf99de8eacf7d7fdfb0184e9ff8073cf027a692c"
+    },
+    {
+     "path": "runs/sustainable-s41101-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s41101-noop/transcript.jsonl",
+     "sha256": "4be6c3c9ffea3852a58f442dd7595a49e66f7dd1b090dd4c18bf2b1a9bd9d73b"
+    },
+    {
+     "path": "runs/sustainable-s41101-noop/session.json",
+     "sha256": "f515faceb287c1e44029d5e7d621bc0f396d4483a0fef8c2af7fe35624dccab4"
+    },
+    {
+     "path": "runs/sustainable-s41101-noop/result.json",
+     "sha256": "fe44f61845797cc4def1d42cfd931802afe0b557874ca6781f6692853adee0e9"
+    },
+    {
+     "path": "runs/sustainable-s41101-noop/t90.json",
+     "sha256": "61107a4fad0b74639c80c7893528ac2288998981cdbdfd07bf3f10efdc719270"
+    }
+   ]
+  },
+  {
+   "id": "sustainable-s41101-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/run.json",
+     "sha256": "b82c902f2e6ca5f24abc174395ed6685bfa5f263aa49233450b21cb4573a5157"
+    },
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/transcript.jsonl",
+     "sha256": "65367e4c95256513539073383b54e08f673c39edc4755506fe07b70a2a873ff3"
+    },
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/session.json",
+     "sha256": "f515faceb287c1e44029d5e7d621bc0f396d4483a0fef8c2af7fe35624dccab4"
+    },
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/result.json",
+     "sha256": "fe44f61845797cc4def1d42cfd931802afe0b557874ca6781f6692853adee0e9"
+    },
+    {
+     "path": "runs/sustainable-s41101-conservative-v2/t90.json",
+     "sha256": "61107a4fad0b74639c80c7893528ac2288998981cdbdfd07bf3f10efdc719270"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s41101-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s41101-noop/run.json",
+     "sha256": "3ea4ddf92e92c614ffee9563ca888b457d690651692c6d9e7c80873661b5c02d"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-noop/transcript.jsonl",
+     "sha256": "99e42cd0739e294111b244433792a9c582669db01b944bce6429c2ed9349b77a"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-noop/session.json",
+     "sha256": "0cbedfc0c5404cd1ea4980e0eed8204a73fd4cc83046d782556a121a23b67d07"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-noop/result.json",
+     "sha256": "bf575ff3e002c85c1b7d88bc7ea5832660a5c64cf534b96b320656218aa35b45"
+    }
+   ]
+  },
+  {
+   "id": "bench-demand-growth-s41101-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-demand-growth-s41101-conservative-v2/run.json",
+     "sha256": "94826b6ab709c3ec0ffa6a0cf5803bc1219df8e2b8eaae329a71a0c506b7e3af"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-conservative-v2/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-conservative-v2/transcript.jsonl",
+     "sha256": "7360818904060217a9f1159b49a6031a21308aad5d03c167b32269bdf517ca2b"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-conservative-v2/session.json",
+     "sha256": "0cbedfc0c5404cd1ea4980e0eed8204a73fd4cc83046d782556a121a23b67d07"
+    },
+    {
+     "path": "runs/bench-demand-growth-s41101-conservative-v2/result.json",
+     "sha256": "bf575ff3e002c85c1b7d88bc7ea5832660a5c64cf534b96b320656218aa35b45"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s41101-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s41101-noop/run.json",
+     "sha256": "4adbf684e1aa985df5e5da7e35f3307fe0ec75941261d63fb2015c33cb4fe11e"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-noop/transcript.jsonl",
+     "sha256": "64246bb7aefd1301ffea3eec46338e8d0b78b934b23bddb6c35eba7f54bd2f5f"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-noop/session.json",
+     "sha256": "929d734978e400075864909145a9c2b4e799ad9363513f916c814dceec8d9abb"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-noop/result.json",
+     "sha256": "536cc5848d2a86a885ae4483022096a5184a66c85ec065867b9675274d2cace9"
+    }
+   ]
+  },
+  {
+   "id": "bench-staffing-shortage-s41101-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-staffing-shortage-s41101-conservative-v2/run.json",
+     "sha256": "cb4243a7a3588eec127a551507f60825c8930df6ad46177b1916524a22f2d86f"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-conservative-v2/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-conservative-v2/transcript.jsonl",
+     "sha256": "bf6a30c7d1f51cd6ecea9c027564c08b5709be4d3ef989ac268732c25fbd5e59"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-conservative-v2/session.json",
+     "sha256": "929d734978e400075864909145a9c2b4e799ad9363513f916c814dceec8d9abb"
+    },
+    {
+     "path": "runs/bench-staffing-shortage-s41101-conservative-v2/result.json",
+     "sha256": "536cc5848d2a86a885ae4483022096a5184a66c85ec065867b9675274d2cace9"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s41101-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s41101-noop/run.json",
+     "sha256": "3f0e8d524bd7c8c3ec1cf90b70b0121bd61a0371fc76c7e4b13397e5c04708ed"
+    },
+    {
+     "path": "runs/bench-stable-s41101-noop/decisions.json",
+     "sha256": "d1cd9e826f32bd1b3eb8599ac70d1eec37b03efd634fbdde21bc2672497e71c3"
+    },
+    {
+     "path": "runs/bench-stable-s41101-noop/transcript.jsonl",
+     "sha256": "18a436e3ad0a88995876d1db275c6469170b7211d6a9c09f8138bb797895d693"
+    },
+    {
+     "path": "runs/bench-stable-s41101-noop/session.json",
+     "sha256": "8302848015651a96b62724693c00429174aeae3da2a532d80ce2d21502c1d61d"
+    },
+    {
+     "path": "runs/bench-stable-s41101-noop/result.json",
+     "sha256": "a6e0481952276cdbe8c21dfa78b5bfd615452e7a484dd0ab5644af2b4b52e999"
+    }
+   ]
+  },
+  {
+   "id": "bench-stable-s41101-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-stable-s41101-conservative-v2/run.json",
+     "sha256": "17c9d2e6859f40a72d60ee2593cb9ca045eb16cbba1c7fbb9d86243c0828af46"
+    },
+    {
+     "path": "runs/bench-stable-s41101-conservative-v2/decisions.json",
+     "sha256": "c040388b97afe0cbc33de84ef9b51c1492142862f3f4ba8318594b27c6e191a4"
+    },
+    {
+     "path": "runs/bench-stable-s41101-conservative-v2/transcript.jsonl",
+     "sha256": "9662336557183361defe81b06e41980d8aa5eb00ec3783898d789948833a6ab4"
+    },
+    {
+     "path": "runs/bench-stable-s41101-conservative-v2/session.json",
+     "sha256": "f3369135a792e9037e2e987d89f5955c498007ef34924f6fe1e8c4c1204a4a21"
+    },
+    {
+     "path": "runs/bench-stable-s41101-conservative-v2/result.json",
+     "sha256": "042873db2e78f3a53fb17c884d5f27c402d221880a47ea6e929d0e8ea8fe03ed"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "881a47037b3b13d9c6e4f4e3277d6e57226e233045db65b6641a817819b32627"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "58c580562647c0c2e4c2e6ef49f0f8eb05a62887ba59d8c6c9e9df96c2257cbc"
+  }
+ ],
+ "suite": [
+  {
+   "path": "suite-run.json",
+   "sha256": "3d267f54b2f787447fcbb9d76a3ad7423f800ed423878e467344eee4e3134399"
+  },
+  {
+   "path": "suite.json",
+   "sha256": "f033e209240daafa9a58be75692304154f8d823323318eda61820373ec5bd000"
+  },
+  {
+   "path": "contract.json",
+   "sha256": "904d5940e70b5cf490c8d6917246b3776ea679d382fe8c17f5f531f1f74b1efc"
+  },
+  {
+   "path": "contract.txt",
+   "sha256": "659acb624d27d52d2d2f3c9a227f658bc1a10f6ad2182f85d1879dbc758eb67a"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json"
+ ]
+}

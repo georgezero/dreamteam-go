@@ -22,11 +22,14 @@ evaluation ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)) adds
 four replay configurations that CI runs. Released in V0.5.0 with the
 policy protocol unchanged. V0.6a (0.6.0-dev.1) adds a scenario suite and an
 evaluation contract on top of the harness, unchanged
-([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)). V0.6b (0.6.0-dev.2, in
-development) adds suite runs and the contract report, and a fourth
-built-in policy, `conservative` (§4 of this document's policy table;
-[BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). Ordinary benchmarks and
-their files are unchanged.
+([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md)). V0.6b (0.6.0-dev.2) adds
+suite runs and the contract report, and a fourth built-in policy,
+`conservative` (§4 of this document's policy table;
+[BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §7). V0.6c (0.6.0-dev.3, in
+development) adds a fifth, `conservative-v2` (§7.2 there), and a
+frozen-agent comparison ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md))
+whose recordings CI replays. Ordinary benchmarks and their files are
+unchanged.
 
 ## 1. Commands
 

@@ -6,7 +6,9 @@ Status: V0.6c, development (0.6.0-dev.3). Not released. The suite is
 the contract is `dreamteam.benchmark-contract/v1` (§3). V0.6a defined them;
 V0.6b runs a suite in one command and reports it under the contract (§9),
 adds a financially conservative baseline (§7) and a demand diagnostic
-(§8).
+(§8). V0.6c adds a second conservative baseline (§7.2) and evaluates two
+frozen LLM agents across the suite
+([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)).
 
 This document defines what DreamTeam's agent benchmark measures:
 * five practices, each a different management problem;
@@ -297,14 +299,26 @@ and `dreamteam benchmark report` prints it (§9).
     and the base profile's December decline absorbs part of the growth.
   * Financial pressure and staffing shortage both lose money with no
     action; they differ in expenses, lost demand, overtime and waits.
-* **The conservative baseline never acted in the V0.6b development matrix**
+* **`conservative` v1 never acted in the V0.6b development matrix**
   ([v06b-dev/README.md](benchmark/v06b-dev/README.md)). Its service signal,
   the oldest unfinished study at the 07:00 decision point, passed 24 hours
   on at most two mornings in a row (after the day with no reading), so it
-  found no sustained problem in any scenario. The baselines therefore
-  still offer two behaviours: no action, and twelve allocation raises.
-* **The conservative baseline cannot invest its way out of a loss.** Its
-  profit guardrail forbids raising reading capacity while the trailing 30
+  found no sustained problem in any scenario. In V0.6b the baselines
+  therefore offered two behaviours: no action, and twelve allocation
+  raises.
+* **`conservative-v2` mostly holds back where money is lost**
+  ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Its breach signal
+  sees sustained problems in every entry. Its guardrails still allow
+  action only in the stable practice and occasionally in reporting backlog
+  and demand growth. The baselines now offer three behaviours: no action;
+  unconditional raises (`greedy`, `rules`); and affordable, reviewed
+  raises.
+* **The frozen-agent comparison is a development result**
+  ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)): two local models,
+  one prompt and settings, three seeds at 30 days and one at 90. It shows
+  differences between the agents; it does not measure them precisely.
+* **The conservative baselines cannot invest their way out of a loss.**
+  Their profit guardrail forbids raising reading capacity while the trailing 30
   days lose money, even when the loss comes from unbilled reports in the
   backlog (§7).
 * **Design used seed 1.** The scenarios' intended conditions were checked
@@ -482,6 +496,31 @@ submitted changes as the simulator would:
 * breaches counted once each;
 * the real simulator's log parsed correctly, alert summaries excluded
   (sustainable practice, test seed 7).
+
+**Development results** ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md);
+nothing tuned afterwards):
+* **Qualification** (seed 41101, 90 days): it acted only in the stable
+  practice.
+  * A raise of Dr. Blake to 57.5%.
+  * A review 14 days after it took effect: the raise had helped (breaches
+    about 2.8 → 1.0 a day), but the practice was losing money, so it
+    stepped back.
+  * A second raise a month later.
+  * Paired with no action: profit −$3,370, TAT p90 −49 minutes, breaches
+    −12.
+* **The other four entries:** its signal found sustained problems on 6–57
+  of 84 points. The trailing 30 days lost money on 79–90 of 90 points, so
+  the profit guardrail held it back. In demand growth it previewed two
+  raises and the affordability check declined both.
+* **The 30-day comparison** (seeds 41201–41203): it acted in the stable
+  practice on two seeds. In reporting backlog and demand growth it raised
+  once (too late to take effect) and declined other raises by the
+  affordability check. In financial pressure and staffing shortage it
+  never acted.
+* **The 90-day comparison** (seed 41301): in the stable practice it raised
+  and then retreated at the review (profit −$2,301, breaches −53). In
+  demand growth it raised once (+$2,191, breaches −5). It took no action
+  in the other three entries.
 
 **Known limitations:**
 * **One lever.** Version 2 can only change the reading allocation. Breaches
