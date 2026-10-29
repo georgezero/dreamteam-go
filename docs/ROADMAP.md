@@ -18,7 +18,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
-| **V0.7** (proposed, not approved) | Simulator realism and agent decision-quality evaluation (§7a) | V0.6 benchmark |
+| **V0.7** (in development: V0.7a, radiologist overtime costing, 0.7.0-dev.1; owner decision 2026-10-29) | Simulator realism: the financial consequences of management actions, then re-characterization and frozen-agent evaluation (§7a) | V0.6 benchmark |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -597,9 +597,38 @@ Acceptance
 
 ---
 
-## 7a. V0.7 — simulator realism and agent decision-quality evaluation (proposed)
+## 7a. V0.7 — simulator realism and agent decision-quality evaluation
 
-**Proposed by the owner, 2026-10-29; not approved for implementation.**
+**Owner decision 2026-10-29:**
+* V0.6.0 is accepted and closed.
+* V0.7 is approved as simulator realism.
+* V0.7a begins with a compatibility design review, and is implemented
+  only if historical behaviour can be preserved.
+
+| Milestone | Scope |
+|---|---|
+| V0.7a | Overtime economics and historical compatibility ([V0.7_OVERTIME_DESIGN.md](V0.7_OVERTIME_DESIGN.md)) |
+| V0.7b | Financial solvency and cash constraints |
+| V0.7c | Re-characterization and frozen-agent evaluation |
+| V0.7.0 | Release |
+
+Decision/rationale consistency, dated demand shocks and staffing
+disruptions can follow in later versions.
+
+**V0.7a (0.7.0-dev.1), in development:**
+* the design note;
+* a scenario policy, `radiologistOvertime`, under which an on-site
+  salaried radiologist's time on duty past the rostered end is paid at the
+  salary's hourly rate;
+* suite `dreamteam-dev` version 2 (the five practices with it on);
+* a prospective characterization with the deterministic baselines
+  ([benchmark/v07a-dev/](benchmark/v07a-dev/PLAN.md)).
+
+Not approved in V0.7a: solvency constraints, new staffing mechanics,
+demand shocks, agent prompt changes, retuning the baselines, or rerunning
+the V0.6 LLM comparison.
+
+The original proposal follows.
 V0.6c showed that an agent can greatly improve reporting while spending
 far more than a practice should tolerate. Before the benchmark grows
 (more models, seeds or scenarios), the simulator should represent the

@@ -8,7 +8,9 @@ V0.6b runs a suite in one command and reports it under the contract (§9),
 adds a financially conservative baseline (§7) and a demand diagnostic
 (§8). V0.6c adds a second conservative baseline (§7.2) and evaluates two
 frozen LLM agents across the suite
-([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Every result here
+([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). V0.7a (0.7.0-dev.1,
+in development) adds suite version 2 with paid radiologist overtime (§10),
+and leaves version 1 unchanged. Every result here
 is a development result on synthetic practices. It is not clinical
 validation, and it ranks no model or policy.
 
@@ -701,3 +703,38 @@ compares every file, the suite files included. Ordinary results gain no
 * missing measures, and every metric absent in any run with its reason.
 
 Nothing is combined: no score, weighting, leaderboard or ranking.
+
+## 10. Suite version 2: radiologist overtime paid (V0.7a, in development)
+
+`dreamteam-dev` version 2
+([benchmark/suite/dreamteam-dev-2.json](benchmark/suite/dreamteam-dev-2.json))
+is version 1 with one economic change: an on-site salaried radiologist's
+time on duty past the rostered end is paid at the salary's hourly
+equivalent ([V0.7_OVERTIME_DESIGN.md](V0.7_OVERTIME_DESIGN.md)).
+
+**Versioning.**
+* Each entry keeps its ID and moves to version 2, on a new bundled
+  scenario: `bench-financial-pressure-ot`, `sustainable-ot`,
+  `bench-demand-growth-ot`, `bench-staffing-shortage-ot`,
+  `bench-stable-ot`.
+* Each variant extends the version 1 scenario file, unchanged, and sets
+  only `policies.radiologistOvertime: "salary_rate"`. A test checks that
+  nothing else differs.
+* Each has its own fingerprint, recorded in the suite file and checked by
+  the runner.
+* Categories, challenges, dimensions, missing measures, horizon and
+  cadence are version 1's.
+* **T90** is `not_applicable` everywhere. The frozen evaluation policy
+  (`v0.2-eval-4`) names the unchanged sustainable scenario's fingerprint,
+  and no evaluation policy is changed.
+
+**Compatibility.**
+* Version 1, its scenario files, its fingerprints and every V0.6 result
+  are unchanged, and they remain results of the historical economics.
+* A version 2 result is not comparable as if the simulator were
+  unchanged. The V0.7a characterization compares the two versions only
+  paired by entry, seed and policy, and reports where the starting states
+  and actions differ ([benchmark/v07a-dev/](benchmark/v07a-dev/PLAN.md)).
+* Recorded LLM decisions from V0.5 and V0.6 replay against version 1
+  only. Their prompts were built from version 1's observations.
+

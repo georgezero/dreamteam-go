@@ -40,6 +40,13 @@ type FinanceConfig struct {
 	PayrollAnchor    simtime.Date
 	PayrollEveryDays int64
 	Fixed            []FixedCost
+	// RadOvertimePaid prices an on-site salaried radiologist's time on duty
+	// past the rostered end at the salary's hourly equivalent, annual ÷
+	// (52 × Policies.WeeklyHours), straight time (V0.7a: the scenario's
+	// policies.radiologistOvertime "salary_rate"). Off ("unpaid" or
+	// omitted), such time costs nothing extra, as in every scenario before
+	// V0.7. Configuration, not state: the state digest never sees it.
+	RadOvertimePaid bool
 }
 
 // PayerConfig is one payer class and its outcome model (§8.2).

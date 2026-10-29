@@ -130,6 +130,7 @@ const (
 	entSeverancePay                      // severance paid on its payday (a: employee)
 	entRetainer                          // teleradiology retainer for an active day (a: contract×3 + window, b: day)
 	entRemoteRead                        // teleradiology read fee at report final (a: study, b: remote claim)
+	entRadOvertime                       // a salaried radiologist's overtime for a worked day, policy salary_rate (a: employee, b: day)
 )
 
 // entryKey is an entry's idempotency key.

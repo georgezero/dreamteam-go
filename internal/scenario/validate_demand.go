@@ -106,6 +106,16 @@ func (c *checker) demand(f *File, cfg *sim.Config) {
 	cfg.Policies.BreakDeferMax = simtime.Duration(pol.BreakDeferMaxMin) * simtime.Minute
 	cfg.Policies.WeeklyHours = simtime.Duration(pol.WeeklyOvertimeHours) * simtime.Hour
 	cfg.Policies.OvertimeBP = pol.OvertimeFactorBP
+	switch pol.RadiologistOvertime {
+	case "", sim.RadOvertimeUnpaid:
+	case sim.RadOvertimeSalaryRate:
+		if pol.WeeklyOvertimeHours < 1 {
+			c.fail("policies.radiologistOvertime", "%q needs weeklyOvertimeHours of at least 1", pol.RadiologistOvertime)
+		}
+		cfg.Finance.RadOvertimePaid = true
+	default:
+		c.fail("policies.radiologistOvertime", "%q is not %q or %q", pol.RadiologistOvertime, sim.RadOvertimeUnpaid, sim.RadOvertimeSalaryRate)
+	}
 	for i, name := range priorities {
 		v, ok := pol.TATTargetMin[name]
 		if !ok || v < 1 || v > 7*24*60 {

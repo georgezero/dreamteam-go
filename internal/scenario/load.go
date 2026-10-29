@@ -265,23 +265,27 @@ type Cover struct {
 
 // Policies are the operating rules.
 type Policies struct {
-	WalkIn               string           `json:"walkIn"`
-	WalkInCutoff         string           `json:"walkInCutoff,omitempty"` // accept_until: "HH:MM"
-	Worklist             string           `json:"worklist"`
-	Late                 string           `json:"late"`
-	GraceMin             int64            `json:"graceMin"`
-	OvertimeAllowanceMin int64            `json:"overtimeAllowanceMin"`
-	MaxShiftHours        int64            `json:"maxShiftHours"`
-	ContrastSupervision  string           `json:"contrastSupervision"`
-	Booking              string           `json:"booking"`
-	BookingHorizonDays   int64            `json:"bookingHorizonDays"`
-	BookingNoticeMin     int64            `json:"bookingNoticeMin"`
-	EarlyStartMin        int64            `json:"earlyStartMin"`
-	StartEarly           bool             `json:"startEarly"`
-	BreakDeferMaxMin     int64            `json:"breakDeferMaxMin"`
-	WeeklyOvertimeHours  int64            `json:"weeklyOvertimeHours"`
-	OvertimeFactorBP     int64            `json:"overtimeFactorBP"`
-	TATTargetMin         map[string]int64 `json:"tatTargetMin"` // by priority
+	WalkIn               string `json:"walkIn"`
+	WalkInCutoff         string `json:"walkInCutoff,omitempty"` // accept_until: "HH:MM"
+	Worklist             string `json:"worklist"`
+	Late                 string `json:"late"`
+	GraceMin             int64  `json:"graceMin"`
+	OvertimeAllowanceMin int64  `json:"overtimeAllowanceMin"`
+	MaxShiftHours        int64  `json:"maxShiftHours"`
+	ContrastSupervision  string `json:"contrastSupervision"`
+	Booking              string `json:"booking"`
+	BookingHorizonDays   int64  `json:"bookingHorizonDays"`
+	BookingNoticeMin     int64  `json:"bookingNoticeMin"`
+	EarlyStartMin        int64  `json:"earlyStartMin"`
+	StartEarly           bool   `json:"startEarly"`
+	BreakDeferMaxMin     int64  `json:"breakDeferMaxMin"`
+	WeeklyOvertimeHours  int64  `json:"weeklyOvertimeHours"`
+	OvertimeFactorBP     int64  `json:"overtimeFactorBP"`
+	// RadiologistOvertime prices on-site salaried radiologists' time on
+	// duty past the rostered end (V0.7a): "unpaid" (omitted: every
+	// scenario before V0.7) or "salary_rate".
+	RadiologistOvertime string           `json:"radiologistOvertime,omitempty"`
+	TATTargetMin        map[string]int64 `json:"tatTargetMin"` // by priority
 }
 
 // maxExtendsDepth bounds extends chains.

@@ -375,6 +375,12 @@ type Policies struct {
 	TATTarget [numPriorities]simtime.Duration
 }
 
+// Radiologist overtime policies (scenario policies.radiologistOvertime).
+const (
+	RadOvertimeUnpaid     = "unpaid"
+	RadOvertimeSalaryRate = "salary_rate"
+)
+
 // Assignment values other than room IDs.
 const (
 	AssignDesk    = "desk"

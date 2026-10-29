@@ -1188,7 +1188,13 @@ for every day of the fortnight; about 74% of open room-hours are staffed.
 * Overtime pay: ×1.5 for hourly staff beyond 40 paid hours in the week
   **[structural for US FLSA; configurable]**; daily-overtime rules (some states)
   configurable. Salaried staff: no overtime pay; extra hours count toward
-  workload only. Time worked past the scheduled shift end is **overtime
+  workload only. **[V0.7a]** Exception, per scenario: under
+  `policies.radiologistOvertime: "salary_rate"`, an on-site salaried
+  radiologist's time on duty past the rostered end is paid at annual ÷
+  (52 × `weeklyOvertimeHours`) per hour, straight time, rounded down per
+  radiologist-day. It is posted when they go home, with benefits
+  (`docs/V0.7_OVERTIME_DESIGN.md`). Omitted or `"unpaid"`, the policy of
+  every scenario before V0.7: no pay. Time worked past the scheduled shift end is **overtime
   time** whatever the weekly total. It is costed at the rate in force (×1.5
   once the week passes 40 paid hours, which a full default week already
   reaches) and recorded per employee and day (§6.9).
@@ -1824,6 +1830,13 @@ an independent re-summation are reconciled by the invariants (§10).
   double-counted nor dropped.
 * Salaried staff accrue annual ÷ 365 per calendar day at 00:00, with
   cumulative rounding. Radiologists accrue × their site allocation.
+* **[V0.7a]** Under `radiologistOvertime: "salary_rate"`, a radiologist's
+  overtime (time on duty past the rostered end, approved or held over)
+  accrues when they go home, as one entry per radiologist-day (kind
+  `rad_overtime`). The amount is annual × seconds ÷ (52 ×
+  `weeklyOvertimeHours` × 3,600), rounded down, with no site-allocation
+  factor (the time is on site). The daily salary accrual is unchanged, and
+  overtime is never charged twice.
 * Benefits and payroll tax (25%) post with every accrual.
 * Payroll is paid every 14 days from `payrollAnchor` (a Friday) at 00:00.
   It pays everything accrued through the day before.

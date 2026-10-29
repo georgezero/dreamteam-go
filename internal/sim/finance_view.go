@@ -322,6 +322,8 @@ func (st *state) memo(k entryKey) (memo, ref string) {
 		return "Wages accrued " + dayName(k.b), st.emps[k.a].terms.ID
 	case entSalary:
 		return "Salary accrued " + dayName(k.b), st.emps[k.a].terms.ID
+	case entRadOvertime:
+		return "Radiologist overtime accrued " + dayName(k.b), st.emps[k.a].terms.ID
 	case entGuarantee:
 		return "Guaranteed pay provision " + dayName(k.b), st.emps[k.a].terms.ID
 	case entRecruiting:

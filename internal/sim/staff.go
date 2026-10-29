@@ -248,6 +248,9 @@ func (st *state) goOff(e *Engine, i int) {
 	appr := min(ot, max(0, emp.endAt.Sub(emp.rosterEnd)))
 	apprCost := st.overtimeCost(emp, paid-(ot-appr), appr)
 	st.payWages(i, paid)
+	if cost > 0 && emp.cfg.Pay == Salaried {
+		st.accruePay(now, entryKey{kind: entRadOvertime, a: int64(i), b: st.day}, cost)
+	}
 	emp.weekPaid += paid
 	if emp.cfg.Role == Trainee {
 		st.staff[i].Trained += paid
@@ -274,16 +277,35 @@ func (st *state) goOff(e *Engine, i int) {
 
 // overtimeCost prices the overtime part of a day's paid time for hourly
 // staff: at the base rate while the week is under WeeklyHours, then at
-// ×OvertimeBP (§6.4). Salaried staff cost nothing extra.
+// ×OvertimeBP (§6.4). Salaried staff cost nothing extra, except on-site
+// radiologists under RadOvertimePaid (radOvertimeCost).
 func (st *state) overtimeCost(emp *employee, paid, ot simtime.Duration) int64 {
-	if emp.cfg.Pay != Hourly || ot <= 0 {
+	if ot <= 0 {
 		return 0
+	}
+	if emp.cfg.Pay != Hourly {
+		return st.radOvertimeCost(emp, ot)
 	}
 	before := emp.weekPaid + paid - ot // paid time this week before the overtime began
 	regular := min(ot, max(0, st.cfg.Policies.WeeklyHours-before))
 	premium := ot - regular
 	rate := emp.cfg.RateCents
 	return (rate*int64(regular) + rate*int64(premium)*st.cfg.Policies.OvertimeBP/10_000) / 3600
+}
+
+// radOvertimeCost prices a salaried radiologist's time on duty past the
+// rostered end under RadOvertimePaid: the annual salary's hourly
+// equivalent over a year of 52 weeks of WeeklyHours, straight time, with
+// no site-allocation factor (the time is on site), rounded down to the
+// cent (V0.7_OVERTIME_DESIGN.md §3). Zero otherwise, and for remote
+// shifts.
+func (st *state) radOvertimeCost(emp *employee, ot simtime.Duration) int64 {
+	p := &st.cfg.Policies
+	if !st.cfg.Finance.RadOvertimePaid || ot <= 0 || emp.cfg.Role != Radiologist || emp.cfg.Pay != Salaried || p.WeeklyHours <= 0 ||
+		(emp.shift >= 0 && st.plan.Shifts[emp.shift].Remote) {
+		return 0
+	}
+	return emp.cfg.RateCents * int64(ot) / (52 * int64(p.WeeklyHours))
 }
 
 // roomsAtShiftEnd lists the rooms technologist i staffs at the last second

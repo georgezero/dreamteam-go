@@ -19,7 +19,8 @@ var update = flag.Bool("update", false, "rewrite golden files")
 
 func TestBundledScenariosCompile(t *testing.T) {
 	ids := List()
-	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-financial-pressure", "bench-stable", "bench-staffing-shortage", "established", "mini", "sustainable"}) || !slices.Contains(ids, Default) {
+	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-demand-growth-ot", "bench-financial-pressure", "bench-financial-pressure-ot",
+		"bench-stable", "bench-stable-ot", "bench-staffing-shortage", "bench-staffing-shortage-ot", "established", "mini", "sustainable", "sustainable-ot"}) || !slices.Contains(ids, Default) {
 		t.Fatalf("List() = %v, default %q", ids, Default)
 	}
 	for _, id := range ids {
@@ -124,6 +125,8 @@ func TestValidationErrors(t *testing.T) {
 		{`{"policies": {"contrastSupervision": "virtual"}}`, "policies.contrastSupervision", "not one of"},
 		{`{"policies": {"bookingHorizonDays": 0}}`, "policies.bookingHorizonDays", "outside"},
 		{`{"policies": {"overtimeFactorBP": 5000}}`, "policies.overtimeFactorBP", "outside"},
+		{`{"policies": {"radiologistOvertime": "double"}}`, "policies.radiologistOvertime", "is not"},
+		{`{"policies": {"radiologistOvertime": "salary_rate", "weeklyOvertimeHours": 0}}`, "policies.radiologistOvertime", "at least 1"},
 		{`{"employees": [{"id": "E08", "roster": {"Tue": {"start": "14:00", "end": "24:00"}}}]}`, "employees[7].roster.Tue", "accounting close"},
 		{`{"behavior": {"registration": {"selfRegFactorBP": 1}}}`, "behavior.registration", "must be 10000–30000"},
 		{`{"catalog": [{"code": "XR_X", "name": "x", "modality": "XR", "category": "XR_15", "techExtraSec": {"p0": 1, "p100": 2}}]}`, "catalog[0].roomTimeSec", "required"},
@@ -298,6 +301,44 @@ func TestCanonicalRoundTrip(t *testing.T) {
 		fb, _ := Fingerprint(g)
 		if !reflect.DeepEqual(a, b) || fa != fb || len(fa) != 64 {
 			t.Fatalf("%s: canonical round trip changed the scenario", id)
+		}
+	}
+}
+
+// V0.7a: the radiologist overtime policy. Omitted or "unpaid", radiologist
+// overtime is unpaid (every scenario before V0.7); "salary_rate" turns it
+// on. Omitting it leaves the canonical form, so no existing fingerprint
+// moves; each -ot variant is its base scenario plus the policy.
+func TestRadiologistOvertimePolicy(t *testing.T) {
+	for _, c := range []struct {
+		ref  string
+		paid bool
+	}{{"established", false}, {"mini", false}, {"sustainable", false}, {"bench-stable", false}, {"bench-stable-ot", true}, {"sustainable-ot", true}} {
+		cfg, err := Resolve(c.ref)
+		if err != nil || cfg.Finance.RadOvertimePaid != c.paid {
+			t.Fatalf("%s: %v %v", c.ref, err, cfg.Finance.RadOvertimePaid)
+		}
+	}
+	for _, base := range []string{"bench-financial-pressure", "sustainable", "bench-demand-growth", "bench-staffing-shortage", "bench-stable"} {
+		b, err := ResolveFile(base)
+		if err != nil {
+			t.Fatal(err)
+		}
+		v, err := ResolveFile(base + "-ot")
+		if err != nil {
+			t.Fatal(err)
+		}
+		raw, _ := Canonical(b)
+		if strings.Contains(string(raw), "radiologistOvertime") {
+			t.Fatalf("%s: the omitted policy appears in the canonical form", base)
+		}
+		if v.Policies.RadiologistOvertime != "salary_rate" || v.ID != base+"-ot" {
+			t.Fatalf("%s-ot: %q %q", base, v.ID, v.Policies.RadiologistOvertime)
+		}
+		v.ID, v.Name, v.Policies.RadiologistOvertime = b.ID, b.Name, ""
+		rv, _ := Canonical(v)
+		if string(rv) != string(raw) {
+			t.Fatalf("%s-ot differs from %s beyond the policy", base, base)
 		}
 	}
 }

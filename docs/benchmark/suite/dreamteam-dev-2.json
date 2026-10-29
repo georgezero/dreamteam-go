@@ -1,0 +1,116 @@
+{
+ "schema": "dreamteam.benchmark-suite/v1",
+ "id": "dreamteam-dev",
+ "version": 2,
+ "split": "development",
+ "contract": "dreamteam.benchmark-contract/v1",
+ "description": "The V0.7a development scenario suite: the five V0.6 practices (dreamteam-dev version 1), each with one change: an on-site radiologist's time on duty past the rostered end is paid at the salary's hourly equivalent (scenario policy radiologistOvertime salary_rate; docs/V0.7_OVERTIME_DESIGN.md). Not a held-out benchmark set; no score, no ranking. Specification: docs/BENCHMARK_SUITE.md.",
+ "horizonDays": 90,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "scenarios": [
+  {
+   "id": "financial-pressure",
+   "version": 2,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot",
+   "fingerprint": "43f2729d06c7cf8d32f9bec69f6b910aecfd3427d05d464586b8148344b5bbee",
+   "source": "scenarios/bench-financial-pressure-ot.json",
+   "challenge": "The sustainable practice's staffing and fixed costs at referral demand x1.15: costs exceed what the volume earns. Balancing service against operating cost. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "reporting-backlog",
+   "version": 2,
+   "category": "Reporting backlog",
+   "scenario": "sustainable-ot",
+   "fingerprint": "366c6373c534976c2cd9d49d84e5f4fd2cd4d3e29384a02bb1a909c506de4e3b",
+   "source": "scenarios/sustainable-ot.json",
+   "challenge": "The bundled sustainable practice unchanged: reading coverage (60/50% site allocations, no Sunday reading) leaves turnaround well beyond the soon and urgent targets. Reducing reporting delay without excessive expenditure. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "demand-growth",
+   "version": 2,
+   "category": "Demand growth",
+   "scenario": "bench-demand-growth-ot",
+   "fingerprint": "bc157649d6336efca6dd2cddd9cf71795b0c6faf8aee097dc4e936b78a2514cb",
+   "source": "scenarios/bench-demand-growth-ot.json",
+   "challenge": "The sustainable practice with referral demand rising 5% a month from October's level (November x1.05, December x1.10, January x1.15). Anticipating capacity needs before losses mount. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "staffing-shortage",
+   "version": 2,
+   "category": "Staffing shortage",
+   "scenario": "bench-staffing-shortage-ot",
+   "fingerprint": "9436e9881ae87b6dc998439dfd66bd8a49176f4efdeb84ec627fc97187fc367a",
+   "source": "scenarios/bench-staffing-shortage-ot.json",
+   "challenge": "The established practice's original rosters at referral demand x1.30: one technologist shared between X-ray and CT, no evening MR technologist. Managing coverage, recruiting lead times and service reliability. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "stable",
+   "version": 2,
+   "category": "Stable practice",
+   "scenario": "bench-stable-ot",
+   "fingerprint": "5bb6aa652c5bf50bb9ad1277c4a31660b9aba9dae3b772230219d524befe8c22",
+   "source": "scenarios/bench-stable-ot.json",
+   "challenge": "The Step 0C lead staffing architecture at x1.30: dedicated XR and CT day technologists, part-time evening MR, site allocations 62.5/52.5%. Profitable at the takeover. Recognizing when no action is appropriate. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate.",
+   "t90": "not_applicable"
+  }
+ ],
+ "dimensions": {
+  "operational": [
+   "examsCompleted",
+   "reportsFinal",
+   "tatP50Sec",
+   "tatP90Sec",
+   "backlogEnd",
+   "waitToExamP50Sec",
+   "waitToExamP90Sec"
+  ],
+  "financial": [
+   "netRevenueCents",
+   "operatingExpenseCents",
+   "operatingProfitCents",
+   "margin",
+   "operatingCashFlowCents"
+  ],
+  "staffingCapacity": [
+   "ordersReceived",
+   "ordersLost",
+   "lostRate",
+   "overtimeSec",
+   "heldOver",
+   "skippedBreaks",
+   "noCoverage"
+  ],
+  "serviceReliability": [
+   "tatOverTarget",
+   "tatBreaches",
+   "waitsOver30",
+   "displacedAppointments",
+   "alertsRaisedAlert",
+   "alertsActiveAtEnd"
+  ],
+  "sustainability": [
+   "minCashCents",
+   "shortfallCents",
+   "daysBelowZero"
+  ],
+  "actions": [
+   "actionsAttempted",
+   "actionsAccepted",
+   "actionsRejected"
+  ]
+ },
+ "missing": [
+  "imaging capacity utilization (no room-utilization metric in dreamteam.result/v1)",
+  "trend within the run (every metric is a whole-window total; the T90 vector's later-window figures exist only for the reporting-backlog scenario)",
+  "action categories (operations versus staffing) are counted from decisions.json by the report, not by a result metric",
+  "model usage and latency (only for policies that record them, such as the LLM agent's policy-evidence)"
+ ]
+}

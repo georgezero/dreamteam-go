@@ -3,6 +3,7 @@ package bench
 import (
 	"encoding/json"
 	"os"
+	"reflect"
 	"slices"
 	"testing"
 
@@ -184,5 +185,59 @@ func TestSuiteDimensions(t *testing.T) {
 	}
 	if len(s.Dimensions) != 6 || len(s.Missing) == 0 {
 		t.Errorf("dimensions %v, missing %v", s.Dimensions, s.Missing)
+	}
+}
+
+// The V0.7a development suite (docs/benchmark/suite/dreamteam-dev-2.json):
+// version 1's entries, each at version 2 on its -ot variant, with the
+// recorded fingerprint, T90 not applicable (the evaluation policy in force
+// names version 1's sustainable scenario only), and the scenario equal to
+// version 1's apart from its identity and the radiologist overtime policy.
+func TestSuiteV2Scenarios(t *testing.T) {
+	v1 := loadSuite(t)
+	raw, err := os.ReadFile("../../docs/benchmark/suite/dreamteam-dev-2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var v2 suiteFile
+	if err := json.Unmarshal(raw, &v2); err != nil {
+		t.Fatal(err)
+	}
+	if v2.Schema != v1.Schema || v2.ID != v1.ID || v2.Version != 2 || v2.Split != "development" || v2.HorizonDays != 90 ||
+		len(v2.Scenarios) != len(v1.Scenarios) || !slices.Equal(v2.Missing, v1.Missing) {
+		t.Fatalf("suite header: %+v", v2)
+	}
+	for k, e := range v2.Scenarios {
+		o := v1.Scenarios[k]
+		if e.ID != o.ID || e.Version != 2 || e.Category != o.Category || e.Scenario != o.Scenario+"-ot" ||
+			e.Source != "scenarios/"+e.Scenario+".json" || e.T90 != "not_applicable" {
+			t.Fatalf("%s: %+v", e.ID, e)
+		}
+		f, err := scenario.ResolveFile(e.Scenario)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := scenario.Compile(f); err != nil {
+			t.Fatalf("%s: %v", e.ID, err)
+		}
+		if fp, _ := scenario.Fingerprint(f); fp != e.Fingerprint {
+			t.Errorf("%s: fingerprint %s, recorded %s", e.ID, fp, e.Fingerprint)
+		}
+		b, err := scenario.ResolveFile(o.Scenario)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f.Policies.RadiologistOvertime != "salary_rate" {
+			t.Fatalf("%s: policy %q", e.ID, f.Policies.RadiologistOvertime)
+		}
+		f.Policies.RadiologistOvertime = ""
+		if a, b := resolved(t, f, "x", "x"), resolved(t, b, "x", "x"); !reflect.DeepEqual(a, b) {
+			t.Errorf("%s: version 2 differs from version 1 beyond the policy", e.ID)
+		}
+	}
+	for dim, ms := range v1.Dimensions {
+		if !slices.Equal(v2.Dimensions[dim], ms) {
+			t.Errorf("dimension %s differs", dim)
+		}
 	}
 }

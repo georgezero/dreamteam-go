@@ -499,3 +499,8 @@ The V0.6c file was made from 132413c (0.6.0-dev.3) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v063.actions.json`
 (the same batches as the 5C.4l file's). 0.6.0 replays it in batch mode
 `v0.6_dev3` with every digest verified (`internal/session/v063_test.go`).
+
+The V0.6.0 file was made from 23d5bbd (0.6.0, tag v0.6.0) with `-scenario
+mini -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v060.actions.json`
+(the same batches as the 5C.4l file's). 0.7.0-dev.1 replays it in batch
+mode `v0.6.0` with every digest verified (`internal/session/v060_test.go`).

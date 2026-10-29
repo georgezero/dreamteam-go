@@ -276,12 +276,19 @@ func (r *EvalRecorder) Capture(name string) {
 }
 
 // earnedUnposted is the hourly pay (with benefits) of shifts in progress,
+// and, under RadOvertimePaid, on-site radiologists' overtime in progress,
 // earned but posted only when the employee goes home.
 func (st *state) earnedUnposted(now simtime.Time) int64 {
 	var total int64
 	p := &st.cfg.Policies
 	for i := range st.emps {
 		emp := &st.emps[i]
+		if emp.cfg.Pay != Hourly && st.cfg.Finance.RadOvertimePaid && emp.shift >= 0 && !emp.done && emp.status != offDuty {
+			if w := st.radOvertimeCost(emp, now.Sub(emp.rosterEnd)); w > 0 {
+				total += w + roundDiv(w*st.cfg.Finance.BenefitsBP, 10_000)
+			}
+			continue
+		}
 		if emp.cfg.Pay != Hourly || emp.shift < 0 || emp.done || emp.startAt == 0 || emp.startAt > now {
 			continue
 		}

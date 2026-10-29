@@ -1,0 +1,23 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v07a-characterize-v2",
+ "description": "V0.7a characterization (docs/benchmark/v07a-dev/PLAN.md): the same five practices with radiologist overtime paid at the salary rate (the -ot variants); noop, greedy and conservative-v2; 90 days; paired with the other version's run on the same entry, seed and policy. No LLM agent. No score, no ranking. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-2.json",
+ "seeds": [
+  41401,
+  41402,
+  41403
+ ],
+ "seedPlan": "Chosen 2026-10-29 and committed in the V0.7a plan (docs/benchmark/v07a-dev/PLAN.md) before any run on them: the next unused block after V0.6c's 41301. None appears as a seed elsewhere in the repository; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them. The same seeds for both versions, so every run is paired.",
+ "days": 90,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2"
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}
