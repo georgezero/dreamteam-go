@@ -1,0 +1,500 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 3 (development) · suite run v07b-characterize-v3 · engine 0.7.0-dev.2
+complete: 90 of 90 runs
+seeds 41501, 41502, 41503 · 90 days · decisions every 1 day(s) at 07:00 · policies noop@1, greedy@1, conservative-v2@2 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry                        version  scenario                              fingerprint    T90             seed   runs  start          identical
+financial-pressure-credit    3        bench-financial-pressure-ot-credit    586f3ef74742…  not_applicable  41501  3     1b48c51ab52c…  yes
+financial-pressure-credit    3        bench-financial-pressure-ot-credit    586f3ef74742…  not_applicable  41502  3     0096b50a2646…  yes
+financial-pressure-credit    3        bench-financial-pressure-ot-credit    586f3ef74742…  not_applicable  41503  3     3d0a3072d696…  yes
+financial-pressure-nocredit  3        bench-financial-pressure-ot-nocredit  ee8c7cc2bd35…  not_applicable  41501  3     1b48c51ab52c…  yes
+financial-pressure-nocredit  3        bench-financial-pressure-ot-nocredit  ee8c7cc2bd35…  not_applicable  41502  3     0096b50a2646…  yes
+financial-pressure-nocredit  3        bench-financial-pressure-ot-nocredit  ee8c7cc2bd35…  not_applicable  41503  3     3d0a3072d696…  yes
+reporting-backlog-credit     3        sustainable-ot-credit                 1fc90da25e02…  not_applicable  41501  3     b3578ec60270…  yes
+reporting-backlog-credit     3        sustainable-ot-credit                 1fc90da25e02…  not_applicable  41502  3     cd1b88dbd16d…  yes
+reporting-backlog-credit     3        sustainable-ot-credit                 1fc90da25e02…  not_applicable  41503  3     e4fee0e6443a…  yes
+reporting-backlog-nocredit   3        sustainable-ot-nocredit               6c9ee3db8392…  not_applicable  41501  3     b3578ec60270…  yes
+reporting-backlog-nocredit   3        sustainable-ot-nocredit               6c9ee3db8392…  not_applicable  41502  3     cd1b88dbd16d…  yes
+reporting-backlog-nocredit   3        sustainable-ot-nocredit               6c9ee3db8392…  not_applicable  41503  3     e4fee0e6443a…  yes
+demand-growth-credit         3        bench-demand-growth-ot-credit         28c16bf37eb6…  not_applicable  41501  3     b3578ec60270…  yes
+demand-growth-credit         3        bench-demand-growth-ot-credit         28c16bf37eb6…  not_applicable  41502  3     cd1b88dbd16d…  yes
+demand-growth-credit         3        bench-demand-growth-ot-credit         28c16bf37eb6…  not_applicable  41503  3     e4fee0e6443a…  yes
+demand-growth-nocredit       3        bench-demand-growth-ot-nocredit       9144c8a48ec0…  not_applicable  41501  3     b3578ec60270…  yes
+demand-growth-nocredit       3        bench-demand-growth-ot-nocredit       9144c8a48ec0…  not_applicable  41502  3     cd1b88dbd16d…  yes
+demand-growth-nocredit       3        bench-demand-growth-ot-nocredit       9144c8a48ec0…  not_applicable  41503  3     e4fee0e6443a…  yes
+staffing-shortage-credit     3        bench-staffing-shortage-ot-credit     5b49b4ca7b73…  not_applicable  41501  3     487f60be0c82…  yes
+staffing-shortage-credit     3        bench-staffing-shortage-ot-credit     5b49b4ca7b73…  not_applicable  41502  3     f029412674e2…  yes
+staffing-shortage-credit     3        bench-staffing-shortage-ot-credit     5b49b4ca7b73…  not_applicable  41503  3     1a4220e3c725…  yes
+staffing-shortage-nocredit   3        bench-staffing-shortage-ot-nocredit   c500a61a374f…  not_applicable  41501  3     487f60be0c82…  yes
+staffing-shortage-nocredit   3        bench-staffing-shortage-ot-nocredit   c500a61a374f…  not_applicable  41502  3     f029412674e2…  yes
+staffing-shortage-nocredit   3        bench-staffing-shortage-ot-nocredit   c500a61a374f…  not_applicable  41503  3     1a4220e3c725…  yes
+stable-credit                3        bench-stable-ot-credit                cfae9ca57ac4…  not_applicable  41501  3     48f8d45955b6…  yes
+stable-credit                3        bench-stable-ot-credit                cfae9ca57ac4…  not_applicable  41502  3     d0d3e4050df0…  yes
+stable-credit                3        bench-stable-ot-credit                cfae9ca57ac4…  not_applicable  41503  3     6f10a216f07d…  yes
+stable-nocredit              3        bench-stable-ot-nocredit              74612d88bcfc…  not_applicable  41501  3     48f8d45955b6…  yes
+stable-nocredit              3        bench-stable-ot-nocredit              74612d88bcfc…  not_applicable  41502  3     d0d3e4050df0…  yes
+stable-nocredit              3        bench-stable-ot-nocredit              74612d88bcfc…  not_applicable  41503  3     6f10a216f07d…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry                        seed   policy             status     replay  actions o/s/r  T90
+financial-pressure-credit    41501  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit    41501  greedy@1           completed  ok      0/12/0         not_requested
+financial-pressure-credit    41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-credit    41502  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit    41502  greedy@1           completed  ok      0/10/2         not_requested
+financial-pressure-credit    41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-credit    41503  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit    41503  greedy@1           completed  ok      0/11/1         not_requested
+financial-pressure-credit    41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41501  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41501  greedy@1           completed  ok      0/6/6          not_requested
+financial-pressure-nocredit  41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41502  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41502  greedy@1           completed  ok      0/4/9          not_requested
+financial-pressure-nocredit  41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41503  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-nocredit  41503  greedy@1           completed  ok      0/4/8          not_requested
+financial-pressure-nocredit  41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41501  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41501  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog-credit     41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41502  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41502  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog-credit     41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41503  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-credit     41503  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog-credit     41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41501  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41501  greedy@1           completed  ok      0/9/3          not_requested
+reporting-backlog-nocredit   41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41502  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41502  greedy@1           completed  ok      0/7/5          not_requested
+reporting-backlog-nocredit   41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41503  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-nocredit   41503  greedy@1           completed  ok      0/8/4          not_requested
+reporting-backlog-nocredit   41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth-credit         41501  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-credit         41501  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth-credit         41501  conservative-v2@2  completed  ok      0/1/0          not_requested
+demand-growth-credit         41502  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-credit         41502  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth-credit         41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth-credit         41503  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-credit         41503  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth-credit         41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth-nocredit       41501  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-nocredit       41501  greedy@1           completed  ok      0/9/3          not_requested
+demand-growth-nocredit       41501  conservative-v2@2  completed  ok      0/1/0          not_requested
+demand-growth-nocredit       41502  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-nocredit       41502  greedy@1           completed  ok      0/8/4          not_requested
+demand-growth-nocredit       41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth-nocredit       41503  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-nocredit       41503  greedy@1           completed  ok      0/8/4          not_requested
+demand-growth-nocredit       41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41501  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41501  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage-credit     41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41502  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41502  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage-credit     41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41503  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-credit     41503  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage-credit     41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41501  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41501  greedy@1           completed  ok      0/8/4          not_requested
+staffing-shortage-nocredit   41501  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41502  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41502  greedy@1           completed  ok      0/7/5          not_requested
+staffing-shortage-nocredit   41502  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41503  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-nocredit   41503  greedy@1           completed  ok      0/6/6          not_requested
+staffing-shortage-nocredit   41503  conservative-v2@2  completed  ok      0/0/0          not_requested
+stable-credit                41501  noop@1             completed  ok      0/0/0          not_requested
+stable-credit                41501  greedy@1           completed  ok      0/12/0         not_requested
+stable-credit                41501  conservative-v2@2  completed  ok      0/3/0          not_requested
+stable-credit                41502  noop@1             completed  ok      0/0/0          not_requested
+stable-credit                41502  greedy@1           completed  ok      0/12/0         not_requested
+stable-credit                41502  conservative-v2@2  completed  ok      0/1/0          not_requested
+stable-credit                41503  noop@1             completed  ok      0/0/0          not_requested
+stable-credit                41503  greedy@1           completed  ok      0/12/0         not_requested
+stable-credit                41503  conservative-v2@2  completed  ok      0/1/0          not_requested
+stable-nocredit              41501  noop@1             completed  ok      0/0/0          not_requested
+stable-nocredit              41501  greedy@1           completed  ok      0/12/0         not_requested
+stable-nocredit              41501  conservative-v2@2  completed  ok      0/3/0          not_requested
+stable-nocredit              41502  noop@1             completed  ok      0/0/0          not_requested
+stable-nocredit              41502  greedy@1           completed  ok      0/9/3          not_requested
+stable-nocredit              41502  conservative-v2@2  completed  ok      0/1/0          not_requested
+stable-nocredit              41503  noop@1             completed  ok      0/0/0          not_requested
+stable-nocredit              41503  greedy@1           completed  ok      0/11/1         not_requested
+stable-nocredit              41503  conservative-v2@2  completed  ok      0/1/0          not_requested
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry                        policy           exams                  reports                TAT p50                      TAT p90                            backlog end   wait p50                  wait p90
+financial-pressure-credit    noop             4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,386  57 min / 62 min / 96 min     824 min / 876 min / 958 min        9 / 11 / 28   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+financial-pressure-credit    greedy           4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,403  29 min / 31 min / 37 min     699 min / 736 min / 767 min        9 / 11 / 11   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+financial-pressure-credit    conservative-v2  4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,386  57 min / 62 min / 96 min     824 min / 876 min / 958 min        9 / 11 / 28   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+financial-pressure-nocredit  noop             4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,386  57 min / 62 min / 96 min     824 min / 876 min / 958 min        9 / 11 / 28   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+financial-pressure-nocredit  greedy           4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,403  35 min / 36 min / 42 min     723 min / 749 min / 778 min        9 / 11 / 11   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+financial-pressure-nocredit  conservative-v2  4,260 / 4,308 / 4,412  4,253 / 4,299 / 4,386  57 min / 62 min / 96 min     824 min / 876 min / 958 min        9 / 11 / 28   19 min / 20 min / 20 min  60 min / 62 min / 67 min
+reporting-backlog-credit     noop             4,581 / 4,592 / 4,685  4,577 / 4,584 / 4,667  100 min / 109 min / 144 min  962 min / 995 min / 1,119 min      12 / 18 / 30  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+reporting-backlog-credit     greedy           4,581 / 4,592 / 4,685  4,584 / 4,585 / 4,686  39 min / 40 min / 47 min     768 min / 802 min / 839 min        10 / 11 / 12  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+reporting-backlog-credit     conservative-v2  4,581 / 4,592 / 4,685  4,577 / 4,584 / 4,667  100 min / 109 min / 144 min  962 min / 995 min / 1,119 min      12 / 18 / 30  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+reporting-backlog-nocredit   noop             4,581 / 4,592 / 4,685  4,577 / 4,584 / 4,667  100 min / 109 min / 144 min  962 min / 995 min / 1,119 min      12 / 18 / 30  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+reporting-backlog-nocredit   greedy           4,581 / 4,592 / 4,685  4,584 / 4,585 / 4,686  41 min / 41 min / 48 min     773 min / 802 min / 839 min        10 / 11 / 12  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+reporting-backlog-nocredit   conservative-v2  4,581 / 4,592 / 4,685  4,577 / 4,584 / 4,667  100 min / 109 min / 144 min  962 min / 995 min / 1,119 min      12 / 18 / 30  20 min / 21 min / 22 min  70 min / 71 min / 72 min
+demand-growth-credit         noop             4,706 / 4,734 / 4,793  4,681 / 4,717 / 4,762  122 min / 149 min / 206 min  1,062 min / 1,087 min / 1,327 min  21 / 39 / 43  21 min / 21 min / 23 min  70 min / 71 min / 73 min
+demand-growth-credit         greedy           4,706 / 4,734 / 4,793  4,711 / 4,728 / 4,795  41 min / 44 min / 51 min     768 min / 802 min / 844 min        9 / 10 / 10   21 min / 21 min / 23 min  70 min / 71 min / 73 min
+demand-growth-credit         conservative-v2  4,706 / 4,734 / 4,793  4,681 / 4,717 / 4,783  122 min / 149 min / 193 min  1,062 min / 1,087 min / 1,238 min  21 / 22 / 39  21 min / 21 min / 23 min  70 min / 71 min / 73 min
+demand-growth-nocredit       noop             4,706 / 4,734 / 4,793  4,681 / 4,717 / 4,762  122 min / 149 min / 206 min  1,062 min / 1,087 min / 1,327 min  21 / 39 / 43  21 min / 21 min / 23 min  70 min / 71 min / 73 min
+demand-growth-nocredit       greedy           4,706 / 4,734 / 4,793  4,711 / 4,728 / 4,795  43 min / 45 min / 51 min     768 min / 802 min / 844 min        9 / 10 / 10   21 min / 21 min / 23 min  70 min / 71 min / 73 min
+demand-growth-nocredit       conservative-v2  4,706 / 4,734 / 4,793  4,681 / 4,717 / 4,783  122 min / 149 min / 193 min  1,062 min / 1,087 min / 1,238 min  21 / 22 / 39  21 min / 21 min / 23 min  70 min / 71 min / 73 min
+staffing-shortage-credit     noop             4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,413  41 min / 44 min / 48 min     713 min / 716 min / 784 min        9 / 12 / 17   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+staffing-shortage-credit     greedy           4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,420  25 min / 26 min / 27 min     133 min / 623 min / 653 min        9 / 10 / 12   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+staffing-shortage-credit     conservative-v2  4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,413  41 min / 44 min / 48 min     713 min / 716 min / 784 min        9 / 12 / 17   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+staffing-shortage-nocredit   noop             4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,413  41 min / 44 min / 48 min     713 min / 716 min / 784 min        9 / 12 / 17   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+staffing-shortage-nocredit   greedy           4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,420  27 min / 27 min / 28 min     135 min / 631 min / 655 min        9 / 10 / 12   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+staffing-shortage-nocredit   conservative-v2  4,380 / 4,395 / 4,430  4,371 / 4,383 / 4,413  41 min / 44 min / 48 min     713 min / 716 min / 784 min        9 / 12 / 17   19 min / 19 min / 19 min  66 min / 69 min / 69 min
+stable-credit                noop             4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,902  102 min / 127 min / 165 min  912 min / 961 min / 1,089 min      9 / 12 / 32   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+stable-credit                greedy           4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,924  48 min / 52 min / 57 min     729 min / 775 min / 812 min        9 / 10 / 12   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+stable-credit                conservative-v2  4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,913  99 min / 123 min / 132 min   907 min / 960 min / 1,017 min      9 / 12 / 21   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+stable-nocredit              noop             4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,902  102 min / 127 min / 165 min  912 min / 961 min / 1,089 min      9 / 12 / 32   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+stable-nocredit              greedy           4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,924  48 min / 52 min / 57 min     729 min / 775 min / 812 min        9 / 10 / 12   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+stable-nocredit              conservative-v2  4,771 / 4,808 / 4,880  4,787 / 4,825 / 4,913  99 min / 123 min / 132 min   907 min / 960 min / 1,017 min      9 / 12 / 21   18 min / 18 min / 20 min  54 min / 54 min / 59 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry                        policy           net revenue                     expenses                        profit                          margin                    op. cash flow
+financial-pressure-credit    noop             $676,581 / $694,537 / $712,070  $732,645 / $740,434 / $741,526  -$56,065 / -$45,897 / -$29,456  -8.3% / -6.6% / -4.1%     -$128,974 / -$113,392 / -$102,703
+financial-pressure-credit    greedy           $676,521 / $694,553 / $714,990  $765,143 / $773,003 / $774,113  -$88,623 / -$78,450 / -$59,123  -13.1% / -11.3% / -8.3%   -$157,685 / -$142,167 / -$131,171
+financial-pressure-credit    conservative-v2  $676,581 / $694,537 / $712,070  $732,645 / $740,434 / $741,526  -$56,065 / -$45,897 / -$29,456  -8.3% / -6.6% / -4.1%     -$128,974 / -$113,392 / -$102,703
+financial-pressure-nocredit  noop             $676,581 / $694,537 / $712,070  $732,645 / $740,434 / $741,526  -$56,065 / -$45,897 / -$29,456  -8.3% / -6.6% / -4.1%     -$128,974 / -$113,392 / -$102,703
+financial-pressure-nocredit  greedy           $676,521 / $694,553 / $714,990  $752,560 / $760,345 / $767,948  -$76,040 / -$65,792 / -$52,959  -11.2% / -9.5% / -7.4%    -$147,082 / -$131,564 / -$126,404
+financial-pressure-nocredit  conservative-v2  $676,581 / $694,537 / $712,070  $732,645 / $740,434 / $741,526  -$56,065 / -$45,897 / -$29,456  -8.3% / -6.6% / -4.1%     -$128,974 / -$113,392 / -$102,703
+reporting-backlog-credit     noop             $729,461 / $735,015 / $747,016  $751,312 / $752,654 / $754,179  -$21,851 / -$19,164 / -$5,637   -3.0% / -2.6% / -0.8%     -$91,729 / -$79,738 / -$78,404
+reporting-backlog-credit     greedy           $730,434 / $735,036 / $750,400  $783,874 / $785,962 / $786,756  -$53,441 / -$51,720 / -$35,562  -7.3% / -7.0% / -4.7%     -$120,695 / -$108,409 / -$106,282
+reporting-backlog-credit     conservative-v2  $729,461 / $735,015 / $747,016  $751,312 / $752,654 / $754,179  -$21,851 / -$19,164 / -$5,637   -3.0% / -2.6% / -0.8%     -$91,729 / -$79,738 / -$78,404
+reporting-backlog-nocredit   noop             $729,461 / $735,015 / $747,016  $751,312 / $752,654 / $754,179  -$21,851 / -$19,164 / -$5,637   -3.0% / -2.6% / -0.8%     -$91,729 / -$79,738 / -$78,404
+reporting-backlog-nocredit   greedy           $730,434 / $735,036 / $750,400  $780,094 / $784,784 / $785,223  -$49,747 / -$49,660 / -$34,823  -6.8% / -6.8% / -4.6%     -$117,983 / -$107,176 / -$105,953
+reporting-backlog-nocredit   conservative-v2  $729,461 / $735,015 / $747,016  $751,312 / $752,654 / $754,179  -$21,851 / -$19,164 / -$5,637   -3.0% / -2.6% / -0.8%     -$91,729 / -$79,738 / -$78,404
+demand-growth-credit         noop             $735,113 / $747,566 / $751,315  $751,880 / $755,069 / $757,371  -$16,767 / -$9,805 / -$3,754    -2.3% / -1.3% / -0.5%     -$89,858 / -$79,700 / -$79,097
+demand-growth-credit         greedy           $740,729 / $749,806 / $757,438  $784,488 / $788,403 / $789,955  -$43,760 / -$40,149 / -$30,965  -5.9% / -5.4% / -4.1%     -$117,849 / -$108,225 / -$106,471
+demand-growth-credit         conservative-v2  $735,113 / $747,566 / $754,792  $751,880 / $755,973 / $757,371  -$16,767 / -$9,805 / -$1,181    -2.3% / -1.3% / -0.2%     -$89,858 / -$79,700 / -$79,673
+demand-growth-nocredit       noop             $735,113 / $747,566 / $751,315  $751,880 / $755,069 / $757,371  -$16,767 / -$9,805 / -$3,754    -2.3% / -1.3% / -0.5%     -$89,858 / -$79,700 / -$79,097
+demand-growth-nocredit       greedy           $740,729 / $749,806 / $757,438  $782,516 / $787,663 / $787,982  -$41,787 / -$38,176 / -$30,226  -5.6% / -5.1% / -4.0%     -$116,617 / -$106,992 / -$106,142
+demand-growth-nocredit       conservative-v2  $735,113 / $747,566 / $754,792  $751,880 / $755,973 / $757,371  -$16,767 / -$9,805 / -$1,181    -2.3% / -1.3% / -0.2%     -$89,858 / -$79,700 / -$79,673
+staffing-shortage-credit     noop             $668,190 / $673,050 / $676,125  $713,934 / $714,240 / $714,742  -$46,051 / -$41,692 / -$37,809  -6.9% / -6.2% / -5.6%     -$106,777 / -$99,787 / -$97,935
+staffing-shortage-credit     greedy           $668,113 / $673,056 / $677,167  $746,506 / $746,797 / $747,306  -$78,683 / -$74,249 / -$69,339  -11.8% / -11.0% / -10.2%  -$135,807 / -$128,491 / -$126,807
+staffing-shortage-credit     conservative-v2  $668,190 / $673,050 / $676,125  $713,934 / $714,240 / $714,742  -$46,051 / -$41,692 / -$37,809  -6.9% / -6.2% / -5.6%     -$106,777 / -$99,787 / -$97,935
+staffing-shortage-nocredit   noop             $668,190 / $673,050 / $676,125  $713,934 / $714,240 / $714,742  -$46,051 / -$41,692 / -$37,809  -6.9% / -6.2% / -5.6%     -$106,777 / -$99,787 / -$97,935
+staffing-shortage-nocredit   greedy           $668,113 / $673,056 / $677,167  $741,141 / $743,016 / $744,533  -$74,902 / -$68,085 / -$67,366  -11.2% / -10.1% / -9.9%   -$133,095 / -$127,258 / -$122,040
+staffing-shortage-nocredit   conservative-v2  $668,190 / $673,050 / $676,125  $713,934 / $714,240 / $714,742  -$46,051 / -$41,692 / -$37,809  -6.9% / -6.2% / -5.6%     -$106,777 / -$99,787 / -$97,935
+stable-credit                noop             $757,248 / $771,666 / $781,499  $754,218 / $759,230 / $759,666  $3,030 / $12,000 / $22,269      0.4% / 1.6% / 2.8%        -$71,714 / -$55,030 / -$49,881
+stable-credit                greedy           $757,226 / $771,730 / $785,641  $786,852 / $792,288 / $792,533  -$29,626 / -$20,558 / -$6,891   -3.9% / -2.7% / -0.9%     -$99,256 / -$82,799 / -$77,895
+stable-credit                conservative-v2  $757,248 / $771,666 / $783,731  $755,040 / $760,488 / $762,164  $2,208 / $11,178 / $21,567      0.3% / 1.4% / 2.8%        -$72,208 / -$55,523 / -$51,364
+stable-nocredit              noop             $757,248 / $771,666 / $781,499  $754,218 / $759,230 / $759,666  $3,030 / $12,000 / $22,269      0.4% / 1.6% / 2.8%        -$71,714 / -$55,030 / -$49,881
+stable-nocredit              greedy           $757,226 / $771,730 / $785,641  $786,112 / $792,288 / $792,533  -$28,886 / -$20,558 / -$6,891   -3.8% / -2.7% / -0.9%     -$98,927 / -$82,799 / -$77,895
+stable-nocredit              conservative-v2  $757,248 / $771,666 / $783,731  $755,040 / $760,488 / $762,164  $2,208 / $11,178 / $21,567      0.3% / 1.4% / 2.8%        -$72,208 / -$55,523 / -$51,364
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry                        policy           orders                 lost                 lost rate              overtime                              held over        skipped breaks  no coverage
+financial-pressure-credit    noop             4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+financial-pressure-credit    greedy           4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+financial-pressure-credit    conservative-v2  4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+financial-pressure-nocredit  noop             4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+financial-pressure-nocredit  greedy           4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+financial-pressure-nocredit  conservative-v2  4,808 / 4,906 / 4,943  457 / 550 / 551      9.5% / 11.1% / 11.2%   8,303 min / 9,641 min / 9,935 min     114 / 115 / 116  0               0
+reporting-backlog-credit     noop             5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+reporting-backlog-credit     greedy           5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+reporting-backlog-credit     conservative-v2  5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+reporting-backlog-nocredit   noop             5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+reporting-backlog-nocredit   greedy           5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+reporting-backlog-nocredit   conservative-v2  5,429 / 5,521 / 5,593  695 / 804 / 847      12.8% / 14.6% / 15.1%  12,198 min / 12,377 min / 12,410 min  128 / 131 / 136  0               0 / 0 / 1
+demand-growth-credit         noop             6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+demand-growth-credit         greedy           6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+demand-growth-credit         conservative-v2  6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+demand-growth-nocredit       noop             6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+demand-growth-nocredit       greedy           6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+demand-growth-nocredit       conservative-v2  6,000 / 6,109 / 6,150  932 / 1,029 / 1,062  15.5% / 16.8% / 17.3%  12,477 min / 13,255 min / 13,508 min  135 / 137 / 142  0               0
+staffing-shortage-credit     noop             5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+staffing-shortage-credit     greedy           5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+staffing-shortage-credit     conservative-v2  5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+staffing-shortage-nocredit   noop             5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+staffing-shortage-nocredit   greedy           5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+staffing-shortage-nocredit   conservative-v2  5,429 / 5,521 / 5,593  974 / 1,074 / 1,143  17.9% / 19.5% / 20.4%  11,410 min / 11,532 min / 11,594 min  131 / 135 / 139  0               0
+stable-credit                noop             5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+stable-credit                greedy           5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+stable-credit                conservative-v2  5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+stable-nocredit              noop             5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+stable-nocredit              greedy           5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+stable-nocredit              conservative-v2  5,429 / 5,521 / 5,593  565 / 657 / 671      10.4% / 11.9% / 12.0%  8,214 min / 8,939 min / 9,390 min     121 / 125 / 133  0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry                        policy           over target      breaches         waits >30              displaced  alerts           alerts at end
+financial-pressure-credit    noop             311 / 320 / 424  303 / 313 / 401  1,312 / 1,344 / 1,466  absent     280 / 287 / 290  2 / 3 / 3
+financial-pressure-credit    greedy           255 / 264 / 302  247 / 257 / 295  1,312 / 1,344 / 1,466  absent     278 / 285 / 287  3 / 3 / 4
+financial-pressure-credit    conservative-v2  311 / 320 / 424  303 / 313 / 401  1,312 / 1,344 / 1,466  absent     280 / 287 / 290  2 / 3 / 3
+financial-pressure-nocredit  noop             311 / 320 / 424  303 / 313 / 401  1,312 / 1,344 / 1,466  absent     280 / 287 / 290  2 / 3 / 3
+financial-pressure-nocredit  greedy           259 / 270 / 307  251 / 263 / 300  1,312 / 1,344 / 1,466  absent     278 / 285 / 287  3 / 3 / 4
+financial-pressure-nocredit  conservative-v2  311 / 320 / 424  303 / 313 / 401  1,312 / 1,344 / 1,466  absent     280 / 287 / 290  2 / 3 / 3
+reporting-backlog-credit     noop             416 / 431 / 536  408 / 414 / 508  1,504 / 1,542 / 1,712  absent     313 / 317 / 328  2
+reporting-backlog-credit     greedy           290 / 292 / 333  282 / 283 / 324  1,504 / 1,542 / 1,712  absent     311 / 317 / 325  2
+reporting-backlog-credit     conservative-v2  416 / 431 / 536  408 / 414 / 508  1,504 / 1,542 / 1,712  absent     313 / 317 / 328  2
+reporting-backlog-nocredit   noop             416 / 431 / 536  408 / 414 / 508  1,504 / 1,542 / 1,712  absent     313 / 317 / 328  2
+reporting-backlog-nocredit   greedy           290 / 296 / 333  282 / 287 / 324  1,504 / 1,542 / 1,712  absent     311 / 317 / 325  2
+reporting-backlog-nocredit   conservative-v2  416 / 431 / 536  408 / 414 / 508  1,504 / 1,542 / 1,712  absent     313 / 317 / 328  2
+demand-growth-credit         noop             506 / 517 / 687  479 / 487 / 647  1,643 / 1,663 / 1,801  absent     315 / 317 / 341  2 / 2 / 3
+demand-growth-credit         greedy           282 / 291 / 325  274 / 283 / 318  1,643 / 1,663 / 1,801  absent     314 / 315 / 335  2
+demand-growth-credit         conservative-v2  506 / 517 / 643  479 / 487 / 624  1,643 / 1,663 / 1,801  absent     315 / 317 / 341  2
+demand-growth-nocredit       noop             506 / 517 / 687  479 / 487 / 647  1,643 / 1,663 / 1,801  absent     315 / 317 / 341  2 / 2 / 3
+demand-growth-nocredit       greedy           282 / 291 / 325  274 / 283 / 318  1,643 / 1,663 / 1,801  absent     314 / 315 / 335  2
+demand-growth-nocredit       conservative-v2  506 / 517 / 643  479 / 487 / 624  1,643 / 1,663 / 1,801  absent     315 / 317 / 341  2
+staffing-shortage-credit     noop             229 / 264 / 273  221 / 255 / 257  1,283 / 1,327 / 1,374  absent     299 / 303 / 312  1 / 2 / 2
+staffing-shortage-credit     greedy           196 / 231 / 234  188 / 222 / 224  1,283 / 1,327 / 1,374  absent     295 / 302 / 311  2 / 2 / 3
+staffing-shortage-credit     conservative-v2  229 / 264 / 273  221 / 255 / 257  1,283 / 1,327 / 1,374  absent     299 / 303 / 312  1 / 2 / 2
+staffing-shortage-nocredit   noop             229 / 264 / 273  221 / 255 / 257  1,283 / 1,327 / 1,374  absent     299 / 303 / 312  1 / 2 / 2
+staffing-shortage-nocredit   greedy           197 / 231 / 234  189 / 222 / 224  1,283 / 1,327 / 1,374  absent     295 / 302 / 311  2
+staffing-shortage-nocredit   conservative-v2  229 / 264 / 273  221 / 255 / 257  1,283 / 1,327 / 1,374  absent     299 / 303 / 312  1 / 2 / 2
+stable-credit                noop             329 / 370 / 498  321 / 361 / 470  1,381 / 1,387 / 1,573  absent     233 / 265 / 275  2 / 2 / 3
+stable-credit                greedy           269 / 279 / 315  261 / 270 / 308  1,381 / 1,387 / 1,573  absent     231 / 261 / 271  2 / 2 / 3
+stable-credit                conservative-v2  325 / 367 / 412  317 / 358 / 395  1,381 / 1,387 / 1,573  absent     233 / 264 / 275  2 / 2 / 3
+stable-nocredit              noop             329 / 370 / 498  321 / 361 / 470  1,381 / 1,387 / 1,573  absent     233 / 265 / 275  2 / 2 / 3
+stable-nocredit              greedy           269 / 279 / 315  261 / 270 / 308  1,381 / 1,387 / 1,573  absent     231 / 261 / 271  2 / 2 / 3
+stable-nocredit              conservative-v2  325 / 367 / 412  317 / 358 / 395  1,381 / 1,387 / 1,573  absent     233 / 264 / 275  2 / 2 / 3
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry                        policy           min cash                     shortfall         days < 0
+financial-pressure-credit    noop             $15,919 / $27,276 / $38,063  $0                0
+financial-pressure-credit    greedy           $0 / $1,623 / $9,108         $0                0
+financial-pressure-credit    conservative-v2  $15,919 / $27,276 / $38,063  $0                0
+financial-pressure-nocredit  noop             $15,919 / $27,276 / $38,063  $0                0
+financial-pressure-nocredit  greedy           -$1,981 / $12,271 / $13,875  $0 / $0 / $1,981  0
+financial-pressure-nocredit  conservative-v2  $15,919 / $27,276 / $38,063  $0                0
+reporting-backlog-credit     noop             $45,932 / $47,444 / $50,242  $0                0
+reporting-backlog-credit     greedy           $22,856 / $33,846 / $35,711  $0                0
+reporting-backlog-credit     conservative-v2  $45,932 / $47,444 / $50,242  $0                0
+reporting-backlog-nocredit   noop             $45,932 / $47,444 / $50,242  $0                0
+reporting-backlog-nocredit   greedy           $25,568 / $34,174 / $36,944  $0                0
+reporting-backlog-nocredit   conservative-v2  $45,932 / $47,444 / $50,242  $0                0
+demand-growth-credit         noop             $45,932 / $47,444 / $50,242  $0                0
+demand-growth-credit         greedy           $25,210 / $32,696 / $35,092  $0                0
+demand-growth-credit         conservative-v2  $45,932 / $47,444 / $50,242  $0                0
+demand-growth-nocredit       noop             $45,932 / $47,444 / $50,242  $0                0
+demand-growth-nocredit       greedy           $26,443 / $33,024 / $36,325  $0                0
+demand-growth-nocredit       conservative-v2  $45,932 / $47,444 / $50,242  $0                0
+staffing-shortage-credit     noop             $37,024 / $42,387 / $42,705  $0                0
+staffing-shortage-credit     greedy           $8,298 / $13,567 / $17,118   $0                0
+staffing-shortage-credit     conservative-v2  $37,024 / $42,387 / $42,705  $0                0
+staffing-shortage-nocredit   noop             $37,024 / $42,387 / $42,705  $0                0
+staffing-shortage-nocredit   greedy           $11,011 / $14,800 / $21,885  $0                0
+staffing-shortage-nocredit   conservative-v2  $37,024 / $42,387 / $42,705  $0                0
+stable-credit                noop             $49,471 / $51,041 / $56,748  $0                0
+stable-credit                greedy           $44,006 / $49,471 / $56,748  $0                0
+stable-credit                conservative-v2  $49,471 / $51,041 / $56,748  $0                0
+stable-nocredit              noop             $49,471 / $51,041 / $56,748  $0                0
+stable-nocredit              greedy           $44,335 / $49,471 / $56,748  $0                0
+stable-nocredit              conservative-v2  $49,471 / $51,041 / $56,748  $0                0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry                        policy           attempted     accepted      rejected  operations  staffing
+financial-pressure-credit    noop             0             0             0         0           0
+financial-pressure-credit    greedy           10 / 11 / 12  10 / 11 / 12  0         0           10 / 11 / 12
+financial-pressure-credit    conservative-v2  0             0             0         0           0
+financial-pressure-nocredit  noop             0             0             0         0           0
+financial-pressure-nocredit  greedy           4 / 4 / 6     4 / 4 / 6     0         0           4 / 4 / 6
+financial-pressure-nocredit  conservative-v2  0             0             0         0           0
+reporting-backlog-credit     noop             0             0             0         0           0
+reporting-backlog-credit     greedy           12            12            0         0           12
+reporting-backlog-credit     conservative-v2  0             0             0         0           0
+reporting-backlog-nocredit   noop             0             0             0         0           0
+reporting-backlog-nocredit   greedy           7 / 8 / 9     7 / 8 / 9     0         0           7 / 8 / 9
+reporting-backlog-nocredit   conservative-v2  0             0             0         0           0
+demand-growth-credit         noop             0             0             0         0           0
+demand-growth-credit         greedy           12            12            0         0           12
+demand-growth-credit         conservative-v2  0 / 0 / 1     0 / 0 / 1     0         0           0 / 0 / 1
+demand-growth-nocredit       noop             0             0             0         0           0
+demand-growth-nocredit       greedy           8 / 8 / 9     8 / 8 / 9     0         0           8 / 8 / 9
+demand-growth-nocredit       conservative-v2  0 / 0 / 1     0 / 0 / 1     0         0           0 / 0 / 1
+staffing-shortage-credit     noop             0             0             0         0           0
+staffing-shortage-credit     greedy           12            12            0         0           12
+staffing-shortage-credit     conservative-v2  0             0             0         0           0
+staffing-shortage-nocredit   noop             0             0             0         0           0
+staffing-shortage-nocredit   greedy           6 / 7 / 8     6 / 7 / 8     0         0           6 / 7 / 8
+staffing-shortage-nocredit   conservative-v2  0             0             0         0           0
+stable-credit                noop             0             0             0         0           0
+stable-credit                greedy           12            12            0         0           12
+stable-credit                conservative-v2  1 / 1 / 3     1 / 1 / 3     0         0           1 / 1 / 3
+stable-nocredit              noop             0             0             0         0           0
+stable-nocredit              greedy           9 / 11 / 12   9 / 11 / 12   0         0           9 / 11 / 12
+stable-nocredit              conservative-v2  1 / 1 / 3     1 / 1 / 3     0         0           1 / 1 / 3
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry                        policy           seeds  exams  reports         TAT p50                       TAT p90                        backlog end     wait p50  wait p90
+financial-pressure-credit    greedy           3      0      0 [0, +17]      -31 min [-59 min, -28 min]    -140 min [-191 min, -126 min]  0 [-17, 0]      0 min     0 min
+financial-pressure-credit    conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+financial-pressure-nocredit  greedy           3      0      0 [0, +17]      -26 min [-54 min, -22 min]    -128 min [-180 min, -101 min]  0 [-17, 0]      0 min     0 min
+financial-pressure-nocredit  conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+reporting-backlog-credit     greedy           3      0      +8 [0, +19]     -69 min [-98 min, -61 min]    -194 min [-280 min, -193 min]  -8 [-19, 0]     0 min     0 min
+reporting-backlog-credit     conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+reporting-backlog-nocredit   greedy           3      0      +8 [0, +19]     -69 min [-97 min, -59 min]    -193 min [-280 min, -190 min]  -8 [-19, 0]     0 min     0 min
+reporting-backlog-nocredit   conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+demand-growth-credit         greedy           3      0      +30 [+11, +33]  -105 min [-155 min, -81 min]  -319 min [-483 min, -260 min]  -30 [-33, -11]  0 min     0 min
+demand-growth-credit         conservative-v2  3      0      0 [0, +21]      0 min [-13 min, 0 min]        0 min [-89 min, 0 min]         0 [-21, 0]      0 min     0 min
+demand-growth-nocredit       greedy           3      0      +30 [+11, +33]  -104 min [-155 min, -80 min]  -319 min [-483 min, -260 min]  -30 [-33, -11]  0 min     0 min
+demand-growth-nocredit       conservative-v2  3      0      0 [0, +21]      0 min [-13 min, 0 min]        0 min [-89 min, 0 min]         0 [-21, 0]      0 min     0 min
+staffing-shortage-credit     greedy           3      0      0 [0, +7]       -18 min [-21 min, -16 min]    -131 min [-583 min, -90 min]   0 [-7, 0]       0 min     0 min
+staffing-shortage-credit     conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+staffing-shortage-nocredit   greedy           3      0      0 [0, +7]       -17 min [-20 min, -15 min]    -129 min [-582 min, -81 min]   0 [-7, 0]       0 min     0 min
+staffing-shortage-nocredit   conservative-v2  3      0      0               0 min                         0 min                          0               0 min     0 min
+stable-credit                greedy           3      0      0 [0, +22]      -75 min [-108 min, -54 min]   -186 min [-277 min, -183 min]  0 [-22, 0]      0 min     0 min
+stable-credit                conservative-v2  3      0      0 [0, +11]      -5 min [-34 min, -3 min]      -5 min [-72 min, -1 min]       0 [-11, 0]      0 min     0 min
+stable-nocredit              greedy           3      0      0 [0, +22]      -75 min [-108 min, -54 min]   -186 min [-277 min, -183 min]  0 [-22, 0]      0 min     0 min
+stable-nocredit              conservative-v2  3      0      0 [0, +11]      -5 min [-34 min, -3 min]      -5 min [-72 min, -1 min]       0 [-11, 0]      0 min     0 min
+
+Financial performance
+
+entry                        policy           seeds  net revenue                 expenses                       profit                         margin  op. cash flow
+financial-pressure-credit    greedy           3      +$16 [-$60, +$2,920]        +$32,569 [+$32,498, +$32,586]  -$32,553 [-$32,558, -$29,667]  n/a     -$28,711 [-$28,775, -$28,468]
+financial-pressure-credit    conservative-v2  3      $0                          $0                             $0                             n/a     $0
+financial-pressure-nocredit  greedy           3      +$16 [-$60, +$2,920]        +$19,915 [+$19,911, +$26,422]  -$19,975 [-$23,502, -$19,895]  n/a     -$18,172 [-$23,701, -$18,108]
+financial-pressure-nocredit  conservative-v2  3      $0                          $0                             $0                             n/a     $0
+reporting-backlog-credit     greedy           3      +$973 [+$21, +$3,384]       +$32,577 [+$32,563, +$33,308]  -$31,590 [-$32,556, -$29,925]  n/a     -$28,671 [-$28,967, -$27,877]
+reporting-backlog-credit     conservative-v2  3      $0                          $0                             $0                             n/a     $0
+reporting-backlog-nocredit   greedy           3      +$973 [+$21, +$3,384]       +$30,605 [+$28,782, +$32,569]  -$29,185 [-$30,584, -$27,809]  n/a     -$27,439 [-$27,549, -$26,254]
+reporting-backlog-nocredit   conservative-v2  3      $0                          $0                             $0                             n/a     $0
+demand-growth-credit         greedy           3      +$5,616 [+$2,240, +$6,123]  +$32,609 [+$32,584, +$33,334]  -$27,211 [-$30,344, -$26,993]  n/a     -$27,991 [-$28,525, -$27,373]
+demand-growth-credit         conservative-v2  3      $0 [$0, +$3,478]            $0 [$0, +$904]                 $0 [$0, +$2,574]               n/a     $0 [-$575, $0]
+demand-growth-nocredit       greedy           3      +$5,616 [+$2,240, +$6,123]  +$30,636 [+$30,611, +$32,594]  -$26,471 [-$28,371, -$25,020]  n/a     -$27,045 [-$27,292, -$26,758]
+demand-growth-nocredit       conservative-v2  3      $0 [$0, +$3,478]            $0 [$0, +$904]                 $0 [$0, +$2,574]               n/a     $0 [-$575, $0]
+staffing-shortage-credit     greedy           3      +$6 [-$76, +$1,042]         +$32,564 [+$32,556, +$32,572]  -$32,558 [-$32,632, -$31,530]  n/a     -$28,872 [-$29,030, -$28,704]
+staffing-shortage-credit     conservative-v2  3      $0                          $0                             $0                             n/a     $0
+staffing-shortage-nocredit   greedy           3      +$6 [-$76, +$1,042]         +$28,775 [+$26,400, +$30,599]  -$28,852 [-$29,558, -$26,393]  n/a     -$26,318 [-$27,471, -$24,105]
+staffing-shortage-nocredit   conservative-v2  3      $0                          $0                             $0                             n/a     $0
+stable-credit                greedy           3      +$64 [-$22, +$4,142]        +$32,634 [+$32,622, +$33,303]  -$32,558 [-$32,656, -$29,160]  n/a     -$27,769 [-$28,014, -$27,541]
+stable-credit                conservative-v2  3      $0 [$0, +$2,232]            +$822 [+$822, +$2,934]         -$822 [-$822, -$701]           n/a     -$493 [-$1,482, -$493]
+stable-nocredit              greedy           3      +$64 [-$22, +$4,142]        +$32,622 [+$31,894, +$33,303]  -$31,916 [-$32,558, -$29,160]  n/a     -$27,769 [-$28,014, -$27,212]
+stable-nocredit              conservative-v2  3      $0 [$0, +$2,232]            +$822 [+$822, +$2,934]         -$822 [-$822, -$701]           n/a     -$493 [-$1,482, -$493]
+
+Staffing and capacity
+
+entry                        policy           seeds  orders  lost  lost rate  overtime  held over  skipped breaks  no coverage
+financial-pressure-credit    greedy           3      0       0     n/a        0 min     0          0               0
+financial-pressure-credit    conservative-v2  3      0       0     n/a        0 min     0          0               0
+financial-pressure-nocredit  greedy           3      0       0     n/a        0 min     0          0               0
+financial-pressure-nocredit  conservative-v2  3      0       0     n/a        0 min     0          0               0
+reporting-backlog-credit     greedy           3      0       0     n/a        0 min     0          0               0
+reporting-backlog-credit     conservative-v2  3      0       0     n/a        0 min     0          0               0
+reporting-backlog-nocredit   greedy           3      0       0     n/a        0 min     0          0               0
+reporting-backlog-nocredit   conservative-v2  3      0       0     n/a        0 min     0          0               0
+demand-growth-credit         greedy           3      0       0     n/a        0 min     0          0               0
+demand-growth-credit         conservative-v2  3      0       0     n/a        0 min     0          0               0
+demand-growth-nocredit       greedy           3      0       0     n/a        0 min     0          0               0
+demand-growth-nocredit       conservative-v2  3      0       0     n/a        0 min     0          0               0
+staffing-shortage-credit     greedy           3      0       0     n/a        0 min     0          0               0
+staffing-shortage-credit     conservative-v2  3      0       0     n/a        0 min     0          0               0
+staffing-shortage-nocredit   greedy           3      0       0     n/a        0 min     0          0               0
+staffing-shortage-nocredit   conservative-v2  3      0       0     n/a        0 min     0          0               0
+stable-credit                greedy           3      0       0     n/a        0 min     0          0               0
+stable-credit                conservative-v2  3      0       0     n/a        0 min     0          0               0
+stable-nocredit              greedy           3      0       0     n/a        0 min     0          0               0
+stable-nocredit              conservative-v2  3      0       0     n/a        0 min     0          0               0
+
+Service reliability
+
+entry                        policy           seeds  over target        breaches           waits >30  displaced  alerts       alerts at end
+financial-pressure-credit    greedy           3      -56 [-122, -56]    -56 [-106, -56]    0          n/a        -2 [-5, 0]   +1 [0, +1]
+financial-pressure-credit    conservative-v2  3      0                  0                  0          n/a        0            0
+financial-pressure-nocredit  greedy           3      -52 [-117, -50]    -52 [-101, -50]    0          n/a        -2 [-5, 0]   +1 [0, +1]
+financial-pressure-nocredit  conservative-v2  3      0                  0                  0          n/a        0            0
+reporting-backlog-credit     greedy           3      -139 [-203, -126]  -131 [-184, -126]  0          n/a        -2 [-3, 0]   0
+reporting-backlog-credit     conservative-v2  3      0                  0                  0          n/a        0            0
+reporting-backlog-nocredit   greedy           3      -135 [-203, -126]  -127 [-184, -126]  0          n/a        -2 [-3, 0]   0
+reporting-backlog-nocredit   conservative-v2  3      0                  0                  0          n/a        0            0
+demand-growth-credit         greedy           3      -226 [-362, -224]  -213 [-329, -196]  0          n/a        -3 [-6, 0]   0 [-1, 0]
+demand-growth-credit         conservative-v2  3      0 [-44, 0]         0 [-23, 0]         0          n/a        0            0 [-1, 0]
+demand-growth-nocredit       greedy           3      -226 [-362, -224]  -213 [-329, -196]  0          n/a        -3 [-6, 0]   0 [-1, 0]
+demand-growth-nocredit       conservative-v2  3      0 [-44, 0]         0 [-23, 0]         0          n/a        0            0 [-1, 0]
+staffing-shortage-credit     greedy           3      -33 [-39, -33]     -33                0          n/a        -1 [-4, -1]  +1 [0, +1]
+staffing-shortage-credit     conservative-v2  3      0                  0                  0          n/a        0            0
+staffing-shortage-nocredit   greedy           3      -33 [-39, -32]     -33 [-33, -32]     0          n/a        -1 [-4, -1]  0 [0, +1]
+staffing-shortage-nocredit   conservative-v2  3      0                  0                  0          n/a        0            0
+stable-credit                greedy           3      -91 [-183, -60]    -91 [-162, -60]    0          n/a        -4 [-4, -2]  0
+stable-credit                conservative-v2  3      -4 [-86, -3]       -4 [-75, -3]       0          n/a        0 [-1, 0]    0
+stable-nocredit              greedy           3      -91 [-183, -60]    -91 [-162, -60]    0          n/a        -4 [-4, -2]  0
+stable-nocredit              conservative-v2  3      -4 [-86, -3]       -4 [-75, -3]       0          n/a        0 [-1, 0]    0
+
+Long-term sustainability
+
+entry                        policy           seeds  min cash                       shortfall         days < 0
+financial-pressure-credit    greedy           3      -$25,653 [-$28,955, -$15,919]  $0                0
+financial-pressure-credit    conservative-v2  3      $0                             $0                0
+financial-pressure-nocredit  greedy           3      -$17,899 [-$24,188, -$15,005]  $0 [$0, +$1,981]  0
+financial-pressure-nocredit  conservative-v2  3      $0                             $0                0
+reporting-backlog-credit     greedy           3      -$16,397 [-$24,588, -$10,221]  $0                0
+reporting-backlog-credit     conservative-v2  3      $0                             $0                0
+reporting-backlog-nocredit   greedy           3      -$16,068 [-$21,875, -$8,988]   $0                0
+reporting-backlog-nocredit   conservative-v2  3      $0                             $0                0
+demand-growth-credit         greedy           3      -$17,547 [-$22,234, -$10,840]  $0                0
+demand-growth-credit         conservative-v2  3      $0                             $0                0
+demand-growth-nocredit       greedy           3      -$17,218 [-$21,001, -$9,607]   $0                0
+demand-growth-nocredit       conservative-v2  3      $0                             $0                0
+staffing-shortage-credit     greedy           3      -$28,725 [-$28,820, -$25,587]  $0                0
+staffing-shortage-credit     conservative-v2  3      $0                             $0                0
+staffing-shortage-nocredit   greedy           3      -$26,013 [-$27,587, -$20,820]  $0                0
+staffing-shortage-nocredit   conservative-v2  3      $0                             $0                0
+stable-credit                greedy           3      $0 [-$7,035, $0]               $0                0
+stable-credit                conservative-v2  3      $0                             $0                0
+stable-nocredit              greedy           3      $0 [-$6,706, $0]               $0                0
+stable-nocredit              conservative-v2  3      $0                             $0                0
+
+Actions
+
+entry                        policy           seeds  attempted       accepted        rejected
+financial-pressure-credit    greedy           3      +11 [+10, +12]  +11 [+10, +12]  0
+financial-pressure-credit    conservative-v2  3      0               0               0
+financial-pressure-nocredit  greedy           3      +4 [+4, +6]     +4 [+4, +6]     0
+financial-pressure-nocredit  conservative-v2  3      0               0               0
+reporting-backlog-credit     greedy           3      +12             +12             0
+reporting-backlog-credit     conservative-v2  3      0               0               0
+reporting-backlog-nocredit   greedy           3      +8 [+7, +9]     +8 [+7, +9]     0
+reporting-backlog-nocredit   conservative-v2  3      0               0               0
+demand-growth-credit         greedy           3      +12             +12             0
+demand-growth-credit         conservative-v2  3      0 [0, +1]       0 [0, +1]       0
+demand-growth-nocredit       greedy           3      +8 [+8, +9]     +8 [+8, +9]     0
+demand-growth-nocredit       conservative-v2  3      0 [0, +1]       0 [0, +1]       0
+staffing-shortage-credit     greedy           3      +12             +12             0
+staffing-shortage-credit     conservative-v2  3      0               0               0
+staffing-shortage-nocredit   greedy           3      +7 [+6, +8]     +7 [+6, +8]     0
+staffing-shortage-nocredit   conservative-v2  3      0               0               0
+stable-credit                greedy           3      +12             +12             0
+stable-credit                conservative-v2  3      +1 [+1, +3]     +1 [+1, +3]     0
+stable-nocredit              greedy           3      +11 [+9, +12]   +11 [+9, +12]   0
+stable-nocredit              conservative-v2  3      +1 [+1, +3]     +1 [+1, +3]     0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 90 run(s): displacedAppointments: none displaced

@@ -64,11 +64,13 @@ def refused(run):
 
 
 def credit(run):
-    """Most drawn at a day's end, interest in the window, days ending below zero."""
+    """Most drawn at a day's end, interest in the window, and the distress
+    shortfall: the lowest cash in the window below zero (under solvency,
+    cash is below zero only when the line is fully drawn; amendment 1)."""
     res = run["result"]
     drawn = max([d.get("creditDrawnEndCents", 0) for d in res["calendar"]] or [0])
     interest = res["window"]["money"].get("interestCents", 0)
-    return drawn, interest, res["balances"]["daysBelowZero"]
+    return drawn, interest, max(0, -res["window"]["money"]["minCashCents"])
 
 
 def money(v, signed=False):
@@ -93,6 +95,10 @@ def table(head, rows):
 def main(d2, d3):
     k2, r2 = load(d2)
     k3, r3 = load(d3)
+    for k, rr in ((k2, r2), (k3, r3)):
+        bad = [i for i, r in rr.items() if r["contract"]["status"] != "completed" or not r["contract"]["replayVerified"]]
+        if bad:
+            print(f"**Runs not completed or not replay-verified in {k['suiteRun']}: {bad}**\n")
     entries = [e["id"] for e in k2["entries"]]
     seeds = k2["seeds"]
     v3 = lambda e, s, p, v: r3[(f"{e}-{v}", s, p)]
@@ -122,9 +128,10 @@ def main(d2, d3):
                 same = sum(accepted(r) == accepted(r2[(e, s, p)]) for r, s in zip(runs, seeds))
                 bound = n_ref > 0 or any(c[0] or c[1] or c[2] for c in cr)
                 rows.append([e, p, v, "**yes**" if bound else "no", n_ref, money(max(c[0] for c in cr)),
-                             money(sum(c[1] for c in cr)), sum(c[2] for c in cr), f"{same} of {len(seeds)}"])
+                             money(sum(c[1] for c in cr)), sum(1 for c in cr if c[2]), money(max(c[2] for c in cr)),
+                             f"{same} of {len(seeds)}"])
     print(table(["entry", "policy", "variant", "binds", "refusals (3 seeds)", "most drawn", "interest (3 seeds)",
-                 "days < 0 (3 seeds)", "actions as v2"], rows) + "\n")
+                 "runs in distress", "largest shortfall", "actions as v2"], rows) + "\n")
 
     print("## 3. Each run\n")
     rows = []
@@ -136,15 +143,16 @@ def main(d2, d3):
                          len(accepted(a))]
                 for v in VARIANTS:
                     b = v3(e, s, p, v)
-                    drawn, interest, below = credit(b)
-                    ok = b["contract"]["status"] == "complete" and b["contract"]["replayVerified"]
+                    drawn, interest, short = credit(b)
+                    ok = b["contract"]["status"] == "completed" and b["contract"]["replayVerified"]
                     cells += [money(metric(b, "operatingProfitCents")), money(metric(b, "minCashCents")),
-                              len(accepted(b)), len(refused(b)), money(drawn), money(interest), below, "" if ok else "**check**"]
+                              len(accepted(b)), len(refused(b)), money(drawn), money(interest), money(short),
+                              "ok" if ok else "**check**"]
                 rows.append(cells)
     head = ["entry", "seed", "policy", "profit v2", "min cash v2", "accepted v2"]
     for v in VARIANTS:
         head += [f"profit {v}", f"min cash {v}", f"accepted {v}", f"refused {v}", f"most drawn {v}", f"interest {v}",
-                 f"days < 0 {v}", f"status {v}"]
+                 f"shortfall {v}", f"status {v}"]
     print(table(head, rows) + "\n")
 
     print("## 4. Version 3 minus version 2 (same practice, seed and policy)\n")

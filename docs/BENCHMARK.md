@@ -30,8 +30,11 @@ fifth, `conservative-v2` (§7.2 there), and a frozen-agent comparison
 ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)) whose recordings CI
 replays. Released in V0.6.0 with the policy protocol unchanged. V0.7a
 (0.7.0-dev.1, in development) adds suite version 2 with paid radiologist
-overtime ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10); the harness and
-the policy protocol are unchanged. Ordinary benchmarks and their files are
+overtime ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10). V0.7b
+(0.7.0-dev.2, in development) adds suite version 3, with a credit line and
+a funding rule (§11 there). A refused commitment is an ordinary action
+result (`insufficient_funds`). The harness and the policy protocol are
+unchanged. Ordinary benchmarks and their files are
 unchanged.
 
 ## 1. Commands

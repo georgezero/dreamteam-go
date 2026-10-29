@@ -103,3 +103,20 @@ Whatever the runs show is reported as it is.
   * paired differences;
   * policy minus `noop`.
 * The README gives the findings and states the limitations.
+
+## Amendments
+
+**Amendment 1 (2026-10-29, after the runs, before any finding was
+written).** Two fixes to [analyze.py](analyze.py); no seed, policy,
+scenario, run or model changes.
+* It compared each run's status with `complete`. The contract report
+  writes `completed`, so every run was marked for checking. It now uses
+  `completed`, and it lists any run that did not complete or replay.
+* §2 named distress lines in the log as a measure. The results keep no
+  log. Under solvency, cash is below zero only when the credit line is
+  fully drawn, so the window's lowest cash below zero is the distress
+  record. Its magnitude is the largest unfunded shortfall. It is now
+  reported per run, and as runs in distress per practice and variant.
+  Days ending below zero are no longer reported: distress at a 00:00
+  disbursement can end the same day, when collections arrive.
+

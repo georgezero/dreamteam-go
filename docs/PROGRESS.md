@@ -7,6 +7,128 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.7b — financial solvency (0.7.0-dev.2)
+
+Owner decision 2026-10-29:
+* V0.7a is accepted and closed.
+* V0.7b models a practice's ability to finance operations, not bankruptcy
+  at zero cash: available cash, a credit facility and financial distress.
+* Consequences go through existing constraints (refusing discretionary
+  commitments), never a shutdown.
+* Manager overtime is deferred.
+
+**Design review** ([V0.7_SOLVENCY_DESIGN.md](V0.7_SOLVENCY_DESIGN.md)):
+* **Cash timing.** Cash leaves only at 00:00: payroll every 14 days,
+  severance on paydays, payables on the 1st. It arrives only with payer
+  remittances.
+* **Committed versus discretionary.** Current liabilities (accrued
+  payroll, payables, severance payable) are on the ledger. Each staffing
+  action's preview already lists the money it guarantees. So committed
+  obligations and discretionary commitments are separable.
+* **Roster changes.** A roster can never exceed the contract, whose
+  guarantee is already owed, so `set_roster` commits no new money. This
+  was found while testing and recorded in the design.
+* **A measurement before the design** (seed 41401, no action): cash stays
+  positive in all five practices. Cash less what is owed starts near
+  $60,000 and falls to $2,504 by day 90 in financial pressure. The limit
+  on spending is money already owed, not overdraft.
+
+**Declared first** (28b9a27, before any run on seeds 41501–41503):
+* **The scenario setting** `finance.solvency` (`creditLimitCents` 0 to
+  $1,000,000, `creditRateBP` 0–5,000), compiled to finance configuration.
+  From the takeover:
+  * **Draws.** A disbursement that would leave cash below zero draws on
+    the line up to its limit. Beyond the limit, cash goes negative:
+    financial distress, logged, with the obligation still paid.
+  * **Interest** accrues daily on the balance drawn, rounded half up, to
+    payables. Cash above zero repays the line at midnight.
+  * **Funding rule.** A hire, salary increase, teleradiology contract or
+    paid extension is refused `insufficient_funds` unless it fits in the
+    funding headroom: cash plus undrawn credit, less current liabilities
+    and reserved commitments.
+  * **Reservations** are released evenly over each commitment's period.
+  * **One check.** Preview, validation and application share it.
+* **Historical states are untouched.**
+  * The solvency state is one pointer and two appended accounts, encoded
+    only when used.
+  * Credit flows are financing, outside collections and disbursements.
+    The window's cash bridge includes them.
+  * New observation, preview and result fields are omitted when empty.
+* **Variants.** Ten bundled variants (`-ot-credit`: $50,000 at 10%;
+  `-ot-nocredit`) and suite `dreamteam-dev` version 3.
+* **Tests** (`internal/sim/solvency_test.go`, `internal/session/solvency_test.go`):
+  * funding: from cash, exactly and a cent short; from credit; with zero
+    credit;
+  * atomic batches; cuts at negative headroom; a reservation's release day
+    by day;
+  * extensions;
+  * the hire and teleradiology commitments equal the preview's
+    guaranteed lines;
+  * a 60-day run with no cash and a $20,000 line: the limit reached once,
+    distress logged, payroll identical to the run without the line, bills
+    plus interest, one interest entry a day to the cent, repayment, every
+    invariant at every midnight;
+  * a non-binding line identical to no line, digest for digest;
+  * save, load and continue;
+  * scenario validation, and each variant equal to its base except for the
+    setting;
+  * suite version 3.
+* **The characterization plan** (`v07b-plan/1`) and analysis script.
+* **Version.** 0.7.0-dev.2. 0.7.0-dev.1 is registered for replay
+  (`mini-seed52-v071`, batch mode `v0.7_dev1`).
+
+**Characterization** ([benchmark/v07b-dev/](benchmark/v07b-dev/README.md);
+`noop`, `greedy` and `conservative-v2`; suite version 2 and both version 3
+variants; seeds 41501–41503; 90 days; 135 runs, all complete):
+* **Amendment 1** (after the runs, before the findings) fixed the
+  analysis script's status string. It also measures distress by the
+  lowest cash, because the results keep no log.
+* **`noop` and `conservative-v2` never bind.** Their 60 version 3 runs are
+  identical to version 2.
+  * `noop` commits nothing and never fell below $15,919.
+  * `conservative-v2`'s profit guardrail is stricter than the funding
+    rule.
+* **`greedy` binds:**
+  * **with a $50,000 line**, only in financial pressure: 3 late raises
+    refused, and one draw of $12,584, repaid at $8 of interest, where
+    version 2 went to −$12,584 unfinanced;
+  * **with no credit**, in every practice: 65 refusals in 14 of 15 runs,
+    profit +$740 to +$12,658, up to 6 more breaches and 24 minutes on TAT
+    p90.
+* **One distress** (financial pressure 41502, no credit): a payroll
+  already owed exceeded cash by $1,981 even after 9 refusals. It was paid
+  and recorded, and recovered the same day.
+* **Starting states** were identical in all 15 entry-seed pairs across
+  the three variants. Every pair is the model's effect alone.
+* **Integrity:**
+  * `verify`: 419 of 419 and 824 of 824;
+  * `reproduce`: 281 of 281 and 551 of 551 on both linux/amd64 and linux/arm64 (Raspberry Pi).
+
+**Gates:**
+* `go test ./...` on linux/amd64: 10 packages pass. That includes:
+  * golden references identical under 0.7.0-dev.2;
+  * every historical session replay, `v060` and `v071` included;
+  * the committed configurations and seed guards.
+* `go test -race -timeout 90m ./...`: 10 packages pass.
+* `go vet` (default, `calibration` and `acceptance` tags) and `gofmt`:
+  clean.
+* Cross-builds: linux/amd64, linux/arm64, darwin/arm64, darwin/amd64 and
+  windows/amd64.
+* Python tests pass.
+* CI green on the declaration commit (28b9a27). CI now also runs a 21-day
+  suite version 3 smoke test with `verify` and `reproduce` on every
+  platform.
+* The tagged clinical evaluation suites were not rerun (unaffected).
+* No LLM agent was run.
+
+**Limitations:**
+* development seeds and deterministic baselines only;
+* the credit line is drawn in one run of 135, so the credit mechanics rest
+  mainly on the financial tests;
+* the funding test covers 30 days of a raise;
+* distress only refuses new commitments;
+* manager overtime is still unpaid.
+
 ## V0.7a — radiologist overtime costing (0.7.0-dev.1)
 
 Owner decision 2026-10-29:

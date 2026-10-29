@@ -27,12 +27,21 @@ patients, staff, referrers, rates and costs are illustrative assumptions,
 not operational data. DreamTeam simulates operations; it makes no clinical
 decisions and produces no clinical content.
 
-In development (unreleased): **V0.7**, simulator realism. V0.7a
-(`0.7.0-dev.1`) makes radiologist overtime cost money in new scenario
-versions. An on-site radiologist's time on duty past the rostered end is
-paid at the salary's hourly rate (`docs/V0.7_OVERTIME_DESIGN.md`), in
-benchmark suite `dreamteam-dev` version 2. Every existing scenario, save
-and result is unchanged (`docs/benchmark/v07a-dev/`).
+In development (unreleased): **V0.7**, simulator realism.
+* **V0.7a** makes radiologist overtime cost money in new scenario
+  versions. An on-site radiologist's time on duty past the rostered end is
+  paid at the salary's hourly rate (`docs/V0.7_OVERTIME_DESIGN.md`), in
+  benchmark suite `dreamteam-dev` version 2.
+* **V0.7b** (`0.7.0-dev.2`) adds financial solvency in suite version 3
+  (`docs/V0.7_SOLVENCY_DESIGN.md`):
+  * a credit line with daily interest;
+  * a funding rule that refuses a discretionary commitment the practice
+    cannot fund from cash and undrawn credit after what it already owes;
+  * financial distress recorded when an obligation already incurred
+    cannot be financed.
+
+Every existing scenario, save and result is unchanged
+(`docs/benchmark/v07a-dev/`, `docs/benchmark/v07b-dev/`).
 
 ## Quick start
 
@@ -370,8 +379,9 @@ are observations, not a ranking:
 * Every LLM recording replays exactly, and every applicable T90 was NO GO.
 
 V0.7a (in development) adds suite version 2. It has the same five
-practices with radiologist overtime paid. Version 1 and every V0.6 result
-are unchanged.
+practices with radiologist overtime paid. V0.7b adds suite version 3: those
+practices with a $50,000 credit line, and with none, under the funding
+rule. Versions 1 and 2 and every earlier result are unchanged.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -432,7 +442,9 @@ reference policy) and `agents/llm` (the LLM agent).
   distort the apparent financial consequences of decisions. It is a
   simulator-modeling limitation, not fixed in this release. V0.7a (in
   development) pays it in suite version 2.
-* **No insolvency consequence.** Negative cash stops nothing.
+* **No insolvency consequence.** Negative cash stops nothing. V0.7b (in
+  development) adds a credit line and a funding rule in suite version 3.
+  Even there, distress only refuses new commitments: nothing shuts down.
 * **Demand growth uses monthly factors,** not a dated shock.
 * **Some metrics are absent:** imaging capacity utilization and trends
   within a run.
