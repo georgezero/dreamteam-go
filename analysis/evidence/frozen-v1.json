@@ -1,0 +1,101 @@
+{
+ "agent": {
+  "memoryFormat": "llm-agent-memory/v1",
+  "promptVersion": "llm-agent-prompt/v2",
+  "sha256": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87",
+  "version": "2"
+ },
+ "analyzer": {
+  "name": "decision-evidence 1",
+  "path": "analysis/evidence/decision_evidence.py",
+  "sha256": "1cc9f9bac9254eeb013caa986a5114fe811f10f8246ddc8de9ca503907a7e7ba",
+  "tests": "analysis/evidence/test_decision_evidence.py",
+  "testsSha256": "0e280f0bbf8e3ae6fcb35d100b1c74fce0221cda23087b60fe4181556a34feff"
+ },
+ "contract": "dreamteam.decision-evidence/v1",
+ "corpus": {
+  "decisionPoints": 3972,
+  "id": "v08a-corpus-1",
+  "path": "docs/benchmark/v08a-dev/corpus.json",
+  "recordings": 90,
+  "recordingsFingerprint": "846abc4cf007f7340af105977a6abe80a21832424b078cc8685dfd1db793397a",
+  "recordingsFingerprintMethod": "SHA-256 of the lines '<sha256>  <path>\\n' of every recording, sorted by path (sha256sum format)",
+  "sha256": "cbc703c99140b118571f5a777d2adbbc7a5522dab371a409a4abda7f37cbfc6e"
+ },
+ "engineAtFreeze": "0.8.0-dev.1",
+ "frozen": "2026-10-30",
+ "outputs": {
+  "byRule": {
+   "EXPLICIT_ACTION_OMITTED": {
+    "insufficient_evidence": 0,
+    "supported": 5,
+    "unresolved": 40
+   },
+   "EXPLICIT_OPPOSITE_ACTION": {
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 3
+   },
+   "FACTUAL_OBSERVATION_MISMATCH": {
+    "insufficient_evidence": 9,
+    "supported": 27,
+    "unresolved": 2
+   },
+   "FINANCIAL_AMOUNT_MISMATCH": {
+    "insufficient_evidence": 0,
+    "supported": 3,
+    "unresolved": 26
+   },
+   "REPEATED_INVALID_PROPOSAL": {
+    "insufficient_evidence": 0,
+    "supported": 107,
+    "unresolved": 0
+   },
+   "STATED_ACTION_NOT_EXECUTED": {
+    "insufficient_evidence": 0,
+    "supported": 45,
+    "unresolved": 0
+   }
+  },
+  "byStatus": {
+   "insufficient_evidence": 9,
+   "supported": 187,
+   "unresolved": 71
+  },
+  "evidenceNormalizedSha256": "db8624614cdabc8a9ef67021e1af076a9a6c7bcd72a180fb6425df6ed3602227",
+  "evidencePath": "docs/benchmark/v08a-dev/evidence.json",
+  "evidenceSha256": "5743bc223965e75d77440021ecf602b74c1e4bb35c6b6a08afe8be08b8955d4d",
+  "normalization": "run.engine of every finding set to null and the replay files' entries removed from inputs; canonical JSON (sorted keys, no spaces, ASCII)",
+  "tablesPath": "docs/benchmark/v08a-dev/tables.md",
+  "tablesSha256": "f2e8a32cadb68938b1b5e74a2ba52cd909c0237e0997f4e120800bcc65e26c98",
+  "tracesSha256": "7ab5120ffe0e6ff9cc9f4d53085bcfa75cc0352786f8e23f77c729014c97c9ce"
+ },
+ "rules": [
+  {
+   "id": "EXPLICIT_ACTION_OMITTED",
+   "version": 1
+  },
+  {
+   "id": "EXPLICIT_OPPOSITE_ACTION",
+   "version": 1
+  },
+  {
+   "id": "FINANCIAL_AMOUNT_MISMATCH",
+   "version": 1
+  },
+  {
+   "id": "REPEATED_INVALID_PROPOSAL",
+   "version": 1
+  },
+  {
+   "id": "STATED_ACTION_NOT_EXECUTED",
+   "version": 1
+  },
+  {
+   "id": "FACTUAL_OBSERVATION_MISMATCH",
+   "version": 1
+  }
+ ],
+ "schema": "dreamteam.decision-evidence-freeze/v1",
+ "sourceCommit": "80cfff9c7738f5a89456f9bcc013d06230dd79f7"
+}

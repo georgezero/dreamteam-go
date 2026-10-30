@@ -26,11 +26,19 @@ Every earlier scenario, save, golden reference and V0.6 result is
 unchanged. The economics are deliberately simple, not a validated model of
 practice finance.
 
-In development, not released: V0.8a (`0.8.0-dev.1`), a read-only,
-deterministic analysis of whether the recorded LLM agents' stated reasons
-agree with what they proposed and what was executed
-(`docs/DECISION_EVIDENCE.md`, `docs/benchmark/v08a-dev/`). It uses no
-model and changes no simulator behaviour.
+In development, not released (`0.8.0-dev.2`):
+* **V0.8a:** a read-only, deterministic analysis of whether the recorded
+  LLM agents' stated reasons agree with what they proposed and what was
+  executed (`docs/DECISION_EVIDENCE.md`, `docs/benchmark/v08a-dev/`). Its
+  rules are now frozen.
+* **V0.8b** (`docs/benchmark/v08b-dev/`):
+  * an independent review package (review pending);
+  * deterministic funding-refusal probes;
+  * refusal-response evidence;
+  * paired financial and operational outcomes;
+  * a proposed recording contract for V0.8c.
+
+Neither uses a model or changes simulator behaviour.
 
 It builds on V0.6 (`0.6.0`, the agent benchmark: a suite of five practice
 scenarios run in one command, each policy reported on six dimensions

@@ -7,6 +7,116 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.8b — evidence validation and financial decision outcomes (0.8.0-dev.2)
+
+Owner decision 2026-10-30: V0.8a accepted and closed (80cfff9, CI run
+41104143975). V0.8b is authorized. There is no live LLM inference, no new
+mechanic, and no change to recordings, prompts, policies or scoring.
+
+**Built:**
+* **The freeze** of `dreamteam.decision-evidence/v1`:
+  * `analysis/evidence/frozen-v1.json` holds the analyzer's SHA-256, the
+    rules, the source commit, the corpus fingerprint and the output
+    hashes;
+  * `analysis/evidence/check_frozen.py` checks a later build against it;
+  * `docs/benchmark/v08a-dev/FREEZE.md` records the unsupported claim
+    types, the coverage limitations and the defects V1-D1 to V1-D4.
+* **The independent review package** (`analysis/evidence/review_package.py`,
+  `docs/benchmark/v08b-dev/review/`):
+  * a seeded, stratified sample of 98 items, with a protocol and a form;
+  * `review_analysis.py` analyses complete, declared-independent forms
+    only.
+  * **Status: PENDING.** No independent reviewer was available, so no
+    label exists.
+* **Funding-refusal probes** (`analysis/probes/funding_probes.py`,
+  `docs/benchmark/v08b-dev/probes.json`, `PROBES.md`): probes A–J are
+  scripted through the agent protocol on the solvency scenarios, seed
+  41801 (fresh). All expectations were met.
+* **The frozen rules on the probes:** `analysis/probes/probe_evidence.py`.
+* **The extension `dreamteam.refusal-response/v1`**
+  (`analysis/evidence/refusal_response.py`, DECISION_EVIDENCE §12),
+  applied to the probes and to the historical recordings.
+* **Paired financial and operational outcomes**
+  (`analysis/evidence/financial_outcomes.py`, `FINANCIAL_OUTCOMES.md`):
+  140 V0.6c and V0.7c pairs.
+* **The proposed V0.8c recording contract**
+  (`docs/benchmark/v08b-dev/RECORDING_CONTRACT.md`): designed, not
+  deployed.
+* **CI** regenerates every V0.8b output from the replays and the probes,
+  requires each to equal the committed one, and compares them across
+  platforms. The frozen v1 output is checked with `check_frozen.py`.
+* **Version** 0.8.0-dev.2. It registers 0.8.0-dev.1 for historical replay
+  (batch mode `v0.8_dev1`, `mini-seed52-v081`, `v081_test.go`).
+
+**Results:**
+* **Frozen v1:** reproduced under 0.8.0-dev.2: the analyzer, tables and
+  traces byte for byte, and the evidence in every field but the engine
+  build.
+* **Probes:**
+  * The four commitment kinds are refused when unfunded.
+  * A revised affordable commitment is accepted and reserved, and the
+    reservation then refuses an extension that fitted before it.
+  * A cost reduction is accepted with negative headroom.
+  * The funding boundary is exact, and with credit it is exactly $50,000
+    higher.
+  * v1's repeat rule misses the identical hire refused on two days
+    (V1-D1).
+* **Refusal responses:**
+  * Probes: 7 classified as scripted. Read in the llm-agent 2 format, 3 of
+    them are `evidence_unavailable`.
+  * History: 559 refusals, none `insufficient_funds`. 457 are
+    `evidence_unavailable`, 452 of them only because the refused attempt's
+    actions are not recorded.
+* **Outcomes:** described per suite run, never combined. Stated intent,
+  submitted actions and executed actions are counted separately.
+
+**Quality gates:**
+
+Run on linux/amd64 unless noted:
+* **Focused tests:** the evidence tests (53, including the 11 new ones:
+  the freeze guard, normalization, every refusal-response category, both
+  recording formats, sampling determinism and the review analysis's
+  refusals) and the probe tests (3, against the built binary) pass.
+* **Go:**
+  * full default suite: all 10 packages pass;
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Python:** agent tests (28) pass.
+* **Historical replay:** every fixture, including the new
+  `mini-seed52-v081` (0.8.0-dev.1, batch mode `v0.8_dev1`), replays with
+  every digest verified.
+* **Golden references:** outcomes identical.
+* **Benchmark verify and reproduce:** 62 of 62, 0 failed, covering the
+  same suites and all 26 recorded-LLM replays as V0.8a.
+* **Frozen v1:** `check_frozen.py` reproduces the analyzer, tables and
+  traces byte for byte, and the normalized evidence exactly.
+* **The V0.8b pipeline:** the review package, financial outcomes, probes,
+  probe evidence and refusal responses, run twice, are byte-identical and
+  equal the committed files. Every probe expectation is met. No model
+  was contacted.
+* **Five cross-builds:** all pass.
+* **CI:** green on linux/amd64, linux/arm64 and darwin/arm64, with the
+  cross-platform comparison of the evidence and the V0.8b outputs.
+
+**No change to:**
+* simulator behaviour, actions, scenarios, scoring, agents, prompts or
+  settings;
+* any recording, session, golden reference or benchmark result;
+* the frozen v1 rules.
+
+No model was contacted.
+
+**Known limitations:**
+* **The independent review is pending,** so the v1 findings' correctness
+  is not independently assessed.
+* **The probes** cover one scenario and seed. `refusal_no_longer_applicable`
+  is tested only in unit tests.
+* **Historical refusal responses** are mostly unclassifiable until the
+  recording contract changes.
+* **The outcome analysis is descriptive only.**
+
+---
+
 ## V0.8a — agent decision consistency and evidence analysis (0.8.0-dev.1)
 
 Owner decision 2026-10-30: V0.7.0 accepted and closed (08ae85f, tag

@@ -524,3 +524,8 @@ The V0.7.0 file was made from 08ae85f (0.7.0, tag v0.7.0) with `-scenario
 mini -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v070.actions.json`
 (the same batches as the 5C.4l file's). 0.8.0-dev.1 replays it in batch
 mode `v0.7.0` with every digest verified (`internal/session/v070_test.go`).
+
+The V0.8a file was made from 80cfff9 (0.8.0-dev.1) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v081.actions.json`
+(the same batches as the 5C.4l file's). 0.8.0-dev.2 replays it in batch
+mode `v0.8_dev1` with every digest verified (`internal/session/v081_test.go`).

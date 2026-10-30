@@ -162,18 +162,44 @@ jobs:
         # model: its unit tests, then the analysis twice, compared with
         # itself and with the committed evidence. The evidence and the
         # decision traces are compared across platforms below.
+        # V0.8b: the v1 rules are frozen (analysis/evidence/frozen-v1.json):
+        # check_frozen requires the frozen analyzer, tables and traces
+        # byte for byte, and the frozen evidence in every field but the
+        # engine build the replays were made with.
         shell: bash
         run: |
           set -euo pipefail
           python3 -B -m unittest discover -s analysis/evidence 2>&1 | tail -1
-          python3 -I -B analysis/evidence/decision_evidence.py --corpus docs/benchmark/v08a-dev/corpus.json --replays . --out evidence
-          python3 -I -B analysis/evidence/decision_evidence.py --corpus docs/benchmark/v08a-dev/corpus.json --replays . --out evidence-again > /dev/null
+          P="python3 -I -B"; C=docs/benchmark/v08a-dev/corpus.json
+          $P analysis/evidence/decision_evidence.py --corpus $C --replays . --out evidence
+          $P analysis/evidence/decision_evidence.py --corpus $C --replays . --out evidence-again > /dev/null
           cmp evidence/evidence.json evidence-again/evidence.json
           cmp evidence/traces.jsonl evidence-again/traces.jsonl
-          cmp evidence/evidence.json docs/benchmark/v08a-dev/evidence.json
-          cmp evidence/tables.md docs/benchmark/v08a-dev/tables.md
+          $P analysis/evidence/check_frozen.py --out evidence
           cp evidence/evidence.json out/decision-evidence.json
           cp evidence/traces.jsonl out/decision-traces.jsonl
+      - name: Evidence validation and outcomes
+        # V0.8b, without any model: the seeded review package, the paired
+        # financial and operational outcomes, the scripted funding-refusal
+        # probes through the agent protocol, the frozen rules on the
+        # probes, and the refusal-response evidence; each equal to the
+        # committed one (docs/benchmark/v08b-dev) and compared across
+        # platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          DREAMTEAM_BINARY=./dt python3 -B -m unittest discover -s analysis/probes 2>&1 | tail -1
+          P="python3 -I -B"; C=docs/benchmark/v08a-dev/corpus.json; V=docs/benchmark/v08b-dev
+          $P analysis/evidence/review_package.py --corpus $C --replays . --out review
+          $P analysis/evidence/financial_outcomes.py --corpus $C --replays . --out fin
+          $P analysis/probes/funding_probes.py --binary ./dt --probes $V/probes.json --out probes
+          $P analysis/probes/probe_evidence.py --probes-out probes --out probe-evidence.json
+          $P analysis/evidence/refusal_response.py --corpus $C --probes probes --out rr
+          for f in manifest.json items.json items.md form.csv; do cmp review/$f $V/review/$f; cp review/$f out/review-$f; done
+          for f in probe-log.json sequence-nocredit.decisions.jsonl sequence-nocredit.attempts.jsonl; do cmp probes/$f $V/probes-out/$f; cp probes/$f out/probes-$f; done
+          for f in fin/financial-outcomes.json fin/financial-outcomes.md probe-evidence.json rr/refusal-response.json rr/refusal-response-tables.md; do
+            cmp $f $V/$(basename $f); cp $f out/$(basename $f)
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

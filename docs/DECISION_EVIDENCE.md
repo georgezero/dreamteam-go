@@ -1,10 +1,18 @@
 # Decision evidence (dreamteam.decision-evidence/v1)
 
-Status: V0.8a (0.8.0-dev.1), in development, not released. The analysis
-is `analysis/evidence/decision_evidence.py` (analyzer `decision-evidence
-1`), its tests `analysis/evidence/test_decision_evidence.py`, its corpus
-[docs/benchmark/v08a-dev/corpus.json](benchmark/v08a-dev/corpus.json) and
-its results [docs/benchmark/v08a-dev/](benchmark/v08a-dev/README.md).
+Status: built in V0.8a (0.8.0-dev.1), and **frozen in V0.8b**
+(0.8.0-dev.2): the rules, their semantics, the finding identifiers, the
+output order and the committed outputs (§11,
+[the freeze record](benchmark/v08a-dev/FREEZE.md)). Not released.
+
+**Files:**
+* the analysis: `analysis/evidence/decision_evidence.py` (analyzer
+  `decision-evidence 1`);
+* its tests: `analysis/evidence/test_decision_evidence.py`;
+* its corpus:
+  [docs/benchmark/v08a-dev/corpus.json](benchmark/v08a-dev/corpus.json);
+* its results: [docs/benchmark/v08a-dev/](benchmark/v08a-dev/README.md);
+* the V0.8b extension: `dreamteam.refusal-response/v1` (§12).
 
 ## 1. Purpose
 
@@ -480,3 +488,85 @@ is made, and the benchmark's scoring contract is untouched.
 * **The corpus is small:** two models (a third, Gemma 4 31B, in V0.5c),
   one agent and prompt version, and development seeds. Nothing here
   generalizes beyond these recordings.
+
+## 11. Freeze (V0.8b)
+
+`dreamteam.decision-evidence/v1` and analyzer `decision-evidence 1` are
+frozen at 80cfff9 ([FREEZE.md](benchmark/v08a-dev/FREEZE.md),
+`analysis/evidence/frozen-v1.json`).
+
+**What a later build must reproduce:**
+* the analyzer's source, byte for byte;
+* the tables and the decision traces, byte for byte;
+* the evidence in every field but the engine build the replays were made
+  with (`check_frozen.py`, in CI).
+
+**Changes:**
+* A behavioural change is a new rule version, approved by the owner, and
+  runs beside v1.
+* Defects found after the freeze are documented in the freeze record
+  (V1-D1 to V1-D4), not fixed in v1.
+
+**The independent review** of a seeded sample of v1 outputs is prepared
+and pending ([review protocol](benchmark/v08b-dev/review/PROTOCOL.md)). No
+review result exists, and none is claimed.
+
+## 12. Extension: refusal responses (dreamteam.refusal-response/v1)
+
+A separate, versioned extension (`analysis/evidence/refusal_response.py`,
+V0.8b). It records **what an agent proposed next after a proposal of its
+was refused**. It changes nothing in v1.
+
+**Inputs:**
+* recordings in the llm-agent 2 format;
+* where it exists, attempt-level evidence: each attempt's own actions and
+  validation, as the funding probes write it, and as the proposed V0.8c
+  record would ([RECORDING_CONTRACT.md](benchmark/v08b-dev/RECORDING_CONTRACT.md)).
+
+No replay or model is needed.
+
+**A refusal** is an action refused by validate, with any code except
+`batch_rejected` (a consequence of another action's refusal).
+
+**Its response** is the same agent's next recorded proposal:
+* the next attempt in the same decision point, if that attempt's actions
+  are recorded;
+* otherwise the next decision point's proposal.
+
+**Identity.** Two actions are identical when their canonical JSON is
+equal, without `requestId` (a label the client chooses). Two actions
+share a target when they have the same type and the same:
+* employee (extend, terminate, roster, allocation);
+* role and skills (hire);
+* operation and plan, or contract (teleradiology).
+
+| Category | When |
+|---|---|
+| `identical_repeated` | the response contains the identical action, and it was refused again or not accepted by validate |
+| `refusal_no_longer_applicable` | the response contains the identical action, and validate accepted it |
+| `modified_proposal` | the response contains an action with the same type and target, with other values |
+| `different_proposal` | the response proposes actions, none with the refused action's type and target |
+| `no_action` | the response proposes no action |
+| `evidence_unavailable` | the refused action's payload is not recorded (an earlier attempt, in the llm-agent 2 format), or no later proposal is recorded |
+
+**Each event records:**
+* the recording and its SHA-256;
+* the point, attempt and action index;
+* the refusal's code and message;
+* the refused action;
+* where the response was, and its actions with whether validate accepted
+  them;
+* the category;
+* for `evidence_unavailable`, why. `responseRecorded` tells the two
+  causes apart.
+
+**What it does not do:**
+* **Infer understanding:** none of the categories says whether an agent
+  understood a refusal.
+* **Rank responses:** a modified or different proposal is not called
+  adaptive.
+* **Tell real from scripted:** a scripted probe's responses are scripted,
+  and they test only that the evidence is represented correctly.
+
+**Results:** [docs/benchmark/v08b-dev/](benchmark/v08b-dev/README.md).
+
