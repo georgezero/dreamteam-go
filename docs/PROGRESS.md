@@ -7,6 +7,66 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.7.0 — release: financial realism for practice-management simulation
+
+Owner decision 2026-10-30:
+* V0.7c accepted and closed (CI green on ad6d25c, run 41015378407);
+* GO for the V0.7.0 release, release-only;
+* no V0.7d, no model retuning and no further financial scenarios before
+  the release;
+* V0.8 proposed as agent decision quality (ROADMAP §7b), not approved.
+
+**Changed:**
+* Version 0.7.0. 0.7.0-dev.3 is registered for replay
+  (`mini-seed52-v073`, made from ad6d25c; batch mode `v0.7_dev3`;
+  `internal/session/v073_test.go`). Every earlier batch mode is kept.
+* Release notes: V0.7.0, with the release summary, the V0.7c development
+  findings (the 90-day staffing-shortage run as one observation), the
+  solvency limitation (no `insufficient_funds` refusal in any V0.7c run,
+  so agents' responses to funding refusals are unobserved) and the known
+  limitations.
+* README (V0.7 current, findings, limitations), ROADMAP (V0.7 released;
+  §7b, V0.8 proposed), the overtime and solvency design notes (status,
+  and what V0.7c showed), BENCHMARK, BENCHMARK_SUITE and LLM_AGENT
+  (status and limitations).
+* The development evidence (`docs/benchmark/v07a-dev/`, `v07b-dev/`,
+  `v07c-dev/`) is unchanged.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, scoring, the harness, the protocols, the policies, the LLM
+agent, its prompt or its settings. No evaluation was rerun.
+
+**Release gates** (linux/amd64 unless noted):
+* Clean release tree.
+* Full default Go suite: all 10 packages with tests pass. The tagged
+  clinical evaluation suites were not rerun (unaffected).
+* Race: `go test -race -timeout 90m ./...` passes.
+* vet (three tag sets) and gofmt: clean.
+* Python agent tests: 28 pass.
+* Historical session replay: every fixture, including
+  `mini-seed52-v073` (0.7.0-dev.3, batch mode `v0.7_dev3`), replays with
+  every digest verified.
+* Golden references: outcomes identical (four references, through the
+  migration manifest). The V0.6 suite and scenario files, and the V0.5 and
+  V0.6 evidence, are unchanged since `v0.6.0`.
+* Suite verify and reproduce: V0.4 CI benchmark (T90 recomputed), V0.6a
+  suite, V0.6b suite run, V0.7a suite run (version 2), V0.7b suite run
+  (version 3). 0 failed.
+* Recorded LLM replay: V0.5a, V0.5b, V0.5c stages a–d, the ten V0.6c
+  per-entry replays and the ten V0.7c per-stage, per-entry replays (the
+  financial ledger, credit draws, repayments and interest included), each
+  verified and reproduced: 52 of 52 commands, 0 checks failed.
+* Five cross-builds: linux/amd64, linux/arm64, darwin/arm64,
+  darwin/amd64, windows/amd64.
+* Committed seed guards (`TestCommittedConfigs`, `TestCommittedSuiteRuns`,
+  the holdout guard): pass.
+* CI on the release commit: green on linux/amd64, linux/arm64 and
+  darwin/arm64, with the cross-platform comparison.
+
+No live LLM evaluation was rerun.
+
+---
+
 ## V0.7c — frozen agents under overtime and solvency economics (0.7.0-dev.3)
 
 Owner decision 2026-10-29:

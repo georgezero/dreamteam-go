@@ -7,45 +7,42 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.6** (`0.6.0`, the agent benchmark) is the current release: a
-reproducible benchmark for radiology practice-management agents. A suite of
-five practice scenarios runs in one command. Each policy is reported on six
-dimensions against no action, with no score or ranking. Every decision,
-including an LLM agent's, is recorded and replays exactly on any platform
-(`docs/BENCHMARK_SUITE.md`). It is a development benchmark on synthetic
-practices, not a clinically validated one. It builds on V0.5 (`0.5.0`, LLM
-agents: an external agent lets a language model on any OpenAI-compatible
-server manage the practice, `agents/llm/`, `docs/LLM_AGENT.md`), V0.4
-(`0.4.0`, the agent evaluation harness: policies, built in or separate
-processes, compared reproducibly on identical scenarios and seeds,
-`dreamteam benchmark`, `docs/BENCHMARK.md`), V0.3 (`0.3.0`, the agent interface: an
-external program runs the practice through a deterministic JSON protocol,
-`docs/AGENT_PROTOCOL.md`, with a reference Python client) and V0.2 (`0.2.0`, practice design: staffing, rosters, reading
-allocation and teleradiology actions, a sustainable scenario and the T90
-evaluation of your plan). Release notes: `docs/RELEASE_NOTES.md`. Everything is synthetic:
-patients, staff, referrers, rates and costs are illustrative assumptions,
-not operational data. DreamTeam simulates operations; it makes no clinical
-decisions and produces no clinical content.
+Status: **V0.7** (`0.7.0`, financial realism) is the current release. It
+adds opt-in financial consequences to management decisions:
+* **paid radiologist overtime:** time on duty past the rostered end, at
+  the salary's hourly rate, with benefits (`docs/V0.7_OVERTIME_DESIGN.md`);
+* **financial solvency:** a credit line with daily interest and repayment,
+  a funding rule that refuses a new commitment the practice cannot fund
+  from cash and undrawn credit after what it already owes, and financial
+  distress recorded when an obligation already incurred cannot be
+  financed (`docs/V0.7_SOLVENCY_DESIGN.md`);
+* **versioned benchmark suites:** `dreamteam-dev` version 1 (the V0.6
+  benchmark, unchanged), version 2 (overtime paid) and version 3
+  (overtime paid, with and without a $50,000 credit line);
+* **a frozen-agent evaluation** under the new economics, every LLM run
+  replayed exactly (`docs/benchmark/v07c-dev/`).
 
-In development (unreleased): **V0.7**, simulator realism.
-* **V0.7a** makes radiologist overtime cost money in new scenario
-  versions. An on-site radiologist's time on duty past the rostered end is
-  paid at the salary's hourly rate (`docs/V0.7_OVERTIME_DESIGN.md`), in
-  benchmark suite `dreamteam-dev` version 2.
-* **V0.7b** (`0.7.0-dev.2`) adds financial solvency in suite version 3
-  (`docs/V0.7_SOLVENCY_DESIGN.md`):
-  * a credit line with daily interest;
-  * a funding rule that refuses a discretionary commitment the practice
-    cannot fund from cash and undrawn credit after what it already owes;
-  * financial distress recorded when an obligation already incurred
-    cannot be financed.
-* **V0.7c** (`0.7.0-dev.3`) evaluates V0.6c's two frozen LLM agents and
-  the baselines in those practices, paired with no action, over 75 runs
-  (`docs/benchmark/v07c-dev/`). No action was refused for funds. One
-  agent run drew on credit after terminating most of its staff.
+Every earlier scenario, save, golden reference and V0.6 result is
+unchanged. The economics are deliberately simple, not a validated model of
+practice finance.
 
-Every existing scenario, save and result is unchanged
-(`docs/benchmark/v07a-dev/`, `docs/benchmark/v07b-dev/`).
+It builds on V0.6 (`0.6.0`, the agent benchmark: a suite of five practice
+scenarios run in one command, each policy reported on six dimensions
+against no action, with no score or ranking, `docs/BENCHMARK_SUITE.md`),
+V0.5 (`0.5.0`, LLM agents: an external agent lets a language model on any
+OpenAI-compatible server manage the practice, `agents/llm/`,
+`docs/LLM_AGENT.md`), V0.4 (`0.4.0`, the agent evaluation harness:
+policies, built in or separate processes, compared reproducibly on
+identical scenarios and seeds, `dreamteam benchmark`, `docs/BENCHMARK.md`),
+V0.3 (`0.3.0`, the agent interface: an external program runs the practice
+through a deterministic JSON protocol, `docs/AGENT_PROTOCOL.md`, with a
+reference Python client) and V0.2 (`0.2.0`, practice design: staffing,
+rosters, reading allocation and teleradiology actions, a sustainable
+scenario and the T90 evaluation of your plan). Release notes:
+`docs/RELEASE_NOTES.md`. Everything is synthetic: patients, staff,
+referrers, rates and costs are illustrative assumptions, not operational
+data. DreamTeam simulates operations; it makes no clinical decisions and
+produces no clinical content.
 
 ## Quick start
 
@@ -382,12 +379,23 @@ are observations, not a ranking:
 * `greedy` spent $27,000–$34,000 over 90 days in every scenario.
 * Every LLM recording replays exactly, and every applicable T90 was NO GO.
 
-V0.7a (in development) adds suite version 2. It has the same five
-practices with radiologist overtime paid. V0.7b adds suite version 3: those
-practices with a $50,000 credit line, and with none, under the funding
-rule. Versions 1 and 2 and every earlier result are unchanged. V0.7c
-runs the two frozen LLM agents and the baselines on version 3's credit
-practices, 30 and 90 days; every recording replays exactly.
+V0.7 adds suite version 2, the same five practices with radiologist
+overtime paid, and version 3, those practices with a $50,000 credit line,
+and with none, under the funding rule. Version 1 and every earlier result
+are unchanged. V0.7c ran the two frozen LLM agents and the baselines on
+version 3's credit practices, 30 and 90 days (75 runs); every recording
+replays exactly. Its development findings, observations rather than a
+ranking:
+* Qwen3.6-35B-A3B intervened in every run, mostly by extending shifts,
+  generally improving reporting at a cost of $3,197–$20,304 of profit over
+  30 days.
+* Gemma 4 26B-A4B intervened comparatively little.
+* In one 90-day staffing-shortage run, Qwen gave notice to its
+  technologists and front desk "to avoid insolvency", drew up to $17,200
+  of credit, and ended $181,589 of profit, 867 exams and 1,450 lost
+  orders worse than no action. One run on one seed.
+* No action by any policy was refused for insufficient funds, so agents'
+  responses to funding refusals remain unobserved.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -418,7 +426,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.6, proposed V0.7, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.7, proposed V0.8, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -426,46 +434,57 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/BENCHMARK.md` | the agent evaluation harness and policy protocol (V0.4) |
 | `docs/BENCHMARK_SUITE.md` | the benchmark scenario suite, evaluation contract, development and held-out governance, the conservative baselines (V0.6) |
 | `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
+| `docs/V0.7_OVERTIME_DESIGN.md` | radiologist overtime costing (V0.7) |
+| `docs/V0.7_SOLVENCY_DESIGN.md` | financial solvency and cash constraints (V0.7) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.6)
+## Known limitations (V0.7)
 
-* **Development results only.** V0.6c covers five scenarios, three seeds
-  at 30 days and one at 90, two frozen LLM configurations and one prompt
-  version (`llm-agent-prompt/v2`). No claim of generality or significance
-  is made. A model's low intervention rate is neither good nor bad in
-  itself.
-* **No clinical validation.** Everything is synthetic. The scenarios do
-  not reproduce all the economics of real practices.
-* **No held-out benchmark execution.** The governance is defined; no
-  held-out set exists yet.
-* **Radiologist shift extensions cost nothing.** Radiologists are
-  salaried, so an extension adds no salary cost. This can materially
-  distort the apparent financial consequences of decisions. It is a
-  simulator-modeling limitation, not fixed in this release. V0.7a (in
-  development) pays it in suite version 2.
-* **No insolvency consequence.** Negative cash stops nothing. V0.7b (in
-  development) adds a credit line and a funding rule in suite version 3.
-  Even there, distress only refuses new commitments: nothing shuts down.
-  In V0.7c's 75 runs no action was refused for funds; the five practices'
-  liquidity leaves the funding rule mostly untested.
-* **Demand growth uses monthly factors,** not a dated shock.
+* **Development results only.** V0.7c covers five scenarios, two seeds at
+  30 days and one at 90, two frozen LLM configurations and one prompt and
+  settings set. No claim of generality or significance is made.
+* **No held-out benchmark evaluation,** and **no clinical validation.**
+  Everything is synthetic.
+* **Funding refusals were never observed with LLM agents.** No V0.7c
+  action was refused for insufficient funds; solvency accounting and
+  enforcement were tested by deterministic tests and the V0.7b baseline
+  characterization only.
+* **Simplified overtime economics:** straight time at the salary's hourly
+  rate, with the standard on-cost. The operations manager's overtime is
+  still unpaid.
+* **A simplified credit facility:** a fixed limit and simple daily
+  interest, no covenants or fees.
+* **Limited insolvency consequences.** Distress only refuses new
+  commitments: there is no shutdown and payroll is never missed.
+* **Demand growth uses monthly factors,** not a dated shock, and there is
+  no staff absence or turnover model.
 * **Some metrics are absent:** imaging capacity utilization and trends
   within a run.
 * **LLM agents:**
   * live inference is nondeterministic, so exact replay needs the
-    recordings;
-  * agents are trusted, not OS-sandboxed;
-  * stated reasons may contradict the submitted actions;
+    recorded decisions;
+  * agents are trusted processes, not OS-sandboxed;
+  * stated reasons may not match the submitted actions;
   * invalid proposals recur;
   * inference was not priced;
   * latency depends on server load.
 * **`conservative-v2`** is a declared rule, neither optimized nor
   validated.
+
+Details: `docs/RELEASE_NOTES.md` (V0.7.0),
+`docs/benchmark/v07c-dev/README.md` §10.
+
+### From V0.6
+
+* **No held-out benchmark execution.** The governance is defined; no
+  held-out set exists yet.
+* **In suite version 1, radiologist shift extensions cost nothing,** and
+  negative cash stops nothing. Versions 2 and 3 address these; version 1
+  is kept unchanged for comparability.
 
 Details: `docs/BENCHMARK_SUITE.md` §6, `docs/benchmark/v06c-dev/README.md`
 §5.

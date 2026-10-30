@@ -5,6 +5,197 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.7.0 — financial realism for practice-management simulation
+
+V0.7 makes the financial consequences of management decisions more
+faithful. Radiologist overtime now costs money, and a practice can run
+short of the means to finance new commitments. Both are **opt-in
+scenario settings**: every earlier scenario, save, golden reference,
+fingerprint and V0.6 benchmark result is unchanged, and suite
+`dreamteam-dev` version 1 (the V0.6 benchmark) is still available as it
+was. The new economics are deliberately simple. They are **not a
+validated model of radiology practice finance** (design notes
+`docs/V0.7_OVERTIME_DESIGN.md`, `docs/V0.7_SOLVENCY_DESIGN.md`).
+
+**Overtime (V0.7a):**
+1. **Radiologist overtime accounting.** Under the scenario policy
+   `radiologistOvertime: "salary_rate"`, an on-site salaried
+   radiologist's time on duty past the rostered end is paid. Omitted or
+   `"unpaid"` means the earlier behaviour.
+2. **Actual worked overtime.** The charge is for time actually on duty
+   past the rostered end, approved extensions and hold-overs alike. An
+   extension that is never worked (for example after a roster change)
+   costs nothing; idle presence inside one is paid.
+3. **Salary-derived cost.** The annual salary over 52 weeks of the
+   scenario's `weeklyOvertimeHours` (2,080 hours for the bundled
+   radiologists: $230.77 an hour), straight time, integer cents, floored
+   once per radiologist-day.
+4. **Benefits and payroll.** It accrues through the existing payroll with
+   the existing 25% on-cost and is paid at the next payroll. It appears in
+   `overtimeCostCents`, `approvedOvertimeCostCents`, wages and operating
+   profit. An `extend_shift` acceptance message carries the estimate.
+
+**Solvency (V0.7b):**
+5. **Opt-in financial solvency.** The scenario setting
+   `finance.solvency` (`creditLimitCents` 0 to $1,000,000,
+   `creditRateBP` 0 to 5,000) turns it on. Without it nothing below
+   exists or runs.
+6. **Cash and credit constraints.** Funding headroom is cash plus undrawn
+   credit, less current liabilities (accrued payroll, payables, severance
+   payable) and reserved commitments. Receivables and profit do not
+   count.
+7. **Credit interest and repayment.** A disbursement that would take cash
+   below zero draws on the line, up to its limit. Simple interest accrues
+   daily on the drawn balance (rounded half up) to payables, as its own
+   expense line. Cash above zero repays the line at midnight.
+8. **Financial distress accounting.** Cash below zero with the line fully
+   drawn is distress. The obligation is still paid (there is no missed
+   payroll and no shutdown); the shortfall is logged and reported.
+9. **Management-action affordability.** A hire, salary-raising allocation
+   change, teleradiology contract or paid extension must fit within the
+   funding headroom, or it is refused `insufficient_funds` (an ordinary
+   action result; the rest of its batch is `batch_rejected`). Cuts,
+   terminations and changes that commit nothing are never refused.
+   Preview, validation and application share one check, and accepted
+   commitments are reserved and released over their period.
+
+**Benchmark and compatibility:**
+10. **Historical compatibility.** Both settings are omitted from canonical
+    JSON when unset, compiled into configuration outside the state digest,
+    and encoded only when used. All golden references are identical, and
+    saves from V0.1 to V0.6 and from every V0.7 development build replay
+    with every digest verified.
+11. **Versioned benchmark suites.** `dreamteam-dev` version 1 is the V0.6
+    benchmark, unchanged. Version 2 is its five practices with paid
+    radiologist overtime (`-ot`). Version 3 is those practices with a
+    $50,000 credit line at 10% (`-ot-credit`) and with none
+    (`-ot-nocredit`). Each entry is checked by fingerprint.
+12. **Frozen-agent evaluation.** V0.7c ran V0.6c's two LLM configurations,
+    unchanged, with the deterministic baselines, on version 3's credit
+    practices (`docs/benchmark/v07c-dev/`), declared before it ran.
+13. **Recorded-decision replay.** All 30 V0.7c LLM runs replay from their
+    recordings without a model, byte for byte, including the ledger,
+    credit draws, repayments and interest.
+14. **Cross-platform reproducibility.** CI replays every committed
+    recording (V0.5, V0.6 and V0.7) on linux/amd64, linux/arm64 and
+    darwin/arm64 and compares the manifests byte for byte.
+
+**Characterization of the new economics** (deterministic baselines;
+`docs/benchmark/v07a-dev/`, `v07b-dev/`):
+* With no action, radiologists are held over 39–69 hours in 90 days, and
+  paid overtime lowers profit by $11,294–$19,788.
+* Under solvency, `noop` and `conservative-v2` never meet the funding
+  rule. `greedy` meets it in financial pressure with a $50,000 line (3
+  refusals, one draw of $12,584) and in every practice with no credit (65
+  refusals in 14 of 15 runs). One distress was recorded: $1,981, recovered
+  the same day.
+* The five practices generally have enough liquidity that solvency is not
+  their dominant management problem. No scenario was made to force
+  insolvency.
+
+**Development findings** (V0.7c, `docs/benchmark/v07c-dev/README.md`).
+These are observations from development seeds, not a ranking and not a
+claim about either model in general.
+* **Scope:** 75 runs, all completed with no failure or rerun:
+  * five scenarios (financial pressure, reporting backlog, demand growth,
+    staffing shortage, stable), version 3 with credit;
+  * `noop`, `greedy`, `conservative-v2` and two frozen LLM configurations
+    (Qwen3.6-35B-A3B and Gemma 4 26B-A4B, llm-agent 2, prompt
+    `llm-agent-prompt/v2`, the V0.6c settings);
+  * 30 days on seeds 41601–41602 (50 runs) and 90 days on seed 41701 (25
+    runs);
+  * every comparison paired with no action from the same starting state;
+    financial and operational outcomes reported together.
+* **Qwen intervened frequently,** in all 15 of its runs, mostly by
+  extending shifts. Over 30 days it reduced profit by $3,197–$20,304
+  against no action, and lowered the lowest cash in every run, while
+  generally improving TAT and breaches.
+* **Gemma intervened comparatively little.** Over 30 days it submitted
+  actions in 4 of 10 runs, all teleradiology contracts. Over 90 days it
+  made no change in financial pressure or stable, and extended shifts in
+  demand growth (27) and staffing shortage (53).
+* **`conservative-v2`'s financial guardrails** kept it from acting except
+  in the stable practice: one raise not yet in effect at 30 days, and two
+  raises over 90 days (profit −$2,712, breaches −12).
+* **Every pairing that improved service lowered profit.** No pairing
+  improved service and raised profit.
+* **One development observation, staffing shortage, 90 days, Qwen.** It
+  hired two technologists, then from 2026-11-27 gave notice to them and
+  to every other technologist and the front desk. Its recorded reasons
+  were "Cash is $0 and critically low; immediate cost reduction is
+  required to avoid insolvency" and "This is a survival move". It drew up
+  to $17,200 on the credit line ($14 of interest). Against no action:
+  operating profit −$181,589, 867 fewer exams completed, 1,450 more
+  orders lost. No recorded reason in that run mentions the credit line,
+  although the agent's observation carries it. This is one run on one
+  seed.
+* **Repeated invalid proposals.** Every refusal came at the agents' own
+  validation step, for timing or form. The same invalid action was
+  proposed again up to 15 times in a run (Qwen) and 27 times (Gemma).
+* **Replay.** Every LLM run replays without the model, byte-identical to
+  the live run, and the replay manifests are identical on linux/arm64 and
+  linux/amd64.
+
+**Solvency: what V0.7 does not show.** No evaluated V0.7c policy action
+was refused for insufficient funds, in any of the 75 runs. The agents'
+responses to funding refusals therefore remain unobserved. Solvency
+accounting and enforcement were tested separately, through deterministic
+tests and the V0.7b baseline characterization. Nothing in this release
+validates LLM behaviour under funding refusals.
+
+**Known limitations:**
+* **Development seeds only;** no held-out benchmark evaluation; no
+  clinical validation. Everything is synthetic.
+* **Two frozen LLM configurations,** with one prompt and one set of
+  settings.
+* **Live inference is nondeterministic.** Exact replay requires the
+  recorded decisions.
+* **External agent processes are trusted,** not sandboxed.
+* **Simplified overtime economics:** straight time at the salary's hourly
+  rate, the same on-cost as all pay, no premiums or call pay.
+* **No manager overtime accounting.** The operations manager's overtime
+  remains unpaid.
+* **A simplified credit facility:** a fixed limit and simple daily
+  interest; no covenants, fees, scoring or rate changes. The funding rule
+  reserves only near-term committed costs.
+* **No automatic practice shutdown,** and limited insolvency
+  consequences: distress refuses new commitments and nothing else.
+  Payroll is never missed.
+* **Limited demand trend modelling:** monthly factors, no dated shocks.
+* **No staff absence or turnover model.**
+* **Repeated invalid LLM proposals,** refused by validation but recurring.
+* **Stated reasons and submitted actions may not match.** A recorded
+  reason is evidence of what an agent said, not of why it acted.
+* **No inference pricing was configured.** Tokens and latency are
+  reported instead, and latency depends on server load.
+
+**Compatibility.**
+* No change to mechanics, randomness, actions, accounting, evaluation or
+  scoring for any existing scenario. The V0.7 behaviour exists only in
+  the new scenario variants.
+* All golden references give identical outcomes, and suite version 1's
+  fingerprints are unchanged.
+* Saves from V0.1 to V0.6 and from 0.7.0-dev.1 to 0.7.0-dev.3 replay with
+  every digest verified. 0.7.0-dev.3 is registered as batch mode
+  `v0.7_dev3`.
+* The LLM agent, its prompt and settings, the policy and agent protocols,
+  and the contract report are unchanged. Every committed recording
+  replays.
+
+**Validation.**
+* The full Go test suite passes, and the race detector finds no race (with
+  `-timeout 90m` for the slow packages).
+* vet and gofmt are clean, and the Python agent tests pass.
+* Every session fixture replays, and every golden reference is identical.
+* Suite verify and reproduce pass for the V0.7 suites.
+* Every recorded LLM decision, V0.5 to V0.7, replays byte for byte.
+* Cross-builds succeed for five targets, and the committed seed guards
+  pass.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
+---
+
 ## V0.6.0 — a reproducible benchmark for practice-management agents
 
 DreamTeam is now a reproducible benchmark for radiology practice-management

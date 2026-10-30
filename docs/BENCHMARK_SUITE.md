@@ -1,6 +1,7 @@
 # DreamTeam benchmark scenario suite and evaluation contract (V0.6)
 
-Status: released in V0.6.0 (V0.6a–V0.6c). The suite is
+Status: released in V0.6.0 (V0.6a–V0.6c), with suite versions 2 and 3
+released in V0.7.0 (V0.7a–V0.7c). The suite is
 `dreamteam-dev`, version 1
 ([benchmark/suite/dreamteam-dev-1.json](benchmark/suite/dreamteam-dev-1.json));
 the contract is `dreamteam.benchmark-contract/v1` (§3). V0.6a defined them;
@@ -8,10 +9,11 @@ V0.6b runs a suite in one command and reports it under the contract (§9),
 adds a financially conservative baseline (§7) and a demand diagnostic
 (§8). V0.6c adds a second conservative baseline (§7.2) and evaluates two
 frozen LLM agents across the suite
-([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). V0.7a (0.7.0-dev.1,
-in development) adds suite version 2 with paid radiologist overtime (§10),
-and leaves version 1 unchanged. V0.7b (0.7.0-dev.2, in development) adds
-suite version 3, with a credit line and a funding rule (§11). Every result here
+([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). V0.7a adds suite
+version 2 with paid radiologist overtime (§10), and leaves version 1
+unchanged. V0.7b adds suite version 3, with a credit line and a funding
+rule (§11). V0.7c evaluates two frozen LLM agents and the baselines on
+version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). Every result here
 is a development result on synthetic practices. It is not clinical
 validation, and it ranks no model or policy.
 
@@ -301,8 +303,8 @@ them follow.
   Radiologists are salaried, so the simulator pays no overtime for them.
   An agent that extends their shifts gains service for nothing. This can
   materially distort the apparent financial consequences of management
-  decisions. It is a simulator-modeling limitation, not fixed in V0.6.0.
-  **V0.7a** adds suite version 2 (§10), which pays radiologist time on
+  decisions. It is a simulator-modeling limitation of version 1, kept
+  unchanged for comparability. **V0.7a** adds suite version 2 (§10), which pays radiologist time on
   duty past the rostered end. Version 1 keeps the historical economics.
   Even in version 2, an extension adds on-site presence (contrast
   supervision), not reading blocks.
@@ -311,7 +313,8 @@ them follow.
   suite version 3 (§11), with a credit line, interest and a funding rule
   for discretionary commitments. Even there, distress has no consequence
   beyond refusing new commitments: payroll is always paid and nothing
-  shuts down.
+  shuts down. In V0.7c's 75 runs no action was refused for insufficient
+  funds, so agents' responses to funding refusals remain unobserved.
 * **Demand growth uses monthly factors,** not an explicit dated shock
   (§2.3, §2.6).
 * **Some important metrics are absent** (§3): imaging capacity
@@ -713,7 +716,7 @@ compares every file, the suite files included. Ordinary results gain no
 
 Nothing is combined: no score, weighting, leaderboard or ranking.
 
-## 10. Suite version 2: radiologist overtime paid (V0.7a, in development)
+## 10. Suite version 2: radiologist overtime paid (V0.7a, released in V0.7.0)
 
 `dreamteam-dev` version 2
 ([benchmark/suite/dreamteam-dev-2.json](benchmark/suite/dreamteam-dev-2.json))
@@ -747,7 +750,7 @@ equivalent ([V0.7_OVERTIME_DESIGN.md](V0.7_OVERTIME_DESIGN.md)).
 * Recorded LLM decisions from V0.5 and V0.6 replay against version 1
   only. Their prompts were built from version 1's observations.
 
-## 11. Suite version 3: financial solvency (V0.7b, in development)
+## 11. Suite version 3: financial solvency (V0.7b, released in V0.7.0)
 
 `dreamteam-dev` version 3
 ([benchmark/suite/dreamteam-dev-3.json](benchmark/suite/dreamteam-dev-3.json))

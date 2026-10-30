@@ -29,14 +29,13 @@ suite runs and the contract report, and a fourth built-in policy,
 fifth, `conservative-v2` (§7.2 there), and a frozen-agent comparison
 ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)) whose recordings CI
 replays. Released in V0.6.0 with the policy protocol unchanged. V0.7a
-(0.7.0-dev.1, in development) adds suite version 2 with paid radiologist
-overtime ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10). V0.7b
-(0.7.0-dev.2, in development) adds suite version 3, with a credit line and
-a funding rule (§11 there). A refused commitment is an ordinary action
-result (`insufficient_funds`). V0.7c (0.7.0-dev.3, in development)
-evaluates the frozen LLM agents and the baselines on version 3
-([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)); CI replays its
-recordings. The harness and the policy protocol are
+(0.7.0-dev.1) adds suite version 2 with paid radiologist overtime
+([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10). V0.7b (0.7.0-dev.2) adds
+suite version 3, with a credit line and a funding rule (§11 there). A
+refused commitment is an ordinary action result (`insufficient_funds`).
+V0.7c (0.7.0-dev.3) evaluates the frozen LLM agents and the baselines on
+version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)); CI
+replays its recordings. Released in V0.7.0. The harness and the policy protocol are
 unchanged. Ordinary benchmarks and their files are
 unchanged.
 

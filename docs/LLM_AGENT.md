@@ -17,7 +17,10 @@ models ([benchmark/v05c-dev/](benchmark/v05c-dev/README.md)); its one
 change is that `memoryDecisions` 0 turns the memory off (§6). V0.6c ran
 it unchanged again, with two of those models, across the V0.6 scenario
 suite ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Released
-unchanged in V0.6.0.
+unchanged in V0.6.0. V0.7c ran it unchanged once more, with the same two
+models, on the V0.7 practices with paid overtime and a credit line
+([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). Released unchanged
+in V0.7.0.
 
 ```
 dreamteam benchmark run CONFIG
@@ -641,7 +644,7 @@ and run record.
   memory off), on linux/amd64, linux/arm64 and darwin/arm64, comparing the
   manifests.
 
-## 12. Known limitations (V0.6)
+## 12. Known limitations (V0.7)
 
 * **Bounded memory, no planning.** The memory is a short record of the
   agent's own decisions and what followed them. There is no plan, no goal
@@ -694,5 +697,22 @@ and run record.
   "$150k/month". Read the submitted batches, not the reason.
 * **Invalid proposals recur** (V0.6c). Qwen repeated a refused proposal up
   to 18 times in a 90-day run.
-* **One prompt version.** Every V0.5c and V0.6 result used
+* **One prompt version.** Every V0.5c, V0.6 and V0.7 result used
   `llm-agent-prompt/v2` with the V0.5c settings.
+* **The prompt was not changed for V0.7** (V0.7c). The summary
+  observation carries the overtime cost and, under solvency, the
+  financing block (credit limit, amount drawn and available, funding
+  headroom), because the engine reports them. Nothing directs the model
+  to them. In V0.7c one recorded reason in 30 runs mentions the credit
+  line.
+* **Funding refusals are unobserved** (V0.7c). No action was refused
+  `insufficient_funds` in any V0.7c run. The agent keeps such a refusal in
+  its memory like any other, but how a model responds to one has not been
+  observed.
+* **Stated intent and consequences** (V0.7c). In one 90-day run Qwen gave
+  notice to its technologists and front desk "to avoid insolvency" and
+  ended $181,589 of profit, 867 exams and 1,450 lost orders worse than no
+  action. A reason states intent; it is not evidence that the action
+  serves it.
+* **Invalid proposals recur** (V0.7c): up to 15 repeats in a run for Qwen
+  and 27 for Gemma.

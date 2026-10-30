@@ -18,7 +18,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
-| **V0.7** (in development: V0.7a, radiologist overtime costing, and V0.7b, financial solvency, accepted; V0.7c, the frozen-agent evaluation, 0.7.0-dev.3, results awaiting owner review; owner decision 2026-10-29) | Simulator realism: the financial consequences of management actions, then re-characterization and frozen-agent evaluation (§7a) | V0.6 benchmark |
+| **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
+| **V0.8** (proposed, not approved) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -654,7 +655,7 @@ The finding kept: the five practices generally have enough liquidity that
 solvency is not their dominant management problem. No scenario is made to
 force insolvency.
 
-**V0.7c (0.7.0-dev.3), in development** (owner decision 2026-10-29). The
+**V0.7c (0.7.0-dev.3)** (owner decision 2026-10-29). The
 last development evaluation before V0.7.0:
 * V0.6c's two frozen LLM agents (Qwen3.6-35B-A3B, Gemma 4 26B-A4B), with
   the V0.6c prompt, memory and settings unchanged;
@@ -666,8 +667,7 @@ last development evaluation before V0.7.0:
   ([plan](benchmark/v07c-dev/PLAN.md));
 * comparisons paired within V0.7 only; V0.6 results are context.
 
-**V0.7c results** ([README](benchmark/v07c-dev/README.md)), awaiting owner
-review:
+**V0.7c results** ([README](benchmark/v07c-dev/README.md)):
 * 75 of 75 runs completed, none rerun;
 * every LLM run replays without the model, byte-identical across
   linux/arm64 and linux/amd64;
@@ -694,6 +694,21 @@ Not approved in V0.7c:
 
 The agents need not perform well: poor financial decisions are legitimate
 findings.
+
+**V0.7c accepted; V0.7.0 released** (owner, 2026-10-30; V0.7c at ad6d25c,
+CI run 41015378407 green). Every release criterion was met. The release
+notes record, as development observations:
+* Qwen improved service but frequently reduced profit;
+* in one 90-day staffing-shortage run, Qwen's staffing changes, stated as
+  avoiding insolvency, left both financial and operational outcomes far
+  worse than no action;
+* solvency constraints remain untested by agent behaviour: no V0.7c
+  action was refused for insufficient funds. Solvency accounting and
+  enforcement are shown by deterministic tests and the baseline
+  characterization, not by LLM responses to refusals.
+
+No V0.7d. No model retuning or further financial scenarios before the
+release.
 
 Not approved in V0.7a: solvency constraints, new staffing mechanics,
 demand shocks, agent prompt changes, retuning the baselines, or rerunning
@@ -723,6 +738,50 @@ The owner suggests beginning with the first two, but only after reviewing
 their impact on historical compatibility and deterministic replay. No
 further model experiments are planned until the simulator's economics are
 improved. Nothing here is implemented in V0.6.0.
+
+## 7b. V0.8 — agent decision quality (proposed, not approved)
+
+The owner's recommendation after V0.7c. With the simulator's economics
+improved, the next weakness is the agents' ability to make coherent
+management decisions. The V0.7c staffing-shortage run is the example: the
+agent took actions that undermined the objective it said it was pursuing.
+
+| Milestone | Proposed scope |
+|---|---|
+| V0.8a | Decision/rationale consistency evaluation |
+| V0.8b | Financial decision-quality and refusal-response tests |
+| V0.8c | Prospective agent evaluation |
+| V0.8.0 | Release |
+
+**V0.8a would distinguish three things:**
+1. **Stated intent:** what the agent says it is trying to accomplish.
+2. **Submitted decision:** what it actually proposes.
+3. **Observed consequence:** what happens after the actions execute.
+
+| Agent statement | Submitted action | Potential finding |
+|---|---|---|
+| "Reduce staffing expenses" | hire additional staff | intent/action contradiction |
+| "Preserve liquidity" | commit substantial new spending | possible financial inconsistency |
+| "Cancel teleradiology" | no cancellation submitted | intent/action mismatch |
+| "Avoid insolvency" | terminate revenue-generating staff | requires consequence analysis |
+| "Wait for scheduled coverage" | no action | intent/action agreement |
+
+* An action is not labelled irrational because its eventual outcome was
+  unfavourable. That needs a separate, outcome-based analysis.
+* The aim is a reproducible evidence framework for identifying
+  contradictions, not an LLM judge assigning subjective quality scores.
+* The suggested start is a read-only analysis of the existing recorded
+  decisions (V0.5c–V0.7c), before any new agent experiment.
+
+**Other candidate directions** (not scheduled):
+* funding-refusal response evaluation;
+* dated demand shocks;
+* staff absences and turnover;
+* additional benchmark scenarios;
+* held-out benchmark governance in practice (a held-out set and its
+  execution).
+
+Nothing in this section is approved or implemented in V0.7.0.
 
 ## 8. Testing strategy (all versions)
 
