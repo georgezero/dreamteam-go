@@ -7,6 +7,132 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.8a — agent decision consistency and evidence analysis (0.8.0-dev.1)
+
+Owner decision 2026-10-30: V0.7.0 accepted and closed (08ae85f, tag
+v0.7.0, CI run 41056460493). V0.8a is authorized as a read-only,
+deterministic framework for analysing historical agent decisions and their
+stated reasons. It measures whether an explanation is consistent with the
+actions, not whether the decisions were good. There is no new LLM run, no
+simulator change, no agent change and no LLM judge.
+
+**Built:**
+* **`analysis/evidence/decision_evidence.py`** (analyzer `decision-evidence
+  1`, standard-library Python), with its tests
+  `analysis/evidence/test_decision_evidence.py` (42).
+  * **Inputs:** the committed recordings, and the deterministic replays CI
+    already runs.
+  * **Prompts:** it rebuilds every prompt and memory text from the replay
+    transcript with the agent's own functions, read only, and checks both
+    against the recorded SHA-256.
+  * **Rules:** it applies six rules with three statuses.
+  * **Outputs:** `evidence.json`, `traces.jsonl` and `tables.md`.
+* **The contract `dreamteam.decision-evidence/v1`, the evidence inventory,
+  the coverage matrix, the rules and the abstention flags:**
+  `docs/DECISION_EVIDENCE.md`.
+* **The corpus** (`docs/benchmark/v08a-dev/corpus.json`): V0.5c, V0.6c and
+  V0.7c primary, V0.5a and V0.5b secondary. 90 recordings, 3,972 decision
+  points.
+* **The results:** `docs/benchmark/v08a-dev/` (README, `evidence.json`,
+  `tables.md`).
+* **CI** runs the tests and the analysis twice after the replays. It
+  compares the output with itself and with the committed evidence, and
+  compares the evidence and the traces across the three platforms.
+* **The version** is 0.8.0-dev.1. It registers 0.7.0 for historical replay
+  (batch mode `v0.7.0`, `testdata/sessions/mini-seed52-v070`,
+  `internal/session/v070_test.go`).
+
+**Evidence inventory:**
+* Every llm-agent 2 recording (V0.5b–V0.7c) records the same fields: the
+  reason and proposed actions of the final parsed reply, validation,
+  refusals, errors, outcome, batches, digests, and the prompt and memory
+  SHA-256.
+* **Prompts:** 3,965 of 3,965 rebuilt and verified.
+* **V0.5a** (llm-agent 1) has no memory or refusal fields, and its prompt
+  cannot be rebuilt.
+* **Not in the repository:** earlier attempts' replies.
+* **Details requests:** none was made in any recording.
+
+**Results** (DECISION_EVIDENCE §6, the report §2):
+
+| Rule | Statements checked | Consistent | Supported | Unresolved | Insufficient evidence |
+|---|---|---|---|---|---|
+| Explicit action omitted | 525 | 480 | 5 | 40 | 0 |
+| Explicit opposite action | 672 | 669 | 0 | 3 | 0 |
+| Financial amount mismatch | 235 | 206 | 3 | 26 | 0 |
+| Repeated invalid proposal | 342 | 235 | 107 | 0 | 0 |
+| Stated action not executed | 352 | 307 | 45 | 0 | 0 |
+| Factual observation mismatch | 5,139 | 5,101 | 27 | 2 | 9 |
+
+* **Opposite actions:** none was found.
+* **Amounts:** the V0.6c retainer misread ($150k for `monthlyRetainerCents`
+  150000) is found mechanically, as cents read as dollars.
+* **Stated actions that failed** were refused by validate, or not submitted
+  because another action in the reply was refused. None was refused when
+  applied.
+* **Repeats:** most repeats at a later point (146 of 159, memory on)
+  happened while the refusal was in the memory shown. These are patterns
+  only, not a claim about why.
+* **The V0.7c staffing-shortage run** shows no omitted, opposite or
+  unexecuted commitment. It shows one payroll amount and one weekday that
+  disagree with the prompt.
+
+No count is a measure of model quality.
+
+**Quality gates:**
+
+Run on linux/amd64 unless noted:
+* **Focused tests:** the analysis's tests (42) pass, including:
+  * each rule with negative controls: similar but distinct targets,
+    qualified and scoped statements of no action, subsets and earlier
+    values;
+  * cents read as dollars;
+  * missing observation and missing reason;
+  * the V0.5a format;
+  * stable identifiers and ordering;
+  * no change to any input, and no socket opened.
+* **Go:**
+  * full default suite: all 10 packages pass;
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Python:** agent tests (28) pass.
+* **Historical replay:** every fixture, including the new
+  `mini-seed52-v070` (0.7.0, batch mode `v0.7.0`), replays with every
+  digest verified.
+* **Golden references:** outcomes identical.
+* **Benchmark verify and reproduce:** 62 of 62, 0 failed. They cover the
+  V0.4 CI benchmark (T90 recomputed), the V0.6a and V0.6b suites, the
+  V0.7a and V0.7b suite runs, and all 26 recorded-LLM replays (V0.5a,
+  V0.5b, V0.5c a–d, ten V0.6c, ten V0.7c).
+* **The analysis:** run twice, its evidence, traces and tables are
+  byte-identical, and they equal the committed `evidence.json` and
+  `tables.md`. It made no model call.
+* **Five cross-builds:** all pass.
+* **CI:** green on linux/amd64, linux/arm64 and darwin/arm64, with the
+  cross-platform comparison of the decision evidence and traces.
+
+No clinical suite or live LLM evaluation was run.
+
+**No change to:**
+* simulator behaviour, actions, scenarios or scoring;
+* the agents, their prompts or their settings;
+* any recording, session, golden reference or benchmark result.
+
+No model was contacted.
+
+**Known limitations:**
+* **Calibration:** the rules were calibrated on this corpus and reviewed
+  by the author, not independently, and no held-out recordings exist.
+* **Reach:** the patterns are narrow. Recall is traded for precision, so
+  a hedge or a revision blocks a statement.
+* **Coverage:**
+  * only the final parsed reply is checked;
+  * observation checks compare with the prompt's summary;
+  * repeat identity uses the engine's message with dates normalized.
+* **Consequences** are next-day observations, never attributed.
+
+---
+
 ## V0.7.0 — release: financial realism for practice-management simulation
 
 Owner decision 2026-10-30:

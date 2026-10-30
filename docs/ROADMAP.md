@@ -19,7 +19,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
-| **V0.8** (proposed, not approved) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
+| **V0.8** (in development: V0.8a, `0.8.0-dev.1`, authorized by the owner 2026-10-30; V0.8b and V0.8c proposed) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -739,19 +739,39 @@ their impact on historical compatibility and deterministic replay. No
 further model experiments are planned until the simulator's economics are
 improved. Nothing here is implemented in V0.6.0.
 
-## 7b. V0.8 — agent decision quality (proposed, not approved)
+## 7b. V0.8 — agent decision quality (V0.8a in development)
 
 The owner's recommendation after V0.7c. With the simulator's economics
 improved, the next weakness is the agents' ability to make coherent
 management decisions. The V0.7c staffing-shortage run is the example: the
 agent took actions that undermined the objective it said it was pursuing.
 
-| Milestone | Proposed scope |
-|---|---|
-| V0.8a | Decision/rationale consistency evaluation |
-| V0.8b | Financial decision-quality and refusal-response tests |
-| V0.8c | Prospective agent evaluation |
-| V0.8.0 | Release |
+| Milestone | Scope | Status |
+|---|---|---|
+| V0.8a | Deterministic decision-evidence analysis | authorized 2026-10-30; built (0.8.0-dev.1), awaiting owner review |
+| V0.8b | Financial decision quality and refusal-response evaluation | proposed |
+| V0.8c | Prospective agent evaluation | proposed |
+| V0.8.0 | Release | pending |
+
+**V0.8a as authorized** (owner, 2026-10-30, after accepting V0.7.0). It
+measures whether an agent's explanation is consistent with its actions,
+not whether its decisions were good. It is a read-only, deterministic
+analysis of the existing recordings, with no new model run, no simulator
+change and no change to the agents.
+* **Five stages are kept apart:** intent (the recorded reason), proposal,
+  validation, execution and consequence.
+* **Six rules:** explicit action omitted, explicit opposite action,
+  financial amount mismatch, repeated invalid proposal, stated action not
+  executed, factual observation mismatch.
+* **Three statuses:** supported, unresolved, insufficient evidence. The
+  analysis abstains whenever a statement is not explicit.
+* **Built:** the contract `dreamteam.decision-evidence/v1`
+  ([DECISION_EVIDENCE.md](DECISION_EVIDENCE.md)) and the analysis of the
+  V0.5a–V0.7c recordings
+  ([docs/benchmark/v08a-dev/](benchmark/v08a-dev/README.md)).
+* **Rejected:** no LLM judge, and no verdict on financial wisdom.
+
+The owner's proposal that preceded it:
 
 **V0.8a would distinguish three things:**
 1. **Stated intent:** what the agent says it is trying to accomplish.
@@ -771,7 +791,8 @@ agent took actions that undermined the objective it said it was pursuing.
 * The aim is a reproducible evidence framework for identifying
   contradictions, not an LLM judge assigning subjective quality scores.
 * The suggested start is a read-only analysis of the existing recorded
-  decisions (V0.5c–V0.7c), before any new agent experiment.
+  decisions (V0.5c–V0.7c), before any new agent experiment. This is
+  V0.8a.
 
 **Other candidate directions** (not scheduled):
 * funding-refusal response evaluation;
@@ -781,7 +802,8 @@ agent took actions that undermined the objective it said it was pursuing.
 * held-out benchmark governance in practice (a held-out set and its
   execution).
 
-Nothing in this section is approved or implemented in V0.7.0.
+Only V0.8a is authorized. Nothing in this section was implemented in
+V0.7.0.
 
 ## 8. Testing strategy (all versions)
 

@@ -26,6 +26,12 @@ Every earlier scenario, save, golden reference and V0.6 result is
 unchanged. The economics are deliberately simple, not a validated model of
 practice finance.
 
+In development, not released: V0.8a (`0.8.0-dev.1`), a read-only,
+deterministic analysis of whether the recorded LLM agents' stated reasons
+agree with what they proposed and what was executed
+(`docs/DECISION_EVIDENCE.md`, `docs/benchmark/v08a-dev/`). It uses no
+model and changes no simulator behaviour.
+
 It builds on V0.6 (`0.6.0`, the agent benchmark: a suite of five practice
 scenarios run in one command, each policy reported on six dimensions
 against no action, with no score or ranking, `docs/BENCHMARK_SUITE.md`),
@@ -426,7 +432,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.7, proposed V0.8, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.7, V0.8 in development, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -436,6 +442,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
 | `docs/V0.7_OVERTIME_DESIGN.md` | radiologist overtime costing (V0.7) |
 | `docs/V0.7_SOLVENCY_DESIGN.md` | financial solvency and cash constraints (V0.7) |
+| `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions (V0.8a, in development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |

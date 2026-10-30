@@ -156,6 +156,24 @@ jobs:
             ./dt benchmark verify "llm-v07c-$n" | tail -1
             cp "llm-v07c-$n/manifest.json" "out/llm-v07c-$n-manifest.json"
           done
+      - name: Decision evidence
+        # V0.8a: the read-only analysis of every recorded LLM decision
+        # replayed above (docs/benchmark/v08a-dev/corpus.json), without any
+        # model: its unit tests, then the analysis twice, compared with
+        # itself and with the committed evidence. The evidence and the
+        # decision traces are compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -B -m unittest discover -s analysis/evidence 2>&1 | tail -1
+          python3 -I -B analysis/evidence/decision_evidence.py --corpus docs/benchmark/v08a-dev/corpus.json --replays . --out evidence
+          python3 -I -B analysis/evidence/decision_evidence.py --corpus docs/benchmark/v08a-dev/corpus.json --replays . --out evidence-again > /dev/null
+          cmp evidence/evidence.json evidence-again/evidence.json
+          cmp evidence/traces.jsonl evidence-again/traces.jsonl
+          cmp evidence/evidence.json docs/benchmark/v08a-dev/evidence.json
+          cmp evidence/tables.md docs/benchmark/v08a-dev/tables.md
+          cp evidence/evidence.json out/decision-evidence.json
+          cp evidence/traces.jsonl out/decision-traces.jsonl
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
