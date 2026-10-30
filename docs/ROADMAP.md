@@ -18,7 +18,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.4** (released, `v0.4.0`: the agent evaluation harness, V0.4a and V0.4b, by the owner's release decision 2026-10-26) | Agent evaluation harness: policies, built in or external processes over stdio, compared on identical scenarios and seeds through the agent protocol with the seed withheld; decisions and outcomes recorded, replay verified, reruns reproduced ([BENCHMARK.md](BENCHMARK.md)). The financial-management scope formerly planned here (§5) awaits a new slot | V0.3 agent interface |
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
-| **V0.7** (in development: V0.7a, radiologist overtime costing, and V0.7b, financial solvency, accepted; V0.7c, the frozen-agent evaluation, 0.7.0-dev.3; owner decision 2026-10-29) | Simulator realism: the financial consequences of management actions, then re-characterization and frozen-agent evaluation (§7a) | V0.6 benchmark |
+| **V0.7** (in development: V0.7a, radiologist overtime costing, and V0.7b, financial solvency, accepted; V0.7c, the frozen-agent evaluation, 0.7.0-dev.3, results awaiting owner review; owner decision 2026-10-29) | Simulator realism: the financial consequences of management actions, then re-characterization and frozen-agent evaluation (§7a) | V0.6 benchmark |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -665,6 +665,15 @@ last development evaluation before V0.7.0:
   days (25 runs), both declared before stage A
   ([plan](benchmark/v07c-dev/PLAN.md));
 * comparisons paired within V0.7 only; V0.6 results are context.
+
+**V0.7c results** ([README](benchmark/v07c-dev/README.md)), awaiting owner
+review:
+* 75 of 75 runs completed, none rerun;
+* every LLM run replays without the model, byte-identical across
+  linux/arm64 and linux/amd64;
+* no action was refused for funds;
+* one run (Qwen, staffing shortage, 90 days) drew on credit after
+  terminating its technologists and front desk.
 
 Not approved in V0.7c:
 * new low-cash or longer-horizon scenarios;

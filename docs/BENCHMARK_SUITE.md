@@ -785,6 +785,10 @@ is version 2 with a solvency setting
   encodes exactly as its version 2 run.
 * The V0.7b characterization compares the versions paired by practice,
   seed and policy ([benchmark/v07b-dev/](benchmark/v07b-dev/PLAN.md)).
+* The V0.7c evaluation runs the frozen LLM agents and the baselines on the
+  five `-credit` entries ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)).
+  In its 75 runs no action was refused `insufficient_funds`, and one run
+  drew on the credit line.
 
 **What it does not model:** shutdown, missed payroll, loan products,
 covenants or rate changes (V0.7_SOLVENCY_DESIGN §12).

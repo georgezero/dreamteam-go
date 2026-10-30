@@ -34,7 +34,78 @@ Owner decision 2026-10-29:
 * **Version 0.7.0-dev.3:** no engine change. 0.7.0-dev.2 is registered for
   replay (`mini-seed52-v072`, batch mode `v0.7_dev2`).
 
-**Results:** to follow, after both stages.
+**Results** ([README](benchmark/v07c-dev/README.md), tables per stage):
+* **Runs:** 75 of 75 completed on the Pi, with no failure and no rerun:
+  * stage A: 50 runs in 1 h 26 min;
+  * stage B: 25 runs in 3 h 59 min.
+* **Starting states** were identical across the five policies of every
+  entry and seed.
+* **Funding:** no action by any policy was refused `insufficient_funds`.
+  * One run of 75 drew on the credit line: Qwen, staffing shortage, 90
+    days. At most $17,200 was drawn, with $14 interest and no unfunded
+    shortfall.
+  * This repeats V0.7b's finding: the practices' liquidity leaves the
+    funding rule mostly unexercised.
+* **Baselines:**
+  * `greedy`: lower profit with better TAT throughout ($30–$1,387 over 30
+    days, $29,022–$33,550 over 90).
+  * `conservative-v2`: changes only in stable.
+* **Qwen** acted in all 15 runs, mostly by extending shifts (14 runs).
+  Paired with no action:
+  * every run lowered profit and lowest cash;
+  * all but one lowered breaches.
+  * In stable it executed 19, 9 and 5 actions, for profit −$9,401,
+    −$4,637 and −$51,560.
+* **Qwen, staffing shortage, 90 days:**
+  * It hired two technologists, then from 11-27 gave notice to them and
+    to every other technologist and the front desk. Its recorded reasons
+    were "Cash is $0 and critically low … avoid insolvency" and "This is a
+    survival move".
+  * Paired with no action: profit −$181,589, exams −867, lost orders
+    +1,450.
+  * No reason in that run mentions the credit line in the summary.
+* **Gemma** changed nothing in financial pressure or stable. It used
+  teleradiology, and in stage B extended shifts in demand growth (27) and
+  staffing shortage (53). Its paired profit was $0 to −$22,096.
+* **Every pair that improved service lowered profit.** No pair improved
+  service and raised profit.
+* **Refusals:** every refusal was at the agents' validate step, for timing
+  or form. Repeated invalid proposals reached 15 (Qwen) and 27 (Gemma)
+  in a run. There were no agent infrastructure errors.
+* **Replay:**
+  * all 30 LLM runs replay without a model;
+  * the replays are byte-identical to the live runs (arm64 live, amd64
+    replay): decisions, sessions and results, with the ledger and credit;
+  * replay verify: 68 checks per stage A entry, 41 per stage B entry, 0
+    failed, on both platforms;
+  * reproduce: 47 checks per stage A suite and 29 per stage B suite, 0 failed, on linux/arm64 (Pi) and linux/amd64;
+  * the ten replay manifests are byte-identical on linux/arm64 and
+    linux/amd64.
+* **Live results:** `verify` on the Pi: stage A 464 checks, stage B 239,
+  0 failed.
+
+**Gates:**
+* `go test ./...` on linux/amd64: 10 packages pass. That includes:
+  * golden references identical under 0.7.0-dev.3;
+  * every historical session replay, `v071` and `v072` included;
+  * the committed configurations and seed guards.
+* `go test -race -timeout 90m ./...`: 10 packages pass.
+* `go vet` (default, `calibration` and `acceptance` tags) and `gofmt`:
+  clean.
+* Cross-builds: linux/amd64, linux/arm64, darwin/arm64, darwin/amd64 and
+  windows/amd64.
+* Python tests pass (28).
+* CI replays the ten V0.7c configurations on linux/amd64, linux/arm64 and
+  darwin/arm64 and compares their manifests.
+* The tagged clinical evaluation suites were not rerun (unaffected), and
+  no historical LLM experiment was rerun.
+
+**Limitations:**
+* two models, one prompt, three seeds;
+* the funding rule bound nowhere, so the questions about refusals for
+  funds have no observations;
+* intent is reported only where a recorded reason states it;
+* live latency and tokens are not reproducible, but the decisions are.
 
 ## V0.7b — financial solvency (0.7.0-dev.2)
 

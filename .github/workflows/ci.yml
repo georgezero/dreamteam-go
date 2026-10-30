@@ -147,6 +147,15 @@ jobs:
             ./dt benchmark verify "llm-$n" | tail -1
             cp "llm-$n/manifest.json" "out/llm-$n-manifest.json"
           done
+          # V0.7c: the frozen-agent evaluation under overtime and solvency
+          # economics, one suite run per stage and entry
+          # (docs/benchmark/v07c-dev), each verified and compared below.
+          for f in docs/benchmark/v07c-dev/stage-*-replay-*.json; do
+            n=$(basename "$f" .json)
+            ./dt benchmark suite run "$f" -out "llm-v07c-$n" > /dev/null
+            ./dt benchmark verify "llm-v07c-$n" | tail -1
+            cp "llm-v07c-$n/manifest.json" "out/llm-v07c-$n-manifest.json"
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

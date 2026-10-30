@@ -1,0 +1,207 @@
+DreamTeam benchmark v07c-stage-a · engine 0.7.0-dev.3 · dreamteam.agent/v1
+scenarios bench-financial-pressure-ot-credit, sustainable-ot-credit, bench-demand-growth-ot-credit, bench-staffing-shortage-ot-credit, bench-stable-ot-credit · seeds 41601, 41602 · 30 days · decisions every 1 day(s) at 07:00
+policies noop@1, greedy@1, conservative-v2@2, qwen36-35b-a3b@2 (external), gemma4-26b-a4b@2 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                                        status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90    breaches  overtime   alerts  T90
+bench-financial-pressure-ot-credit-s41601-noop             completed  0/0/0         ok      -$16,657  $236,565     165   1,529  837 min    93        3,729 min  103     not requested
+bench-financial-pressure-ot-credit-s41601-greedy           completed  4/0/0         ok      -$16,716  $237,739     165   1,529  823 min    92        3,729 min  103     not requested
+bench-financial-pressure-ot-credit-s41601-conservative-v2  completed  0/0/0         ok      -$16,657  $236,565     165   1,529  837 min    93        3,729 min  103     not requested
+bench-financial-pressure-ot-credit-s41601-qwen36-35b-a3b   completed  16/0/0        ok      -$32,443  $236,933     165   1,529  797 min    92        7,089 min  103     not requested
+bench-financial-pressure-ot-credit-s41601-gemma4-26b-a4b   completed  0/0/0         ok      -$16,657  $236,565     165   1,529  837 min    93        3,729 min  103     not requested
+bench-financial-pressure-ot-credit-s41602-noop             completed  0/0/0         ok      -$17,598  $233,115     182   1,480  817 min    88        3,125 min  97      not requested
+bench-financial-pressure-ot-credit-s41602-greedy           completed  4/0/0         ok      -$17,783  $234,163     182   1,480  806 min    87        3,125 min  97      not requested
+bench-financial-pressure-ot-credit-s41602-conservative-v2  completed  0/0/0         ok      -$17,598  $233,115     182   1,480  817 min    88        3,125 min  97      not requested
+bench-financial-pressure-ot-credit-s41602-qwen36-35b-a3b   completed  4/0/0         ok      -$22,281  $234,771     181   1,484  815 min    87        3,416 min  95      not requested
+bench-financial-pressure-ot-credit-s41602-gemma4-26b-a4b   completed  0/0/0         ok      -$17,598  $233,115     182   1,480  817 min    88        3,125 min  97      not requested
+sustainable-ot-credit-s41601-noop                          completed  0/0/0         ok      -$6,395   $249,722     279   1,616  1,031 min  170       4,320 min  117     not requested
+sustainable-ot-credit-s41601-greedy                        completed  4/0/0         ok      -$6,926   $250,506     279   1,616  984 min    155       4,320 min  117     not requested
+sustainable-ot-credit-s41601-conservative-v2               completed  0/0/0         ok      -$6,395   $249,722     279   1,616  1,031 min  170       4,320 min  117     not requested
+sustainable-ot-credit-s41601-qwen36-35b-a3b                completed  5/0/0         ok      -$9,987   $250,330     279   1,617  953 min    109       4,756 min  113     not requested
+sustainable-ot-credit-s41601-gemma4-26b-a4b                completed  1/0/0         ok      -$7,777   $249,722     279   1,616  988 min    147       4,320 min  117     not requested
+sustainable-ot-credit-s41602-noop                          completed  0/0/0         ok      -$5,406   $250,946     294   1,596  1,101 min  164       4,138 min  109     not requested
+sustainable-ot-credit-s41602-greedy                        completed  4/0/0         ok      -$6,792   $251,450     294   1,596  1,047 min  142       4,138 min  109     not requested
+sustainable-ot-credit-s41602-conservative-v2               completed  0/0/0         ok      -$5,406   $250,946     294   1,596  1,101 min  164       4,138 min  109     not requested
+sustainable-ot-credit-s41602-qwen36-35b-a3b                completed  6/0/0         ok      -$10,786  $254,360     291   1,597  1,072 min  138       4,706 min  108     not requested
+sustainable-ot-credit-s41602-gemma4-26b-a4b                completed  0/0/0         ok      -$5,406   $250,946     294   1,596  1,101 min  164       4,138 min  109     not requested
+bench-demand-growth-ot-credit-s41601-noop                  completed  0/0/0         ok      -$6,261   $250,080     298   1,615  1,036 min  171       4,297 min  116     not requested
+bench-demand-growth-ot-credit-s41601-greedy                completed  4/0/0         ok      -$7,209   $250,447     298   1,615  984 min    157       4,297 min  115     not requested
+bench-demand-growth-ot-credit-s41601-conservative-v2       completed  0/0/0         ok      -$6,261   $250,080     298   1,615  1,036 min  171       4,297 min  116     not requested
+bench-demand-growth-ot-credit-s41601-qwen36-35b-a3b        completed  5/0/0         ok      -$14,696  $253,200     293   1,621  953 min    128       5,135 min  108     not requested
+bench-demand-growth-ot-credit-s41601-gemma4-26b-a4b        completed  2/0/0         ok      -$8,997   $249,762     298   1,615  968 min    132       4,297 min  116     not requested
+bench-demand-growth-ot-credit-s41602-noop                  completed  0/0/0         ok      -$5,018   $251,295     301   1,602  1,105 min  167       4,135 min  109     not requested
+bench-demand-growth-ot-credit-s41602-greedy                completed  4/0/0         ok      -$6,010   $252,194     301   1,602  1,046 min  142       4,135 min  109     not requested
+bench-demand-growth-ot-credit-s41602-conservative-v2       completed  0/0/0         ok      -$5,018   $251,295     301   1,602  1,105 min  167       4,135 min  109     not requested
+bench-demand-growth-ot-credit-s41602-qwen36-35b-a3b        completed  1/0/0         ok      -$8,215   $254,518     301   1,602  960 min    107       4,135 min  110     not requested
+bench-demand-growth-ot-credit-s41602-gemma4-26b-a4b        completed  0/0/0         ok      -$5,018   $251,295     301   1,602  1,105 min  167       4,135 min  109     not requested
+bench-staffing-shortage-ot-credit-s41601-noop              completed  0/0/0         ok      -$12,011  $229,774     391   1,526  725 min    79        3,708 min  88      not requested
+bench-staffing-shortage-ot-credit-s41601-greedy            completed  4/0/0         ok      -$13,050  $229,968     391   1,526  708 min    77        3,708 min  88      not requested
+bench-staffing-shortage-ot-credit-s41601-conservative-v2   completed  0/0/0         ok      -$12,011  $229,774     391   1,526  725 min    79        3,708 min  88      not requested
+bench-staffing-shortage-ot-credit-s41601-qwen36-35b-a3b    completed  11/0/0        ok      -$32,315  $232,833     381   1,537  121 min    46        5,010 min  91      not requested
+bench-staffing-shortage-ot-credit-s41601-gemma4-26b-a4b    completed  0/0/0         ok      -$12,011  $229,774     391   1,526  725 min    79        3,708 min  88      not requested
+bench-staffing-shortage-ot-credit-s41602-noop              completed  0/0/0         ok      -$16,555  $227,196     402   1,518  729 min    77        4,038 min  106     not requested
+bench-staffing-shortage-ot-credit-s41602-greedy            completed  4/0/0         ok      -$17,631  $227,353     402   1,518  726 min    76        4,038 min  106     not requested
+bench-staffing-shortage-ot-credit-s41602-conservative-v2   completed  0/0/0         ok      -$16,555  $227,196     402   1,518  729 min    77        4,038 min  106     not requested
+bench-staffing-shortage-ot-credit-s41602-qwen36-35b-a3b    completed  13/0/0        ok      -$29,995  $228,009     400   1,520  712 min    75        4,731 min  106     not requested
+bench-staffing-shortage-ot-credit-s41602-gemma4-26b-a4b    completed  1/0/0         ok      -$18,598  $229,077     402   1,518  132 min    56        4,038 min  106     not requested
+bench-stable-ot-credit-s41601-noop                         completed  0/0/0         ok      $8,552    $267,144     211   1,714  1,065 min  144       2,986 min  89      not requested
+bench-stable-ot-credit-s41601-greedy                       completed  4/0/0         ok      $8,400    $268,306     211   1,714  1,033 min  138       2,986 min  89      not requested
+bench-stable-ot-credit-s41601-conservative-v2              completed  1/0/0         ok      $8,552    $267,144     211   1,714  1,065 min  144       2,986 min  89      not requested
+bench-stable-ot-credit-s41601-qwen36-35b-a3b               completed  16/0/0        ok      -$848     $267,518     211   1,714  995 min    107       4,784 min  88      not requested
+bench-stable-ot-credit-s41601-gemma4-26b-a4b               completed  1/0/0         ok      $8,552    $267,144     211   1,714  1,065 min  144       2,986 min  89      not requested
+bench-stable-ot-credit-s41602-noop                         completed  0/0/0         ok      $1,006    $257,648     250   1,646  843 min    84        2,693 min  85      not requested
+bench-stable-ot-credit-s41602-greedy                       completed  4/0/0         ok      $975      $258,851     250   1,646  805 min    80        2,693 min  85      not requested
+bench-stable-ot-credit-s41602-conservative-v2              completed  0/0/0         ok      $1,006    $257,648     250   1,646  843 min    84        2,693 min  85      not requested
+bench-stable-ot-credit-s41602-qwen36-35b-a3b               completed  10/0/0        ok      -$3,632   $257,648     250   1,646  836 min    85        3,657 min  85      not requested
+bench-stable-ot-credit-s41602-gemma4-26b-a4b               completed  0/0/0         ok      $1,006    $257,648     250   1,646  843 min    84        2,693 min  85      not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario                            seed   runs  start                state digest   identical
+bench-financial-pressure-ot-credit  41601  5     2026-10-13T06:00:00  7f3d5146a71e…  yes
+bench-financial-pressure-ot-credit  41602  5     2026-10-13T06:00:00  128bb439bbdc…  yes
+sustainable-ot-credit               41601  5     2026-10-13T06:00:00  d938ba8775b7…  yes
+sustainable-ot-credit               41602  5     2026-10-13T06:00:00  97c3fbb4ec40…  yes
+bench-demand-growth-ot-credit       41601  5     2026-10-13T06:00:00  d938ba8775b7…  yes
+bench-demand-growth-ot-credit       41602  5     2026-10-13T06:00:00  97c3fbb4ec40…  yes
+bench-staffing-shortage-ot-credit   41601  5     2026-10-13T06:00:00  b1d340022f71…  yes
+bench-staffing-shortage-ot-credit   41602  5     2026-10-13T06:00:00  0e3fbc3e8a14…  yes
+bench-stable-ot-credit              41601  5     2026-10-13T06:00:00  37c8bc87a295…  yes
+bench-stable-ot-credit              41602  5     2026-10-13T06:00:00  a85b2a2bfe35…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (10/10)                     greedy@1 (10/10)                   conservative-v2@2 (10/10)          qwen36-35b-a3b@2 (10/10)           gemma4-26b-a4b@2 (10/10)
+netRevenueCents         $227,196 / $249,722 / $267,144     $227,353 / $250,447 / $268,306     $227,196 / $249,722 / $267,144     $228,009 / $250,330 / $267,518     $229,077 / $249,722 / $267,144
+operatingExpenseCents   $241,785 / $256,117 / $258,591     $243,018 / $257,432 / $259,906     $241,785 / $256,117 / $258,591     $257,052 / $262,733 / $269,376     $241,785 / $256,314 / $258,759
+operatingProfitCents    -$17,598 / -$6,395 / $8,552        -$17,783 / -$7,209 / $8,400        -$17,598 / -$6,395 / $8,552        -$32,443 / -$14,696 / -$848        -$18,598 / -$8,997 / $8,552
+operatingCashFlowCents  -$26,121 / -$11,753 / $7,432       -$26,121 / -$11,753 / $7,432       -$26,121 / -$11,753 / $7,432       -$27,764 / -$13,657 / $2,896       -$26,121 / -$11,753 / $7,432
+minCashCents            $36,846 / $44,329 / $52,187        $36,846 / $44,329 / $52,187        $36,846 / $44,329 / $52,187        $31,777 / $42,421 / $49,284        $36,846 / $44,329 / $52,187
+shortfallCents          $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0
+ordersReceived          1,699 / 1,924 / 2,021              1,699 / 1,924 / 2,021              1,699 / 1,924 / 2,021              1,699 / 1,924 / 2,021              1,699 / 1,924 / 2,021
+ordersLost              165 / 279 / 402                    165 / 279 / 402                    165 / 279 / 402                    165 / 279 / 400                    165 / 279 / 402
+examsCompleted          1,480 / 1,596 / 1,714              1,480 / 1,596 / 1,714              1,480 / 1,596 / 1,714              1,484 / 1,597 / 1,714              1,480 / 1,596 / 1,714
+reportsFinal            1,465 / 1,598 / 1,722              1,470 / 1,601 / 1,727              1,465 / 1,598 / 1,722              1,476 / 1,603 / 1,725              1,465 / 1,595 / 1,722
+tatP50Sec               41 min / 105 min / 155 min         39 min / 95 min / 130 min          41 min / 105 min / 155 min         26 min / 77 min / 121 min          38 min / 105 min / 155 min
+tatP90Sec               725 min / 843 min / 1,105 min      708 min / 823 min / 1,047 min      725 min / 843 min / 1,105 min      121 min / 836 min / 1,072 min      132 min / 843 min / 1,105 min
+tatOverTarget           77 / 93 / 171                      76 / 92 / 157                      77 / 93 / 171                      46 / 92 / 138                      56 / 93 / 167
+tatBreaches             77 / 93 / 171                      76 / 92 / 157                      77 / 93 / 171                      46 / 92 / 138                      56 / 93 / 167
+backlogEnd              8 / 15 / 18                        4 / 9 / 15                         8 / 15 / 18                        0 / 6 / 15                         0 / 15 / 21
+waitToExamP50Sec        19 min / 20 min / 23 min           19 min / 20 min / 23 min           19 min / 20 min / 23 min           19 min / 20 min / 23 min           19 min / 20 min / 23 min
+waitToExamP90Sec        56 min / 69 min / 71 min           56 min / 69 min / 71 min           56 min / 69 min / 71 min           55 min / 68 min / 73 min           56 min / 69 min / 71 min
+waitsOver30             456 / 518 / 624                    456 / 518 / 624                    456 / 518 / 624                    448 / 514 / 624                    456 / 518 / 624
+displacedAppointments   –                                  –                                  –                                  –                                  –
+overtimeSec             2,693 min / 3,729 min / 4,320 min  2,693 min / 3,729 min / 4,320 min  2,693 min / 3,729 min / 4,320 min  3,416 min / 4,731 min / 7,089 min  2,693 min / 3,729 min / 4,320 min
+heldOver                36 / 45 / 52                       36 / 45 / 52                       36 / 45 / 52                       36 / 44 / 51                       36 / 45 / 52
+skippedBreaks           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+noCoverage              0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 1
+alertsRaisedWarn        379 / 461 / 479                    378 / 460 / 477                    379 / 461 / 479                    378 / 456 / 472                    379 / 455 / 479
+alertsRaisedAlert       85 / 103 / 117                     85 / 103 / 117                     85 / 103 / 117                     85 / 103 / 113                     85 / 103 / 117
+alertsActiveAtEnd       1 / 1 / 1                          0 / 1 / 1                          1 / 1 / 1                          0 / 0 / 1                          0 / 1 / 1
+daysBelowZero           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+actionsAttempted        0 / 0 / 0                          4 / 4 / 4                          0 / 0 / 1                          1 / 10 / 19                        0 / 0 / 3
+actionsAccepted         0 / 0 / 0                          4 / 4 / 4                          0 / 0 / 1                          1 / 10 / 19                        0 / 0 / 3
+actionsRejected         0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario                            seed   policy           decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime   Δalerts
+bench-financial-pressure-ot-credit  41601  greedy           different  different  -$59      +$1,174       0      0       -14 min   -1         0 min       0
+bench-financial-pressure-ot-credit  41602  greedy           different  different  -$185     +$1,048       0      0       -12 min   -1         0 min       0
+sustainable-ot-credit               41601  greedy           different  different  -$531     +$784         0      0       -47 min   -15        0 min       0
+sustainable-ot-credit               41602  greedy           different  different  -$1,387   +$504         0      0       -55 min   -22        0 min       0
+bench-demand-growth-ot-credit       41601  greedy           different  different  -$948     +$367         0      0       -53 min   -14        0 min       -1
+bench-demand-growth-ot-credit       41602  greedy           different  different  -$991     +$899         0      0       -59 min   -25        0 min       0
+bench-staffing-shortage-ot-credit   41601  greedy           different  different  -$1,038   +$195         0      0       -17 min   -2         0 min       0
+bench-staffing-shortage-ot-credit   41602  greedy           different  different  -$1,076   +$157         0      0       -3 min    -1         0 min       0
+bench-stable-ot-credit              41601  greedy           different  different  -$152     +$1,163       0      0       -31 min   -6         0 min       0
+bench-stable-ot-credit              41602  greedy           different  different  -$30      +$1,202       0      0       -38 min   -4         0 min       0
+bench-financial-pressure-ot-credit  41601  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  41602  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+sustainable-ot-credit               41601  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+sustainable-ot-credit               41602  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-demand-growth-ot-credit       41601  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-demand-growth-ot-credit       41602  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   41601  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   41602  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-stable-ot-credit              41601  conservative-v2  different  different  $0        $0            0      0       0 min     0          0 min       0
+bench-stable-ot-credit              41602  conservative-v2  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  41601  qwen36-35b-a3b   different  different  -$15,786  +$367         0      0       -41 min   -1         +3,360 min  0
+bench-financial-pressure-ot-credit  41602  qwen36-35b-a3b   different  different  -$4,684   +$1,656       -1     +4      -2 min    -1         +292 min    -2
+sustainable-ot-credit               41601  qwen36-35b-a3b   different  different  -$3,593   +$607         0      +1      -78 min   -61        +436 min    -4
+sustainable-ot-credit               41602  qwen36-35b-a3b   different  different  -$5,381   +$3,414       -3     +1      -29 min   -26        +568 min    -1
+bench-demand-growth-ot-credit       41601  qwen36-35b-a3b   different  different  -$8,435   +$3,121       -5     +6      -83 min   -43        +838 min    -8
+bench-demand-growth-ot-credit       41602  qwen36-35b-a3b   different  different  -$3,197   +$3,222       0      0       -146 min  -60        0 min       +1
+bench-staffing-shortage-ot-credit   41601  qwen36-35b-a3b   different  different  -$20,304  +$3,059       -10    +11     -604 min  -33        +1,302 min  +3
+bench-staffing-shortage-ot-credit   41602  qwen36-35b-a3b   different  different  -$13,440  +$813         -2     +2      -17 min   -2         +693 min    0
+bench-stable-ot-credit              41601  qwen36-35b-a3b   different  different  -$9,401   +$374         0      0       -69 min   -37        +1,798 min  -1
+bench-stable-ot-credit              41602  qwen36-35b-a3b   different  different  -$4,637   $0            0      0       -7 min    +1         +965 min    0
+bench-financial-pressure-ot-credit  41601  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  41602  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+sustainable-ot-credit               41601  gemma4-26b-a4b   different  different  -$1,383   $0            0      0       -43 min   -23        0 min       0
+sustainable-ot-credit               41602  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-demand-growth-ot-credit       41601  gemma4-26b-a4b   different  different  -$2,736   -$318         0      0       -68 min   -39        0 min       0
+bench-demand-growth-ot-credit       41602  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   41601  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   41602  gemma4-26b-a4b   different  different  -$2,043   +$1,881       0      0       -597 min  -21        0 min       0
+bench-stable-ot-credit              41601  gemma4-26b-a4b   different  different  $0        $0            0      0       0 min     0          0 min       0
+bench-stable-ot-credit              41602  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min     0          0 min       0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  greedy      conservative-v2  qwen36-35b-a3b  gemma4-26b-a4b
+netRevenueCents         10 / 0 / 0  0 / 0 / 10       9 / 0 / 1       1 / 1 / 8
+operatingExpenseCents   10 / 0 / 0  0 / 0 / 10       10 / 0 / 0      3 / 0 / 7
+operatingProfitCents    0 / 10 / 0  0 / 0 / 10       0 / 10 / 0      0 / 3 / 7
+operatingCashFlowCents  0 / 0 / 10  0 / 0 / 10       0 / 10 / 0      0 / 0 / 10
+minCashCents            0 / 0 / 10  0 / 0 / 10       0 / 10 / 0      0 / 0 / 10
+shortfallCents          0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+ordersReceived          0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+ordersLost              0 / 0 / 10  0 / 0 / 10       0 / 5 / 5       0 / 0 / 10
+examsCompleted          0 / 0 / 10  0 / 0 / 10       6 / 0 / 4       0 / 0 / 10
+reportsFinal            10 / 0 / 0  0 / 0 / 10       9 / 0 / 1       1 / 1 / 8
+tatP50Sec               0 / 10 / 0  0 / 0 / 10       0 / 10 / 0      0 / 3 / 7
+tatP90Sec               0 / 10 / 0  0 / 0 / 10       0 / 10 / 0      0 / 3 / 7
+tatOverTarget           0 / 10 / 0  0 / 0 / 10       1 / 9 / 0       0 / 3 / 7
+tatBreaches             0 / 10 / 0  0 / 0 / 10       1 / 9 / 0       0 / 3 / 7
+backlogEnd              0 / 10 / 0  0 / 0 / 10       0 / 9 / 1       1 / 1 / 8
+waitToExamP50Sec        0 / 0 / 10  0 / 0 / 10       2 / 5 / 3       0 / 0 / 10
+waitToExamP90Sec        0 / 0 / 10  0 / 0 / 10       2 / 4 / 4       0 / 0 / 10
+waitsOver30             0 / 0 / 10  0 / 0 / 10       3 / 3 / 4       0 / 0 / 10
+displacedAppointments   0 / 0 / 0   0 / 0 / 0        0 / 0 / 0       0 / 0 / 0
+overtimeSec             0 / 0 / 10  0 / 0 / 10       9 / 0 / 1       0 / 0 / 10
+heldOver                0 / 0 / 10  0 / 0 / 10       0 / 4 / 6       0 / 0 / 10
+skippedBreaks           0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+noCoverage              0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+alertsRaisedWarn        0 / 9 / 1   0 / 0 / 10       0 / 10 / 0      0 / 3 / 7
+alertsRaisedAlert       0 / 1 / 9   0 / 0 / 10       2 / 5 / 3       0 / 0 / 10
+alertsActiveAtEnd       0 / 1 / 9   0 / 0 / 10       0 / 5 / 5       0 / 1 / 9
+daysBelowZero           0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+actionsAttempted        10 / 0 / 0  1 / 0 / 9        10 / 0 / 0      4 / 0 / 6
+actionsAccepted         10 / 0 / 0  1 / 0 / 9        10 / 0 / 0      4 / 0 / 6
+actionsRejected         0 / 0 / 10  0 / 0 / 10       0 / 0 / 10      0 / 0 / 10
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  50
+
+policy           decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop             300              0        0        0        0                0                0
+greedy           300              40       40       0        0                0                0
+conservative-v2  300              1        1        0        0                0                0
+qwen36-35b-a3b   300              87       87       0        0                0                0
+gemma4-26b-a4b   300              5        5        0        0                0                0
+
+6. Replay verification
+
+50 of 50 saved sessions replayed with every digest verified; 50 of 50 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

@@ -39,6 +39,10 @@ In development (unreleased): **V0.7**, simulator realism.
     cannot fund from cash and undrawn credit after what it already owes;
   * financial distress recorded when an obligation already incurred
     cannot be financed.
+* **V0.7c** (`0.7.0-dev.3`) evaluates V0.6c's two frozen LLM agents and
+  the baselines in those practices, paired with no action, over 75 runs
+  (`docs/benchmark/v07c-dev/`). No action was refused for funds. One
+  agent run drew on credit after terminating most of its staff.
 
 Every existing scenario, save and result is unchanged
 (`docs/benchmark/v07a-dev/`, `docs/benchmark/v07b-dev/`).
@@ -381,7 +385,9 @@ are observations, not a ranking:
 V0.7a (in development) adds suite version 2. It has the same five
 practices with radiologist overtime paid. V0.7b adds suite version 3: those
 practices with a $50,000 credit line, and with none, under the funding
-rule. Versions 1 and 2 and every earlier result are unchanged.
+rule. Versions 1 and 2 and every earlier result are unchanged. V0.7c
+runs the two frozen LLM agents and the baselines on version 3's credit
+practices, 30 and 90 days; every recording replays exactly.
 
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
@@ -445,6 +451,8 @@ reference policy) and `agents/llm` (the LLM agent).
 * **No insolvency consequence.** Negative cash stops nothing. V0.7b (in
   development) adds a credit line and a funding rule in suite version 3.
   Even there, distress only refuses new commitments: nothing shuts down.
+  In V0.7c's 75 runs no action was refused for funds; the five practices'
+  liquidity leaves the funding rule mostly untested.
 * **Demand growth uses monthly factors,** not a dated shock.
 * **Some metrics are absent:** imaging capacity utilization and trends
   within a run.

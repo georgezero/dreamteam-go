@@ -33,7 +33,10 @@ replays. Released in V0.6.0 with the policy protocol unchanged. V0.7a
 overtime ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md) §10). V0.7b
 (0.7.0-dev.2, in development) adds suite version 3, with a credit line and
 a funding rule (§11 there). A refused commitment is an ordinary action
-result (`insufficient_funds`). The harness and the policy protocol are
+result (`insufficient_funds`). V0.7c (0.7.0-dev.3, in development)
+evaluates the frozen LLM agents and the baselines on version 3
+([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)); CI replays its
+recordings. The harness and the policy protocol are
 unchanged. Ordinary benchmarks and their files are
 unchanged.
 

@@ -1,0 +1,380 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 3 (development) · suite run v07c-stage-b · engine 0.7.0-dev.3
+complete: 25 of 25 runs
+seeds 41701 · 90 days · decisions every 1 day(s) at 07:00 · policies noop@1, greedy@1, conservative-v2@2, qwen36-35b-a3b@2, gemma4-26b-a4b@2 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry                      version  scenario                            fingerprint    T90             seed   runs  start          identical
+financial-pressure-credit  3        bench-financial-pressure-ot-credit  586f3ef74742…  not_applicable  41701  5     a573e5d01eda…  yes
+reporting-backlog-credit   3        sustainable-ot-credit               1fc90da25e02…  not_applicable  41701  5     715fdabb0bf3…  yes
+demand-growth-credit       3        bench-demand-growth-ot-credit       28c16bf37eb6…  not_applicable  41701  5     715fdabb0bf3…  yes
+staffing-shortage-credit   3        bench-staffing-shortage-ot-credit   5b49b4ca7b73…  not_applicable  41701  5     15f81b0ebc38…  yes
+stable-credit              3        bench-stable-ot-credit              cfae9ca57ac4…  not_applicable  41701  5     e3ddc6090a63…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry                      seed   policy             status     replay  actions o/s/r  T90
+financial-pressure-credit  41701  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit  41701  greedy@1           completed  ok      0/12/0         not_requested
+financial-pressure-credit  41701  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-credit  41701  qwen36-35b-a3b@2   completed  ok      22/3/0         not_requested
+financial-pressure-credit  41701  gemma4-26b-a4b@2   completed  ok      0/0/0          not_requested
+reporting-backlog-credit   41701  noop@1             completed  ok      0/0/0          not_requested
+reporting-backlog-credit   41701  greedy@1           completed  ok      0/12/0         not_requested
+reporting-backlog-credit   41701  conservative-v2@2  completed  ok      0/0/0          not_requested
+reporting-backlog-credit   41701  qwen36-35b-a3b@2   completed  ok      16/0/0         not_requested
+reporting-backlog-credit   41701  gemma4-26b-a4b@2   completed  ok      0/3/0          not_requested
+demand-growth-credit       41701  noop@1             completed  ok      0/0/0          not_requested
+demand-growth-credit       41701  greedy@1           completed  ok      0/12/0         not_requested
+demand-growth-credit       41701  conservative-v2@2  completed  ok      0/0/0          not_requested
+demand-growth-credit       41701  qwen36-35b-a3b@2   completed  ok      16/2/0         not_requested
+demand-growth-credit       41701  gemma4-26b-a4b@2   completed  ok      27/3/0         not_requested
+staffing-shortage-credit   41701  noop@1             completed  ok      0/0/0          not_requested
+staffing-shortage-credit   41701  greedy@1           completed  ok      0/12/0         not_requested
+staffing-shortage-credit   41701  conservative-v2@2  completed  ok      0/0/0          not_requested
+staffing-shortage-credit   41701  qwen36-35b-a3b@2   completed  ok      20/22/0        not_requested
+staffing-shortage-credit   41701  gemma4-26b-a4b@2   completed  ok      53/1/0         not_requested
+stable-credit              41701  noop@1             completed  ok      0/0/0          not_requested
+stable-credit              41701  greedy@1           completed  ok      0/12/0         not_requested
+stable-credit              41701  conservative-v2@2  completed  ok      0/2/0          not_requested
+stable-credit              41701  qwen36-35b-a3b@2   completed  ok      3/2/0          not_requested
+stable-credit              41701  gemma4-26b-a4b@2   completed  ok      0/0/0          not_requested
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry                      policy           exams  reports  TAT p50  TAT p90    backlog end  wait p50  wait p90
+financial-pressure-credit  noop             4,387  4,380    88 min   925 min    10           20 min    66 min
+financial-pressure-credit  greedy           4,387  4,380    33 min   762 min    10           20 min    66 min
+financial-pressure-credit  conservative-v2  4,387  4,380    88 min   925 min    10           20 min    66 min
+financial-pressure-credit  qwen36-35b-a3b   4,387  4,390    79 min   893 min    0            20 min    66 min
+financial-pressure-credit  gemma4-26b-a4b   4,387  4,380    88 min   925 min    10           20 min    66 min
+reporting-backlog-credit   noop             4,700  4,694    165 min  1,190 min  13           22 min    76 min
+reporting-backlog-credit   greedy           4,700  4,697    48 min   847 min    10           22 min    76 min
+reporting-backlog-credit   conservative-v2  4,700  4,694    165 min  1,190 min  13           22 min    76 min
+reporting-backlog-credit   qwen36-35b-a3b   4,711  4,705    167 min  1,155 min  13           22 min    74 min
+reporting-backlog-credit   gemma4-26b-a4b   4,700  4,707    72 min   904 min    0            22 min    76 min
+demand-growth-credit       noop             4,839  4,803    198 min  1,325 min  43           23 min    77 min
+demand-growth-credit       greedy           4,839  4,834    52 min   867 min    12           23 min    77 min
+demand-growth-credit       conservative-v2  4,839  4,803    198 min  1,325 min  43           23 min    77 min
+demand-growth-credit       qwen36-35b-a3b   4,845  4,852    128 min  992 min    0            23 min    77 min
+demand-growth-credit       gemma4-26b-a4b   4,874  4,881    175 min  1,145 min  0            22 min    74 min
+staffing-shortage-credit   noop             4,471  4,461    51 min   785 min    10           20 min    77 min
+staffing-shortage-credit   greedy           4,471  4,461    28 min   695 min    10           20 min    77 min
+staffing-shortage-credit   conservative-v2  4,471  4,461    51 min   785 min    10           20 min    77 min
+staffing-shortage-credit   qwen36-35b-a3b   3,604  3,604    34 min   150 min    0            18 min    65 min
+staffing-shortage-credit   gemma4-26b-a4b   4,525  4,525    56 min   768 min    0            20 min    77 min
+stable-credit              noop             4,878  4,891    121 min  917 min    10           20 min    61 min
+stable-credit              greedy           4,878  4,891    56 min   737 min    10           20 min    61 min
+stable-credit              conservative-v2  4,878  4,891    105 min  889 min    10           20 min    61 min
+stable-credit              qwen36-35b-a3b   4,882  4,905    48 min   112 min    0            19 min    61 min
+stable-credit              gemma4-26b-a4b   4,878  4,891    121 min  917 min    10           20 min    61 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry                      policy           net revenue  expenses  profit     margin  op. cash flow
+financial-pressure-credit  noop             $698,029     $736,683  -$38,654   -5.5%   -$108,202
+financial-pressure-credit  greedy           $698,040     $769,259  -$71,219   -10.2%  -$136,836
+financial-pressure-credit  conservative-v2  $698,029     $736,683  -$38,654   -5.5%   -$108,202
+financial-pressure-credit  qwen36-35b-a3b   $699,144     $756,947  -$57,803   -8.3%   -$124,541
+financial-pressure-credit  gemma4-26b-a4b   $698,029     $736,683  -$38,654   -5.5%   -$108,202
+reporting-backlog-credit   noop             $750,360     $753,263  -$2,904    -0.4%   -$67,944
+reporting-backlog-credit   greedy           $750,767     $787,220  -$36,453   -4.9%   -$96,652
+reporting-backlog-credit   conservative-v2  $750,360     $753,263  -$2,904    -0.4%   -$67,944
+reporting-backlog-credit   qwen36-35b-a3b   $751,305     $762,215  -$10,910   -1.5%   -$76,166
+reporting-backlog-credit   gemma4-26b-a4b   $751,948     $776,948  -$25,000   -3.3%   -$83,840
+demand-growth-credit       noop             $758,231     $758,255  -$24       -0.0%   -$67,766
+demand-growth-credit       greedy           $763,121     $792,168  -$29,047   -3.8%   -$97,374
+demand-growth-credit       conservative-v2  $758,231     $758,255  -$24       -0.0%   -$67,766
+demand-growth-credit       qwen36-35b-a3b   $764,999     $785,938  -$20,939   -2.7%   -$91,685
+demand-growth-credit       gemma4-26b-a4b   $768,369     $774,317  -$5,947    -0.8%   -$78,916
+staffing-shortage-credit   noop             $681,949     $714,956  -$33,007   -4.8%   -$90,415
+staffing-shortage-credit   greedy           $681,897     $747,526  -$65,629   -9.6%   -$119,182
+staffing-shortage-credit   conservative-v2  $681,949     $714,956  -$33,007   -4.8%   -$90,415
+staffing-shortage-credit   qwen36-35b-a3b   $543,434     $758,030  -$214,596  -39.5%  -$129,951
+staffing-shortage-credit   gemma4-26b-a4b   $694,616     $731,310  -$36,694   -5.3%   -$99,867
+stable-credit              noop             $771,580     $756,894  $14,685    1.9%    -$42,976
+stable-credit              greedy           $771,690     $789,487  -$17,798   -2.3%   -$71,274
+stable-credit              conservative-v2  $771,580     $759,606  $11,973    1.6%    -$45,689
+stable-credit              qwen36-35b-a3b   $773,376     $810,251  -$36,875   -4.8%   -$88,859
+stable-credit              gemma4-26b-a4b   $771,580     $756,894  $14,685    1.9%    -$42,976
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry                      policy           orders  lost   lost rate  overtime    held over  skipped breaks  no coverage
+financial-pressure-credit  noop             4,916   494    10.0%      8,897 min   117        0               0
+financial-pressure-credit  greedy           4,916   494    10.0%      8,897 min   117        0               0
+financial-pressure-credit  conservative-v2  4,916   494    10.0%      8,897 min   117        0               0
+financial-pressure-credit  qwen36-35b-a3b   4,916   494    10.0%      11,621 min  121        0               0
+financial-pressure-credit  gemma4-26b-a4b   4,916   494    10.0%      8,897 min   117        0               0
+reporting-backlog-credit   noop             5,548   749    13.5%      12,038 min  146        0               0
+reporting-backlog-credit   greedy           5,548   749    13.5%      12,038 min  146        0               0
+reporting-backlog-credit   conservative-v2  5,548   749    13.5%      12,038 min  146        0               0
+reporting-backlog-credit   qwen36-35b-a3b   5,548   741    13.4%      14,587 min  144        0               0
+reporting-backlog-credit   gemma4-26b-a4b   5,548   749    13.5%      12,038 min  146        0               0
+demand-growth-credit       noop             6,161   997    16.2%      13,683 min  150        0               0
+demand-growth-credit       greedy           6,161   997    16.2%      13,683 min  150        0               0
+demand-growth-credit       conservative-v2  6,161   997    16.2%      13,683 min  150        0               0
+demand-growth-credit       qwen36-35b-a3b   6,161   990    16.1%      14,711 min  149        0               0
+demand-growth-credit       gemma4-26b-a4b   6,161   969    15.7%      16,297 min  142        0               4
+staffing-shortage-credit   noop             5,548   1,029  18.5%      11,538 min  147        0               0
+staffing-shortage-credit   greedy           5,548   1,029  18.5%      11,538 min  147        0               0
+staffing-shortage-credit   conservative-v2  5,548   1,029  18.5%      11,538 min  147        0               0
+staffing-shortage-credit   qwen36-35b-a3b   5,548   2,479  44.7%      9,035 min   98         0               0
+staffing-shortage-credit   gemma4-26b-a4b   5,548   976    17.6%      17,381 min  142        0               0
+stable-credit              noop             5,548   595    10.7%      8,534 min   123        0               0
+stable-credit              greedy           5,548   595    10.7%      8,534 min   123        0               0
+stable-credit              conservative-v2  5,548   595    10.7%      8,534 min   123        0               0
+stable-credit              qwen36-35b-a3b   5,548   595    10.7%      8,892 min   124        0               0
+stable-credit              gemma4-26b-a4b   5,548   595    10.7%      8,534 min   123        0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry                      policy           over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure-credit  noop             363          355       1,473      absent     298     2
+financial-pressure-credit  greedy           277          269       1,473      absent     291     3
+financial-pressure-credit  conservative-v2  363          355       1,473      absent     298     2
+financial-pressure-credit  qwen36-35b-a3b   323          323       1,473      absent     299     1
+financial-pressure-credit  gemma4-26b-a4b   363          355       1,473      absent     298     2
+reporting-backlog-credit   noop             606          593       1,699      absent     336     1
+reporting-backlog-credit   greedy           370          360       1,699      absent     333     1
+reporting-backlog-credit   conservative-v2  606          593       1,699      absent     336     1
+reporting-backlog-credit   qwen36-35b-a3b   568          555       1,705      absent     333     1
+reporting-backlog-credit   gemma4-26b-a4b   253          253       1,699      absent     333     0
+demand-growth-credit       noop             699          656       1,821      absent     352     2
+demand-growth-credit       greedy           351          339       1,821      absent     352     1
+demand-growth-credit       conservative-v2  699          656       1,821      absent     352     2
+demand-growth-credit       qwen36-35b-a3b   352          352       1,835      absent     358     0
+demand-growth-credit       gemma4-26b-a4b   548          548       1,786      absent     348     0
+staffing-shortage-credit   noop             279          269       1,492      absent     324     1
+staffing-shortage-credit   greedy           245          235       1,492      absent     325     1
+staffing-shortage-credit   conservative-v2  279          269       1,492      absent     324     1
+staffing-shortage-credit   qwen36-35b-a3b   190          190       1,053      991        209     1
+staffing-shortage-credit   gemma4-26b-a4b   163          163       1,520      absent     342     0
+stable-credit              noop             364          354       1,588      absent     254     1
+stable-credit              greedy           288          278       1,588      absent     250     1
+stable-credit              conservative-v2  352          342       1,588      absent     253     1
+stable-credit              qwen36-35b-a3b   55           55        1,567      absent     243     0
+stable-credit              gemma4-26b-a4b   364          354       1,588      absent     254     1
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry                      policy           min cash  shortfall  days < 0
+financial-pressure-credit  noop             $24,466   $0         0
+financial-pressure-credit  greedy           $5,603    $0         0
+financial-pressure-credit  conservative-v2  $24,466   $0         0
+financial-pressure-credit  qwen36-35b-a3b   $18,168   $0         0
+financial-pressure-credit  gemma4-26b-a4b   $24,466   $0         0
+reporting-backlog-credit   noop             $45,163   $0         0
+reporting-backlog-credit   greedy           $39,081   $0         0
+reporting-backlog-credit   conservative-v2  $45,163   $0         0
+reporting-backlog-credit   qwen36-35b-a3b   $37,041   $0         0
+reporting-backlog-credit   gemma4-26b-a4b   $40,165   $0         0
+demand-growth-credit       noop             $45,108   $0         0
+demand-growth-credit       greedy           $39,026   $0         0
+demand-growth-credit       conservative-v2  $45,108   $0         0
+demand-growth-credit       qwen36-35b-a3b   $38,959   $0         0
+demand-growth-credit       gemma4-26b-a4b   $42,957   $0         0
+staffing-shortage-credit   noop             $37,229   $0         0
+staffing-shortage-credit   greedy           $24,153   $0         0
+staffing-shortage-credit   conservative-v2  $37,229   $0         0
+staffing-shortage-credit   qwen36-35b-a3b   $0        $0         0
+staffing-shortage-credit   gemma4-26b-a4b   $30,602   $0         0
+stable-credit              noop             $47,046   $0         0
+stable-credit              greedy           $47,046   $0         0
+stable-credit              conservative-v2  $47,046   $0         0
+stable-credit              qwen36-35b-a3b   $37,224   $0         0
+stable-credit              gemma4-26b-a4b   $47,046   $0         0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry                      policy           attempted  accepted  rejected  operations  staffing
+financial-pressure-credit  noop             0          0         0         0           0
+financial-pressure-credit  greedy           12         12        0         0           12
+financial-pressure-credit  conservative-v2  0          0         0         0           0
+financial-pressure-credit  qwen36-35b-a3b   25         25        0         22          3
+financial-pressure-credit  gemma4-26b-a4b   0          0         0         0           0
+reporting-backlog-credit   noop             0          0         0         0           0
+reporting-backlog-credit   greedy           12         12        0         0           12
+reporting-backlog-credit   conservative-v2  0          0         0         0           0
+reporting-backlog-credit   qwen36-35b-a3b   16         16        0         16          0
+reporting-backlog-credit   gemma4-26b-a4b   3          3         0         0           3
+demand-growth-credit       noop             0          0         0         0           0
+demand-growth-credit       greedy           12         12        0         0           12
+demand-growth-credit       conservative-v2  0          0         0         0           0
+demand-growth-credit       qwen36-35b-a3b   18         18        0         16          2
+demand-growth-credit       gemma4-26b-a4b   30         30        0         27          3
+staffing-shortage-credit   noop             0          0         0         0           0
+staffing-shortage-credit   greedy           12         12        0         0           12
+staffing-shortage-credit   conservative-v2  0          0         0         0           0
+staffing-shortage-credit   qwen36-35b-a3b   42         42        0         20          22
+staffing-shortage-credit   gemma4-26b-a4b   54         54        0         53          1
+stable-credit              noop             0          0         0         0           0
+stable-credit              greedy           12         12        0         0           12
+stable-credit              conservative-v2  2          2         0         0           2
+stable-credit              qwen36-35b-a3b   5          5         0         3           2
+stable-credit              gemma4-26b-a4b   0          0         0         0           0
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry                      policy           seeds  exams  reports  TAT p50   TAT p90   backlog end  wait p50  wait p90
+financial-pressure-credit  greedy           1      0      0        -55 min   -162 min  0            0 min     0 min
+financial-pressure-credit  conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+financial-pressure-credit  qwen36-35b-a3b   1      0      +10      -9 min    -32 min   -10          0 min     0 min
+financial-pressure-credit  gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+reporting-backlog-credit   greedy           1      0      +3       -117 min  -343 min  -3           0 min     0 min
+reporting-backlog-credit   conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+reporting-backlog-credit   qwen36-35b-a3b   1      +11    +11      +2 min    -35 min   0            0 min     -1 min
+reporting-backlog-credit   gemma4-26b-a4b   1      0      +13      -93 min   -285 min  -13          0 min     0 min
+demand-growth-credit       greedy           1      0      +31      -147 min  -458 min  -31          0 min     0 min
+demand-growth-credit       conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+demand-growth-credit       qwen36-35b-a3b   1      +6     +49      -71 min   -333 min  -43          0 min     0 min
+demand-growth-credit       gemma4-26b-a4b   1      +35    +78      -23 min   -180 min  -43          -1 min    -3 min
+staffing-shortage-credit   greedy           1      0      0        -23 min   -90 min   0            0 min     0 min
+staffing-shortage-credit   conservative-v2  1      0      0        0 min     0 min     0            0 min     0 min
+staffing-shortage-credit   qwen36-35b-a3b   1      -867   -857     -17 min   -635 min  -10          -2 min    -12 min
+staffing-shortage-credit   gemma4-26b-a4b   1      +54    +64      +5 min    -17 min   -10          +0 min    0 min
+stable-credit              greedy           1      0      0        -66 min   -180 min  0            0 min     0 min
+stable-credit              conservative-v2  1      0      0        -17 min   -28 min   0            0 min     0 min
+stable-credit              qwen36-35b-a3b   1      +4     +14      -74 min   -805 min  -10          0 min     +0 min
+stable-credit              gemma4-26b-a4b   1      0      0        0 min     0 min     0            0 min     0 min
+
+Financial performance
+
+entry                      policy           seeds  net revenue  expenses  profit     margin  op. cash flow
+financial-pressure-credit  greedy           1      +$11         +$32,576  -$32,565   n/a     -$28,634
+financial-pressure-credit  conservative-v2  1      $0           $0        $0         n/a     $0
+financial-pressure-credit  qwen36-35b-a3b   1      +$1,115      +$20,263  -$19,149   n/a     -$16,339
+financial-pressure-credit  gemma4-26b-a4b   1      $0           $0        $0         n/a     $0
+reporting-backlog-credit   greedy           1      +$407        +$33,957  -$33,550   n/a     -$28,708
+reporting-backlog-credit   conservative-v2  1      $0           $0        $0         n/a     $0
+reporting-backlog-credit   qwen36-35b-a3b   1      +$945        +$8,952   -$8,007    n/a     -$8,222
+reporting-backlog-credit   gemma4-26b-a4b   1      +$1,589      +$23,685  -$22,096   n/a     -$15,896
+demand-growth-credit       greedy           1      +$4,891      +$33,913  -$29,022   n/a     -$29,608
+demand-growth-credit       conservative-v2  1      $0           $0        $0         n/a     $0
+demand-growth-credit       qwen36-35b-a3b   1      +$6,768      +$27,682  -$20,914   n/a     -$23,919
+demand-growth-credit       gemma4-26b-a4b   1      +$10,139     +$16,061  -$5,923    n/a     -$11,149
+staffing-shortage-credit   greedy           1      -$52         +$32,570  -$32,622   n/a     -$28,767
+staffing-shortage-credit   conservative-v2  1      $0           $0        $0         n/a     $0
+staffing-shortage-credit   qwen36-35b-a3b   1      -$138,515    +$43,074  -$181,589  n/a     -$39,536
+staffing-shortage-credit   gemma4-26b-a4b   1      +$12,668     +$16,355  -$3,687    n/a     -$9,452
+stable-credit              greedy           1      +$110        +$32,593  -$32,483   n/a     -$28,297
+stable-credit              conservative-v2  1      $0           +$2,712   -$2,712    n/a     -$2,712
+stable-credit              qwen36-35b-a3b   1      +$1,796      +$53,357  -$51,560   n/a     -$45,883
+stable-credit              gemma4-26b-a4b   1      $0           $0        $0         n/a     $0
+
+Staffing and capacity
+
+entry                      policy           seeds  orders  lost    lost rate  overtime    held over  skipped breaks  no coverage
+financial-pressure-credit  greedy           1      0       0       n/a        0 min       0          0               0
+financial-pressure-credit  conservative-v2  1      0       0       n/a        0 min       0          0               0
+financial-pressure-credit  qwen36-35b-a3b   1      0       0       n/a        +2,724 min  +4         0               0
+financial-pressure-credit  gemma4-26b-a4b   1      0       0       n/a        0 min       0          0               0
+reporting-backlog-credit   greedy           1      0       0       n/a        0 min       0          0               0
+reporting-backlog-credit   conservative-v2  1      0       0       n/a        0 min       0          0               0
+reporting-backlog-credit   qwen36-35b-a3b   1      0       -8      n/a        +2,549 min  -2         0               0
+reporting-backlog-credit   gemma4-26b-a4b   1      0       0       n/a        0 min       0          0               0
+demand-growth-credit       greedy           1      0       0       n/a        0 min       0          0               0
+demand-growth-credit       conservative-v2  1      0       0       n/a        0 min       0          0               0
+demand-growth-credit       qwen36-35b-a3b   1      0       -7      n/a        +1,028 min  -1         0               0
+demand-growth-credit       gemma4-26b-a4b   1      0       -28     n/a        +2,614 min  -8         0               +4
+staffing-shortage-credit   greedy           1      0       0       n/a        0 min       0          0               0
+staffing-shortage-credit   conservative-v2  1      0       0       n/a        0 min       0          0               0
+staffing-shortage-credit   qwen36-35b-a3b   1      0       +1,450  n/a        -2,503 min  -49        0               0
+staffing-shortage-credit   gemma4-26b-a4b   1      0       -53     n/a        +5,843 min  -5         0               0
+stable-credit              greedy           1      0       0       n/a        0 min       0          0               0
+stable-credit              conservative-v2  1      0       0       n/a        0 min       0          0               0
+stable-credit              qwen36-35b-a3b   1      0       0       n/a        +358 min    +1         0               0
+stable-credit              gemma4-26b-a4b   1      0       0       n/a        0 min       0          0               0
+
+Service reliability
+
+entry                      policy           seeds  over target  breaches  waits >30  displaced  alerts  alerts at end
+financial-pressure-credit  greedy           1      -86          -86       0          n/a        -7      +1
+financial-pressure-credit  conservative-v2  1      0            0         0          n/a        0       0
+financial-pressure-credit  qwen36-35b-a3b   1      -40          -32       0          n/a        +1      -1
+financial-pressure-credit  gemma4-26b-a4b   1      0            0         0          n/a        0       0
+reporting-backlog-credit   greedy           1      -236         -233      0          n/a        -3      0
+reporting-backlog-credit   conservative-v2  1      0            0         0          n/a        0       0
+reporting-backlog-credit   qwen36-35b-a3b   1      -38          -38       +6         n/a        -3      0
+reporting-backlog-credit   gemma4-26b-a4b   1      -353         -340      0          n/a        -3      -1
+demand-growth-credit       greedy           1      -348         -317      0          n/a        0       -1
+demand-growth-credit       conservative-v2  1      0            0         0          n/a        0       0
+demand-growth-credit       qwen36-35b-a3b   1      -347         -304      +14        n/a        +6      -2
+demand-growth-credit       gemma4-26b-a4b   1      -151         -108      -35        n/a        -4      -2
+staffing-shortage-credit   greedy           1      -34          -34       0          n/a        +1      0
+staffing-shortage-credit   conservative-v2  1      0            0         0          n/a        0       0
+staffing-shortage-credit   qwen36-35b-a3b   1      -89          -79       -439       n/a        -115    0
+staffing-shortage-credit   gemma4-26b-a4b   1      -116         -106      +28        n/a        +18     -1
+stable-credit              greedy           1      -76          -76       0          n/a        -4      0
+stable-credit              conservative-v2  1      -12          -12       0          n/a        -1      0
+stable-credit              qwen36-35b-a3b   1      -309         -299      -21        n/a        -11     -1
+stable-credit              gemma4-26b-a4b   1      0            0         0          n/a        0       0
+
+Long-term sustainability
+
+entry                      policy           seeds  min cash  shortfall  days < 0
+financial-pressure-credit  greedy           1      -$18,863  $0         0
+financial-pressure-credit  conservative-v2  1      $0        $0         0
+financial-pressure-credit  qwen36-35b-a3b   1      -$6,298   $0         0
+financial-pressure-credit  gemma4-26b-a4b   1      $0        $0         0
+reporting-backlog-credit   greedy           1      -$6,082   $0         0
+reporting-backlog-credit   conservative-v2  1      $0        $0         0
+reporting-backlog-credit   qwen36-35b-a3b   1      -$8,122   $0         0
+reporting-backlog-credit   gemma4-26b-a4b   1      -$4,998   $0         0
+demand-growth-credit       greedy           1      -$6,082   $0         0
+demand-growth-credit       conservative-v2  1      $0        $0         0
+demand-growth-credit       qwen36-35b-a3b   1      -$6,149   $0         0
+demand-growth-credit       gemma4-26b-a4b   1      -$2,152   $0         0
+staffing-shortage-credit   greedy           1      -$13,075  $0         0
+staffing-shortage-credit   conservative-v2  1      $0        $0         0
+staffing-shortage-credit   qwen36-35b-a3b   1      -$37,229  $0         0
+staffing-shortage-credit   gemma4-26b-a4b   1      -$6,627   $0         0
+stable-credit              greedy           1      $0        $0         0
+stable-credit              conservative-v2  1      $0        $0         0
+stable-credit              qwen36-35b-a3b   1      -$9,823   $0         0
+stable-credit              gemma4-26b-a4b   1      $0        $0         0
+
+Actions
+
+entry                      policy           seeds  attempted  accepted  rejected
+financial-pressure-credit  greedy           1      +12        +12       0
+financial-pressure-credit  conservative-v2  1      0          0         0
+financial-pressure-credit  qwen36-35b-a3b   1      +25        +25       0
+financial-pressure-credit  gemma4-26b-a4b   1      0          0         0
+reporting-backlog-credit   greedy           1      +12        +12       0
+reporting-backlog-credit   conservative-v2  1      0          0         0
+reporting-backlog-credit   qwen36-35b-a3b   1      +16        +16       0
+reporting-backlog-credit   gemma4-26b-a4b   1      +3         +3        0
+demand-growth-credit       greedy           1      +12        +12       0
+demand-growth-credit       conservative-v2  1      0          0         0
+demand-growth-credit       qwen36-35b-a3b   1      +18        +18       0
+demand-growth-credit       gemma4-26b-a4b   1      +30        +30       0
+staffing-shortage-credit   greedy           1      +12        +12       0
+staffing-shortage-credit   conservative-v2  1      0          0         0
+staffing-shortage-credit   qwen36-35b-a3b   1      +42        +42       0
+staffing-shortage-credit   gemma4-26b-a4b   1      +54        +54       0
+stable-credit              greedy           1      +12        +12       0
+stable-credit              conservative-v2  1      +2         +2        0
+stable-credit              qwen36-35b-a3b   1      +5         +5        0
+stable-credit              gemma4-26b-a4b   1      0          0         0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 24 run(s): displacedAppointments: none displaced
