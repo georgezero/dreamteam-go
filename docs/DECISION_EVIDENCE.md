@@ -19,7 +19,9 @@ not independently validated: the independent review is PENDING.
 * the V0.8c additions, each versioned on its own: refusal-response
   version 2 (§13), repeat rule version 2 (§14), and the frozen rules on
   llm-agent 3's records (§15);
-* the versions in V0.8.0, and how to read their findings (§16).
+* the versions in V0.8.0, and how to read their findings (§16);
+* V0.9a (in development): the independent review workflow and a separate
+  contract, `dreamteam.parameter-evidence/v1` (§17).
 
 ## 1. Purpose
 
@@ -753,3 +755,37 @@ regeneration and sets aside exactly these fields:
 Every other byte must match. The exception covers those two frozen
 artifacts only and is not a general relaxation: every other committed
 output is compared byte for byte, and frozen v1 is checked as in §11.
+
+## 17. V0.9a: the review workflow and parameter evidence (in development)
+
+Nothing in §1–§16 changes. Two additions sit beside them:
+
+* **The independent review workflow**
+  ([docs/benchmark/v09a-dev/review/](benchmark/v09a-dev/review/INSTRUCTIONS.md)):
+  * an offline review page built from the frozen 98-item package;
+  * reviewer instructions;
+  * `review_metrics.py`, the checks and metrics for completed forms;
+  * a recall protocol, designed and not run.
+
+  The sample, items, form and protocol are unchanged. **The review is
+  still PENDING.** No v1 finding is independently validated.
+
+  Once forms exist, the metrics report agreement, confirmed findings and
+  per-rule precision, each with its denominator and its sampling:
+  * census for A and C;
+  * a stratified, non-random sample for D, E and F.
+
+  They never report recall.
+* **`dreamteam.parameter-evidence/v1`**
+  ([PARAMETER_EVIDENCE.md](PARAMETER_EVIDENCE.md)) checks explicit
+  parameters (amount, target, date, duration, direction) stated in an
+  action phrase against the action submitted in the same reply. It reads
+  llm-agent 3's every attempt, and llm-agent 2's final parsed reply.
+
+  It is a separate contract, with its own identifiers (`pe1-…`). It
+  overlaps v1 in one place: v1's FINANCIAL_AMOUNT_MISMATCH compares stated
+  amounts with the observation, while parameter evidence compares them
+  with the submitted action. Each finding is read under its own contract.
+
+  On V0.5c–V0.8c it made 816 eligible checks: 762 consistent, 0
+  supported, 54 unresolved.

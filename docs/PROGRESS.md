@@ -7,6 +7,113 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.9a — evidence validation and decision/action parameter consistency (0.9.0-dev.1)
+
+Owner decision 2026-10-31:
+* V0.8.0 accepted and closed (b803302, tag v0.8.0, CI run 41211327314).
+* V0.9a is authorized: the independent review as a separate human task,
+  and narrowly scoped, versioned parameter-consistency evidence on
+  existing recordings.
+* No simulator, agent, prompt or scoring change, and no live LLM run.
+
+**Built:**
+* **The independent review workflow**
+  ([benchmark/v09a-dev/review/](benchmark/v09a-dev/review/INSTRUCTIONS.md)).
+  The frozen V0.8b package and its protocol are unchanged.
+  * `review.html`: one offline, self-contained page built from the
+    package by `analysis/evidence/review_tool.py`. A reviewer reads each
+    item's evidence, labels it, explains, declares independence, and
+    saves `form.csv` and `reviewer.json`.
+  * `review_metrics.py` (`dreamteam.evidence-review-metrics/v1`): the
+    checks and metrics for completed forms. Precision is given with
+    denominator and sampling; recall never.
+  * `INSTRUCTIONS.md`, `REVIEW_STATUS.md` and `review-status.json`
+    (**PENDING**).
+  * `RECALL_PROTOCOL.md`: a design, not run.
+* **Parameter evidence** `dreamteam.parameter-evidence/v1`
+  ([PARAMETER_EVIDENCE.md](PARAMETER_EVIDENCE.md),
+  `analysis/evidence/parameter_evidence.py`):
+  * AMOUNT, TARGET, DATE, DURATION and DIRECTION mismatches between an
+    explicit statement in an action phrase and the action submitted in
+    the same reply;
+  * deterministic normalization, with no tolerance;
+  * explicit abstention.
+* **The corpus** ([benchmark/v09a-dev/corpus.json](benchmark/v09a-dev/corpus.json)):
+  V0.5c–V0.7c (llm-agent 2) and V0.8c (llm-agent 3), on the replays CI
+  already runs.
+* **CI** rebuilds the review page and the PENDING status, runs the
+  parameter evidence twice, compares each with the committed file, and
+  compares them across platforms.
+* **Version 0.9.0-dev.1.** It registers 0.8.0 for replay
+  (`mini-seed52-v080`, made from b803302; batch mode `v0.8.0`;
+  `internal/session/v080_test.go`).
+
+**Results** ([benchmark/v09a-dev/](benchmark/v09a-dev/README.md)):
+* **Independent review:** PENDING. Nothing was labelled. The workflow was
+  tested with synthetic labels only, which the tests generate and
+  discard.
+* **Parameter evidence:** 96 recordings, 4,191 decision points.
+  * 816 eligible checks: 762 consistent, **0 supported**, 54 unresolved,
+    0 insufficient evidence.
+  * By rule (eligible): target 493, date 146, duration 142, amount 21,
+    direction 14.
+  * Older recordings are checked on the final parsed reply only.
+  * The developer's calibration removed 13, then 7, false positives (all
+    documented). The rules have found mismatches only in synthetic tests.
+
+**Quality gates:**
+
+Run on linux/amd64 unless noted:
+* **Focused tests:**
+  * agent tests (40);
+  * evidence tests (111, including the 40 parameter evidence tests and the
+    9 review workflow tests, one of which runs the review page's own
+    logic under Node);
+  * probe tests (3, against the built binary).
+  All pass.
+* **Go:**
+  * full default suite: all 10 packages pass, including the new
+    `mini-seed52-v080` fixture (0.8.0, batch mode `v0.8.0`);
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Historical replay:** every fixture replays with every digest
+  verified; every recording in the corpus was replayed at 0.9.0-dev.1.
+* **Benchmark verify and reproduce:** 66 of 66, 0 failed.
+* **The V0.8c pipeline:** run twice, byte-identical and equal to the
+  committed files. `check_v08b.py` reproduces the V0.8b review package
+  and probe log, with build numbers set aside.
+* **V0.9a outputs:** the review page and its PENDING status are rebuilt
+  identically. The parameter evidence, run twice, is byte-identical.
+  The gate run caught one stale committed file: `parameter-evidence.json`
+  had been written before replay `run.json` and `transcript.jsonl` were
+  dropped from the hashed inputs, so its `inputs` list still named 192 of
+  them. Every check, count and table was identical; the file was
+  regenerated, and it now equals both runs.
+* **Five cross-builds:** all pass.
+* **CI:** linux/amd64, linux/arm64 and darwin/arm64, with the
+  cross-platform comparison and the new review and parameter evidence
+  step.
+
+**No change to:**
+* simulator behaviour, actions, scenarios, scoring, agents, prompts or
+  settings;
+* any recording, session, golden reference or benchmark result;
+* the frozen v1 rules and outputs, repeat v2, refusal-response v1 and v2;
+* the review package and its protocol.
+
+No model was contacted.
+
+**Known limitations:**
+* **The independent review is pending.** No rule is independently
+  validated.
+* **The parameter rules are calibrated on the corpus they describe,**
+  with no held-out set, and are narrow by design.
+* **llm-agent 2 records only the final parsed reply.**
+* **No hire stated an hourly rate,** so `rateCents` is untested on
+  recordings.
+
+---
+
 ## V0.8.0 — release: auditable decision evidence for practice-management agents
 
 Owner decision 2026-10-31:

@@ -20,7 +20,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
-| **V0.9** (proposed, not approved) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
+| **V0.9** (in development: V0.9a, `0.9.0-dev.1`, authorized by the owner 2026-10-31, built) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -873,7 +873,7 @@ The owner's proposal that preceded it:
 
 V0.8a, V0.8b and V0.8c were authorized and released in V0.8.0.
 
-## 7c. V0.9 — agent decision reliability (proposed, not approved)
+## 7c. V0.9 — agent decision reliability (in development)
 
 The owner's recommendation after V0.8c: shift from building evidence
 infrastructure to using it to improve the reliability of management
@@ -881,12 +881,38 @@ agents. First, independent review of the existing evidence rules, then
 more specific decision/action consistency checks. No further simulator
 mechanics and no large LLM benchmark first.
 
-| Milestone | Proposed scope |
-|---|---|
-| V0.9a | Independent evidence validation and targeted rule improvements |
-| V0.9b | Financial decision-quality framework |
-| V0.9c | Prospective evaluation with frozen models |
-| V0.9.0 | Release |
+| Milestone | Scope | Status |
+|---|---|---|
+| V0.9a | Independent review workflow and decision/action parameter consistency | authorized 2026-10-31; built (0.9.0-dev.1), awaiting owner review |
+| V0.9b | Financial decision-quality framework | proposed |
+| V0.9c | Prospective evaluation with frozen models | proposed |
+| V0.9.0 | Release | pending |
+
+**V0.9a as authorized** (owner, 2026-10-31, after accepting V0.8.0):
+* **Independent review:** a separate human task. The implementation may
+  prepare, validate, import and analyse labels, but may not claim
+  validation without an actual independent reviewer.
+* **Precision:** only with a clear denominator and sampling
+  qualification.
+* **Recall:** never from the 98 items. It would need a separate
+  annotation protocol over eligible statements, misses included.
+* **Parameter evidence:** `dreamteam.parameter-evidence/v1`, a separate,
+  versioned contract:
+  * amount, target, date, duration and direction mismatches;
+  * explicit statements only;
+  * abstention preferred.
+* **Not approved:** simulator, agent or prompt changes; live LLM runs;
+  scoring; an LLM judge; changes to frozen evidence.
+* **Built:** [docs/benchmark/v09a-dev/](benchmark/v09a-dev/README.md).
+  * The review is still PENDING.
+  * The parameter evidence made 816 eligible checks on V0.5c–V0.8c: 0
+    supported mismatches, 54 abstentions.
+
+**V0.9b, the owner's recommendation:** a financial decision-quality
+framework that distinguishes affordability, reversibility and downstream
+operational exposure, without collapsing them into one score. It would
+let cases such as the V0.7c staffing terminations be analysed rigorously,
+without claiming that a decision was irrational.
 
 Directions recorded:
 * **independent evidence review:** label the frozen 98-item package by an
@@ -901,8 +927,8 @@ Directions recorded:
 * **agent decision-quality benchmarking,** without a leaderboard.
 
 Each rule change is a new, separately versioned rule, and earlier
-findings stay under their original versions. Nothing in this section was
-implemented in V0.8.0. Each step needs the owner's GO.
+findings stay under their original versions. V0.9a is built. V0.9b and
+later steps each need the owner's GO.
 
 ## 8. Testing strategy (all versions)
 

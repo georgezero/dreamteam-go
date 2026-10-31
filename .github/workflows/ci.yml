@@ -231,6 +231,24 @@ jobs:
             cmp history/$f $V/history/$f; cp history/$f out/history-$f
           done
           for f in v08c-analysis.json v08c-tables.md; do cmp v08c/$f $V/$f; cp v08c/$f out/$f; done
+      - name: Review workflow and parameter evidence
+        # V0.9a, without any model: the offline review page rebuilt from the
+        # frozen V0.8b review package, the review status (no form exists,
+        # so it must say PENDING), and dreamteam.parameter-evidence/v1 on
+        # the V0.5c-V0.8c replays above, run twice. Each equal to the
+        # committed one (docs/benchmark/v09a-dev) and compared across
+        # platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v09a-dev
+          $P analysis/evidence/review_tool.py --package docs/benchmark/v08b-dev/review --out review-page/review.html
+          $P analysis/evidence/review_metrics.py --package docs/benchmark/v08b-dev/review --out review-page/review-status.json
+          grep -q '"status": "PENDING"' review-page/review-status.json
+          $P analysis/evidence/parameter_evidence.py --corpus $V/corpus.json --replays . --out param
+          $P analysis/evidence/parameter_evidence.py --corpus $V/corpus.json --replays . --out param-again
+          for f in parameter-evidence.json parameter-tables.md; do cmp param/$f param-again/$f; cmp param/$f $V/$f; cp param/$f out/$f; done
+          for f in review.html review-status.json; do cmp review-page/$f $V/review/$f; cp review-page/$f out/review-page-$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
