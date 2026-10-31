@@ -7,47 +7,35 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.7** (`0.7.0`, financial realism) is the current release. It
-adds opt-in financial consequences to management decisions:
-* **paid radiologist overtime:** time on duty past the rostered end, at
-  the salary's hourly rate, with benefits (`docs/V0.7_OVERTIME_DESIGN.md`);
-* **financial solvency:** a credit line with daily interest and repayment,
-  a funding rule that refuses a new commitment the practice cannot fund
-  from cash and undrawn credit after what it already owes, and financial
-  distress recorded when an obligation already incurred cannot be
-  financed (`docs/V0.7_SOLVENCY_DESIGN.md`);
-* **versioned benchmark suites:** `dreamteam-dev` version 1 (the V0.6
-  benchmark, unchanged), version 2 (overtime paid) and version 3
-  (overtime paid, with and without a $50,000 credit line);
-* **a frozen-agent evaluation** under the new economics, every LLM run
-  replayed exactly (`docs/benchmark/v07c-dev/`).
+Status: **V0.8** (`0.8.0`, auditable decision evidence) is the current
+release. It adds evaluation and auditability of agent decisions, not
+clinical validation, and changes no simulator behaviour:
+* **decision evidence:** deterministic, versioned rules that check whether
+  a recorded agent's stated reasons agree with what it proposed and what
+  was executed, with source references and explicit abstention, and no LLM
+  judge (`docs/DECISION_EVIDENCE.md`). Version 1 is frozen; its known
+  defects are documented, and corrections are separate versions (repeat
+  evidence v2, refusal-response v2);
+* **an independent review package** of 98 items, frozen. The review is
+  **pending**: no rule is independently validated;
+* **paired financial and operational outcomes** against no action, and
+  deterministic funding-refusal probes;
+* **llm-agent 3** (`agents/llm/llm_agent3.py`), which records every attempt
+  at a decision, every one replayable and checkable without a model
+  (`docs/LLM_AGENT.md` §13);
+* **a prospective funding-refusal evaluation** of the two frozen models on
+  a low-liquidity variant made of existing settings
+  (`docs/benchmark/v08c-dev/`).
 
-Every earlier scenario, save, golden reference and V0.6 result is
-unchanged. The economics are deliberately simple, not a validated model of
-practice finance.
+Every earlier scenario, save, golden reference and benchmark result is
+unchanged.
 
-In development, not released (`0.8.0-dev.3`):
-* **V0.8a:** a read-only, deterministic analysis of whether the recorded
-  LLM agents' stated reasons agree with what they proposed and what was
-  executed (`docs/DECISION_EVIDENCE.md`, `docs/benchmark/v08a-dev/`). Its
-  rules are now frozen.
-* **V0.8b** (`docs/benchmark/v08b-dev/`):
-  * an independent review package (review pending);
-  * deterministic funding-refusal probes;
-  * refusal-response evidence;
-  * paired financial and operational outcomes;
-  * a proposed recording contract for V0.8c.
-
-  Neither uses a model or changes simulator behaviour.
-* **V0.8c** (`docs/benchmark/v08c-dev/`): llm-agent 3
-  (`agents/llm/llm_agent3.py`), which records every attempt at a decision
-  (`docs/LLM_AGENT.md` §13), and a small prospective evaluation of what
-  the frozen models do after a funding refusal, on a low-liquidity variant
-  of the financial-pressure practice made of existing settings.
-
-It builds on V0.6 (`0.6.0`, the agent benchmark: a suite of five practice
-scenarios run in one command, each policy reported on six dimensions
-against no action, with no score or ranking, `docs/BENCHMARK_SUITE.md`),
+It builds on V0.7 (`0.7.0`, financial realism: paid radiologist overtime
+and opt-in solvency with a credit line and a funding rule,
+`docs/V0.7_SOLVENCY_DESIGN.md`), V0.6 (`0.6.0`, the agent benchmark: a
+suite of five practice scenarios run in one command, each policy reported
+on six dimensions against no action, with no score or ranking,
+`docs/BENCHMARK_SUITE.md`),
 V0.5 (`0.5.0`, LLM agents: an external agent lets a language model on any
 OpenAI-compatible server manage the practice, `agents/llm/`,
 `docs/LLM_AGENT.md`), V0.4 (`0.4.0`, the agent evaluation harness:
@@ -416,6 +404,28 @@ ranking:
 * No action by any policy was refused for insufficient funds, so agents'
   responses to funding refusals remain unobserved.
 
+V0.8 analyses what agents stated, proposed and did. Its development
+findings are observations, not a ranking or a rate:
+* In the 90 historical recordings (3,972 decision points), 3,965 of the
+  3,972 prompts were rebuilt and verified (every llm-agent 2 prompt). The
+  frozen v1 rules found, among others, 5 explicit actions omitted, 3
+  amount mismatches, 45 stated actions not executed and 107 repeated
+  invalid proposals. None is independently validated, and v1's repeat
+  counts are not confirmed exact-action repeats: repeat evidence v2
+  confirms none of v1's 202 historical repeat links, mostly because the
+  refused actions were never recorded (`docs/DECISION_EVIDENCE.md` §14).
+* V0.8c ran 20 runs (8 live LLM runs) on a control and a low-liquidity
+  condition, two seeds, 30 days, with every attempt recorded: 240 of 240
+  decision points, 270 attempts. Every live run replays without the
+  model, byte for byte.
+* 10 LLM actions were refused for insufficient funds (Qwen 8, Gemma 2),
+  all in the low-liquidity condition on one seed. The next proposals:
+  exact repeat 0, modified 2 (the effective date only), different 3, no
+  action 5.
+* No run reached financial distress. Every low-liquidity run drew credit,
+  no action included. Qwen lowered profit against no action in all four
+  of its runs ($1,699–$21,221); Gemma's outcomes equalled no action.
+
 Golden references in `testdata/golden/` pin four V0.1 runs and three V0.2
 runs (hire and terminate; roster changes; reading allocation); see its
 README for checking and (deliberately) regenerating them.
@@ -445,7 +455,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.7, V0.8 in development, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.8, V0.9 proposed, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -455,24 +465,33 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/LLM_AGENT.md` | the LLM agent: setup, settings, prompt, memory, decisions, evidence, usage, replay (V0.5) |
 | `docs/V0.7_OVERTIME_DESIGN.md` | radiologist overtime costing (V0.7) |
 | `docs/V0.7_SOLVENCY_DESIGN.md` | financial solvency and cash constraints (V0.7) |
-| `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions (V0.8a, in development) |
+| `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions; its versions, defects and the refusal-response and repeat evidence (V0.8) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.7)
+## Known limitations (V0.8)
 
-* **Development results only.** V0.7c covers five scenarios, two seeds at
-  30 days and one at 90, two frozen LLM configurations and one prompt and
-  settings set. No claim of generality or significance is made.
+* **Development results only.** V0.8c covers two conditions, two seeds at
+  30 days, two frozen LLM configurations and one prompt and settings set;
+  funding refusals occurred on one seed only. No claim of generality,
+  significance or a response rate is made.
 * **No held-out benchmark evaluation,** and **no clinical validation.**
   Everything is synthetic.
-* **Funding refusals were never observed with LLM agents.** No V0.7c
-  action was refused for insufficient funds; solvency accounting and
-  enforcement were tested by deterministic tests and the V0.7b baseline
-  characterization only.
+* **The independent evidence review is pending.** The 98-item package is
+  frozen but unlabelled, so no rule is independently validated and no
+  precision, recall or agreement is reported.
+* **The evidence rules are narrow,** calibrated on the corpus they
+  describe, and favour precision over recall. Frozen v1 has documented
+  defects (V1-D1 to V1-D5); its repeat counts are not confirmed
+  exact-action repeats. Findings are read under the rule version that
+  made them.
+* **Historical recordings are mostly unclassifiable** for repeats and
+  refusal responses: only llm-agent 3 records every attempt.
+* **A stated reason is evidence of what an agent said,** not of why it
+  acted; outcomes are described, never attributed to a decision.
 * **Simplified overtime economics:** straight time at the salary's hourly
   rate, with the standard on-cost. The operations manager's overtime is
   still unpaid.
@@ -495,7 +514,8 @@ reference policy) and `agents/llm` (the LLM agent).
 * **`conservative-v2`** is a declared rule, neither optimized nor
   validated.
 
-Details: `docs/RELEASE_NOTES.md` (V0.7.0),
+Details: `docs/RELEASE_NOTES.md` (V0.8.0, V0.7.0),
+`docs/benchmark/v08c-dev/README.md` §11,
 `docs/benchmark/v07c-dev/README.md` §10.
 
 ### From V0.6

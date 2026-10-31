@@ -5,6 +5,279 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.8.0 — auditable decision evidence for practice-management agents
+
+V0.8 adds **evaluation and auditability** of agent decisions. It does not
+add clinical validation, change the simulator, or rank any model. It
+provides deterministic, versioned evidence of what an agent stated, what
+it proposed, what was validated and executed, what followed, and how an
+agent responded when an action was refused. Every input to that evidence
+is recorded and can be checked again without a model.
+
+There is no new mechanic, scenario behaviour, action or scoring rule.
+Every earlier scenario, save, golden reference and benchmark result is
+unchanged. The one new scenario variant, `bench-financial-pressure-ot-lowliquidity`,
+is made of existing settings only (an evaluation condition, see 13).
+
+**Decision evidence (V0.8a, V0.8b):**
+1. **Decision evidence v1.** `dreamteam.decision-evidence/v1`
+   (`analysis/evidence/decision_evidence.py`, `docs/DECISION_EVIDENCE.md`)
+   checks whether a recorded agent's stated reasons are consistent with
+   its proposed and executed actions, by six deterministic rules. It uses
+   no LLM judge and makes no claim about whether a decision was good.
+2. **Historical prompt reconstruction.** Every prompt and memory text an
+   llm-agent 2 recording was given is rebuilt from the replay transcript
+   with the agent's own functions, and checked against the recorded
+   SHA-256.
+3. **Evidence source references.** Every finding carries its sources:
+   the recording and its line, the replay transcript, the apply results,
+   and the prompt's SHA-256 and whether it was verified. A trace of each
+   decision point is written beside the findings.
+4. **Explicit abstention.** A rule that cannot decide says so:
+   `unresolved` or `insufficient_evidence`, with the reason. Hedged,
+   deferred or conditional statements are not read as commitments.
+5. **Frozen evidence rules.** v1 is frozen (`analysis/evidence/frozen-v1.json`,
+   `check_frozen.py`): the analyzer's SHA-256, the rules, the corpus
+   fingerprint and the output hashes. Any change to a rule is a new,
+   separately versioned rule. Its known defects are documented, not fixed
+   (see *Evidence corrections*).
+6. **Independent review package.** A deterministic, stratified sample of
+   98 v1 outputs (supported findings, unresolved and insufficient
+   outcomes, consistent checks and negative controls), with a protocol
+   and a form (`docs/benchmark/v08b-dev/review/`),
+   frozen. **The review is PENDING** (see below).
+7. **Financial outcome analysis.** `analysis/evidence/financial_outcomes.py`
+   pairs each policy run with no action from the same starting state and
+   reports financial and operational outcomes side by side, never
+   combined into a score, and separately from the consistency evidence.
+8. **Deterministic refusal probes.** Probes A–J
+   (`analysis/probes/funding_probes.py`, `docs/benchmark/v08b-dev/PROBES.md`)
+   script funding refusals through the agent protocol and check the
+   funding rule's refusals, reservations and boundary exactly.
+
+**Complete recording and the funding-refusal evaluation (V0.8c):**
+9. **Complete attempt recording v3.** `dreamteam.llm-decision-record/v3`
+   (`docs/LLM_AGENT.md` §13) records every attempt at a decision: its
+   input by SHA-256 with any feedback, the bounded raw output, the parse
+   result, reason and actions, each validate answer, refusals and errors,
+   which attempt was used, and the record's completeness. Model output,
+   parsed actions, validated actions and applied batches are kept
+   separate. No secret or server detail is recorded.
+10. **llm-agent 3** (`agents/llm/llm_agent3.py`) writes that record. Given
+    the same answers it makes the same decisions as llm-agent 2, with the
+    same prompt (`llm-agent-prompt/v2`) and memory format. llm-agent 1 and
+    2 are unchanged and remain the agents of every earlier recording.
+11. **Repeat evidence v2.** `dreamteam.repeat-evidence/v2`
+    (DECISION_EVIDENCE §14) recognizes a repeated refused proposal by the
+    exact content of the action, not the refusal message. It counts a
+    same-target proposal with other values as `related`, never as a
+    repeat, and abstains where the evidence is incomplete. It is a
+    separate version; v1 is unchanged.
+12. **Refusal-response v2.** `dreamteam.refusal-response/v2`
+    (DECISION_EVIDENCE §13) classifies what an agent proposed next after a
+    refusal: `identical_repeated`, `modified_proposal`,
+    `different_proposal`, `no_action` or `evidence_unavailable`. It
+    corrects v1's reader (RR1-D1) and reads llm-agent 3's records
+    directly. v1's outputs are unchanged.
+13. **Prospective funding-refusal evaluation.** A plan, a low-liquidity
+    condition (the V0.7c financial-pressure practice with $80,000 opening
+    cash, set by a deterministic rule on analysis seed 41900) and fresh
+    seeds were committed before any live run
+    (`docs/benchmark/v08c-dev/PLAN.md`; suite `dreamteam-dev` version 4).
+14. **Recorded-decision replay.** Every LLM run, V0.5 to V0.8, replays
+    from its recording without a model, byte for byte. An llm-agent 3
+    replay also rebuilds every attempt's input and asks validate again,
+    and requires the recorded answer exactly.
+15. **Cross-platform reproducibility.** CI regenerates every V0.8 output
+    from the replays on linux/amd64, linux/arm64 and darwin/arm64,
+    requires each to equal the committed one, and compares them across
+    platforms byte for byte.
+
+**Development findings.** These are development observations, not
+estimates, not a ranking and not a claim about either model in general.
+* **Historical corpus** (V0.8a, `docs/benchmark/v08a-dev/`): 90 recordings
+  (V0.5a–V0.7c), 3,972 decision points. Of the 3,972 prompts, 3,965 are
+  rebuilt and verified: every llm-agent 2 prompt. The 7 V0.5a (llm-agent
+  1) prompts cannot be rebuilt.
+* **Frozen v1 findings** on the historical corpus, read under v1's rules:
+
+  | Rule | Checked | Consistent | Supported | Unresolved | Insufficient |
+  |---|---|---|---|---|---|
+  | Explicit action omitted | 525 | 480 | 5 | 40 | 0 |
+  | Explicit opposite action | 672 | 669 | 0 | 3 | 0 |
+  | Financial amount mismatch | 235 | 206 | 3 | 26 | 0 |
+  | Repeated invalid proposal | 342 | 235 | 107 | 0 | 0 |
+  | Stated action not executed | 352 | 307 | 45 | 0 | 0 |
+  | Factual observation mismatch | 5,139 | 5,101 | 27 | 2 | 9 |
+
+  None is independently validated. The repeat counts are not confirmed
+  exact-action repeats (see *Evidence corrections*).
+* **Independent review package:** 98 items, unlabelled.
+* **V0.8c evaluation** (`docs/benchmark/v08c-dev/README.md`):
+  * 20 of 20 planned runs completed on the first attempt, with no failure
+    or rerun: two conditions (control and low liquidity), seeds 41901 and
+    41902, 30 days, `noop`, `greedy`, `conservative-v2` and the two frozen
+    models (Qwen3.6-35B-A3B and Gemma 4 26B-A4B, llm-agent 3, the V0.6c
+    settings). 8 of the 20 were live LLM runs.
+  * Recording was complete at 240 of 240 decision points: 270 of 270
+    attempts preserved, every input verifiable, none truncated.
+  * Every live run replays without the model, equal to the live run byte
+    for byte.
+
+**Funding refusals (V0.8c).** 10 of the LLM agents' actions were refused
+`insufficient_funds`: 8 encountered by Qwen, 2 by Gemma. All 10 occurred
+in the low-liquidity condition on one development seed, 41901. There were
+none in the control or on seed 41902.
+
+| Response to the 10 funding refusals | Count |
+|---|---|
+| Exact repeat (`identical_repeated`) | 0 |
+| Modified proposal | 2 |
+| Different proposal | 3 |
+| No action | 5 |
+| Evidence unavailable | 0 |
+
+* Both modified proposals changed only the effective date. A changed date
+  alone does not establish financial adaptation.
+* These are counts of what happened, not response rates. No
+  population-level rate is established, and nothing here generalizes to
+  other scenarios, seeds or models.
+* Across all 51 refusals of the LLM agents' actions (all codes): exact
+  repeat 1, modified 13, different 16, no action 21.
+
+**Financial and operational outcomes (V0.8c),** each policy minus no
+action on the same condition and seed, 30 days. They are reported
+separately from the consistency evidence. No causal attribution is made
+from the order of events.
+* **Financial distress:** none in any of the 20 runs.
+* **Credit:** drawn in every low-liquidity run, no action included
+  ($29,429 on seed 41901, $32,220 on 41902), with $18–$26 of interest.
+  Never drawn in the control. Qwen's most drawn: $33,668 and $33,951.
+* **Qwen, profit vs no action:** −$21,221 and −$1,699 (control, seeds
+  41901 and 41902); −$20,967 and −$8,515 (low liquidity).
+* **Qwen, operations vs no action:**
+  * control 41901: exams −42, lost orders +40, TAT breaches +186;
+  * control 41902: exams +2, lost orders 0, breaches +2;
+  * low liquidity 41901: exams 0, lost orders 0, breaches +208;
+  * low liquidity 41902: exams 0, lost orders 0, breaches +4.
+* **Gemma:** the same as no action in profit and every operational
+  measure, in all four runs. Its one executed action took effect after
+  the horizon.
+* **`greedy`:** profit −$1,271 and −$598, breaches −6 and −2, the same in
+  both conditions. Its 4 refusals at apply were `insufficient_funds`, in
+  low liquidity. **`conservative-v2`** took no action.
+
+**Evidence corrections.** Each finding is to be read under the rule
+version that produced it. Nothing earlier was rewritten.
+
+| Version | What it is | Status |
+|---|---|---|
+| `dreamteam.decision-evidence/v1` | six consistency rules, V0.8a | frozen, unchanged; defects V1-D1 to V1-D5 documented |
+| `dreamteam.repeat-evidence/v2` | repeats by exact action identity, V0.8c | new, separately versioned |
+| `dreamteam.refusal-response/v1` | the response after a refusal, V0.8b | unchanged; defect RR1-D1 documented |
+| `dreamteam.refusal-response/v2` | its corrected reader, V0.8c | new, separately versioned |
+
+* **v1's repeat counts are not confirmed exact-action repeats.** v1
+  identifies a refused proposal by type, code and message. Of its 202
+  historical repeat links, repeat v2 confirms none: at 194 at least one
+  end's actions were never recorded, and at 8 both are recorded and
+  differ. On the V0.8c records, v1 makes 13 links and v2 finds 1 (the
+  same extension refused `after_close` twice within one decision point);
+  the other 12 join different actions.
+* **V0.8c has one confirmed exact repeat** across all refusal types, and
+  **no exact repeat of a funding-refused proposal.**
+* **Historical attempt evidence is often incomplete.** llm-agent 1 and 2
+  recorded only the final parsed reply's actions, so of 559 historical
+  refusals repeat v2 abstains on 545 (452 insufficient evidence, 93
+  unresolved), and refusal-response v2 classifies 59 (v1 reported 102).
+* **The defects:**
+  * **V1-D1:** a refusal message carrying amounts (`insufficient_funds`)
+    differs from day to day, so v1 misses the identical proposal repeated
+    across decision points.
+  * **V1-D2:** a flagged (hedged, deferred) commitment with a matching
+    action is counted consistent. Counts only; no finding.
+  * **V1-D3:** amount agreement is lenient by up to one unit of the
+    stated precision.
+  * **V1-D4:** month-to-date profit in the traces resets at a month's
+    start. Traces only.
+  * **V1-D5:** different actions refused with the same message are linked
+    as one repeated proposal.
+  * **RR1-D1:** refusal-response v1 compared a refused proposal with
+    itself when the next reply could not be parsed. Both of V0.8b's
+    historical `identical_repeated` responses are this defect.
+
+**Independent review: PENDING.** The 98-item package is frozen but no
+independent reviewer has labelled it. No independent precision, recall or
+agreement is reported, and the consistency rules are not independently
+validated. No LLM reviewer was used.
+
+**The one reproducibility exception.** The frozen V0.8b review package and
+probe log record the engine build that made them (`0.8.0-dev.2`). A later
+build regenerates them with its own build number, so
+`analysis/evidence/check_v08b.py` sets aside exactly these build-version
+fields and nothing else:
+* `run.engine` of each review item (`review/items.json`);
+* the review manifest's `itemsSha256`, which then differs only through
+  those fields; the committed value must be the committed `items.json`'s
+  own SHA-256, and the regenerated one the regenerated file's;
+* `engine` of each probe in `probes-out/probe-log.json`.
+
+Every other byte, including every identifier, finding, metric, form row
+and probe decision, must match exactly. This applies to those two frozen
+V0.8b artifacts only. It is not a general relaxation: every other
+committed output is compared byte for byte, and frozen v1's own check is
+unchanged.
+
+**Known limitations:**
+* **Development seeds only;** no held-out evaluation, no clinical
+  validation. Everything is synthetic.
+* **The independent review is pending.**
+* **The V0.8c evaluation is small:** two seeds, two conditions, two
+  frozen models, one prompt. Funding refusals occurred on one seed only.
+* **Historical recordings are mostly unclassifiable** for repeats and
+  refusal responses. Only llm-agent 3 records every attempt.
+* **Exact action identity is strict.** A proposal changed only in its
+  date is `related` or `modified`, never a repeat, and the evidence does
+  not decide whether it is "the same" proposal.
+* **The rules were calibrated on the corpus they describe,** and recall is
+  traded for precision.
+* **A stated reason is evidence of what an agent said,** not of why it
+  acted. The outcome analysis is descriptive only.
+* **Live inference is nondeterministic;** exact replay needs the recorded
+  decisions. External agents are trusted processes, not sandboxed.
+* The V0.7 limitations of the economics remain.
+
+**Compatibility.**
+* No change to mechanics, randomness, actions, accounting, evaluation,
+  scoring or scenarios' behaviour. Suite versions 1 to 3 and their
+  fingerprints are unchanged; version 4 adds the low-liquidity variant.
+* All golden references give identical outcomes.
+* Saves from V0.1 to V0.7 and from 0.8.0-dev.1 to 0.8.0-dev.3 replay with
+  every digest verified. 0.8.0-dev.3 is registered as batch mode
+  `v0.8_dev3`.
+* llm-agent 1 and 2, their prompts and settings, the protocols and the
+  contract report are unchanged. Every committed recording replays.
+* The V0.8a, V0.8b and V0.8c evidence is committed unchanged.
+
+**Validation.**
+* The full Go test suite passes, and the race detector finds no race (with
+  `-timeout 90m`).
+* vet and gofmt are clean. The Python agent, evidence and probe tests
+  pass.
+* Every session fixture replays, and every golden reference is identical.
+* Benchmark verify and reproduce pass, including every recorded-LLM
+  replay and the V0.8c llm-agent 3 replays, every attempt checked.
+* Frozen v1 reproduces byte for byte. The frozen V0.8b artifacts reproduce
+  with only the build-version fields above set aside.
+* Every V0.8 output, the financial ledgers included, is regenerated and
+  equals the committed one.
+* Cross-builds succeed for five targets, and the committed seed guards
+  pass.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
+---
+
 ## V0.7.0 — financial realism for practice-management simulation
 
 V0.7 makes the financial consequences of management decisions more

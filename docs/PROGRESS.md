@@ -7,6 +7,79 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.8.0 — release: auditable decision evidence for practice-management agents
+
+Owner decision 2026-10-31:
+* V0.8c accepted and closed (ee8aabc, da52a77; CI run 41171062478 green);
+* GO for the V0.8.0 release, release-only;
+* no V0.8d; no simulator, agent, prompt, model, scoring or scenario
+  change;
+* V0.9 proposed (ROADMAP §7c), not approved.
+
+**Changed:**
+* Version 0.8.0. 0.8.0-dev.3 is registered for replay
+  (`mini-seed52-v083`, made from da52a77; batch mode `v0.8_dev3`;
+  `internal/session/v083_test.go`). Every earlier batch mode is kept.
+* Release notes: V0.8.0, with the release summary (fifteen items), the
+  development findings with their denominators, the evidence corrections
+  (the four versions; V1-D1 to V1-D5 and RR1-D1), the pending
+  independent review, the funding refusals and the paired outcomes, and
+  the known limitations.
+* README (V0.8 current, findings, limitations), ROADMAP (V0.8 released;
+  §7c, V0.9 proposed), DECISION_EVIDENCE (status; §16, the versions and
+  how to read them, and the one reproducibility exception), BENCHMARK_SUITE
+  and LLM_AGENT (status and limitations).
+* `check_v08b.py` now also requires the regenerated review manifest's
+  `itemsSha256` to be its own `items.json`'s SHA-256. Its exception,
+  the build-version fields of the two frozen V0.8b artifacts only, is
+  documented narrowly in DECISION_EVIDENCE §16 and the release notes.
+* The development evidence (`docs/benchmark/v08a-dev/`, `v08b-dev/`,
+  `v08c-dev/`) is unchanged.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, scoring, the harness, the protocols, the policies, the LLM
+agents, their prompts or settings, or any evidence rule. No evaluation
+was rerun, and no model was contacted.
+
+**Release gates** (linux/amd64 unless noted):
+* Clean release tree (only release changes).
+* Full default Go suite: all 10 packages with tests pass, including
+  `v083_test.go`. The tagged clinical evaluation suites were not rerun
+  (unaffected).
+* Race: `go test -race -timeout 90m ./...` passes.
+* vet (three tag sets) and gofmt: clean.
+* Python: agent tests (40, llm-agent 2 and 3), evidence tests (62) and
+  probe tests (3, against the built 0.8.0 binary) pass.
+* Historical session replay: every fixture, including
+  `mini-seed52-v083` (0.8.0-dev.3, batch mode `v0.8_dev3`), replays with
+  every digest verified.
+* Golden references: outcomes identical (through the migration manifest).
+* Suite verify and reproduce: the V0.4 CI benchmark (T90 recomputed), the
+  V0.6a suite, the V0.6b, V0.7a and V0.7b suite runs.
+* Recorded LLM replay: V0.5a, V0.5b, V0.5c stages a–d, the ten V0.6c and
+  ten V0.7c replays (the financial ledger, credit draws, repayments and
+  interest included), and the two V0.8c llm-agent 3 replays, every
+  attempt's input and validate answer checked. With the suites: 66 of 66
+  verify and reproduce commands, 0 checks failed.
+* Frozen v1: `check_frozen.py` reproduces the analyzer, tables and traces
+  byte for byte, and the evidence in every field but the engine build.
+* Frozen V0.8b artifacts: `check_v08b.py` reproduces the review package
+  and probe log with only the documented build-version fields set aside.
+* The V0.8b and V0.8c pipelines (financial outcomes, probes, probe
+  evidence, refusal-response v1 and v2, repeat v2, the scenario analysis
+  and the V0.8c analysis), run twice under 0.8.0: byte-identical, and
+  equal to the committed files.
+* Five cross-builds: linux/amd64, linux/arm64, darwin/arm64,
+  darwin/amd64, windows/amd64.
+* Committed seed guards (`TestCommittedConfigs`, `TestCommittedSuiteRuns`,
+  the holdout guard): pass.
+* CI on the release commit: green on linux/amd64, linux/arm64 and
+  darwin/arm64, with the cross-platform comparison.
+
+No live LLM evaluation was rerun.
+
+---
+
 ## V0.8c — complete decision recording and prospective refusal-response evaluation (0.8.0-dev.3)
 
 Owner decision 2026-10-30: V0.8b accepted and closed (5b6cdba, CI run

@@ -5,8 +5,8 @@ Status: built in V0.8a (0.8.0-dev.1), and **frozen in V0.8b**
 output order and the committed outputs (§11,
 [the freeze record](benchmark/v08a-dev/FREEZE.md)). V0.8c adds separately
 versioned readers and rules beside it (§13–§15) and changes nothing in
-it. Its findings are not independently validated: the independent review
-is PENDING. Not released.
+it. Released in V0.8.0 with every version below (§16). Its findings are
+not independently validated: the independent review is PENDING.
 
 **Files:**
 * the analysis: `analysis/evidence/decision_evidence.py` (analyzer
@@ -18,7 +18,8 @@ is PENDING. Not released.
 * the V0.8b extension: `dreamteam.refusal-response/v1` (§12);
 * the V0.8c additions, each versioned on its own: refusal-response
   version 2 (§13), repeat rule version 2 (§14), and the frozen rules on
-  llm-agent 3's records (§15).
+  llm-agent 3's records (§15);
+* the versions in V0.8.0, and how to read their findings (§16).
 
 ## 1. Purpose
 
@@ -511,7 +512,7 @@ frozen at 80cfff9 ([FREEZE.md](benchmark/v08a-dev/FREEZE.md),
 * A behavioural change is a new rule version, approved by the owner, and
   runs beside v1.
 * Defects found after the freeze are documented in the freeze record
-  (V1-D1 to V1-D4), not fixed in v1.
+  (V1-D1 to V1-D5), not fixed in v1.
 
 **The independent review** of a seeded sample of v1 outputs is prepared
 and pending ([review protocol](benchmark/v08b-dev/review/PROTOCOL.md)). No
@@ -709,3 +710,46 @@ and memory are llm-agent 2's.
 
 **Its findings stay v1 findings:** version 1 semantics, the defects of
 §11 included. The independent review (V0.8b) covers none of them.
+
+## 16. The versions in V0.8.0
+
+| Version | What it is | Introduced | Status |
+|---|---|---|---|
+| `dreamteam.decision-evidence/v1` | the six consistency rules (§6) | V0.8a | frozen (§11); defects V1-D1 to V1-D5 documented, not fixed |
+| `dreamteam.refusal-response/v1` | the response after a refusal (§12) | V0.8b | unchanged; defect RR1-D1 documented (§13) |
+| `dreamteam.refusal-response/v2` | its corrected reader, reading llm-agent 3 directly (§13) | V0.8c | separate version |
+| `dreamteam.repeat-evidence/v2` | repeats by exact action identity, with abstention (§14) | V0.8c | separate version |
+
+**How to read them:**
+* **A finding is read under the version that produced it.** No later
+  version rewrites or replaces an earlier one's findings. Each is
+  regenerated and checked against its committed output.
+* **v1's repeat counts are not confirmed exact-action repeats.** v1 keys a
+  refusal by type, code and message (V1-D1, V1-D5). Of its 202 historical
+  repeat links, repeat v2 confirms none: at 194 at least one end's
+  actions were never recorded, at 8 the actions differ. On V0.8c's
+  complete records, v1 makes 13 links and v2 finds 1, the only exact
+  repeat across all refusal types; none of the 10 funding refusals was
+  repeated exactly.
+* **Historical attempt evidence is often incomplete.** llm-agent 1 and 2
+  recorded only the final parsed reply's actions. Of 559 historical
+  refusals, repeat v2 abstains on 545, and refusal-response v2 classifies
+  59 (v1 reported 102, including RR1-D1's two).
+* **Only llm-agent 3's records are complete** (240 of 240 V0.8c decision
+  points), so only they support every version without abstention.
+* **None of these is independently validated.** The 98-item review
+  package (V0.8b) samples v1 outputs and is unlabelled.
+
+**The one reproducibility exception.** The frozen V0.8b review package and
+probe log embed the engine build that made them (`0.8.0-dev.2`).
+`analysis/evidence/check_v08b.py` compares them with a later build's
+regeneration and sets aside exactly these fields:
+* each review item's `run.engine`;
+* the review manifest's `itemsSha256`, which then differs only through
+  those fields: each manifest's value must be its own `items.json`'s
+  SHA-256;
+* each probe's `engine` in `probe-log.json`.
+
+Every other byte must match. The exception covers those two frozen
+artifacts only and is not a general relaxation: every other committed
+output is compared byte for byte, and frozen v1 is checked as in §11.

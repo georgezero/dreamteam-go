@@ -10,11 +10,12 @@ them with its own build number and nothing else different. They are
 frozen, so they are not regenerated; this check requires every byte to
 match except those build numbers:
 * items.json: equal with each item's run.engine set aside;
-* manifest.json: equal except itemsSha256, which must be the committed
-  items.json's own SHA-256;
+* manifest.json: equal except itemsSha256, which differs only through
+  those build numbers: each must be its own items.json's SHA-256;
 * items.md, form.csv, the probes' decisions and attempts: byte for byte;
 * probe-log.json: equal with each probe's engine set aside.
-Exits 1 on any other difference.
+Exits 1 on any other difference. This exception is for these two frozen
+V0.8b artifacts only; no other output is compared this way.
 """
 
 import argparse
@@ -47,6 +48,8 @@ def main(argv=None):
     man = [json.loads(raw(os.path.join(d, "manifest.json"))) for d in (rv, cv)]
     if man[0]["itemsSha256"] != hashlib.sha256(raw(os.path.join(rv, "items.json"))).hexdigest():
         bad.append("the committed manifest's itemsSha256 is not the committed items.json's")
+    if man[1]["itemsSha256"] != hashlib.sha256(raw(os.path.join(cv, "items.json"))).hexdigest():
+        bad.append("the regenerated manifest's itemsSha256 is not the regenerated items.json's")
     for m in man:
         m.pop("itemsSha256")
     if man[0] != man[1]:

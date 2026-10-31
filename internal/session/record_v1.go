@@ -239,6 +239,7 @@ var earlierV2Engines = map[string]string{
 	"0.7.0":        batchModeV070,   // the V0.7 release: this build's action set and rules
 	"0.8.0-dev.1":  batchModeV081,   // V0.8a (the decision evidence analysis): this build's action set and rules
 	"0.8.0-dev.2":  batchModeV082,   // V0.8b (evidence validation and financial outcomes): this build's action set and rules
+	"0.8.0-dev.3":  batchModeV083,   // V0.8c (complete decision recording and the funding-refusal evaluation): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

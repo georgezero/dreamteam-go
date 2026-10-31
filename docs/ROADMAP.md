@@ -19,7 +19,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
-| **V0.8** (in development: V0.8a and V0.8b accepted; V0.8c, `0.8.0-dev.3`, authorized by the owner 2026-10-30, built) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
+| **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
+| **V0.9** (proposed, not approved) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -739,7 +740,7 @@ their impact on historical compatibility and deterministic replay. No
 further model experiments are planned until the simulator's economics are
 improved. Nothing here is implemented in V0.6.0.
 
-## 7b. V0.8 — agent decision quality (in development)
+## 7b. V0.8 — agent decision quality (released)
 
 The owner's recommendation after V0.7c. With the simulator's economics
 improved, the next weakness is the agents' ability to make coherent
@@ -750,8 +751,26 @@ agent took actions that undermined the objective it said it was pursuing.
 |---|---|---|
 | V0.8a | Deterministic decision-evidence analysis | complete: accepted by the owner 2026-10-30 (80cfff9, CI run 41104143975) |
 | V0.8b | Evidence validation and financial outcome analysis | complete: accepted by the owner 2026-10-30 (5b6cdba, CI run 41133370321) |
-| V0.8c | Complete decision recording and prospective refusal-response evaluation | authorized 2026-10-30; declared (ee8aabc) and built (0.8.0-dev.3), awaiting owner review |
-| V0.8.0 | Release | pending |
+| V0.8c | Complete decision recording and prospective refusal-response evaluation | complete: accepted by the owner 2026-10-31 (declared ee8aabc, results da52a77, CI run 41171062478) |
+| V0.8.0 | Release | released 2026-10-31, tag `v0.8.0` |
+
+**V0.8c accepted; V0.8.0 released** (owner, 2026-10-31). Every release
+criterion below was met; the independent review is pending and disclosed.
+The release notes record, as development observations:
+* complete recording changes what can be measured: repeat evidence v2
+  confirms none of frozen v1's 202 historical repeat links, and 1 of its
+  13 V0.8c links. v1 stays reproducible, but its repeat counts are not
+  confirmed exact-action repeats;
+* 10 funding refusals were observed, all in the low-liquidity condition
+  on one seed (Qwen 8, Gemma 2). The next proposals: no action 5,
+  different 3, modified 2 (the effective date only), exact repeat 0.
+  These are counts, not rates;
+* Qwen lowered profit against no action in all four of its runs; Gemma's
+  outcomes equalled no action. Consistency, financial and operational
+  outcomes are kept separate.
+
+No V0.8d. No simulator, agent, prompt or scoring change before the
+release.
 
 **V0.8c as authorized** (owner, 2026-10-30, after accepting V0.8b):
 * **Recording:** llm-agent 3 records every attempt
@@ -846,15 +865,44 @@ The owner's proposal that preceded it:
   V0.8a.
 
 **Other candidate directions** (not scheduled):
-* funding-refusal response evaluation;
 * dated demand shocks;
 * staff absences and turnover;
 * additional benchmark scenarios;
 * held-out benchmark governance in practice (a held-out set and its
   execution).
 
-V0.8a, V0.8b and V0.8c are authorized. Nothing in this
-section was implemented in V0.7.0.
+V0.8a, V0.8b and V0.8c were authorized and released in V0.8.0.
+
+## 7c. V0.9 — agent decision reliability (proposed, not approved)
+
+The owner's recommendation after V0.8c: shift from building evidence
+infrastructure to using it to improve the reliability of management
+agents. First, independent review of the existing evidence rules, then
+more specific decision/action consistency checks. No further simulator
+mechanics and no large LLM benchmark first.
+
+| Milestone | Proposed scope |
+|---|---|
+| V0.9a | Independent evidence validation and targeted rule improvements |
+| V0.9b | Financial decision-quality framework |
+| V0.9c | Prospective evaluation with frozen models |
+| V0.9.0 | Release |
+
+Directions recorded:
+* **independent evidence review:** label the frozen 98-item package by an
+  independent reviewer, then report agreement, precision and recall
+  under its protocol;
+* **improved financial decision analysis;**
+* **decision/action parameter consistency:** whether stated amounts,
+  dates, targets and values agree with the submitted action's
+  parameters;
+* **broader refusal-response evaluation,** on more seeds and conditions,
+  with complete recording;
+* **agent decision-quality benchmarking,** without a leaderboard.
+
+Each rule change is a new, separately versioned rule, and earlier
+findings stay under their original versions. Nothing in this section was
+implemented in V0.8.0. Each step needs the owner's GO.
 
 ## 8. Testing strategy (all versions)
 

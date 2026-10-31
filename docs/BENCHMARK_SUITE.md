@@ -14,7 +14,8 @@ version 2 with paid radiologist overtime (§10), and leaves version 1
 unchanged. V0.7b adds suite version 3, with a credit line and a funding
 rule (§11). V0.7c evaluates two frozen LLM agents and the baselines on
 version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). V0.8c adds suite
-version 4, with one low-liquidity entry (§12). Every result here
+version 4, with one low-liquidity entry (§12), released in V0.8.0.
+Versions 1 to 3 and their fingerprints are unchanged. Every result here
 is a development result on synthetic practices. It is not clinical
 validation, and it ranks no model or policy.
 
@@ -799,7 +800,7 @@ is version 2 with a solvency setting
 **What it does not model:** shutdown, missed payroll, loan products,
 covenants or rate changes (V0.7_SOLVENCY_DESIGN §12).
 
-## 12. Suite version 4: a low-liquidity entry (V0.8c, in development)
+## 12. Suite version 4: a low-liquidity entry (V0.8c, released in V0.8.0)
 
 `dreamteam-dev` version 4
 ([benchmark/suite/dreamteam-dev-4.json](benchmark/suite/dreamteam-dev-4.json))
