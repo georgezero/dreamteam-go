@@ -26,7 +26,7 @@ Every earlier scenario, save, golden reference and V0.6 result is
 unchanged. The economics are deliberately simple, not a validated model of
 practice finance.
 
-In development, not released (`0.8.0-dev.2`):
+In development, not released (`0.8.0-dev.3`):
 * **V0.8a:** a read-only, deterministic analysis of whether the recorded
   LLM agents' stated reasons agree with what they proposed and what was
   executed (`docs/DECISION_EVIDENCE.md`, `docs/benchmark/v08a-dev/`). Its
@@ -38,7 +38,12 @@ In development, not released (`0.8.0-dev.2`):
   * paired financial and operational outcomes;
   * a proposed recording contract for V0.8c.
 
-Neither uses a model or changes simulator behaviour.
+  Neither uses a model or changes simulator behaviour.
+* **V0.8c** (`docs/benchmark/v08c-dev/`, in progress): llm-agent 3
+  (`agents/llm/llm_agent3.py`), which records every attempt at a decision
+  (`docs/LLM_AGENT.md` §13), and a small prospective evaluation of what
+  the frozen models do after a funding refusal, on a low-liquidity variant
+  of the financial-pressure practice made of existing settings.
 
 It builds on V0.6 (`0.6.0`, the agent benchmark: a suite of five practice
 scenarios run in one command, each policy reported on six dimensions

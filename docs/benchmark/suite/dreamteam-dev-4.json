@@ -1,0 +1,176 @@
+{
+ "schema": "dreamteam.benchmark-suite/v1",
+ "id": "dreamteam-dev",
+ "version": 4,
+ "split": "development",
+ "contract": "dreamteam.benchmark-contract/v1",
+ "description": "The V0.8c development scenario suite: version 3's ten practices unchanged, and one more: financial-pressure-lowliquidity, version 3's financial-pressure-credit with $80,000 opening cash instead of $150,000 (its $50,000 credit line at 10% and the funding rule unchanged), so that under no action the funding headroom is about $6,000 to $35,000 over 30 days instead of about $76,000 to $105,000. Chosen by the deterministic rule of docs/benchmark/v08c-dev/PLAN.md §5 before any live run. Not a held-out benchmark set; no score, no ranking. Specification: docs/BENCHMARK_SUITE.md.",
+ "horizonDays": 90,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "scenarios": [
+  {
+   "id": "financial-pressure-credit",
+   "version": 3,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "source": "scenarios/bench-financial-pressure-ot-credit.json",
+   "challenge": "The sustainable practice's staffing and fixed costs at referral demand x1.15: costs exceed what the volume earns. Balancing service against operating cost. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (credit): a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "financial-pressure-nocredit",
+   "version": 3,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot-nocredit",
+   "fingerprint": "ee8c7cc2bd35992e0941aec540f1defcb5ff1dfa33dbd2b649e964e10d9b81b9",
+   "source": "scenarios/bench-financial-pressure-ot-nocredit.json",
+   "challenge": "The sustainable practice's staffing and fixed costs at referral demand x1.15: costs exceed what the volume earns. Balancing service against operating cost. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (no credit): no credit line; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "financial-pressure-lowliquidity",
+   "version": 4,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "source": "scenarios/bench-financial-pressure-ot-lowliquidity.json",
+   "challenge": "Version 3's financial-pressure-credit practice (costs exceed what the volume earns; radiologist overtime paid; a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom) with $80,000 opening cash instead of $150,000: the funding headroom is low enough that common discretionary commitments (a hire, a large allocation raise) do not fit on many days, and the credit line is drawn at the month's disbursements. Version 4 (V0.8c).",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "reporting-backlog-credit",
+   "version": 3,
+   "category": "Reporting backlog",
+   "scenario": "sustainable-ot-credit",
+   "fingerprint": "1fc90da25e025f8cb61462ecfd03cb7b00766aac9c1409bb38d5f09e6db76ce7",
+   "source": "scenarios/sustainable-ot-credit.json",
+   "challenge": "The bundled sustainable practice unchanged: reading coverage (60/50% site allocations, no Sunday reading) leaves turnaround well beyond the soon and urgent targets. Reducing reporting delay without excessive expenditure. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (credit): a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "reporting-backlog-nocredit",
+   "version": 3,
+   "category": "Reporting backlog",
+   "scenario": "sustainable-ot-nocredit",
+   "fingerprint": "6c9ee3db8392836f203a90e2f997a4068e1440205f6202815d8e5dfb5d596a31",
+   "source": "scenarios/sustainable-ot-nocredit.json",
+   "challenge": "The bundled sustainable practice unchanged: reading coverage (60/50% site allocations, no Sunday reading) leaves turnaround well beyond the soon and urgent targets. Reducing reporting delay without excessive expenditure. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (no credit): no credit line; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "demand-growth-credit",
+   "version": 3,
+   "category": "Demand growth",
+   "scenario": "bench-demand-growth-ot-credit",
+   "fingerprint": "28c16bf37eb6b67ef320807fc536fef71133e026963618010a9d667e2495adae",
+   "source": "scenarios/bench-demand-growth-ot-credit.json",
+   "challenge": "The sustainable practice with referral demand rising 5% a month from October's level (November x1.05, December x1.10, January x1.15). Anticipating capacity needs before losses mount. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (credit): a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "demand-growth-nocredit",
+   "version": 3,
+   "category": "Demand growth",
+   "scenario": "bench-demand-growth-ot-nocredit",
+   "fingerprint": "9144c8a48ec06a9ad31a27247d333275accab5171b1e1afacf4c9f3cd2582446",
+   "source": "scenarios/bench-demand-growth-ot-nocredit.json",
+   "challenge": "The sustainable practice with referral demand rising 5% a month from October's level (November x1.05, December x1.10, January x1.15). Anticipating capacity needs before losses mount. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (no credit): no credit line; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "staffing-shortage-credit",
+   "version": 3,
+   "category": "Staffing shortage",
+   "scenario": "bench-staffing-shortage-ot-credit",
+   "fingerprint": "5b49b4ca7b7304b39c814481b5de23fb631c620607d4f1ccbafb5cbf44c383fa",
+   "source": "scenarios/bench-staffing-shortage-ot-credit.json",
+   "challenge": "The established practice's original rosters at referral demand x1.30: one technologist shared between X-ray and CT, no evening MR technologist. Managing coverage, recruiting lead times and service reliability. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (credit): a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "staffing-shortage-nocredit",
+   "version": 3,
+   "category": "Staffing shortage",
+   "scenario": "bench-staffing-shortage-ot-nocredit",
+   "fingerprint": "c500a61a374f85cbc827cf3dbf2507f8f09890a634910638b5b0604f96c62544",
+   "source": "scenarios/bench-staffing-shortage-ot-nocredit.json",
+   "challenge": "The established practice's original rosters at referral demand x1.30: one technologist shared between X-ray and CT, no evening MR technologist. Managing coverage, recruiting lead times and service reliability. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (no credit): no credit line; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "stable-credit",
+   "version": 3,
+   "category": "Stable practice",
+   "scenario": "bench-stable-ot-credit",
+   "fingerprint": "cfae9ca57ac465894ed5eeafe42b200609e5ab0fba3dc59179d56b10633b0f0e",
+   "source": "scenarios/bench-stable-ot-credit.json",
+   "challenge": "The Step 0C lead staffing architecture at x1.30: dedicated XR and CT day technologists, part-time evening MR, site allocations 62.5/52.5%. Profitable at the takeover. Recognizing when no action is appropriate. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (credit): a $50,000 credit line at 10% a year; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  },
+  {
+   "id": "stable-nocredit",
+   "version": 3,
+   "category": "Stable practice",
+   "scenario": "bench-stable-ot-nocredit",
+   "fingerprint": "74612d88bcfc507b3153a7017f20a7f9134a6d943642c7f7028437f4fb9284d7",
+   "source": "scenarios/bench-stable-ot-nocredit.json",
+   "challenge": "The Step 0C lead staffing architecture at x1.30: dedicated XR and CT day technologists, part-time evening MR, site allocations 62.5/52.5%. Profitable at the takeover. Recognizing when no action is appropriate. Version 2: radiologist time on duty past the rostered end is paid at the salary's hourly rate. Version 3 (no credit): no credit line; discretionary commitments must fit in the funding headroom.",
+   "t90": "not_applicable"
+  }
+ ],
+ "dimensions": {
+  "operational": [
+   "examsCompleted",
+   "reportsFinal",
+   "tatP50Sec",
+   "tatP90Sec",
+   "backlogEnd",
+   "waitToExamP50Sec",
+   "waitToExamP90Sec"
+  ],
+  "financial": [
+   "netRevenueCents",
+   "operatingExpenseCents",
+   "operatingProfitCents",
+   "margin",
+   "operatingCashFlowCents"
+  ],
+  "staffingCapacity": [
+   "ordersReceived",
+   "ordersLost",
+   "lostRate",
+   "overtimeSec",
+   "heldOver",
+   "skippedBreaks",
+   "noCoverage"
+  ],
+  "serviceReliability": [
+   "tatOverTarget",
+   "tatBreaches",
+   "waitsOver30",
+   "displacedAppointments",
+   "alertsRaisedAlert",
+   "alertsActiveAtEnd"
+  ],
+  "sustainability": [
+   "minCashCents",
+   "shortfallCents",
+   "daysBelowZero"
+  ],
+  "actions": [
+   "actionsAttempted",
+   "actionsAccepted",
+   "actionsRejected"
+  ]
+ },
+ "missing": [
+  "imaging capacity utilization (no room-utilization metric in dreamteam.result/v1)",
+  "trend within the run (every metric is a whole-window total; the T90 vector's later-window figures exist only for the reporting-backlog scenario)",
+  "action categories (operations versus staffing) are counted from decisions.json by the report, not by a result metric",
+  "model usage and latency (only for policies that record them, such as the LLM agent's policy-evidence)"
+ ]
+}

@@ -13,7 +13,8 @@ frozen LLM agents across the suite
 version 2 with paid radiologist overtime (§10), and leaves version 1
 unchanged. V0.7b adds suite version 3, with a credit line and a funding
 rule (§11). V0.7c evaluates two frozen LLM agents and the baselines on
-version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). Every result here
+version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). V0.8c adds suite
+version 4, with one low-liquidity entry (§12). Every result here
 is a development result on synthetic practices. It is not clinical
 validation, and it ranks no model or policy.
 
@@ -795,3 +796,35 @@ is version 2 with a solvency setting
 
 **What it does not model:** shutdown, missed payroll, loan products,
 covenants or rate changes (V0.7_SOLVENCY_DESIGN §12).
+
+## 12. Suite version 4: a low-liquidity entry (V0.8c, in development)
+
+`dreamteam-dev` version 4
+([benchmark/suite/dreamteam-dev-4.json](benchmark/suite/dreamteam-dev-4.json))
+is version 3 unchanged, with one more entry.
+
+**`financial-pressure-lowliquidity`** (scenario
+`bench-financial-pressure-ot-lowliquidity`, fingerprint `3175656e…`):
+* It is version 3's `financial-pressure-credit` practice with $80,000
+  opening cash instead of $150,000.
+* Everything else is unchanged: radiologist overtime paid, the $50,000
+  credit line at 10% a year, the funding rule. It is made of existing
+  settings only, and no mechanic was added.
+* A test checks that nothing but the opening cash differs.
+
+**What it does to funding.** Under no action on the analysis seed:
+* the funding headroom is about $6,000 to $35,000 at the 30 daily
+  decision points, against about $76,000 to $105,000 for the control;
+* the line is drawn at the month's disbursements (up to about $21,700),
+  and repaid within days;
+* there is no distress.
+
+**How it was chosen.** By a deterministic rule fixed in the V0.8c plan,
+before any live run, with no policy or model
+([benchmark/v08c-dev/PLAN.md](benchmark/v08c-dev/PLAN.md) §5,
+[scenario_analysis.py](benchmark/v08c-dev/scenario_analysis.py)). It is
+not changed after any result.
+
+**Unchanged from version 3:** every other entry, the categories,
+dimensions, missing measures, horizon and cadence. T90 is
+`not_applicable`.

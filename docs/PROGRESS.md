@@ -7,6 +7,38 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.8c — complete decision recording and prospective refusal-response evaluation (0.8.0-dev.3)
+
+Owner decision 2026-10-30: V0.8b accepted and closed (5b6cdba, CI run
+41133370321). V0.8c is authorized, including a small controlled live LLM
+evaluation (at most eight runs), and repeat detection as a separately
+versioned rule. Prompts, models, mechanics and the frozen v1 rules are not
+to be changed.
+
+**Declared before any live run** (this commit):
+* **llm-agent 3** (`agents/llm/llm_agent3.py`) and its record
+  `dreamteam.llm-decision-record/v3` ([LLM_AGENT.md §13](LLM_AGENT.md)):
+  * every attempt, its input by SHA-256, output, parse, reason, actions,
+    validate answers, refusals and error, the used attempt, and the
+    record's completeness;
+  * a replay that rebuilds every input and asks validate again;
+  * the same messages and decisions as llm-agent 2 on the same answers.
+* **The low-liquidity condition:** scenario
+  `bench-financial-pressure-ot-lowliquidity`, suite `dreamteam-dev`
+  version 4. It is the V0.7c financial-pressure-credit practice with
+  $80,000 opening cash, chosen by a deterministic rule on analysis seed
+  41900 ([scenario_analysis.py](benchmark/v08c-dev/scenario_analysis.py)).
+* **The plan:** [PLAN.md](benchmark/v08c-dev/PLAN.md) and
+  [eval.json](benchmark/v08c-dev/eval.json). Two conditions, seeds 41901
+  and 41902, 30 days, the two frozen models and three deterministic
+  comparators: 20 runs, 8 of them live.
+* **Version:** 0.8.0-dev.3, with no engine behaviour changed. 0.8.0-dev.2
+  is registered for replay (`mini-seed52-v082`, batch mode `v0.8_dev2`).
+
+**Results:** pending; the live runs follow this commit.
+
+---
+
 ## V0.8b — evidence validation and financial decision outcomes (0.8.0-dev.2)
 
 Owner decision 2026-10-30: V0.8a accepted and closed (80cfff9, CI run

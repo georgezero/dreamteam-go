@@ -20,7 +20,8 @@ suite ([benchmark/v06c-dev/](benchmark/v06c-dev/README.md)). Released
 unchanged in V0.6.0. V0.7c ran it unchanged once more, with the same two
 models, on the V0.7 practices with paid overtime and a credit line
 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)). Released unchanged
-in V0.7.0.
+in V0.7.0. V0.8c adds llm-agent 3 (`agents/llm/llm_agent3.py`, §13): the
+same decisions, with every attempt recorded. llm-agent 2 is unchanged.
 
 ```
 dreamteam benchmark run CONFIG
@@ -716,3 +717,134 @@ and run record.
   serves it.
 * **Invalid proposals recur** (V0.7c): up to 15 repeats in a run for Qwen
   and 27 for Gemma.
+
+## 13. llm-agent 3: complete decision recording (V0.8c)
+
+`agents/llm/llm_agent3.py` is llm-agent version 3. It **decides exactly as
+version 2**, which stays in `agents/llm/llm_agent.py`, unchanged, for
+every earlier recording:
+* the same system prompt, prompt (`llm-agent-prompt/v2`), memory
+  (`llm-agent-memory/v1`) and settings file format;
+* the same retries, details turn, batching and fallback.
+
+The model is sent the same messages, word for word.
+`agents/llm/test_llm_agent3.py` and `internal/bench/llm_agent3_test.go`
+check this against version 2 on the same model answers: the same requests,
+decisions, memory and simulated practice.
+
+What changes is the record. Version 2 kept only the final reply's reason
+and actions, so a refused attempt's actions were lost; the V0.8b analysis
+could not classify 457 of 559 historical refusals for that reason.
+Version 3 writes `dreamteam.llm-decision-record/v3`, as designed in V0.8b
+([RECORDING_CONTRACT.md](benchmark/v08b-dev/RECORDING_CONTRACT.md)).
+
+### 13.1 The record
+
+One JSON object per decision point, one per line of `decisions.jsonl`:
+
+| Field | Contents |
+|---|---|
+| `schema` | `dreamteam.llm-decision-record/v3` |
+| `point`, `time`, `day`, `digests`, `mode` | the decision point's identity, as in version 2 |
+| `agentVersion`, `promptVersion`, `memoryFormat`, `promptSettings` | `3`, `llm-agent-prompt/v2`, `llm-agent-memory/v1`, and the settings that shape the prompt |
+| `promptSha256`, `promptChars`, `memorySha256`, `memoryChars`, `leftOut` | the first prompt's and the memory's fingerprints, as in version 2 |
+| `attempts` | every attempt, in order (§13.2) |
+| `final` | `{attempt, outcome}`: the attempt whose decision was submitted (null for a fallback), and `actions`, `no_action` or `fallback` |
+| `batches` | what was submitted: the replayed decision |
+| `outcome`, `reason`, `refusals`, `errors` | the decision's summary as version 2 recorded it, which the memory reads: the last parsed reason, every refusal (with its attempt), and one error per failed attempt |
+| `completeness` | §13.3 |
+
+**Each attempt:**
+
+| Field | Contents |
+|---|---|
+| `id` | `"<point>.<attempt>"`, stable |
+| `point`, `attempt` | the decision point, and 1, 2, … in the order made |
+| `turn` | `first`, `details` or `retry` |
+| `input` | the message the attempt answered: `kind` (`prompt`, `details`, `retry`, or `resend` when the previous request got no answer and the same messages were sent again), its `sha256` and `chars`; for a retry, `feedback` (the previous attempt's error, as sent) and `feedbackTruncated` |
+| `transport` | `ok`, or the failure's code (`timeout`, `connection`, `http_status`, `response_not_json`, …), without any server detail |
+| `output` | the model's reply: `sha256`, `chars` and `text` (at most 4,000 characters; the whole reply stays in the live `model.jsonl`) |
+| `parse` | `{ok: true}`, or `{ok: false, code, message}` |
+| `reason`, `actions` | as parsed, or null |
+| `detailsRequested` | the names asked for, on a details turn |
+| `validation` | one entry per validated batch: `actions`, their `indices` in the reply, and the engine's `answer` |
+| `protocolError` | `{batch, code, message}` if validate answered with a protocol error |
+| `refusals` | `{attempt, action, type, code, message}` of each refused action |
+| `error` | why the attempt could not be used (at most 8,000 characters), or null |
+| `used` | whether this attempt's decision was submitted |
+
+**What is kept apart:** a reply's text (`output`), what was parsed from it
+(`actions`), what the engine said of it (`validation`) and what was
+submitted (`batches`). What was applied is the harness's `decisions.json`:
+the agent does not see the apply answer.
+
+**Also written as they happen:** attempts go to `attempts.jsonl` as they
+are made, so a run that stops in the middle of a decision point keeps
+them. No attempt is overwritten by a later one.
+
+### 13.2 Bounds and what is not recorded
+
+**Bounds:**
+* reasons, 2,000 characters (the parser's limit);
+* reply text, 4,000;
+* errors and feedback, 8,000;
+* parse and protocol messages, 500;
+* actions, the protocol's 64 per batch.
+
+A cut field is named in `completeness.truncated`.
+
+**Never recorded:** the endpoint, host, port, API key, environment values
+or any path outside the run.
+* *In `agent.json` and `model.jsonl` only:* the endpoint, as version 2
+  keeps it. They are live evidence and are not committed.
+* *In the live evidence:* latency, token usage and the served model name.
+  The record has none of them, so nothing in it depends on the model
+  server's timing.
+
+### 13.3 Completeness
+
+| Field | Meaning |
+|---|---|
+| `attemptsRecorded` | every attempt made is in `attempts` (false only for a point cut short by a protocol error; its attempts are in `attempts.jsonl`) |
+| `attempts` | how many |
+| `stopped` | null, `budget` (the decision budget ran out), `prompt_too_large` or `protocol_error` |
+| `outputsRecorded`, `reasonsRecorded`, `actionsRecorded` | attempts with a reply, a parsed reason, parsed actions |
+| `inputsVerifiable` | every input can be rebuilt in replay (false when a feedback was cut) |
+| `truncated` | the fields cut to their bound |
+
+### 13.4 Replay
+
+`--replay FILE ...` replays version 3 records only. Version 1 and 2
+recordings replay with `llm_agent.py`, which refuses nothing it replayed
+before. At each decision point the replay checks, before it submits the
+recorded batches:
+1. the decision point and its digests;
+2. the memory and the first prompt, rebuilt from this run's observation
+   and checked against their SHA-256;
+3. each attempt's order and input:
+   * the first prompt;
+   * a details answer, rebuilt by asking the protocol for the same
+     sections;
+   * a retry, rebuilt from its feedback, which must be the previous
+     attempt's error;
+   * a resend, which must repeat the previous input;
+4. every validate answer, asked again of the engine with the recorded
+   actions and compared in full;
+5. that the submitted batches are the used attempt's actions, and that
+   only the last attempt was used.
+
+**Not model-dependent:** a replay calls no model. Validate and observe are
+read-only, so the extra requests change nothing in the simulation. The
+replay's sessions and results equal the live run's.
+
+**What the replay writes:** each record as recorded, marked `mode`
+`replay`, with `replayChecked` (how many inputs and validate answers it
+checked).
+
+### 13.5 What version 3 still does not know
+
+* **Why a model chose anything.** The record holds what it wrote and what
+  it did.
+* **What an unparseable reply meant** beyond its first 4,000 characters.
+* **What was applied.** The harness's session and `decisions.json` hold
+  that, and the analyses join them by decision point.

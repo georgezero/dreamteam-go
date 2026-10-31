@@ -21,7 +21,7 @@ var update = flag.Bool("update", false, "rewrite golden files")
 func TestBundledScenariosCompile(t *testing.T) {
 	ids := List()
 	if !slices.Equal(ids, []string{"bench-demand-growth", "bench-demand-growth-ot", "bench-demand-growth-ot-credit", "bench-demand-growth-ot-nocredit",
-		"bench-financial-pressure", "bench-financial-pressure-ot", "bench-financial-pressure-ot-credit", "bench-financial-pressure-ot-nocredit",
+		"bench-financial-pressure", "bench-financial-pressure-ot", "bench-financial-pressure-ot-credit", "bench-financial-pressure-ot-lowliquidity", "bench-financial-pressure-ot-nocredit",
 		"bench-stable", "bench-stable-ot", "bench-stable-ot-credit", "bench-stable-ot-nocredit",
 		"bench-staffing-shortage", "bench-staffing-shortage-ot", "bench-staffing-shortage-ot-credit", "bench-staffing-shortage-ot-nocredit",
 		"established", "mini", "sustainable", "sustainable-ot", "sustainable-ot-credit", "sustainable-ot-nocredit"}) || !slices.Contains(ids, Default) {

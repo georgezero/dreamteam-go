@@ -1,0 +1,58 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v08c-eval",
+ "description": "V0.8c prospective funding-refusal evaluation (docs/benchmark/v08c-dev/PLAN.md): no action, greedy, conservative-v2 and llm-agent 3 (agents/llm/llm_agent3.py; the V0.6c and V0.7c agent's prompt, memory and settings, with every attempt recorded) with the two frozen models, on suite dreamteam-dev version 4's financial-pressure-credit (the control) and financial-pressure-lowliquidity (the same practice with $80,000 opening cash), daily decisions at 07:00. No score, no ranking. Run from the repository root with DREAMTEAM_LLM_BASE_URL set. Two seeds, 30 days: 20 runs, 8 of them live LLM runs.",
+ "suite": "../suite/dreamteam-dev-4.json",
+ "entries": [
+  "financial-pressure-credit",
+  "financial-pressure-lowliquidity"
+ ],
+ "seeds": [
+  41901,
+  41902
+ ],
+ "seedPlan": "Chosen 2026-10-30 and committed in the V0.8c plan (docs/benchmark/v08c-dev/PLAN.md) before any run on them: the next unused block after the V0.8b probes' 41801: 41900 for the deterministic scenario analysis only (no policy, no model), 41901 and 41902 for the evaluation. None appeared in the repository before; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "days": 30,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, with every attempt recorded as dreamteam.llm-decision-record/v3), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json (unchanged since V0.5c; used in V0.6c and V0.7c)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, with every attempt recorded as dreamteam.llm-decision-record/v3), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json (unchanged since V0.5c; used in V0.6c and V0.7c)",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

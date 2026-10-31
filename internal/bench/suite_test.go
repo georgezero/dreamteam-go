@@ -301,3 +301,63 @@ func TestSuiteV3Scenarios(t *testing.T) {
 		}
 	}
 }
+
+// Suite version 4 (V0.8c) is version 3 unchanged, with one more entry:
+// financial-pressure-lowliquidity, version 3's financial-pressure-credit
+// scenario with $80,000 opening cash and nothing else changed.
+func TestSuiteV4Scenarios(t *testing.T) {
+	read := func(name string) suiteFile {
+		raw, err := os.ReadFile("../../docs/benchmark/suite/" + name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var s suiteFile
+		if err := json.Unmarshal(raw, &s); err != nil {
+			t.Fatal(err)
+		}
+		return s
+	}
+	v3, v4 := read("dreamteam-dev-3.json"), read("dreamteam-dev-4.json")
+	if v4.Schema != v3.Schema || v4.ID != v3.ID || v4.Version != 4 || v4.Split != "development" || v4.HorizonDays != 90 ||
+		len(v4.Scenarios) != len(v3.Scenarios)+1 || !slices.Equal(v4.Missing, v3.Missing) || !reflect.DeepEqual(v4.Dimensions, v3.Dimensions) {
+		t.Fatalf("suite header: %+v", v4)
+	}
+	k := 0
+	for _, e := range v4.Scenarios {
+		if e.ID != "financial-pressure-lowliquidity" {
+			if !reflect.DeepEqual(e, v3.Scenarios[k]) {
+				t.Errorf("%s: differs from version 3", e.ID)
+			}
+			k++
+			continue
+		}
+		if e.Version != 4 || e.Category != "Financial pressure" || e.Scenario != "bench-financial-pressure-ot-lowliquidity" ||
+			e.Source != "scenarios/"+e.Scenario+".json" || e.T90 != "not_applicable" {
+			t.Fatalf("%s: %+v", e.ID, e)
+		}
+		f, err := scenario.ResolveFile(e.Scenario)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if _, err := scenario.Compile(f); err != nil {
+			t.Fatalf("%s: %v", e.ID, err)
+		}
+		if fp, _ := scenario.Fingerprint(f); fp != e.Fingerprint {
+			t.Errorf("%s: fingerprint %s, recorded %s", e.ID, fp, e.Fingerprint)
+		}
+		c, err := scenario.ResolveFile("bench-financial-pressure-ot-credit")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if f.OpeningCashCents != 8_000_000 || c.OpeningCashCents != 15_000_000 {
+			t.Fatalf("%s: opening cash %d, control %d", e.ID, f.OpeningCashCents, c.OpeningCashCents)
+		}
+		f.OpeningCashCents = c.OpeningCashCents
+		if a, b := resolved(t, f, "x", "x"), resolved(t, c, "x", "x"); !reflect.DeepEqual(a, b) {
+			t.Errorf("%s: differs from financial-pressure-credit beyond the opening cash", e.ID)
+		}
+	}
+	if k != len(v3.Scenarios) {
+		t.Errorf("%d of version 3's entries kept", k)
+	}
+}
