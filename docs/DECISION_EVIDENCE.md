@@ -21,7 +21,9 @@ not independently validated: the independent review is PENDING.
   llm-agent 3's records (§15);
 * the versions in V0.8.0, and how to read their findings (§16);
 * V0.9a (in development): the independent review workflow and a separate
-  contract, `dreamteam.parameter-evidence/v1` (§17).
+  contract, `dreamteam.parameter-evidence/v1` (§17);
+* V0.9b (in development): the freeze of parameter evidence v1, and a
+  separate contract, `dreamteam.financial-evidence/v1` (§18).
 
 ## 1. Purpose
 
@@ -789,3 +791,43 @@ Nothing in §1–§16 changes. Two additions sit beside them:
 
   On V0.5c–V0.8c it made 816 eligible checks: 762 consistent, 0
   supported, 54 unresolved.
+
+## 18. V0.9b: financial decision evidence (in development)
+
+Nothing in §1–§17 changes.
+
+* **Parameter evidence v1 is frozen** as accepted at a5e5f9b. The freeze
+  record (`analysis/evidence/frozen-parameter-v1.json`) holds the SHA-256
+  of:
+  * the analyzer and its tests;
+  * the corpus and its 96 recordings;
+  * both outputs.
+
+  `check_parameter_frozen.py` requires them byte for byte in CI. The rules
+  are not tuned against these recordings again. Its zero supported
+  mismatches are an in-sample result, after calibration on the same
+  corpus, with deliberately limited coverage. Recall is not measured.
+* **`dreamteam.financial-evidence/v1`**
+  ([FINANCIAL_EVIDENCE.md](FINANCIAL_EVIDENCE.md)) asks a different
+  question: not whether the agent's words agree with its actions, but what
+  each decision committed the practice to. It has three dimensions, kept
+  apart, with no score:
+  * **affordability**, under the engine's funding rule;
+  * **reversibility**, under the simulator's own rules;
+  * **direct operational exposure**, kept apart from the outcomes observed
+    later and from the run's pairing with no action.
+
+  Every value comes from the engine. The replay's transcript is fed back
+  with read-only previews inserted, and every original answer must be
+  identical.
+
+  It is a separate contract, with its own identifiers (`fe1-…`). It reads
+  the V0.6c, V0.7c and V0.8c recordings: 78 recordings and 3,540 decision
+  points. Results:
+  [docs/benchmark/v09b-dev/](benchmark/v09b-dev/README.md).
+
+  It judges no decision. An affordable action is not called wise, and an
+  irreversible one is not called a mistake. No later outcome is
+  attributed to a single decision.
+
+**The independent review is still PENDING.**

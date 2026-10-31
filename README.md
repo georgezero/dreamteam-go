@@ -30,13 +30,23 @@ clinical validation, and changes no simulator behaviour:
 Every earlier scenario, save, golden reference and benchmark result is
 unchanged.
 
-In development, not released (`0.9.0-dev.1`): **V0.9a**
-(`docs/benchmark/v09a-dev/`):
-* an offline workflow for the independent evidence review. The review
-  is still **pending**;
-* `dreamteam.parameter-evidence/v1` (`docs/PARAMETER_EVIDENCE.md`):
-  whether amounts, targets, dates, durations and directions stated in a
-  reason agree with the submitted action.
+In development, not released (`0.9.0-dev.2`):
+* **V0.9a** (`docs/benchmark/v09a-dev/`):
+  * an offline workflow for the independent evidence review. The review
+    is still **pending**;
+  * `dreamteam.parameter-evidence/v1` (`docs/PARAMETER_EVIDENCE.md`):
+    whether amounts, targets, dates, durations and directions stated in a
+    reason agree with the submitted action. It is now frozen.
+* **V0.9b** (`docs/benchmark/v09b-dev/`):
+  `dreamteam.financial-evidence/v1` (`docs/FINANCIAL_EVIDENCE.md`). For
+  every recorded management decision it gives, separately and with no
+  score:
+  * what the decision committed the practice to, and whether the credit
+    line funded it;
+  * how far the simulator's rules let it be undone;
+  * which resources it changed directly.
+
+  Every value comes from the engine's own preview at the decision point.
 
 It builds on V0.7 (`0.7.0`, financial realism: paid radiologist overtime
 and opt-in solvency with a credit line and a funding rule,
@@ -474,7 +484,8 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/V0.7_OVERTIME_DESIGN.md` | radiologist overtime costing (V0.7) |
 | `docs/V0.7_SOLVENCY_DESIGN.md` | financial solvency and cash constraints (V0.7) |
 | `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions; its versions, defects and the refusal-response and repeat evidence (V0.8) |
-| `docs/PARAMETER_EVIDENCE.md` | parameter evidence: whether stated amounts, targets, dates, durations and directions agree with the submitted action (V0.9a, in development) |
+| `docs/PARAMETER_EVIDENCE.md` | parameter evidence: whether stated amounts, targets, dates, durations and directions agree with the submitted action (V0.9a, frozen in V0.9b) |
+| `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9b, in development) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |

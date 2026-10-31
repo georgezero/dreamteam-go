@@ -1,0 +1,86 @@
+{
+ "analyzer": {
+  "name": "parameter-evidence 1",
+  "path": "analysis/evidence/parameter_evidence.py",
+  "sha256": "68a38129966aefbaf5ea218807f17e4e3b468954ecea90ef8a355bf196875049",
+  "tests": "analysis/evidence/test_parameter_evidence.py",
+  "testsSha256": "247fd5d2e1181f948974c177ce0dc0a10b1e54504d4bb6adbc8d350f4545992e"
+ },
+ "calibration": "In-sample. The rules were narrowed on this corpus after two drafts found 13 and then 7 'supported' mismatches, every one a false positive; the final rules find none. Zero supported mismatches is therefore an in-sample result with deliberately limited coverage, not evidence that agents never misstate parameters. Recall is not measured.",
+ "contract": "dreamteam.parameter-evidence/v1",
+ "corpus": {
+  "id": "v09a-parameter-corpus-1",
+  "path": "docs/benchmark/v09a-dev/corpus.json",
+  "recordings": 96,
+  "recordingsFingerprint": "506b443cdef50d14a1164257f19772b27c6542e5812a2b2197da2fdae22b80ab",
+  "recordingsFingerprintMethod": "SHA-256 of the lines '<sha256>  <path>\\n' of every recording, sorted by path (sha256sum format)",
+  "sha256": "3e2476c09cd07281bd6cf1d64040fd59f64650a48c477fefd4c1fda4e919d48a"
+ },
+ "frozen": "2026-10-31",
+ "frozenAt": "a5e5f9b (V0.9a, accepted)",
+ "outputs": {
+  "byRule": {
+   "AMOUNT_MISMATCH": {
+    "consistent": 20,
+    "eligible": 21,
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 1
+   },
+   "DATE_MISMATCH": {
+    "consistent": 105,
+    "eligible": 146,
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 41
+   },
+   "DIRECTION_MISMATCH": {
+    "consistent": 12,
+    "eligible": 14,
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 2
+   },
+   "DURATION_MISMATCH": {
+    "consistent": 136,
+    "eligible": 142,
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 6
+   },
+   "TARGET_MISMATCH": {
+    "consistent": 489,
+    "eligible": 493,
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 4
+   }
+  },
+  "parameterEvidenceSha256": "9f556c69ad187c22b9dbb1c4a3149b1e450c368b97815b1e3e75368ae3c01a71",
+  "parameterTablesSha256": "2c880e59c8918dad0e20cdde88266d0680d35ec9e8d9476890608ea53d03c474"
+ },
+ "policy": "Frozen: the analyzer, its tests and its outputs on this corpus are not changed or tuned against these recordings. A change of rules is a new contract version with its own outputs; v1 and its outputs stay as they are.",
+ "rules": [
+  {
+   "id": "AMOUNT_MISMATCH",
+   "version": 1
+  },
+  {
+   "id": "TARGET_MISMATCH",
+   "version": 1
+  },
+  {
+   "id": "DATE_MISMATCH",
+   "version": 1
+  },
+  {
+   "id": "DURATION_MISMATCH",
+   "version": 1
+  },
+  {
+   "id": "DIRECTION_MISMATCH",
+   "version": 1
+  }
+ ],
+ "schema": "dreamteam.parameter-evidence-freeze/v1"
+}

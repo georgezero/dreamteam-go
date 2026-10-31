@@ -7,6 +7,135 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.9b — financial decision quality and operational exposure (0.9.0-dev.2)
+
+Owner decision 2026-10-31:
+* V0.9a accepted and closed (a5e5f9b, CI run 41230474654).
+* V0.9b is authorized: a read-only analysis of what recorded decisions
+  committed the practice to, how reversible they are and which
+  capabilities they put at risk.
+* No simulator, agent, prompt or scoring change, and no live LLM run.
+
+**Built:**
+* **Parameter evidence v1 frozen**
+  (`analysis/evidence/frozen-parameter-v1.json`,
+  `check_parameter_frozen.py`, run in CI). Its in-sample calibration and
+  limited recall are documented in PARAMETER_EVIDENCE.md and DECISION_EVIDENCE
+  §18.
+* **Financial evidence** `dreamteam.financial-evidence/v1`
+  ([FINANCIAL_EVIDENCE.md](FINANCIAL_EVIDENCE.md),
+  `analysis/evidence/financial_evidence.py`). Three dimensions, never
+  combined:
+  * **affordability:** one record per submitted batch, under the engine's
+    funding rule;
+  * **reversibility:** one record per executed action, under the
+    simulator's own rules ([the matrix](benchmark/v09b-dev/REVERSIBILITY.md));
+  * **operational exposure:** direct state changes (A), kept apart from
+    the observed timeline (B) and the pairing with no action (C).
+* **Engine-sourced values.**
+  * Each replay's transcript is fed back to the engine with read-only
+    previews, observations and validations inserted.
+  * Every original answer must be identical, or the analysis stops.
+  * Commitments, money lines, notice, severance, retained obligations and
+    displaced bookings are the engine's preview values.
+  * A shift extension's commitment is the reservation it added.
+* **The corpus** ([benchmark/v09b-dev/corpus.json](benchmark/v09b-dev/corpus.json)):
+  V0.6c, V0.7c and V0.8c, each group with its own economics and contract
+  reports, and three case studies.
+* **CI** checks the parameter evidence freeze. It runs the financial
+  evidence on the replays it already makes, compares the outputs with the
+  committed files, and compares them across platforms.
+* **Version 0.9.0-dev.2.** It registers 0.9.0-dev.1 for replay
+  (`mini-seed52-v091`, made from a5e5f9b; batch mode `v0.9_dev1`;
+  `internal/session/v091_test.go`).
+
+**Results** ([benchmark/v09b-dev/](benchmark/v09b-dev/README.md)):
+* **The engine replay:** 78 recordings and 3,540 decision points, every
+  original answer identical. 77 refused llm-agent 2 final replies were
+  validated again, and each reproduced its recorded validation exactly.
+* **Affordability,** by submitted batches:
+  * V0.6c (281): no funding rule, so 169 are `evidence_unavailable` by
+    definition.
+  * V0.7c (272): 180 funded without credit, 30 only with credit, and no
+    funding refusal.
+  * V0.8c (69): 8 funded without credit, 9 with credit, and 10 refused for
+    insufficient funds, all in the low-liquidity entry.
+* **Reversibility,** by executed actions: 720 actions, none resting on
+  the rule alone (every staffing action had a matching preview item).
+  * V0.6c (396): 342 not reversible, 31 reversible with a retained
+    obligation, 15 withdrawable, 8 policies.
+  * V0.7c (291): 243, 27, 10 and 11.
+  * V0.8c (33): 22, 2, 8 and 1.
+
+  Extensions make up most of "not reversible".
+* **Credit:** five runs drew on the line: the V0.7c staffing-shortage Qwen
+  run (at most $17,200.28) and the four V0.8c low-liquidity runs.
+* **The case studies.**
+  * V0.7c staffing shortage, Qwen: the MR hire was funded only by the
+    credit line, and the engine stated that the termination batches
+    displaced 991 booked appointments. Both were knowable at the decision,
+    before any loss was observed.
+  * A limited-intervention contrast.
+  * The V0.8c low-liquidity refusals.
+* **Agents never called `preview`.** The exact commitments were knowable
+  on request, not shown.
+
+**Quality gates:**
+
+Run on linux/amd64 unless noted:
+* **Focused tests:**
+  * agent tests (40);
+  * evidence tests (139, including the 31 financial evidence tests, which
+    cover the 18 required cases, and the parameter evidence freeze check);
+  * probe tests (3, against the built binary).
+  All pass.
+* **Go:**
+  * full default suite: all packages pass, including the new
+    `mini-seed52-v091` fixture (0.9.0-dev.1, batch mode `v0.9_dev1`);
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Historical replay:** every fixture replays with every digest
+  verified; every recording in the corpus was replayed at 0.9.0-dev.2.
+* **Benchmark verify and reproduce:** 66 of 66, 0 failed.
+* **Earlier pipelines:** the V0.8c pipeline, run twice, is byte-identical
+  and equal to the committed files; `check_v08b.py` reproduces the V0.8b
+  review package and probe log, with build numbers set aside; the V0.9a
+  outputs are rebuilt identically and the review status is PENDING.
+* **Parameter evidence v1 freeze:** the frozen analyzer, corpus,
+  recordings and outputs are reproduced.
+* **Financial evidence:** run twice, 2,062 records from 78 recordings,
+  byte-identical and equal to the committed files. Every engine replay
+  answered identically to its recording.
+* **Earlier evidence, suites and golden references:** unchanged; no
+  deletions.
+* **Five cross-builds:** all pass.
+* **CI:** linux/amd64, linux/arm64 and darwin/arm64, with the
+  cross-platform comparison and the new financial evidence step.
+
+**No change to:**
+* simulator behaviour, actions, scenarios, scoring, agents, prompts or
+  settings;
+* any recording, session, golden reference or benchmark result;
+* the frozen rules and outputs: decision evidence v1, repeat v2,
+  refusal-response v1 and v2, parameter evidence v1;
+* the review package, its protocol, the review page and status.
+
+No model was contacted.
+
+**Known limitations:**
+* **The independent review is pending.** No rule is independently
+  validated.
+* **Knowable is not known.** The agents never requested the previews this
+  analysis uses.
+* **llm-agent 2 records only the final reply.** 301 earlier attempts are
+  counted but unknown.
+* **No causal attribution.** No later outcome is attributed to one
+  decision. That would need runs that differ in one decision only, which
+  were not performed.
+* **In-sample, development recordings only.**
+
+---
+
 ## V0.9a — evidence validation and decision/action parameter consistency (0.9.0-dev.1)
 
 Owner decision 2026-10-31:

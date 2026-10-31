@@ -1,9 +1,29 @@
 # Parameter evidence (dreamteam.parameter-evidence/v1)
 
-Status: built in V0.9a (0.9.0-dev.1). Not released. Not independently
+Status: built in V0.9a (0.9.0-dev.1), and **frozen in V0.9b**
+(0.9.0-dev.2) as accepted at a5e5f9b. Not released. Not independently
 validated. A new, separately versioned contract: it changes nothing in
 `dreamteam.decision-evidence/v1` (frozen), `dreamteam.repeat-evidence/v2`
 or the refusal-response extensions.
+
+**The freeze.**
+* **The record:** `analysis/evidence/frozen-parameter-v1.json` holds the
+  SHA-256 of:
+  * the analyzer and its tests;
+  * the corpus and its 96 recordings;
+  * `parameter-evidence.json` and `parameter-tables.md`;
+  * the counts by rule.
+* **The check:** `analysis/evidence/check_parameter_frozen.py --out <dir>`
+  requires all of them byte for byte. CI runs it on every commit.
+* **No further tuning.** The rules are not tuned against these recordings
+  again. A rule change would be a new version (v2), with its own outputs;
+  v1 and its outputs stay as they are.
+* **What the result means.** The rules were calibrated in-sample: §8 and
+  the V0.9a report's calibration section show how they were narrowed after
+  false positives on this same corpus. Their zero supported mismatches are
+  therefore an in-sample result with deliberately limited coverage. They
+  are not evidence that agents never misstate action parameters, and
+  recall is not measured.
 
 **Files:**
 * the analysis: `analysis/evidence/parameter_evidence.py` (analyzer

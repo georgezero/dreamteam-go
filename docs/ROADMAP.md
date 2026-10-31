@@ -20,7 +20,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
-| **V0.9** (in development: V0.9a, `0.9.0-dev.1`, authorized by the owner 2026-10-31, built) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
+| **V0.9** (in development: V0.9a accepted; V0.9b, `0.9.0-dev.2`, authorized by the owner 2026-10-31, built) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -883,9 +883,9 @@ mechanics and no large LLM benchmark first.
 
 | Milestone | Scope | Status |
 |---|---|---|
-| V0.9a | Independent review workflow and decision/action parameter consistency | authorized 2026-10-31; built (0.9.0-dev.1), awaiting owner review |
-| V0.9b | Financial decision-quality framework | proposed |
-| V0.9c | Prospective evaluation with frozen models | proposed |
+| V0.9a | Independent review workflow and decision/action parameter consistency | accepted and closed 2026-10-31 (a5e5f9b, 0.9.0-dev.1) |
+| V0.9b | Financial decision quality and operational exposure | authorized 2026-10-31; built (0.9.0-dev.2), awaiting owner review |
+| V0.9c | Prospective financial decision evaluation | proposed |
 | V0.9.0 | Release | pending |
 
 **V0.9a as authorized** (owner, 2026-10-31, after accepting V0.8.0):
@@ -908,11 +908,35 @@ mechanics and no large LLM benchmark first.
   * The parameter evidence made 816 eligible checks on V0.5c–V0.8c: 0
     supported mismatches, 54 abstentions.
 
-**V0.9b, the owner's recommendation:** a financial decision-quality
-framework that distinguishes affordability, reversibility and downstream
-operational exposure, without collapsing them into one score. It would
-let cases such as the V0.7c staffing terminations be analysed rigorously,
-without claiming that a decision was irrational.
+**V0.9a, accepted** (owner, 2026-10-31). The owner's qualification: the
+zero supported parameter mismatches are an in-sample result after the
+rules were narrowed on the same corpus. So parameter-evidence/v1 is frozen,
+and not tuned against these recordings again.
+
+**V0.9b as authorized** (owner, 2026-10-31): financial decision quality
+and operational exposure, a read-only analysis.
+* **Three dimensions,** with evidence completeness as a fourth property:
+  affordability, reversibility and operational exposure, never combined
+  into a score.
+* **No financial model on top of the simulator:** use the engine's exact
+  values where it gives them, a supported qualitative property where it
+  does not, and otherwise abstain.
+* **Exposure in three parts:** direct state changes, subsequent observed
+  outcomes and paired run-level differences. No outcome is attributed to
+  one action because it followed it.
+* **Not approved:** simulator, agent or prompt changes; live LLM runs; new
+  benchmark scoring.
+* **Built:** [docs/benchmark/v09b-dev/](benchmark/v09b-dev/README.md),
+  `dreamteam.financial-evidence/v1`:
+  * 78 recordings from V0.6c, V0.7c and V0.8c, every engine answer
+    reproduced;
+  * 2,062 records;
+  * case studies of the V0.7c staffing-shortage run, a limited-intervention
+    contrast and the V0.8c low-liquidity refusals.
+
+**V0.9c, proposed:** a prospective financial decision evaluation. It asks
+whether agents respond to these constraints in prospective scenarios
+(docs/benchmark/v09b-dev/README.md §9). It needs the owner's GO.
 
 Directions recorded:
 * **independent evidence review:** label the frozen 98-item package by an
@@ -927,8 +951,8 @@ Directions recorded:
 * **agent decision-quality benchmarking,** without a leaderboard.
 
 Each rule change is a new, separately versioned rule, and earlier
-findings stay under their original versions. V0.9a is built. V0.9b and
-later steps each need the owner's GO.
+findings stay under their original versions. V0.9a is accepted, and
+V0.9b is built. V0.9c and later steps each need the owner's GO.
 
 ## 8. Testing strategy (all versions)
 
