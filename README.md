@@ -39,7 +39,7 @@ In development, not released (`0.8.0-dev.3`):
   * a proposed recording contract for V0.8c.
 
   Neither uses a model or changes simulator behaviour.
-* **V0.8c** (`docs/benchmark/v08c-dev/`, in progress): llm-agent 3
+* **V0.8c** (`docs/benchmark/v08c-dev/`): llm-agent 3
   (`agents/llm/llm_agent3.py`), which records every attempt at a decision
   (`docs/LLM_AGENT.md` §13), and a small prospective evaluation of what
   the frozen models do after a funding refusal, on a low-liquidity variant

@@ -1,0 +1,6528 @@
+{
+ "schema": "dreamteam.benchmark-contract/v1",
+ "engine": "0.8.0-dev.3",
+ "suite": {
+  "id": "dreamteam-dev",
+  "version": 4,
+  "split": "development"
+ },
+ "suiteRun": "v08c-eval",
+ "status": "complete",
+ "expectedRuns": 20,
+ "completedRuns": 20,
+ "failedRuns": [],
+ "seeds": [
+  41901,
+  41902
+ ],
+ "days": 30,
+ "cadence": {
+  "everyDays": 1,
+  "at": "07:00"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1"
+  },
+  {
+   "id": "greedy",
+   "version": "1"
+  },
+  {
+   "id": "conservative-v2",
+   "version": "2"
+  },
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3"
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3"
+  }
+ ],
+ "baseline": "noop",
+ "entries": [
+  {
+   "id": "financial-pressure-credit",
+   "version": 3,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "t90": "not_applicable",
+   "startingStates": [
+    {
+     "seed": 41901,
+     "runs": 5,
+     "identical": true,
+     "time": "2026-10-13T06:00:00",
+     "stateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128"
+    },
+    {
+     "seed": 41902,
+     "runs": 5,
+     "identical": true,
+     "time": "2026-10-13T06:00:00",
+     "stateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537"
+    }
+   ]
+  },
+  {
+   "id": "financial-pressure-lowliquidity",
+   "version": 4,
+   "category": "Financial pressure",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "t90": "not_applicable",
+   "startingStates": [
+    {
+     "seed": 41901,
+     "runs": 5,
+     "identical": true,
+     "time": "2026-10-13T06:00:00",
+     "stateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93"
+    },
+    {
+     "seed": 41902,
+     "runs": 5,
+     "identical": true,
+     "time": "2026-10-13T06:00:00",
+     "stateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9"
+    }
+   ]
+  }
+ ],
+ "missing": [
+  "imaging capacity utilization (no room-utilization metric in dreamteam.result/v1)",
+  "trend within the run (every metric is a whole-window total; the T90 vector's later-window figures exist only for the reporting-backlog scenario)",
+  "action categories (operations versus staffing) are counted from decisions.json by the report, not by a result metric",
+  "model usage and latency (only for policies that record them, such as the LLM agent's policy-evidence)"
+ ],
+ "note": "The evaluation contract dreamteam.benchmark-contract/v1 (docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each reported on its own; no composite score, weighting, leaderboard or ranking. Absent values are marked, not estimated. T90 is reported only where the evaluation policy in force applies. Paired differences are policy minus baseline on the same entry and seed.",
+ "runs": [
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-noop",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41901,
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25328471
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2000927
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2000927
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 4057057
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-greedy",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41901,
+   "policy": {
+    "id": "greedy",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 4,
+    "byType": {
+     "set_reading_allocation": 4
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1490
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3001
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 48045
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23331954
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25459977
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2128023
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23331954,
+        "num": -2128023
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 121
+      },
+      {
+       "name": "tatBreaches",
+       "value": 121
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 4057057
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 4
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 4
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-conservative-v2",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41901,
+   "policy": {
+    "id": "conservative-v2",
+    "version": "2"
+   },
+   "days": 30,
+   "startingStateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25328471
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2000927
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2000927
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 4057057
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41901,
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 2,
+    "staffing": 10,
+    "byType": {
+     "extend_shift": 2,
+     "set_reading_allocation": 9,
+     "terminate": 1
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1454
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1318
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 5724
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 173374
+      },
+      {
+       "name": "backlogEnd",
+       "value": 139
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1255
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4501
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 20147560
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 24270593
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -4123033
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 20147560,
+        "num": -4123033
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2118991
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 201
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 201
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 255002
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 388
+      },
+      {
+       "name": "tatBreaches",
+       "value": 313
+      },
+      {
+       "name": "waitsOver30",
+       "value": 499
+      },
+      {
+       "name": "displacedAppointments",
+       "value": 57
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 119
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 4
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3995709
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 12
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 12
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41901,
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "e0cca2d547845e735b643cac44be2ddc394786d67faa5f66e95f0ed253d9c128",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25328471
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2000927
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2000927
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 4057057
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-noop",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41902,
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25025481
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1391112
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1391112
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3777962
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-greedy",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41902,
+   "policy": {
+    "id": "greedy",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 4,
+    "byType": {
+     "set_reading_allocation": 4
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1512
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3764
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 50544
+      },
+      {
+       "name": "backlogEnd",
+       "value": 5
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23706097
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25156987
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1450890
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23706097,
+        "num": -1450890
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 105
+      },
+      {
+       "name": "tatBreaches",
+       "value": 105
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 90
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3777962
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 4
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 4
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-conservative-v2",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41902,
+   "policy": {
+    "id": "conservative-v2",
+    "version": "2"
+   },
+   "days": 30,
+   "startingStateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25025481
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1391112
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1391112
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3777962
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41902,
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 9,
+    "staffing": 0,
+    "byType": {
+     "extend_shift": 9
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1518
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1510
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4353
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51743
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1205
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3676
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23641569
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25202532
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1560963
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23641569,
+        "num": -1560963
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2545560
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 225875
+      },
+      {
+       "name": "heldOver",
+       "value": 36
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 109
+      },
+      {
+       "name": "tatBreaches",
+       "value": 109
+      },
+      {
+       "name": "waitsOver30",
+       "value": 491
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 88
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3600911
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 9
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 9
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b",
+   "entry": "financial-pressure-credit",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "fingerprint": "586f3ef74742af8c537e7ff41c41d586fafbfa75c4426043122595ba7c8795b1",
+   "seed": 41902,
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "387bc34ed523a7473144f215aa39c69cfb827d84b0f597e75d61e61f71f5d537",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25025481
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1391112
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1391112
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 3777962
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-noop",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41901,
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25330253
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2002709
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2002709
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-greedy",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41901,
+   "policy": {
+    "id": "greedy",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 2,
+    "byType": {
+     "set_reading_allocation": 2
+    },
+    "refused": 2
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1490
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3001
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 48045
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23331954
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25461759
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2129805
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23331954,
+        "num": -2129805
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 121
+      },
+      {
+       "name": "tatBreaches",
+       "value": 121
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 2
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 2
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41901,
+   "policy": {
+    "id": "conservative-v2",
+    "version": "2"
+   },
+   "days": 30,
+   "startingStateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25330253
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2002709
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2002709
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41901,
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 5,
+    "staffing": 6,
+    "byType": {
+     "extend_shift": 5,
+     "hire": 1,
+     "set_reading_allocation": 4,
+     "terminate": 1
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1386
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 6047
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 150360
+      },
+      {
+       "name": "backlogEnd",
+       "value": 113
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 21650633
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25750044
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -4099411
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 21650633,
+        "num": -4099411
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2481461
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 268297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 380
+      },
+      {
+       "name": "tatBreaches",
+       "value": 335
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "value": 9
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 115
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 4
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 11
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 11
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41901,
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "90843f9980e97fc47592f6986263c3c588405e15926045957993cf69bbbf7d93",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 1,
+    "byType": {
+     "contract_teleradiology": 1
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1496
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1489
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3518
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 49994
+      },
+      {
+       "name": "backlogEnd",
+       "value": 10
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1248
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 4471
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23327544
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25330253
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2002709
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23327544,
+        "num": -2002709
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2057643
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1718
+      },
+      {
+       "name": "ordersLost",
+       "value": 161
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1718,
+        "num": 161
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 250297
+      },
+      {
+       "name": "heldOver",
+       "value": 48
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 127
+      },
+      {
+       "name": "tatBreaches",
+       "value": 127
+      },
+      {
+       "name": "waitsOver30",
+       "value": 517
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 114
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 1
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 1
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 1
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-noop",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41902,
+   "policy": {
+    "id": "noop",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25027801
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1393432
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1393432
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-greedy",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41902,
+   "policy": {
+    "id": "greedy",
+    "version": "1"
+   },
+   "days": 30,
+   "startingStateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 2,
+    "byType": {
+     "set_reading_allocation": 2
+    },
+    "refused": 2
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1512
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 3764
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 50544
+      },
+      {
+       "name": "backlogEnd",
+       "value": 5
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23706097
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25159307
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1453210
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23706097,
+        "num": -1453210
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 105
+      },
+      {
+       "name": "tatBreaches",
+       "value": 105
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 90
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 2
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 2
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41902,
+   "policy": {
+    "id": "conservative-v2",
+    "version": "2"
+   },
+   "days": 30,
+   "startingStateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25027801
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1393432
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1393432
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41902,
+   "policy": {
+    "id": "qwen36-35b-a3b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 4,
+    "staffing": 2,
+    "byType": {
+     "extend_shift": 2,
+     "set_worklist_policy": 2,
+     "terminate": 2
+    },
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4189
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 50975
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23616129
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25861110
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2244981
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23616129,
+        "num": -2244981
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2541585
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 192329
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 111
+      },
+      {
+       "name": "tatBreaches",
+       "value": 111
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "value": 6
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 90
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 6
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 6
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b",
+   "entry": "financial-pressure-lowliquidity",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "fingerprint": "3175656ee0248a369e3884d539086c2c1fd3b37b306150c2ae33a064d94dc781",
+   "seed": 41902,
+   "policy": {
+    "id": "gemma4-26b-a4b",
+    "version": "3"
+   },
+   "days": 30,
+   "startingStateDigest": "7a452528d28a62e91af22c05be82f2b9f37795182a171ce0138b13a0bf91a8c9",
+   "status": "completed",
+   "replayVerified": true,
+   "actions": {
+    "operations": 0,
+    "staffing": 0,
+    "byType": {},
+    "refused": 0
+   },
+   "t90": {
+    "applicability": "not_applicable",
+    "status": "not_requested"
+   },
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "metrics": [
+      {
+       "name": "examsCompleted",
+       "value": 1516
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1508
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 4344
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 51725
+      },
+      {
+       "name": "backlogEnd",
+       "value": 9
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 1226
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 3715
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "metrics": [
+      {
+       "name": "netRevenueCents",
+       "value": 23634369
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 25027801
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -1393432
+      },
+      {
+       "name": "margin",
+       "value": {
+        "den": 23634369,
+        "num": -1393432
+       }
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -2368509
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "metrics": [
+      {
+       "name": "ordersReceived",
+       "value": 1731
+      },
+      {
+       "name": "ordersLost",
+       "value": 152
+      },
+      {
+       "name": "lostRate",
+       "value": {
+        "den": 1731,
+        "num": 152
+       }
+      },
+      {
+       "name": "overtimeSec",
+       "value": 170729
+      },
+      {
+       "name": "heldOver",
+       "value": 37
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "metrics": [
+      {
+       "name": "tatOverTarget",
+       "value": 107
+      },
+      {
+       "name": "tatBreaches",
+       "value": 107
+      },
+      {
+       "name": "waitsOver30",
+       "value": 500
+      },
+      {
+       "name": "displacedAppointments",
+       "absent": "none displaced"
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 89
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "metrics": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "metrics": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "pairs": [
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41901,
+   "policy": "greedy",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1
+      },
+      {
+       "name": "tatP50Sec",
+       "value": -517
+      },
+      {
+       "name": "tatP90Sec",
+       "value": -1949
+      },
+      {
+       "name": "backlogEnd",
+       "value": -1
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 4410
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 131506
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -127096
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": -6
+      },
+      {
+       "name": "tatBreaches",
+       "value": -6
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 4
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 4
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    4
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41901,
+   "policy": "conservative-v2",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41901,
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": -42
+      },
+      {
+       "name": "reportsFinal",
+       "value": -171
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 2206
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 123380
+      },
+      {
+       "name": "backlogEnd",
+       "value": 129
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 7
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 30
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": -3179984
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": -1057878
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2122106
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -61348
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 40
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 4705
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 261
+      },
+      {
+       "name": "tatBreaches",
+       "value": 186
+      },
+      {
+       "name": "waitsOver30",
+       "value": -18
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 5
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 3
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": -61348
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 12
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 12
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    2,
+    10
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41901,
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41902,
+   "policy": "greedy",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 4
+      },
+      {
+       "name": "tatP50Sec",
+       "value": -580
+      },
+      {
+       "name": "tatP90Sec",
+       "value": -1181
+      },
+      {
+       "name": "backlogEnd",
+       "value": -4
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 71728
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 131506
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -59778
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": -2
+      },
+      {
+       "name": "tatBreaches",
+       "value": -2
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 1
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 4
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 4
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    4
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41902,
+   "policy": "conservative-v2",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41902,
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 2
+      },
+      {
+       "name": "reportsFinal",
+       "value": 2
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 9
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 18
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": -21
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": -39
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 7200
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 177051
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -169851
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -177051
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 55146
+      },
+      {
+       "name": "heldOver",
+       "value": -1
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 2
+      },
+      {
+       "name": "tatBreaches",
+       "value": 2
+      },
+      {
+       "name": "waitsOver30",
+       "value": -9
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": -1
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": -177051
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 9
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 9
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    9,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-credit",
+   "seed": 41902,
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41901,
+   "policy": "greedy",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 1
+      },
+      {
+       "name": "tatP50Sec",
+       "value": -517
+      },
+      {
+       "name": "tatP90Sec",
+       "value": -1949
+      },
+      {
+       "name": "backlogEnd",
+       "value": -1
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 4410
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 131506
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -127096
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": -6
+      },
+      {
+       "name": "tatBreaches",
+       "value": -6
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 2
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 2
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    2
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41901,
+   "policy": "conservative-v2",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41901,
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": -103
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 2529
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 100366
+      },
+      {
+       "name": "backlogEnd",
+       "value": 103
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": -1676911
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 419791
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -2096702
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -423818
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 18000
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 253
+      },
+      {
+       "name": "tatBreaches",
+       "value": 208
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 1
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 3
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 11
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 11
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    5,
+    6
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41901,
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 1
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 1
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    1
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41902,
+   "policy": "greedy",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 4
+      },
+      {
+       "name": "tatP50Sec",
+       "value": -580
+      },
+      {
+       "name": "tatP90Sec",
+       "value": -1181
+      },
+      {
+       "name": "backlogEnd",
+       "value": -4
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 71728
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 131506
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -59778
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": -2
+      },
+      {
+       "name": "tatBreaches",
+       "value": -2
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 1
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 2
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 2
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    2
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41902,
+   "policy": "conservative-v2",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41902,
+   "policy": "qwen36-35b-a3b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": -155
+      },
+      {
+       "name": "tatP90Sec",
+       "value": -750
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": -18240
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 833309
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": -851549
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": -173076
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 21600
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 4
+      },
+      {
+       "name": "tatBreaches",
+       "value": 4
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 1
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 6
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 6
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    4,
+    2
+   ]
+  },
+  {
+   "entry": "financial-pressure-lowliquidity",
+   "seed": 41902,
+   "policy": "gemma4-26b-a4b",
+   "against": "noop",
+   "dimensions": [
+    {
+     "dimension": "operational",
+     "deltas": [
+      {
+       "name": "examsCompleted",
+       "value": 0
+      },
+      {
+       "name": "reportsFinal",
+       "value": 0
+      },
+      {
+       "name": "tatP50Sec",
+       "value": 0
+      },
+      {
+       "name": "tatP90Sec",
+       "value": 0
+      },
+      {
+       "name": "backlogEnd",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP50Sec",
+       "value": 0
+      },
+      {
+       "name": "waitToExamP90Sec",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "financial",
+     "deltas": [
+      {
+       "name": "netRevenueCents",
+       "value": 0
+      },
+      {
+       "name": "operatingExpenseCents",
+       "value": 0
+      },
+      {
+       "name": "operatingProfitCents",
+       "value": 0
+      },
+      {
+       "name": "margin",
+       "value": null
+      },
+      {
+       "name": "operatingCashFlowCents",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "staffingCapacity",
+     "deltas": [
+      {
+       "name": "ordersReceived",
+       "value": 0
+      },
+      {
+       "name": "ordersLost",
+       "value": 0
+      },
+      {
+       "name": "lostRate",
+       "value": null
+      },
+      {
+       "name": "overtimeSec",
+       "value": 0
+      },
+      {
+       "name": "heldOver",
+       "value": 0
+      },
+      {
+       "name": "skippedBreaks",
+       "value": 0
+      },
+      {
+       "name": "noCoverage",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "serviceReliability",
+     "deltas": [
+      {
+       "name": "tatOverTarget",
+       "value": 0
+      },
+      {
+       "name": "tatBreaches",
+       "value": 0
+      },
+      {
+       "name": "waitsOver30",
+       "value": 0
+      },
+      {
+       "name": "displacedAppointments",
+       "value": null
+      },
+      {
+       "name": "alertsRaisedAlert",
+       "value": 0
+      },
+      {
+       "name": "alertsActiveAtEnd",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "sustainability",
+     "deltas": [
+      {
+       "name": "minCashCents",
+       "value": 0
+      },
+      {
+       "name": "shortfallCents",
+       "value": 0
+      },
+      {
+       "name": "daysBelowZero",
+       "value": 0
+      }
+     ]
+    },
+    {
+     "dimension": "actions",
+     "deltas": [
+      {
+       "name": "actionsAttempted",
+       "value": 0
+      },
+      {
+       "name": "actionsAccepted",
+       "value": 0
+      },
+      {
+       "name": "actionsRejected",
+       "value": 0
+      }
+     ]
+    }
+   ],
+   "actionsOperationsStaffing": [
+    0,
+    0
+   ]
+  }
+ ]
+}

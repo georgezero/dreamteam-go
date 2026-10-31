@@ -15,7 +15,7 @@ evaluation (at most eight runs), and repeat detection as a separately
 versioned rule. Prompts, models, mechanics and the frozen v1 rules are not
 to be changed.
 
-**Declared before any live run** (this commit):
+**Declared before any live run** (ee8aabc):
 * **llm-agent 3** (`agents/llm/llm_agent3.py`) and its record
   `dreamteam.llm-decision-record/v3` ([LLM_AGENT.md §13](LLM_AGENT.md)):
   * every attempt, its input by SHA-256, output, parse, reason, actions,
@@ -35,7 +35,100 @@ to be changed.
 * **Version:** 0.8.0-dev.3, with no engine behaviour changed. 0.8.0-dev.2
   is registered for replay (`mini-seed52-v082`, batch mode `v0.8_dev2`).
 
-**Results:** pending; the live runs follow this commit.
+**Built after the declaration:**
+* **Refusal-response version 2** (`dreamteam.refusal-response/v2`,
+  DECISION_EVIDENCE §13):
+  * a corrected reader;
+  * the response is the next parsed proposal;
+  * it reads llm-agent 3 directly;
+  * version 1's outputs are unchanged.
+  * It found **RR1-D1:** both historical `identical_repeated` refusals of
+    V0.8b were a proposal compared with itself.
+* **Repeat rule version 2** (`dreamteam.repeat-evidence/v2`,
+  DECISION_EVIDENCE §14): repeats by exact action content, with explicit
+  abstention, compared with v1's links. It found **V1-D5:** v1 merges
+  different actions refused with the same message.
+* **The frozen rules on llm-agent 3's records** through an llm-agent 2 view
+  (DECISION_EVIDENCE §15), checked field by field against llm-agent 2's
+  own records.
+* **The evaluation's analysis** (`analysis/evidence/v08c_analysis.py`):
+  recording completeness, the plan's 15 primary outcomes with
+  denominators, the response categories, and outcomes paired with no
+  action.
+* **`check_v08b.py`:** the frozen V0.8b review package and probe log
+  record their build number. They are checked byte for byte with the
+  build numbers set aside, rather than regenerated.
+
+**Results** ([benchmark/v08c-dev/](benchmark/v08c-dev/README.md)):
+* **Runs:** 20 of 20 completed on the first attempt, 8 of them live LLM
+  runs, with no transport failures.
+* **Recording:** every attempt was recorded and every input is verifiable
+  at 240 of 240 decision points (270 attempts).
+* **Funding refusals:** 10, all in the low-liquidity condition on seed
+  41901 (Qwen 8, Gemma 2). There were none in the control or on seed
+  41902.
+* **Responses to those 10:** repeated 0, modified 2 (only the effective
+  date changed), different 3, no action 5, unavailable 0.
+* **Financial:** no distress anywhere. Credit was drawn under every
+  policy in the low-liquidity condition, no action included.
+* **Replay:** every live run replays without the model and equals the live
+  run byte for byte, every attempt's input and validate answer included.
+* **Historical recordings, read again:**
+  * refusal-response v2 classifies 59 of 559 refusals, not 102;
+  * repeat v2 can confirm none of v1's 202 repeat links: 194 lack the
+    payload, and 8 join different actions.
+* **Independent review:** PENDING. No v1 finding is independently
+  validated.
+
+**Quality gates:**
+
+Run on linux/amd64 unless noted:
+* **Focused tests:**
+  * agent tests (40, llm-agent 2 and 3, including the llm-agent 3 record,
+    its replay and tamper checks, and the same decisions as llm-agent 2);
+  * evidence tests (62, including the 9 new ones: repeat v2's cases and
+    abstention, refusal-response v2 and RR1-D1, and the llm-agent 2 view);
+  * probe tests (3, against the built binary).
+  All pass.
+* **Go:**
+  * full default suite: all 10 packages pass, including the llm-agent 3
+    tests against a mock model;
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Historical replay:** every fixture, including the new
+  `mini-seed52-v082` (0.8.0-dev.2, batch mode `v0.8_dev2`), replays with
+  every digest verified. Every llm-agent 1 and 2 recording replays
+  unchanged with `llm_agent.py`.
+* **Golden references:** outcomes identical.
+* **Benchmark verify and reproduce:** 66 of 66, 0 failed: V0.8b's 62 and
+  the two llm-agent 3 replays of the evaluation.
+* **Frozen v1:** `check_frozen.py` reproduces it byte for byte.
+* **V0.8b package:** `check_v08b.py` reproduces the review package and
+  probe log, with build numbers set aside.
+* **The V0.8c pipeline:** the scenario analysis, both evaluation replays,
+  refusal-response v2, repeat v2 and the evaluation analysis, run twice,
+  are byte-identical and equal the committed files. No model was
+  contacted.
+* **Cross-platform:** the evaluation replays' manifests are identical on
+  linux/amd64 and linux/arm64.
+* **Five cross-builds:** all pass.
+* **CI:** green on linux/amd64, linux/arm64 and darwin/arm64, with the
+  cross-platform comparison.
+
+**No change to:**
+* simulator behaviour, actions, scoring, llm-agent 1 and 2, prompts or
+  settings;
+* any earlier recording, session, golden reference or benchmark result;
+* the frozen v1 rules or the V0.8b review package.
+
+**Known limitations:**
+* **The independent review is pending,** so no v1 finding is
+  independently validated, and no precision or recall is claimed.
+* **The evaluation is small:** two seeds, two conditions, two models, and
+  funding refusals on one seed only. It shows what happened, not rates.
+* **Historical recordings** remain mostly unclassifiable; only llm-agent 3
+  records every attempt.
+* **The outcome analysis is descriptive only.**
 
 ---
 

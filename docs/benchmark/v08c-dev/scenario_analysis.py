@@ -60,7 +60,9 @@ def trajectory(binary, scenario):
                          "creditDrawnCents": s.get("creditDrawnCents"), "interestChargedCents": s.get("interestChargedCents"),
                          "shortfallCents": fin.get("shortfallCents"), "daysBelowZero": fin.get("daysBelowZero")})
     sc = hello.get("scenario") or {}
-    return {"scenario": scenario, "fingerprint": sc.get("fingerprint"), "engine": hello.get("engine"),
+    # Not the engine build: the trajectory is the scenario's, and a later
+    # build that changes no behaviour reproduces it byte for byte.
+    return {"scenario": scenario, "fingerprint": sc.get("fingerprint"),
             "start": start, "openingCashCents": rows[0]["cashCents"], "points": rows}
 
 

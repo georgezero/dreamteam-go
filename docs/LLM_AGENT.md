@@ -647,6 +647,9 @@ and run record.
 
 ## 12. Known limitations (V0.7)
 
+(Version 2, which recorded only the final reply's actions. Version 3 (§13)
+records every attempt, for new runs only.)
+
 * **Bounded memory, no planning.** The memory is a short record of the
   agent's own decisions and what followed them. There is no plan, no goal
   tracking and no reasoning across runs, and older decisions survive only

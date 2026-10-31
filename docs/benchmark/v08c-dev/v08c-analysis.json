@@ -1,0 +1,5968 @@
+{
+ "baseline": "noop",
+ "contract": "docs/benchmark/v08c-dev/eval/contract.json",
+ "days": 30,
+ "decisionEvidenceV1": {
+  "byRule": {
+   "EXPLICIT_ACTION_OMITTED": {
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 4
+   },
+   "EXPLICIT_OPPOSITE_ACTION": {
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 0
+   },
+   "FACTUAL_OBSERVATION_MISMATCH": {
+    "insufficient_evidence": 0,
+    "supported": 2,
+    "unresolved": 0
+   },
+   "FINANCIAL_AMOUNT_MISMATCH": {
+    "insufficient_evidence": 0,
+    "supported": 0,
+    "unresolved": 31
+   },
+   "REPEATED_INVALID_PROPOSAL": {
+    "insufficient_evidence": 0,
+    "supported": 7,
+    "unresolved": 0
+   },
+   "STATED_ACTION_NOT_EXECUTED": {
+    "insufficient_evidence": 0,
+    "supported": 8,
+    "unresolved": 0
+   }
+  },
+  "byStatus": {
+   "insufficient_evidence": 0,
+   "supported": 17,
+   "unresolved": 35
+  },
+  "coverage": [
+   {
+    "observation": 240,
+    "points": 240,
+    "promptMismatch": 0,
+    "promptVerified": 240,
+    "reasonMissing": 0,
+    "recordings": 8,
+    "replayMissing": 0
+   }
+  ],
+  "findings": [
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 5 times: 0 time(s) again within a decision point's retries, 4 time(s) at a later decision point.",
+    "id": "de1-c7685fd64272e0fc",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 4,
+       "refusalShownInMemory": true,
+       "to": 11
+      },
+      {
+       "from": 11,
+       "refusalShownInMemory": true,
+       "to": 23
+      },
+      {
+       "from": 23,
+       "refusalShownInMemory": true,
+       "to": 24
+      },
+      {
+       "from": 24,
+       "refusalShownInMemory": true,
+       "to": 29
+      }
+     ],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 5,
+     "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 4
+      },
+      {
+       "attempt": 1,
+       "point": 11
+      },
+      {
+       "attempt": 1,
+       "point": 23
+      },
+      {
+       "attempt": 1,
+       "point": 24
+      },
+      {
+       "attempt": 1,
+       "point": 29
+      }
+     ],
+     "sameTypeLaterSubmitted": false,
+     "type": "extend_shift",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: refused_at_validate.",
+    "id": "de1-1b8f90ea0250a335",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "hire"
+   },
+   {
+    "basis": "The reason states weekday 'Sun'; the observation shown has weekday = 'Mon'.",
+    "id": "de1-782b4c9fa21287bd",
+    "point": 13,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FACTUAL_OBSERVATION_MISMATCH",
+    "status": "supported",
+    "subrule": "weekday"
+   },
+   {
+    "basis": "A dollar amount (~$24.6k) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-6970915fd77bebd4",
+    "point": 14,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 2 times: 0 time(s) again within a decision point's retries, 1 time(s) at a later decision point.",
+    "id": "de1-d039003a0e41b137",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 23,
+       "refusalShownInMemory": false,
+       "to": 29
+      }
+     ],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 2,
+     "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 23
+      },
+      {
+       "attempt": 1,
+       "point": 29
+      }
+     ],
+     "sameTypeLaterSubmitted": false,
+     "type": "extend_shift",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "An action statement with no matching proposed action, but the statement is hedged, says_cannot.",
+    "id": "de1-979def8035c0f9ea",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "EXPLICIT_ACTION_OMITTED",
+    "status": "unresolved",
+    "subrule": "set_reading_allocation"
+   },
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 3 times: 0 time(s) again within a decision point's retries, 2 time(s) at a later decision point.",
+    "id": "de1-6c15531cb4b1fb3f",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 2,
+       "refusalShownInMemory": true,
+       "to": 3
+      },
+      {
+       "from": 3,
+       "refusalShownInMemory": true,
+       "to": 6
+      }
+     ],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 3,
+     "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 2
+      },
+      {
+       "attempt": 1,
+       "point": 3
+      },
+      {
+       "attempt": 1,
+       "point": 6
+      }
+     ],
+     "sameTypeLaterSubmitted": true,
+     "type": "extend_shift",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 2 times: 0 time(s) again within a decision point's retries, 1 time(s) at a later decision point.",
+    "id": "de1-bde56486d5fdd85e",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 2,
+       "refusalShownInMemory": true,
+       "to": 3
+      }
+     ],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 2,
+     "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 2
+      },
+      {
+       "attempt": 2,
+       "point": 3
+      }
+     ],
+     "sameTypeLaterSubmitted": true,
+     "type": "extend_shift",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "An action statement with no matching proposed action, but the statement is question, revised_in_text.",
+    "id": "de1-6668083ffd34bc01",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "EXPLICIT_ACTION_OMITTED",
+    "status": "unresolved",
+    "subrule": "extend_shift"
+   },
+   {
+    "basis": "A dollar amount (-$10k) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-dbfa641bbbccbad9",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-aacf21553f7c8e15",
+    "point": 19,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-8809e98ce74cc857",
+    "point": 20,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: refused_at_validate.",
+    "id": "de1-daf0518cce92ffc8",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "contract_teleradiology"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-eed9b13f12a8e7ce",
+    "point": 19,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-1eb24240b4e7f71d",
+    "point": 20,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-2153bdf65d035a7f",
+    "point": 21,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($131) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-0814eda26be11dbe",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "An action statement with no matching proposed action, but the statement is hedged, revised_in_text.",
+    "id": "de1-0ecdb1a7fd02b9c6",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "EXPLICIT_ACTION_OMITTED",
+    "status": "unresolved",
+    "subrule": "extend_shift"
+   },
+   {
+    "basis": "The same refused proposal (hire lead_too_short) was refused 3 times: 0 time(s) again within a decision point's retries, 2 time(s) at a later decision point.",
+    "id": "de1-ba8135da1ad9a711",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 4,
+       "refusalShownInMemory": false,
+       "to": 25
+      },
+      {
+       "from": 25,
+       "refusalShownInMemory": true,
+       "to": 29
+      }
+     ],
+     "code": "lead_too_short",
+     "codeClass": "rule",
+     "count": 3,
+     "message": "At the premium tier recruiting takes 21 days: the earliest start is <date>.",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 4
+      },
+      {
+       "attempt": 1,
+       "point": 25
+      },
+      {
+       "attempt": 1,
+       "point": 29
+      }
+     ],
+     "sameTypeLaterSubmitted": false,
+     "type": "hire",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "lead_too_short"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: not_submitted_other_refused.",
+    "id": "de1-53dce6d34ec25784",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "extend_shift"
+   },
+   {
+    "basis": "The reason states weekday 'Sun'; the observation shown has weekday = 'Tue'.",
+    "id": "de1-173a50057455841e",
+    "point": 7,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FACTUAL_OBSERVATION_MISMATCH",
+    "status": "supported",
+    "subrule": "weekday"
+   },
+   {
+    "basis": "An action statement with no matching proposed action, but the statement is revised_in_text, retracted_elsewhere.",
+    "id": "de1-90ac553e385f76f1",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "EXPLICIT_ACTION_OMITTED",
+    "status": "unresolved",
+    "subrule": "set_reading_allocation"
+   },
+   {
+    "basis": "A dollar amount (~$14.8k) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-835063b43ff021bc",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$24.6k) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-273d930071c3b4df",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$14,795) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-443a728f4bd540a7",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$24,658) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-6e362683c4e5185e",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$9,863) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-c1ea4c85f258a220",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($16,725) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-4b1aecee11212fe1",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($30k) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-7158d0dfaf0f2e65",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($24.6k) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-0ddd7a5a032054e4",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($54.6k) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-80976560d801b97a",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($16.7k) that no quantity rule binds: an earlier value (from, was, previously), not the current observation.",
+    "id": "de1-8f46441103bc0cd7",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($24,658) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-cd8827ebfe984ace",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($16,725) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-8e3b0978acbe4d84",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($50,000) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-cdd80c5f91ceb07e",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($117,728) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-c8c546d200681cad",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($9,114) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-9ca699eb65eb597b",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($16,725) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-a0433b156cda59b9",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$24,658) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-51e8ee6cc2f9650f",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$14,795) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-6e9a12aa9efca915",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-252fef9a92096bba",
+    "point": 20,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-f5db79f74d4eed8e",
+    "point": 21,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "A dollar amount (~$4,500) that no quantity rule binds: a rate (per month, week, day or hour), not an observed amount.",
+    "id": "de1-1251e5ab6d4147b6",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: not_submitted_batch_rejected.",
+    "id": "de1-5fe076900d25d82f",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "terminate"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: refused_at_validate.",
+    "id": "de1-dc3f93a88fd45dcb",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "contract_teleradiology"
+   },
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 3 times: 0 time(s) again within a decision point's retries, 2 time(s) at a later decision point.",
+    "id": "de1-62b377ffaae1a73b",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [
+      {
+       "from": 25,
+       "refusalShownInMemory": true,
+       "to": 28
+      },
+      {
+       "from": 28,
+       "refusalShownInMemory": true,
+       "to": 29
+      }
+     ],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 3,
+     "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 25
+      },
+      {
+       "attempt": 1,
+       "point": 28
+      },
+      {
+       "attempt": 1,
+       "point": 29
+      }
+     ],
+     "sameTypeLaterSubmitted": false,
+     "type": "extend_shift",
+     "withinPoint": 0
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: refused_at_validate.",
+    "id": "de1-0742df3b420fcb60",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "hire"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: not_submitted_batch_rejected.",
+    "id": "de1-2ad1bdcce691fa70",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "set_reading_allocation"
+   },
+   {
+    "basis": "A dollar amount (-$2,452) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-95ce169b1819731e",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   },
+   {
+    "basis": "The same refused proposal (extend_shift after_close) was refused 2 times: 1 time(s) again within a decision point's retries, 0 time(s) at a later decision point.",
+    "id": "de1-cb00ef1978317458",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": {
+     "acrossPoints": [],
+     "code": "after_close",
+     "codeClass": "rule",
+     "count": 2,
+     "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+     "occurrences": [
+      {
+       "attempt": 1,
+       "point": 1
+      },
+      {
+       "attempt": 2,
+       "point": 1
+      }
+     ],
+     "sameTypeLaterSubmitted": true,
+     "type": "extend_shift",
+     "withinPoint": 1
+    },
+    "rule": "REPEATED_INVALID_PROPOSAL",
+    "status": "supported",
+    "subrule": "after_close"
+   },
+   {
+    "basis": "The stated action was proposed but not executed: refused_at_validate.",
+    "id": "de1-3dd3004ed9a91672",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "STATED_ACTION_NOT_EXECUTED",
+    "status": "supported",
+    "subrule": "extend_shift"
+   },
+   {
+    "basis": "A dollar amount ($0) that no quantity rule binds: no quantity rule names this amount.",
+    "id": "de1-1cc328b3f30f3cdf",
+    "point": 21,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "repeat": null,
+    "rule": "FINANCIAL_AMOUNT_MISMATCH",
+    "status": "unresolved",
+    "subrule": "unbound"
+   }
+  ]
+ },
+ "engine": "0.8.0-dev.3",
+ "plan": "docs/benchmark/v08c-dev/PLAN.md",
+ "refusalResponseV2": {
+  "events": [
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rr2-939e3f4e52502e5b",
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "employee": "E05",
+       "lastDay": "2026-10-31",
+       "type": "terminate"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-10-31",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-10-31",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-0f3c99bffb92fb3d",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E04",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "employee": "E05",
+       "lastDay": "2026-10-31",
+       "type": "terminate"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-10-31",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-10-31",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-231d2c4333d588df",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-24",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 11
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4400,
+       "requestId": "hire-ct-prem-1025",
+       "role": "technologist",
+       "skills": [
+        "CT"
+       ],
+       "startDate": "2026-10-25",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-07",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "telerad-urgent-sat-1107",
+       "scope": "urgent",
+       "type": "contract_teleradiology",
+       "windows": [
+        "saturday"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-24T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "category": "no_action",
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rr2-d441f0fe57e29b68",
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-14.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-1025",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-10-25",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 12
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-24T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-ac6ffd1ff2e7f358",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-05",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 23
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-05T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-5558dc7077a55f9b",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-05",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 23
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-05T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-78859f88ca4e02e3",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-06",
+     "employee": "E04",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 24
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-06T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rr2-060284943299916e",
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 50% from Sun Nov 22 would be followed by 60% from Mon Nov 23 after 1 day (the earliest next change is Sun Dec 6).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-23",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 6000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 27
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-12-06",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 6000,
+       "type": "set_reading_allocation"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-12-06",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 6000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-09T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-97a0ba4d4376c773",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "employee": "E04",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 29
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-11T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-94907474ab917410",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "employee": "E11",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 29
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-11T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rr2-f95c817175220cfe",
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 50% from Sun Nov 22 would be followed by 60% from Wed Nov 25 after 3 days (the earliest next change is Sun Dec 6).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-25",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 6000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 29
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-11T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-c4cba6a08bdfa408",
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-15",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 2
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E07",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E05",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E01",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-15T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 4,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-ae93d390e3e8683b",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-15",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 2
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E07",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E05",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E01",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-15T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-fd85817a3d4be08e",
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 3,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-16",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 3
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-16",
+       "employee": "E07",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-16",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-16",
+       "employee": "E05",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-16",
+       "employee": "E11",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-16",
+       "employee": "E01",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-16T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 3,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-7da22976c719fcf2",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 3,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-16",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 4
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-17",
+       "employee": "E07",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-17",
+       "employee": "E04",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-17",
+       "employee": "E05",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-16T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rr2-dadcc4da4895a292",
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-e9a272face34b579",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "not_on_shift",
+    "group": "v08c",
+    "id": "rr2-4d9d16659b646a9b",
+    "message": "Casey is not rostered today.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E05",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-6c52eed97c0ecb7f",
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-19",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 6
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-19",
+       "employee": "E07",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-19T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rr2-718247e30c3f8fdf",
+    "message": "contract_teleradiology needs op \"start\" or \"cancel\".",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "response": {
+     "attempt": 2,
+     "point": 26
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-22",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "telerad-backlog-fix",
+       "scope": "all",
+       "type": "contract_teleradiology",
+       "windows": [
+        "weeknights",
+        "saturday",
+        "sunday"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-08T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "category": "modified_proposal",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-486ad6051470d4f8",
+    "message": "Not funded: this batch commits $3,030 through action 1 (teleradiology retainer to the earliest end $3,030), more than the funding headroom $2,654 = cash $22,971 + undrawn credit $50,000 \u2212 current liabilities $70,317 \u2212 reserved commitments $0. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "response": {
+     "attempt": 1,
+     "point": 27
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-23",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "telerad-backlog-fix",
+       "scope": "all",
+       "type": "contract_teleradiology",
+       "windows": [
+        "weeknights"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-08T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-ea43345fb6fc4615",
+    "message": "Not funded: this batch commits $1,465 through action 1 (teleradiology retainer to the earliest end $1,465), more than the funding headroom \u2212$2,430 = cash $22,971 + undrawn credit $50,000 \u2212 current liabilities $75,401 \u2212 reserved commitments $0. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-23",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights"
+     ]
+    },
+    "response": {
+     "attempt": 2,
+     "point": 27
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-09T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rr2-62c054a59422ac54",
+    "message": "contract_teleradiology op start needs plan, windows, scope and effective.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-24",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-start-001",
+     "scope": "all",
+     "type": "contract_teleradiology"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 28
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-11-24",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "telerad-start-002",
+       "scope": "all",
+       "type": "contract_teleradiology",
+       "windows": [
+        "weeknights",
+        "saturday",
+        "sunday"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-10T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rr2-e6dbd05cffc866a9",
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-07.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261017",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-10-24",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4400,
+       "requestId": "hire-ct-prem-20261017-v2",
+       "role": "technologist",
+       "skills": [
+        "CT"
+       ],
+       "startDate": "2026-11-07",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-10-31",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "not_on_shift",
+    "group": "v08c",
+    "id": "rr2-8d61a36fada617de",
+    "message": "Dr. Avery is not rostered today.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 5,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-18",
+     "employee": "E07",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 5
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-18T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "past_date",
+    "group": "v08c",
+    "id": "rr2-814b0da665fed644",
+    "message": "effective 2026-10-19 is not after today: an allocation in force or past cannot change.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-10-19",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 6
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-02",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 10000,
+       "type": "set_reading_allocation"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-19",
+       "employee": "E07",
+       "minutes": 60,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-19T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "category": "no_action",
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rr2-882576c9e0ae79fc",
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 30% from Sat Oct 31 would be followed by 100% from Mon Nov 2 after 2 days (the earliest next change is Sat Nov 14).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-02",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 7
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-19T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-0ef148509f43ce1e",
+    "message": "Not funded: this batch commits $36,979 through action 2 (hire MR technologist: recruiting fee and earliest lawful exit $12,321; Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $16,725 = cash $93,567 + undrawn credit $50,000 \u2212 current liabilities $117,728 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-05",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 9
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-22T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rr2-f5921364262f61ea",
+    "message": "At the standard tier recruiting takes 28 days: the earliest start is 2026-11-20.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 10,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-us-std-20261023",
+     "role": "technologist",
+     "skills": [
+      "US"
+     ],
+     "startDate": "2026-10-24",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 10
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4800,
+       "requestId": "hire-us-prem-20261023",
+       "role": "technologist",
+       "skills": [
+        "US"
+       ],
+       "startDate": "2026-11-13",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-06",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 10000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-23T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "category": "modified_proposal",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-c5eeca1778c4613e",
+    "message": "Not funded: this batch commits $37,600 through action 2 (hire US technologist: recruiting fee and earliest lawful exit $12,943; Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $15,430 = cash $101,164 + undrawn credit $50,000 \u2212 current liabilities $126,620 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 10,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-06",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 11
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-07",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 10000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-23T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-24b0424fa66461ce",
+    "message": "Not funded: this batch commits $24,658 through action 1 (Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $14,047 = cash $109,605 + undrawn credit $50,000 \u2212 current liabilities $136,444 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-07",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 11
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "effective": "2026-11-07",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-24T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-8e4f4b3310287c3b",
+    "message": "Not funded: this batch commits $24,658 through action 1 (Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $2,831 = cash $109,605 + undrawn credit $50,000 \u2212 current liabilities $147,660 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 13,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-09",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 13
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-26T07:00:00",
+    "type": "set_reading_allocation",
+    "unavailable": null
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rr2-0bf2b51b76168f9c",
+    "message": "contract_teleradiology op start needs plan, windows, scope and effective.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-20",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261106",
+     "scope": "all",
+     "type": "contract_teleradiology"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 24
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "employee": "E03",
+       "lastDay": "2026-11-20",
+       "type": "terminate"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-20",
+       "employee": "E07",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-20",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "tr-urgent-backlog-20261106",
+       "scope": "all",
+       "type": "contract_teleradiology",
+       "windows": [
+        "weeknights",
+        "saturday",
+        "sunday"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-06T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 2,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-2ecbe94c95aebd4e",
+    "message": "Not funded: this batch commits $3,037 through action 3 (teleradiology retainer to the earliest end $3,037), more than the funding headroom \u2212$2,480 = cash $12,079 + undrawn credit $50,000 \u2212 current liabilities $55,445 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-20",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261106",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "response": {
+     "attempt": 1,
+     "point": 25
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-11-07",
+       "employee": "E04",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4400,
+       "requestId": "hire-ct-prem-20261107-v1",
+       "role": "technologist",
+       "skills": [
+        "CT"
+       ],
+       "startDate": "2026-11-14",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-21",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-06T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-40fc2b8e5b898fb3",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-07",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 25
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4400,
+       "requestId": "hire-ct-prem-20261107-v2",
+       "role": "technologist",
+       "skills": [
+        "CT"
+       ],
+       "startDate": "2026-11-28",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-21",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-07T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rr2-08a64673abd1cbf9",
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-28.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261107-v1",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-14",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 25
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "contractedWeeklyMinutes": 2400,
+       "rateCents": 4400,
+       "requestId": "hire-ct-prem-20261107-v2",
+       "role": "technologist",
+       "skills": [
+        "CT"
+       ],
+       "startDate": "2026-11-28",
+       "type": "hire"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-21",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 3000,
+       "type": "set_reading_allocation"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-07T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-6c6f047498f9ed01",
+    "message": "Not funded: this batch commits $12,114 through action 1 (hire CT technologist: recruiting fee and earliest lawful exit $12,114), more than the funding headroom \u2212$4,359 = cash $18,733 + undrawn credit $50,000 \u2212 current liabilities $64,586 \u2212 reserved commitments $8,507. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261107-v2",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-28",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 26
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "effective": "2026-11-22",
+       "op": "start",
+       "plan": "standard-v1",
+       "requestId": "tr-urgent-backlog-20261108",
+       "scope": "all",
+       "type": "contract_teleradiology",
+       "windows": [
+        "weeknights",
+        "saturday",
+        "sunday"
+       ]
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-07T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-29feeea926dc532d",
+    "message": "Not funded: this batch commits $3,030 through action 1 (teleradiology retainer to the earliest end $3,030), more than the funding headroom \u2212$9,864 = cash $18,733 + undrawn credit $50,000 \u2212 current liabilities $70,698 \u2212 reserved commitments $7,899. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261108",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "response": {
+     "attempt": 2,
+     "point": 26
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-08T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-f399d67ac95bb4b4",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-10",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 28
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-10T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rr2-0981952f1058a74e",
+    "message": "Not funded: this batch commits $1,463 through action 1 (teleradiology retainer to the earliest end $1,463), more than the funding headroom \u2212$2,452 = cash $38,881 + undrawn credit $50,000 \u2212 current liabilities $84,649 \u2212 reserved commitments $6,684. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-24",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-20261110",
+     "scope": "urgent",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights"
+     ]
+    },
+    "response": {
+     "attempt": 2,
+     "point": 28
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-10T07:00:00",
+    "type": "contract_teleradiology",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-642d4e952f5ed71e",
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-11",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 29
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-11T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "no_action",
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rr2-9e777381bfb96e1f",
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-12-02.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261111-v1",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-18",
+     "type": "hire"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 29
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-11T07:00:00",
+    "type": "hire",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "exceeds_max_shift",
+    "group": "v08c",
+    "id": "rr2-7f4644583b7bd5fe",
+    "message": "Dr. Avery would work until 20:00, past the 12-hour limit at 19:30 (at most +3h 30m more).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 1
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E07",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E08",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E05",
+       "minutes": 90,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E11",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-14T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "exceeds_max_shift",
+    "group": "v08c",
+    "id": "rr2-f4dbab4cc06b3400",
+    "message": "Dr. Blake would work until 00:00, past the 12-hour limit at 23:30 (at most +3h 30m more).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E08",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 1
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E07",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E08",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E05",
+       "minutes": 90,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E11",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-14T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 4,
+    "attempt": 1,
+    "category": "identical_repeated",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-d210e8c4b48c8230",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 1
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E07",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E08",
+       "minutes": 210,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E03",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E05",
+       "minutes": 90,
+       "type": "extend_shift"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-14",
+       "employee": "E11",
+       "minutes": 120,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-14T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-3e3fe341e38b2452",
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E08",
+     "minutes": 210,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 2
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E07",
+       "minutes": 180,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-14T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 4,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rr2-f4f7fb97045b12d9",
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 2
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "date": "2026-10-15",
+       "employee": "E07",
+       "minutes": 180,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-14T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "invalid_minutes",
+    "group": "v08c",
+    "id": "rr2-f359420557c79734",
+    "message": "Minutes must be 1\u2013240.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 300,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 4
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "date": "2026-10-17",
+       "employee": "E07",
+       "minutes": 240,
+       "type": "extend_shift"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "category": "different_proposal",
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rr2-d6ef67de3df2889c",
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 5
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": true,
+      "action": {
+       "policy": "oldest_first",
+       "type": "set_worklist_policy"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-10-17T07:00:00",
+    "type": "extend_shift",
+    "unavailable": null
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "category": "modified_proposal",
+    "code": "notice_too_short",
+    "group": "v08c",
+    "id": "rr2-f2a696dc01e8170e",
+    "message": "The last day must be at least 14 days after today and the start date: 2026-11-23 at the earliest.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "employee": "E04",
+     "lastDay": "2026-11-20",
+     "type": "terminate"
+    },
+    "response": {
+     "attempt": 2,
+     "point": 27
+    },
+    "responseActions": [
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "employee": "E04",
+       "lastDay": "2026-11-23",
+       "type": "terminate"
+      }
+     },
+     {
+      "acceptedByValidate": false,
+      "action": {
+       "employee": "E01",
+       "lastDay": "2026-11-23",
+       "type": "terminate"
+      }
+     }
+    ],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-09T07:00:00",
+    "type": "terminate",
+    "unavailable": null
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "category": "no_action",
+    "code": "already_terminating",
+    "group": "v08c",
+    "id": "rr2-9c59769e471b4040",
+    "message": "Jordan (E01) is already leaving with last day 2026-11-20: notice cannot be moved or withdrawn.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "employee": "E01",
+     "lastDay": "2026-11-23",
+     "type": "terminate"
+    },
+    "response": {
+     "attempt": 1,
+     "point": 28
+    },
+    "responseActions": [],
+    "responseRecorded": true,
+    "skippedUnparsed": 0,
+    "time": "2026-11-09T07:00:00",
+    "type": "terminate",
+    "unavailable": null
+   }
+  ],
+  "summary": {
+   "v08c|Qwen3.6-35B-A3B-oQ4e-mtp": {
+    "different_proposal": 15,
+    "evidence_unavailable": 0,
+    "identical_repeated": 1,
+    "insufficientFunds": 8,
+    "modified_proposal": 11,
+    "no_action": 20,
+    "payloadUnrecordedResponseRecorded": 0,
+    "refusal_no_longer_applicable": 0,
+    "refusals": 47
+   },
+   "v08c|gemma-4-26B-A4B-it-oQ4e-mtp": {
+    "different_proposal": 1,
+    "evidence_unavailable": 0,
+    "identical_repeated": 0,
+    "insufficientFunds": 2,
+    "modified_proposal": 2,
+    "no_action": 1,
+    "payloadUnrecordedResponseRecorded": 0,
+    "refusal_no_longer_applicable": 0,
+    "refusals": 4
+   }
+  }
+ },
+ "repeatV2": {
+  "events": [
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rp2-939e3f4e52502e5b",
+    "identity": "28498026bcf77fa1",
+    "laterUnrecorded": 0,
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-0f3c99bffb92fb3d",
+    "identity": "34780391fec4fc72",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E04",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "related": 4,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-231d2c4333d588df",
+    "identity": "d6a923f35cae0ba9",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-24",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 3,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rp2-d441f0fe57e29b68",
+    "identity": "735634a52f76bb29",
+    "laterUnrecorded": 0,
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-14.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-1025",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-10-25",
+     "type": "hire"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-ac6ffd1ff2e7f358",
+    "identity": "340088da2710cf08",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-05",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-5558dc7077a55f9b",
+    "identity": "3bb06e8357b5ccfb",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 23,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-05",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-78859f88ca4e02e3",
+    "identity": "e299261ccd5d3f52",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-06",
+     "employee": "E04",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rp2-060284943299916e",
+    "identity": "0be444599b2902d2",
+    "laterUnrecorded": 0,
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 50% from Sun Nov 22 would be followed by 60% from Mon Nov 23 after 1 day (the earliest next change is Sun Dec 6).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-23",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 6000,
+     "type": "set_reading_allocation"
+    },
+    "related": 3,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-97a0ba4d4376c773",
+    "identity": "fe42db027bec298a",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "employee": "E04",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-94907474ab917410",
+    "identity": "5ff0284406cfc98a",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "employee": "E11",
+     "minutes": 60,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rp2-f95c817175220cfe",
+    "identity": "8c91bfa21a31328f",
+    "laterUnrecorded": 0,
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 50% from Sun Nov 22 would be followed by 60% from Wed Nov 25 after 3 days (the earliest next change is Sun Dec 6).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-25",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 6000,
+     "type": "set_reading_allocation"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-c4cba6a08bdfa408",
+    "identity": "bbbddb3c6c86db4f",
+    "laterUnrecorded": 0,
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-15",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 4,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-ae93d390e3e8683b",
+    "identity": "f4cd1afd6ac8620e",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 2,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-15",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-fd85817a3d4be08e",
+    "identity": "280d1de55d1567b2",
+    "laterUnrecorded": 0,
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 3,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-16",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 3,
+    "attempt": 2,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-7da22976c719fcf2",
+    "identity": "65a800d4c0f7068f",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 3,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-16",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rp2-dadcc4da4895a292",
+    "identity": "d66c079f8f6b844b",
+    "laterUnrecorded": 0,
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-e9a272face34b579",
+    "identity": "5bc6310ccac060a4",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "code": "not_on_shift",
+    "group": "v08c",
+    "id": "rp2-4d9d16659b646a9b",
+    "identity": "da9a70a7b641ec25",
+    "laterUnrecorded": 0,
+    "message": "Casey is not rostered today.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E05",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-6c52eed97c0ecb7f",
+    "identity": "cbf8ff07365718d9",
+    "laterUnrecorded": 0,
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-19",
+     "employee": "E08",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rp2-718247e30c3f8fdf",
+    "identity": "ccb93f2cee7e192c",
+    "laterUnrecorded": 0,
+    "message": "contract_teleradiology needs op \"start\" or \"cancel\".",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-486ad6051470d4f8",
+    "identity": "a5a6cca93f6030eb",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $3,030 through action 1 (teleradiology retainer to the earliest end $3,030), more than the funding headroom $2,654 = cash $22,971 + undrawn credit $50,000 \u2212 current liabilities $70,317 \u2212 reserved commitments $0. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "related": 3,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-ea43345fb6fc4615",
+    "identity": "4ef2eb4846d602ea",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $1,465 through action 1 (teleradiology retainer to the earliest end $1,465), more than the funding headroom \u2212$2,430 = cash $22,971 + undrawn credit $50,000 \u2212 current liabilities $75,401 \u2212 reserved commitments $0. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-23",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-backlog-fix",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights"
+     ]
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rp2-62c054a59422ac54",
+    "identity": "510ece9f6114e45c",
+    "laterUnrecorded": 0,
+    "message": "contract_teleradiology op start needs plan, windows, scope and effective.",
+    "model": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-24",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "telerad-start-001",
+     "scope": "all",
+     "type": "contract_teleradiology"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rp2-e6dbd05cffc866a9",
+    "identity": "2c292a8adbcd9b19",
+    "laterUnrecorded": 0,
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-07.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261017",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-10-24",
+     "type": "hire"
+    },
+    "related": 4,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "not_on_shift",
+    "group": "v08c",
+    "id": "rp2-8d61a36fada617de",
+    "identity": "2129a1e6a6b1e2d0",
+    "laterUnrecorded": 0,
+    "message": "Dr. Avery is not rostered today.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 5,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-18",
+     "employee": "E07",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "past_date",
+    "group": "v08c",
+    "id": "rp2-814b0da665fed644",
+    "identity": "7fe1c9560033eaea",
+    "laterUnrecorded": 0,
+    "message": "effective 2026-10-19 is not after today: an allocation in force or past cannot change.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-10-19",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 5,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "code": "commitment_too_short",
+    "group": "v08c",
+    "id": "rp2-882576c9e0ae79fc",
+    "identity": "834aa01722b7d574",
+    "laterUnrecorded": 0,
+    "message": "An allocation stays in force at least 14 days: Dr. Avery (E07)'s 30% from Sat Oct 31 would be followed by 100% from Mon Nov 2 after 2 days (the earliest next change is Sat Nov 14).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 6,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-02",
+     "employee": "E07",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 4,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-0ef148509f43ce1e",
+    "identity": "791d2efa18375062",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $36,979 through action 2 (hire MR technologist: recruiting fee and earliest lawful exit $12,321; Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $16,725 = cash $93,567 + undrawn credit $50,000 \u2212 current liabilities $117,728 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 9,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-05",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 8,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rp2-f5921364262f61ea",
+    "identity": "6b4232cae9100cb0",
+    "laterUnrecorded": 0,
+    "message": "At the standard tier recruiting takes 28 days: the earliest start is 2026-11-20.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 10,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-us-std-20261023",
+     "role": "technologist",
+     "skills": [
+      "US"
+     ],
+     "startDate": "2026-10-24",
+     "type": "hire"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-c5eeca1778c4613e",
+    "identity": "37135fa74de4420d",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $37,600 through action 2 (hire US technologist: recruiting fee and earliest lawful exit $12,943; Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $15,430 = cash $101,164 + undrawn credit $50,000 \u2212 current liabilities $126,620 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 10,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-06",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 6,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-24b0424fa66461ce",
+    "identity": "eccbc1b46ae2b3c1",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $24,658 through action 1 (Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $14,047 = cash $109,605 + undrawn credit $50,000 \u2212 current liabilities $136,444 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 11,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-07",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 5,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-8e4f4b3310287c3b",
+    "identity": "b15867d39f488904",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $24,658 through action 1 (Dr. Blake (E08)'s salary increase for 30 days $24,658), more than the funding headroom $2,831 = cash $109,605 + undrawn credit $50,000 \u2212 current liabilities $147,660 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 13,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-09",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 10000,
+     "type": "set_reading_allocation"
+    },
+    "related": 4,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "set_reading_allocation"
+   },
+   {
+    "action": 2,
+    "attempt": 1,
+    "code": "invalid_schema",
+    "group": "v08c",
+    "id": "rp2-0bf2b51b76168f9c",
+    "identity": "477128a1135b791b",
+    "laterUnrecorded": 0,
+    "message": "contract_teleradiology op start needs plan, windows, scope and effective.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-20",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261106",
+     "scope": "all",
+     "type": "contract_teleradiology"
+    },
+    "related": 3,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 2,
+    "attempt": 2,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-2ecbe94c95aebd4e",
+    "identity": "efa5ee9f9d436048",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $3,037 through action 3 (teleradiology retainer to the earliest end $3,037), more than the funding headroom \u2212$2,480 = cash $12,079 + undrawn credit $50,000 \u2212 current liabilities $55,445 \u2212 reserved commitments $9,114. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 24,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-20",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261106",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-40fc2b8e5b898fb3",
+    "identity": "ede533c56bbda663",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-07",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rp2-08a64673abd1cbf9",
+    "identity": "1fd2b1c07da5e5a2",
+    "laterUnrecorded": 0,
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-11-28.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261107-v1",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-14",
+     "type": "hire"
+    },
+    "related": 2,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-6c6f047498f9ed01",
+    "identity": "483a3946a331d4ce",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $12,114 through action 1 (hire CT technologist: recruiting fee and earliest lawful exit $12,114), more than the funding headroom \u2212$4,359 = cash $18,733 + undrawn credit $50,000 \u2212 current liabilities $64,586 \u2212 reserved commitments $8,507. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 25,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261107-v2",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-28",
+     "type": "hire"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-29feeea926dc532d",
+    "identity": "a5a6cca93f6030eb",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $3,030 through action 1 (teleradiology retainer to the earliest end $3,030), more than the funding headroom \u2212$9,864 = cash $18,733 + undrawn credit $50,000 \u2212 current liabilities $70,698 \u2212 reserved commitments $7,899. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 26,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-22",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-backlog-20261108",
+     "scope": "all",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ]
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-f399d67ac95bb4b4",
+    "identity": "94d60ef57e071a58",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-10",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "insufficient_funds",
+    "group": "v08c",
+    "id": "rp2-0981952f1058a74e",
+    "identity": "9e449c70094662a6",
+    "laterUnrecorded": 0,
+    "message": "Not funded: this batch commits $1,463 through action 1 (teleradiology retainer to the earliest end $1,463), more than the funding headroom \u2212$2,452 = cash $38,881 + undrawn credit $50,000 \u2212 current liabilities $84,649 \u2212 reserved commitments $6,684. Cost-cutting actions and actions without a commitment remain available.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 28,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "effective": "2026-11-24",
+     "op": "start",
+     "plan": "standard-v1",
+     "requestId": "tr-urgent-20261110",
+     "scope": "urgent",
+     "type": "contract_teleradiology",
+     "windows": [
+      "weeknights"
+     ]
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "contract_teleradiology"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-642d4e952f5ed71e",
+    "identity": "75e29d12a07fc933",
+    "laterUnrecorded": 0,
+    "message": "Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "date": "2026-11-11",
+     "employee": "E04",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "lead_too_short",
+    "group": "v08c",
+    "id": "rp2-9e777381bfb96e1f",
+    "identity": "7e2895aa2946648f",
+    "laterUnrecorded": 0,
+    "message": "At the premium tier recruiting takes 21 days: the earliest start is 2026-12-02.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 29,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "refused": {
+     "contractedWeeklyMinutes": 2400,
+     "rateCents": 4400,
+     "requestId": "hire-ct-prem-20261111-v1",
+     "role": "technologist",
+     "skills": [
+      "CT"
+     ],
+     "startDate": "2026-11-18",
+     "type": "hire"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "hire"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "exceeds_max_shift",
+    "group": "v08c",
+    "id": "rp2-7f4644583b7bd5fe",
+    "identity": "7e628b5f831755be",
+    "laterUnrecorded": 0,
+    "message": "Dr. Avery would work until 20:00, past the 12-hour limit at 19:30 (at most +3h 30m more).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "related": 5,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 1,
+    "code": "exceeds_max_shift",
+    "group": "v08c",
+    "id": "rp2-f4dbab4cc06b3400",
+    "identity": "182752edeea17b9c",
+    "laterUnrecorded": 0,
+    "message": "Dr. Blake would work until 00:00, past the 12-hour limit at 23:30 (at most +3h 30m more).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E08",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 4,
+    "attempt": 1,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-d210e8c4b48c8230",
+    "identity": "310e14199fe065d6",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": {
+     "action": 4,
+     "attempt": 2,
+     "code": "after_close",
+     "point": 1,
+     "sameMessage": true,
+     "samePoint": true
+    },
+    "status": "repeated_refused",
+    "type": "extend_shift"
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-3e3fe341e38b2452",
+    "identity": "14a4ad4794b3ddb6",
+    "laterUnrecorded": 0,
+    "message": "Dr. Blake's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E08",
+     "minutes": 210,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 4,
+    "attempt": 2,
+    "code": "after_close",
+    "group": "v08c",
+    "id": "rp2-f4f7fb97045b12d9",
+    "identity": "310e14199fe065d6",
+    "laterUnrecorded": 0,
+    "message": "Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 1,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-14",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "invalid_minutes",
+    "group": "v08c",
+    "id": "rp2-f359420557c79734",
+    "identity": "0b1ed8576f1a7a38",
+    "laterUnrecorded": 0,
+    "message": "Minutes must be 1\u2013240.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 300,
+     "type": "extend_shift"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 2,
+    "code": "no_coverage",
+    "group": "v08c",
+    "id": "rp2-d6ef67de3df2889c",
+    "identity": "28498026bcf77fa1",
+    "laterUnrecorded": 0,
+    "message": "Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 4,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "date": "2026-10-17",
+     "employee": "E07",
+     "minutes": 240,
+     "type": "extend_shift"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "extend_shift"
+   },
+   {
+    "action": 0,
+    "attempt": 1,
+    "code": "notice_too_short",
+    "group": "v08c",
+    "id": "rp2-f2a696dc01e8170e",
+    "identity": "c5e0c1d889e30626",
+    "laterUnrecorded": 0,
+    "message": "The last day must be at least 14 days after today and the start date: 2026-11-23 at the earliest.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "employee": "E04",
+     "lastDay": "2026-11-20",
+     "type": "terminate"
+    },
+    "related": 1,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "terminate"
+   },
+   {
+    "action": 1,
+    "attempt": 2,
+    "code": "already_terminating",
+    "group": "v08c",
+    "id": "rp2-9c59769e471b4040",
+    "identity": "d33e5db5d8b16f66",
+    "laterUnrecorded": 0,
+    "message": "Jordan (E01) is already leaving with last day 2026-11-20: notice cannot be moved or withdrawn.",
+    "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+    "point": 27,
+    "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+    "refused": {
+     "employee": "E01",
+     "lastDay": "2026-11-23",
+     "type": "terminate"
+    },
+    "related": 0,
+    "repeat": null,
+    "status": "not_repeated",
+    "type": "terminate"
+   }
+  ],
+  "findings": [
+   {
+    "acrossPoints": 0,
+    "action": {
+     "date": "2026-10-14",
+     "employee": "E11",
+     "minutes": 120,
+     "type": "extend_shift"
+    },
+    "basis": "The identical action (extend_shift) was refused 2 times: 1 time(s) again within a decision point's retries, 0 time(s) at a later decision point, with 1 distinct refusal message(s).",
+    "codes": [
+     "after_close"
+    ],
+    "count": 2,
+    "distinctMessages": 1,
+    "id": "rf2-058d4fb2701e334d",
+    "occurrences": [
+     {
+      "action": 4,
+      "attempt": 1,
+      "code": "after_close",
+      "point": 1
+     },
+     {
+      "action": 4,
+      "attempt": 2,
+      "code": "after_close",
+      "point": 1
+     }
+    ],
+    "recording": {
+     "group": "v08c",
+     "model": "Qwen3.6-35B-A3B-oQ4e-mtp",
+     "path": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+     "sha256": "3dfb5c4ebab599c198c3712132c5438d4e09fa26e814c27bff2918dae69fc4d3"
+    },
+    "rule": "REPEATED_REFUSED_PROPOSAL",
+    "status": "supported",
+    "type": "extend_shift",
+    "version": 2,
+    "withinPoint": 1
+   }
+  ],
+  "summary": {
+   "v08c|Qwen3.6-35B-A3B-oQ4e-mtp": {
+    "findings": 1,
+    "insufficientFunds": 8,
+    "insufficient_evidence": 0,
+    "not_repeated": 46,
+    "refusals": 47,
+    "related": 31,
+    "repeated_accepted": 0,
+    "repeated_refused": 1,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "v08c|gemma-4-26B-A4B-it-oQ4e-mtp": {
+    "findings": 0,
+    "insufficientFunds": 2,
+    "insufficient_evidence": 0,
+    "not_repeated": 4,
+    "refusals": 4,
+    "related": 3,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   }
+  },
+  "versusV1": {
+   "v08c|Qwen3.6-35B-A3B-oQ4e-mtp": {
+    "both": 1,
+    "examples": [
+     {
+      "from": [
+       4,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+      "to": [
+       11,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     },
+     {
+      "from": [
+       11,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+      "to": [
+       23,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     },
+     {
+      "from": [
+       23,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+      "to": [
+       24,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     },
+     {
+      "from": [
+       23,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+      "to": [
+       29,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     },
+     {
+      "from": [
+       24,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+      "to": [
+       29,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     },
+     {
+      "from": [
+       2,
+       1,
+       "extend_shift",
+       "after_close"
+      ],
+      "kind": "v1OnlyDifferentActions",
+      "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+      "to": [
+       3,
+       1,
+       "extend_shift",
+       "after_close"
+      ]
+     }
+    ],
+    "v1Links": 13,
+    "v1OnlyDifferentActions": 12,
+    "v1OnlyV2Abstains": 0,
+    "v2Links": 1,
+    "v2OnlyMessageDiffers": 0,
+    "v2OnlyOther": 0
+   },
+   "v08c|gemma-4-26B-A4B-it-oQ4e-mtp": {
+    "both": 0,
+    "examples": [],
+    "v1Links": 0,
+    "v1OnlyDifferentActions": 0,
+    "v1OnlyV2Abstains": 0,
+    "v2Links": 0,
+    "v2OnlyMessageDiffers": 0,
+    "v2OnlyOther": 0
+   }
+  }
+ },
+ "replayMatchesLive": [
+  {
+   "metricsEqualLive": true,
+   "replay": "llm-v08c-replay-financial-pressure-credit",
+   "runs": 10
+  },
+  {
+   "metricsEqualLive": true,
+   "replay": "llm-v08c-replay-financial-pressure-lowliquidity",
+   "runs": 10
+  }
+ ],
+ "runs": [
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": null,
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 4057057,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25328471,
+    "operatingProfitCents": -2000927,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "noop",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41901-noop",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 4,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 4,
+   "executedByType": {
+    "set_reading_allocation": 4
+   },
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 4410,
+    "operatingExpenseCents": 131506,
+    "operatingProfitCents": -127096,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": -6,
+    "tatP90Sec": -1949
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 4057057,
+    "netRevenueCents": 23331954,
+    "operatingExpenseCents": 25459977,
+    "operatingProfitCents": -2128023,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 121,
+    "tatP90Sec": 48045
+   },
+   "overtimeCostCents": 685673,
+   "policy": "greedy",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41901-greedy",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 4
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 4057057,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25328471,
+    "operatingProfitCents": -2000927,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "conservative-v2",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41901-conservative-v2",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 12,
+   "completeness": {
+    "actionsRecorded": 36,
+    "attempts": 36,
+    "attemptsPerPoint": {
+     "1": 24,
+     "2": 6
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 36,
+    "points": 30,
+    "reasonsRecorded": 36,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 9,
+   "executedByType": {
+    "extend_shift": 2,
+    "set_reading_allocation": 6,
+    "terminate": 1
+   },
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": -42,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": -61348,
+    "netRevenueCents": -3179984,
+    "operatingExpenseCents": -1057878,
+    "operatingProfitCents": -2122106,
+    "ordersLost": 40,
+    "overtimeSec": 4705,
+    "shortfallCents": 0,
+    "tatBreaches": 186,
+    "tatP90Sec": 123380
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1454,
+    "minCashCents": 3995709,
+    "netRevenueCents": 20147560,
+    "operatingExpenseCents": 24270593,
+    "operatingProfitCents": -4123033,
+    "ordersLost": 201,
+    "overtimeSec": 255002,
+    "shortfallCents": 0,
+    "tatBreaches": 313,
+    "tatP90Sec": 173374
+   },
+   "overtimeCostCents": 723942,
+   "policy": "qwen36-35b-a3b",
+   "proposedActions": 28,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 3,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 1,
+     "no_action": 7,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 11,
+     "refusedAndRevised": 4
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 11,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41901,
+   "statedCommitments": {
+    "extend_shift": 2,
+    "hire": 1,
+    "set_reading_allocation": 3
+   },
+   "status": "completed",
+   "submitted": 12,
+   "submittedActions": 12,
+   "validateRefusals": {
+    "after_close": 7,
+    "batch_rejected": 3,
+    "commitment_too_short": 2,
+    "lead_too_short": 1,
+    "no_coverage": 1
+   }
+  },
+  {
+   "accepted": 0,
+   "completeness": {
+    "actionsRecorded": 30,
+    "attempts": 30,
+    "attemptsPerPoint": {
+     "1": 30
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 30,
+    "points": 30,
+    "reasonsRecorded": 30,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 4057057,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25328471,
+    "operatingProfitCents": -2000927,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "gemma4-26b-a4b",
+   "proposedActions": 0,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 0,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41901,
+   "statedCommitments": {},
+   "status": "completed",
+   "submitted": 0,
+   "submittedActions": 0,
+   "validateRefusals": {}
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": null,
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 3777962,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25025481,
+    "operatingProfitCents": -1391112,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "noop",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41902-noop",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 4,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 4,
+   "executedByType": {
+    "set_reading_allocation": 4
+   },
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 71728,
+    "operatingExpenseCents": 131506,
+    "operatingProfitCents": -59778,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": -2,
+    "tatP90Sec": -1181
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 3777962,
+    "netRevenueCents": 23706097,
+    "operatingExpenseCents": 25156987,
+    "operatingProfitCents": -1450890,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 105,
+    "tatP90Sec": 50544
+   },
+   "overtimeCostCents": 464128,
+   "policy": "greedy",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41902-greedy",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 4
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 3777962,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25025481,
+    "operatingProfitCents": -1391112,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "conservative-v2",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41902-conservative-v2",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 9,
+   "completeness": {
+    "actionsRecorded": 34,
+    "attempts": 36,
+    "attemptsPerPoint": {
+     "1": 24,
+     "2": 6
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 36,
+    "points": 30,
+    "reasonsRecorded": 34,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 9,
+   "executedByType": {
+    "extend_shift": 9
+   },
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 2,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": -177051,
+    "netRevenueCents": 7200,
+    "operatingExpenseCents": 177051,
+    "operatingProfitCents": -169851,
+    "ordersLost": 0,
+    "overtimeSec": 55146,
+    "shortfallCents": 0,
+    "tatBreaches": 2,
+    "tatP90Sec": 18
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1518,
+    "minCashCents": 3600911,
+    "netRevenueCents": 23641569,
+    "operatingExpenseCents": 25202532,
+    "operatingProfitCents": -1560963,
+    "ordersLost": 152,
+    "overtimeSec": 225875,
+    "shortfallCents": 0,
+    "tatBreaches": 109,
+    "tatP90Sec": 51743
+   },
+   "overtimeCostCents": 593628,
+   "policy": "qwen36-35b-a3b",
+   "proposedActions": 26,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 5,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 3,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 8,
+     "refusedAndRevised": 5
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 8,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41902,
+   "statedCommitments": {
+    "extend_shift": 5
+   },
+   "status": "completed",
+   "submitted": 9,
+   "submittedActions": 9,
+   "validateRefusals": {
+    "after_close": 6,
+    "no_coverage": 1,
+    "not_on_shift": 1
+   }
+  },
+  {
+   "accepted": 0,
+   "completeness": {
+    "actionsRecorded": 30,
+    "attempts": 30,
+    "attemptsPerPoint": {
+     "1": 30
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 30,
+    "points": 30,
+    "reasonsRecorded": 30,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 0,
+    "interestCents": 0,
+    "maxDrawnCents": 0
+   },
+   "days": 30,
+   "entry": "financial-pressure-credit",
+   "executed": 0,
+   "executedByType": {},
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 3777962,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25025481,
+    "operatingProfitCents": -1391112,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "gemma4-26b-a4b",
+   "proposedActions": 0,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s41902-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 0,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b",
+   "scenario": "bench-financial-pressure-ot-credit",
+   "seed": 41902,
+   "statedCommitments": {},
+   "status": "completed",
+   "submitted": 0,
+   "submittedActions": 0,
+   "validateRefusals": {}
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 1782,
+    "maxDrawnCents": 2942943
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": null,
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 0,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25330253,
+    "operatingProfitCents": -2002709,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "noop",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41901-noop",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 2,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 1782,
+    "maxDrawnCents": 2942943
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 2,
+   "executedByType": {
+    "set_reading_allocation": 2
+   },
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 4410,
+    "operatingExpenseCents": 131506,
+    "operatingProfitCents": -127096,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": -6,
+    "tatP90Sec": -1949
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 0,
+    "netRevenueCents": 23331954,
+    "operatingExpenseCents": 25461759,
+    "operatingProfitCents": -2129805,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 121,
+    "tatP90Sec": 48045
+   },
+   "overtimeCostCents": 685673,
+   "policy": "greedy",
+   "refusedAtApply": {
+    "insufficient_funds": 2
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41901-greedy",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 4
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 1782,
+    "maxDrawnCents": 2942943
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 0,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25330253,
+    "operatingProfitCents": -2002709,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "conservative-v2",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41901,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 11,
+   "completeness": {
+    "actionsRecorded": 42,
+    "attempts": 42,
+    "attemptsPerPoint": {
+     "1": 18,
+     "2": 12
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 42,
+    "points": 30,
+    "reasonsRecorded": 42,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 2246,
+    "maxDrawnCents": 3366761
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 9,
+   "executedByType": {
+    "extend_shift": 5,
+    "hire": 1,
+    "set_reading_allocation": 2,
+    "terminate": 1
+   },
+   "fundingRefusalsAtValidate": 8,
+   "fundingResponse": "funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 464,
+    "maxCreditDrawnCents": 423818,
+    "minCashCents": 0,
+    "netRevenueCents": -1676911,
+    "operatingExpenseCents": 419791,
+    "operatingProfitCents": -2096702,
+    "ordersLost": 0,
+    "overtimeSec": 18000,
+    "shortfallCents": 0,
+    "tatBreaches": 208,
+    "tatP90Sec": 100366
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 0,
+    "netRevenueCents": 21650633,
+    "operatingExpenseCents": 25750044,
+    "operatingProfitCents": -4099411,
+    "ordersLost": 161,
+    "overtimeSec": 268297,
+    "shortfallCents": 0,
+    "tatBreaches": 335,
+    "tatP90Sec": 150360
+   },
+   "overtimeCostCents": 782477,
+   "policy": "qwen36-35b-a3b",
+   "proposedActions": 44,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 4,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 6,
+     "no_action": 9,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 19,
+     "refusedAndRevised": 10
+    },
+    "fundingRefusals": {
+     "different_proposal": 3,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 1,
+     "no_action": 4,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 8,
+     "refusedAndRevised": 4
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 19,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41901,
+   "statedCommitments": {
+    "contract_teleradiology": 1,
+    "extend_shift": 8,
+    "hire": 4,
+    "set_reading_allocation": 6,
+    "terminate": 2
+   },
+   "status": "completed",
+   "submitted": 11,
+   "submittedActions": 11,
+   "validateRefusals": {
+    "after_close": 3,
+    "batch_rejected": 11,
+    "commitment_too_short": 1,
+    "insufficient_funds": 8,
+    "invalid_schema": 1,
+    "lead_too_short": 4,
+    "not_on_shift": 1,
+    "past_date": 1
+   }
+  },
+  {
+   "accepted": 1,
+   "completeness": {
+    "actionsRecorded": 33,
+    "attempts": 33,
+    "attemptsPerPoint": {
+     "1": 27,
+     "2": 3
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 33,
+    "points": 30,
+    "reasonsRecorded": 33,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 1782,
+    "maxDrawnCents": 2942943
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 1,
+   "executedByType": {
+    "contract_teleradiology": 1
+   },
+   "fundingRefusalsAtValidate": 2,
+   "fundingResponse": "funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1496,
+    "minCashCents": 0,
+    "netRevenueCents": 23327544,
+    "operatingExpenseCents": 25330253,
+    "operatingProfitCents": -2002709,
+    "ordersLost": 161,
+    "overtimeSec": 250297,
+    "shortfallCents": 0,
+    "tatBreaches": 127,
+    "tatP90Sec": 49994
+   },
+   "overtimeCostCents": 685673,
+   "policy": "gemma4-26b-a4b",
+   "proposedActions": 5,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 1,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 2,
+     "no_action": 1,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 4,
+     "refusedAndRevised": 3
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 1,
+     "no_action": 1,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 2,
+     "refusedAndRevised": 1
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 4,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41901,
+   "statedCommitments": {
+    "contract_teleradiology": 1
+   },
+   "status": "completed",
+   "submitted": 1,
+   "submittedActions": 1,
+   "validateRefusals": {
+    "insufficient_funds": 2,
+    "invalid_schema": 2
+   }
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 2320,
+    "maxDrawnCents": 3222038
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": null,
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 0,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25027801,
+    "operatingProfitCents": -1393432,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "noop",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41902-noop",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 2,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 2320,
+    "maxDrawnCents": 3222038
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 2,
+   "executedByType": {
+    "set_reading_allocation": 2
+   },
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 71728,
+    "operatingExpenseCents": 131506,
+    "operatingProfitCents": -59778,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": -2,
+    "tatP90Sec": -1181
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 0,
+    "netRevenueCents": 23706097,
+    "operatingExpenseCents": 25159307,
+    "operatingProfitCents": -1453210,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 105,
+    "tatP90Sec": 50544
+   },
+   "overtimeCostCents": 464128,
+   "policy": "greedy",
+   "refusedAtApply": {
+    "insufficient_funds": 2
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41902-greedy",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 4
+  },
+  {
+   "accepted": 0,
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 2320,
+    "maxDrawnCents": 3222038
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 0,
+   "executedByType": {},
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 0,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25027801,
+    "operatingProfitCents": -1393432,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "conservative-v2",
+   "refusedAtApply": {},
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41902,
+   "status": "completed",
+   "submitted": 0
+  },
+  {
+   "accepted": 6,
+   "completeness": {
+    "actionsRecorded": 33,
+    "attempts": 33,
+    "attemptsPerPoint": {
+     "1": 27,
+     "2": 3
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 33,
+    "points": 30,
+    "reasonsRecorded": 33,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 5,
+    "interestCents": 2553,
+    "maxDrawnCents": 3395114
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 5,
+   "executedByType": {
+    "extend_shift": 2,
+    "set_worklist_policy": 1,
+    "terminate": 2
+   },
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 233,
+    "maxCreditDrawnCents": 173076,
+    "minCashCents": 0,
+    "netRevenueCents": -18240,
+    "operatingExpenseCents": 833309,
+    "operatingProfitCents": -851549,
+    "ordersLost": 0,
+    "overtimeSec": 21600,
+    "shortfallCents": 0,
+    "tatBreaches": 4,
+    "tatP90Sec": -750
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 0,
+    "netRevenueCents": 23616129,
+    "operatingExpenseCents": 25861110,
+    "operatingProfitCents": -2244981,
+    "ordersLost": 152,
+    "overtimeSec": 192329,
+    "shortfallCents": 0,
+    "tatBreaches": 111,
+    "tatP90Sec": 50975
+   },
+   "overtimeCostCents": 602588,
+   "policy": "qwen36-35b-a3b",
+   "proposedActions": 22,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 3,
+     "evidence_unavailable": 0,
+     "identical_repeated": 1,
+     "modified_proposal": 4,
+     "no_action": 1,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 9,
+     "refusedAndRevised": 7
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 8,
+    "repeated_accepted": 0,
+    "repeated_refused": 1,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41902,
+   "statedCommitments": {
+    "extend_shift": 3
+   },
+   "status": "completed",
+   "submitted": 6,
+   "submittedActions": 6,
+   "validateRefusals": {
+    "after_close": 3,
+    "already_terminating": 1,
+    "batch_rejected": 2,
+    "exceeds_max_shift": 2,
+    "invalid_minutes": 1,
+    "no_coverage": 1,
+    "notice_too_short": 1
+   }
+  },
+  {
+   "accepted": 0,
+   "completeness": {
+    "actionsRecorded": 30,
+    "attempts": 30,
+    "attemptsPerPoint": {
+     "1": 30
+    },
+    "attemptsRecorded": 30,
+    "infrastructureAffectedPoints": 0,
+    "inputsVerifiable": 30,
+    "outputsRecorded": 30,
+    "points": 30,
+    "reasonsRecorded": 30,
+    "stopped": {},
+    "transportFailures": 0,
+    "truncatedFields": 0
+   },
+   "credit": {
+    "daysDrawn": 4,
+    "interestCents": 2320,
+    "maxDrawnCents": 3222038
+   },
+   "days": 30,
+   "entry": "financial-pressure-lowliquidity",
+   "executed": 0,
+   "executedByType": {},
+   "fundingRefusalsAtValidate": 0,
+   "fundingResponse": "no funding refusal encountered",
+   "noAction": {
+    "daysBelowZero": 0,
+    "examsCompleted": 0,
+    "interestCents": 0,
+    "maxCreditDrawnCents": 0,
+    "minCashCents": 0,
+    "netRevenueCents": 0,
+    "operatingExpenseCents": 0,
+    "operatingProfitCents": 0,
+    "ordersLost": 0,
+    "overtimeSec": 0,
+    "shortfallCents": 0,
+    "tatBreaches": 0,
+    "tatP90Sec": 0
+   },
+   "outcomes": {
+    "daysBelowZero": 0,
+    "examsCompleted": 1516,
+    "minCashCents": 0,
+    "netRevenueCents": 23634369,
+    "operatingExpenseCents": 25027801,
+    "operatingProfitCents": -1393432,
+    "ordersLost": 152,
+    "overtimeSec": 170729,
+    "shortfallCents": 0,
+    "tatBreaches": 107,
+    "tatP90Sec": 51725
+   },
+   "overtimeCostCents": 464128,
+   "policy": "gemma4-26b-a4b",
+   "proposedActions": 0,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41902-decisions.jsonl",
+   "refusalResponses": {
+    "all": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    },
+    "fundingRefusals": {
+     "different_proposal": 0,
+     "evidence_unavailable": 0,
+     "identical_repeated": 0,
+     "modified_proposal": 0,
+     "no_action": 0,
+     "refusal_no_longer_applicable": 0,
+     "refusals": 0,
+     "refusedAndRevised": 0
+    }
+   },
+   "refusedAtApply": {},
+   "repeatV2": {
+    "insufficient_evidence": 0,
+    "not_repeated": 0,
+    "repeated_accepted": 0,
+    "repeated_refused": 0,
+    "repeated_unvalidated": 0,
+    "unresolved": 0
+   },
+   "replayed": true,
+   "runId": "bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b",
+   "scenario": "bench-financial-pressure-ot-lowliquidity",
+   "seed": 41902,
+   "statedCommitments": {},
+   "status": "completed",
+   "submitted": 0,
+   "submittedActions": 0,
+   "validateRefusals": {}
+  }
+ ],
+ "schema": "dreamteam.v08c-analysis/v1",
+ "seeds": [
+  41901,
+  41902
+ ],
+ "suite": {
+  "id": "dreamteam-dev",
+  "split": "development",
+  "version": 4
+ }
+}

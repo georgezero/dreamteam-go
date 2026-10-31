@@ -195,11 +195,42 @@ jobs:
           $P analysis/probes/funding_probes.py --binary ./dt --probes $V/probes.json --out probes
           $P analysis/probes/probe_evidence.py --probes-out probes --out probe-evidence.json
           $P analysis/evidence/refusal_response.py --corpus $C --probes probes --out rr
-          for f in manifest.json items.json items.md form.csv; do cmp review/$f $V/review/$f; cp review/$f out/review-$f; done
-          for f in probe-log.json sequence-nocredit.decisions.jsonl sequence-nocredit.attempts.jsonl; do cmp probes/$f $V/probes-out/$f; cp probes/$f out/probes-$f; done
+          # The review package and the probe log record the build that made
+          # them; check_v08b sets only those build numbers aside (V0.8c).
+          $P analysis/evidence/check_v08b.py --review review --probes probes
+          for f in manifest.json items.json items.md form.csv; do cp review/$f out/review-$f; done
+          for f in probe-log.json sequence-nocredit.decisions.jsonl sequence-nocredit.attempts.jsonl; do cp probes/$f out/probes-$f; done
           for f in fin/financial-outcomes.json fin/financial-outcomes.md probe-evidence.json rr/refusal-response.json rr/refusal-response-tables.md; do
             cmp $f $V/$(basename $f); cp $f out/$(basename $f)
           done
+      - name: Decision recording and the funding-refusal evaluation
+        # V0.8c, without any model: the low-liquidity scenario's
+        # deterministic analysis; every V0.8c run replayed (llm-agent 3's
+        # recordings, every attempt's input and validate answer checked,
+        # beside the deterministic comparators run again); refusal-response
+        # version 2 and repeat rule version 2 on the historical recordings
+        # and the probes; and the evaluation's analysis, with the frozen v1
+        # rules on the llm-agent 2 view. Each equal to the committed one
+        # (docs/benchmark/v08c-dev) and compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; C=docs/benchmark/v08a-dev/corpus.json; V=docs/benchmark/v08c-dev
+          $P $V/scenario_analysis.py --binary ./dt --out scenario-analysis.json > /dev/null
+          for f in $V/eval-replay-*.json; do
+            e=$(basename "$f" .json); e=${e#eval-replay-}
+            ./dt benchmark suite run "$f" -out "llm-v08c-replay-$e" > /dev/null
+            ./dt benchmark verify "llm-v08c-replay-$e" | tail -1
+            cp "llm-v08c-replay-$e/manifest.json" "out/llm-v08c-replay-$e-manifest.json"
+          done
+          $P analysis/evidence/refusal_response.py --version 2 --corpus $C --probes probes --out history > /dev/null
+          $P analysis/evidence/repeat_v2.py --corpus $C --v1 docs/benchmark/v08a-dev/evidence.json --probes probes --out history > /dev/null
+          $P analysis/evidence/v08c_analysis.py --corpus $V/corpus.json --contract $V/eval/contract.json --replays . --out v08c
+          cmp scenario-analysis.json $V/scenario-analysis.json; cp scenario-analysis.json out/
+          for f in refusal-response-v2.json refusal-response-v2-tables.md repeat-v2.json repeat-v2-tables.md; do
+            cmp history/$f $V/history/$f; cp history/$f out/history-$f
+          done
+          for f in v08c-analysis.json v08c-tables.md; do cmp v08c/$f $V/$f; cp v08c/$f out/$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

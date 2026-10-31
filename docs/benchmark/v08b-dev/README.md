@@ -215,3 +215,18 @@ replaying unchanged.
   * development seeds, five scenarios, one horizon each;
   * replays only for the LLM runs, so overtime cost and credit for the
     baselines are not shown.
+
+## Errata (V0.8c)
+
+Found in V0.8c. The committed V0.8b outputs are unchanged.
+* **RR1-D1 (refusal-response v1).** The two historical
+  `identical_repeated` refusals in §5 are artefacts: each refused proposal
+  was compared with itself, because v1 assigned the recorded reply to a
+  later attempt whose reply could not be parsed. Refusal-response
+  version 2 corrects the reader. It classifies 59 of the 559 historical
+  refusals, not 102, and finds no identical repeat
+  ([../v08c-dev/history/](../v08c-dev/history/refusal-response-v2-tables.md),
+  DECISION_EVIDENCE §13).
+* **V1-D5 (the frozen rules).** v1's repeat rule merges different actions
+  refused with the same message: 8 of its 202 historical repeat links
+  ([FREEZE.md](../v08a-dev/FREEZE.md)).

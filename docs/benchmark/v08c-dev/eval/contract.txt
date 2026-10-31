@@ -1,0 +1,212 @@
+DreamTeam benchmark contract report · dreamteam.benchmark-contract/v1 · suite dreamteam-dev version 4 (development) · suite run v08c-eval · engine 0.8.0-dev.3
+complete: 20 of 20 runs
+seeds 41901, 41902 · 30 days · decisions every 1 day(s) at 07:00 · policies noop@1, greedy@1, conservative-v2@2, qwen36-35b-a3b@3, gemma4-26b-a4b@3 · paired against noop
+
+The evaluation contract dreamteam.benchmark-contract/v1
+(docs/BENCHMARK_SUITE.md): the harness's own metrics on six dimensions, each
+reported on its own; no composite score, weighting, leaderboard or ranking.
+Absent values are marked, not estimated. T90 is reported only where the
+evaluation policy in force applies. Paired differences are policy minus
+baseline on the same entry and seed.
+
+1. Scenarios and starting states
+
+entry                            version  scenario                                  fingerprint    T90             seed   runs  start          identical
+financial-pressure-credit        3        bench-financial-pressure-ot-credit        586f3ef74742…  not_applicable  41901  5     e0cca2d54784…  yes
+financial-pressure-credit        3        bench-financial-pressure-ot-credit        586f3ef74742…  not_applicable  41902  5     387bc34ed523…  yes
+financial-pressure-lowliquidity  4        bench-financial-pressure-ot-lowliquidity  3175656ee024…  not_applicable  41901  5     90843f9980e9…  yes
+financial-pressure-lowliquidity  4        bench-financial-pressure-ot-lowliquidity  3175656ee024…  not_applicable  41902  5     7a452528d28a…  yes
+
+2. Runs: status, replay, actions (operations/staffing/refused) and T90
+
+entry                            seed   policy             status     replay  actions o/s/r  T90
+financial-pressure-credit        41901  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit        41901  greedy@1           completed  ok      0/4/0          not_requested
+financial-pressure-credit        41901  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-credit        41901  qwen36-35b-a3b@3   completed  ok      2/10/0         not_requested
+financial-pressure-credit        41901  gemma4-26b-a4b@3   completed  ok      0/0/0          not_requested
+financial-pressure-credit        41902  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-credit        41902  greedy@1           completed  ok      0/4/0          not_requested
+financial-pressure-credit        41902  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-credit        41902  qwen36-35b-a3b@3   completed  ok      9/0/0          not_requested
+financial-pressure-credit        41902  gemma4-26b-a4b@3   completed  ok      0/0/0          not_requested
+financial-pressure-lowliquidity  41901  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-lowliquidity  41901  greedy@1           completed  ok      0/2/2          not_requested
+financial-pressure-lowliquidity  41901  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-lowliquidity  41901  qwen36-35b-a3b@3   completed  ok      5/6/0          not_requested
+financial-pressure-lowliquidity  41901  gemma4-26b-a4b@3   completed  ok      0/1/0          not_requested
+financial-pressure-lowliquidity  41902  noop@1             completed  ok      0/0/0          not_requested
+financial-pressure-lowliquidity  41902  greedy@1           completed  ok      0/2/2          not_requested
+financial-pressure-lowliquidity  41902  conservative-v2@2  completed  ok      0/0/0          not_requested
+financial-pressure-lowliquidity  41902  qwen36-35b-a3b@3   completed  ok      4/2/0          not_requested
+financial-pressure-lowliquidity  41902  gemma4-26b-a4b@3   completed  ok      0/0/0          not_requested
+
+3. Operational performance: minimum / median / maximum over completed runs
+
+entry                            policy           exams                  reports                TAT p50                    TAT p90                        backlog end  wait p50                  wait p90
+financial-pressure-credit        noop             1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-credit        greedy           1,496 / 1,496 / 1,516  1,490 / 1,490 / 1,512  50 min / 50 min / 63 min   801 min / 801 min / 842 min    5 / 5 / 9    20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-credit        conservative-v2  1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-credit        qwen36-35b-a3b   1,454 / 1,454 / 1,518  1,318 / 1,318 / 1,510  73 min / 73 min / 95 min   862 min / 862 min / 2,890 min  9 / 9 / 139  20 min / 20 min / 21 min  61 min / 61 min / 75 min
+financial-pressure-credit        gemma4-26b-a4b   1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-lowliquidity  noop             1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-lowliquidity  greedy           1,496 / 1,496 / 1,516  1,490 / 1,490 / 1,512  50 min / 50 min / 63 min   801 min / 801 min / 842 min    5 / 5 / 9    20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-lowliquidity  conservative-v2  1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-lowliquidity  qwen36-35b-a3b   1,496 / 1,496 / 1,516  1,386 / 1,386 / 1,508  70 min / 70 min / 101 min  850 min / 850 min / 2,506 min  9 / 9 / 113  20 min / 20 min / 21 min  62 min / 62 min / 75 min
+financial-pressure-lowliquidity  gemma4-26b-a4b   1,496 / 1,496 / 1,516  1,489 / 1,489 / 1,508  59 min / 59 min / 72 min   833 min / 833 min / 862 min    9 / 9 / 10   20 min / 20 min / 21 min  62 min / 62 min / 75 min
+
+4. Financial performance: minimum / median / maximum over completed runs
+
+entry                            policy           net revenue                     expenses                        profit                          margin                   op. cash flow
+financial-pressure-credit        noop             $233,275 / $233,275 / $236,344  $250,255 / $250,255 / $253,285  -$20,009 / -$20,009 / -$13,911  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-credit        greedy           $233,320 / $233,320 / $237,061  $251,570 / $251,570 / $254,600  -$21,280 / -$21,280 / -$14,509  -9.1% / -9.1% / -6.1%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-credit        conservative-v2  $233,275 / $233,275 / $236,344  $250,255 / $250,255 / $253,285  -$20,009 / -$20,009 / -$13,911  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-credit        qwen36-35b-a3b   $201,476 / $201,476 / $236,416  $242,706 / $242,706 / $252,025  -$41,230 / -$41,230 / -$15,610  -20.5% / -20.5% / -6.6%  -$25,456 / -$25,456 / -$21,190
+financial-pressure-credit        gemma4-26b-a4b   $233,275 / $233,275 / $236,344  $250,255 / $250,255 / $253,285  -$20,009 / -$20,009 / -$13,911  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-lowliquidity  noop             $233,275 / $233,275 / $236,344  $250,278 / $250,278 / $253,303  -$20,027 / -$20,027 / -$13,934  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-lowliquidity  greedy           $233,320 / $233,320 / $237,061  $251,593 / $251,593 / $254,618  -$21,298 / -$21,298 / -$14,532  -9.1% / -9.1% / -6.1%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-lowliquidity  conservative-v2  $233,275 / $233,275 / $236,344  $250,278 / $250,278 / $253,303  -$20,027 / -$20,027 / -$13,934  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+financial-pressure-lowliquidity  qwen36-35b-a3b   $216,506 / $216,506 / $236,161  $257,500 / $257,500 / $258,611  -$40,994 / -$40,994 / -$22,450  -18.9% / -18.9% / -9.5%  -$25,416 / -$25,416 / -$24,815
+financial-pressure-lowliquidity  gemma4-26b-a4b   $233,275 / $233,275 / $236,344  $250,278 / $250,278 / $253,303  -$20,027 / -$20,027 / -$13,934  -8.6% / -8.6% / -5.9%    -$23,685 / -$23,685 / -$20,576
+
+5. Staffing and capacity: minimum / median / maximum over completed runs
+
+entry                            policy           orders                 lost             lost rate            overtime                           held over     skipped breaks  no coverage
+financial-pressure-credit        noop             1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-credit        greedy           1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-credit        conservative-v2  1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-credit        qwen36-35b-a3b   1,718 / 1,718 / 1,731  152 / 152 / 201  8.8% / 8.8% / 11.7%  3,765 min / 3,765 min / 4,250 min  36 / 36 / 48  0               0
+financial-pressure-credit        gemma4-26b-a4b   1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-lowliquidity  noop             1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-lowliquidity  greedy           1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-lowliquidity  conservative-v2  1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+financial-pressure-lowliquidity  qwen36-35b-a3b   1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   3,205 min / 3,205 min / 4,472 min  37 / 37 / 48  0               0
+financial-pressure-lowliquidity  gemma4-26b-a4b   1,718 / 1,718 / 1,731  152 / 152 / 161  8.8% / 8.8% / 9.4%   2,845 min / 2,845 min / 4,172 min  37 / 37 / 48  0               0
+
+6. Service reliability: minimum / median / maximum over completed runs
+
+entry                            policy           over target      breaches         waits >30        displaced         alerts         alerts at end
+financial-pressure-credit        noop             107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+financial-pressure-credit        greedy           105 / 105 / 121  105 / 105 / 121  500 / 500 / 517  absent            90 / 90 / 114  0 / 0 / 1
+financial-pressure-credit        conservative-v2  107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+financial-pressure-credit        qwen36-35b-a3b   109 / 109 / 388  109 / 109 / 313  491 / 491 / 499  57 (absent in 1)  88 / 88 / 119  0 / 0 / 4
+financial-pressure-credit        gemma4-26b-a4b   107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+financial-pressure-lowliquidity  noop             107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+financial-pressure-lowliquidity  greedy           105 / 105 / 121  105 / 105 / 121  500 / 500 / 517  absent            90 / 90 / 114  0 / 0 / 1
+financial-pressure-lowliquidity  conservative-v2  107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+financial-pressure-lowliquidity  qwen36-35b-a3b   111 / 111 / 380  111 / 111 / 335  500 / 500 / 517  6 / 6 / 9         90 / 90 / 115  0 / 0 / 4
+financial-pressure-lowliquidity  gemma4-26b-a4b   107 / 107 / 127  107 / 107 / 127  500 / 500 / 517  absent            89 / 89 / 114  0 / 0 / 1
+
+7. Long-term sustainability: minimum / median / maximum over completed runs
+
+entry                            policy           min cash                     shortfall  days < 0
+financial-pressure-credit        noop             $37,780 / $37,780 / $40,571  $0         0
+financial-pressure-credit        greedy           $37,780 / $37,780 / $40,571  $0         0
+financial-pressure-credit        conservative-v2  $37,780 / $37,780 / $40,571  $0         0
+financial-pressure-credit        qwen36-35b-a3b   $36,009 / $36,009 / $39,957  $0         0
+financial-pressure-credit        gemma4-26b-a4b   $37,780 / $37,780 / $40,571  $0         0
+financial-pressure-lowliquidity  noop             $0                           $0         0
+financial-pressure-lowliquidity  greedy           $0                           $0         0
+financial-pressure-lowliquidity  conservative-v2  $0                           $0         0
+financial-pressure-lowliquidity  qwen36-35b-a3b   $0                           $0         0
+financial-pressure-lowliquidity  gemma4-26b-a4b   $0                           $0         0
+
+8. Actions: minimum / median / maximum over completed runs
+
+entry                            policy           attempted   accepted    rejected  operations  staffing
+financial-pressure-credit        noop             0           0           0         0           0
+financial-pressure-credit        greedy           4           4           0         0           4
+financial-pressure-credit        conservative-v2  0           0           0         0           0
+financial-pressure-credit        qwen36-35b-a3b   9 / 9 / 12  9 / 9 / 12  0         2 / 2 / 9   0 / 0 / 10
+financial-pressure-credit        gemma4-26b-a4b   0           0           0         0           0
+financial-pressure-lowliquidity  noop             0           0           0         0           0
+financial-pressure-lowliquidity  greedy           2           2           0         0           2
+financial-pressure-lowliquidity  conservative-v2  0           0           0         0           0
+financial-pressure-lowliquidity  qwen36-35b-a3b   6 / 6 / 11  6 / 6 / 11  0         4 / 4 / 5   2 / 2 / 6
+financial-pressure-lowliquidity  gemma4-26b-a4b   0 / 0 / 1   0 / 0 / 1   0         0           0 / 0 / 1
+
+9. Paired with noop (policy − noop, same entry and seed): median [minimum, maximum] over seeds
+
+Operational performance
+
+entry                            policy           seeds  exams          reports          TAT p50                    TAT p90                        backlog end  wait p50               wait p90
+financial-pressure-credit        greedy           2      0              +1 [+1, +4]      -10 min [-10 min, -9 min]  -32 min [-32 min, -20 min]     -4 [-4, -1]  0 min                  0 min
+financial-pressure-credit        conservative-v2  2      0              0                0 min                      0 min                          0            0 min                  0 min
+financial-pressure-credit        qwen36-35b-a3b   2      -42 [-42, +2]  -171 [-171, +2]  +0 min [+0 min, +37 min]   +0 min [+0 min, +2,056 min]    0 [0, +129]  0 min [0 min, +0 min]  -1 min [-1 min, +1 min]
+financial-pressure-credit        gemma4-26b-a4b   2      0              0                0 min                      0 min                          0            0 min                  0 min
+financial-pressure-lowliquidity  greedy           2      0              +1 [+1, +4]      -10 min [-10 min, -9 min]  -32 min [-32 min, -20 min]     -4 [-4, -1]  0 min                  0 min
+financial-pressure-lowliquidity  conservative-v2  2      0              0                0 min                      0 min                          0            0 min                  0 min
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      0              -103 [-103, 0]   -3 min [-3 min, +42 min]   -13 min [-13 min, +1,673 min]  0 [0, +103]  0 min                  0 min
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      0              0                0 min                      0 min                          0            0 min                  0 min
+
+Financial performance
+
+entry                            policy           seeds  net revenue                 expenses                      profit                        margin  op. cash flow
+financial-pressure-credit        greedy           2      +$44 [+$44, +$717]          +$1,315                       -$1,271 [-$1,271, -$598]      n/a     $0
+financial-pressure-credit        conservative-v2  2      $0                          $0                            $0                            n/a     $0
+financial-pressure-credit        qwen36-35b-a3b   2      -$31,800 [-$31,800, +$72]   -$10,579 [-$10,579, +$1,771]  -$21,221 [-$21,221, -$1,699]  n/a     -$1,771 [-$1,771, -$613]
+financial-pressure-credit        gemma4-26b-a4b   2      $0                          $0                            $0                            n/a     $0
+financial-pressure-lowliquidity  greedy           2      +$44 [+$44, +$717]          +$1,315                       -$1,271 [-$1,271, -$598]      n/a     $0
+financial-pressure-lowliquidity  conservative-v2  2      $0                          $0                            $0                            n/a     $0
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      -$16,769 [-$16,769, -$182]  +$4,198 [+$4,198, +$8,333]    -$20,967 [-$20,967, -$8,515]  n/a     -$4,238 [-$4,238, -$1,731]
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      $0                          $0                            $0                            n/a     $0
+
+Staffing and capacity
+
+entry                            policy           seeds  orders  lost        lost rate  overtime                       held over   skipped breaks  no coverage
+financial-pressure-credit        greedy           2      0       0           n/a        0 min                          0           0               0
+financial-pressure-credit        conservative-v2  2      0       0           n/a        0 min                          0           0               0
+financial-pressure-credit        qwen36-35b-a3b   2      0       0 [0, +40]  n/a        +78 min [+78 min, +919 min]    -1 [-1, 0]  0               0
+financial-pressure-credit        gemma4-26b-a4b   2      0       0           n/a        0 min                          0           0               0
+financial-pressure-lowliquidity  greedy           2      0       0           n/a        0 min                          0           0               0
+financial-pressure-lowliquidity  conservative-v2  2      0       0           n/a        0 min                          0           0               0
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      0       0           n/a        +300 min [+300 min, +360 min]  0           0               0
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      0       0           n/a        0 min                          0           0               0
+
+Service reliability
+
+entry                            policy           seeds  over target    breaches       waits >30      displaced  alerts       alerts at end
+financial-pressure-credit        greedy           2      -6 [-6, -2]    -6 [-6, -2]    0              n/a        0 [0, +1]    0
+financial-pressure-credit        conservative-v2  2      0              0              0              n/a        0            0
+financial-pressure-credit        qwen36-35b-a3b   2      +2 [+2, +261]  +2 [+2, +186]  -18 [-18, -9]  n/a        -1 [-1, +5]  0 [0, +3]
+financial-pressure-credit        gemma4-26b-a4b   2      0              0              0              n/a        0            0
+financial-pressure-lowliquidity  greedy           2      -6 [-6, -2]    -6 [-6, -2]    0              n/a        0 [0, +1]    0
+financial-pressure-lowliquidity  conservative-v2  2      0              0              0              n/a        0            0
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      +4 [+4, +253]  +4 [+4, +208]  0              n/a        +1           0 [0, +3]
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      0              0              0              n/a        0            0
+
+Long-term sustainability
+
+entry                            policy           seeds  min cash                  shortfall  days < 0
+financial-pressure-credit        greedy           2      $0                        $0         0
+financial-pressure-credit        conservative-v2  2      $0                        $0         0
+financial-pressure-credit        qwen36-35b-a3b   2      -$1,771 [-$1,771, -$613]  $0         0
+financial-pressure-credit        gemma4-26b-a4b   2      $0                        $0         0
+financial-pressure-lowliquidity  greedy           2      $0                        $0         0
+financial-pressure-lowliquidity  conservative-v2  2      $0                        $0         0
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      $0                        $0         0
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      $0                        $0         0
+
+Actions
+
+entry                            policy           seeds  attempted     accepted      rejected
+financial-pressure-credit        greedy           2      +4            +4            0
+financial-pressure-credit        conservative-v2  2      0             0             0
+financial-pressure-credit        qwen36-35b-a3b   2      +9 [+9, +12]  +9 [+9, +12]  0
+financial-pressure-credit        gemma4-26b-a4b   2      0             0             0
+financial-pressure-lowliquidity  greedy           2      +2            +2            0
+financial-pressure-lowliquidity  conservative-v2  2      0             0             0
+financial-pressure-lowliquidity  qwen36-35b-a3b   2      +6 [+6, +11]  +6 [+6, +11]  0
+financial-pressure-lowliquidity  gemma4-26b-a4b   2      0 [0, +1]     0 [0, +1]     0
+
+10. Missing
+
+- imaging capacity utilization (no room-utilization metric in
+dreamteam.result/v1)
+- trend within the run (every metric is a whole-window total; the T90
+vector's later-window figures exist only for the reporting-backlog scenario)
+- action categories (operations versus staffing) are counted from
+decisions.json by the report, not by a result metric
+- model usage and latency (only for policies that record them, such as the
+LLM agent's policy-evidence)
+- absent in 17 run(s): displacedAppointments: none displaced

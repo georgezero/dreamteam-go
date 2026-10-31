@@ -315,7 +315,9 @@ them follow.
   for discretionary commitments. Even there, distress has no consequence
   beyond refusing new commitments: payroll is always paid and nothing
   shuts down. In V0.7c's 75 runs no action was refused for insufficient
-  funds, so agents' responses to funding refusals remain unobserved.
+  funds. V0.8c's low-liquidity entry (§12) met 10 funding refusals in 2
+  of its 8 live LLM runs, all on one seed. Responses to funding refusals
+  are observed only there: two seeds, 30 days, one practice.
 * **Demand growth uses monthly factors,** not an explicit dated shock
   (§2.3, §2.6).
 * **Some important metrics are absent** (§3): imaging capacity
@@ -828,3 +830,12 @@ not changed after any result.
 **Unchanged from version 3:** every other entry, the categories,
 dimensions, missing measures, horizon and cadence. T90 is
 `not_applicable`.
+
+**What V0.8c found with it** (seeds 41901 and 41902, 30 days,
+[benchmark/v08c-dev/](benchmark/v08c-dev/README.md)):
+* **Funding refusals:**
+  * 10, in the low-liquidity runs of both frozen models on seed 41901;
+  * none in the control or on seed 41902;
+  * greedy's raises were refused at apply 4 times.
+* **Credit:** drawn under every policy, no action included, at the month's
+  disbursements, with no distress.

@@ -1,0 +1,900 @@
+{
+ "schema": "dreamteam.benchmark-results/v1",
+ "benchmark": "v08c-eval",
+ "engine": "0.8.0-dev.3",
+ "protocol": "dreamteam.agent/v1",
+ "config": {
+  "path": "config.json",
+  "sha256": "96d877de4272e5c653f0a31115b72ac5f24f00045029d09dada0f202c2076fba"
+ },
+ "policies": [
+  {
+   "id": "noop",
+   "version": "1",
+   "description": "never submits an action (agent.Noop)"
+  },
+  {
+   "id": "greedy",
+   "version": "1",
+   "description": "the V0.3 protocol demonstration (agent.Greedy): raises one radiologist's site reading allocation by 5 points whenever the oldest unread study is over a day old; not a strategy"
+  },
+  {
+   "id": "conservative-v2",
+   "version": "2",
+   "description": "the financially conservative baseline, version 2 (V0.6c): watches the public log's urgent and soon report breaches; raises a site reading allocation by 5 points only for a problem sustained over a week (urgent breaches on 3 of 7 days or soon breaches on 5), within the trailing 30 days' operating profit after the change's cost, a $50,000 cash floor and a 10-point cap; reviews each raise after 14 days in effect and steps it back, raising no more, if breaches did not fall by a quarter; steps back when money is lost or service has been clear for a week"
+  },
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, with every attempt recorded as dreamteam.llm-decision-record/v3), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json (unchanged since V0.5c; used in V0.6c and V0.7c)",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent3.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent3.py",
+      "sha256": "ef2c17a06749d7c287cda918f77ff0e518d79475048e87fd3404848c2fb0015c"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+      "sha256": "e19a47dce948a8acbd3262ef5053b89f1e23c32603860e03628d38b184acbf5d"
+     }
+    ]
+   }
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, with every attempt recorded as dreamteam.llm-decision-record/v3), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json (unchanged since V0.5c; used in V0.6c and V0.7c)",
+   "external": {
+    "command": [
+     "python3",
+     "-I",
+     "-B",
+     "./agents/llm/llm_agent3.py",
+     "--settings",
+     "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+    ],
+    "timeoutSeconds": 1800,
+    "files": [
+     {
+      "path": "./agents/llm/llm_agent3.py",
+      "sha256": "ef2c17a06749d7c287cda918f77ff0e518d79475048e87fd3404848c2fb0015c"
+     },
+     {
+      "path": "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+      "sha256": "1a1edae5a492b67a72086bec51faecc8ed0930800bdb6e548412b65fa444aa6a"
+     }
+    ]
+   }
+  }
+ ],
+ "policyOps": [
+  "hello",
+  "observe",
+  "sections",
+  "actions",
+  "validate",
+  "preview",
+  "digests"
+ ],
+ "metrics": [
+  {
+   "name": "netRevenueCents",
+   "path": "window.money.netRevenueCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingExpenseCents",
+   "path": "window.money.operatingExpenseCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "operatingProfitCents",
+   "path": "window.money.operatingProfitCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "margin",
+   "path": "window.money.margin",
+   "kind": "ratio",
+   "group": "finance"
+  },
+  {
+   "name": "operatingCashFlowCents",
+   "path": "window.money.operatingCashFlowCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "minCashCents",
+   "path": "window.money.minCashCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "shortfallCents",
+   "path": "window.money.shortfallCents",
+   "kind": "int",
+   "group": "finance"
+  },
+  {
+   "name": "ordersReceived",
+   "path": "window.ops.demand.received",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "ordersLost",
+   "path": "window.ops.demand.lost",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "lostRate",
+   "path": "window.ops.demand.lostRate",
+   "kind": "ratio",
+   "group": "demand"
+  },
+  {
+   "name": "examsCompleted",
+   "path": "window.ops.exams",
+   "kind": "int",
+   "group": "demand"
+  },
+  {
+   "name": "reportsFinal",
+   "path": "window.ops.reporting.final",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP50Sec",
+   "path": "window.ops.reporting.tat.p50Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatP90Sec",
+   "path": "window.ops.reporting.tat.p90Sec",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatOverTarget",
+   "path": "window.ops.reporting.overTarget",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "tatBreaches",
+   "path": "window.ops.reporting.breaches",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "backlogEnd",
+   "path": "window.ops.reporting.backlogEnd",
+   "kind": "int",
+   "group": "reporting"
+  },
+  {
+   "name": "waitToExamP50Sec",
+   "path": "window.ops.waits.toExam.p50Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitToExamP90Sec",
+   "path": "window.ops.waits.toExam.p90Sec",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "waitsOver30",
+   "path": "window.ops.waits.over30",
+   "kind": "int",
+   "group": "service"
+  },
+  {
+   "name": "displacedAppointments",
+   "path": "window.ops.displacement.events",
+   "kind": "int",
+   "group": "service",
+   "absent": "none displaced"
+  },
+  {
+   "name": "overtimeSec",
+   "path": "window.ops.workforce.overtimeSec",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "heldOver",
+   "path": "window.ops.workforce.heldOver",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "skippedBreaks",
+   "path": "window.ops.workforce.skippedBreaks",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "noCoverage",
+   "path": "window.ops.workforce.noCoverage",
+   "kind": "int",
+   "group": "staffing"
+  },
+  {
+   "name": "alertsRaisedWarn",
+   "path": "alerts.raisedWarn",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsRaisedAlert",
+   "path": "alerts.raisedAlert",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "alertsActiveAtEnd",
+   "path": "alerts.activeAtEnd",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "daysBelowZero",
+   "path": "balances.daysBelowZero",
+   "kind": "int",
+   "group": "safety"
+  },
+  {
+   "name": "actionsAttempted",
+   "path": "actions.attempted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsAccepted",
+   "path": "actions.accepted",
+   "kind": "int",
+   "group": "actions"
+  },
+  {
+   "name": "actionsRejected",
+   "path": "actions.rejected",
+   "kind": "int",
+   "group": "actions"
+  }
+ ],
+ "runs": [
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-noop/run.json",
+     "sha256": "5570df3745d1c086d646a7e3e7d65c42f4f10dfd3059bbb4a4d9f80921478e2e"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-noop/transcript.jsonl",
+     "sha256": "721c0a3d90d64299ca23e5a9f4715e65a3a4ec23149fc3525d90d27eafb3993a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-noop/session.json",
+     "sha256": "43feb7c48ba09b64f22ed3fad743d271b1b04c4d6baeeb671b2d996c7d8f4874"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-noop/result.json",
+     "sha256": "03c9e4cc1dcc8c8cc4552630aeacc85f3342b1852aece49a64be90cde966b58c"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-greedy/run.json",
+     "sha256": "e9e5a9014f754391b17c016169542bf9ddb2ec4cd13b29c50196b3f5ce16268a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-greedy/decisions.json",
+     "sha256": "be9de808b2cc034abcedf87dc39c8b14e9f8ba03922decc5c85203c7a2c73bcc"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-greedy/transcript.jsonl",
+     "sha256": "1694b03617f7359757eb8416993bbba73ab51c9c9503f7e7c8f07236b9348b92"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-greedy/session.json",
+     "sha256": "bc1cbcf6ec4550f54083bbd192c77d3001ba30b8c85769eaba3303dbed9723dd"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-greedy/result.json",
+     "sha256": "25c460739e8a62497d2466d9215983e61fa1bee808e596c8146f5e324410c023"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-conservative-v2/run.json",
+     "sha256": "9eeb4d0b75d9af5273d72354cab8f6da882c887e89319435e16b2ba24b73805f"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-conservative-v2/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-conservative-v2/transcript.jsonl",
+     "sha256": "7473e31926c584e266923b5ad8ffd89eb7bcf407f17dc092c25a2fda5f00234e"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-conservative-v2/session.json",
+     "sha256": "43feb7c48ba09b64f22ed3fad743d271b1b04c4d6baeeb671b2d996c7d8f4874"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-conservative-v2/result.json",
+     "sha256": "03c9e4cc1dcc8c8cc4552630aeacc85f3342b1852aece49a64be90cde966b58c"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/run.json",
+     "sha256": "2f8532084050f0d92e5ebfcf218b4108447dba8397ecb3b8d8446a666ddf6e00"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/decisions.json",
+     "sha256": "cf1042a1e18e333c9420eb8bf3cd9a21a92a99db8f6ffa395b15f3c515a21128"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "8bcd170079007157083d18cd90eec8c2e27e930f53d6ed503d38eb8992a28afb"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/session.json",
+     "sha256": "b507ad94c71f3bb682d70abc202a4423a0569946b10150663311dfefc97d62df"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/result.json",
+     "sha256": "00c82af8976e5576bd8aa443bfd8610c4cc055a89ed969a084f1657e2c417404"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/run.json",
+     "sha256": "a16b534c6ccaaedd0e1a7477647360282fa6c50d46c4f33068c2310ccd15587b"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "70c5528bf1234254efce8a0279101333bec079b90db7203ec7a2e3a22179a3eb"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/session.json",
+     "sha256": "43feb7c48ba09b64f22ed3fad743d271b1b04c4d6baeeb671b2d996c7d8f4874"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/result.json",
+     "sha256": "03c9e4cc1dcc8c8cc4552630aeacc85f3342b1852aece49a64be90cde966b58c"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-noop/run.json",
+     "sha256": "01eda2ee139392037b7fd29c551dfbf7fe65dbe4c82bef20f20bf206bc754998"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-noop/transcript.jsonl",
+     "sha256": "fb2f0b9926c702289e310d5465c19fe112b70ec9f9e0f194560d6489773abffe"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-noop/session.json",
+     "sha256": "28eaf6bd67dd97829db8755a9ca2c51cfcb1618dd44ed5a63ca1c95101e0ab5c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-noop/result.json",
+     "sha256": "2438997f6802901d88bdd5a4b42238a49561e2ff919bf937554b947881737d60"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-greedy/run.json",
+     "sha256": "c1e0173101f8d517bf9dd60424567b669e52b1fcb597bf06e3fc5b97ca8f8531"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-greedy/decisions.json",
+     "sha256": "be9de808b2cc034abcedf87dc39c8b14e9f8ba03922decc5c85203c7a2c73bcc"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-greedy/transcript.jsonl",
+     "sha256": "393ccd4007b3a039b1aff67d3814a8cd06277eb2e982b96540143270e5da23bc"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-greedy/session.json",
+     "sha256": "f49c93f6038483d1a56ab8eb5ac0d8b8c8ad34a90fbcb56451af5f537123b0b1"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-greedy/result.json",
+     "sha256": "f5e71552f25c2caa91ecaa5d3ed55664456bf6e5792b3bfe7ff7c9d50ff7aa8a"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-conservative-v2/run.json",
+     "sha256": "24bcc3050218a7c2a29158eed3e4670ed732d40406ceea166e07b8245b9a8189"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-conservative-v2/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-conservative-v2/transcript.jsonl",
+     "sha256": "6592c68922e4857abd53d6c8f33ed64afead7cd69b8af823d888dc79f7c6cbfd"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-conservative-v2/session.json",
+     "sha256": "28eaf6bd67dd97829db8755a9ca2c51cfcb1618dd44ed5a63ca1c95101e0ab5c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-conservative-v2/result.json",
+     "sha256": "2438997f6802901d88bdd5a4b42238a49561e2ff919bf937554b947881737d60"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/run.json",
+     "sha256": "a11d0fa9fac0edaa570db4a9240672fd6bd209a0bb255663052bfc5423b8bc2a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/decisions.json",
+     "sha256": "58a8b9007bc417e72a437958ea83d98f944f4ac3ea57f0496130a8982dc30516"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "cd40a0043c6e5ef73e3fd860593fa7e12738c04b845132152cb19a6b214b21b4"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/session.json",
+     "sha256": "b2ba197824b544cdadd9577374eab7fd30bf979ce4bea70e8bc1f236a4c8bf0c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/result.json",
+     "sha256": "84875f5091ef519e0bb6601ee1e2062f20321db7008a252e86738ec59e1d6a6b"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/run.json",
+     "sha256": "f22acb58c2d9506178175fbd7ddf995196aa467cbbd7743662587c576445dc8f"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "fc8b16ded7a10ffa5656c1f1c4b203a3a5360ab3270b0260e33c9b78614e814c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/session.json",
+     "sha256": "28eaf6bd67dd97829db8755a9ca2c51cfcb1618dd44ed5a63ca1c95101e0ab5c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/result.json",
+     "sha256": "2438997f6802901d88bdd5a4b42238a49561e2ff919bf937554b947881737d60"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-noop/run.json",
+     "sha256": "3c657cc51ef4dbe0344eb87e1faaa789d4aea48cb3486ce870800ce680890822"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-noop/transcript.jsonl",
+     "sha256": "675933c1e305efe21da37d70da84e61b97ea5e33b4589451cde721aca5c2fd02"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-noop/session.json",
+     "sha256": "17e27e529c3e80c15abe41044b327e0a2ff18f13d3c2a08a0aa60aaf76495134"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-noop/result.json",
+     "sha256": "75bf35ad4af601ba5341f4195abaab56fa4885ee53272ef5d5c5de778b0ee6f1"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-greedy/run.json",
+     "sha256": "0a4e1ac813aa10a9941a7a723c36c447e0ddb6bb04ab0cf1b8601f7d6a6fdc2e"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-greedy/decisions.json",
+     "sha256": "c8986c2d792229a42b65746d4a777671d71ac2b049077f0305873b9c4594fecd"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-greedy/transcript.jsonl",
+     "sha256": "001bc23a08268339b2280ffe7db386466c57e15d19756225d4c88ae5cc8ddf1d"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-greedy/session.json",
+     "sha256": "645abe945f84c9f3e4f403fba5070c5180b82bf24f97ef4721eae3b438565158"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-greedy/result.json",
+     "sha256": "9404fcc5fdf25c3187c197c7f82e7e4f3f1df96a30ef0737989df53efd523c7d"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2/run.json",
+     "sha256": "23e658fbb92c39cffa1a44dc1707a0caf7c39bb230120a9f4ac5fc5e74a2e81e"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2/transcript.jsonl",
+     "sha256": "84e4e469a57dedc117a32d9d8fd804072adfa93fb3037a37a2192efd61606f7c"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2/session.json",
+     "sha256": "17e27e529c3e80c15abe41044b327e0a2ff18f13d3c2a08a0aa60aaf76495134"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2/result.json",
+     "sha256": "75bf35ad4af601ba5341f4195abaab56fa4885ee53272ef5d5c5de778b0ee6f1"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/run.json",
+     "sha256": "915eed3740d65bb5c3ae24512c5f1b5c4bce446acdad061cee90297fb55081de"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/decisions.json",
+     "sha256": "516658913135c7d5961de7baad5a1a206b0383a3a84fd214760b923db64fcb3b"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "a35feac1d7e02fb8414dad3e765897b70aa196481e64d8f033c9576803cb0751"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/session.json",
+     "sha256": "659ee435a74003be78fe413d8e540c4ddede76f3ba0518d55fe41ea1cda94500"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/result.json",
+     "sha256": "e8d67565a7b08d710a49140af66e47e59538b3e4f17d7eef18f38328c84c3fb8"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/run.json",
+     "sha256": "7999e15c23967e0a51231f5356bcc08753e38a6e198903c962006b3b4581d298"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/decisions.json",
+     "sha256": "24fbacb12fd005c0c9464b51e2486a17080bdad985e9db76dd9e3f069b56821a"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "7aa9f3a37736a4de6db7906a29f5ff3c6bc0d41a0d34bb83b153d1cf45763ce8"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/session.json",
+     "sha256": "bff5387409356a87333ff3f5f4409f1c85406751c8e709df2462805fb928cdc7"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/result.json",
+     "sha256": "23fd115b218e071499e886f19a82039147a9e4617ad47800ea9e7fb317842c10"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-noop",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-noop/run.json",
+     "sha256": "245d492ff9adbbead245d6d326cc1aa95e8cee4da565d6648fa76a78e3cfe9bd"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-noop/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-noop/transcript.jsonl",
+     "sha256": "aae9393aeffd5d2a67764729f51842320960a2f9de943ba354007277de78ebd5"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-noop/session.json",
+     "sha256": "e4587651c808a9a5d67bb37b43a3c792ff5533e02e35efef0e242ba232551621"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-noop/result.json",
+     "sha256": "254591621b12dffd7eb7115fed214c9673c84a36f65ea678394ee727abb7b8bc"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-greedy",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-greedy/run.json",
+     "sha256": "7cf8497ed3313cfa8fe54438f98413bb0b3c6d1be20b0afff21552da69c17089"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-greedy/decisions.json",
+     "sha256": "572a899fda0919f04be21fd86e86afcbf2074d91baee2033875fab3e8faea144"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-greedy/transcript.jsonl",
+     "sha256": "2dadf3720724ce001d42a873b365922a144e326edc7caf7f28fea051b72fa5e2"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-greedy/session.json",
+     "sha256": "68a1b789317088ac17e7d0f68a3dd705c589b95f99d8a8b549e4f1020f606f72"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-greedy/result.json",
+     "sha256": "7f7f886bfe313b2486932bf83683f9d5d3da02b38ab7d1f56e12b3f9ce2ac5b2"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2/run.json",
+     "sha256": "3a79049e1c0456c0d5a622202d5525104dc44e6b018d745bfb44ff49192d3906"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2/transcript.jsonl",
+     "sha256": "f2f38e9ba4305de6bb378ccc1c33d900c107e32e4b24afbdf63ba2c5e9419d07"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2/session.json",
+     "sha256": "e4587651c808a9a5d67bb37b43a3c792ff5533e02e35efef0e242ba232551621"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2/result.json",
+     "sha256": "254591621b12dffd7eb7115fed214c9673c84a36f65ea678394ee727abb7b8bc"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/run.json",
+     "sha256": "89d2e1e84c80695fedf68cad23d8d1df28c6191cac82d49bca41b29088ee5e4d"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/decisions.json",
+     "sha256": "6d95efccc4861ebd7a122522b133219af86b9f197691888cde24c67ba2ec65c2"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/transcript.jsonl",
+     "sha256": "a009228eb4f468f82d864edfe3f31ea89c4ef16a74c57d0b7d5d834b58441566"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/session.json",
+     "sha256": "a3d499e3f845b7dc1e965479403833a6b4a0d396d6fd4df10c718673cda7c305"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/result.json",
+     "sha256": "4bd4526cad09c2e2dfdd06577dbbbba732e1dce0cc753f275b59d0f9e5fe57a0"
+    }
+   ]
+  },
+  {
+   "id": "bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b",
+   "status": "completed",
+   "files": [
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/run.json",
+     "sha256": "a11f034ced3775be9bd61194d413563880be2f29c5ff3a6738a703b91ffe3e81"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/decisions.json",
+     "sha256": "512187ee60132eea9cb408972c1c457b1ab59aeed7c9bf22b5c4bad7a3877021"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/transcript.jsonl",
+     "sha256": "7ad9969b1c8a417c38e6b64bf59298d61169e05c248025958770badc723e6cc4"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/session.json",
+     "sha256": "e4587651c808a9a5d67bb37b43a3c792ff5533e02e35efef0e242ba232551621"
+    },
+    {
+     "path": "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/result.json",
+     "sha256": "254591621b12dffd7eb7115fed214c9673c84a36f65ea678394ee727abb7b8bc"
+    }
+   ]
+  }
+ ],
+ "reports": [
+  {
+   "path": "report.json",
+   "sha256": "068ced04e515e9992e73fbfa0aa00b9be7b55c5263edc9e54fda40d81be8e009"
+  },
+  {
+   "path": "report.txt",
+   "sha256": "ecad975c51274323f1661807291120e97d5a9184d436eceac86f4ee14ab67d5e"
+  }
+ ],
+ "suite": [
+  {
+   "path": "suite-run.json",
+   "sha256": "b68508d5d4d1ce29d4beeb6233312b21208ec007d6f472c4361b6c36185f2165"
+  },
+  {
+   "path": "suite.json",
+   "sha256": "e95b9158c8f4f84699ee0ab8b5f78ecbcb7683c59db86f8d1ac1e5771934d082"
+  },
+  {
+   "path": "contract.json",
+   "sha256": "ce9e110e1e2dac18fe1c4f9ec026b8c24824a7815af2b19033a07b8f212f8b49"
+  },
+  {
+   "path": "contract.txt",
+   "sha256": "c3d4a4057432b8ff2f53688deafcc869ae514a7b063512a646338a38f2445b7d"
+  }
+ ],
+ "nondeterministic": [
+  "timing.json",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/stderr.txt",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/stderr.txt",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/stderr.txt",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/stderr.txt",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/stderr.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/stderr.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/stderr.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b/policy-evidence/usage.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/stderr.txt",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/agent.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/attempts.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/decisions.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/memory.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/model.jsonl",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/summary.json",
+  "runs/bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b/policy-evidence/usage.txt"
+ ]
+}

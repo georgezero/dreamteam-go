@@ -19,7 +19,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.5** (released, `v0.5.0`: LLM agents, V0.5a–V0.5c, by the owner's release decision 2026-10-28) | LLM agents: a model-agnostic agent that manages a practice through the existing policy protocol as a separate process, calling an OpenAI-compatible API; bounded memory within a run, action guidance and targeted prompts; model evidence, usage and estimated cost recorded; recorded decisions replayable ([LLM_AGENT.md](LLM_AGENT.md), §5a) | V0.4 harness |
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
-| **V0.8** (in development: V0.8a and V0.8b accepted; V0.8c, `0.8.0-dev.3`, authorized by the owner 2026-10-30, in progress) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
+| **V0.8** (in development: V0.8a and V0.8b accepted; V0.8c, `0.8.0-dev.3`, authorized by the owner 2026-10-30, built) | Agent decision quality: decision/rationale consistency, financial decision quality and responses to funding refusals (§7b) | V0.7 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -750,7 +750,7 @@ agent took actions that undermined the objective it said it was pursuing.
 |---|---|---|
 | V0.8a | Deterministic decision-evidence analysis | complete: accepted by the owner 2026-10-30 (80cfff9, CI run 41104143975) |
 | V0.8b | Evidence validation and financial outcome analysis | complete: accepted by the owner 2026-10-30 (5b6cdba, CI run 41133370321) |
-| V0.8c | Complete decision recording and prospective refusal-response evaluation | authorized 2026-10-30; declared (0.8.0-dev.3), in progress |
+| V0.8c | Complete decision recording and prospective refusal-response evaluation | authorized 2026-10-30; declared (ee8aabc) and built (0.8.0-dev.3), awaiting owner review |
 | V0.8.0 | Release | pending |
 
 **V0.8c as authorized** (owner, 2026-10-30, after accepting V0.8b):
@@ -770,6 +770,7 @@ agent took actions that undermined the objective it said it was pursuing.
 * **Not approved:** prompt or model tuning, new mechanics, changes to the
   frozen v1 rules.
 * **Declared before any live run:** [PLAN.md](benchmark/v08c-dev/PLAN.md).
+  Built: [docs/benchmark/v08c-dev/](benchmark/v08c-dev/README.md).
 
 **V0.8.0 release criteria** (owner):
 * V3 captures every attempt, rejected ones included.

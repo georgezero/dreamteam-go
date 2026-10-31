@@ -1,0 +1,147 @@
+DreamTeam benchmark v08c-eval · engine 0.8.0-dev.3 · dreamteam.agent/v1
+scenarios bench-financial-pressure-ot-credit, bench-financial-pressure-ot-lowliquidity · seeds 41901, 41902 · 30 days · decisions every 1 day(s) at 07:00
+policies noop@1, greedy@1, conservative-v2@2, qwen36-35b-a3b@3 (external), gemma4-26b-a4b@3 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                                              status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90    breaches  overtime   alerts  T90
+bench-financial-pressure-ot-credit-s41901-noop                   completed  0/0/0         ok      -$20,009  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-credit-s41901-greedy                 completed  4/0/0         ok      -$21,280  $233,320     161   1,496  801 min    121       4,172 min  114     not requested
+bench-financial-pressure-ot-credit-s41901-conservative-v2        completed  0/0/0         ok      -$20,009  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-credit-s41901-qwen36-35b-a3b         completed  6/0/0         ok      -$41,230  $201,476     201   1,454  2,890 min  313       4,250 min  119     not requested
+bench-financial-pressure-ot-credit-s41901-gemma4-26b-a4b         completed  0/0/0         ok      -$20,009  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-credit-s41902-noop                   completed  0/0/0         ok      -$13,911  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+bench-financial-pressure-ot-credit-s41902-greedy                 completed  4/0/0         ok      -$14,509  $237,061     152   1,516  842 min    105       2,845 min  90      not requested
+bench-financial-pressure-ot-credit-s41902-conservative-v2        completed  0/0/0         ok      -$13,911  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+bench-financial-pressure-ot-credit-s41902-qwen36-35b-a3b         completed  3/0/0         ok      -$15,610  $236,416     152   1,518  862 min    109       3,765 min  88      not requested
+bench-financial-pressure-ot-credit-s41902-gemma4-26b-a4b         completed  0/0/0         ok      -$13,911  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+bench-financial-pressure-ot-lowliquidity-s41901-noop             completed  0/0/0         ok      -$20,027  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-lowliquidity-s41901-greedy           completed  2/2/0         ok      -$21,298  $233,320     161   1,496  801 min    121       4,172 min  114     not requested
+bench-financial-pressure-ot-lowliquidity-s41901-conservative-v2  completed  0/0/0         ok      -$20,027  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-lowliquidity-s41901-qwen36-35b-a3b   completed  8/0/0         ok      -$40,994  $216,506     161   1,496  2,506 min  335       4,472 min  115     not requested
+bench-financial-pressure-ot-lowliquidity-s41901-gemma4-26b-a4b   completed  1/0/0         ok      -$20,027  $233,275     161   1,496  833 min    127       4,172 min  114     not requested
+bench-financial-pressure-ot-lowliquidity-s41902-noop             completed  0/0/0         ok      -$13,934  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+bench-financial-pressure-ot-lowliquidity-s41902-greedy           completed  2/2/0         ok      -$14,532  $237,061     152   1,516  842 min    105       2,845 min  90      not requested
+bench-financial-pressure-ot-lowliquidity-s41902-conservative-v2  completed  0/0/0         ok      -$13,934  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+bench-financial-pressure-ot-lowliquidity-s41902-qwen36-35b-a3b   completed  5/0/0         ok      -$22,450  $236,161     152   1,516  850 min    111       3,205 min  90      not requested
+bench-financial-pressure-ot-lowliquidity-s41902-gemma4-26b-a4b   completed  0/0/0         ok      -$13,934  $236,344     152   1,516  862 min    107       2,845 min  89      not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario                                  seed   runs  start                state digest   identical
+bench-financial-pressure-ot-credit        41901  5     2026-10-13T06:00:00  e0cca2d54784…  yes
+bench-financial-pressure-ot-credit        41902  5     2026-10-13T06:00:00  387bc34ed523…  yes
+bench-financial-pressure-ot-lowliquidity  41901  5     2026-10-13T06:00:00  90843f9980e9…  yes
+bench-financial-pressure-ot-lowliquidity  41902  5     2026-10-13T06:00:00  7a452528d28a…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (4/4)                       greedy@1 (4/4)                     conservative-v2@2 (4/4)            qwen36-35b-a3b@3 (4/4)             gemma4-26b-a4b@3 (4/4)
+netRevenueCents         $233,275 / $233,275 / $236,344     $233,320 / $233,320 / $237,061     $233,275 / $233,275 / $236,344     $201,476 / $216,506 / $236,416     $233,275 / $233,275 / $236,344
+operatingExpenseCents   $250,255 / $250,278 / $253,303     $251,570 / $251,593 / $254,618     $250,255 / $250,278 / $253,303     $242,706 / $252,025 / $258,611     $250,255 / $250,278 / $253,303
+operatingProfitCents    -$20,027 / -$20,009 / -$13,911     -$21,298 / -$21,280 / -$14,509     -$20,027 / -$20,009 / -$13,911     -$41,230 / -$40,994 / -$15,610     -$20,027 / -$20,009 / -$13,911
+operatingCashFlowCents  -$23,685 / -$23,685 / -$20,576     -$23,685 / -$23,685 / -$20,576     -$23,685 / -$23,685 / -$20,576     -$25,456 / -$25,416 / -$21,190     -$23,685 / -$23,685 / -$20,576
+minCashCents            $0 / $0 / $40,571                  $0 / $0 / $40,571                  $0 / $0 / $40,571                  $0 / $0 / $39,957                  $0 / $0 / $40,571
+shortfallCents          $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0
+ordersReceived          1,718 / 1,718 / 1,731              1,718 / 1,718 / 1,731              1,718 / 1,718 / 1,731              1,718 / 1,718 / 1,731              1,718 / 1,718 / 1,731
+ordersLost              152 / 152 / 161                    152 / 152 / 161                    152 / 152 / 161                    152 / 152 / 201                    152 / 152 / 161
+examsCompleted          1,496 / 1,496 / 1,516              1,496 / 1,496 / 1,516              1,496 / 1,496 / 1,516              1,454 / 1,496 / 1,518              1,496 / 1,496 / 1,516
+reportsFinal            1,489 / 1,489 / 1,508              1,490 / 1,490 / 1,512              1,489 / 1,489 / 1,508              1,318 / 1,386 / 1,510              1,489 / 1,489 / 1,508
+tatP50Sec               59 min / 59 min / 72 min           50 min / 50 min / 63 min           59 min / 59 min / 72 min           70 min / 73 min / 101 min          59 min / 59 min / 72 min
+tatP90Sec               833 min / 833 min / 862 min        801 min / 801 min / 842 min        833 min / 833 min / 862 min        850 min / 862 min / 2,890 min      833 min / 833 min / 862 min
+tatOverTarget           107 / 107 / 127                    105 / 105 / 121                    107 / 107 / 127                    109 / 111 / 388                    107 / 107 / 127
+tatBreaches             107 / 107 / 127                    105 / 105 / 121                    107 / 107 / 127                    109 / 111 / 335                    107 / 107 / 127
+backlogEnd              9 / 9 / 10                         5 / 5 / 9                          9 / 9 / 10                         9 / 9 / 139                        9 / 9 / 10
+waitToExamP50Sec        20 min / 20 min / 21 min           20 min / 20 min / 21 min           20 min / 20 min / 21 min           20 min / 20 min / 21 min           20 min / 20 min / 21 min
+waitToExamP90Sec        62 min / 62 min / 75 min           62 min / 62 min / 75 min           62 min / 62 min / 75 min           61 min / 62 min / 75 min           62 min / 62 min / 75 min
+waitsOver30             500 / 500 / 517                    500 / 500 / 517                    500 / 500 / 517                    491 / 499 / 517                    500 / 500 / 517
+displacedAppointments   –                                  –                                  –                                  6 / 9 / 57                         –
+overtimeSec             2,845 min / 2,845 min / 4,172 min  2,845 min / 2,845 min / 4,172 min  2,845 min / 2,845 min / 4,172 min  3,205 min / 3,765 min / 4,472 min  2,845 min / 2,845 min / 4,172 min
+heldOver                37 / 37 / 48                       37 / 37 / 48                       37 / 37 / 48                       36 / 37 / 48                       37 / 37 / 48
+skippedBreaks           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+noCoverage              0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+alertsRaisedWarn        405 / 406 / 428                    405 / 406 / 427                    405 / 406 / 428                    398 / 407 / 444                    405 / 406 / 428
+alertsRaisedAlert       89 / 89 / 114                      90 / 90 / 114                      89 / 89 / 114                      88 / 90 / 119                      89 / 89 / 114
+alertsActiveAtEnd       0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 4                          0 / 0 / 1
+daysBelowZero           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+actionsAttempted        0 / 0 / 0                          2 / 2 / 4                          0 / 0 / 0                          6 / 9 / 12                         0 / 0 / 1
+actionsAccepted         0 / 0 / 0                          2 / 2 / 4                          0 / 0 / 0                          6 / 9 / 12                         0 / 0 / 1
+actionsRejected         0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario                                  seed   policy           decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90    Δbreaches  Δovertime  Δalerts
+bench-financial-pressure-ot-credit        41901  greedy           different  different  -$1,271   +$44          0      0       -32 min     -6         0 min      0
+bench-financial-pressure-ot-credit        41902  greedy           different  different  -$598     +$717         0      0       -20 min     -2         0 min      +1
+bench-financial-pressure-ot-lowliquidity  41901  greedy           different  different  -$1,271   +$44          0      0       -32 min     -6         0 min      0
+bench-financial-pressure-ot-lowliquidity  41902  greedy           different  different  -$598     +$717         0      0       -20 min     -2         0 min      +1
+bench-financial-pressure-ot-credit        41901  conservative-v2  same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-credit        41902  conservative-v2  same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-lowliquidity  41901  conservative-v2  same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-lowliquidity  41902  conservative-v2  same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-credit        41901  qwen36-35b-a3b   different  different  -$21,221  -$31,800      +40    -42     +2,056 min  +186       +78 min    +5
+bench-financial-pressure-ot-credit        41902  qwen36-35b-a3b   different  different  -$1,699   +$72          0      +2      +0 min      +2         +919 min   -1
+bench-financial-pressure-ot-lowliquidity  41901  qwen36-35b-a3b   different  different  -$20,967  -$16,769      0      0       +1,673 min  +208       +300 min   +1
+bench-financial-pressure-ot-lowliquidity  41902  qwen36-35b-a3b   different  different  -$8,515   -$182         0      0       -13 min     +4         +360 min   +1
+bench-financial-pressure-ot-credit        41901  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-credit        41902  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-lowliquidity  41901  gemma4-26b-a4b   different  different  $0        $0            0      0       0 min       0          0 min      0
+bench-financial-pressure-ot-lowliquidity  41902  gemma4-26b-a4b   same       identical  $0        $0            0      0       0 min       0          0 min      0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  greedy     conservative-v2  qwen36-35b-a3b  gemma4-26b-a4b
+netRevenueCents         4 / 0 / 0  0 / 0 / 4        1 / 3 / 0       0 / 0 / 4
+operatingExpenseCents   4 / 0 / 0  0 / 0 / 4        3 / 1 / 0       0 / 0 / 4
+operatingProfitCents    0 / 4 / 0  0 / 0 / 4        0 / 4 / 0       0 / 0 / 4
+operatingCashFlowCents  0 / 0 / 4  0 / 0 / 4        0 / 4 / 0       0 / 0 / 4
+minCashCents            0 / 0 / 4  0 / 0 / 4        0 / 2 / 2       0 / 0 / 4
+shortfallCents          0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+ordersReceived          0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+ordersLost              0 / 0 / 4  0 / 0 / 4        1 / 0 / 3       0 / 0 / 4
+examsCompleted          0 / 0 / 4  0 / 0 / 4        1 / 1 / 2       0 / 0 / 4
+reportsFinal            4 / 0 / 0  0 / 0 / 4        1 / 2 / 1       0 / 0 / 4
+tatP50Sec               0 / 4 / 0  0 / 0 / 4        3 / 1 / 0       0 / 0 / 4
+tatP90Sec               0 / 4 / 0  0 / 0 / 4        3 / 1 / 0       0 / 0 / 4
+tatOverTarget           0 / 4 / 0  0 / 0 / 4        4 / 0 / 0       0 / 0 / 4
+tatBreaches             0 / 4 / 0  0 / 0 / 4        4 / 0 / 0       0 / 0 / 4
+backlogEnd              0 / 4 / 0  0 / 0 / 4        2 / 0 / 2       0 / 0 / 4
+waitToExamP50Sec        0 / 0 / 4  0 / 0 / 4        1 / 1 / 2       0 / 0 / 4
+waitToExamP90Sec        0 / 0 / 4  0 / 0 / 4        1 / 1 / 2       0 / 0 / 4
+waitsOver30             0 / 0 / 4  0 / 0 / 4        0 / 2 / 2       0 / 0 / 4
+displacedAppointments   0 / 0 / 0  0 / 0 / 0        0 / 0 / 0       0 / 0 / 0
+overtimeSec             0 / 0 / 4  0 / 0 / 4        4 / 0 / 0       0 / 0 / 4
+heldOver                0 / 0 / 4  0 / 0 / 4        0 / 1 / 3       0 / 0 / 4
+skippedBreaks           0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+noCoverage              0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+alertsRaisedWarn        0 / 2 / 2  0 / 0 / 4        3 / 1 / 0       0 / 0 / 4
+alertsRaisedAlert       2 / 0 / 2  0 / 0 / 4        3 / 1 / 0       0 / 0 / 4
+alertsActiveAtEnd       0 / 0 / 4  0 / 0 / 4        2 / 0 / 2       0 / 0 / 4
+daysBelowZero           0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+actionsAttempted        4 / 0 / 0  0 / 0 / 4        4 / 0 / 0       1 / 0 / 3
+actionsAccepted         4 / 0 / 0  0 / 0 / 4        4 / 0 / 0       1 / 0 / 3
+actionsRejected         0 / 0 / 4  0 / 0 / 4        0 / 0 / 4       0 / 0 / 4
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  20
+
+policy           decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop             120              0        0        0        0                0                0
+greedy           120              16       12       4        0                0                0
+conservative-v2  120              0        0        0        0                0                0
+qwen36-35b-a3b   120              22       22       0        0                0                0
+gemma4-26b-a4b   120              1        1        0        0                0                0
+
+6. Replay verification
+
+20 of 20 saved sessions replayed with every digest verified; 20 of 20 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

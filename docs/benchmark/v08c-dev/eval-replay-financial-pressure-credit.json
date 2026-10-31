@@ -1,0 +1,61 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v08c-replay-financial-pressure-credit",
+ "description": "V0.8c recorded-decision replay, entry financial-pressure-credit: every completed live LLM run's recorded decisions (docs/benchmark/v08c-dev/eval/) submitted again through the protocol by llm-agent 3's replay mode, without any model, beside the three deterministic comparators (no action, greedy, conservative-v2), which run again as they did live. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-4.json",
+ "entries": [
+  "financial-pressure-credit"
+ ],
+ "seeds": [
+  41901,
+  41902
+ ],
+ "seedPlan": "The seeds of docs/benchmark/v08c-dev/eval.json, so that the recorded decisions belong to the runs.",
+ "days": 30,
+ "policies": [
+  "noop",
+  "greedy",
+  "conservative-v2",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3",
+   "description": "llm-agent 3 in replay mode: qwen36-35b-a3b's recorded decisions from the V0.8c evaluation, entry financial-pressure-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--replay",
+    "./docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3",
+   "description": "llm-agent 3 in replay mode: gemma4-26b-a4b's recorded decisions from the V0.8c evaluation, entry financial-pressure-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--replay",
+    "./docs/benchmark/v08c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s41901-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v08c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s41902-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

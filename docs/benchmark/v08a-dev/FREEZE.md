@@ -120,3 +120,18 @@ precision.**
   month-to-date profit.
 * *Effect:* across the first day of a month its change compares two
   different months. Only the traces are affected, not any finding.
+
+**V1-D5. Different actions refused with the same message are counted as one
+repeated proposal** (found in V0.8c, by repeat rule version 2).
+* *Cause:* `REPEATED_INVALID_PROPOSAL` keys a refusal by its type, code and
+  message (dates normalized), not by the action proposed.
+* *Effect:* two different actions of one type, refused with the same
+  message, are linked as a repeat. In the historical corpus, 8 of v1's 202
+  repeat links join refused actions whose payloads are both recorded and
+  differ. For example, two different teleradiology contracts were both
+  refused `contract_overlap`.
+* *Not determinable for the other 194 links:* at least one end's actions
+  are not recorded.
+* *Where it is addressed:* repeat rule version 2
+  (`dreamteam.repeat-evidence/v2`, DECISION_EVIDENCE §14), a separate
+  version approved by the owner. v1 is unchanged.

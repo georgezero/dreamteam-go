@@ -33,6 +33,25 @@ label the client chooses).
 The categories describe what was proposed. None of them says whether the
 agent understood the refusal, and a different proposal is not called
 adaptive.
+
+Version 2 (dreamteam.refusal-response/v2, V0.8c; `--version 2`) keeps the
+categories and the identity, and changes how the response is found:
+* **The parsed reply's own attempt.** In the llm-agent 2 format, the
+  recorded reply (`proposed`) belongs to the last attempt whose reply was
+  parsed. Version 1 assigned it to the last attempt even when that
+  attempt's reply could not be parsed, so a refused proposal followed by
+  an unparseable retry was compared with itself (defect RR1-D1: both
+  historical `identical_repeated` refusals).
+* **The next proposal.** The response is the next attempt whose reply was
+  parsed as a decision, in the same decision point or the next one. Replies
+  that could not be parsed, and details requests, are skipped and counted.
+  If the next proposal was made but its actions are not recorded (an
+  earlier attempt in the llm-agent 2 format), the response is
+  `evidence_unavailable`; version 1 used the next point's final reply
+  instead.
+* **llm-agent 3.** Its records (dreamteam.llm-decision-record/v3) keep every
+  attempt, and are read directly.
+Version 1's outputs are kept unchanged beside version 2's.
 """
 
 import argparse
@@ -44,8 +63,10 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import decision_evidence as D  # noqa: E402  (the frozen analyzer: corpus and model helpers only)
+import record_v3 as V3  # noqa: E402
 
 SCHEMA = "dreamteam.refusal-response/v1"
+SCHEMA_V2 = "dreamteam.refusal-response/v2"
 CATEGORIES = ("identical_repeated", "refusal_no_longer_applicable", "modified_proposal", "different_proposal",
               "no_action", "evidence_unavailable")
 
@@ -186,13 +207,158 @@ def analyze_sequence(recs, attempt_recs, source):
     return events
 
 
+# --- version 2 -----------------------------------------------------------
+
+def parsed_attempt(rec, n):
+    """In the llm-agent 1 and 2 formats, the attempt whose reply is the
+    record's `proposed`: the last attempt, unless the point fell back; then
+    the last attempt whose reply was parsed and validated (its error is a
+    refusal or a validate protocol error), or None."""
+    if rec.get("outcome") != "fallback":
+        return n
+    k = None
+    for e in rec.get("errors") or []:
+        e = str(e)
+        if e.startswith("attempt ") and (": refused: " in e or ": invalid_action: validate answered" in e):
+            k = int(e.split(":", 1)[0].split()[1])
+    return k
+
+
+def _ok_map(actions, validation, results_of):
+    ok = {}
+    if actions and isinstance(validation, list):
+        for (batch, idx), v in zip(D.A.split(actions), validation):
+            for k, r in enumerate(results_of(v)):
+                if k < len(idx):
+                    ok[idx[k]] = bool(r.get("ok"))
+    return ok
+
+
+def steps(rec, arec):
+    """A decision point's attempts in order, details requests left out:
+    ("proposal", attempt, actions, {index: accepted}), ("unparsed",
+    attempt) for a reply that was not a usable decision, or ("unrecorded",
+    attempt) for a proposal whose actions are not recorded."""
+    out = []
+    if V3.is_v3(rec):
+        for at in rec.get("attempts") or []:
+            if at.get("detailsRequested"):
+                continue
+            if (at.get("parse") or {}).get("ok"):
+                out.append(("proposal", at["attempt"], at["actions"], _ok_map(
+                    at["actions"], at.get("validation"), lambda v: (v.get("answer") or {}).get("results") or [])))
+            else:
+                out.append(("unparsed", at["attempt"]))
+        return out
+    if arec is not None:
+        return [("proposal", at["attempt"], at["actions"], _ok_map(at["actions"], at.get("validation"),
+                                                                  lambda v: v.get("results") or []))
+                for at in arec["attempts"]]
+    rs = D.refusals_of(rec) or []
+    n = max([rec.get("attempts") or 1] + [r.get("attempt") or 0 for r in rs])
+    kp = parsed_attempt(rec, n)
+    errs = {}
+    for e in rec.get("errors") or []:
+        e = str(e)
+        if e.startswith("attempt ") and ":" in e:
+            head, text = e.split(":", 1)
+            try:
+                errs[int(head.split()[1])] = text.strip()
+            except (IndexError, ValueError):
+                pass
+    proposed = rec.get("proposed") if isinstance(rec.get("proposed"), list) else None
+    for k in range(1, n + 1):
+        if k == kp and proposed is not None:
+            out.append(("proposal", k, proposed, _ok_map(proposed, rec.get("validation"),
+                                                         lambda v: v.get("results") or [])))
+        elif k in errs:
+            t = errs[k]
+            known = t.startswith("refused: ") or t.startswith("invalid_action: validate answered")
+            out.append(("unrecorded" if known else "unparsed", k))
+        # otherwise a details request: not a decision
+    return out
+
+
+def refused_v2(rec, arec):
+    """Each refusal of a decision point: (attempt, action index, type, code,
+    message, payload or None), the payload known only for the attempt whose
+    actions are recorded."""
+    if V3.is_v3(rec):
+        return refused_actions(rec, V3.attempt_view(rec))
+    if arec is not None:
+        return refused_actions(rec, arec)
+    rs = D.refusals_of(rec) or []
+    n = max([rec.get("attempts") or 1] + [r.get("attempt") or 0 for r in rs])
+    kp = parsed_attempt(rec, n)
+    proposed = rec.get("proposed") if isinstance(rec.get("proposed"), list) else []
+    final_refused = set()
+    if proposed and isinstance(rec.get("validation"), list):
+        for (batch, idx), v in zip(D.A.split(proposed), rec["validation"]):
+            for k, r in enumerate(v.get("results") or []):
+                if not r.get("ok"):
+                    final_refused.add((idx[k], r.get("code")))
+    out = []
+    for r in rs:
+        if r.get("code") == "batch_rejected":
+            continue
+        payload = None
+        if r.get("attempt") == kp and (r.get("action"), r.get("code")) in final_refused:
+            payload = proposed[r["action"]]
+        out.append((r.get("attempt"), r.get("action"), r.get("type"), r.get("code"), r.get("message"), payload))
+    return out
+
+
+def response_v2(by_point, recs, i, attempt):
+    """The next proposal after attempt `attempt` of point i: (response or
+    None, where, unparsed replies skipped, why unavailable)."""
+    seq = [(i, s) for s in by_point[i] if s[1] > attempt]
+    if i + 1 < len(recs):
+        seq += [(i + 1, s) for s in by_point[i + 1]]
+    skipped = 0
+    for j, s in seq:
+        where = {"point": recs[j]["point"], "attempt": s[1]}
+        if s[0] == "unparsed":
+            skipped += 1
+            continue
+        if s[0] == "unrecorded":
+            return None, where, skipped, "the next proposal's actions are not recorded"
+        return [(a, s[3].get(k, False)) for k, a in enumerate(s[2])], where, skipped, None
+    if i + 1 >= len(recs) and not [x for x in seq if x[0] == i]:
+        return None, None, skipped, "no later proposal is recorded (the run ended)"
+    return None, None, skipped, "no parsed proposal follows within the next decision point"
+
+
+def analyze_sequence_v2(recs, attempt_recs, source):
+    events = []
+    by_point = [steps(r, attempt_recs[i] if attempt_recs else None) for i, r in enumerate(recs)]
+    for i, rec in enumerate(recs):
+        arec = attempt_recs[i] if attempt_recs else None
+        for attempt, idx, typ, code, msg, payload in refused_v2(rec, arec):
+            resp, where, skipped, why = response_v2(by_point, recs, i, attempt)
+            cat = classify(payload, resp)
+            if payload is None:
+                why = "the refused action's payload is not recorded (an earlier attempt)"
+            key = json.dumps([source["sha256"], rec["point"], attempt, idx, code], sort_keys=True)
+            events.append({
+                "id": "rr2-" + hashlib.sha256(key.encode("utf-8")).hexdigest()[:16],
+                "recording": source["path"], "group": source["group"], "model": source["model"],
+                "point": rec["point"], "time": rec.get("time"), "attempt": attempt, "action": idx, "type": typ,
+                "code": code, "message": msg, "refused": D.short_action(payload) if payload else None,
+                "response": where, "skippedUnparsed": skipped,
+                "responseActions": None if resp is None else [{"action": D.short_action(a), "acceptedByValidate": ok}
+                                                             for a, ok in resp],
+                "category": cat, "unavailable": why if cat == "evidence_unavailable" else None,
+                "responseRecorded": resp is not None})
+    return events
+
+
 def jsonl(path):
     with open(path, "rb") as f:
         raw = f.read()
     return raw, [json.loads(l) for l in raw.decode("utf-8").splitlines() if l.strip()]
 
 
-def run(corpus_path, probes_dir=None):
+def run(corpus_path, probes_dir=None, version=1):
     sources = []
     with open(corpus_path, encoding="utf-8") as f:
         corpus = json.load(f)
@@ -222,7 +388,7 @@ def run(corpus_path, probes_dir=None):
                "model": D.model_of(path, D.Inputs()) if not probe else "scripted probe"}
         if not any(i["path"] == name for i in inputs):
             inputs.append({"path": name, "sha256": src["sha256"]})
-        events += analyze_sequence(recs, arecs, src)
+        events += (analyze_sequence_v2 if version == 2 else analyze_sequence)(recs, arecs, src)
     summary = {}
     for e in events:
         k = f"{e['group']}|{e['model']}"
@@ -232,7 +398,7 @@ def run(corpus_path, probes_dir=None):
         s["payloadUnrecordedResponseRecorded"] += e["refused"] is None and e["responseRecorded"]
         s["insufficientFunds"] += e["code"] == "insufficient_funds"
         s[e["category"]] += 1
-    return {"schema": SCHEMA, "categories": list(CATEGORIES),
+    return {"schema": SCHEMA_V2 if version == 2 else SCHEMA, "categories": list(CATEGORIES),
             "identity": "canonical JSON of the action without requestId",
             "inputs": inputs, "summary": {k: summary[k] for k in sorted(summary)}, "events": events}
 
@@ -264,13 +430,16 @@ def main(argv=None):
     ap.add_argument("--corpus", required=True)
     ap.add_argument("--probes", help="a funding probe output directory")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--version", type=int, choices=(1, 2), default=1)
+    ap.add_argument("--name", help="output file name stem (default refusal-response, or refusal-response-v2)")
     a = ap.parse_args(argv)
-    doc = run(a.corpus, a.probes)
+    doc = run(a.corpus, a.probes, a.version)
+    name = a.name or ("refusal-response-v2" if a.version == 2 else "refusal-response")
     os.makedirs(a.out, exist_ok=True)
-    with open(os.path.join(a.out, "refusal-response.json"), "w", encoding="utf-8") as f:
+    with open(os.path.join(a.out, name + ".json"), "w", encoding="utf-8") as f:
         json.dump(doc, f, indent=1, sort_keys=True, ensure_ascii=True)
         f.write("\n")
-    with open(os.path.join(a.out, "refusal-response-tables.md"), "w", encoding="utf-8") as f:
+    with open(os.path.join(a.out, name + "-tables.md"), "w", encoding="utf-8") as f:
         f.write(tables(doc))
     print(f"refusal responses: {len(doc['events'])} refusals classified")
     return 0

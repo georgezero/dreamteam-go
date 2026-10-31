@@ -3,7 +3,10 @@
 Status: built in V0.8a (0.8.0-dev.1), and **frozen in V0.8b**
 (0.8.0-dev.2): the rules, their semantics, the finding identifiers, the
 output order and the committed outputs (§11,
-[the freeze record](benchmark/v08a-dev/FREEZE.md)). Not released.
+[the freeze record](benchmark/v08a-dev/FREEZE.md)). V0.8c adds separately
+versioned readers and rules beside it (§13–§15) and changes nothing in
+it. Its findings are not independently validated: the independent review
+is PENDING. Not released.
 
 **Files:**
 * the analysis: `analysis/evidence/decision_evidence.py` (analyzer
@@ -12,7 +15,10 @@ output order and the committed outputs (§11,
 * its corpus:
   [docs/benchmark/v08a-dev/corpus.json](benchmark/v08a-dev/corpus.json);
 * its results: [docs/benchmark/v08a-dev/](benchmark/v08a-dev/README.md);
-* the V0.8b extension: `dreamteam.refusal-response/v1` (§12).
+* the V0.8b extension: `dreamteam.refusal-response/v1` (§12);
+* the V0.8c additions, each versioned on its own: refusal-response
+  version 2 (§13), repeat rule version 2 (§14), and the frozen rules on
+  llm-agent 3's records (§15).
 
 ## 1. Purpose
 
@@ -570,3 +576,136 @@ share a target when they have the same type and the same:
 
 **Results:** [docs/benchmark/v08b-dev/](benchmark/v08b-dev/README.md).
 
+## 13. Extension: refusal responses, version 2 (dreamteam.refusal-response/v2)
+
+V0.8c. The same module (`refusal_response.py --version 2`), the same
+categories and the same identity as version 1. Version 1's outputs are
+unchanged and are still produced beside it. What changes is how the
+response is found.
+
+**Defect RR1-D1, found in V0.8c.** In the llm-agent 2 format, the recorded
+reply (`proposed`) belongs to the last attempt whose reply was parsed.
+* *What version 1 does:* it assigns that reply to the point's last attempt
+  even when that attempt's reply could not be parsed.
+* *The effect:* a refused proposal followed by an unparseable retry is
+  compared with itself and classified `identical_repeated`.
+* *Where it happened:* both historical `identical_repeated` refusals
+  reported in V0.8b (one in V0.6c, one in V0.7c, both Gemma 4 26B-A4B
+  hires refused `lead_too_short`) are this artefact.
+
+V0.8b's committed figures are not rewritten. Version 2 is the corrected
+reading.
+
+**The response in version 2** is the agent's next parsed proposal:
+* **Where to look:** the next attempt in the same decision point whose
+  reply was parsed as a decision, else the first such attempt at the next
+  decision point.
+* **What is skipped:** replies that could not be parsed (counted in
+  `skippedUnparsed`) and details requests (not decisions).
+* **When the response is unavailable:**
+  * the next proposal was made but its actions are not recorded (an
+    earlier attempt in the llm-agent 2 format). Version 1 used the next
+    point's final reply instead.
+  * no parsed proposal follows within the next decision point.
+* **Where the reply's attempt comes from (llm-agent 2 format):** the
+  record's errors. The parsed reply is the last attempt unless the point
+  fell back. Then it is the last attempt refused by validate, or answered
+  with a validate protocol error.
+* **llm-agent 3** (`dreamteam.llm-decision-record/v3`): every attempt is
+  read directly.
+
+`unavailable` gives the cause.
+
+## 14. Repeat rule version 2 (dreamteam.repeat-evidence/v2)
+
+`analysis/evidence/repeat_v2.py`, rule `REPEATED_REFUSED_PROPOSAL`
+version 2, approved by the owner for V0.8c. It sits beside the frozen
+v1 rule `REPEATED_INVALID_PROPOSAL` (§6.4), which is unchanged. v1's
+findings are neither replaced nor relabelled.
+
+**Why.** v1 recognizes a repeat by the refusal: its type, code and
+message, with dates normalized. That causes two errors:
+* *It misses repeats when the message states an amount* (defect V1-D1),
+  because the amount differs from day to day.
+* *It merges different actions* refused with the same message.
+
+Version 2 recognizes a repeat by the action itself.
+
+**Identity.**
+* *Exact identity:* the action's canonical JSON without `requestId`, the
+  identity of the refusal-response extension. The refusal's wording plays
+  no part.
+* *Similarity, kept apart:* a later action with the same type and target
+  but other values is counted as `related`. It is never a repeat.
+
+**Each refused action** (any code but `batch_rejected`, in any attempt, at
+any decision point) gets one status:
+
+| Status | When |
+|---|---|
+| `repeated_refused` | the identical action is proposed at a later attempt (the same point or later) and refused again |
+| `repeated_accepted` | the identical action is proposed later and validate accepts it: the refusal no longer applied |
+| `repeated_unvalidated` | the identical action is proposed later but was not validated |
+| `not_repeated` | no later attempt proposes it, and every later attempt's actions are recorded |
+| `unresolved` | no later recorded attempt proposes it, but some later attempts' actions are not recorded (the llm-agent 2 format) |
+| `insufficient_evidence` | the refused attempt's own actions are not recorded |
+
+**Abstention is explicit:** with incomplete evidence the rule says so
+(`unresolved`, `insufficient_evidence`). It does not count a case as
+not repeated.
+
+**A finding** (`supported`) is a group of two or more refused occurrences
+of one identical action in a recording. It records:
+* the occurrences;
+* how many repeats were within a decision point's retries and how many
+  were across decision points;
+* the codes, and how many distinct refusal messages there were.
+
+**Versus v1.** For every recording, a repeat link joins one refused
+occurrence to the next refused occurrence of the same proposal. Each
+version's links are compared:
+
+| Count | Meaning |
+|---|---|
+| both | the link is in both versions |
+| v1 only: v2 abstains | an end's actions are not recorded |
+| v1 only: different actions | both ends are recorded, and the actions differ: v1 merged them by message |
+| v2 only: message differs | the refusal messages differ (V1-D1) |
+| v2 only: other | v2 links them for another reason (for example, a different code) |
+
+**Inputs:**
+* the llm-agent 1 and 2 formats;
+* llm-agent 3's records;
+* the probes' attempt-level evidence.
+
+**Results:**
+* *Historical recordings and probes:*
+  [docs/benchmark/v08c-dev/history/](benchmark/v08c-dev/history/).
+* *The V0.8c evaluation:*
+  [v08c-analysis.json](benchmark/v08c-dev/v08c-analysis.json).
+
+## 15. The frozen rules on llm-agent 3's records
+
+The frozen analyzer reads the llm-agent 2 format. For llm-agent 3's
+records (V0.8c), `analysis/evidence/record_v3.py` writes each record's
+**llm-agent 2 view**:
+* the summary fields llm-agent 3 keeps (`outcome`, `reason`, `refusals`,
+  `errors`, `batches`);
+* the fields llm-agent 2 kept at the top, set as llm-agent 2 set them:
+  * `attempts` as a count;
+  * `retries`;
+  * `detailsRequested`;
+  * `proposed`: the last parsed reply's actions;
+  * `validation`: the answers of the last attempt whose actions were
+    validated.
+
+A test checks this view against llm-agent 2's own record of the same
+decision point, field by field (`test_v08c.py`).
+
+**How the analyzer runs on it:** unchanged, on view files written under
+the replays directory, with the replays of the llm-agent 3 runs. Its
+prompts are rebuilt and verified as before, because llm-agent 3's prompt
+and memory are llm-agent 2's.
+
+**Its findings stay v1 findings:** version 1 semantics, the defects of
+§11 included. The independent review (V0.8b) covers none of them.
