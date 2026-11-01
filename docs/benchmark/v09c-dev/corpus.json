@@ -1,0 +1,29 @@
+{
+ "schema": "dreamteam.financial-evidence-corpus/v1",
+ "id": "v09c-financial-corpus-1",
+ "description": "The V0.9c evaluation's LLM recordings, both conditions: llm-agent 3 (baseline, v3 records) and llm-agent 4 (preview-enabled, v4 records, read as their v3 view), on suite dreamteam-dev version 4's financial-pressure-credit and staffing-shortage-credit, seeds 42001 and 42002, 30 days, paired with no action from the evaluation's contract report. One economics; no other group is combined with it.",
+ "caseStudies": [],
+ "groups": [
+  {
+   "id": "v09c",
+   "economics": "dreamteam-dev 4 (V0.9c, unchanged since V0.8c): radiologist overtime paid, $50,000 credit line at 10%, the V0.7b funding rule",
+   "replays": [
+    {
+     "config": "docs/benchmark/v09c-dev/eval-replay-financial-pressure-credit.json",
+     "out": "llm-v09c-replay-financial-pressure-credit"
+    },
+    {
+     "config": "docs/benchmark/v09c-dev/eval-replay-staffing-shortage-credit.json",
+     "out": "llm-v09c-replay-staffing-shortage-credit"
+    }
+   ],
+   "suiteRuns": [
+    {
+     "id": "v09c-eval",
+     "contract": "docs/benchmark/v09c-dev/eval/contract.json",
+     "economics": "dreamteam-dev 4 (V0.9c, unchanged since V0.8c): radiologist overtime paid, $50,000 credit line at 10%, the V0.7b funding rule"
+    }
+   ]
+  }
+ ]
+}

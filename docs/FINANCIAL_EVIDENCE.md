@@ -246,3 +246,28 @@ runs have no suite contract to pair them with no action.
   historical engine's own previews, which were never requested.
 * **In-sample and descriptive.** The corpus is the committed development
   recordings: no holdout, no new runs, and no model.
+
+## 9. Use in V0.9c
+
+V0.9c ([benchmark/v09c-dev/](benchmark/v09c-dev/README.md)) runs v1,
+unchanged, on both conditions of its evaluation: llm-agent 3's v3 records
+and llm-agent 4's v4 records. The analysis is
+`analysis/evidence/preview_evaluation.py`. Two adapters give v1 the input
+it expects; no rule, status or output field of v1 changes:
+* **The v3 view.** A v4 record is read with its schema named v3. The
+  attempt fields v1 links (each attempt's `validation`) are the same. The
+  run list keeps the file's own SHA-256, and its format reads
+  `llm-agent 4 (read as its v3 view)`.
+* **The preview checks left out.** After each preview, llm-agent 4 asks
+  for the digests to check that nothing changed. v1 starts a decision
+  point at each digests request carrying the point's digests, so that
+  request would end the point early, and the submissions after it would
+  be lost. The transcript given to v1 leaves those requests out: one per
+  preview shown. They are read-only, and v1's engine replay still requires
+  every remaining answer to be identical.
+
+**The check:** every batch the records say was validated has its
+affordability record, or the analysis stops.
+
+The adapters are V0.9c's; the V0.9b outputs are unchanged.
+

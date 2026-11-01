@@ -1,0 +1,147 @@
+DreamTeam benchmark v09c-eval · engine 0.9.0-dev.3 · dreamteam.agent/v1
+scenarios bench-financial-pressure-ot-credit, bench-staffing-shortage-ot-credit · seeds 42001, 42002 · 30 days · decisions every 1 day(s) at 07:00
+policies noop@1, qwen36-35b-a3b@3 (external), gemma4-26b-a4b@3 (external), qwen36-35b-a3b-preview@4 (external), gemma4-26b-a4b-preview@4 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                                                               status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90  breaches  overtime   alerts  T90
+bench-financial-pressure-ot-credit-s42001-noop                    completed  0/0/0         ok      -$12,712  $238,843     179   1,503  970 min  140       3,289 min  110     not requested
+bench-financial-pressure-ot-credit-s42001-qwen36-35b-a3b          completed  8/0/0         ok      -$40,261  $203,238     390   1,385  893 min  92        3,333 min  109     not requested
+bench-financial-pressure-ot-credit-s42001-gemma4-26b-a4b          completed  0/0/0         ok      -$12,712  $238,843     179   1,503  970 min  140       3,289 min  110     not requested
+bench-financial-pressure-ot-credit-s42001-qwen36-35b-a3b-preview  completed  9/0/0         ok      -$14,608  $242,621     178   1,504  959 min  127       4,286 min  107     not requested
+bench-financial-pressure-ot-credit-s42001-gemma4-26b-a4b-preview  completed  0/0/0         ok      -$12,712  $238,843     179   1,503  970 min  140       3,289 min  110     not requested
+bench-financial-pressure-ot-credit-s42002-noop                    completed  0/0/0         ok      -$5,923   $245,261     186   1,505  842 min  107       3,206 min  93      not requested
+bench-financial-pressure-ot-credit-s42002-qwen36-35b-a3b          completed  5/0/0         ok      -$7,942   $245,261     186   1,505  821 min  99        3,626 min  92      not requested
+bench-financial-pressure-ot-credit-s42002-gemma4-26b-a4b          completed  0/0/0         ok      -$5,923   $245,261     186   1,505  842 min  107       3,206 min  93      not requested
+bench-financial-pressure-ot-credit-s42002-qwen36-35b-a3b-preview  completed  15/0/0        ok      -$14,588  $245,261     186   1,505  803 min  101       5,009 min  94      not requested
+bench-financial-pressure-ot-credit-s42002-gemma4-26b-a4b-preview  completed  0/0/0         ok      -$5,923   $245,261     186   1,505  842 min  107       3,206 min  93      not requested
+bench-staffing-shortage-ot-credit-s42001-noop                     completed  0/0/0         ok      -$17,792  $225,618     390   1,515  775 min  96        4,133 min  110     not requested
+bench-staffing-shortage-ot-credit-s42001-qwen36-35b-a3b           completed  16/0/0        ok      -$29,299  $232,907     434   1,579  877 min  114       6,981 min  102     not requested
+bench-staffing-shortage-ot-credit-s42001-gemma4-26b-a4b           completed  1/0/0         ok      -$16,559  $227,788     390   1,515  774 min  95        4,133 min  110     not requested
+bench-staffing-shortage-ot-credit-s42001-qwen36-35b-a3b-preview   completed  7/0/0         ok      -$34,528  $229,576     383   1,528  123 min  45        4,667 min  112     not requested
+bench-staffing-shortage-ot-credit-s42001-gemma4-26b-a4b-preview   completed  1/0/0         ok      -$16,559  $227,788     390   1,515  774 min  95        4,133 min  110     not requested
+bench-staffing-shortage-ot-credit-s42002-noop                     completed  0/0/0         ok      -$11,093  $231,465     426   1,511  739 min  69        3,727 min  95      not requested
+bench-staffing-shortage-ot-credit-s42002-qwen36-35b-a3b           completed  13/0/0        ok      -$13,965  $235,876     410   1,525  720 min  60        5,571 min  96      not requested
+bench-staffing-shortage-ot-credit-s42002-gemma4-26b-a4b           completed  0/0/0         ok      -$11,093  $231,465     426   1,511  739 min  69        3,727 min  95      not requested
+bench-staffing-shortage-ot-credit-s42002-qwen36-35b-a3b-preview   completed  8/0/0         ok      -$28,395  $235,349     407   1,528  223 min  77        5,610 min  86      not requested
+bench-staffing-shortage-ot-credit-s42002-gemma4-26b-a4b-preview   completed  0/0/0         ok      -$11,093  $231,465     426   1,511  739 min  69        3,727 min  95      not requested
+
+2. Initial conditions (same scenario and seed)
+
+scenario                            seed   runs  start                state digest   identical
+bench-financial-pressure-ot-credit  42001  5     2026-10-13T06:00:00  aee64924fe63…  yes
+bench-financial-pressure-ot-credit  42002  5     2026-10-13T06:00:00  e0254dec4b1d…  yes
+bench-staffing-shortage-ot-credit   42001  5     2026-10-13T06:00:00  d73f75300d8e…  yes
+bench-staffing-shortage-ot-credit   42002  5     2026-10-13T06:00:00  9a6b7f962bed…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (4/4)                       qwen36-35b-a3b@3 (4/4)             gemma4-26b-a4b@3 (4/4)             qwen36-35b-a3b-preview@4 (4/4)     gemma4-26b-a4b-preview@4 (4/4)
+netRevenueCents         $225,618 / $231,465 / $245,261     $203,238 / $232,907 / $245,261     $227,788 / $231,465 / $245,261     $229,576 / $235,349 / $245,261     $227,788 / $231,465 / $245,261
+operatingExpenseCents   $242,559 / $243,410 / $251,555     $243,498 / $249,842 / $262,206     $242,559 / $244,347 / $251,555     $257,229 / $259,849 / $264,104     $242,559 / $244,347 / $251,555
+operatingProfitCents    -$17,792 / -$12,712 / -$5,923      -$40,261 / -$29,299 / -$7,942      -$16,559 / -$12,712 / -$5,923      -$34,528 / -$28,395 / -$14,588     -$16,559 / -$12,712 / -$5,923
+operatingCashFlowCents  -$24,742 / -$16,036 / -$8,888      -$25,607 / -$19,586 / -$15,461     -$24,742 / -$16,036 / -$8,888      -$30,522 / -$19,388 / -$13,091     -$24,742 / -$16,036 / -$8,888
+minCashCents            $41,452 / $42,866 / $50,542        $39,800 / $40,079 / $40,587        $41,452 / $42,866 / $50,542        $35,672 / $40,046 / $42,729        $41,452 / $42,866 / $50,542
+shortfallCents          $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0                       $0 / $0 / $0
+ordersReceived          1,676 / 1,683 / 1,932              1,676 / 1,683 / 1,932              1,676 / 1,683 / 1,932              1,676 / 1,683 / 1,932              1,676 / 1,683 / 1,932
+ordersLost              179 / 186 / 426                    186 / 390 / 434                    179 / 186 / 426                    178 / 186 / 407                    179 / 186 / 426
+examsCompleted          1,503 / 1,505 / 1,515              1,385 / 1,505 / 1,579              1,503 / 1,505 / 1,515              1,504 / 1,505 / 1,528              1,503 / 1,505 / 1,515
+reportsFinal            1,489 / 1,499 / 1,508              1,381 / 1,499 / 1,558              1,489 / 1,499 / 1,515              1,499 / 1,505 / 1,528              1,489 / 1,499 / 1,515
+tatP50Sec               45 min / 48 min / 101 min          42 min / 67 min / 77 min           45 min / 47 min / 101 min          28 min / 34 min / 88 min           45 min / 47 min / 101 min
+tatP90Sec               739 min / 775 min / 970 min        720 min / 821 min / 893 min        739 min / 774 min / 970 min        123 min / 223 min / 959 min        739 min / 774 min / 970 min
+tatOverTarget           69 / 96 / 140                      60 / 92 / 114                      69 / 95 / 140                      45 / 77 / 127                      69 / 95 / 140
+tatBreaches             69 / 96 / 140                      60 / 92 / 114                      69 / 95 / 140                      45 / 77 / 127                      69 / 95 / 140
+backlogEnd              7 / 9 / 15                         0 / 5 / 21                         0 / 9 / 15                         0 / 0 / 10                         0 / 9 / 15
+waitToExamP50Sec        19 min / 19 min / 20 min           18 min / 18 min / 21 min           19 min / 19 min / 20 min           19 min / 19 min / 20 min           19 min / 19 min / 20 min
+waitToExamP90Sec        64 min / 67 min / 72 min           61 min / 66 min / 70 min           64 min / 67 min / 72 min           59 min / 62 min / 73 min           64 min / 67 min / 72 min
+waitsOver30             452 / 472 / 505                    453 / 472 / 481                    452 / 472 / 505                    453 / 472 / 499                    452 / 472 / 505
+displacedAppointments   –                                  69 / 69 / 405                      –                                  –                                  –
+overtimeSec             3,206 min / 3,289 min / 4,133 min  3,333 min / 3,626 min / 6,981 min  3,206 min / 3,289 min / 4,133 min  4,286 min / 4,667 min / 5,610 min  3,206 min / 3,289 min / 4,133 min
+heldOver                37 / 42 / 47                       37 / 40 / 42                       37 / 42 / 47                       36 / 42 / 47                       37 / 42 / 47
+skippedBreaks           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+noCoverage              0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+alertsRaisedWarn        384 / 417 / 473                    398 / 416 / 469                    384 / 417 / 473                    382 / 417 / 474                    384 / 417 / 473
+alertsRaisedAlert       93 / 95 / 110                      92 / 96 / 109                      93 / 95 / 110                      86 / 94 / 112                      93 / 95 / 110
+alertsActiveAtEnd       0 / 1 / 1                          0 / 1 / 1                          0 / 0 / 1                          0 / 0 / 1                          0 / 0 / 1
+daysBelowZero           0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+actionsAttempted        0 / 0 / 0                          6 / 11 / 41                        0 / 0 / 1                          11 / 11 / 20                       0 / 0 / 1
+actionsAccepted         0 / 0 / 0                          6 / 11 / 41                        0 / 0 / 1                          11 / 11 / 20                       0 / 0 / 1
+actionsRejected         0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0                          0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario                            seed   policy                  decisions  outcome    Δprofit   Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime   Δalerts
+bench-financial-pressure-ot-credit  42001  qwen36-35b-a3b          different  different  -$27,548  -$35,605      +211   -118    -78 min   -48        +44 min     -1
+bench-financial-pressure-ot-credit  42002  qwen36-35b-a3b          different  different  -$2,019   $0            0      0       -22 min   -8         +420 min    -1
+bench-staffing-shortage-ot-credit   42001  qwen36-35b-a3b          different  different  -$11,507  +$7,289       +44    +64     +102 min  +18        +2,848 min  -8
+bench-staffing-shortage-ot-credit   42002  qwen36-35b-a3b          different  different  -$2,872   +$4,411       -16    +14     -19 min   -9         +1,844 min  +1
+bench-financial-pressure-ot-credit  42001  gemma4-26b-a4b          same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  42002  gemma4-26b-a4b          same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   42001  gemma4-26b-a4b          different  different  +$1,233   +$2,170       0      0       0 min     -1         0 min       0
+bench-staffing-shortage-ot-credit   42002  gemma4-26b-a4b          same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  42001  qwen36-35b-a3b-preview  different  different  -$1,896   +$3,778       -1     +1      -12 min   -13        +997 min    -3
+bench-financial-pressure-ot-credit  42002  qwen36-35b-a3b-preview  different  different  -$8,665   $0            0      0       -39 min   -6         +1,802 min  +1
+bench-staffing-shortage-ot-credit   42001  qwen36-35b-a3b-preview  different  different  -$16,736  +$3,958       -7     +13     -652 min  -51        +534 min    +2
+bench-staffing-shortage-ot-credit   42002  qwen36-35b-a3b-preview  different  different  -$17,302  +$3,884       -19    +17     -516 min  +8         +1,883 min  -9
+bench-financial-pressure-ot-credit  42001  gemma4-26b-a4b-preview  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-financial-pressure-ot-credit  42002  gemma4-26b-a4b-preview  same       identical  $0        $0            0      0       0 min     0          0 min       0
+bench-staffing-shortage-ot-credit   42001  gemma4-26b-a4b-preview  different  different  +$1,233   +$2,170       0      0       0 min     -1         0 min       0
+bench-staffing-shortage-ot-credit   42002  gemma4-26b-a4b-preview  same       identical  $0        $0            0      0       0 min     0          0 min       0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  qwen36-35b-a3b  gemma4-26b-a4b  qwen36-35b-a3b-preview  gemma4-26b-a4b-preview
+netRevenueCents         2 / 1 / 1       1 / 0 / 3       3 / 0 / 1               1 / 0 / 3
+operatingExpenseCents   3 / 1 / 0       1 / 0 / 3       4 / 0 / 0               1 / 0 / 3
+operatingProfitCents    0 / 4 / 0       1 / 0 / 3       0 / 4 / 0               1 / 0 / 3
+operatingCashFlowCents  0 / 4 / 0       0 / 0 / 4       0 / 4 / 0               0 / 0 / 4
+minCashCents            0 / 4 / 0       0 / 0 / 4       0 / 4 / 0               0 / 0 / 4
+shortfallCents          0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+ordersReceived          0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+ordersLost              2 / 1 / 1       0 / 0 / 4       0 / 3 / 1               0 / 0 / 4
+examsCompleted          2 / 1 / 1       0 / 0 / 4       3 / 0 / 1               0 / 0 / 4
+reportsFinal            2 / 1 / 1       1 / 0 / 3       3 / 0 / 1               1 / 0 / 3
+tatP50Sec               1 / 3 / 0       0 / 1 / 3       0 / 4 / 0               0 / 1 / 3
+tatP90Sec               1 / 3 / 0       0 / 1 / 3       0 / 4 / 0               0 / 1 / 3
+tatOverTarget           1 / 3 / 0       0 / 1 / 3       1 / 3 / 0               0 / 1 / 3
+tatBreaches             1 / 3 / 0       0 / 1 / 3       1 / 3 / 0               0 / 1 / 3
+backlogEnd              1 / 2 / 1       0 / 1 / 3       0 / 3 / 1               0 / 1 / 3
+waitToExamP50Sec        1 / 2 / 1       0 / 0 / 4       0 / 3 / 1               0 / 0 / 4
+waitToExamP90Sec        1 / 2 / 1       0 / 0 / 4       1 / 2 / 1               0 / 0 / 4
+waitsOver30             1 / 2 / 1       0 / 0 / 4       2 / 1 / 1               0 / 0 / 4
+displacedAppointments   0 / 0 / 0       0 / 0 / 0       0 / 0 / 0               0 / 0 / 0
+overtimeSec             4 / 0 / 0       0 / 0 / 4       4 / 0 / 0               0 / 0 / 4
+heldOver                0 / 2 / 2       0 / 0 / 4       0 / 2 / 2               0 / 0 / 4
+skippedBreaks           0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+noCoverage              0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+alertsRaisedWarn        1 / 3 / 0       0 / 1 / 3       1 / 2 / 1               0 / 1 / 3
+alertsRaisedAlert       1 / 3 / 0       0 / 0 / 4       2 / 2 / 0               0 / 0 / 4
+alertsActiveAtEnd       0 / 0 / 4       0 / 1 / 3       0 / 2 / 2               0 / 1 / 3
+daysBelowZero           0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+actionsAttempted        4 / 0 / 0       1 / 0 / 3       4 / 0 / 0               1 / 0 / 3
+actionsAccepted         4 / 0 / 0       1 / 0 / 3       4 / 0 / 0               1 / 0 / 3
+actionsRejected         0 / 0 / 4       0 / 0 / 4       0 / 0 / 4               0 / 0 / 4
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  20
+
+policy                  decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop                    120              0        0        0        0                0                0
+qwen36-35b-a3b          120              42       42       0        0                0                0
+gemma4-26b-a4b          120              1        1        0        0                0                0
+qwen36-35b-a3b-preview  120              39       39       0        0                0                0
+gemma4-26b-a4b-preview  120              1        1        0        0                0                0
+
+6. Replay verification
+
+20 of 20 saved sessions replayed with every digest verified; 20 of 20 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.

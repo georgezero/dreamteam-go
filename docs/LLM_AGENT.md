@@ -994,3 +994,16 @@ point.
   * the replay equals the live run;
   * tampered previews and version 3 recordings are refused.
 
+### 14.5 What V0.9c found about the setting
+
+* **The server's answers varied at identical inputs.** At temperature 0,
+  byte-identical requests did not always get the same answer:
+  * Qwen3.6-35B-A3B: 0 of 5;
+  * Gemma 4 26B-A4B: 85 of 91.
+
+  ([benchmark/v09c-dev/README.md §6](benchmark/v09c-dev/README.md)).
+* **What this means for recordings:** a live run is not repeatable, so
+  conditions compared run against run include that variability.
+* **What it does not affect:** the recordings and their replays, which are
+  exact.
+

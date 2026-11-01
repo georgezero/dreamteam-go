@@ -7,6 +7,70 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.9c — prospective preview evaluation (0.9.0-dev.3): results
+
+The evaluation declared at d4d2f2f (below), run and analysed
+(`docs/benchmark/v09c-dev/README.md`). The plan was not amended. The
+independent review is still PENDING, and V0.9 is unreleased.
+
+**Run:**
+* 20 of 20 runs on the Pi, in about 70 minutes: 16 live (8 pairs) and 4
+  no action.
+* All 555 model requests were answered: no infrastructure-affected point,
+  no failure, no rerun.
+
+**Found:**
+* **The preview step.** 9 previews were shown (Qwen 8, Gemma 1), in 9
+  eligible points out of 240, with no failures.
+  * The 5 that showed a refused action: 4 revised, 1 abandoned. In four of
+    the five, the model's next reason describes the refusal as a failed
+    attempt.
+  * The 4 that showed accepted, funded actions were kept. One of them,
+    Qwen's allocation raises ($44,383.55), was funded only with the credit
+    line.
+  * No preview showed an unfunded commitment, a termination or displaced
+    bookings.
+* **Model variability.** The server's answers differed at byte-identical
+  requests at temperature 0:
+  * Qwen: 0 of 5 the same;
+  * Gemma: 85 of 91 the same output, 91 of 91 the same proposal.
+
+  Every Qwen pair diverged at point 0 or 1, at or before its first
+  preview. One Qwen pair with no preview shown still differs by −$6,646.03
+  in operating profit, so the run-level pairs cannot isolate the preview.
+* **Gemma's four pairs** end identical in every run outcome.
+* **No run** had financial distress, drew credit, or had a batch refused
+  for funds.
+* **Financial evidence v1** runs unchanged on both conditions (425 records,
+  every validated batch linked), through two documented adapters: the v3
+  view of a v4 record, and the transcript without the agent's own digests
+  check after a preview (FINANCIAL_EVIDENCE.md §9).
+
+**New:**
+* `analysis/evidence/preview_evaluation.py`
+  (`dreamteam.preview-evaluation/v1`) and its tests;
+* the evaluation's recordings, usage files and contract report
+  (`docs/benchmark/v09c-dev/eval/`), with one replay configuration per
+  entry and the corpus;
+* the outputs: `preview-evaluation.json`, `preview-tables.md`,
+  `financial-evidence.json`, `financial-tables.md`;
+* a CI step that replays the evaluation and compares the outputs;
+* LLM_AGENT.md §14.5 and FINANCIAL_EVIDENCE.md §9.
+
+**Quality gates:**
+Pending: the horo (linux/amd64) gate run and this commit's CI run are in progress; the results follow in the next commit.
+
+**No change to:**
+* simulator behaviour, actions, scenarios, scoring or accounting;
+* llm-agent 1, 2 or 3, their prompts or settings;
+* any earlier recording, session, golden reference or benchmark result;
+* the frozen evidence: decision evidence v1, repeat v2, refusal-response
+  v1 and v2, parameter evidence v1, and V0.9b's financial evidence outputs.
+
+No historical live experiment was rerun.
+
+---
+
 ## V0.9c — prospective preview evaluation (0.9.0-dev.3): declaration
 
 Owner decision 2026-10-31: V0.9b is accepted and closed (8ffae8d, CI run

@@ -20,7 +20,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
-| **V0.9** (in development: V0.9a and V0.9b accepted; V0.9c, `0.9.0-dev.3`, authorized by the owner 2026-10-31, declared) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
+| **V0.9** (in development: V0.9a and V0.9b accepted; V0.9c, `0.9.0-dev.3`, authorized by the owner 2026-10-31, evaluated, awaiting owner review) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -885,7 +885,7 @@ mechanics and no large LLM benchmark first.
 |---|---|---|
 | V0.9a | Independent review workflow and decision/action parameter consistency | accepted and closed 2026-10-31 (a5e5f9b, 0.9.0-dev.1) |
 | V0.9b | Financial decision quality and operational exposure | accepted and closed 2026-10-31 (8ffae8d, 0.9.0-dev.2) |
-| V0.9c | Prospective preview evaluation: does showing the simulator's existing preview change management decisions? | authorized 2026-10-31; declared (0.9.0-dev.3), before any live run |
+| V0.9c | Prospective preview evaluation: does showing the simulator's existing preview change management decisions? | authorized 2026-10-31; declared at d4d2f2f before any live run; evaluated (0.9.0-dev.3), awaiting owner review |
 | V0.9.0 | Release | pending |
 
 **V0.9a as authorized** (owner, 2026-10-31, after accepting V0.8.0):
@@ -959,6 +959,14 @@ comparison of two conditions.
   with llm-agent 4 (`agents/llm/llm_agent4.py`, LLM_AGENT.md §14), the
   treatment record [TREATMENT.md](benchmark/v09c-dev/TREATMENT.md), seeds
   42001 and 42002.
+* **Evaluated:** [docs/benchmark/v09c-dev/](benchmark/v09c-dev/README.md).
+  * 20 of 20 runs; every live run replays exactly.
+  * Nine previews were shown. The five that showed a refused action were
+    revised or abandoned; the four that showed accepted, funded actions
+    were kept.
+  * No preview showed an unfunded commitment or displaced bookings.
+  * The model server's answers varied at byte-identical requests, so the
+    run-level pairs cannot separate the preview from that variability.
 
 The owner plans to release V0.9.0 after V0.9c whatever its result: a
 negative result would show that making financial consequences visible is

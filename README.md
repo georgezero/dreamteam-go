@@ -51,7 +51,12 @@ In development, not released (`0.9.0-dev.3`):
   llm-agent 4 (`agents/llm/llm_agent4.py`), which shows the model the
   simulator's existing preview of a staffing proposal before submitting
   it, against llm-agent 3 unchanged. Declared before any live run
-  (`PLAN.md`).
+  (`PLAN.md`), then run: 16 live runs on two models, two scenarios and two
+  seeds, all replayed exactly.
+  * The nine previews shown changed the proposal when they showed a
+    refused action, and left it when everything was accepted and funded.
+  * The run-level pairs are dominated by the model server's variability at
+    identical requests.
 
 It builds on V0.7 (`0.7.0`, financial realism: paid radiologist overtime
 and opt-in solvency with a credit line and a funding rule,

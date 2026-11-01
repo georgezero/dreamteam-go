@@ -1,0 +1,93 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v09c-replay-staffing-shortage-credit",
+ "description": "V0.9c recorded-decision replay, entry staffing-shortage-credit: every completed live LLM run's recorded decisions (docs/benchmark/v09c-dev/eval/), baseline (llm-agent 3) and preview-enabled (llm-agent 4), submitted again through the protocol by each agent's replay mode, without any model, beside no action, which runs again as it did live. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "suite": "../suite/dreamteam-dev-4.json",
+ "entries": [
+  "staffing-shortage-credit"
+ ],
+ "seeds": [
+  42001,
+  42002
+ ],
+ "seedPlan": "The seeds of docs/benchmark/v09c-dev/eval.json, so that the recorded decisions belong to the runs.",
+ "days": 30,
+ "policies": [
+  "noop",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b-preview",
+  "gemma4-26b-a4b-preview"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3",
+   "description": "llm-agent 3 in replay mode: qwen36-35b-a3b's recorded decisions from the V0.9c evaluation, entry staffing-shortage-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42001-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42002-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3",
+   "description": "llm-agent 3 in replay mode: gemma4-26b-a4b's recorded decisions from the V0.9c evaluation, entry staffing-shortage-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-s42001-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-s42002-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "qwen36-35b-a3b-preview",
+   "version": "4",
+   "description": "llm-agent 4 in replay mode: qwen36-35b-a3b-preview's recorded decisions from the V0.9c evaluation, entry staffing-shortage-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; every preview is asked again at the attempt the rule puts it and compared in full, and the review message is rebuilt; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent4.py",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "gemma4-26b-a4b-preview",
+   "version": "4",
+   "description": "llm-agent 4 in replay mode: gemma4-26b-a4b-preview's recorded decisions from the V0.9c evaluation, entry staffing-shortage-credit, one recording per seed; the memory, the prompt and every attempt's input are rebuilt and checked against their recorded SHA-256, and every validate answer is asked again and compared; every preview is asked again at the attempt the rule puts it and compared in full, and the review message is rebuilt; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent4.py",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42001-decisions.jsonl",
+    "--replay",
+    "./docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42002-decisions.jsonl"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

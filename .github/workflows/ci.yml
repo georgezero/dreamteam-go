@@ -265,6 +265,27 @@ jobs:
           $P analysis/evidence/check_parameter_frozen.py --out param
           $P analysis/evidence/financial_evidence.py --binary ./dt --corpus $V/corpus.json --replays . --out fin-ev --jobs 4
           for f in financial-evidence.json financial-tables.md case-studies.md REVERSIBILITY.md; do cmp fin-ev/$f $V/$f; cp fin-ev/$f out/$f; done
+      - name: Prospective preview evaluation
+        # V0.9c, without any model: every V0.9c run replayed (llm-agent 3's
+        # recordings, and llm-agent 4's with every preview asked again and
+        # its review message rebuilt, beside no action run again); then
+        # dreamteam.preview-evaluation/v1 on them, with financial evidence
+        # v1 unchanged on both conditions. Equal to the committed outputs
+        # (docs/benchmark/v09c-dev) and compared across platforms below.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v09c-dev
+          for f in $V/eval-replay-*.json; do
+            e=$(basename "$f" .json); e=${e#eval-replay-}
+            ./dt benchmark suite run "$f" -out "llm-v09c-replay-$e" > /dev/null
+            ./dt benchmark verify "llm-v09c-replay-$e" | tail -1
+            cp "llm-v09c-replay-$e/manifest.json" "out/llm-v09c-replay-$e-manifest.json"
+          done
+          $P analysis/evidence/preview_evaluation.py --binary ./dt --dir $V --replays . --out v09c --jobs 4
+          for f in preview-evaluation.json preview-tables.md financial-evidence.json financial-tables.md; do
+            cmp v09c/$f $V/$f; cp v09c/$f out/v09c-$f
+          done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
