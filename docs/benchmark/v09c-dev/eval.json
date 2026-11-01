@@ -1,0 +1,86 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v09c-eval",
+ "description": "V0.9c prospective preview evaluation (docs/benchmark/v09c-dev/PLAN.md): llm-agent 3 (the baseline, unchanged) and llm-agent 4 (the same agent with the simulator's existing preview shown before a staffing proposal is validated) with the two frozen models, beside no action, on suite dreamteam-dev version 4's financial-pressure-credit and staffing-shortage-credit, daily decisions at 07:00. No score, no ranking. Run from the repository root with DREAMTEAM_LLM_BASE_URL set. Two seeds, 30 days: 20 runs, 16 of them live LLM runs.",
+ "suite": "../suite/dreamteam-dev-4.json",
+ "entries": [
+  "financial-pressure-credit",
+  "staffing-shortage-credit"
+ ],
+ "seeds": [
+  42001,
+  42002
+ ],
+ "seedPlan": "Chosen 2026-10-31 and committed in the V0.9c plan (docs/benchmark/v09c-dev/PLAN.md) before any run on them: the next unused block after V0.8c's 41900-41902. Neither appears as a seed anywhere in the repository before this plan; not a reference seed (1001-1020), not a V0.2 development seed (901-910), not a clinical calibration seed, not drawn from any reserved stream, not a benchmark holdout seed (none exists); the sealed clinical holdout guard accepts them.",
+ "days": 30,
+ "policies": [
+  "noop",
+  "qwen36-35b-a3b",
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b-preview",
+  "gemma4-26b-a4b-preview"
+ ],
+ "external": [
+  {
+   "id": "qwen36-35b-a3b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py, unchanged since V0.8c: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, every attempt recorded as dreamteam.llm-decision-record/v3), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json: the baseline condition",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b",
+   "version": "3",
+   "description": "llm-agent 3 (agents/llm/llm_agent3.py, unchanged since V0.8c: llm-agent 2's prompt llm-agent-prompt/v2 and memory llm-agent-memory/v1, memory on, every attempt recorded as dreamteam.llm-decision-record/v3), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json: the baseline condition",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent3.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "qwen36-35b-a3b-preview",
+   "version": "4",
+   "description": "llm-agent 4 (agents/llm/llm_agent4.py: llm-agent 3 loaded unchanged, with the preview step llm-agent-preview/v1: the simulator's existing preview of a proposal's staffing actions is shown to the model before validation, and its reply is the decision; every attempt and preview recorded as dreamteam.llm-decision-record/v4), live, with Qwen3.6-35B-A3B-oQ4e-mtp and the same frozen V0.5c settings docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json: the preview-enabled condition",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent4.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json"
+   ],
+   "timeoutSeconds": 1800
+  },
+  {
+   "id": "gemma4-26b-a4b-preview",
+   "version": "4",
+   "description": "llm-agent 4 (agents/llm/llm_agent4.py: llm-agent 3 loaded unchanged, with the preview step llm-agent-preview/v1: the simulator's existing preview of a proposal's staffing actions is shown to the model before validation, and its reply is the decision; every attempt and preview recorded as dreamteam.llm-decision-record/v4), live, with gemma-4-26B-A4B-it-oQ4e-mtp and the same frozen V0.5c settings docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json: the preview-enabled condition",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./agents/llm/llm_agent4.py",
+    "--settings",
+    "./docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json"
+   ],
+   "timeoutSeconds": 1800
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

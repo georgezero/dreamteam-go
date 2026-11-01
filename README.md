@@ -30,7 +30,7 @@ clinical validation, and changes no simulator behaviour:
 Every earlier scenario, save, golden reference and benchmark result is
 unchanged.
 
-In development, not released (`0.9.0-dev.2`):
+In development, not released (`0.9.0-dev.3`):
 * **V0.9a** (`docs/benchmark/v09a-dev/`):
   * an offline workflow for the independent evidence review. The review
     is still **pending**;
@@ -47,6 +47,11 @@ In development, not released (`0.9.0-dev.2`):
   * which resources it changed directly.
 
   Every value comes from the engine's own preview at the decision point.
+* **V0.9c** (`docs/benchmark/v09c-dev/`): a prospective evaluation of
+  llm-agent 4 (`agents/llm/llm_agent4.py`), which shows the model the
+  simulator's existing preview of a staffing proposal before submitting
+  it, against llm-agent 3 unchanged. Declared before any live run
+  (`PLAN.md`).
 
 It builds on V0.7 (`0.7.0`, financial realism: paid radiologist overtime
 and opt-in solvency with a credit line and a funding rule,

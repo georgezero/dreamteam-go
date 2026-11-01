@@ -63,6 +63,12 @@ func (m *mockLLM) count(model string) int {
 //	            reply (a staffing and an operations batch)
 //	details     first asks for details, then decides as raise
 //	fixafter    badparams's decision first (refused), raise's on the retry
+//	pvkeep      raise's decision, and the same again after a preview
+//	pvrevise    raise's decision, then mixed's after a preview
+//	pvabandon   raise's decision, then no action after a preview
+//
+// (A preview is the preview-enabled agent's message that begins
+// "PREVIEW.": agents/llm/llm_agent4.py.)
 func (m *mockLLM) serve(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Model    string `json:"model"`
@@ -115,6 +121,16 @@ func (m *mockLLM) serve(w http.ResponseWriter, r *http.Request) {
 		content = `{"reason":"cut reading","actions":[{"type":"set_reading_allocation","op":"set","employee":"E07","effective":"2026-10-27","siteAllocationBP":100}]}`
 		if len(req.Messages) > 2 {
 			content = raiseDecision(prompt)
+		}
+	case "pvkeep", "pvrevise", "pvabandon":
+		content = raiseDecision(prompt)
+		if strings.HasPrefix(req.Messages[len(req.Messages)-1].Content, "PREVIEW.") {
+			switch req.Model {
+			case "pvrevise":
+				content = mixedDecision(prompt)
+			case "pvabandon":
+				content = `{"reason":"the preview shows the cost; no change","actions":[]}`
+			}
 		}
 	case "details":
 		content = `{"reason":"I need the allocation details","actions":[],"details":["set_reading_allocation","finance.cashHistory","worklist.recent"]}`

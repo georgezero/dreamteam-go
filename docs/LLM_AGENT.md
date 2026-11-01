@@ -23,7 +23,9 @@ models, on the V0.7 practices with paid overtime and a credit line
 in V0.7.0. V0.8c adds llm-agent 3 (`agents/llm/llm_agent3.py`, §13): the
 same decisions, with every attempt recorded. Released in V0.8.0, with
 llm-agent 1 and 2 unchanged; every earlier recording replays with
-`llm_agent.py`.
+`llm_agent.py`. V0.9c adds llm-agent 4 (`agents/llm/llm_agent4.py`, §14):
+llm-agent 3, loaded unchanged, that shows the model the simulator's
+existing preview of a staffing proposal before submitting it.
 
 ```
 dreamteam benchmark run CONFIG
@@ -859,3 +861,136 @@ checked).
 * **What an unparseable reply meant** beyond its first 4,000 characters.
 * **What was applied.** The harness's session and `decisions.json` hold
   that, and the analyses join them by decision point.
+
+## 14. llm-agent 4: the preview step (V0.9c)
+
+`agents/llm/llm_agent4.py` is llm-agent version 4, the preview-enabled
+condition of the V0.9c evaluation
+([benchmark/v09c-dev/PLAN.md](benchmark/v09c-dev/PLAN.md)). It **is
+llm-agent 3**, loaded from `llm_agent3.py` unchanged (the file is not
+copied), with one addition: the treatment `llm-agent-preview/v1`.
+Everything else is version 3's:
+* the system prompt, prompt (`llm-agent-prompt/v2`), memory
+  (`llm-agent-memory/v1`) and settings file format;
+* the retries, details turn, batching, validation and fallback.
+
+Version 3 stays the baseline, unchanged, and still replays its own
+recordings. Version 4 replays only version 4 records.
+
+### 14.1 The preview step
+
+At a decision point, the first parsed proposal that has a staffing action
+(`hire`, `terminate`, `set_roster`, `set_reading_allocation`,
+`contract_teleradiology`) is not validated at once:
+
+1. **Preview.** The agent sends the protocol's `preview` with the
+   proposal's staffing actions, exactly as the model wrote them. The
+   simulator answers as the game's staff screen does:
+   * each action's result;
+   * the changes: hires, terminations, roster and allocation changes,
+     teleradiology, slots, displaced bookings;
+   * the guaranteed and forecast money lines;
+   * the funding test.
+
+   Preview is read-only. The agent asks for the digests after it and
+   records whether they are unchanged.
+2. **Review.** The model is shown the answer as compact JSON, exactly as
+   returned, in the fixed message of
+   [PLAN.md §3](benchmark/v09c-dev/PLAN.md). The proposal and the message
+   are appended to the conversation; this is the `review` turn.
+3. **Decision.** The model's reply replaces the proposal:
+   * the same actions (in any order): `kept`;
+   * other actions: `revised`;
+   * `"actions": []`: `abandoned`.
+4. **Validation and submission,** exactly as version 3. If validate
+   refuses the reply, the retry carries version 3's feedback. The retry is
+   not previewed again.
+
+**At most once per decision point.** There is no second preview, even of a
+revised or retried proposal. The details turn is not offered after a
+preview. A proposal with only operations actions, which the simulator
+cannot preview, goes straight to validation.
+
+**When the preview cannot be shown:**
+* `failed`: the preview answered with a protocol error;
+* `too_large`: the review message would be longer than `maxPromptChars`
+  (200,000 characters by default; a termination's preview lists each
+  displaced booking).
+
+In both cases the answer or error is recorded, nothing is shown, and the
+proposal goes to validation unchanged, as version 3's would. The point
+counts as a preview failure.
+
+**What it adds:** one model request per preview shown, and the review
+message. It adds no goal, advice or heuristic. The system prompt and the
+first message at every decision point are version 3's.
+
+### 14.2 The record: `dreamteam.llm-decision-record/v4`
+
+Version 3's record (§13.1), with `agentVersion` `4`, `baseAgentVersion`
+`3`, `treatmentVersion` and `treatmentSha256`, and:
+
+**In each attempt,** `preview`: null, or
+
+| Field | Contents |
+|---|---|
+| `actions`, `indices` | the staffing actions previewed, and their positions in the reply |
+| `status` | `ok` (shown), `failed` or `too_large` |
+| `answer`, `answerSha256` | the simulator's answer as returned, and the SHA-256 of its compact JSON (the text shown) |
+| `error` | `{code, message}` of a protocol error |
+| `digestsUnchanged` | the session's digests after the preview equal the decision point's |
+| `message` | the review message's `sha256` and `chars` |
+
+A previewed attempt that was shown has no `validation`, no `error` and is
+not `used`. The next attempt's `turn` is `review` and its input is
+`{kind: "preview", sha256, chars}`.
+
+**At each decision point,** `preview`:
+
+| Field | Contents |
+|---|---|
+| `version` | `llm-agent-preview/v1` |
+| `status` | `not_applicable` (no parsed proposal had a staffing action), `ok`, `failed` or `too_large` |
+| `proposalAttempt`, `reviewAttempt` | the attempt previewed, and the one that answered the preview |
+| `response`, `responseAttempt` | the first parsed reply after the preview, against the proposal: `kept`, `revised`, `abandoned`, or `no_reply` when none parsed |
+| `staffing`, `operations` | that reply's staffing and operations actions against the proposal's: `kept`, `revised`, `dropped`, `added`, `none proposed` |
+| `final` | the decision submitted, against the proposal: `kept`, `revised`, `abandoned`, or `fallback` |
+
+**Completeness** adds `previewsRequested` and `previewsRecorded`.
+
+### 14.3 Replay
+
+`--replay FILE ...` replays version 4 records. Its checks are version 3's
+(§13.4), with these added:
+1. **Placement.** A preview is recorded exactly at the attempt the rule
+   puts it, and nowhere else.
+2. **The answer.** Each preview is asked again of the engine with the
+   recorded actions. Status, answer, SHA-256, error, digests and message
+   must all match.
+3. **The review message,** rebuilt from the recorded answer and checked
+   against its SHA-256.
+4. **The point's preview summary,** recomputed from the attempts.
+
+A shown preview must be answered, unless the decision budget stopped the
+point.
+
+### 14.4 Testing
+
+* `agents/llm/test_llm_agent4.py` covers:
+  * the request and its placement;
+  * the preserved answer;
+  * keep, revise and abandon;
+  * a refused reply and multiple attempts;
+  * malformed output;
+  * preview failure and an oversized preview;
+  * completeness and deterministic records;
+  * replay, and refusal of missing or changed preview evidence;
+  * compatibility with versions 2 and 3.
+* `internal/bench/llm_agent4_test.go` checks against the engine and the
+  mock model server:
+  * kept proposals give version 3's decisions and session byte for byte;
+  * every first request equals version 3's;
+  * the engine's previews are recorded;
+  * the replay equals the live run;
+  * tampered previews and version 3 recordings are refused.
+

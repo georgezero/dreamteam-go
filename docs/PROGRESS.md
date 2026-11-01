@@ -7,6 +7,56 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.9c — prospective preview evaluation (0.9.0-dev.3): declaration
+
+Owner decision 2026-10-31: V0.9b is accepted and closed (8ffae8d, CI run
+41251637831). V0.9c is authorized: a controlled, prospective comparison of
+llm-agent 3 (unchanged) and a preview-enabled agent version, on frozen
+models. No simulator mechanics, accounting or scoring changes, and no
+tuning against results.
+
+**Declared before any live run** (`docs/benchmark/v09c-dev/`):
+* **llm-agent 4** (`agents/llm/llm_agent4.py`, LLM_AGENT.md §14):
+  * llm-agent 3, loaded unchanged, with one step, `llm-agent-preview/v1`.
+    The first parsed proposal at a decision point that has a staffing
+    action is previewed with the protocol's existing `preview`.
+  * The model is shown the answer exactly as returned and replies with its
+    decision: kept, revised or abandoned. That decision is validated and
+    submitted as version 3's would be.
+  * A failed or oversized preview is recorded and not shown, and the
+    proposal goes to validation unchanged.
+  * The record is `dreamteam.llm-decision-record/v4`, and the replay asks
+    every preview again.
+* **The plan** (`PLAN.md`, `v09c-plan/1`):
+  * financial-pressure-credit and staffing-shortage-credit;
+  * seeds 42001 and 42002, 30 days;
+  * no action, both models, both conditions: 20 runs, 16 of them live;
+  * the 20 outcomes, analyses A–G, stop conditions and replay
+    requirements.
+* **The treatment isolation record** (`TREATMENT.md`): what is identical,
+  the only added text (SHA-256 `f8b7d787…`), and the unavoidable
+  differences (one more model request per preview shown, a longer
+  conversation at that point).
+* **The baseline** (`README.md` §1): hashes at 8ffae8d of the agents,
+  settings, frozen evidence, recordings, suites, golden references and
+  fixtures.
+
+**Tests:**
+* `agents/llm/test_llm_agent4.py` (20 tests): the 16 required cases.
+* `internal/bench/llm_agent4_test.go`, against the engine:
+  * kept proposals give version 3's decisions and session byte for byte,
+    so the preview alone changes nothing;
+  * every first request equals version 3's;
+  * replay equals live;
+  * tampering is refused.
+* The configuration ran for one day on seed 777 against a stub server (not
+  kept).
+
+**Version:** 0.9.0-dev.3, with no engine change. 0.9.0-dev.2 is registered
+for replay (`mini-seed52-v092`, batch mode `v0.9_dev2`).
+
+---
+
 ## V0.9b — financial decision quality and operational exposure (0.9.0-dev.2)
 
 Owner decision 2026-10-31:
