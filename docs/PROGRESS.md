@@ -58,7 +58,42 @@ independent review is still PENDING, and V0.9 is unreleased.
 * LLM_AGENT.md §14.5 and FINANCIAL_EVIDENCE.md §9.
 
 **Quality gates:**
-Pending: the horo (linux/amd64) gate run and this commit's CI run are in progress; the results follow in the next commit.
+
+Run on linux/amd64 (horo) unless noted:
+* **Focused tests:**
+  * agent tests (60, including the 20 llm-agent 4 tests);
+  * evidence tests (147, including the 8 preview evaluation tests);
+  * probe tests (3, against the built binary).
+  All pass.
+* **Go:**
+  * full default suite: all packages pass, including
+    `TestLLMAgent4Preview`, `TestLLMAgent4Replay` and the new
+    `mini-seed52-v092` fixture (0.9.0-dev.2, batch mode `v0.9_dev2`);
+  * race (`go test -race -timeout 90m ./...`): pass;
+  * vet (three tag sets) and gofmt: clean.
+* **Historical replay:** every fixture replays with every digest
+  verified; every recording in the corpus was replayed at 0.9.0-dev.3.
+* **Benchmark verify and reproduce:** 70 of 70, 0 failed, including the
+  two V0.9c entries (104 checks each).
+* **Earlier pipelines:** the V0.8c pipeline, run twice, is byte-identical
+  and equal to the committed files; `check_v08b.py` reproduces the V0.8b
+  review package and probe log, with build numbers set aside; the V0.9a
+  outputs are rebuilt identically and the review status is PENDING.
+* **Parameter evidence v1 freeze:** the frozen analyzer, corpus,
+  recordings and outputs are reproduced.
+* **Financial evidence (V0.9b):** run twice, 2,062 records from 78
+  recordings, byte-identical and equal to the committed files.
+* **Preview evaluation (V0.9c):** the 16 LLM runs replayed and the
+  analysis run twice: 8 pairs, 425 financial evidence records,
+  byte-identical and equal to the committed files.
+* **Earlier evidence, frozen files, baseline agents (llm-agent 1–3),
+  suites and golden references:** unchanged; no deletions.
+* **Five cross-builds:** linux/amd64, linux/arm64, darwin/arm64,
+  darwin/amd64, windows/amd64: all pass.
+* **CI** (run 41268808888, on be537f2): linux/amd64, linux/arm64 and
+  darwin/arm64, with the cross-platform comparison and the new
+  prospective preview evaluation step: all pass.
+* **Clinical suites:** not run, as specified.
 
 **No change to:**
 * simulator behaviour, actions, scenarios, scoring or accounting;
