@@ -321,7 +321,9 @@ jobs:
         # the committed recordings, each context's messages checked against
         # their recorded SHA-256 and each preview asked again of the engine
         # on the replays above; the request schedule rebuilt from the
-        # protocol. Equal to the committed files.
+        # protocol; the analysis of the committed live responses, every
+        # request rebuilt and every engine answer replayed. Equal to the
+        # committed files and compared across platforms below.
         shell: bash
         run: |
           set -euo pipefail
@@ -330,6 +332,8 @@ jobs:
           $P analysis/repeatability/decision_experiment.py schedule --protocol $V/protocol.json --out v10b
           cmp v10b/schedule.json $V/schedule.json
           cp v10b/schedule.json out/v10b-schedule.json
+          $P analysis/repeatability/decision_experiment.py analyze --binary ./dt --replays . --dir $V --out v10b
+          for f in decisions.json decision-tables.md inference.json; do cmp v10b/$f $V/$f; cp v10b/$f out/v10b-$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

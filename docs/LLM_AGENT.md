@@ -1039,4 +1039,33 @@ requests from V0.8c and V0.9c were sent again unchanged:
   ([benchmark/v10a-dev/DESIGN.md](benchmark/v10a-dev/DESIGN.md)) removes the
   variation before the intervention, not after it.
 
+## 16. The preview at a fixed decision point (V0.10b)
 
+V0.10b ([benchmark/v10b-dev/](benchmark/v10b-dev/README.md)) measured
+llm-agent 4's preview step in isolation, with no change to either agent.
+At 8 recorded staffing proposals (Gemma 4, Qwen 4) the model was sent its
+own recorded conversation and proposal again, then one of two messages:
+* llm-agent 4's review message with the engine's exact preview;
+* a neutral request for its final decision, whose final paragraph is the
+  review message's own.
+
+Each arm had 20 draws, one at a time.
+
+* **Where the preview showed a refusal** (5 points), the model changed
+  its decision after the preview in 99 of 100 draws. It abandoned the
+  proposal, or corrected a malformed action so that it was accepted at 2
+  points. Without the preview, it resubmitted the refused proposal in 77
+  of 100.
+* **Where the preview showed nothing refused** (3 points), the decisions
+  were the same at 2 points. At the third, the preview made Qwen keep its
+  credit-supported $44,687.30 commitment in 20 of 20 draws, against 11 of
+  20 without it.
+* **Repeatability at these points:** Gemma gave one decision per arm
+  every time. Qwen varied more without the preview than with it.
+* **Not compared:** llm-agent 3's own loop. It validates and retries with
+  the refusal message, which the neutral control does not have. At the
+  refused points the preview gives, before submission, information
+  validation would give after it.
+
+The financial evidence of each decision is in the report (§6). No change
+is called better because it changed.

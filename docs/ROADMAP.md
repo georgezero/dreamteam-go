@@ -21,7 +21,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
-| **V0.10** (in development: V0.10a accepted; V0.10b, `0.10.0-dev.2`, authorized by the owner 2026-11-01, declared) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
+| **V0.10** (in development: V0.10a accepted; V0.10b, `0.10.0-dev.2`, authorized by the owner 2026-11-01, done, awaiting owner review) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1018,7 +1018,7 @@ than more financial features.
 | Milestone | Proposed scope | Status |
 |---|---|---|
 | V0.10a | Inference repeatability and controlled-comparison design | accepted 2026-11-01 (de8ac79, CI 41326685680) |
-| V0.10b | Live shared-prefix decision experiments | authorized 2026-11-01; declared before any request (0.10.0-dev.2) |
+| V0.10b | Live shared-prefix decision experiments | authorized 2026-11-01; declared at ab1d8d1 before any request; done (0.10.0-dev.2), awaiting owner review |
 | V0.10c | Prospective controlled evaluation | proposed |
 | V0.10.0 | Release | pending |
 
@@ -1084,6 +1084,17 @@ prospectively declared decision-level experiment, not another 30- or
 * **Declared:** [docs/benchmark/v10b-dev/PLAN.md](benchmark/v10b-dev/PLAN.md)
   and [SPEC.md](benchmark/v10b-dev/SPEC.md) (`shared-prefix/v2`), before
   any request.
+* **Done:** [docs/benchmark/v10b-dev/](benchmark/v10b-dev/README.md). 320 of
+  320 requests.
+  * Where the preview showed a refusal, the treatment changed the
+    decision in 99 of 100 draws; the control resubmitted the refused
+    proposal in 77.
+  * Where it showed nothing refused, the arms were the same at 2 of 3
+    points.
+  * The control has no validation feedback, so the comparison is the
+    preview against no information.
+  * Recommended for V0.10c: a validation-feedback control and
+    prospective points with financial stakes.
 
 The other items above remain proposed. Each step needs the owner's GO.
 

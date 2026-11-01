@@ -46,7 +46,14 @@ In development, not released (`0.10.0-dev.2`): **V0.10b**
 At 8 recorded branch points the state and the initial staffing proposal
 are held fixed. The model is then shown either a neutral continuation or
 the engine's exact preview, 20 times each. It was declared before any
-request; results to follow.
+request.
+* Where the preview showed a refusal, the model changed its decision in
+  99 of 100 draws. Without the preview it resubmitted the refused
+  proposal in 77.
+* Where the preview showed nothing refused, the decisions were the same
+  at 2 of 3 points.
+* The control sees no validation feedback, so this is the preview against
+  no information, not against an agent's retry loop.
 
 Before it, **V0.10a** (`docs/benchmark/v10a-dev/`, accepted): inference
 repeatability and controlled comparison design. Its protocol was declared

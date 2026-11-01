@@ -617,6 +617,35 @@ suffix (no action) keeps the rest of the run deterministic. The
 comparison still needs repeated live draws of each arm, and its
 identification assumptions (DESIGN.md §4), before any effect is claimed.
 
+## 11b. A live shared-prefix decision experiment (V0.10b)
+
+`shared-prefix/v2` ([benchmark/v10b-dev/SPEC.md](benchmark/v10b-dev/SPEC.md))
+runs the comparison live, at the decision level. It does not run a
+policy for a whole benchmark run. At each declared branch point:
+* the recorded request and the recorded initial proposal are sent again;
+* then a neutral continuation (control) or the engine's exact preview
+  (treatment);
+* the model's one reply is the final decision.
+
+The engine's answers come from the recordings' replay transcripts, fed
+back to `dt agent --stdio` with every recorded answer checked. Each
+distinct decision is then validated, applied if valid, and followed by a
+fixed no-action suffix, with financial evidence v1 applied to it.
+
+The analysis needs only the recorded responses and the engine. CI
+regenerates it and compares it across platforms.
+
+V0.10b ([benchmark/v10b-dev/](benchmark/v10b-dev/README.md)) ran 8 points
+× 2 arms × 20 draws, one at a time:
+* where the preview showed a refusal, the treatment changed the decision
+  in 99 of 100 draws, and the control resubmitted the refused proposal in
+  77;
+* where the preview showed nothing refused, the arms were the same at 2
+  of 3 points.
+
+The control has no validation feedback. So this compares the preview
+with no information, not with an agent's validate-and-retry loop.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

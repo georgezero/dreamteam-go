@@ -7,6 +7,84 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10b — live shared-prefix decision experiment (0.10.0-dev.2): results
+
+The experiment declared at ab1d8d1 (below), run and analysed. Report:
+`docs/benchmark/v10b-dev/README.md`.
+
+**Live run:** 2026-11-01, 19:11–19:25 UTC.
+* 320 of 320 requests, all HTTP 200, one at a time; no stop.
+* 40 server checks, all the same configuration.
+* 7 invalid replies (6 control, 1 treatment), counted in every
+  denominator.
+
+**Decisions** (kept / revised / abandoned / invalid, of 20 per arm):
+
+| Point | Preview | Control | Treatment |
+|---|---|---|---|
+| ss-gemma-s42001-p14 | accepted | 20 / 0 / 0 / 0 | 20 / 0 / 0 / 0 |
+| fl-gemma-s41901-p27 | refused | 20 / 0 / 0 / 0 | 0 / 0 / 20 / 0 |
+| fl-gemma-s41901-p28 | refused | 20 / 0 / 0 / 0 | 0 / 20 / 0 / 0 |
+| fl-gemma-s41901-p26 | refused | 20 / 0 / 0 / 0 | 0 / 20 / 0 / 0 |
+| ss-qwen-s42002-p6 | accepted | 11 / 8 / 0 / 1 | 20 / 0 / 0 / 0 |
+| ss-qwen-s42001-p1 | accepted | 20 / 0 / 0 / 0 | 20 / 0 / 0 / 0 |
+| ss-qwen-s42002-p26 | refused | 1 / 7 / 7 / 5 | 0 / 0 / 20 / 0 |
+| ss-qwen-s42002-p1 | refused | 16 / 4 / 0 / 0 | 0 / 19 / 0 / 1 |
+
+* **Refused-preview points:** the treatment changed the decision in 99 of
+  100 draws, and the control resubmitted the refused proposal in 77.
+  Two revisions corrected a malformed contract, which was then accepted.
+* **Accepted-preview points:** the same at 2 of 3. At ss-qwen-s42002-p6
+  the treatment kept a credit-supported $44,687.30 commitment 20/20,
+  against 11/20 under control.
+* **Credit-supported commitments submitted:** control 11, treatment 40.
+* **Repeatability:**
+  * Gemma: one decision per arm at every point.
+  * Qwen: 5–17 distinct texts per control arm, 2–4 per treatment arm.
+  * At the V0.9c points the treatment reproduced V0.9c's recorded
+    decision in 99 of 100 draws.
+* **Interpretation:** the control has no validation feedback, and the
+  treatment message is longer. This is a local comparison of the preview
+  against no information, at these 8 points, with intervals that are
+  descriptive.
+
+**Continuation:** 26 distinct decisions were run with the no-action
+suffix. The 8 applied ones agreed with their validation, 8 of 8.
+
+**Reproducibility:** the analysis contacts no model and rebuilds every
+request. It is byte-identical on the Pi, horo and CI.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Focused tests: `analysis/repeatability` (25 new) | Pi, horo and CI | 57 tests, OK |
+| Python tests: `agents/llm`, `analysis/evidence` | CI | run by CI on this commit (unchanged code) |
+| Go suite (`go test ./...`), golden references | CI, three platforms | run by CI on this commit; the new `v0101` session tests also run on the Pi |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64 | exit 0; 10 packages ok, no failure |
+| `go vet ./...` (default, calibration, acceptance tags), `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64) | horo | all ok |
+| Historical replays (V0.8c, V0.9c) | horo and CI | 104 checks, 0 failed, each of 4 replays |
+| Benchmark verify and reproduce | CI | run by CI on this commit |
+| Branch points checked again (selection, previews, requests) | Pi, horo and CI | 8 contexts verified |
+| Analysis regenerated and compared | Pi, horo (twice) and CI | byte-identical |
+| Cross-platform CI (linux/amd64, linux/arm64, darwin/arm64) | CI | run by CI on this commit; declaration commit ab1d8d1 green (run 41340455061) |
+
+Not run: no clinical suite, no historical live evaluation rerun, and no
+local repeat of the gates CI runs (Go suite, golden references, verify
+and reproduce).
+
+**No change to:** the simulator, the agents, prompts, settings, scoring,
+the frozen evidence rules or any earlier recording. No historical live
+evaluation was rerun, and no clinical suite was run.
+
+**Recommended V0.10c:**
+* a control with the agents' validation feedback;
+* a length-matched or length-reported control;
+* prospective branch points with financial stakes;
+* draws fixed from V0.10b's variation.
+
+---
+
 ## V0.10b — live shared-prefix decision experiment (0.10.0-dev.2): declaration
 
 V0.10a was accepted (de8ac79, CI 41326685680) and V0.10b authorized by the
