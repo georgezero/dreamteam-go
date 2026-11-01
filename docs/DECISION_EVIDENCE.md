@@ -20,9 +20,9 @@ not independently validated: the independent review is PENDING.
   version 2 (§13), repeat rule version 2 (§14), and the frozen rules on
   llm-agent 3's records (§15);
 * the versions in V0.8.0, and how to read their findings (§16);
-* V0.9a (in development): the independent review workflow and a separate
+* V0.9a (released in V0.9.0): the independent review workflow and a separate
   contract, `dreamteam.parameter-evidence/v1` (§17);
-* V0.9b (in development): the freeze of parameter evidence v1, and a
+* V0.9b (released in V0.9.0): the freeze of parameter evidence v1, and a
   separate contract, `dreamteam.financial-evidence/v1` (§18).
 
 ## 1. Purpose
@@ -758,7 +758,7 @@ Every other byte must match. The exception covers those two frozen
 artifacts only and is not a general relaxation: every other committed
 output is compared byte for byte, and frozen v1 is checked as in §11.
 
-## 17. V0.9a: the review workflow and parameter evidence (in development)
+## 17. V0.9a: the review workflow and parameter evidence (released in V0.9.0)
 
 Nothing in §1–§16 changes. Two additions sit beside them:
 
@@ -792,7 +792,7 @@ Nothing in §1–§16 changes. Two additions sit beside them:
   On V0.5c–V0.8c it made 816 eligible checks: 762 consistent, 0
   supported, 54 unresolved.
 
-## 18. V0.9b: financial decision evidence (in development)
+## 18. V0.9b: financial decision evidence (released in V0.9.0)
 
 Nothing in §1–§17 changes.
 

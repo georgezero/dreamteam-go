@@ -554,3 +554,8 @@ The V0.9b file was made from 8ffae8d (0.9.0-dev.2) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v092.actions.json`
 (the same batches as the 5C.4l file's). 0.9.0-dev.3 replays it in batch
 mode `v0.9_dev2` with every digest verified (`internal/session/v092_test.go`).
+
+The V0.9c file was made from a38d031 (0.9.0-dev.3) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v093.actions.json`
+(the same batches as the 5C.4l file's). 0.9.0 replays it in batch mode
+`v0.9_dev3` with every digest verified (`internal/session/v093_test.go`).

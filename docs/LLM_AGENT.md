@@ -25,7 +25,9 @@ same decisions, with every attempt recorded. Released in V0.8.0, with
 llm-agent 1 and 2 unchanged; every earlier recording replays with
 `llm_agent.py`. V0.9c adds llm-agent 4 (`agents/llm/llm_agent4.py`, §14):
 llm-agent 3, loaded unchanged, that shows the model the simulator's
-existing preview of a staffing proposal before submitting it.
+existing preview of a staffing proposal before submitting it. Released
+in V0.9.0, with llm-agent 1, 2 and 3 unchanged. Its prospective evaluation
+established no financial benefit of the preview (§14.5).
 
 ```
 dreamteam benchmark run CONFIG

@@ -7,6 +7,77 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.9.0 — release: financial decision evidence and preview-based decision support
+
+Owner decision 2026-11-01:
+* V0.9c accepted and closed (d4d2f2f, be537f2, a38d031; CI run
+  41274622273 green);
+* GO for the V0.9.0 release, release-only;
+* no V0.9d; no simulator, agent, prompt, model, scoring, scenario or
+  evaluation change, and no evaluation rerun;
+* V0.10 proposed (ROADMAP §7d), not approved.
+
+The owner's finding: V0.9c measured the preview interactions but could
+not identify their downstream financial effect. **No financial benefit of
+preview access was established.**
+
+**Baseline** (`docs/audits/v0.9.0-release-baseline.md`): clean `main` at
+a38d031; the tags `v0.5.0` to `v0.8.0` unchanged, locally and on the
+remote; hashes of the historical recordings (114), the frozen evidence
+contracts, the review package and page, the suites, the golden
+references, the agents (llm-agent 1–4), the V0.9c plan and results, and
+all development evidence. On the release tree only the session fixtures
+changed: two added.
+
+**Changed:**
+* Version 0.9.0. 0.9.0-dev.3 is registered for replay
+  (`mini-seed52-v093`, made from a clean a38d031 worktree; batch mode
+  `v0.9_dev3`; `internal/session/v093_test.go`). Every earlier batch mode
+  is kept.
+* Release notes: V0.9.0, with the thirteen capabilities, the V0.9a, V0.9b
+  and V0.9c findings with their denominators, the staffing-shortage case
+  study (direct consequences apart from run outcomes), nondeterminism and
+  the four properties (simulator replay, recorded-inference replay, live
+  inference, causal identification), the pending review and the known
+  limitations.
+* README (V0.9 current; limitations), ROADMAP (V0.9 released; §7d, V0.10
+  proposed), DECISION_EVIDENCE, PARAMETER_EVIDENCE, FINANCIAL_EVIDENCE and
+  LLM_AGENT (status).
+* The development evidence (`docs/benchmark/v09a-dev/`, `v09b-dev/`,
+  `v09c-dev/`) is unchanged.
+
+No change to mechanics, randomness, scenarios, actions, accounting,
+evaluation, scoring, the harness, the protocols, the policies, the LLM
+agents, their prompts or settings, or any evidence rule. No evaluation
+was rerun, and no model was contacted.
+
+**Release gates** (linux/amd64 unless noted):
+* Clean release tree (only release changes; baseline unchanged but for
+  the two added fixtures).
+* Full default Go suite on the release tree (horo): all packages pass,
+  including `v093_test.go`, the golden references and the committed seed
+  guards (`TestCommittedConfigs`, `TestCommittedSuiteRuns`, the holdout
+  guards).
+* The V0.9 fixture tests (`TestV091*`, `TestV092*`, `TestV093*`) on
+  linux/arm64 (the Pi): pass.
+* Five cross-builds: linux/amd64, linux/arm64, darwin/arm64,
+  darwin/amd64, windows/amd64.
+* CI on the release commit (linux/amd64, linux/arm64, darwin/arm64, and
+  the cross-platform comparison): vet (three tag sets), gofmt, the full
+  suite, golden references, the Python agent, evidence and probe tests,
+  benchmark verify and reproduce, every recorded-LLM replay (llm-agent 3
+  and 4 included), the frozen evidence checks, and every V0.8 and V0.9
+  pipeline regenerated and compared with the committed outputs.
+* **Not rerun for the release,** by the owner's decision: the race
+  detector and the separate linux/amd64 rerun of the replays and
+  pipelines. Both passed on a38d031 (V0.9c), and the release changes no
+  concurrent code: the version constant, one batch-mode constant and one
+  map entry.
+
+No live LLM evaluation and no clinical suite was rerun.
+
+---
+
 ## V0.9c — prospective preview evaluation (0.9.0-dev.3): results
 
 The evaluation declared at d4d2f2f (below), run and analysed

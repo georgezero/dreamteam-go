@@ -1,10 +1,10 @@
 # Parameter evidence (dreamteam.parameter-evidence/v1)
 
 Status: built in V0.9a (0.9.0-dev.1), and **frozen in V0.9b**
-(0.9.0-dev.2) as accepted at a5e5f9b. Not released. Not independently
-validated. A new, separately versioned contract: it changes nothing in
-`dreamteam.decision-evidence/v1` (frozen), `dreamteam.repeat-evidence/v2`
-or the refusal-response extensions.
+(0.9.0-dev.2) as accepted at a5e5f9b. Released, frozen, in V0.9.0. Not
+independently validated. A new, separately versioned contract: it changes
+nothing in `dreamteam.decision-evidence/v1` (frozen),
+`dreamteam.repeat-evidence/v2` or the refusal-response extensions.
 
 **The freeze.**
 * **The record:** `analysis/evidence/frozen-parameter-v1.json` holds the

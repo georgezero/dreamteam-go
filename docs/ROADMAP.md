@@ -20,7 +20,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.6** (released, `v0.6.0`: the agent benchmark, V0.6a–V0.6c, by the owner's release decision 2026-10-29) | A reproducible benchmark for practice-management agents: a five-scenario suite with versioned fingerprints, one-command suite runs, a six-dimensional contract report paired against no action, deterministic baselines, external LLM agents, recorded-decision replay ([BENCHMARK_SUITE.md](BENCHMARK_SUITE.md), §7) | V0.5 agents |
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
-| **V0.9** (in development: V0.9a and V0.9b accepted; V0.9c, `0.9.0-dev.3`, authorized by the owner 2026-10-31, evaluated, awaiting owner review) | Agent decision reliability: independent evidence validation, financial decision quality, prospective evaluation with frozen models (§7c) | V0.8 |
+| **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
+| **V0.10** (proposed, not approved) | Experimental validity: inference repeatability, decision-level interventions, stronger controls for evaluating decision support (§7d) | V0.9 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -873,7 +874,7 @@ The owner's proposal that preceded it:
 
 V0.8a, V0.8b and V0.8c were authorized and released in V0.8.0.
 
-## 7c. V0.9 — agent decision reliability (in development)
+## 7c. V0.9 — agent decision reliability (released)
 
 The owner's recommendation after V0.8c: shift from building evidence
 infrastructure to using it to improve the reliability of management
@@ -885,8 +886,8 @@ mechanics and no large LLM benchmark first.
 |---|---|---|
 | V0.9a | Independent review workflow and decision/action parameter consistency | accepted and closed 2026-10-31 (a5e5f9b, 0.9.0-dev.1) |
 | V0.9b | Financial decision quality and operational exposure | accepted and closed 2026-10-31 (8ffae8d, 0.9.0-dev.2) |
-| V0.9c | Prospective preview evaluation: does showing the simulator's existing preview change management decisions? | authorized 2026-10-31; declared at d4d2f2f before any live run; evaluated (0.9.0-dev.3), awaiting owner review |
-| V0.9.0 | Release | pending |
+| V0.9c | Prospective preview evaluation: does showing the simulator's existing preview change management decisions? | accepted and closed 2026-11-01 (declared d4d2f2f, results be537f2, gates a38d031, CI run 41274622273; 0.9.0-dev.3) |
+| V0.9.0 | Release | released 2026-11-01, tag `v0.9.0` |
 
 **V0.9a as authorized** (owner, 2026-10-31, after accepting V0.8.0):
 * **Independent review:** a separate human task. The implementation may
@@ -972,6 +973,24 @@ The owner plans to release V0.9.0 after V0.9c whatever its result: a
 negative result would show that making financial consequences visible is
 not, by itself, enough to improve management decisions.
 
+**V0.9c accepted; V0.9.0 released** (owner, 2026-11-01). Every release
+criterion was met; the independent review is pending and disclosed. The
+owner's assessment:
+* V0.9c measured the preview interactions, but it could not identify their
+  downstream financial effect. **No financial benefit of preview access
+  was established.**
+* In the nine interactions, the agents kept proposals the preview showed
+  as accepted (4) and revised (4) or abandoned (1) those it showed as
+  refused. These are observed interactions, not estimates.
+* The larger finding is model nondeterminism: Qwen matched identical
+  requests at 0 of 5 compared points, every Qwen pair diverged before any
+  preview, and one pair without a preview differed in profit by
+  $6,646.03. This is a design limitation of the experiment, not a failure
+  of recording or replay.
+
+No V0.9d. No simulator, agent, prompt, model or evaluation change before
+the release.
+
 Directions recorded:
 * **independent evidence review:** label the frozen 98-item package by an
   independent reviewer, then report agreement, precision and recall
@@ -985,8 +1004,36 @@ Directions recorded:
 * **agent decision-quality benchmarking,** without a leaderboard.
 
 Each rule change is a new, separately versioned rule, and earlier
-findings stay under their original versions. V0.9a and V0.9b are
-accepted, and V0.9c is authorized. Later steps each need the owner's GO.
+findings stay under their original versions. V0.9a, V0.9b and V0.9c are
+accepted and V0.9.0 is released. Later steps each need the owner's GO.
+
+## 7d. V0.10 — experimental validity (proposed, not approved)
+
+The owner's recommendation after V0.9c. DreamTeam can replay an
+experiment exactly; the next question is whether an experiment can
+distinguish the effect of a decision-support intervention from ordinary
+variation in model outputs. V0.10 is about experimental validity rather
+than more financial features.
+
+| Milestone | Proposed scope | Status |
+|---|---|---|
+| V0.10a | Inference repeatability and controlled comparison methodology | proposed |
+| V0.10b | Decision-level interventions and counterfactual analysis | proposed |
+| V0.10c | Expanded preview evaluation with stronger experimental controls | proposed |
+| V0.10.0 | Release | proposed |
+
+Proposed work:
+* **independent evidence review:** label the frozen 98-item package by an
+  independent reviewer;
+* **controlled inference repeatability experiments:** how often identical
+  requests give identical outputs, and under what server settings;
+* **decision-level intervention evaluation:** comparisons that differ in
+  one decision, from a shared recorded prefix;
+* **improved preview coverage:** beyond staffing actions;
+* **financial consequence communication:** how the preview's facts are
+  presented to an agent.
+
+None of this is approved or implemented. Each step needs the owner's GO.
 
 ## 8. Testing strategy (all versions)
 

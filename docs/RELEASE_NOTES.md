@@ -5,6 +5,252 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.9.0 — financial decision evidence and preview-based decision support
+
+V0.9 adds **evidence and evaluation capabilities** for the financial
+consequences of agent decisions. It does not add clinical validation, a
+predictive financial model, or a new simulator mechanic, and it ranks no
+model. It shows what each recorded decision committed the practice to,
+how far it could be undone and which resources it changed. Every value
+comes from the engine's own answers at the decision point. It also
+evaluates, prospectively, an agent version that sees the engine's preview
+of its staffing proposal before submitting it.
+
+**The prospective evaluation did not establish a financial benefit of
+preview access.** It measured how the agents responded to the preview,
+but it could not identify any downstream financial or operational effect
+(see *Nondeterminism*).
+
+There is no new mechanic, scenario behaviour, action, accounting or
+scoring rule. Every earlier scenario, save, golden reference, recording
+and benchmark result is unchanged.
+
+**Parameter evidence and the review workflow (V0.9a, V0.9b):**
+1. **Parameter evidence v1, frozen.** `dreamteam.parameter-evidence/v1`
+   (`analysis/evidence/parameter_evidence.py`, `docs/PARAMETER_EVIDENCE.md`)
+   checks whether an amount, target, date, duration or direction stated
+   in a reason agrees with the submitted action. It was frozen in V0.9b
+   (`analysis/evidence/frozen-parameter-v1.json`,
+   `check_parameter_frozen.py`, run in CI).
+2. **Offline independent review UI.** A single self-contained page
+   (`docs/benchmark/v09a-dev/review/review.html`, built by
+   `analysis/evidence/review_tool.py`) for labelling the frozen 98-item
+   package without a server or a model, with its instructions and a recall
+   protocol.
+3. **Review import and metrics.** `review_metrics.py` imports a completed
+   form, checks it against the frozen package and computes agreement and
+   precision only from independent labels. Until labels exist it reports
+   the status, PENDING, and no metric.
+
+**Financial decision evidence (V0.9b):**
+4. **Financial evidence v1.** `dreamteam.financial-evidence/v1`
+   (`analysis/evidence/financial_evidence.py`, `docs/FINANCIAL_EVIDENCE.md`)
+   gives, for every recorded management decision and separately, with no
+   score: affordability, reversibility and direct operational exposure.
+   Each value is the engine's own answer to the existing read-only
+   requests (`preview`, `observe`, `validate`), asked again on a replay of
+   the recording at that decision point.
+5. **Affordability analysis.** The exact commitment, the headroom with and
+   without credit, and whether the funding rule funded it from cash, only
+   with credit, or not at all.
+6. **Reversibility analysis.** What the simulator's rules let be undone,
+   at what retained cost and until when (`REVERSIBILITY.md`): a pending
+   allocation or roster change is withdrawable until its notice date; a
+   hire is reversible only with its retained obligation (the recruiting
+   fee, the guarantee and severance); a termination is not reversible.
+7. **Operational exposure analysis.** The resources a decision changed
+   directly: hires, terminations, roster and allocation changes,
+   teleradiology, slots opened and closed, displaced bookings. Run-level
+   outcomes are paired with no action and reported apart from them.
+
+**Preview-based decision support (V0.9c):**
+8. **Engine-backed decision preview.** The protocol's existing `preview`,
+   the game's staff-screen preview, unchanged, used as decision support:
+   each action's result, the money lines with their timing and basis, and
+   the funding test. It covers **staffing actions only**; operations
+   actions have no preview.
+9. **llm-agent 4** (`agents/llm/llm_agent4.py`, `docs/LLM_AGENT.md` §14).
+   llm-agent 3 loaded unchanged, with one step, `llm-agent-preview/v1`:
+   the first parsed proposal at a decision point that has a staffing
+   action is previewed, the preview is shown to the model exactly as
+   returned, and the model's reply (kept, revised or abandoned) is
+   validated and submitted as version 3's would be. Without a staffing
+   proposal it is version 3. llm-agent 1, 2 and 3 are unchanged.
+10. **Complete preview recording v4.** `dreamteam.llm-decision-record/v4`
+    adds to v3 each preview request, its exact answer by SHA-256, the
+    review message, the digests after it (unchanged at every preview) and
+    a per-point summary of the model's response.
+11. **Prospective preview evaluation.** The plan, the treatment isolation
+    record and the configuration (`docs/benchmark/v09c-dev/PLAN.md`,
+    `TREATMENT.md`, `eval.json`) were committed (d4d2f2f) before any live
+    run, and not amended.
+12. **Model-free exact replay.** Every LLM run, V0.5 to V0.9, replays from
+    its recording without a model, byte for byte. An llm-agent 4 replay
+    also asks every preview again and requires the recorded answer and
+    the review message exactly.
+13. **Cross-platform reproducibility.** CI replays every V0.9 recording and
+    regenerates every V0.9 output on linux/amd64, linux/arm64 and
+    darwin/arm64, requires each to equal the committed one, and compares
+    the platforms byte for byte.
+
+**Development findings.** These are development observations, not
+estimates, not a ranking and not claims about either model in general.
+
+*Parameter evidence (V0.9a, `docs/benchmark/v09a-dev/`):* 96 recordings
+(V0.5c to V0.8c), 4,191 decision points.
+
+| Eligible checks | Consistent | Supported mismatch | Unresolved | Insufficient evidence |
+|---|---|---|---|---|
+| 816 | 762 | 0 | 54 | 0 |
+
+* **Zero observed mismatches does not establish zero true errors.**
+* The rules were calibrated on this same corpus, in-sample. False
+  positives found during development were removed by narrowing the rules,
+  so they read few statements and favour precision.
+* **Recall was not measured.** A statement the rules do not read is not
+  checked.
+* **The independent review is PENDING.** No rule is independently
+  validated.
+
+*Financial evidence (V0.9b, `docs/benchmark/v09b-dev/`):* 78 recordings,
+3,540 decision points, 2,062 financial evidence records. All 78 replayed
+with every engine answer identical to its recording. Affordability is the
+engine's own funding test; reversibility follows the simulator's rules;
+exposure counts only what a decision changed directly. Run-level outcomes
+are paired with no action and reported separately.
+
+**Case study: V0.7c stage B, staffing shortage, Qwen, 90 days, seed 41701**
+(`docs/benchmark/v09b-dev/case-studies.md`).
+
+*Direct decision consequences,* as the engine stated them at each
+decision:
+* an MR technologist hire with a commitment of $13,150.00, when the
+  headroom without credit was −$781.54: funded only by the credit line;
+* seven terminations in six batches, from 11-27 to 12-07, displacing 991
+  booked appointments in all, with $27,195.00 severance recognized at
+  once, none reversible. The headroom without credit was negative at each.
+
+*Subsequent run outcomes,* paired with no action: profit −$181,588.63,
+orders lost +1,450, exams completed −867. These describe two whole runs.
+**They are not attributed to the terminations or to any one action:** that
+would need runs that differ only in those decisions, which were not
+performed.
+
+*Prospective preview evaluation (V0.9c, `docs/benchmark/v09c-dev/`):*
+financial pressure and staffing shortage (both with credit), development
+seeds 42001 and 42002, 30 days; Qwen3.6-35B-A3B and Gemma 4 26B-A4B, each
+with llm-agent 3 (baseline) and llm-agent 4 (preview).
+* 20 of 20 runs completed: 16 live LLM runs and 4 no-action comparisons,
+  with no infrastructure failure, budget stop or rerun.
+* 555 model requests, all answered; 93 replies unusable.
+* **Preview was triggered only by staffing proposals.** Operations-only
+  proposals received no preview. Of 240 decision points in the preview
+  runs, 9 had a staffing proposal (Qwen 8, Gemma 1), and the preview was
+  shown at all 9.
+
+| Nine preview interactions | Count |
+|---|---|
+| Preview showed a refused action → proposal revised | 4 |
+| Preview showed a refused action → proposal abandoned | 1 |
+| Preview showed every action accepted → proposal kept | 4 |
+
+* In these nine interactions the agents kept the proposals the preview
+  showed as accepted, and changed or abandoned those it showed as
+  refused. These are observed interactions, not an estimate of how agents
+  behave in other scenarios.
+* **No preview showed a termination or displaced bookings.** No preview
+  showed an unfunded commitment. One showed a commitment funded with
+  credit (allocation raises of $44,383.55, headroom $87,205.37, $37,205.37
+  without credit); it was kept.
+* No run had financial distress, drew credit, or had a batch refused for
+  funds.
+
+**Nondeterminism.** Live model outputs were not reliably deterministic at
+temperature zero.
+* At decision points where both conditions sent the identical request,
+  Qwen gave the same output at **0 of 5**. Gemma gave the same output at
+  85 of 91, and the same proposal at 91 of 91.
+* **Every Qwen pair diverged before any preview interaction,** at decision
+  point 0 or 1.
+* **One Qwen pair received no preview and still differed in financial
+  outcomes:** profit −$6,646.03 (financial pressure, seed 42002).
+* Gemma's four pairs had identical operational and financial outcomes.
+* **The paired profit and service differences are therefore not
+  attributed to preview access.** Qwen's four pairs differ in profit by
+  +$25,652.39, −$6,646.03, −$5,228.73 and −$14,429.19; these are ordinary
+  variation in model output as far as this evaluation can tell.
+
+Four different properties, not to be confused:
+
+| Property | Status in V0.9 |
+|---|---|
+| A. Deterministic simulator replay | **Yes.** The same scenario, seed and actions give the same practice, byte for byte, on every platform. |
+| B. Reproducible recorded inference | **Yes.** Every recorded LLM run replays from its recording without a model, byte for byte, every attempt and preview checked. |
+| C. Deterministic live inference | **No.** The same request to the same model at temperature zero gave different outputs. A repeat of a live evaluation would not reproduce its decisions. |
+| D. Causal identification | **No.** The paired runs differ in more than the preview, so no effect of the preview on outcomes is identified. |
+
+**Independent review: PENDING.** The frozen 98-item package has not been
+labelled by an independent reviewer. No independent precision, recall or
+agreement is reported, and no LLM reviewer was used.
+
+**Known limitations:**
+* **A synthetic outpatient practice.** Everything is illustrative; no
+  clinical validation.
+* **Development seeds only;** no held-out evaluation.
+* **The prospective evaluation is small:** two models, two scenarios, two
+  seeds, 30 days.
+* **Limited preview exposure:** 9 of 240 decision points, 8 of them Qwen's.
+  No preview showed a termination, displaced bookings or an unfunded
+  commitment.
+* **No causal effect of the preview was identified,** on financial or
+  operational outcomes.
+* **Preview covers staffing actions only.**
+* **No predictive financial model.** The preview states the engine's
+  committed amounts and money lines; it does not forecast profit or
+  recovery.
+* **The independent review is pending.**
+* **Historical attempt evidence is incomplete before llm-agent 3:**
+  llm-agent 1 and 2 recorded only the final parsed reply.
+* **The parameter rules were calibrated on the corpus they analyze,** and
+  recall was not measured.
+* **Live inference is nondeterministic;** exact replay needs the recorded
+  decisions. External agents are trusted processes, not sandboxed.
+* The V0.8 and V0.7 limitations remain.
+
+**Compatibility.**
+* No change to mechanics, randomness, actions, accounting, evaluation,
+  scoring or scenarios' behaviour. Suite versions 1 to 4 and their
+  fingerprints are unchanged.
+* All golden references give identical outcomes.
+* Saves from V0.1 to V0.8 and from 0.9.0-dev.1 to 0.9.0-dev.3 replay with
+  every digest verified. 0.9.0-dev.3 is registered as batch mode
+  `v0.9_dev3`; every earlier batch mode is kept.
+* llm-agent 1, 2 and 3, their prompts and settings, the protocols and the
+  contract report are unchanged. Every committed recording replays,
+  llm-agent 3 (v3) and llm-agent 4 (v4) records with every attempt and
+  preview checked.
+* The V0.9a, V0.9b and V0.9c evidence, including the prospective
+  declaration and the negative findings, is committed unchanged.
+
+**Validation.**
+* The full Go test suite passes. The race detector found no race (with
+  `-timeout 90m`) on the V0.9c tree, a38d031; it was not rerun for the
+  release, which changes no concurrent code.
+* vet and gofmt are clean. The Python agent, evidence and probe tests
+  pass.
+* Every session fixture replays, and every golden reference is identical.
+* Benchmark verify and reproduce pass, including every recorded-LLM
+  replay and the V0.9c llm-agent 3 and 4 replays.
+* Frozen decision evidence v1 and parameter evidence v1 reproduce. The
+  V0.8 and V0.9 pipelines regenerate every output, equal to the committed
+  one.
+* Cross-builds succeed for five targets, and the committed seed guards
+  pass.
+* CI is green on all three platforms and in the cross-platform
+  comparison.
+
+---
+
 ## V0.8.0 — auditable decision evidence for practice-management agents
 
 V0.8 adds **evaluation and auditability** of agent decisions. It does not

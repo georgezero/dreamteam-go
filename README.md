@@ -7,60 +7,46 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.8** (`0.8.0`, auditable decision evidence) is the current
-release. It adds evaluation and auditability of agent decisions, not
-clinical validation, and changes no simulator behaviour:
-* **decision evidence:** deterministic, versioned rules that check whether
-  a recorded agent's stated reasons agree with what it proposed and what
-  was executed, with source references and explicit abstention, and no LLM
-  judge (`docs/DECISION_EVIDENCE.md`). Version 1 is frozen; its known
-  defects are documented, and corrections are separate versions (repeat
-  evidence v2, refusal-response v2);
-* **an independent review package** of 98 items, frozen. The review is
-  **pending**: no rule is independently validated;
-* **paired financial and operational outcomes** against no action, and
-  deterministic funding-refusal probes;
-* **llm-agent 3** (`agents/llm/llm_agent3.py`), which records every attempt
-  at a decision, every one replayable and checkable without a model
-  (`docs/LLM_AGENT.md` §13);
-* **a prospective funding-refusal evaluation** of the two frozen models on
-  a low-liquidity variant made of existing settings
-  (`docs/benchmark/v08c-dev/`).
+Status: **V0.9** (`0.9.0`, financial decision evidence and preview-based
+decision support) is the current release. It adds evidence and evaluation
+capabilities, not clinical validation or a predictive financial model,
+and changes no simulator behaviour:
+* **financial decision evidence** (`docs/FINANCIAL_EVIDENCE.md`): for every
+  recorded management decision, separately and with no score, what it
+  committed the practice to and whether the credit line funded it, how far
+  the simulator's rules let it be undone, and which resources it changed
+  directly. Every value comes from the engine's own preview at the
+  decision point;
+* **parameter evidence v1, frozen** (`docs/PARAMETER_EVIDENCE.md`): whether
+  amounts, targets, dates, durations and directions stated in a reason
+  agree with the submitted action;
+* **an offline review UI, import and metrics** for the frozen 98-item
+  evidence review. The review is still **pending**: no rule is
+  independently validated;
+* **llm-agent 4** (`agents/llm/llm_agent4.py`, `docs/LLM_AGENT.md` §14),
+  which shows the model the simulator's existing preview of a staffing
+  proposal before submitting it, recorded completely
+  (`dreamteam.llm-decision-record/v4`) and replayable without a model;
+* **a prospective preview evaluation** (`docs/benchmark/v09c-dev/`),
+  declared before any live run: 16 live runs on two models, two scenarios
+  and two seeds, against llm-agent 3 unchanged.
+  * In the nine preview interactions, the agents kept the proposals the
+    preview showed as accepted (4) and revised (4) or abandoned (1) those
+    it showed as refused.
+  * **No financial benefit of preview access was established.** The model
+    server gave different outputs at identical requests at temperature
+    zero, and every Qwen pair diverged before any preview, so the paired
+    differences are not attributed to the preview.
 
-Every earlier scenario, save, golden reference and benchmark result is
-unchanged.
+Every earlier scenario, save, golden reference, recording and benchmark
+result is unchanged.
 
-In development, not released (`0.9.0-dev.3`):
-* **V0.9a** (`docs/benchmark/v09a-dev/`):
-  * an offline workflow for the independent evidence review. The review
-    is still **pending**;
-  * `dreamteam.parameter-evidence/v1` (`docs/PARAMETER_EVIDENCE.md`):
-    whether amounts, targets, dates, durations and directions stated in a
-    reason agree with the submitted action. It is now frozen.
-* **V0.9b** (`docs/benchmark/v09b-dev/`):
-  `dreamteam.financial-evidence/v1` (`docs/FINANCIAL_EVIDENCE.md`). For
-  every recorded management decision it gives, separately and with no
-  score:
-  * what the decision committed the practice to, and whether the credit
-    line funded it;
-  * how far the simulator's rules let it be undone;
-  * which resources it changed directly.
-
-  Every value comes from the engine's own preview at the decision point.
-* **V0.9c** (`docs/benchmark/v09c-dev/`): a prospective evaluation of
-  llm-agent 4 (`agents/llm/llm_agent4.py`), which shows the model the
-  simulator's existing preview of a staffing proposal before submitting
-  it, against llm-agent 3 unchanged. Declared before any live run
-  (`PLAN.md`), then run: 16 live runs on two models, two scenarios and two
-  seeds, all replayed exactly.
-  * The nine previews shown changed the proposal when they showed a
-    refused action, and left it when everything was accepted and funded.
-  * The run-level pairs are dominated by the model server's variability at
-    identical requests.
-
-It builds on V0.7 (`0.7.0`, financial realism: paid radiologist overtime
-and opt-in solvency with a credit line and a funding rule,
-`docs/V0.7_SOLVENCY_DESIGN.md`), V0.6 (`0.6.0`, the agent benchmark: a
+It builds on V0.8 (`0.8.0`, auditable decision evidence: deterministic,
+versioned consistency rules for agents' stated reasons, a frozen review
+package, complete attempt recording with llm-agent 3,
+`docs/DECISION_EVIDENCE.md`), V0.7 (`0.7.0`, financial realism: paid
+radiologist overtime and opt-in solvency with a credit line and a funding
+rule, `docs/V0.7_SOLVENCY_DESIGN.md`), V0.6 (`0.6.0`, the agent benchmark: a
 suite of five practice scenarios run in one command, each policy reported
 on six dimensions against no action, with no score or ranking,
 `docs/BENCHMARK_SUITE.md`),
@@ -483,7 +469,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.8, V0.9 proposed, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.9, V0.10 proposed, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -495,14 +481,36 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/V0.7_SOLVENCY_DESIGN.md` | financial solvency and cash constraints (V0.7) |
 | `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions; its versions, defects and the refusal-response and repeat evidence (V0.8) |
 | `docs/PARAMETER_EVIDENCE.md` | parameter evidence: whether stated amounts, targets, dates, durations and directions agree with the submitted action (V0.9a, frozen in V0.9b) |
-| `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9b, in development) |
+| `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9) |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.8)
+## Known limitations (V0.9)
+
+* **No causal effect of the preview was identified.** The V0.9c
+  evaluation measured how the agents responded to the preview, not its
+  downstream financial or operational effect. It is small (two models,
+  two scenarios, two development seeds, 30 days) and the preview was shown
+  at 9 of 240 decision points, none with a termination, displaced bookings
+  or an unfunded commitment.
+* **Live inference is not deterministic at temperature zero.** Identical
+  requests gave different outputs (Qwen: the same output at 0 of 5
+  compared points). Simulator replay and recorded-inference replay are
+  exact; a live rerun is not, and neither establishes causation.
+* **The preview covers staffing actions only;** operations actions have
+  none. It states the engine's committed amounts and money lines; it is
+  not a forecast of profit or recovery.
+* **Parameter evidence was calibrated on the corpus it analyzes,** and its
+  recall was not measured. Zero observed mismatches does not establish
+  zero true errors.
+* **Historical attempt evidence is incomplete before llm-agent 3.**
+
+Details: `docs/RELEASE_NOTES.md` (V0.9.0), `docs/benchmark/v09c-dev/README.md` §14.
+
+### From V0.8
 
 * **Development results only.** V0.8c covers two conditions, two seeds at
   30 days, two frozen LLM configurations and one prompt and settings set;

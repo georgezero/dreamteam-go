@@ -1,6 +1,6 @@
 # Financial decision evidence (`dreamteam.financial-evidence/v1`)
 
-V0.9b. A deterministic, read-only account of what each recorded
+V0.9b; released in V0.9.0. A deterministic, read-only account of what each recorded
 management decision committed the practice to, how far the simulator lets
 it be undone, and which simulator-controlled resources it changed
 directly. Three dimensions, kept apart. **No composite score, ranking or
