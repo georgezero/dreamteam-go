@@ -1,0 +1,129 @@
+{
+ "schema": "dreamteam.shared-prefix/v3",
+ "id": "v10c-feedback-1",
+ "version": "shared-prefix/v3",
+ "description": "V0.10c validation feedback against preview information: at 12 recorded branch points, the recorded conversation and initial proposal, then a neutral continuation (A), the engine's exact validate answer (B) or the engine's exact preview (C) for the proposal's staffing actions; one reply each; Gemma 10 and Qwen 20 draws per arm per point, one request at a time. Declared before any request (PLAN.md).",
+ "points": "points",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp",
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp"
+ },
+ "modelOrder": [
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b"
+ ],
+ "arms": {
+  "neutral": {
+   "label": "A",
+   "text": "CONTINUE. Nothing has been submitted yet.\n\nNow reply with your final decision, one JSON object {\"reason\": ..., \"actions\": [...]}. It replaces your reply above: give the same actions to keep it, changed actions to revise it, or \"actions\": [] to submit nothing. It is then validated and submitted as before.",
+   "sha256": "bab212b0f0897f3b533f722413a718916b9079ade06979d275d30e697b5da5f8",
+   "rule": "V0.10b's control, unchanged"
+  },
+  "validation": {
+   "label": "B",
+   "template": "VALIDATION. Nothing has been submitted yet. This is the simulator's validation of the staffing actions in your reply (actions {indices}), exactly as the simulator returned it:\n{validation}\n\n{ops_note}",
+   "opsNote": "The operations actions in your reply are not shown here (this covers the staffing actions only).\n\n",
+   "finalRequest": "Now reply with your final decision, one JSON object {\"reason\": ..., \"actions\": [...]}. It replaces your reply above: give the same actions to keep it, changed actions to revise it, or \"actions\": [] to submit nothing. It is then validated and submitted as before.",
+   "sha256": "f740e555bddad45043a707bd56456dba317f002a4f5b2936f60699a180ed53d3",
+   "rule": "the engine's validate answer for the proposal's staffing actions at the recorded state, as compact JSON, in the template; then the final request"
+  },
+  "preview": {
+   "label": "C",
+   "template": "PREVIEW. Nothing has been submitted yet. This is the simulator's preview of the staffing actions in your reply (actions {indices}), exactly as the simulator returned it:\n{preview}\n\n{ops_note}Now reply with your final decision, one JSON object {{\"reason\": ..., \"actions\": [...]}}. It replaces your reply above: give the same actions to keep it, changed actions to revise it, or \"actions\": [] to submit nothing. It is then validated and submitted as before.",
+   "opsNote": "The operations actions in your reply have no preview (the simulator previews staffing actions only).\n\n",
+   "treatment": "llm-agent-preview/v1",
+   "sha256": "f8b7d787b59c36373d4a18135c1503ccf64e3dd956c749be42fdfb0dbe5c54fa",
+   "rule": "llm-agent 4's review message, unchanged: the engine's preview of the same actions, as compact JSON"
+  },
+  "primary": "preview minus validation (C − B)",
+  "references": [
+   "validation minus neutral (B − A)",
+   "preview minus neutral (C − A)"
+  ],
+  "lengthControl": "none: a length-matched neutral message would need padding, which is either a new stimulus or invented content; every arm's length is reported instead"
+ },
+ "selection": {
+  "rule": "dreamteam-v10c-select/1",
+  "quota": {
+   "gemma4-26b-a4b": {
+    "accepted": null,
+    "refused": null
+   },
+   "qwen36-35b-a3b": {
+    "accepted": 4,
+    "refused": 4
+   }
+  },
+  "maxPerRecording": 2,
+  "acceptedCover": [
+   "credit_supported",
+   "retained_obligation",
+   "withdrawable",
+   "displaces_bookings",
+   "not_reversible"
+  ],
+  "text": "Gemma: every distinct eligible context. Qwen, per stratum (the proposal's staffing actions valid or refused at the recorded state): accepted, for each category in acceptedCover the context with that category and the largest stake not yet taken, then the largest stakes; refused, insufficient-funds refusals first, then by stake; ties by SHA-256('dreamteam-v10c-select/1|<recording>|<point>'); a context taken once only; at most 2 points from one recording. Stake: the larger of the preview's funding commitment and financial evidence v1's applied commitment of the whole proposal. No response of V0.10b or V0.10c is read."
+ },
+ "drawsPerArm": {
+  "gemma4-26b-a4b": 10,
+  "qwen36-35b-a3b": 20
+ },
+ "drawsBasis": "V0.10b: Gemma gave one decision per arm in all 20 draws at each of its 4 points; Qwen gave 1 to 5 distinct decisions per arm",
+ "orderRule": "dreamteam-v10c-order/1",
+ "order": "per model in modelOrder; its draws as rounds; in each round every point and arm of the model once, in the order of SHA-256('dreamteam-v10c-order/1|<model>|<round>|<point id>|<arm>'); one request at a time",
+ "requests": 600,
+ "concurrency": 1,
+ "preflight": "GET /health, /v1/models and /openapi.json only; no inference preflight",
+ "request": {
+  "body": "the recorded proposal request (model, messages, temperature 0, max_tokens 4096, response_format json_object), its messages followed by the recorded proposal (assistant) and the arm's message (user); serialized as the agent serialized it; nothing added",
+  "timeoutSeconds": 300,
+  "retries": 0
+ },
+ "server": {
+  "observed": "before the run, before each round and after: /health, server version, OpenAPI SHA-256, both models' /v1/models entries; cached prompt tokens per response",
+  "material": "server version, OpenAPI SHA-256 or either model's entry changes, or /health not healthy",
+  "unavailable": [
+   "cache clearing, cache disabling, cold starts and server settings: admin-only, not used"
+  ]
+ },
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "wallClockSeconds": 14400,
+  "health": "an unhealthy /health before a round stops the run",
+  "serverChange": "a material change before a round stops the run"
+ },
+ "failures": "every request recorded; no retry, replacement or rerun; a failed request or an invalid reply is that draw's outcome (invalid); a stopped run is analysed as far as it went and reported as stopped",
+ "resources": "the client on the Pi under systemd-run --user --scope -p MemoryMax=1G nice -n 10; one request in flight",
+ "outcomes": {
+  "primary": "per point and arm over all its draws: kept, revised, abandoned (A4.response_of against the recorded proposal) or invalid; final accepted, refused or no action (the engine's validate of llm-agent 3's batches at the recorded state); exact action content (the canonical action list); every draw in the denominator. Primary estimand: the difference in these distributions, preview minus validation, per point",
+  "financial": "financial evidence v1, unchanged, of each distinct final decision at the recorded state: commitment of applied batches (initial, final, difference), cash-only funding headroom at the point, credit support, retained obligations, reversibility, direct operational exposure, displaced bookings",
+  "distinctions": [
+   "informationChars: the arm's message length",
+   "proposalChanged: revised or abandoned",
+   "becameValid: a refused proposal's final decision accepted",
+   "commitmentChanged: the applied commitment differs from the proposal's",
+   "exposureChanged: the direct exposure differs from the proposal's"
+  ],
+  "secondary": [
+   "raw, canonical JSON and action agreement within an arm",
+   "direction and parameters of revisions",
+   "latency, tokens, cached tokens, finish reasons (live metadata, apart)"
+  ],
+  "notComputed": "no composite score; a smaller commitment is not called better, and a valid one not wise"
+ },
+ "statistics": {
+  "perPoint": "counts with Wilson 95% intervals per arm; differences C − B, B − A and C − A per outcome and final status with Newcombe 95% intervals; the round-blocked table for each comparison; whether the action-content distributions are identical",
+  "pooled": "after the per-point results, per model and stratum and overall: per-point differences, their unweighted mean, points with positive or negative difference; no interval over clustered points",
+  "separation": "validation-feedback effect (B − A), incremental preview effect (C − B), inference variation (distinct values within an arm), branch-point heterogeneity (per-point differences)",
+  "claims": "descriptive; no hypothesis test; no population claim"
+ },
+ "continuation": {
+  "suffix": "no_action",
+  "rule": "as shared-prefix/v2: each distinct final decision validated (staffing previewed), applied in order if every batch is valid, then every later day advanced with no action",
+  "recorded": "apply results, validate/apply agreement, digests after the decision and each later day, the observed state at the end, financial evidence v1 records",
+  "purpose": "a mechanics and reproducibility check, not an outcome"
+ },
+ "replay": "the analysis reads the recorded responses, the points and the engine only; checks every request and response hash, the content against the response, the order against the schedule, and the validate and preview answers against a fresh engine session; CI regenerates the points' check, the schedule and the analysis and compares them byte for byte across platforms",
+ "material": "development only: the committed V0.8c and V0.9c recordings and their seeds (41901, 41902, 42001, 42002); no clinical, reference, reserved or sealed holdout seed"
+}

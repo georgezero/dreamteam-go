@@ -569,3 +569,8 @@ The V0.10a file was made from de8ac79 (0.10.0-dev.1) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0101.actions.json`
 (the same batches as the 5C.4l file's). 0.10.0-dev.2 replays it in batch
 mode `v0.10_dev1` with every digest verified (`internal/session/v0101_test.go`).
+
+The V0.10b file was made from d3da060 (0.10.0-dev.2) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0102.actions.json`
+(the same batches as the 5C.4l file's). 0.10.0-dev.3 replays it in batch
+mode `v0.10_dev2` with every digest verified (`internal/session/v0102_test.go`).

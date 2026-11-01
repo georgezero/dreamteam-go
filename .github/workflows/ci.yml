@@ -334,6 +334,22 @@ jobs:
           cp v10b/schedule.json out/v10b-schedule.json
           $P analysis/repeatability/decision_experiment.py analyze --binary ./dt --replays . --dir $V --out v10b
           for f in decisions.json decision-tables.md inference.json; do cmp v10b/$f $V/$f; cp v10b/$f out/v10b-$f; done
+      - name: Validation feedback against preview
+        # V0.10c, without any model: the information and candidate
+        # inventory made again from the committed recordings and the engine
+        # on the replays above, the branch points selected again and every
+        # context checked (messages, proposal, validate and preview
+        # answers, the three arms' requests); the request schedule rebuilt
+        # from the protocol. Equal to the committed files.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v10c-dev
+          $P analysis/repeatability/feedback_experiment.py points --binary ./dt --replays . --check $V/points
+          $P analysis/repeatability/feedback_experiment.py schedule --protocol $V/protocol.json --out v10c
+          cmp v10c/schedule.json $V/schedule.json
+          cp v10c/schedule.json out/v10c-schedule.json
+          cp $V/points/inventory.json out/v10c-inventory.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

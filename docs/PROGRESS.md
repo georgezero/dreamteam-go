@@ -7,6 +7,53 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10c — validation feedback against preview information (0.10.0-dev.3): declaration
+
+V0.10b was accepted (CI 41349684200) and V0.10c authorized by the owner.
+This commit declares the experiment before any live request. Report:
+`docs/benchmark/v10c-dev/README.md`.
+
+**Information inventory** (`API_INVENTORY.md`, `points/inventory.json`).
+The engine's validate and preview answers for the 56 recorded staffing
+proposals, each asked at its recorded state:
+* the preview's `results` equal validate's in 56 of 56;
+* a refused proposal's preview adds `asOf` and, for `insufficient_funds`,
+  the funding test, whose numbers the refusal message already states;
+* a valid proposal's preview adds the structured funding test, money
+  lines, item details, slots and displacements.
+
+Neither answer states a credit requirement or a reversibility class.
+
+**Protocol** (`v10c-feedback-1`, `dreamteam.shared-prefix/v3`; `PLAN.md`,
+`SPEC.md`, `protocol.json`, `points/`, `schedule.json`):
+* **Points:** 12. Gemma has all 4 of its contexts (1 accepted, 3
+  refused). Qwen has 4 accepted, by financial-category coverage and
+  stake, and 4 refused, insufficient funds first.
+* **Arms:**
+  * A, V0.10b's neutral control;
+  * B, the engine's exact validate answer;
+  * C, llm-agent 4's exact preview message.
+
+  All three end with the same final paragraph.
+* **Draws:** Gemma 10 and Qwen 20 per arm per point; 600 requests, one at
+  a time, in hash-ordered rounds.
+* **Analysis:** primary C − B per point, with B − A and C − A as
+  references; financial evidence v1; the five distinctions kept apart
+  (information, change, validity, commitment, exposure).
+* **No length control.** Padding would be a new stimulus or invented
+  content; the lengths are reported.
+
+**Code:** `analysis/repeatability/feedback_experiment.py` imports
+shared-prefix/v2's module unchanged. It covers the inventory, the points
+and their CI check, the schedule, the sequential live client, and the
+analysis, which contacts no model. Tests: `test_feedback_experiment.py`,
+17 tests.
+
+**Engine:** unchanged. 0.10.0-dev.2 is registered for replay
+(`mini-seed52-v0102`, batch mode `v0.10_dev2`).
+
+---
+
 ## V0.10b — live shared-prefix decision experiment (0.10.0-dev.2): results
 
 The experiment declared at ab1d8d1 (below), run and analysed. Report:

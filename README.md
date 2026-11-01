@@ -41,8 +41,16 @@ and changes no simulator behaviour:
 Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged.
 
-In development, not released (`0.10.0-dev.2`): **V0.10b**
-(`docs/benchmark/v10b-dev/`), a live shared-prefix decision experiment.
+In development, not released (`0.10.0-dev.3`): **V0.10c**
+(`docs/benchmark/v10c-dev/`), validation feedback against preview
+information. At 12 recorded branch points the model is shown one of
+three messages: a neutral one, the engine's validation of its staffing
+proposal, or the engine's preview of it. The primary comparison is
+preview against validation. It was declared before any request; results
+to follow.
+
+Before it, **V0.10b**
+(`docs/benchmark/v10b-dev/`, accepted), a live shared-prefix decision experiment.
 At 8 recorded branch points the state and the initial staffing proposal
 are held fixed. The model is then shown either a neutral continuation or
 the engine's exact preview, 20 times each. It was declared before any
