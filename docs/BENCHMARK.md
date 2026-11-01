@@ -587,6 +587,36 @@ OS-level isolation is claimed.
 Benchmarking an untrusted agent would need OS-level isolation and a
 withheld or derived seed scheme; that is a later requirement.
 
+## 11a. Live inference and controlled comparisons (V0.10a)
+
+The harness makes a run reproducible given the policy's decisions: the
+same scenario, seed and decisions give the same files, and a recorded LLM
+run replays without a model, byte for byte. A **live** LLM policy's
+decisions are not reproducible. V0.10a measured this
+([benchmark/v10a-dev/](benchmark/v10a-dev/README.md)). On the oMLX server
+used since V0.8c, at temperature 0, 25 recorded requests sent again 15
+times each:
+* gave identical text across all 15 for 2 of 25;
+* gave the same decision across all 15 for 17 of 25;
+* varied more when two were sent at once.
+
+Four properties are distinct, and only the first two hold:
+* deterministic simulator replay;
+* reproducible recorded inference;
+* deterministic live inference;
+* causal identification.
+
+So two live runs that differ in a policy also differ in inference. The
+harness supports a **shared-prefix comparison**
+([benchmark/v10a-dev/DESIGN.md](benchmark/v10a-dev/DESIGN.md),
+`shared-prefix/v1`). Both arms are external policies that replay one
+recording's decisions up to a branch point, checked by the recording
+agent's replay, and so reach the same state. They share the recorded
+initial proposal there and differ by design after it. A declared fixed
+suffix (no action) keeps the rest of the run deterministic. The
+comparison still needs repeated live draws of each arm, and its
+identification assumptions (DESIGN.md §4), before any effect is claimed.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

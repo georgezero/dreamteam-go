@@ -7,6 +7,91 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10a — inference repeatability and controlled comparison design (0.10.0-dev.1): results
+
+The protocol declared at 41b16c9 (below), run, analysed and prototyped.
+Report: `docs/benchmark/v10a-dev/README.md`.
+
+**Live repeatability** (2026-11-01, 14:23–14:48 UTC; 375 of 375 requests
+answered, no stop, no rerun):
+* **Text:** identical across all 15 requests of a prompt for 2 of 10 Gemma
+  prompts and 0 of 15 Qwen prompts. Parsed replies varied exactly as the
+  text did: no difference was only formatting.
+* **Actions:** identical for 7 of 10 and 6 of 15. **Decision:** identical
+  for 8 of 10 and 9 of 15.
+* **Sequential vs concurrent:** requests sent one at a time (11 per
+  prompt) changed the decision at 3 of 25 prompts, and two at a time (4
+  per prompt) at 8. Concurrent requests were the least repeatable at every
+  level. Two identical requests sent at once had identical text in 11 of
+  50 pairs (exploratory).
+* **Seed and cache:** `"seed": 0` gave the same counts as without it. The
+  prompt cache was hit by 365 of 375 requests, including most of those
+  whose answers differed. Cache clearing, cache disabling and a cold start
+  were unavailable, and none is claimed.
+* **Most variable:** staffing proposals, which alternated between
+  submitting, being refused and doing nothing.
+
+**Shared-prefix design** (`DESIGN.md`, `shared-prefix/v1`):
+* the arms share the recorded state and the recorded initial proposal,
+  then continue as llm-agent 3 (control) and 4 (treatment, preview
+  shown), with a declared suffix;
+* what is held fixed, what differs by design, what remains uncontrolled,
+  and what can and cannot be identified; the assumptions a causal reading
+  needs.
+
+**Offline prototype** (`analysis/repeatability/shared_prefix.py`,
+`prototype/`): an external benchmark policy, one spec per V0.9c preview
+point (9):
+* prefixes and proposals were identical in both arms and equal to the
+  recording at 9 of 9 points;
+* the treatment arm submitted what the recording submitted at 9 of 9;
+* where both arms submitted the same batches (5), the runs never
+  diverged.
+
+The control arm's replies are scripted, so nothing it reports is an
+effect.
+
+**New:**
+* `analysis/repeatability/`: `prompt_sample.py`, `repeat_run.py`,
+  `repeat_analysis.py`, `shared_prefix.py`, with 32 tests (14 for the
+  sample, the runner and the analysis levels, 18 for the prototype);
+* `docs/benchmark/v10a-dev/`: `live/`, `repeatability.json`,
+  `repeatability-tables.md`, `DESIGN.md`, `prototype/`, `README.md`;
+* a CI step that checks the sample, rebuilds the schedule and the
+  prototype's specs, and regenerates the analysis and both prototype arms
+  and compares them;
+* LLM_AGENT §15, BENCHMARK §11a.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Focused tests: `analysis/repeatability` | Pi and CI | 32 tests, OK |
+| Python tests: `agents/llm`, `analysis/evidence` | Pi and CI | 60 and 147 tests, OK |
+| Go suite (`go test ./...`), golden files | CI, three platforms | run by CI on this commit |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64, Go 1.27.0 | exit 0; 10 packages ok, no failure |
+| `go vet ./...`, `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/amd64, darwin/arm64, windows/amd64) | horo | all ok |
+| Historical replays (V0.8c, V0.9c recordings) | Pi, horo and CI | 104 checks, 0 failed, each of 4 replays |
+| Benchmark verify and reproduce; prototype runs verified | CI | run by CI on this commit; prototype runs 41, 113 and 77 checks, 0 failed |
+| Analysis, specs, prototype and comparison regenerated and compared byte for byte | Pi, horo and CI | identical |
+| Cross-platform CI (linux, macOS, Windows) | CI | run by CI on this commit |
+
+Not run: no clinical suite, no historical live evaluation rerun, and no
+local repeat of the gates CI runs (Go suite, golden files, verify and
+reproduce), per the project's practice of running only the race and the
+cross-builds locally.
+
+**No change to:**
+* simulator behaviour, actions, scenarios, scoring or accounting;
+* llm-agent 1–4, their prompts or settings;
+* any recording, session, golden reference, suite or benchmark result;
+* the frozen evidence.
+
+The independent review is still PENDING. No historical live experiment
+was rerun.
+
+---
+
 ## V0.10a — inference repeatability and controlled comparison design (0.10.0-dev.1): declaration
 
 Owner decision 2026-11-01: V0.9.0 is accepted and closed (7fa9557, tag

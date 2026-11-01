@@ -1,0 +1,30 @@
+{
+ "schema": "dreamteam.shared-prefix-spec/v1",
+ "id": "ss-qwen-s42002-p6",
+ "version": "shared-prefix/v1",
+ "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+ "recordingSha256": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+ "branchPoint": 6,
+ "maxRetries": 1,
+ "suffix": "no_action",
+ "outputs": {},
+ "replies": {
+  "treatment": [
+   {
+    "source": "recorded",
+    "from": "6.2",
+    "answers": "242200d682ec76d5119d1e29e44d7cba668214c3772b78e6351babb1bc703f95",
+    "sha256": "4f7c43ddc8cc8575d4572c88b115c4372e126e30ea0748d9d1d4465591d6a490",
+    "content": "{\"reason\": \"The preview confirms the reading allocation changes are valid and funded. I will keep the operations actions (extend_shift for E03 and E05) to maximize exam throughput today, supporting the increased reading capacity. The reading allocation changes will take effect on Nov 2, helping clear the backlog and improve TAT for the coming weeks.\", \"actions\": [{\"type\": \"set_reading_allocation\", \"employee\": \"E07\", \"op\": \"set\", \"siteAllocationBP\": 10000, \"effective\": \"2026-11-02\"}, {\"type\": \"set_reading_allocation\", \"employee\": \"E08\", \"op\": \"set\", \"siteAllocationBP\": 10000, \"effective\": \"2026-11-02\"}, {\"type\": \"extend_shift\", \"employee\": \"E03\", \"minutes\": 120, \"date\": \"2026-10-19\"}, {\"type\": \"extend_shift\", \"employee\": \"E05\", \"minutes\": 120, \"date\": \"2026-10-19\"}]}"
+   }
+  ],
+  "control": [
+   {
+    "source": "scripted",
+    "from": null,
+    "answers": null,
+    "content": "{\"reason\": \"Scripted reply (shared-prefix/v1 prototype): no action.\", \"actions\": []}"
+   }
+  ]
+ }
+}

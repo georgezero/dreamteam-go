@@ -1,0 +1,1691 @@
+{
+ "schema": "dreamteam.shared-prefix-comparison/v1",
+ "version": "shared-prefix/v1",
+ "points": [
+  {
+   "spec": "fp-qwen-s42001-p13",
+   "recording": "docs/benchmark/v09c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "branchPoint": 13,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "f4f8ebdf576e33d3e159d6c6a868b929c67be299ff2e913caa174f82d9f5d96e"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "db4a8019b776785e7991e584b2eb8a7f24546993cbc81e06b11073aab3d2ef54",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 911,
+      "sha256": "f3bf8b02a7d2cd849b7512dabda9d657469a085433412395812d18974141c8e5"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 4,
+    "treatmentMessages": 6
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "scripted",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "invalid_decision",
+      "error": "invalid_decision"
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "revised",
+     "batches": [
+      [
+       {
+        "date": "2026-10-26",
+        "employee": "E07",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-11-09",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "tr-2026-10-26-all",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights"
+        ]
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "revised",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": false,
+   "firstDivergentPoint": 14,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -1552063,
+     "examsCompleted": 1504,
+     "ordersLost": 178,
+     "tatBreaches": 135
+    },
+    "treatment": {
+     "operatingProfitCents": -1403126,
+     "examsCompleted": 1504,
+     "ordersLost": 178,
+     "tatBreaches": 129
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 148937,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": -6
+   }
+  },
+  {
+   "spec": "ss-gemma-s42001-p14",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42001-decisions.jsonl",
+   "branchPoint": 14,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "6ba0fbc590fa16719fc8678fe203e366483a4f4894323a242e07dec58469f75c"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "a5f57eca4c39b8662c6d4b8dd789a19e4026db90cabf1d55f2a05de99dae049e",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 2554,
+      "sha256": "0412b73a2d899e099d6a844db1accb45026259911dc7eeeda32a68937d21a447"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 2,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "effective": "2026-11-10",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "telerad-001",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights",
+         "saturday",
+         "sunday"
+        ]
+       }
+      ]
+     ]
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "effective": "2026-11-10",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "telerad-001",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights",
+         "saturday",
+         "sunday"
+        ]
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "kept",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -1655919,
+     "examsCompleted": 1515,
+     "ordersLost": 390,
+     "tatBreaches": 95
+    },
+    "treatment": {
+     "operatingProfitCents": -1655919,
+     "examsCompleted": 1515,
+     "ordersLost": 390,
+     "tatBreaches": 95
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  },
+  {
+   "spec": "ss-qwen-s42001-p0",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "branchPoint": 0,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "e215947882341dda16254d227cd17b724538a1c9d383f47e8b930f3041d0f2c2"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "d06e01b367b711252ad69bcf6540ae57bd1584beb8fb1c7d24e64171b168fde6",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 3838,
+      "sha256": "f9c112b72d1709d4cea9226c224a57fb10672b96258d21b4da420fe38a9d0ef7"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 4,
+    "treatmentMessages": 6
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "scripted",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "revised",
+     "batches": [
+      [
+       {
+        "date": "2026-10-13",
+        "employee": "E05",
+        "minutes": 60,
+        "type": "extend_shift"
+       },
+       {
+        "date": "2026-10-14",
+        "employee": "E05",
+        "minutes": 60,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "contractedWeeklyMinutes": 2400,
+        "rateCents": 4900,
+        "requestId": "hire-mr-prem-001",
+        "role": "technologist",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Mon": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Sat": null,
+          "Sun": null,
+          "Thu": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Tue": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Wed": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          }
+         },
+         "B": {
+          "Fri": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Mon": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Sat": null,
+          "Sun": null,
+          "Thu": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Tue": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Wed": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "end": "16:30",
+           "start": "08:00"
+          }
+         }
+        },
+        "skills": [
+         "MR"
+        ],
+        "startDate": "2026-11-03",
+        "type": "hire"
+       },
+       {
+        "contractedWeeklyMinutes": 2400,
+        "rateCents": 4200,
+        "requestId": "hire-ct-prem-001",
+        "role": "technologist",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Mon": null,
+          "Sat": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "13:30",
+             "14:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "10:00",
+             "room": "R1",
+             "until": "18:00"
+            }
+           ],
+           "end": "18:00",
+           "start": "10:00"
+          },
+          "Sun": null,
+          "Thu": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Tue": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Wed": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          }
+         },
+         "B": {
+          "Fri": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Mon": null,
+          "Sat": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "13:30",
+             "14:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "10:00",
+             "room": "R1",
+             "until": "18:00"
+            }
+           ],
+           "end": "18:00",
+           "start": "10:00"
+          },
+          "Sun": null,
+          "Thu": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Tue": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Wed": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          }
+         }
+        },
+        "skills": [
+         "CT",
+         "XR"
+        ],
+        "startDate": "2026-11-03",
+        "type": "hire"
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "revised",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": false,
+   "firstDivergentPoint": 1,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -1779219,
+     "examsCompleted": 1515,
+     "ordersLost": 390,
+     "tatBreaches": 96
+    },
+    "treatment": {
+     "operatingProfitCents": -2923499,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 99
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": -1144280,
+    "examsCompleted": 13,
+    "ordersLost": -7,
+    "tatBreaches": 3
+   }
+  },
+  {
+   "spec": "ss-qwen-s42001-p1",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "branchPoint": 1,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "2943040fb23f1635f5fb25f4126923a7250fb9e178f350fe9e0c682454cbe9fd"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "d4a084c596c8509a0a92b29072155f015221e9a102725a76830a37c3d60ff59e",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 2617,
+      "sha256": "7a60b6b06dabfacc4d124e628659187904ee0ff310a57d799d13246e03252b8b"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 2,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "date": "2026-10-14",
+        "employee": "E07",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-10-28",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "telerad-backlog-001",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights",
+         "saturday"
+        ]
+       }
+      ]
+     ]
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "date": "2026-10-14",
+        "employee": "E07",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-10-28",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "telerad-backlog-001",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights",
+         "saturday"
+        ]
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "kept",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -3337410,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 46
+    },
+    "treatment": {
+     "operatingProfitCents": -3337410,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 46
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  },
+  {
+   "spec": "ss-qwen-s42001-p26",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "branchPoint": 26,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "3a48af5181b5446bb725a0f84b308f3702ba1886ddc19bf3243148c17007f7a9"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "f49a200faac44cfe94783ac9e6b796c1c0e4db2cd0dfa8fdf6b70c2e50aca31c",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 3844,
+      "sha256": "548320dea1303a9641616498ed03f9e1834ece67e3f05fcc6cb6ef804d3a9853"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 4,
+    "treatmentMessages": 6
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "scripted",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": "refused"
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    },
+    "treatment": {
+     "outcome": "fallback",
+     "final": "fallback",
+     "batches": []
+    }
+   },
+   "treatmentResponse": "revised",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -3452792,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 45
+    },
+    "treatment": {
+     "operatingProfitCents": -3452792,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 45
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  },
+  {
+   "spec": "ss-qwen-s42001-p27",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "branchPoint": 27,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "59ad488bce64704bb4c76f738714869f898c55a18c7e97c4b4b58b62a0fb47c3"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "68f5ec86982a39e5e450359f77cac454376d45110d341d85db22767e3a51785b",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 5825,
+      "sha256": "1b6ab9b0bb6e89eea44408b5856b79138e7648be6247108234d26158d42179b8"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 2,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "effective": "2026-11-23",
+        "employee": "H00001",
+        "op": "set",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Mon": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Sat": null,
+          "Sun": null,
+          "Thu": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Tue": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Wed": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          }
+         }
+        },
+        "type": "set_roster"
+       },
+       {
+        "effective": "2026-11-23",
+        "employee": "H00002",
+        "op": "set",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Mon": null,
+          "Sat": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "13:30",
+             "14:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "10:00",
+             "room": "R1",
+             "until": "18:00"
+            }
+           ],
+           "end": "18:00",
+           "start": "10:00"
+          },
+          "Sun": null,
+          "Thu": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Tue": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Wed": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          }
+         }
+        },
+        "type": "set_roster"
+       },
+       {
+        "contract": "T00001",
+        "endDate": "2026-12-09",
+        "op": "cancel",
+        "type": "contract_teleradiology"
+       }
+      ]
+     ]
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "effective": "2026-11-23",
+        "employee": "H00001",
+        "op": "set",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Mon": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Sat": null,
+          "Sun": null,
+          "Thu": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Tue": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          },
+          "Wed": {
+           "assignment": "R4",
+           "breaks": [
+            [
+             "12:30",
+             "13:00"
+            ]
+           ],
+           "covers": [],
+           "end": "16:30",
+           "start": "08:00"
+          }
+         }
+        },
+        "type": "set_roster"
+       },
+       {
+        "effective": "2026-11-23",
+        "employee": "H00002",
+        "op": "set",
+        "roster": {
+         "A": {
+          "Fri": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Mon": null,
+          "Sat": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "13:30",
+             "14:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "10:00",
+             "room": "R1",
+             "until": "18:00"
+            }
+           ],
+           "end": "18:00",
+           "start": "10:00"
+          },
+          "Sun": null,
+          "Thu": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Tue": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          },
+          "Wed": {
+           "assignment": "R3",
+           "breaks": [
+            [
+             "15:30",
+             "16:00"
+            ]
+           ],
+           "covers": [
+            {
+             "from": "16:15",
+             "room": "R1",
+             "until": "20:00"
+            }
+           ],
+           "end": "20:00",
+           "start": "11:30"
+          }
+         }
+        },
+        "type": "set_roster"
+       },
+       {
+        "contract": "T00001",
+        "endDate": "2026-12-09",
+        "op": "cancel",
+        "type": "contract_teleradiology"
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "kept",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -3452792,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 45
+    },
+    "treatment": {
+     "operatingProfitCents": -3452792,
+     "examsCompleted": 1528,
+     "ordersLost": 383,
+     "tatBreaches": 45
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  },
+  {
+   "spec": "ss-qwen-s42002-p1",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "branchPoint": 1,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "39b09c3b7a8442cbde919f59376b01913c130e00c04f5f11e3a8b3fc8edac63c"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "4be7076160b6613afc05fd0e2eb022589669e3c2387a13a18445af20feacc696",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 911,
+      "sha256": "6662a02b4d7f875a8e97086a851fbe4aeb4639edc30bdaccd36576fe0fddf246"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 4,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "scripted",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "revised",
+     "batches": [
+      [
+       {
+        "date": "2026-10-14",
+        "employee": "E03",
+        "minutes": 120,
+        "type": "extend_shift"
+       },
+       {
+        "date": "2026-10-14",
+        "employee": "E05",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-10-28",
+        "op": "start",
+        "plan": "standard-v1",
+        "requestId": "tr-2026-10-14-001",
+        "scope": "all",
+        "type": "contract_teleradiology",
+        "windows": [
+         "weeknights"
+        ]
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "revised",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": false,
+   "firstDivergentPoint": 2,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -1109311,
+     "examsCompleted": 1511,
+     "ordersLost": 426,
+     "tatBreaches": 69
+    },
+    "treatment": {
+     "operatingProfitCents": -1362332,
+     "examsCompleted": 1513,
+     "ordersLost": 422,
+     "tatBreaches": 73
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": -253021,
+    "examsCompleted": 2,
+    "ordersLost": -4,
+    "tatBreaches": 4
+   }
+  },
+  {
+   "spec": "ss-qwen-s42002-p26",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "branchPoint": 26,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "3e6a4a0e734aa3569ea2f14a73a481513cebee0a2b9787da3bfc705a4bc0d35b"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "ca60619689fe34bfc88e09a7522982cd34a7e8f03c35f586b2595b02ac34ff8b",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 5370,
+      "sha256": "83a23d915a3952867f319f351ac7bb1873a495c926bda1eaf0d92b100824657c"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 4,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": "refused"
+     },
+     {
+      "source": "scripted",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    },
+    "treatment": {
+     "outcome": "no_action",
+     "final": "abandoned",
+     "batches": []
+    }
+   },
+   "treatmentResponse": "abandoned",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -2839468,
+     "examsCompleted": 1528,
+     "ordersLost": 407,
+     "tatBreaches": 77
+    },
+    "treatment": {
+     "operatingProfitCents": -2839468,
+     "examsCompleted": 1528,
+     "ordersLost": 407,
+     "tatBreaches": 77
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  },
+  {
+   "spec": "ss-qwen-s42002-p6",
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "branchPoint": 6,
+   "heldFixed": {
+    "prefixDigestsEqual": true,
+    "prefixIsRecorded": true,
+    "proposalEqual": true,
+    "proposalSha256": "984a995945c0098799f60bcfce4abc5122a5f27336a8596304f9f7b364613c0b"
+   },
+   "differsByDesign": {
+    "treatmentPreview": {
+     "answerSha256": "df279bede2c5611c236026ba0d13063112685c311569e483b31067d95b022865",
+     "digestsUnchanged": true,
+     "error": null,
+     "message": {
+      "chars": 3637,
+      "sha256": "242200d682ec76d5119d1e29e44d7cba668214c3772b78e6351babb1bc703f95"
+     },
+     "status": "ok"
+    },
+    "controlMessages": 2,
+    "treatmentMessages": 4
+   },
+   "replies": {
+    "control": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     }
+    ],
+    "treatment": [
+     {
+      "source": "shared",
+      "parse": "ok",
+      "error": null
+     },
+     {
+      "source": "recorded",
+      "parse": "ok",
+      "error": null
+     }
+    ]
+   },
+   "decision": {
+    "control": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "date": "2026-10-19",
+        "employee": "E03",
+        "minutes": 120,
+        "type": "extend_shift"
+       },
+       {
+        "date": "2026-10-19",
+        "employee": "E05",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-11-02",
+        "employee": "E07",
+        "op": "set",
+        "siteAllocationBP": 10000,
+        "type": "set_reading_allocation"
+       },
+       {
+        "effective": "2026-11-02",
+        "employee": "E08",
+        "op": "set",
+        "siteAllocationBP": 10000,
+        "type": "set_reading_allocation"
+       }
+      ]
+     ]
+    },
+    "treatment": {
+     "outcome": "actions",
+     "final": "kept",
+     "batches": [
+      [
+       {
+        "date": "2026-10-19",
+        "employee": "E03",
+        "minutes": 120,
+        "type": "extend_shift"
+       },
+       {
+        "date": "2026-10-19",
+        "employee": "E05",
+        "minutes": 120,
+        "type": "extend_shift"
+       }
+      ],
+      [
+       {
+        "effective": "2026-11-02",
+        "employee": "E07",
+        "op": "set",
+        "siteAllocationBP": 10000,
+        "type": "set_reading_allocation"
+       },
+       {
+        "effective": "2026-11-02",
+        "employee": "E08",
+        "op": "set",
+        "siteAllocationBP": 10000,
+        "type": "set_reading_allocation"
+       }
+      ]
+     ]
+    }
+   },
+   "treatmentResponse": "kept",
+   "treatmentEqualsRecording": true,
+   "sameSubmission": true,
+   "firstDivergentPoint": null,
+   "runOutcomes": {
+    "control": {
+     "operatingProfitCents": -2818636,
+     "examsCompleted": 1521,
+     "ordersLost": 416,
+     "tatBreaches": 78
+    },
+    "treatment": {
+     "operatingProfitCents": -2818636,
+     "examsCompleted": 1521,
+     "ordersLost": 416,
+     "tatBreaches": 78
+    }
+   },
+   "runOutcomeDifference": {
+    "operatingProfitCents": 0,
+    "examsCompleted": 0,
+    "ordersLost": 0,
+    "tatBreaches": 0
+   }
+  }
+ ],
+ "note": "A prototype: the control arm's replies are scripted and the suffix is fixed. Nothing here is an effect of the preview."
+}

@@ -1,0 +1,30 @@
+{
+ "schema": "dreamteam.shared-prefix-spec/v1",
+ "id": "ss-qwen-s42001-p1",
+ "version": "shared-prefix/v1",
+ "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+ "recordingSha256": "c3ccd42e6ebe1a3f9c0967d9fc7ebce6f8b36700262746129ca7392e266fbff3",
+ "branchPoint": 1,
+ "maxRetries": 1,
+ "suffix": "no_action",
+ "outputs": {},
+ "replies": {
+  "treatment": [
+   {
+    "source": "recorded",
+    "from": "1.2",
+    "answers": "7a60b6b06dabfacc4d124e628659187904ee0ff310a57d799d13246e03252b8b",
+    "sha256": "ed229557b354c7fffd2d91af4c9ad2dcc04174218241155fee6121d39b1b0422",
+    "content": "{\"reason\": \"The teleradiology contract is accepted and will help with the backlog starting Oct 28. I am keeping the extend_shift for Dr. Avery to help clear the immediate reading backlog today. The new hires are already scheduled for Nov 3. No other immediate changes are needed as the practice is currently closed and the main bottleneck is reading capacity.\", \"actions\": [{\"type\": \"extend_shift\", \"employee\": \"E07\", \"minutes\": 120, \"date\": \"2026-10-14\"}, {\"type\": \"contract_teleradiology\", \"op\": \"start\", \"plan\": \"standard-v1\", \"effective\": \"2026-10-28\", \"scope\": \"all\", \"requestId\": \"telerad-backlog-001\", \"windows\": [\"weeknights\", \"saturday\"]}]}"
+   }
+  ],
+  "control": [
+   {
+    "source": "scripted",
+    "from": null,
+    "answers": null,
+    "content": "{\"reason\": \"Scripted reply (shared-prefix/v1 prototype): no action.\", \"actions\": []}"
+   }
+  ]
+ }
+}

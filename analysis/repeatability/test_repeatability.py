@@ -134,3 +134,56 @@ class Run(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Levels(unittest.TestCase):
+    """The comparison levels of repeat_analysis.py."""
+
+    def setUp(self):
+        import repeat_analysis as A
+        self.A = A
+        self.types = {"hire", "extend_shift", "set_reading_allocation"}
+
+    def test_text_differs_decision_same(self):
+        A = self.A
+        a = '{"reason": "Hold.", "actions": []}'
+        b = '{"reason": "Hold steady.", "actions": []}'
+        c = '```json\n{"actions": [], "reason": "Hold."}\n```'
+        self.assertNotEqual(a, b)
+        self.assertNotEqual(A.parsed(a), A.parsed(b))
+        self.assertEqual(A.parsed(a), A.parsed(c))
+        ra, rb = A.reading(a, self.types, True), A.reading(b, self.types, True)
+        self.assertEqual(A.canon(ra), A.canon(rb))
+        self.assertEqual((A.decision(ra, []), A.decision(rb, [])), ("no_action", "no_action"))
+
+    def test_unparsable_and_unknown(self):
+        A = self.A
+        self.assertEqual(A.parsed("not json"), "unparsable")
+        self.assertEqual(A.parsed(None), "no_content")
+        self.assertEqual(A.reading("not json", self.types, True), {"error": "invalid_json"})
+        bad = '{"reason": "x", "actions": [{"type": "fly"}]}'
+        self.assertEqual(A.reading(bad, self.types, True), {"error": "unknown_action"})
+        self.assertEqual(A.decision({"error": "unknown_action"}, []), "unparsable")
+
+    def test_details_allowed_only_before_details_or_preview(self):
+        A = self.A
+        rec = {"promptSettings": {"allowDetails": True}, "attempts": [
+            {"input": {"kind": "prompt"}}, {"input": {"kind": "preview"}}]}
+        self.assertTrue(A.details_allowed(rec, 1))
+        self.assertFalse(A.details_allowed(rec, 2))
+        d = '{"reason": "x", "actions": [], "details": ["hire"]}'
+        self.assertEqual(A.reading(d, self.types, True), {"details": ["hire"]})
+        self.assertEqual(A.reading(d, self.types, False), {"error": "invalid_decision"})
+
+    def test_validation_outcome(self):
+        A = self.A
+        ok = {"valid": True, "results": [{"ok": True}]}
+        bad = {"valid": False, "results": [{"ok": False, "code": "insufficient_funds"},
+                                           {"ok": False, "code": "batch_rejected"}]}
+        self.assertEqual(A.outcome([ok, bad]), [{"valid": True, "refused": []},
+                                                {"valid": False, "refused": ["batch_rejected", "insufficient_funds"]}])
+        acts = {"actions": [{"type": "hire"}]}
+        self.assertEqual(A.decision(acts, A.outcome([ok])), "actions")
+        self.assertEqual(A.decision(acts, A.outcome([bad])), "refused")
+        self.assertEqual(A.batches([{"type": "hire"}, {"type": "extend_shift"}]),
+                         [[{"type": "extend_shift"}], [{"type": "hire"}]])

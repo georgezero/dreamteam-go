@@ -290,7 +290,11 @@ jobs:
         # V0.10a, without any model: the prompt sample selected again from
         # the committed recordings and every request's messages checked
         # against their recorded SHA-256; the repeatability tools' tests;
-        # the request schedule rebuilt from the protocol and compared.
+        # the request schedule rebuilt from the protocol; the analysis of
+        # the committed live responses, validated by the engine on the
+        # V0.8c and V0.9c replays above; the shared-prefix prototype's
+        # specs rebuilt, both arms run and compared. Each equal to the
+        # committed file and compared across platforms below.
         shell: bash
         run: |
           set -euo pipefail
@@ -299,6 +303,19 @@ jobs:
           python3 -B -m unittest discover -s analysis/repeatability 2>&1 | tail -1
           $P analysis/repeatability/repeat_run.py --protocol $V/protocol.json --schedule-only --out v10a
           cmp v10a/schedule.json $V/schedule.json
+          $P analysis/repeatability/repeat_analysis.py --binary ./dt --dir $V --replays . --out v10a
+          for f in repeatability.json repeatability-tables.md; do cmp v10a/$f $V/$f; cp v10a/$f out/v10a-$f; done
+          $P analysis/repeatability/shared_prefix.py specs --prior $V/prototype --out v10a-proto
+          diff -r v10a-proto $V/prototype -x prototype.json -x prototype-tables.md
+          mkdir -p v10a-runs
+          for f in $V/prototype/run-*.json; do
+            n=$(basename "$f" .json)
+            ./dt benchmark suite run "$f" -out "v10a-runs/v10a-prototype-$n" > /dev/null
+            ./dt benchmark verify "v10a-runs/v10a-prototype-$n" | tail -1
+            cp "v10a-runs/v10a-prototype-$n/manifest.json" "out/v10a-prototype-$n-manifest.json"
+          done
+          $P analysis/repeatability/shared_prefix.py compare --dir $V/prototype --runs v10a-runs --out v10a-cmp
+          for f in prototype.json prototype-tables.md; do cmp v10a-cmp/$f $V/prototype/$f; cp v10a-cmp/$f out/v10a-$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

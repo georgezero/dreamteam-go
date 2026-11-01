@@ -1,0 +1,132 @@
+{
+ "schema": "dreamteam.benchmark-suite-run/v1",
+ "id": "v10a-prototype-staffing-shortage-credit-s42002",
+ "description": "V0.10a shared-prefix prototype, entry staffing-shortage-credit, seed 42002: both arms of each V0.9c preview point on this run, beside no action. Deterministic: a rerun gives the same files. Run from the repository root.",
+ "suite": "../../suite/dreamteam-dev-4.json",
+ "entries": [
+  "staffing-shortage-credit"
+ ],
+ "seeds": [
+  42002
+ ],
+ "seedPlan": "The V0.9c run's seed, so that the recorded decisions belong to the run.",
+ "days": 30,
+ "policies": [
+  "noop",
+  "ss-qwen-s42002-p1-control",
+  "ss-qwen-s42002-p1-treatment",
+  "ss-qwen-s42002-p6-control",
+  "ss-qwen-s42002-p6-treatment",
+  "ss-qwen-s42002-p26-control",
+  "ss-qwen-s42002-p26-treatment"
+ ],
+ "external": [
+  {
+   "id": "ss-qwen-s42002-p1-control",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, control arm of ss-qwen-s42002-p1: the recorded decisions before point 1 replayed and checked, the recorded proposal at it, the control arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p1.json",
+    "--arm",
+    "control"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "ss-qwen-s42002-p1-treatment",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, treatment arm of ss-qwen-s42002-p1: the recorded decisions before point 1 replayed and checked, the recorded proposal at it, the treatment arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p1.json",
+    "--arm",
+    "treatment"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "ss-qwen-s42002-p6-control",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, control arm of ss-qwen-s42002-p6: the recorded decisions before point 6 replayed and checked, the recorded proposal at it, the control arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p6.json",
+    "--arm",
+    "control"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "ss-qwen-s42002-p6-treatment",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, treatment arm of ss-qwen-s42002-p6: the recorded decisions before point 6 replayed and checked, the recorded proposal at it, the treatment arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p6.json",
+    "--arm",
+    "treatment"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "ss-qwen-s42002-p26-control",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, control arm of ss-qwen-s42002-p26: the recorded decisions before point 26 replayed and checked, the recorded proposal at it, the control arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p26.json",
+    "--arm",
+    "control"
+   ],
+   "timeoutSeconds": 300
+  },
+  {
+   "id": "ss-qwen-s42002-p26-treatment",
+   "version": "1",
+   "description": "shared-prefix/v1 prototype, treatment arm of ss-qwen-s42002-p26: the recorded decisions before point 26 replayed and checked, the recorded proposal at it, the treatment arm's continuation with the spec's replies, then no action; no model is called",
+   "command": [
+    "python3",
+    "-I",
+    "-B",
+    "./analysis/repeatability/shared_prefix.py",
+    "policy",
+    "--spec",
+    "./docs/benchmark/v10a-dev/prototype/specs/ss-qwen-s42002-p26.json",
+    "--arm",
+    "treatment"
+   ],
+   "timeoutSeconds": 300
+  }
+ ],
+ "baseline": "noop",
+ "output": "results",
+ "evaluation": {
+  "t90": false
+ }
+}

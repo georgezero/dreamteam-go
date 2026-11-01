@@ -1,0 +1,30 @@
+{
+ "schema": "dreamteam.shared-prefix-spec/v1",
+ "id": "ss-qwen-s42002-p1",
+ "version": "shared-prefix/v1",
+ "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+ "recordingSha256": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+ "branchPoint": 1,
+ "maxRetries": 1,
+ "suffix": "no_action",
+ "outputs": {},
+ "replies": {
+  "treatment": [
+   {
+    "source": "recorded",
+    "from": "1.2",
+    "answers": "6662a02b4d7f875a8e97086a851fbe4aeb4639edc30bdaccd36576fe0fddf246",
+    "sha256": "41ffb86585605fdc572f445534afebd7c0b1123be3aeef6d96d3dbbbe9976329",
+    "content": "{\"reason\": \"The previous teleradiology action failed because it was missing the 'windows' field. I will correct the contract_teleradiology action to include the required 'windows' field (weeknights) and resubmit the extend_shift actions for Riley and Casey to boost today's capacity.\", \"actions\": [{\"type\": \"extend_shift\", \"employee\": \"E03\", \"minutes\": 120, \"date\": \"2026-10-14\"}, {\"type\": \"extend_shift\", \"employee\": \"E05\", \"minutes\": 120, \"date\": \"2026-10-14\"}, {\"type\": \"contract_teleradiology\", \"op\": \"start\", \"plan\": \"standard-v1\", \"effective\": \"2026-10-28\", \"scope\": \"all\", \"windows\": [\"weeknights\"], \"requestId\": \"tr-2026-10-14-001\"}]}"
+   }
+  ],
+  "control": [
+   {
+    "source": "scripted",
+    "from": null,
+    "answers": null,
+    "content": "{\"reason\": \"Scripted reply (shared-prefix/v1 prototype): no action.\", \"actions\": []}"
+   }
+  ]
+ }
+}

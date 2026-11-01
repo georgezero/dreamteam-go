@@ -1,0 +1,30 @@
+{
+ "schema": "dreamteam.shared-prefix-spec/v1",
+ "id": "ss-qwen-s42001-p27",
+ "version": "shared-prefix/v1",
+ "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+ "recordingSha256": "c3ccd42e6ebe1a3f9c0967d9fc7ebce6f8b36700262746129ca7392e266fbff3",
+ "branchPoint": 27,
+ "maxRetries": 1,
+ "suffix": "no_action",
+ "outputs": {},
+ "replies": {
+  "treatment": [
+   {
+    "source": "recorded",
+    "from": "27.2",
+    "answers": "1b6ab9b0bb6e89eea44408b5856b79138e7648be6247108234d26158d42179b8",
+    "sha256": "f57d412f9ec78ae9dcb0551af3d6e2360ab2de3dc51583fdaddfac32b2ac2a3f",
+    "content": "{\"reason\": \"The preview confirms that the roster changes for H00001 and H00002 and the cancellation of the teleradiology contract T00001 are valid and accepted. These actions prepare for the new staff becoming productive and reduce future costs by ending the telerad contract when possible.\", \"actions\": [{\"type\": \"set_roster\", \"employee\": \"H00001\", \"op\": \"set\", \"effective\": \"2026-11-23\", \"roster\": {\"A\": {\"Mon\": {\"start\": \"08:00\", \"end\": \"16:30\", \"breaks\": [[\"12:30\", \"13:00\"]], \"assignment\": \"R4\", \"covers\": []}, \"Tue\": {\"start\": \"08:00\", \"end\": \"16:30\", \"breaks\": [[\"12:30\", \"13:00\"]], \"assignment\": \"R4\", \"covers\": []}, \"Wed\": {\"start\": \"08:00\", \"end\": \"16:30\", \"breaks\": [[\"12:30\", \"13:00\"]], \"assignment\": \"R4\", \"covers\": []}, \"Thu\": {\"start\": \"08:00\", \"end\": \"16:30\", \"breaks\": [[\"12:30\", \"13:00\"]], \"assignment\": \"R4\", \"covers\": []}, \"Fri\": {\"start\": \"08:00\", \"end\": \"16:30\", \"breaks\": [[\"12:30\", \"13:00\"]], \"assignment\": \"R4\", \"covers\": []}, \"Sat\": null, \"Sun\": null}}}, {\"type\": \"set_roster\", \"employee\": \"H00002\", \"op\": \"set\", \"effective\": \"2026-11-23\", \"roster\": {\"A\": {\"Mon\": null, \"Tue\": {\"start\": \"11:30\", \"end\": \"20:00\", \"breaks\": [[\"15:30\", \"16:00\"]], \"assignment\": \"R3\", \"covers\": [{\"from\": \"16:15\", \"room\": \"R1\", \"until\": \"20:00\"}]}, \"Wed\": {\"start\": \"11:30\", \"end\": \"20:00\", \"breaks\": [[\"15:30\", \"16:00\"]], \"assignment\": \"R3\", \"covers\": [{\"from\": \"16:15\", \"room\": \"R1\", \"until\": \"20:00\"}]}, \"Thu\": {\"start\": \"11:30\", \"end\": \"20:00\", \"breaks\": [[\"15:30\", \"16:00\"]], \"assignment\": \"R3\", \"covers\": [{\"from\": \"16:15\", \"room\": \"R1\", \"until\": \"20:00\"}]}, \"Fri\": {\"start\": \"11:30\", \"end\": \"20:00\", \"breaks\": [[\"15:30\", \"16:00\"]], \"assignment\": \"R3\", \"covers\": [{\"from\": \"16:15\", \"room\": \"R1\", \"until\": \"20:00\"}]}, \"Sat\": {\"start\": \"10:00\", \"end\": \"18:00\", \"breaks\": [[\"13:30\", \"14:00\"]], \"assignment\": \"R3\", \"covers\": [{\"from\": \"10:00\", \"room\": \"R1\", \"until\": \"18:00\"}]}, \"Sun\": null}}}, {\"type\": \"contract_teleradiology\", \"op\": \"cancel\", \"contract\": \"T00001\", \"endDate\": \"2026-12-09\"}]}"
+   }
+  ],
+  "control": [
+   {
+    "source": "scripted",
+    "from": null,
+    "answers": null,
+    "content": "{\"reason\": \"Scripted reply (shared-prefix/v1 prototype): no action.\", \"actions\": []}"
+   }
+  ]
+ }
+}

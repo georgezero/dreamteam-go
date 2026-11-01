@@ -43,11 +43,14 @@ result is unchanged.
 
 In development, not released (`0.10.0-dev.1`): **V0.10a**
 (`docs/benchmark/v10a-dev/`), inference repeatability and controlled
-comparison design. It measures how often the same request to the same
-model gives the same answer, and at which level a difference appears: the
-text, the parsed reply, the actions, their validation or the decision. It
-also designs a shared-prefix comparison, prototyped offline. Its protocol
-was declared before any request.
+comparison design. Its protocol was declared before any request.
+* **The measurement:** 25 recorded requests were sent again 15 times each
+  to the same models.
+  * The text was identical across all 15 for 2 of 25.
+  * The decision was the same for 17 of 25.
+  * Sending requests at once added variation.
+* **The design:** a shared-prefix comparison that holds the state and the
+  initial proposal fixed, prototyped offline.
 
 It builds on V0.8 (`0.8.0`, auditable decision evidence: deterministic,
 versioned consistency rules for agents' stated reasons, a frozen review

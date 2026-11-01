@@ -1009,3 +1009,34 @@ point.
 * **What it does not affect:** the recordings and their replays, which are
   exact.
 
+## 15. Inference repeatability of the agents' setting (V0.10a)
+
+V0.10a measured the repeatability of the setting llm-agent 3 and 4 run in,
+with no change to either agent, prompt or settings file
+([benchmark/v10a-dev/](benchmark/v10a-dev/README.md)). 25 recorded
+requests from V0.8c and V0.9c were sent again unchanged:
+* each request's messages were verified against the recording;
+* 15 times each, under four declared conditions;
+* compared at five levels: text, parsed reply, actions, the engine's
+  validation at the recorded state, and the decision.
+
+* **Text:** identical across all 15 requests for 2 of 10 Gemma prompts and
+  0 of 15 Qwen prompts.
+* **Decision** (act, no action, refused, unparsable): the same across all
+  15 for 8 of 10 Gemma and 9 of 15 Qwen prompts. Requests sent one at a
+  time changed the decision at 3 of 25 prompts; sent two at a time, at 8.
+* **Staffing proposals varied most.** That is where llm-agent 4's preview
+  step applies.
+* **`seed`** (a server request field, not one the agent sends) made no
+  visible difference. The prompt cache was nearly always hit, including
+  for differing answers.
+
+**For users of the agent:**
+* a live run's decisions are a sample, not a fixed function of the prompt;
+* the recordings and their replays remain exact;
+* comparing two agent versions live mixes the versions' difference with
+  this variation. The shared-prefix design
+  ([benchmark/v10a-dev/DESIGN.md](benchmark/v10a-dev/DESIGN.md)) removes the
+  variation before the intervention, not after it.
+
+
