@@ -286,6 +286,19 @@ jobs:
           for f in preview-evaluation.json preview-tables.md financial-evidence.json financial-tables.md; do
             cmp v09c/$f $V/$f; cp v09c/$f out/v09c-$f
           done
+      - name: Inference repeatability
+        # V0.10a, without any model: the prompt sample selected again from
+        # the committed recordings and every request's messages checked
+        # against their recorded SHA-256; the repeatability tools' tests;
+        # the request schedule rebuilt from the protocol and compared.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v10a-dev
+          $P analysis/repeatability/prompt_sample.py --check $V/sample
+          python3 -B -m unittest discover -s analysis/repeatability 2>&1 | tail -1
+          $P analysis/repeatability/repeat_run.py --protocol $V/protocol.json --schedule-only --out v10a
+          cmp v10a/schedule.json $V/schedule.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

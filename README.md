@@ -41,6 +41,14 @@ and changes no simulator behaviour:
 Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged.
 
+In development, not released (`0.10.0-dev.1`): **V0.10a**
+(`docs/benchmark/v10a-dev/`), inference repeatability and controlled
+comparison design. It measures how often the same request to the same
+model gives the same answer, and at which level a difference appears: the
+text, the parsed reply, the actions, their validation or the decision. It
+also designs a shared-prefix comparison, prototyped offline. Its protocol
+was declared before any request.
+
 It builds on V0.8 (`0.8.0`, auditable decision evidence: deterministic,
 versioned consistency rules for agents' stated reasons, a frozen review
 package, complete attempt recording with llm-agent 3,

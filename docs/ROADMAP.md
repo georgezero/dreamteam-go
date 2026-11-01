@@ -21,7 +21,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
-| **V0.10** (proposed, not approved) | Experimental validity: inference repeatability, decision-level interventions, stronger controls for evaluating decision support (§7d) | V0.9 |
+| **V0.10** (in development: V0.10a, `0.10.0-dev.1`, authorized by the owner 2026-11-01) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1007,7 +1007,7 @@ Each rule change is a new, separately versioned rule, and earlier
 findings stay under their original versions. V0.9a, V0.9b and V0.9c are
 accepted and V0.9.0 is released. Later steps each need the owner's GO.
 
-## 7d. V0.10 — experimental validity (proposed, not approved)
+## 7d. V0.10 — experimental validity (in development)
 
 The owner's recommendation after V0.9c. DreamTeam can replay an
 experiment exactly; the next question is whether an experiment can
@@ -1017,10 +1017,10 @@ than more financial features.
 
 | Milestone | Proposed scope | Status |
 |---|---|---|
-| V0.10a | Inference repeatability and controlled comparison methodology | proposed |
-| V0.10b | Decision-level interventions and counterfactual analysis | proposed |
-| V0.10c | Expanded preview evaluation with stronger experimental controls | proposed |
-| V0.10.0 | Release | proposed |
+| V0.10a | Inference repeatability and controlled-comparison design | authorized 2026-11-01; declared (0.10.0-dev.1) |
+| V0.10b | Shared-prefix decision interventions | proposed |
+| V0.10c | Prospective controlled evaluation | proposed |
+| V0.10.0 | Release | pending |
 
 Proposed work:
 * **independent evidence review:** label the frozen 98-item package by an
@@ -1033,7 +1033,29 @@ Proposed work:
 * **financial consequence communication:** how the preview's facts are
   presented to an agent.
 
-None of this is approved or implemented. Each step needs the owner's GO.
+**V0.9.0 accepted; V0.10a as authorized** (owner, 2026-11-01). The main
+remaining problem is experimental control, not simulator functionality:
+in V0.9c Qwen's answers diverged before the preview, so the financial
+differences could not be attributed to it. V0.10a is a methodology and
+measurement milestone in two parts:
+* **Part A, inference repeatability:** how often the same model, prompt,
+  settings and server state give identical responses, at the levels of
+  raw text, parsed reply, proposed actions, validated actions and the
+  decision. A difference in wording is not necessarily a difference in
+  management decisions. Cold and warm, sequential and concurrent
+  requests, and prompt-cache behaviour, where the server allows them;
+  otherwise marked unavailable.
+* **Part B, controlled comparison design:** a versioned shared-prefix
+  method that branches from an identical recorded state and initial
+  proposal, one branch shown the preview, the other not, with an offline
+  prototype on recorded or scripted responses.
+* **Not authorized:** a new 30- or 90-day live LLM evaluation; simulator
+  mechanics; agent prompt or decision changes; scoring changes; restarting
+  the shared inference service.
+* **Declared:** [docs/benchmark/v10a-dev/PLAN.md](benchmark/v10a-dev/PLAN.md),
+  before any request.
+
+The other items above remain proposed. Each step needs the owner's GO.
 
 ## 8. Testing strategy (all versions)
 

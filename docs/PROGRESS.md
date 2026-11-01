@@ -7,6 +7,48 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10a — inference repeatability and controlled comparison design (0.10.0-dev.1): declaration
+
+Owner decision 2026-11-01: V0.9.0 is accepted and closed (7fa9557, tag
+`v0.9.0`, CI run 41307369300). V0.10a is authorized: a methodology and
+measurement milestone. No simulator mechanics, agent prompt or decision
+change, scoring change, or multi-day live benchmark.
+
+**Declared before any request** (`docs/benchmark/v10a-dev/`):
+* **The protocol** `v10a-repeatability-1` (`PLAN.md`, `protocol.json`):
+  * the 25 sampled requests sent again, unchanged, to the same two
+    models;
+  * four conditions: `interleaved` (5 rounds), `back_to_back` (3 in a
+    row), `concurrent` (2 rounds of 2 at once) and `seeded` (3 in a row
+    with `"seed": 0`). 375 requests;
+  * the exact order in `schedule.json`;
+  * stop conditions, resource limits, and the five comparison levels
+    (raw, parsed, actions, validation, decision);
+  * unavailable and not invented: cache cleared, cache disabled and
+    cold start. They need admin access or would affect the shared
+    server's other users.
+* **The prompt sample** (`sample/`, `analysis/repeatability/prompt_sample.py`,
+  `dreamteam.repeatability-sample/v1`):
+  * a deterministic, hash-ranked sample from the V0.8c and V0.9c
+    recordings in five categories (no action, staffing, financially
+    consequential, validation refusal, preview review);
+  * every message of every request verified against the recorded SHA-256;
+  * re-checked in CI.
+* **The server record** (`SERVER.md`, `server-declared.json`): oMLX 0.7.0;
+  what its public endpoints show, and what only the admin API would.
+* **The live client** (`analysis/repeatability/repeat_run.py`): the
+  endpoint is never recorded, nothing is retried or dropped; tests with a
+  stub server.
+* **Version** 0.10.0-dev.1; 0.9.0 registered for replay
+  (`mini-seed52-v090`, made from a clean 7fa9557 worktree; batch mode
+  `v0.9.0`; `internal/session/v090_test.go`).
+* **Baseline** at 7fa9557 (`docs/benchmark/v10a-dev/README.md` §1).
+
+No change to the simulator's behaviour, the agents, their prompts or
+settings, any recording, evidence rule, suite or golden reference.
+
+---
+
 ## V0.9.0 — release: financial decision evidence and preview-based decision support
 
 Owner decision 2026-11-01:

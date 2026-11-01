@@ -1,0 +1,388 @@
+{
+ "categories": [
+  "no_action",
+  "staffing_proposal",
+  "financially_consequential",
+  "validation_refusal",
+  "preview_review"
+ ],
+ "counts": {
+  "candidates": {
+   "gemma4-26b-a4b": {
+    "financially_consequential": 0,
+    "no_action": 350,
+    "preview_review": 1,
+    "staffing_proposal": 3,
+    "validation_refusal": 4
+   },
+   "qwen36-35b-a3b": {
+    "financially_consequential": 3,
+    "no_action": 233,
+    "preview_review": 8,
+    "staffing_proposal": 25,
+    "validation_refusal": 97
+   }
+  },
+  "selected": {
+   "gemma4-26b-a4b": {
+    "financially_consequential": 0,
+    "no_action": 3,
+    "preview_review": 1,
+    "staffing_proposal": 3,
+    "validation_refusal": 3
+   },
+   "qwen36-35b-a3b": {
+    "financially_consequential": 3,
+    "no_action": 3,
+    "preview_review": 3,
+    "staffing_proposal": 3,
+    "validation_refusal": 3
+   }
+  }
+ },
+ "evidence": [
+  "docs/benchmark/v09b-dev/financial-evidence.json",
+  "docs/benchmark/v09c-dev/financial-evidence.json"
+ ],
+ "minCommitmentCents": 1000000,
+ "models": {
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp",
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp"
+ },
+ "perCell": 3,
+ "prompts": [
+  {
+   "attempt": 1,
+   "attemptId": "1.1",
+   "category": "no_action",
+   "id": "p01",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 1,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s41902-decisions.jsonl",
+   "recordingSha256": "0cc7a20176ee971e2bb31dbca7c34bbde260bfa0d8b5cccf9f7ee04fb3eafd2b",
+   "requestChars": 29713,
+   "requestSha256": "27865e59f72002d671d9ee50f19536eb67eb821b51ce9e52f373dc535ec49e0c"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "2.1",
+   "category": "no_action",
+   "id": "p02",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 2,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "recordingSha256": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "requestChars": 29695,
+   "requestSha256": "6924b3537f3823857397604b6145ab9b777d57f83f517ad79cb6e5df74a778eb"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "16.1",
+   "category": "no_action",
+   "id": "p03",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 16,
+   "recording": "docs/benchmark/v09c-dev/eval/financial-pressure-credit-gemma4-26b-a4b-s42002-decisions.jsonl",
+   "recordingSha256": "0cbb4305661f336b4b9bd0134ffafdac49fa8106738ed97d2fb5c2d14b664e5e",
+   "requestChars": 31064,
+   "requestSha256": "a53e00e4c0cdc46282daa7362bd8a1c47d5b45f514190e78ecbb69441ee511b4"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "28.2",
+   "category": "staffing_proposal",
+   "id": "p04",
+   "messages": 4,
+   "model": "gemma4-26b-a4b",
+   "point": 28,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "recordingSha256": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "requestChars": 32707,
+   "requestSha256": "4a1e98d6031275c83a7b9cbe03f25f32bdb6557409f5344d4c1b46db9a354790"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "14.1",
+   "category": "staffing_proposal",
+   "id": "p05",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 14,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-s42001-decisions.jsonl",
+   "recordingSha256": "66baedefbbb9b26dcfd70b3d6c213b004b16543cdd162b707a029a5fdc58c830",
+   "requestChars": 29317,
+   "requestSha256": "9de6b0777fc3e12e6997e361401b42ef22f6abfb2cf6f3803a03f7caad7b7cfb"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "14.1",
+   "category": "staffing_proposal",
+   "id": "p06",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 14,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "c98da4640ad69abb24590c3b68cfefecf173d14159f16df3ca93f728a95ddf7c",
+   "requestChars": 29317,
+   "requestSha256": "9de6b0777fc3e12e6997e361401b42ef22f6abfb2cf6f3803a03f7caad7b7cfb"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "28.1",
+   "category": "validation_refusal",
+   "id": "p07",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 28,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "recordingSha256": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "requestChars": 31823,
+   "requestSha256": "7d5e8982d3c8734e76942e26d0dca5fcdd90e8065341696fcec08a27d6cb907a"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "26.2",
+   "category": "validation_refusal",
+   "id": "p08",
+   "messages": 4,
+   "model": "gemma4-26b-a4b",
+   "point": 26,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "recordingSha256": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "requestChars": 31840,
+   "requestSha256": "3ca1d3701c22c548eb75622dac95b5575ea3b9533b894bffc299680a1cea28fc"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "27.1",
+   "category": "validation_refusal",
+   "id": "p09",
+   "messages": 2,
+   "model": "gemma4-26b-a4b",
+   "point": 27,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl",
+   "recordingSha256": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "requestChars": 32902,
+   "requestSha256": "b3e57c6072a129988edf587cac46d8ed6fa4cb92f4ebad6e482ec9cceac25884"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "14.2",
+   "category": "preview_review",
+   "id": "p10",
+   "messages": 4,
+   "model": "gemma4-26b-a4b",
+   "point": 14,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "c98da4640ad69abb24590c3b68cfefecf173d14159f16df3ca93f728a95ddf7c",
+   "requestChars": 32458,
+   "requestSha256": "62b70391cc0c7016b579545f55b09a5653f3008a6ace42a5e99de6dc57060c81"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "16.1",
+   "category": "no_action",
+   "id": "p11",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 16,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42001-decisions.jsonl",
+   "recordingSha256": "596775f40fc06b10c5a37c654bd7f50a1eacc5508e4c8479d3434bccc9571c3c",
+   "requestChars": 36050,
+   "requestSha256": "be05abe7d14d8c5a098b5e52e069bfee2e2d835e8d7daa7d7e37882b2cd6dfbb"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "21.1",
+   "category": "no_action",
+   "id": "p12",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 21,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+   "recordingSha256": "4cd75fccecaa7eb7a554afcc8f015945ef662e347e656490dd49d8f0f945146c",
+   "requestChars": 36241,
+   "requestSha256": "4c02fa53dfa22b5b12ba64a225bb5366967610890f85b3bb56f1b6ea99b31de0"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "29.1",
+   "category": "no_action",
+   "id": "p13",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 29,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41902-decisions.jsonl",
+   "recordingSha256": "ac3d6b34254a13c1a3eed6fd9c2abda833fd6c2acbabdc9d866ee2123755aecd",
+   "requestChars": 33641,
+   "requestSha256": "912b68b2f635c90061d2f42dc3184ec392285ad4477ba0fe10db02af7eb45485"
+  },
+  {
+   "attempt": 3,
+   "attemptId": "13.3",
+   "category": "staffing_proposal",
+   "id": "p14",
+   "messages": 6,
+   "model": "qwen36-35b-a3b",
+   "point": 13,
+   "recording": "docs/benchmark/v09c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "a19267ed20117ce05b25a5b69898ff8025584b182f06b3cb15923f03a7ba6f30",
+   "requestChars": 36475,
+   "requestSha256": "745b91019d8fb3586b32fb9ddc6b712c48e93c45ea24703fc45975ee363253a6"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "24.1",
+   "category": "staffing_proposal",
+   "id": "p15",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 24,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl",
+   "recordingSha256": "3dfb5c4ebab599c198c3712132c5438d4e09fa26e814c27bff2918dae69fc4d3",
+   "requestChars": 33641,
+   "requestSha256": "cd43d2b822af4763368b593c1613dc65af1b2cd284a995691b3a78fc4b976baf"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "6.1",
+   "category": "staffing_proposal",
+   "id": "p16",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 6,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "recordingSha256": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+   "requestChars": 37440,
+   "requestSha256": "5bf8a15ba9c9b8bf28d0f4589645808b241c0dcd92f74e03652970ae5e56f48d"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "4.2",
+   "category": "financially_consequential",
+   "id": "p17",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 4,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl",
+   "recordingSha256": "4cd75fccecaa7eb7a554afcc8f015945ef662e347e656490dd49d8f0f945146c",
+   "requestChars": 34495,
+   "requestSha256": "c40a70e303ff3c274811f211fc718a1d108e7c0b193dc8e3d1b8207eebac1c6f"
+  },
+  {
+   "attempt": 3,
+   "attemptId": "0.3",
+   "category": "financially_consequential",
+   "id": "p18",
+   "messages": 6,
+   "model": "qwen36-35b-a3b",
+   "point": 0,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "c3ccd42e6ebe1a3f9c0967d9fc7ebce6f8b36700262746129ca7392e266fbff3",
+   "requestChars": 39250,
+   "requestSha256": "4bcaca6aab1e6dd858939356312a15e87940ec1b2551bae653bd098618f37ae6"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "0.2",
+   "category": "financially_consequential",
+   "id": "p19",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 0,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42001-decisions.jsonl",
+   "recordingSha256": "596775f40fc06b10c5a37c654bd7f50a1eacc5508e4c8479d3434bccc9571c3c",
+   "requestChars": 31615,
+   "requestSha256": "3f8487d75c046bda285b641880e8e27e89cca6481a9621561963d476ebb4004b"
+  },
+  {
+   "attempt": 3,
+   "attemptId": "26.3",
+   "category": "validation_refusal",
+   "id": "p20",
+   "messages": 6,
+   "model": "qwen36-35b-a3b",
+   "point": 26,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "c3ccd42e6ebe1a3f9c0967d9fc7ebce6f8b36700262746129ca7392e266fbff3",
+   "requestChars": 50913,
+   "requestSha256": "2d2535fe3e6753271077e1771d3c79425ffec796167f409a226db8b5588e6d26"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "6.2",
+   "category": "validation_refusal",
+   "id": "p21",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 6,
+   "recording": "docs/benchmark/v09c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s42001-decisions.jsonl",
+   "recordingSha256": "fde6c0d0c1ae2486fd9d18b221d55a8646189f9323e5ce231fa92611428e9569",
+   "requestChars": 39299,
+   "requestSha256": "8b81f7f54131f381095480033c3eb982003f8eab1f966f5b71b7b3db13bd1e9c"
+  },
+  {
+   "attempt": 1,
+   "attemptId": "4.1",
+   "category": "validation_refusal",
+   "id": "p22",
+   "messages": 2,
+   "model": "qwen36-35b-a3b",
+   "point": 4,
+   "recording": "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl",
+   "recordingSha256": "61b2ef115cd490e716a4ec0a77b2ec6715c7f0e78c8aaab88bbf0fe9c9bff7a0",
+   "requestChars": 30738,
+   "requestSha256": "e6c7776657b75631985cbcbc68b742a31e8ffc2b233ee0f1f4b77b530b6c23d6"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "0.2",
+   "category": "preview_review",
+   "id": "p23",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 0,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42001-decisions.jsonl",
+   "recordingSha256": "c3ccd42e6ebe1a3f9c0967d9fc7ebce6f8b36700262746129ca7392e266fbff3",
+   "requestChars": 34979,
+   "requestSha256": "94419db75ad43498139a73e7d77aa6e7a28e625f2f4daf28f8a9008f0ddd9b4d"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "26.2",
+   "category": "preview_review",
+   "id": "p24",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 26,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "recordingSha256": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+   "requestChars": 45481,
+   "requestSha256": "7ac79879d832d952ed61d9066a8432df8aad97ecca4cda8ab7bdc368506c8fe5"
+  },
+  {
+   "attempt": 2,
+   "attemptId": "1.2",
+   "category": "preview_review",
+   "id": "p25",
+   "messages": 4,
+   "model": "qwen36-35b-a3b",
+   "point": 1,
+   "recording": "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl",
+   "recordingSha256": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+   "requestChars": 31226,
+   "requestSha256": "2c9fcb367cb72eedad6cedafc91aaf7aeb340b542b59dde5a64ed20f3ae07f7c"
+  }
+ ],
+ "promptsFileSha256": "d1815fd78f483bfe2673cde93da25f31ee3aee6b8a3a2ed0bb7ce6f624a9150f",
+ "recordings": [
+  "docs/benchmark/v08c-dev/eval/*-decisions.jsonl",
+  "docs/benchmark/v09c-dev/eval/*-decisions.jsonl"
+ ],
+ "rule": "dreamteam-v10a-sample/1",
+ "schema": "dreamteam.repeatability-sample/v1",
+ "systemPromptSha256": "0efc36e21b592abc4acb4c8b78ee7634b39755580a0f5ac348a5be1f8a80c4e1"
+}

@@ -1,0 +1,43 @@
+{
+ "schema": "dreamteam.repeatability-protocol/v1",
+ "id": "v10a-repeatability-1",
+ "description": "V0.10a live inference repeatability: the sample's recorded requests sent again, unchanged, to the same models on the same server, under four declared conditions. Declared before any request (PLAN.md).",
+ "sample": "sample",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp",
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp"
+ },
+ "modelOrder": ["gemma4-26b-a4b", "qwen36-35b-a3b"],
+ "orderRule": "dreamteam-v10a-order/1",
+ "conditions": [
+  {"id": "interleaved", "description": "sequential; 5 rounds; in each round every prompt of the model once, in the order of SHA-256('dreamteam-v10a-order/1|interleaved|<round>|<prompt id>')", "rounds": 5, "concurrency": 1, "seed": null},
+  {"id": "back_to_back", "description": "sequential; each prompt 3 times in a row, prompts in the order of SHA-256('dreamteam-v10a-order/1|back_to_back|<prompt id>')", "repeats": 3, "concurrency": 1, "seed": null},
+  {"id": "concurrent", "description": "2 identical requests sent at once, 2 rounds per prompt, prompts in the order of SHA-256('dreamteam-v10a-order/1|concurrent|<prompt id>')", "rounds": 2, "concurrency": 2, "seed": null},
+  {"id": "seeded", "description": "sequential; each prompt 3 times in a row with the request's seed field set to 0, prompts in the order of SHA-256('dreamteam-v10a-order/1|seeded|<prompt id>')", "repeats": 3, "concurrency": 1, "seed": 0}
+ ],
+ "request": {
+  "body": "the recorded request (model, messages, temperature 0, max_tokens 4096, response_format json_object), serialized as the agent serialized it; the seeded condition adds \"seed\": 0 at the end",
+  "timeoutSeconds": 300,
+  "retries": 0
+ },
+ "unavailable": [
+  {"condition": "cache_cleared", "reason": "the server's cache controls (hot-cache and SSD-cache clear) are admin-only, need a key this study does not have, and would affect the server's other users; not authorized"},
+  {"condition": "cache_disabled", "reason": "no per-request cache switch in the public request schema; server settings are admin-only; not authorized"},
+  {"condition": "cold_start", "reason": "would need a model unload or server restart, which affects other users; not authorized. The first request of each prompt in this study is reported as such, with its observed cached tokens, and not called cold"}
+ ],
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "wallClockSeconds": 14400,
+  "healthBeforeEachBlock": "GET /health must answer status healthy; otherwise the study stops"
+ },
+ "resources": "the client runs on the Pi under systemd-run with MemoryMax 1G and nice 10; at most 2 requests in flight",
+ "comparison": {
+  "A_raw": "the message content's bytes (choices[0].message.content), exactly",
+  "B_parsed": "the content parsed as llm-agent 3 parses it (wrapping stripped, one JSON object) and serialized canonically (sorted keys, no spaces); unparsable is its own value",
+  "C_actions": "the parsed actions list (or the details request), canonical JSON; unparsable is its own value",
+  "D_validation": "each distinct action list split into llm-agent 3's batches and validated by the engine at the recorded decision point (a replay of the recording); the outcome is each batch's valid flag and refusal codes",
+  "E_decision": "no_action, actions (every batch valid), refused (some batch invalid), details, or unparsable",
+  "reference": "each request is compared with the prompt's first response in the same condition, and with the original recorded response"
+ }
+}
