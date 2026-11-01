@@ -21,7 +21,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
-| **V0.10** (in development: V0.10a, `0.10.0-dev.1`, authorized by the owner 2026-11-01, done, awaiting owner review) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
+| **V0.10** (in development: V0.10a accepted; V0.10b, `0.10.0-dev.2`, authorized by the owner 2026-11-01, declared) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1017,8 +1017,8 @@ than more financial features.
 
 | Milestone | Proposed scope | Status |
 |---|---|---|
-| V0.10a | Inference repeatability and controlled-comparison design | authorized 2026-11-01; declared at 41b16c9 before any request; done (0.10.0-dev.1), awaiting owner review |
-| V0.10b | Shared-prefix decision interventions | proposed |
+| V0.10a | Inference repeatability and controlled-comparison design | accepted 2026-11-01 (de8ac79, CI 41326685680) |
+| V0.10b | Live shared-prefix decision experiments | authorized 2026-11-01; declared before any request (0.10.0-dev.2) |
 | V0.10c | Prospective controlled evaluation | proposed |
 | V0.10.0 | Release | pending |
 
@@ -1066,6 +1066,24 @@ measurement milestone in two parts:
     and its offline prototype, on the 9 V0.9c preview points: identical
     prefixes and proposals, the treatment arm equal to the recording.
     Nothing causal is claimed.
+
+**V0.10a accepted; V0.10b authorized** (owner, 2026-11-01): a bounded,
+prospectively declared decision-level experiment, not another 30- or
+90-day benchmark.
+* **Design:** at 8 recorded branch points, the state and initial staffing
+  proposal are held fixed. The control arm gets a neutral continuation;
+  the treatment arm gets the engine's exact preview. 20 draws per arm per
+  point, 320 requests, sequential and in a randomized interleaved order.
+  The outcome is keep, revise or abandon; the simulator continues only
+  with a fixed no-action suffix.
+* **Inventory:** the declared 2 accepted-preview and 2 refused-preview
+  points per model was impossible for Gemma, which has one
+  accepted-preview context
+  ([inventory](audits/v0.10b-branch-point-inventory.md)). The owner
+  approved option A: Gemma 1 accepted and 3 refused; Qwen 2 and 2.
+* **Declared:** [docs/benchmark/v10b-dev/PLAN.md](benchmark/v10b-dev/PLAN.md)
+  and [SPEC.md](benchmark/v10b-dev/SPEC.md) (`shared-prefix/v2`), before
+  any request.
 
 The other items above remain proposed. Each step needs the owner's GO.
 

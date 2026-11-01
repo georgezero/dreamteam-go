@@ -1,0 +1,81 @@
+{
+ "schema": "dreamteam.shared-prefix/v2",
+ "id": "v10b-decision-1",
+ "version": "shared-prefix/v2",
+ "description": "V0.10b live shared-prefix decision experiment: at 8 recorded branch points, the recorded conversation and initial proposal, then a neutral continuation (control) or the engine's exact preview (treatment), 20 draws per arm, one request at a time. Declared before any request (PLAN.md).",
+ "design": "option A of docs/audits/v0.10b-branch-point-inventory.md, approved by the owner: Gemma 1 accepted-preview and 3 refused-preview points (all its distinct contexts), Qwen 2 and 2",
+ "points": "points",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp",
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp"
+ },
+ "modelOrder": [
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b"
+ ],
+ "arms": {
+  "control": {
+   "text": "CONTINUE. Nothing has been submitted yet.\n\nNow reply with your final decision, one JSON object {\"reason\": ..., \"actions\": [...]}. It replaces your reply above: give the same actions to keep it, changed actions to revise it, or \"actions\": [] to submit nothing. It is then validated and submitted as before.",
+   "sha256": "bab212b0f0897f3b533f722413a718916b9079ade06979d275d30e697b5da5f8",
+   "rule": "the neutral continuation: its second paragraph is the treatment message's last paragraph, byte for byte"
+  },
+  "treatment": {
+   "template": "PREVIEW. Nothing has been submitted yet. This is the simulator's preview of the staffing actions in your reply (actions {indices}), exactly as the simulator returned it:\n{preview}\n\n{ops_note}Now reply with your final decision, one JSON object {{\"reason\": ..., \"actions\": [...]}}. It replaces your reply above: give the same actions to keep it, changed actions to revise it, or \"actions\": [] to submit nothing. It is then validated and submitted as before.",
+   "opsNote": "The operations actions in your reply have no preview (the simulator previews staffing actions only).\n\n",
+   "treatment": "llm-agent-preview/v1",
+   "sha256": "f8b7d787b59c36373d4a18135c1503ccf64e3dd956c749be42fdfb0dbe5c54fa",
+   "rule": "llm-agent 4's review message, unchanged: the engine's preview of the proposal's staffing actions at the recorded state, as compact JSON"
+  },
+  "assignment": "both arms at every point, every round: the arm is assigned by the schedule, not by the model or the state"
+ },
+ "drawsPerArm": 20,
+ "orderRule": "dreamteam-v10b-order/1",
+ "order": "per model in modelOrder; draws 1..20 as rounds; in each round every point and arm of the model once, in the order of SHA-256('dreamteam-v10b-order/1|<round>|<point id>|<arm>'); one request at a time",
+ "requests": 320,
+ "concurrency": 1,
+ "preflight": "GET /health, /v1/models and /openapi.json only (public, no inference); no inference preflight",
+ "request": {
+  "body": "the recorded proposal request (model, messages, temperature 0, max_tokens 4096, response_format json_object) with its messages followed by the recorded proposal (assistant) and the arm's message (user); serialized as the agent serialized it (json.dumps, keys in the recorded order); nothing added (no seed)",
+  "timeoutSeconds": 300,
+  "retries": 0
+ },
+ "server": {
+  "observed": "before the run, before each round and after the run: /health, the server version, the OpenAPI document's SHA-256 and the experiment models' entries in /v1/models; the cached prompt tokens each response reports",
+  "material": "the server version, the OpenAPI SHA-256, or either experiment model's entry changes; or /health is not healthy",
+  "unavailable": [
+   "cache clearing, cache disabling, cold starts and server settings: admin-only, not authorized, not used"
+  ]
+ },
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "wallClockSeconds": 14400,
+  "health": "a /health answer other than healthy before a round stops the run",
+  "serverChange": "a material change before a round stops the run"
+ },
+ "failures": "every request is recorded, failed or not; no retry, no replacement, no rerun; a failed request or an invalid reply is the draw's outcome (invalid); a stopped run is analysed as far as it went, the rest of its draws reported as not run",
+ "resources": "the client on the Pi under systemd-run --user --scope -p MemoryMax=1G nice -n 10; one request in flight",
+ "outcomes": {
+  "primary": "per point and arm, the distribution of the final decision over the 20 draws: kept, revised or abandoned (A4.response_of against the recorded proposal: the same actions in any order, other actions, or none) and invalid (a failed request, or a reply llm-agent 3's strict parser rejects, details not allowed), all in the denominator",
+  "secondary": [
+   "raw, canonical JSON and action agreement within an arm",
+   "direction and parameter changes of revised decisions (actions matched by type and employee, role or op; fields that differ)",
+   "the final decision accepted, refused or no action (the engine's validate of llm-agent 3's batches at the recorded state)",
+   "financial evidence v1 (unchanged) of each distinct final decision at the recorded state: affordability per batch and the commitment of applied batches, credit support, reversibility and direct operational exposure of executed actions; the commitment change against the proposal",
+   "latency, tokens, cached tokens and finish reasons (live metadata, apart)"
+  ],
+  "notComputed": "no composite score; no outcome is called better because it changed"
+ },
+ "statistics": {
+  "perPoint": "counts and proportions with Wilson 95% score intervals per arm; treatment minus control per outcome with Newcombe hybrid score 95% intervals; the round-blocked table of control and treatment outcomes (the schedule puts both arms of a point in every round)",
+  "pooled": "after the per-point results: the per-point differences, their unweighted mean and the number of points with a positive or negative difference, per model and overall; no interval over 4 or 8 clustered points",
+  "claims": "descriptive; no population claim about models, prompts or practices; no hypothesis test"
+ },
+ "continuation": {
+  "suffix": "no_action",
+  "rule": "each distinct final decision at the recorded state: its batches validated (staffing previewed first); if every batch is valid, each applied in order, the engine's observation after each; then every later day advanced with no action; a refused decision is not submitted (no retry here), so nothing is applied",
+  "recorded": "apply results, validate/apply agreement, digests after the decision and at each later day, the observed state at the end",
+  "purpose": "a reproducibility and mechanics check, not an outcome"
+ },
+ "replay": "the analysis reads the recorded responses and the engine only; every request's SHA-256 is rebuilt from the points; CI regenerates the points' check, the schedule and the analysis and compares them byte for byte on every platform"
+}

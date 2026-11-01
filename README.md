@@ -41,9 +41,16 @@ and changes no simulator behaviour:
 Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged.
 
-In development, not released (`0.10.0-dev.1`): **V0.10a**
-(`docs/benchmark/v10a-dev/`), inference repeatability and controlled
-comparison design. Its protocol was declared before any request.
+In development, not released (`0.10.0-dev.2`): **V0.10b**
+(`docs/benchmark/v10b-dev/`), a live shared-prefix decision experiment.
+At 8 recorded branch points the state and the initial staffing proposal
+are held fixed. The model is then shown either a neutral continuation or
+the engine's exact preview, 20 times each. It was declared before any
+request; results to follow.
+
+Before it, **V0.10a** (`docs/benchmark/v10a-dev/`, accepted): inference
+repeatability and controlled comparison design. Its protocol was declared
+before any request.
 * **The measurement:** 25 recorded requests were sent again 15 times each
   to the same models.
   * The text was identical across all 15 for 2 of 25.

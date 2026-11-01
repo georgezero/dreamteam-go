@@ -7,6 +7,52 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10b — live shared-prefix decision experiment (0.10.0-dev.2): declaration
+
+V0.10a was accepted (de8ac79, CI 41326685680) and V0.10b authorized by the
+owner. This commit declares the experiment before any live request.
+Report: `docs/benchmark/v10b-dev/README.md`.
+
+**Inventory and the owner's decision**
+(`docs/audits/v0.10b-branch-point-inventory.md`):
+* 56 V0.8c and V0.9c decision points have a staffing proposal. All are
+  verifiable. The engine's preview at each recorded state accepts the
+  proposal at 19 and refuses it at 37.
+* Gemma has only one accepted-preview context. Its staffing shortage,
+  s42001, point 14 is the same bytes in the baseline and preview runs. So
+  the declared 2 + 2 per model was impossible. The run stopped for the
+  owner, who approved option A: Gemma 1 accepted and 3 refused (all its
+  contexts), Qwen 2 and 2.
+
+**Protocol** (`v10b-decision-1`, `dreamteam.shared-prefix/v2`; `PLAN.md`,
+`SPEC.md`, `protocol.json`, `points/`, `schedule.json`):
+* **Arms,** after the same recorded conversation and initial proposal:
+  * control: a neutral continuation, whose final paragraph is the
+    treatment message's own;
+  * treatment: llm-agent 4's review message with the engine's exact
+    preview.
+* **Draws:** one reply each, no retry; 20 draws per arm per point; 320
+  requests, one at a time. Rounds are ordered by hash, Gemma then Qwen.
+* **Outcome:** kept, revised, abandoned or invalid, every draw in the
+  denominator. Wilson and Newcombe intervals per point before any pooled
+  summary.
+* **Continuation:** a fixed no-action suffix. Financial evidence v1 is
+  applied to each distinct decision.
+* **Stops:** server checks before each round.
+
+**Code** (`analysis/repeatability/decision_experiment.py`):
+* points: candidates, selection, contexts, and the CI check;
+* the schedule and the sequential live client;
+* the analysis, which contacts no model.
+
+Tests: `test_decision_experiment.py`, 25 tests (the repeatability suite
+now has 57), against a scripted engine and a stub server.
+
+**Engine:** unchanged. 0.10.0-dev.1 is registered for replay
+(`mini-seed52-v0101`, batch mode `v0.10_dev1`).
+
+---
+
 ## V0.10a — inference repeatability and controlled comparison design (0.10.0-dev.1): results
 
 The protocol declared at 41b16c9 (below), run, analysed and prototyped.

@@ -316,6 +316,20 @@ jobs:
           done
           $P analysis/repeatability/shared_prefix.py compare --dir $V/prototype --runs v10a-runs --out v10a-cmp
           for f in prototype.json prototype-tables.md; do cmp v10a-cmp/$f $V/prototype/$f; cp v10a-cmp/$f out/v10a-$f; done
+      - name: Live decision experiment
+        # V0.10b, without any model: the branch points selected again from
+        # the committed recordings, each context's messages checked against
+        # their recorded SHA-256 and each preview asked again of the engine
+        # on the replays above; the request schedule rebuilt from the
+        # protocol. Equal to the committed files.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v10b-dev
+          $P analysis/repeatability/decision_experiment.py points --binary ./dt --replays . --check $V/points
+          $P analysis/repeatability/decision_experiment.py schedule --protocol $V/protocol.json --out v10b
+          cmp v10b/schedule.json $V/schedule.json
+          cp v10b/schedule.json out/v10b-schedule.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
