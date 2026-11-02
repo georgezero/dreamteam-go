@@ -646,6 +646,25 @@ V0.10b ([benchmark/v10b-dev/](benchmark/v10b-dev/README.md)) ran 8 points
 The control has no validation feedback. So this compares the preview
 with no information, not with an agent's validate-and-retry loop.
 
+## 11c. Three arms at a fixed decision point (V0.10c)
+
+`shared-prefix/v3` ([benchmark/v10c-dev/SPEC.md](benchmark/v10c-dev/SPEC.md))
+adds an arm to v2: the engine's exact validate answer for the proposal's
+staffing actions. The arms are then neutral (A), validation (B) and
+preview (C).
+
+The engine's two answers are asked at the recorded state and committed
+with each point. The analysis asks for them again. The information
+inventory ([benchmark/v10c-dev/API_INVENTORY.md](benchmark/v10c-dev/API_INVENTORY.md))
+records what each carries.
+
+V0.10c ran 12 points, 600 requests, one at a time:
+* preview and validation gave the same decisions at 7 points;
+* where the proposal was valid, the preview kept what validation revised
+  (3 Qwen points);
+* where it was refused, the preview's revisions were more often valid
+  (2 Qwen points).
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

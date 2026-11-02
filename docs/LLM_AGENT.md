@@ -1069,3 +1069,35 @@ Each arm had 20 draws, one at a time.
 
 The financial evidence of each decision is in the report (§6). No change
 is called better because it changed.
+
+## 17. Validation feedback against the preview (V0.10c)
+
+V0.10c ([benchmark/v10c-dev/](benchmark/v10c-dev/README.md)) compared
+llm-agent 4's preview message with the engine's validation answer for the
+same staffing actions, and with a neutral message. No agent was changed.
+The setting was 12 recorded proposals (Gemma 4, Qwen 8), the model's own
+conversation and proposal, then one message, with Gemma 10 and Qwen 20
+draws per arm.
+
+* **What the two answers carry** ([API_INVENTORY.md](benchmark/v10c-dev/API_INVENTORY.md)):
+  * the preview's `results` are validate's;
+  * for a refused proposal the preview adds `asOf` and, for
+    `insufficient_funds`, the funding test;
+  * for a valid one it adds the funding test, money lines, item details,
+    slots and displacements.
+* **Refused proposals:** the validation answer produced the same
+  decisions as the preview at 5 of 7 points. At 2 Qwen points the
+  preview's revisions were more often valid.
+* **Valid proposals:** with the validation answer Qwen revised every
+  time at all 4 of its points. Twice that meant dropping costly actions:
+  a $44,687.30 credit-supported pair of reading allocations, and a
+  teleradiology contract. With the preview it mostly kept the proposal.
+  Gemma kept its proposal under every arm.
+
+**For users of llm-agent 4:**
+* most of the preview step's effect on refused proposals is the
+  validation information it repeats;
+* on valid proposals the preview tends to confirm them.
+
+Neither effect is shown to improve outcomes. llm-agent 3's own feedback
+after a refusal (codes and messages only) was not an arm.

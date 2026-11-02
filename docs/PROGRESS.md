@@ -7,6 +7,85 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10c — validation feedback against preview information (0.10.0-dev.3): results
+
+The experiment declared at 679483e (below), run and analysed. Report:
+`docs/benchmark/v10c-dev/README.md`.
+
+**Live run:** 2026-11-01 23:46 to 2026-11-02 00:26 UTC.
+* 600 of 600 requests, all HTTP 200, one at a time; no stop.
+* 30 server checks, all the same configuration.
+* 2 invalid replies (neutral).
+
+**Decisions** (kept / revised / abandoned / invalid; Gemma of 10, Qwen
+of 20):
+
+| Point | Proposal | A neutral | B validation | C preview |
+|---|---|---|---|---|
+| ss-gemma-pv-s42001-p14 | accepted | 10/0/0/0 | 10/0/0/0 | 10/0/0/0 |
+| fl-gemma-s41901-p26 | refused | 10/0/0/0 | 0/10/0/0 | 0/10/0/0 |
+| fl-gemma-s41901-p28 | refused | 10/0/0/0 | 0/10/0/0 | 0/10/0/0 |
+| fl-gemma-s41901-p27 | refused | 10/0/0/0 | 0/0/10/0 | 0/0/10/0 |
+| ss-qwen-pv-s42002-p6 | accepted | 12/7/0/1 | 0/20/0/0 | 20/0/0/0 |
+| ss-qwen-s42002-p7 | accepted | 20/0/0/0 | 0/20/0/0 | 20/0/0/0 |
+| fp-qwen-s41901-p26 | accepted | 20/0/0/0 | 0/20/0/0 | 0/20/0/0 |
+| ss-qwen-s42001-p20 | accepted | 20/0/0/0 | 0/20/0/0 | 17/3/0/0 |
+| fl-qwen-s41901-p9 | refused | 0/19/0/1 | 0/18/2/0 | 0/20/0/0 |
+| fl-qwen-s41901-p11 | refused | 20/0/0/0 | 0/0/20/0 | 0/0/20/0 |
+| ss-qwen-s42001-p23 | refused | 0/20/0/0 | 0/17/3/0 | 0/19/1/0 |
+| fp-qwen-s42001-p27 | refused | 20/0/0/0 | 0/20/0/0 | 0/20/0/0 |
+
+* **C − B, primary:** the same decisions at 7 of 12 points.
+  * At 3 accepted Qwen points the preview kept what validation revised.
+  * At 2 refused Qwen points the preview's revisions were more often
+    valid: 20 vs 2 and 16 vs 5 of 20.
+* **B − A:** under validation the model revised or abandoned every
+  refused proposal in every draw, and revised every accepted Qwen
+  proposal. Under A it resubmitted at 5 of the 7 refused points and kept
+  at the accepted ones.
+* **Money:**
+  * Validation dropped ss-qwen-pv-s42002-p6's $44,687.30 credit-supported
+    allocations (to $303.75) and ss-qwen-s42002-p7's teleradiology
+    contract. The preview kept both.
+  * Credit-supported commitments submitted: A 12, B 10, C 34.
+* **Repeatability:** Gemma gave one decision per arm everywhere. Qwen
+  varied most under A.
+
+**Continuation:** 53 distinct decisions were run with the no-action
+suffix. The 21 applied ones agreed with their validation, 21 of 21.
+
+**Reproducibility:** the analysis contacts no model. It checks every
+request and response hash and the engine's answers, and is byte-identical
+on the Pi, horo and CI.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Focused shared-prefix tests (`analysis/repeatability`; 17 new for v3) | Pi, horo and CI | 74 tests, OK |
+| Agent tests (`agents/llm`), evidence tests (`analysis/evidence`) | horo and CI | 60 and 147 tests, OK |
+| Go suite (`go test ./...`), golden references | CI, three platforms | run by CI on this commit; the new `v0102` session tests also on the Pi |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64 | exit 0; 10 packages ok, no failure |
+| `go vet ./...` (default, calibration, acceptance tags), `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64) | horo | all ok |
+| Historical replays (V0.8c, V0.9c) | horo and CI | 104 checks, 0 failed, each of 4 replays |
+| Benchmark verify and reproduce | CI | run by CI on this commit |
+| Inventory and branch points made again (selection, engine answers, requests) | horo and CI | 12 contexts verified |
+| Analysis regenerated and compared | Pi, horo (twice) and CI | byte-identical |
+| Cross-platform CI (linux/amd64, linux/arm64, darwin/arm64) | CI | run by CI on this commit; declaration commit 679483e green (run 41363727129) |
+
+Not run: no clinical suite, no historical live evaluation rerun, and no
+local repeat of the gates CI runs (Go suite, golden references, verify
+and reproduce).
+
+**No change to:** the simulator, the agents, prompts, settings, scoring,
+the frozen evidence rules or any earlier recording. No historical live
+evaluation was rerun, and no clinical suite was run.
+
+**Recommendation:** release V0.10.0 as a methodology and measurement
+release, after owner review.
+
+---
+
 ## V0.10c — validation feedback against preview information (0.10.0-dev.3): declaration
 
 V0.10b was accepted (CI 41349684200) and V0.10c authorized by the owner.

@@ -46,8 +46,11 @@ In development, not released (`0.10.0-dev.3`): **V0.10c**
 information. At 12 recorded branch points the model is shown one of
 three messages: a neutral one, the engine's validation of its staffing
 proposal, or the engine's preview of it. The primary comparison is
-preview against validation. It was declared before any request; results
-to follow.
+preview against validation. It was declared before any request.
+* For refused proposals, validation alone produced nearly the same
+  decisions as the preview.
+* For valid ones, validation led Qwen to revise or cut them, while the
+  preview mostly kept them.
 
 Before it, **V0.10b**
 (`docs/benchmark/v10b-dev/`, accepted), a live shared-prefix decision experiment.
