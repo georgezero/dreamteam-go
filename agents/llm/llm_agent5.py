@@ -2,8 +2,19 @@
 """The DreamTeam LLM agent, validation-first (llm-agent, version 5).
 
 An external benchmark policy (docs/BENCHMARK.md §4). Specification:
-docs/LLM_AGENT.md §18 and docs/V0.11_AGENT_WORKFLOW.md (the workflow
-llm-agent-workflow/v1).
+docs/LLM_AGENT.md §18 and docs/V0.11_AGENT_WORKFLOW.md.
+
+Two workflows, chosen with --workflow (V0.11.0):
+* validation-first (the default; llm-agent-validation-first-workflow/v1):
+  steps 1-3 and 6 below, with no preview: a fully validated proposal is
+  submitted;
+* validation-first-preview (llm-agent-workflow/v1, unchanged since V0.11a):
+  steps 1-6, with the selective preview.
+They share the proposal, validation, refusal feedback, retries and
+submission; the only difference is whether step 4 occurs. Every record
+names its workflow; replay takes it from the recording. A record made
+before the selector existed has llm-agent-workflow/v1 and no selection, and
+replays with the preview, as it was made.
 
 Version 5 is version 3 (agents/llm/llm_agent3.py) and version 4's preview
 request (agents/llm/llm_agent4.py), both loaded unchanged from this
@@ -110,6 +121,40 @@ ELIGIBILITY_RULE = (
 )
 WORKFLOW_SHA256 = sha256("\n".join([WORKFLOW_VERSION, FEEDBACK_TEMPLATE, PREVIEW_TEMPLATE, OPS_NOTE] +
                                    [f"{k}: {v}" for k, v in ELIGIBILITY_RULE]))
+# The validation-first workflow without the preview (V0.11.0): the same
+# feedback text; the rule that replaces the preview step.
+VALIDATION_FIRST_VERSION = "llm-agent-validation-first-workflow/v1"
+VALIDATION_FIRST_RULE = "no preview: a fully validated proposal is submitted"
+VALIDATION_FIRST_SHA256 = sha256("\n".join([VALIDATION_FIRST_VERSION, FEEDBACK_TEMPLATE, VALIDATION_FIRST_RULE]))
+# The selectable workflows. llm-agent-workflow/v1 keeps its V0.11a identity.
+WORKFLOWS = {
+    "validation-first": {"version": VALIDATION_FIRST_VERSION, "sha256": VALIDATION_FIRST_SHA256, "preview": False},
+    "validation-first-preview": {"version": WORKFLOW_VERSION, "sha256": WORKFLOW_SHA256, "preview": True},
+}
+DEFAULT_WORKFLOW = "validation-first"
+LEGACY_WORKFLOW = "validation-first-preview"  # a record made before the selector names none
+
+
+def workflow_of(r, error=None):
+    """The workflow a record was made with, from its identity
+    (workflowVersion, workflowSha256) and its selection ("workflow"). Only
+    a record of llm-agent-workflow/v1 may lack the selection (made before
+    the selector, with the preview). An unknown identity, or a selection
+    that contradicts it, is refused: one workflow is never taken for
+    another."""
+    error = error or SettingsError
+    ident = (r.get("workflowVersion"), r.get("workflowSha256"))
+    named = [n for n, w in WORKFLOWS.items() if (w["version"], w["sha256"]) == ident]
+    where = f"decision point {r.get('point')}"
+    if not named:
+        raise error(f"{where}: unknown workflow identity {ident[0]!r} ({str(ident[1])[:12]}…)")
+    if "workflow" not in r:
+        if named[0] != LEGACY_WORKFLOW:
+            raise error(f"{where}: a {ident[0]} record without its workflow selection")
+        return LEGACY_WORKFLOW
+    if r["workflow"] != named[0]:
+        raise error(f"{where}: the workflow selection {r['workflow']!r} contradicts the identity {ident[0]}")
+    return named[0]
 
 
 def file_sha256(path):
@@ -266,10 +311,10 @@ def completeness(attempts, stopped, cut, recorded=True):
     return c
 
 
-def new_record(point, clock, mode, mem, prompt, left, pset):
+def new_record(point, clock, mode, mem, prompt, left, pset, workflow):
     rec = A3.new_record(point, clock, mode, mem, prompt, left, pset)
     rec.update({"schema": RECORD_SCHEMA, "agentVersion": VERSION, "baseAgentVersion": BASE_VERSION,
-                "workflowVersion": WORKFLOW_VERSION, "workflowSha256": WORKFLOW_SHA256})
+                "workflowVersion": WORKFLOWS[workflow]["version"], "workflowSha256": WORKFLOWS[workflow]["sha256"]})
     return rec
 
 
@@ -291,14 +336,20 @@ def validate_all(h, at, actions, k):
     return refused
 
 
-def ask(h, ev, client, settings, memory, point, prev=None):
-    """One live decision point (llm-agent-workflow/v1). Every attempt is
-    recorded as it is made (attempts.jsonl) and in the record."""
+def ask(h, ev, client, settings, memory, point, prev=None, *, workflow=LEGACY_WORKFLOW):
+    """One live decision point, with the named workflow (WORKFLOWS). Every
+    attempt is recorded as it is made (attempts.jsonl) and in the record.
+    A caller that names no workflow gets V0.11a's (with the preview), as
+    before the selector; the agent's command line defaults to
+    validation-first (DEFAULT_WORKFLOW) and always names it."""
+    if workflow not in WORKFLOWS:
+        raise SettingsError(f"unknown workflow {workflow!r}")
+    preview_on = WORKFLOWS[workflow]["preview"]
     start = time.monotonic()
     clock = h.request("digests")
     pset = A3.prompt_settings(settings)
     obs, omitted, catalog, mem, prompt, left = A3.prepare(h, memory, point, pset)
-    rec = new_record(point, clock, "live", mem, prompt, left, pset)
+    rec = new_record(point, clock, "live", mem, prompt, left, pset, workflow)
     attempts, cut, stopped, used = [], [], None, None
     rec.update({"attempts": attempts, "final": None, "batches": [], "outcome": "fallback", "reason": None,
                 "refusals": [], "errors": [], "previousExecution": execution_of(obs, prev)})
@@ -357,7 +408,7 @@ def ask(h, ev, client, settings, memory, point, prev=None):
                             rec["refusals"] += refused
                             raise ValueError("refused: " + "; ".join(
                                 f"action {r['action']}: {r['code']}: {r['message']}" for r in refused))
-                        if preview_due(at, previewed):
+                        if preview_on and preview_due(at, previewed):
                             previewed = True
                             at["preview"], review = request_preview(h, d["actions"], clock, pset, obs)
                 except ProtocolError as e:
@@ -429,8 +480,9 @@ def load_recordings(paths):
     """Each recorded decisions file: (path, SHA-256, records). Only
     dreamteam.llm-decision-record/v5 records are replayed here; version 4
     recordings replay with llm_agent4.py, version 3 with llm_agent3.py,
-    versions 1 and 2 with llm_agent.py."""
-    out = []
+    versions 1 and 2 with llm_agent.py. Every record's workflow is checked
+    (workflow_of), and all must have the same one."""
+    out, workflows = [], set()
     for p in paths:
         try:
             with open(p, "rb") as f:
@@ -442,16 +494,26 @@ def load_recordings(paths):
                            or not isinstance(r.get("batches"), list) for r in recs):
             raise SettingsError(f"replay {p}: not a recorded decisions file")
         for r in recs:
-            got = (r.get("schema"), r.get("agentVersion"), r.get("memoryFormat"), r.get("promptVersion"),
-                   r.get("workflowVersion"), r.get("workflowSha256"))
-            if got != (RECORD_SCHEMA, VERSION, MEMORY_FORMAT, PROMPT_VERSION, WORKFLOW_VERSION, WORKFLOW_SHA256):
+            got = (r.get("schema"), r.get("agentVersion"), r.get("memoryFormat"), r.get("promptVersion"))
+            if got != (RECORD_SCHEMA, VERSION, MEMORY_FORMAT, PROMPT_VERSION):
                 raise SettingsError(
                     f"replay {p}: version incompatible: decision point {r['point']} is not a {RECORD_SCHEMA} record "
-                    f"of {AGENT} {VERSION} ({MEMORY_FORMAT}, {PROMPT_VERSION}, {WORKFLOW_VERSION}); version 4 "
+                    f"of {AGENT} {VERSION} ({MEMORY_FORMAT}, {PROMPT_VERSION}); version 4 "
                     "recordings replay with agents/llm/llm_agent4.py, version 3 with llm_agent3.py, versions 1 and "
                     "2 with llm_agent.py")
+            try:
+                workflows.add(workflow_of(r))
+            except SettingsError as e:
+                raise SettingsError(f"replay {p}: {e}")
+        if len(workflows) > 1:
+            raise SettingsError(f"replay {p}: the recordings mix the workflows {sorted(workflows)}")
         out.append((p, hashlib.sha256(raw).hexdigest(), recs))
     return out
+
+
+def recorded_workflow(recordings):
+    """The one workflow of loaded recordings (load_recordings checked it)."""
+    return workflow_of(recordings[0][2][0])
 
 
 def verify_attempts(h, r, obs, omitted, catalog, prompt, clock):
@@ -463,6 +525,7 @@ def verify_attempts(h, r, obs, omitted, catalog, prompt, clock):
     if not isinstance(atts, list) or not isinstance(r.get("final"), dict):
         raise ReplayError(f"decision point {point}: the record has no attempts or final decision")
     pset = r["promptSettings"]
+    preview_on = WORKFLOWS[workflow_of(r, ReplayError)]["preview"]
     checked = {"inputs": 0, "validations": 0, "previews": 0}
     prev, previewed = None, False
     for k, at in enumerate(atts, 1):
@@ -522,7 +585,7 @@ def verify_attempts(h, r, obs, omitted, catalog, prompt, clock):
         if refused != (at.get("refusals") or []):
             raise ReplayError(f"{where}: the refusals are not the validate answers'")
         pv = at.get("preview")
-        due = preview_due(at, previewed)
+        due = preview_on and preview_due(at, previewed)
         if bool(pv) != bool(due):
             raise ReplayError(f"{where}: a preview {'missing' if due else 'not due'} at this attempt")
         if pv:
@@ -615,8 +678,10 @@ def usage_text(s):
 
 # --- main ----------------------------------------------------------------
 
-def run(h, ev, client, settings, memory, replayer, records):
-    """The policy loop: one decision per turn, every record kept."""
+def run(h, ev, client, settings, memory, replayer, records, workflow):
+    """The policy loop: one decision per turn, every record kept. A live
+    record names the workflow it was made with; a replayed one is the
+    recording's."""
     checked, prev = False, None
     while True:
         msg = h.turn()
@@ -633,20 +698,22 @@ def run(h, ev, client, settings, memory, replayer, records):
             batches = rec["batches"]
         else:
             try:
-                batches, rec = ask(h, ev, client, settings, memory, point, prev)
+                batches, rec = ask(h, ev, client, settings, memory, point, prev, workflow=workflow)
             except ProtocolError as e:
                 # Never expected (the agent uses permitted operations only);
                 # recorded as such, and refused by replay.
                 batches, rec = [], {"schema": RECORD_SCHEMA, "point": point, "time": None, "mode": "live",
                                     "agentVersion": VERSION, "baseAgentVersion": BASE_VERSION,
                                     "promptVersion": PROMPT_VERSION, "memoryFormat": MEMORY_FORMAT,
-                                    "workflowVersion": WORKFLOW_VERSION, "workflowSha256": WORKFLOW_SHA256,
+                                    "workflowVersion": WORKFLOWS[workflow]["version"],
+                                    "workflowSha256": WORKFLOWS[workflow]["sha256"],
                                     "protocolError": str(e), "outcome": "fallback", "batches": [],
                                     "errors": [f"protocol: {e}"], "attempts": [],
                                     "final": {"attempt": None, "outcome": "fallback"},
                                     "stages": stages([], [], "fallback"), "previousExecution": None,
                                     "completeness": completeness([], "protocol_error", [], recorded=False),
                                     "digests": None}
+            rec["workflow"] = workflow
         records.append(rec)
         if memory and rec.get("time") is not None:
             memory.record(rec)
@@ -662,12 +729,19 @@ def main(argv=None):
     ap.add_argument("--replay", action="append", default=[], metavar="FILE",
                     help="submit the decisions recorded in FILE (decisions.jsonl) instead of asking a model; repeatable")
     ap.add_argument("--evidence", default="evidence", help="evidence directory (default ./evidence)")
+    ap.add_argument("--workflow", choices=sorted(WORKFLOWS),
+                    help=f"live: the decision workflow (default {DEFAULT_WORKFLOW}; validation-first-preview adds the "
+                         "selective preview). Replay takes it from the recording; if given, it must match")
     a = ap.parse_args(argv)
     try:
         if a.replay:
             settings, recordings = None, load_recordings(a.replay)
+            workflow = recorded_workflow(recordings)
+            if a.workflow is not None and a.workflow != workflow:
+                raise SettingsError(f"--workflow {a.workflow}: the recordings were made with {workflow}")
         elif a.settings:
             settings, recordings = A3.load_settings(a.settings, os.environ), None
+            workflow = a.workflow or DEFAULT_WORKFLOW
         else:
             raise SettingsError("give --settings (live) or --replay (replay)")
     except SettingsError as e:
@@ -675,8 +749,9 @@ def main(argv=None):
         return 2
     ev = A3.Evidence(a.evidence)
     info = {"schema": EVIDENCE_SCHEMA, "agent": AGENT, "version": VERSION, "baseVersion": BASE_VERSION,
-            "promptVersion": PROMPT_VERSION, "memoryFormat": MEMORY_FORMAT, "workflowVersion": WORKFLOW_VERSION,
-            "workflowSha256": WORKFLOW_SHA256, "feedbackVersion": FEEDBACK_VERSION, "previewVersion": PREVIEW_VERSION,
+            "promptVersion": PROMPT_VERSION, "memoryFormat": MEMORY_FORMAT, "workflow": workflow,
+            "workflowVersion": WORKFLOWS[workflow]["version"], "workflowSha256": WORKFLOWS[workflow]["sha256"],
+            "preview": WORKFLOWS[workflow]["preview"], "feedbackVersion": FEEDBACK_VERSION, "previewVersion": PREVIEW_VERSION,
             "eligibilityVersion": ELIGIBILITY_VERSION, "agentSha256": file_sha256(os.path.abspath(__file__)),
             "baseAgentSha256": file_sha256(BASE_PATH), "previewAgentSha256": file_sha256(PREVIEW_PATH),
             "mode": "replay" if recordings else "live", "python": sys.version.split()[0]}
@@ -701,7 +776,7 @@ def main(argv=None):
         ev.write("summary.json", s)
         ev.text("usage.txt", usage_text(s))
     try:
-        for _ in run(h, ev, client, settings, memory, replayer, records):
+        for _ in run(h, ev, client, settings, memory, replayer, records, workflow):
             finish()
         return 0
     except (ExchangeError, ReplayError) as e:

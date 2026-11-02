@@ -10,26 +10,43 @@ import (
 	"testing"
 )
 
-// llm-agent 5 (agents/llm/llm_agent5.py, V0.11a) against the engine and the
-// mock model server: the validation-first workflow (llm-agent-workflow/v1).
-// Every proposal is validated before anything else; a refusal is answered
-// with the simulator's own results; a valid staffing proposal's preview is
-// shown when the engine's answer shows a direct effect; only validated
-// batches are submitted; the replay checks it all without a model.
+// llm-agent 5 (agents/llm/llm_agent5.py) against the engine and the mock
+// model server, with each workflow (V0.11.0 --workflow):
+//   - validation-first-preview (llm-agent-workflow/v1, V0.11a): every
+//     proposal is validated before anything else; a refusal is answered
+//     with the simulator's own results; a valid staffing proposal's preview
+//     is shown when the engine's answer shows a direct effect; only
+//     validated batches are submitted;
+//   - validation-first (the default): the same without the preview.
+// The replay checks it all without a model, with the recording's workflow.
 
-func llmPolicy5(t *testing.T, id, model string, extra map[string]any) ExternalPolicy {
+const (
+	workflowVF = "validation-first"
+	workflowPV = "validation-first-preview"
+)
+
+// llmPolicy5 runs llm-agent 5 live with the named workflow ("" names none:
+// the default).
+func llmPolicy5(t *testing.T, id, model string, extra map[string]any, workflow ...string) ExternalPolicy {
 	p := llmPolicy(t, id, model, extra)
 	p.Command[3], p.Version = "./agents/llm/llm_agent5.py", "5"
+	for _, w := range workflow {
+		if w != "" {
+			p.Command = append(p.Command, "--workflow", w)
+		}
+	}
 	return p
 }
 
 // agentRecord5 is one line of llm-agent 5's decisions.jsonl, in part.
 type agentRecord5 struct {
-	Schema   string             `json:"schema"`
-	Point    int                `json:"point"`
-	Outcome  string             `json:"outcome"`
-	Batches  [][]map[string]any `json:"batches"`
-	Attempts []struct {
+	Schema          string             `json:"schema"`
+	Workflow        string             `json:"workflow"`
+	WorkflowVersion string             `json:"workflowVersion"`
+	Point           int                `json:"point"`
+	Outcome         string             `json:"outcome"`
+	Batches         [][]map[string]any `json:"batches"`
+	Attempts        []struct {
 		Turn       string         `json:"turn"`
 		Input      map[string]any `json:"input"`
 		Validation []struct {
@@ -67,9 +84,9 @@ type agentRecord5 struct {
 
 func TestLLMAgent5Workflow(t *testing.T) {
 	m := llmSetup(t)
-	c := externalConfig(t, llmPolicy5(t, "keep", "pvkeep", nil), llmPolicy5(t, "revise", "pvrevise", nil),
-		llmPolicy5(t, "abandon", "pvabandon", nil), llmPolicy5(t, "fix", "fixafter", nil),
-		llmPolicy5(t, "mixed", "mixed", nil))
+	c := externalConfig(t, llmPolicy5(t, "keep", "pvkeep", nil, workflowPV), llmPolicy5(t, "revise", "pvrevise", nil, workflowPV),
+		llmPolicy5(t, "abandon", "pvabandon", nil, workflowPV), llmPolicy5(t, "fix", "fixafter", nil, workflowPV),
+		llmPolicy5(t, "mixed", "mixed", nil, workflowPV))
 	c.Evaluation.T90 = false
 	dir := runMatrix(t, c)
 	_, _, recs, err := LoadResults(dir)
@@ -94,6 +111,9 @@ func TestLLMAgent5Workflow(t *testing.T) {
 		for k, d := range ds {
 			if d.Schema != "dreamteam.llm-decision-record/v5" || !d.DigestsBeforeSubmit.Unchanged {
 				t.Fatalf("%s: point %d: schema %s, state unchanged %v", id, d.Point, d.Schema, d.DigestsBeforeSubmit.Unchanged)
+			}
+			if d.Workflow != workflowPV || d.WorkflowVersion != "llm-agent-workflow/v1" {
+				t.Fatalf("%s: point %d: workflow %q (%s)", id, d.Point, d.Workflow, d.WorkflowVersion)
 			}
 			// Only a validated proposal is submitted, and the harness applies it.
 			var used *int
@@ -181,7 +201,7 @@ func TestLLMAgent5Workflow(t *testing.T) {
 // are refused.
 func TestLLMAgent5Replay(t *testing.T) {
 	m := llmSetup(t)
-	c := externalConfig(t, llmPolicy5(t, "llm", "pvrevise", nil), llmPolicy5(t, "fix", "fixafter", nil))
+	c := externalConfig(t, llmPolicy5(t, "llm", "pvrevise", nil, workflowPV), llmPolicy5(t, "fix", "fixafter", nil, workflowPV))
 	c.Seeds, c.Evaluation.T90 = []int64{privateSeed, 5}, false
 	live := runMatrix(t, c)
 	_, _, liveRecs, err := LoadResults(live)
@@ -304,5 +324,133 @@ func TestLLMAgent5Replay(t *testing.T) {
 		if rs[1].Status != StatusCrash || !strings.Contains(string(stderr), tc.want) {
 			t.Errorf("%s: %s, stderr %q", tc.want, rs[1].Status, stderr)
 		}
+	}
+}
+
+// The default workflow (no --workflow) and --workflow validation-first:
+// validation first and the simulator's results after a refusal, as with
+// the preview, but no preview is ever asked for; a validated proposal is
+// submitted. The recording names its workflow and replays with it, without
+// a model; a --workflow that contradicts the recording is refused.
+func TestLLMAgent5ValidationFirst(t *testing.T) {
+	m := llmSetup(t)
+	c := externalConfig(t, llmPolicy5(t, "default", "pvkeep", nil), llmPolicy5(t, "keep", "pvkeep", nil, workflowVF),
+		llmPolicy5(t, "fix", "fixafter", nil, workflowVF), llmPolicy5(t, "mixed", "mixed", nil, workflowVF))
+	c.Seeds, c.Evaluation.T90 = []int64{privateSeed, 5}, false
+	live := runMatrix(t, c)
+	_, _, liveRecs, err := LoadResults(live)
+	if err != nil {
+		t.Fatal(err)
+	}
+	recordings := map[string][]string{}
+	fixed, submitted := 0, 0
+	for _, r := range liveRecs {
+		if r.Status != StatusCompleted {
+			t.Fatalf("%s: %s %+v", r.ID, r.Status, r.Failure)
+		}
+		id := r.Policy.ID
+		if id == "noop" {
+			continue
+		}
+		path := filepath.Join(live, "runs", r.ID, FileEvidence, "decisions.jsonl")
+		recordings[id] = append(recordings[id], "--replay", path)
+		var info map[string]any
+		if err := readJSON(filepath.Join(live, "runs", r.ID, FileEvidence, "agent.json"), &info); err != nil ||
+			info["workflow"] != workflowVF || info["preview"] != false {
+			t.Fatalf("%s: agent.json: %v %v", r.ID, err, info)
+		}
+		var harness []Decision
+		if err := readJSON(filepath.Join(live, "runs", r.ID, FileDecisions), &harness); err != nil {
+			t.Fatal(err)
+		}
+		for k, d := range readJSONL[agentRecord5](t, path) {
+			if d.Workflow != workflowVF || d.WorkflowVersion != "llm-agent-validation-first-workflow/v1" ||
+				!d.DigestsBeforeSubmit.Unchanged {
+				t.Fatalf("%s: point %d: workflow %q (%s)", r.ID, d.Point, d.Workflow, d.WorkflowVersion)
+			}
+			if d.Stages.Previewed != nil {
+				t.Errorf("%s: point %d: a preview stage", r.ID, d.Point)
+			}
+			for i, a := range d.Attempts {
+				if a.Preview != nil || a.Input["kind"] == "preview" || a.Turn == "review" {
+					t.Errorf("%s: point %d, attempt %d: a preview with validation-first", r.ID, d.Point, i+1)
+				}
+				if len(a.Refusals) > 0 {
+					if i+1 >= len(d.Attempts) || d.Attempts[i+1].Input["kind"] != "validation" {
+						if i+1 < len(d.Attempts) {
+							t.Errorf("%s: point %d: a refusal not answered with validation feedback", r.ID, d.Point)
+						}
+					} else {
+						fixed++
+					}
+				}
+				// A valid proposal is used at once: nothing after it.
+				if len(a.Validation) > 0 && len(a.Refusals) == 0 && (!a.Used || i != len(d.Attempts)-1) {
+					t.Errorf("%s: point %d: a validated proposal was not submitted", r.ID, d.Point)
+				}
+			}
+			if len(d.Batches) > 0 {
+				submitted++
+				for _, b := range harness[k].Batches {
+					if !b.Applied {
+						t.Errorf("%s: point %d: the harness refused a validated batch", r.ID, d.Point)
+					}
+				}
+			}
+		}
+		b, _ := os.ReadFile(path)
+		if strings.Contains(string(b), "PREVIEW.") {
+			t.Errorf("%s: a preview message in the recording", r.ID)
+		}
+	}
+	if fixed == 0 || submitted == 0 {
+		t.Fatalf("fixed %d, submitted %d", fixed, submitted)
+	}
+	// No engine preview request: the mock served exactly the calls recorded,
+	// one per point for pvkeep (its preview answer is never asked for).
+	calls := m.count("pvkeep") + m.count("fixafter") + m.count("mixed")
+
+	replay := func(id string, args ...string) ExternalPolicy {
+		return ExternalPolicy{ID: id, Version: "5", Description: "llm-agent 5, replayed",
+			Command: append([]string{"python3", "-I", "-B", "./agents/llm/llm_agent5.py"}, args...), TimeoutSeconds: 60}
+	}
+	c2 := externalConfig(t, replay("default", recordings["default"]...), replay("keep", recordings["keep"]...),
+		replay("fix", recordings["fix"]...), replay("mixed", recordings["mixed"]...))
+	c2.Seeds, c2.Evaluation.T90 = c.Seeds, false
+	a := runMatrix(t, c2)
+	if m.count("pvkeep")+m.count("fixafter")+m.count("mixed") != calls {
+		t.Fatal("the replay called the model")
+	}
+	_, _, recs, _ := LoadResults(a)
+	for i, r := range recs {
+		l := liveRecs[i]
+		if r.Status != StatusCompleted || r.Final.Digests != l.Final.Digests {
+			t.Fatalf("%s: %s, final digests differ from the live run's", r.ID, r.Status)
+		}
+		for _, f := range []string{FileResult, FileSession, FileDecisions} {
+			p, _ := os.ReadFile(filepath.Join(live, "runs", r.ID, f))
+			q, _ := os.ReadFile(filepath.Join(a, "runs", r.ID, f))
+			if !bytes.Equal(p, q) {
+				t.Errorf("%s: %s differs from the live run's", r.ID, f)
+			}
+		}
+		if r.Policy.ID == "noop" {
+			continue
+		}
+		for _, d := range readJSONL[map[string]any](t, filepath.Join(a, "runs", r.ID, FileEvidence, "decisions.jsonl")) {
+			if d["workflow"] != workflowVF || d["replayChecked"] == nil {
+				t.Fatalf("%s: a replayed record: workflow %v, checked %v", r.ID, d["workflow"], d["replayChecked"])
+			}
+		}
+	}
+
+	// The command line never overrides the recording's workflow.
+	c3 := externalConfig(t, replay("keep", append(recordings["keep"][:2:2], "--workflow", workflowPV)...))
+	c3.Evaluation.T90 = false
+	dir := runMatrix(t, c3)
+	_, _, rs, _ := LoadResults(dir)
+	stderr, _ := os.ReadFile(filepath.Join(dir, "runs", rs[1].ID, FileStderr))
+	if rs[1].Status != StatusCrash || !strings.Contains(string(stderr), "the recordings were made with validation-first") {
+		t.Errorf("a contradicting --workflow: %s, stderr %q", rs[1].Status, stderr)
 	}
 }
