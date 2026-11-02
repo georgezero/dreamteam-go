@@ -683,6 +683,23 @@ log. A refused batch is recorded by the harness alone.
 `internal/bench/llm_agent5_test.go` runs it against the engine and the
 mock model, live and replayed.
 
+## 11e. Whole workflows from one proposal (V0.11b)
+
+`shared-prefix/v4` ([benchmark/v11b-dev/SPEC.md](benchmark/v11b-dev/SPEC.md))
+makes each arm a whole decision workflow: llm-agent 3, llm-agent 5
+without its preview, and llm-agent 5.
+* Each arm runs from the same recorded proposal, on an engine session at
+  the recorded state.
+* Its driver follows each agent's loop with the agents' own functions,
+  and is tested against the agents.
+* Every draw is replayed without the model in the analysis, which CI
+  reproduces across platforms.
+
+V0.11b ran 14 points and 720 draws:
+* the preview changed decisions at 4 of 14 points (C − B);
+* validation-first feedback produced valid corrections at 3 refused Qwen
+  points where llm-agent 3's retry loop did not (B − A).
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

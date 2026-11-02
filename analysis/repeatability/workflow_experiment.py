@@ -32,6 +32,7 @@ and decisions are tested against the agents' ask() (test_workflow_experiment.py)
 import argparse
 import collections
 import json
+import math
 import os
 import sys
 import time
@@ -735,7 +736,7 @@ def summarize(contexts, draws, proto):
                 diffs = {o: [r["comparisons"][key]["outcomes"][o]["difference"] for r in rows] for o in OUTCOMES}
                 out["pooled"][k][key] = {
                     "perPointDifferences": diffs,
-                    "unweightedMean": {o: round(sum(v) / len(v), 4) for o, v in diffs.items()},
+                    "unweightedMean": {o: round(math.fsum(v) / len(v), 4) for o, v in diffs.items()},  # fsum: identical on every Python version
                     "pointsSameActionContent": sum(1 for r in rows if r["comparisons"][key]["sameActionContent"])}
     return out
 

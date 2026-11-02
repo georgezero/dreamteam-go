@@ -1140,3 +1140,31 @@ its own recordings.
 dreamteam benchmark run CONFIG    # with ./agents/llm/llm_agent5.py --settings FILE as an external policy
 python3 -I -B agents/llm/llm_agent5.py --replay decisions.jsonl   # no model
 ```
+
+## 19. llm-agent 5 against llm-agent 3, at fixed decision points (V0.11b)
+
+V0.11b ([benchmark/v11b-dev/](benchmark/v11b-dev/README.md)) ran three
+whole decision workflows from 14 recorded staffing proposals (Gemma 4,
+Qwen 10), with no agent changed:
+* **A:** llm-agent 3;
+* **B:** llm-agent 5 with its preview disabled;
+* **C:** llm-agent 5.
+
+Draws were 10 (Gemma) or 20 (Qwen) per arm.
+
+* **Validation-first feedback (B − A):** at 3 of 5 refused Qwen
+  proposals, llm-agent 5's exact feedback led to valid corrections, 5 to
+  20 of 20, where llm-agent 3's retry loop led to none. Two of these
+  corrections terminate a technologist and displace bookings. Gemma
+  behaved identically under all three workflows.
+* **The selective preview (C − B):**
+  * the same decisions at 10 of 14 points;
+  * at valid proposals the model kept 4 of 6 after the preview,
+    including a $44,687.30 credit-supported allocation;
+  * it dropped a teleradiology contract at one and a no-op allocation at
+    another;
+  * it never raised a valid proposal's commitment.
+* **Model calls:** A 130, B 130, C 312. At a valid proposal llm-agent 3
+  and B submit without asking the model again.
+
+None of this shows that the decisions are better.

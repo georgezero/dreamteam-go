@@ -369,8 +369,9 @@ jobs:
       - name: Workflow evaluation
         # V0.11b, without any model: the branch points selected again from
         # the V0.10c inventory and the recordings, every context checked;
-        # the draw schedule rebuilt from the protocol. Equal to the
-        # committed files.
+        # the draw schedule rebuilt from the protocol; every recorded draw's
+        # workflow replayed without the model and analysed. Equal to the
+        # committed files and compared across platforms below.
         shell: bash
         run: |
           set -euo pipefail
@@ -379,6 +380,8 @@ jobs:
           $P analysis/repeatability/workflow_experiment.py schedule --protocol $V/protocol.json --out v11b
           cmp v11b/schedule.json $V/schedule.json
           cp v11b/schedule.json out/v11b-schedule.json
+          $P analysis/repeatability/workflow_experiment.py analyze --binary ./dt --replays . --dir $V --out v11b
+          for f in decisions.json decision-tables.md inference.json; do cmp v11b/$f $V/$f; cp v11b/$f out/v11b-$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

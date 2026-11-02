@@ -7,6 +7,79 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.11b — controlled evaluation of the validation-first workflow (0.11.0-dev.2): results
+
+The experiment declared at 562ed93 (below), run and analysed. Report:
+`docs/benchmark/v11b-dev/README.md`.
+
+**Live run:** 2026-11-02, 15:26–16:04 UTC.
+* 720 of 720 draws and 572 model calls, all HTTP 200; no stop.
+* 30 server checks, all the same configuration.
+* Model calls by arm: A 130, B 130, C 312.
+
+**Results** (per point; Gemma of 10, Qwen of 20):
+* **C − B:** the same decisions at 10 of 14 points.
+  * At valid proposals, C kept 4 of 6, including the $44,687.30
+    credit-supported allocation, 20/20.
+  * At ss-qwen-s42002-p7, C dropped the teleradiology contract (16/20
+    revised, 4/20 abandoned; $3,228.33 to $135.00–$303.75).
+  * At fp-qwen-s41901-p26, C dropped a no-op allocation (20/20, the
+    commitment unchanged).
+  * At refused proposals, C and B are within 5 pp.
+* **B − A:** valid corrections where llm-agent 3 made none:
+  * fl-qwen-s41902-p27: 20/20 against 0;
+  * fl-qwen-s41901-p9: 13 against 0;
+  * fp-qwen-s42001-p24: 5 against 0.
+
+  The first two terminate a technologist (100 and 8 bookings displaced).
+  No difference at the valid points (both submit) or for Gemma.
+* **Gemma:** identical decisions under A, B and C at all four points.
+* **Credit-supported submissions:** 30 per arm.
+
+**Replay:** all 720 draws were run again without a model (572 responses,
+2,299 engine requests, all equal). The analysis is byte-identical on the
+Pi, horo and CI.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Focused tests: `analysis/repeatability` (11 new for v4) | Pi, horo and CI | 85 tests, OK |
+| Agent tests (`agents/llm`), evidence tests (`analysis/evidence`) | horo and CI | 89 and 147 tests, OK |
+| Go suite (`go test ./...`), golden references | CI, three platforms | run by CI on this commit; the new `v0111` session tests also on the Pi |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64 | exit 0; 10 packages ok, no failure |
+| `go vet ./...` (default, calibration, acceptance tags), `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64) | horo | all ok |
+| Historical replays (V0.8c, V0.9c) | horo and CI | 104 checks, 0 failed, each of 4 replays |
+| Benchmark verify and reproduce | CI | run by CI on this commit |
+| Branch points made again (selection, engine answers, requests) | horo and CI | 14 contexts verified |
+| Every draw replayed without a model, analysis regenerated and compared | Pi, horo (three times) and CI | 720 draws, 572 responses, 2,299 engine requests equal; byte-identical (see the note) |
+| Cross-platform CI (linux/amd64, linux/arm64, darwin/arm64) | CI | run by CI on this commit; declaration commit 562ed93 green (run 41471597358) |
+
+**A cross-version fix found by the gates.** The first horo comparison
+found one difference in `decisions.json`: a pooled mean of exactly
+0.21875 was rounded to 0.2187 on the Pi (Python 3.11) and to 0.2188 on
+horo (Python 3.13). Python 3.12 made `sum()` of floats compensated, so
+the computed mean differed in its last bit. The pooled means now use
+`math.fsum`, which is correctly rounded on every version. Only that one
+value changed (to 0.2188), and no per-point result. The fixed analysis
+was rerun on horo and equals the committed file. The V0.10b and V0.10c
+analyzers, frozen, use the same `sum()`. Their committed outputs are
+unaffected, as CI's comparisons show.
+
+Not run: no clinical suite, no historical live evaluation rerun, and no
+local repeat of the gates CI runs (Go suite, golden references, verify
+and reproduce).
+
+**No change to:** the simulator, llm-agent 1–5, prompts, settings,
+scoring, the frozen evidence rules or any recording. No historical live
+evaluation was rerun, and no clinical suite was run.
+
+**Recommendation:** prepare V0.11.0 after owner review. Choose B (fewer
+calls, the same measured validation benefit) or C (it can review an
+expensive valid proposal) as the default.
+
+---
+
 ## V0.11b — controlled evaluation of the validation-first workflow (0.11.0-dev.2): declaration
 
 V0.11a was accepted (e6bb386, CI 41448551855), and V0.11b authorized by
