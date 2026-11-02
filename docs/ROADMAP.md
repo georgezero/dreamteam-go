@@ -22,7 +22,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
-| **V0.11** (in development: V0.11a, `0.11.0-dev.1`, authorized by the owner 2026-11-02, done, awaiting owner review) | Agent decision workflow: validate first, preview selectively, a controlled decision-level evaluation (§7e) | V0.10 |
+| **V0.11** (in development: V0.11a accepted; V0.11b, `0.11.0-dev.2`, authorized by the owner 2026-11-02, declared) | Agent decision workflow: validate first, preview selectively, a controlled decision-level evaluation (§7e) | V0.10 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1182,8 +1182,8 @@ prepared and verified but does not block engineering.
 
 | Milestone | Scope | Status |
 |---|---|---|
-| V0.11a | Validation-first agent workflow | authorized 2026-11-02; done (0.11.0-dev.1), awaiting owner review |
-| V0.11b | Controlled decision-level evaluation | proposed |
+| V0.11a | Validation-first agent workflow | accepted 2026-11-02 (e6bb386, CI 41448551855) |
+| V0.11b | Controlled evaluation of the validation-first workflow | authorized 2026-11-02; declared before any request (0.11.0-dev.2) |
 | V0.11c | Multi-day evaluation, if justified | proposed |
 | V0.11.0 | Release | pending |
 
@@ -1199,6 +1199,20 @@ prepared and verified but does not block engineering.
   * Tested with scripted models only; no live run.
   * The reviewer handoff is [REVIEWER_HANDOFF.md](REVIEWER_HANDOFF.md);
     the review is still PENDING.
+
+**V0.11a accepted; V0.11b authorized** (owner, 2026-11-02). It
+distinguishes three things:
+* **correctness**, established by V0.11a's deterministic tests;
+* **behaviour:** whether the workflow changes decisions;
+* **decision quality:** whether the changes improve outcomes.
+
+V0.11b measures behaviour. It compares three whole workflows from one
+recorded proposal: llm-agent 3 (A), llm-agent 5 without the preview (B)
+and llm-agent 5 (C). The eligibility rule stays unchanged.
+* **Declared:** [docs/benchmark/v11b-dev/PLAN.md](benchmark/v11b-dev/PLAN.md),
+  [SPEC.md](benchmark/v11b-dev/SPEC.md) (`shared-prefix/v4`), before any
+  request.
+* **Size:** 14 points, 720 draws.
 
 ## 8. Testing strategy (all versions)
 

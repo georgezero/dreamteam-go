@@ -366,6 +366,19 @@ jobs:
           V=docs/benchmark/v11a-dev
           python3 -I -B analysis/workflow/scripted_cases.py --out v11a
           for f in scripted-cases.json scripted-cases.md; do cmp v11a/$f $V/$f; cp v11a/$f out/v11a-$f; done
+      - name: Workflow evaluation
+        # V0.11b, without any model: the branch points selected again from
+        # the V0.10c inventory and the recordings, every context checked;
+        # the draw schedule rebuilt from the protocol. Equal to the
+        # committed files.
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v11b-dev
+          $P analysis/repeatability/workflow_experiment.py points --check $V/points
+          $P analysis/repeatability/workflow_experiment.py schedule --protocol $V/protocol.json --out v11b
+          cmp v11b/schedule.json $V/schedule.json
+          cp v11b/schedule.json out/v11b-schedule.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

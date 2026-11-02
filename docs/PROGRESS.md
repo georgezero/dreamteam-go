@@ -7,6 +7,49 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.11b — controlled evaluation of the validation-first workflow (0.11.0-dev.2): declaration
+
+V0.11a was accepted (e6bb386, CI 41448551855), and V0.11b authorized by
+the owner. This commit declares the experiment before any live request.
+Report: `docs/benchmark/v11b-dev/README.md`.
+
+**Protocol** (`v11b-workflow-1`, `dreamteam.shared-prefix/v4`; `PLAN.md`,
+`SPEC.md`, `protocol.json`, `points/`, `schedule.json`):
+* **Arms:** three whole workflows from one recorded state and proposal:
+  * A, llm-agent 3;
+  * B, llm-agent 5 with the preview disabled (the experiment
+    configuration `v11b-B-validation-only`);
+  * C, llm-agent 5.
+
+  They run with the frozen `maxRetries` 1 and details turn. Model calls
+  differ by workflow and are counted.
+* **Points:** 14 from the V0.10c inventory.
+  * Gemma: all 4 of its eligible contexts.
+  * Qwen, 5 valid: credit-supported, retained obligation, termination,
+    allocation, then stake.
+  * Qwen, 5 refused: insufficient funds 2, timing 2, other 1.
+  * Two candidates with an earlier refusal at the point are excluded.
+  * Prior exposure is recorded: 9 points were in V0.10b or V0.10c.
+* **Draws:** Gemma 10 and Qwen 20 per arm and point; 720 draws, one model
+  request at a time, in hash-ordered rounds.
+* **Analysis:**
+  * primary C − B and secondary B − A, per point;
+  * financial evidence v1 and the preview-nudge tables;
+  * a fixed no-action continuation.
+
+**Code:** `analysis/repeatability/workflow_experiment.py`. Its arm driver
+follows each agent's loop with the agents' own functions. It also does
+the selection, the schedule, the sequential live client (one engine
+session per point), and the analysis, which replays every draw's workflow
+without a model. `test_workflow_experiment.py` (11 tests) checks that A
+sends llm-agent 3's messages and submits its batches, B llm-agent 5's
+without a preview, and C llm-agent 5's.
+
+**Engine:** unchanged. 0.11.0-dev.1 is registered for replay
+(`mini-seed52-v0111`, batch mode `v0.11_dev1`).
+
+---
+
 ## V0.11a — validation-first agent decision workflow (0.11.0-dev.1)
 
 V0.10.0 was accepted, and the owner authorized V0.11a: implementation and

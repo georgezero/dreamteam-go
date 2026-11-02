@@ -249,6 +249,7 @@ var earlierV2Engines = map[string]string{
 	"0.10.0-dev.2": batchModeV0102,  // V0.10b (the live shared-prefix decision experiment): this build's action set and rules
 	"0.10.0-dev.3": batchModeV0103,  // V0.10c (validation feedback against preview information): this build's action set and rules
 	"0.10.0":       batchModeV0100,  // the V0.10 release: this build's action set and rules
+	"0.11.0-dev.1": batchModeV0111,  // V0.11a (the validation-first agent workflow): this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

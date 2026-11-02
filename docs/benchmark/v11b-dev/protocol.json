@@ -1,0 +1,104 @@
+{
+ "schema": "dreamteam.shared-prefix/v4",
+ "id": "v11b-workflow-1",
+ "version": "shared-prefix/v4",
+ "description": "V0.11b controlled evaluation of the validation-first workflow: at 14 recorded branch points, the recorded state, conversation and initial staffing proposal, then three whole decision workflows (A llm-agent 3, B llm-agent 5 with the preview disabled, C llm-agent 5), Gemma 10 and Qwen 20 draws per arm per point, one model request at a time. Declared before any request (PLAN.md).",
+ "points": "points",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp",
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp"
+ },
+ "modelOrder": [
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b"
+ ],
+ "arms": {
+  "A": {
+   "name": "llm-agent 3 (validation and retry)",
+   "agent": "agents/llm/llm_agent3.py",
+   "agentVersion": "3",
+   "recordSchema": "dreamteam.llm-decision-record/v3",
+   "workflow": "the proposal validated (version 3's batches); a refusal, an unreadable reply or a protocol error answered with version 3's retry message; a timeout resent; within maxRetries; a details request answered while open; no preview"
+  },
+  "B": {
+   "name": "llm-agent 5, preview disabled (v11b-B-validation-only)",
+   "agent": "agents/llm/llm_agent5.py",
+   "agentVersion": "5",
+   "configuration": "v11b-B-validation-only",
+   "workflow": "llm-agent-workflow/v1 with its preview step disabled: validation first; a refusal answered with llm-agent-validation-feedback/v1; an unreadable reply or a protocol error with version 3's retry message; a timeout resent; within maxRetries; no preview request",
+   "note": "an experiment configuration of the driver, not a production agent: llm-agent 5 itself is unchanged"
+  },
+  "C": {
+   "name": "llm-agent 5 (llm-agent-workflow/v1)",
+   "agent": "agents/llm/llm_agent5.py",
+   "agentVersion": "5",
+   "workflowVersion": "llm-agent-workflow/v1",
+   "workflowSha256": "3ee7d66f4f10fd93e05a908725c792b16b76d01dc29095360dae9d67c0c09d0a",
+   "workflow": "B's steps, plus the read-only preview of the first fully valid proposal with staffing actions, shown when llm-agent-preview-eligibility/v1 finds a reason (unchanged: no threshold), with llm-agent-selective-preview/v1; the reply validated again"
+  },
+  "shared": "every arm: the recorded state, the recorded request (system prompt, prompt, earlier exchanges), the recorded initial proposal as the model's first reply, maxRetries 1 and allowDetails as the frozen settings (failures and details already used before the proposal carried over); the same final-response schema; only a fully validated proposal submitted",
+  "differences": "the arms differ in the messages after the proposal and so in the number of model calls: at a valid proposal A and B call no model and C calls it once when the preview is shown; at a refused proposal each arm calls it once per retry, and C once more when a corrected proposal's preview is shown. The calls are counted per draw, not equalized",
+  "fidelity": "workflow_experiment.run_arm follows each agent's loop with the agents' own functions; test_workflow_experiment.py checks, on scripted engine and model, that A sends llm-agent 3's messages and submits its batches, B llm-agent 5's with no preview, C llm-agent 5's",
+  "primary": "C − B",
+  "secondary": "B − A"
+ },
+ "settings": {
+  "maxRetries": 1,
+  "allowDetails": true,
+  "decisionBudget": "not applied: the agents' wall-clock decision budget (900 s) is not reached by one point's workflow and is not reproducible; declared here instead of enforced"
+ },
+ "drawsPerArm": {
+  "gemma4-26b-a4b": 10,
+  "qwen36-35b-a3b": 20
+ },
+ "drawsBasis": "V0.10b and V0.10c: Gemma gave one decision per arm at every point in 10–20 draws; Qwen gave 1–6 distinct decisions per arm in 20",
+ "draws": 720,
+ "maxModelCallsPerDraw": 4,
+ "maxModelCalls": 2880,
+ "orderRule": "dreamteam-v11b-order/1",
+ "order": "per model in modelOrder; its draws as rounds; in each round every point and arm of the model once, in the order of SHA-256('dreamteam-v11b-order/1|<model>|<round>|<point id>|<arm>'); one draw, and one model request, at a time",
+ "concurrency": 1,
+ "preflight": "GET /health, /v1/models and /openapi.json only; no inference preflight",
+ "request": {
+  "body": "the recorded proposal request (model, messages, temperature 0, max_tokens 4096, response_format json_object) with its messages followed by the workflow's turns; serialized as the agent serialized it; nothing added",
+  "timeoutSeconds": 300,
+  "retries": "none beyond the workflow's own"
+ },
+ "server": {
+  "observed": "before the run, before each round and after: /health, server version, OpenAPI SHA-256, both models' entries; cached tokens per response",
+  "material": "server version, OpenAPI SHA-256 or either model's entry changes, or /health not healthy",
+  "unavailable": [
+   "cache clearing, cache disabling, cold starts, server settings: admin-only, not used"
+  ]
+ },
+ "engine": "one session per point on the recording's replay transcript, at the recorded digests; validate, preview, observe and digests only (read-only); every request and answer recorded with the draw",
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "wallClockSeconds": 14400,
+  "health": "an unhealthy /health before a round stops the run",
+  "serverChange": "a material change before a round stops the run"
+ },
+ "failures": "every model request recorded, failed or not; a failure is handled by the arm's own workflow (resend within maxRetries), never rerun outside it; a stopped run is analysed as far as it went",
+ "resources": "the client on the Pi under systemd-run --user --scope -p MemoryMax=2G nice -n 10 (14 engine sessions); one model request in flight",
+ "outcomes": {
+  "primary": "per point, model and arm, over all draws: the decision against the proposal (kept, revised, abandoned; refused: the workflow ended on a refusal; invalid: it ended on an unreadable reply or a failed request), the final decision (accepted, no action, none submitted), retries, model calls, preview shown and its status, the response after a shown preview, the final submitted actions (canonical action content)",
+  "financial": "financial evidence v1, unchanged, of each distinct final decision at the recorded state: initial and final commitment and their change, cash-only funding headroom at the point, credit support, retained obligations, severance (through REVERSIBILITY records), reversibility, displaced bookings, direct capacity changes; a workflow that submits nothing commits nothing",
+  "nudge": "at valid proposals: kept under B and C, commitment under B and C, credit support under B and C; at refused proposals: valid corrections (final accepted) and abandonment under B and C; per point before any pooled result",
+  "notComputed": "no composite score; no reason for a decision inferred; a smaller commitment is not called better, and an accepted preview not good judgment"
+ },
+ "statistics": {
+  "perPoint": "counts with Wilson 95% intervals; C − B, B − A and C − A per outcome, final status and credit support with Newcombe 95% intervals; whether the action-content distributions are identical",
+  "pooled": "after the per-point results, per model and proposal validity and overall: per-point differences and their unweighted mean, no interval over clustered points",
+  "separation": "workflow effects (between arms at a point), inference variability (distinct decisions within an arm; none for A and B at a valid proposal, which call no model), branch-point heterogeneity (per-point differences), model differences (Gemma and Qwen reported apart), financial exposure (financial evidence v1 per decision)",
+  "claims": "descriptive; no hypothesis test; nothing generalized beyond these points"
+ },
+ "continuation": {
+  "suffix": "no_action",
+  "rule": "shared-prefix/v2's: each distinct final decision validated and applied in order at the recorded state if valid, then every later day with no action",
+  "recorded": "apply results, validate/apply agreement, digests, the observed state at the end, financial evidence v1 records",
+  "purpose": "a mechanics check; no long-run claim"
+ },
+ "replay": "the analysis runs every draw's workflow again with the recorded responses (each request checked by SHA-256 against the recorded one, each response against its hash) on a fresh engine session at the point; the trace and every engine answer must equal the recorded ones; CI regenerates the points' check, the schedule and the analysis and compares them across platforms",
+ "material": "development only: the committed V0.8c and V0.9c recordings (seeds 41901, 41902, 42001, 42002); no clinical, reference, reserved or sealed holdout seed; no new live agent trajectory"
+}
