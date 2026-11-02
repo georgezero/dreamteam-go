@@ -5,6 +5,220 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.10.0 — inference repeatability and controlled decision experiments
+
+V0.10 is a **methodology and measurement release**. It adds research and
+evaluation capabilities:
+* a measurement of live inference repeatability;
+* a versioned method for comparing decision-support messages from one
+  recorded decision point;
+* two prospectively declared experiments run with it.
+
+**These are not evidence of improved management performance.** No
+financial or operational benefit of the preview was established.
+
+No mechanic, scenario behaviour, action, accounting or scoring rule
+changes. No agent, prompt, model or setting changes: llm-agent 1–4 are
+as in V0.9.0. Every earlier scenario, save, golden reference, recording
+and benchmark result is unchanged.
+
+**Capabilities:**
+1. **Live inference repeatability** (V0.10a, `analysis/repeatability/prompt_sample.py`,
+   `repeat_run.py`, `repeat_analysis.py`; `docs/benchmark/v10a-dev/`).
+   Recorded model requests are sent again, byte for byte, under declared
+   conditions.
+2. **Raw-output against action-level variation.** Each response is
+   compared at five levels: raw text, parsed reply, actions, the engine's
+   validation at the recorded state, and the decision.
+3. **Sequential against concurrent inference.** Interleaved,
+   back-to-back, concurrent (two at once) and seeded conditions.
+4. **Server and cache limitations recorded.** The cached prompt tokens
+   each response reports are observed. Cache clearing, cache disabling
+   and cold starts were unavailable (admin-only) and are not claimed.
+5. **Shared-prefix methodology v1** (`shared_prefix.py`,
+   `docs/benchmark/v10a-dev/DESIGN.md`). Two arms share a recorded state
+   and initial proposal, then branch, with a fixed no-action suffix,
+   prototyped offline.
+6. **Shared-prefix v2** (`decision_experiment.py`,
+   `docs/benchmark/v10b-dev/SPEC.md`). The live version: one reply per
+   arm and draw, at branch points fed from the recordings' replay
+   transcripts.
+7. **Shared-prefix v3** (`feedback_experiment.py`,
+   `docs/benchmark/v10c-dev/SPEC.md`). A third arm, the engine's validate
+   answer, with both engine answers committed per point and asked for
+   again in analysis.
+8. **Prospective branch-point selection.**
+   * Every candidate is inventoried and checked against the recording's
+     hashes.
+   * Points are selected by a declared rule that reads no response, and
+     identical contexts are taken once.
+   * The selection is committed before any request and re-checked in CI.
+9. **Neutral continuation control:** a request for the final decision
+   with no feedback.
+10. **Validation feedback control:** the engine's exact validate answer
+    for the proposal's staffing actions.
+11. **Full preview treatment:** llm-agent 4's exact review message with
+    the engine's preview.
+12. **Decision-distribution analysis.**
+    * Kept, revised, abandoned or invalid, and final accepted, refused or
+      no action, per point and arm, every draw in the denominator.
+    * Wilson and Newcombe 95% intervals and round-blocked tables.
+    * Per-point results before any pooled summary, and no interval over
+      clustered points.
+13. **Financial commitment analysis.** Financial evidence v1, unchanged,
+    for each distinct final decision at the recorded state:
+    commitment, credit support, reversibility, direct exposure and
+    displaced bookings.
+14. **Deterministic continuation.** Each distinct decision is validated,
+    applied if valid, and followed by the no-action suffix, with the
+    validate/apply agreement and state digests recorded.
+15. **Model-free exact replay.** The analyses read the recorded
+    responses and the engine only. They check every request (and in v3
+    every response) against its SHA-256, and replay every engine answer
+    from the recordings' transcripts.
+16. **Cross-platform reproducibility.** CI regenerates every sample,
+    point set, schedule and analysis and compares them byte for byte on
+    linux/amd64, linux/arm64 and darwin/arm64.
+
+**V0.10a findings** (2026-11-01; 375 of 375 requests answered):
+* **The sample:** 25 selected prompts, 24 distinct requests (two are the
+  same bytes); two local models (`gemma-4-26B-A4B-it-oQ4e-mtp`,
+  `Qwen3.6-35B-A3B-oQ4e-mtp`) at temperature zero, 15 requests per
+  prompt.
+* **Temperature zero did not guarantee identical output.** The raw text
+  was identical across all 15 for 2 of 10 Gemma prompts and 0 of 15
+  Qwen prompts.
+* **A different explanation was not necessarily a different decision.**
+  The proposed actions were identical for 7 of 10 and 6 of 15 prompts,
+  and the decision for 8 of 10 and 9 of 15.
+* **Concurrency:**
+  * Sent one at a time, the decision changed at 3 of 25 prompts; sent
+    two at a time, at 8 of 25.
+  * Of two identical requests sent at once, 11 of 50 pairs had identical
+    text.
+  * This is observed, not attributed: the server's state, load and other
+    users were not controlled.
+* **Cache:** 365 of 375 requests reported cached prompt tokens, including
+  most of those whose answers differed. `seed` 0 gave the same counts as
+  no seed.
+
+**V0.10b findings** (8 branch points, 2 arms, 20 draws, 320 of 320
+requests). Identical initial states and proposals, then a neutral
+continuation or the preview:
+
+| Point | Preview | Neutral: kept / revised / abandoned / invalid | Preview: kept / revised / abandoned / invalid |
+|---|---|---|---|
+| ss-gemma-s42001-p14 | accepted | 20/0/0/0 | 20/0/0/0 |
+| fl-gemma-s41901-p27 | refused | 20/0/0/0 | 0/0/20/0 |
+| fl-gemma-s41901-p28 | refused | 20/0/0/0 | 0/20/0/0 |
+| fl-gemma-s41901-p26 | refused | 20/0/0/0 | 0/20/0/0 |
+| ss-qwen-s42002-p6 | accepted | 11/8/0/1 | 20/0/0/0 |
+| ss-qwen-s42001-p1 | accepted | 20/0/0/0 | 20/0/0/0 |
+| ss-qwen-s42002-p26 | refused | 1/7/7/5 | 0/0/20/0 |
+| ss-qwen-s42002-p1 | refused | 16/4/0/0 | 0/19/0/1 |
+
+* **At the five refused-preview points the preview changed 99 of 100
+  proposals.** The neutral control retained 77 of 100 refused proposals.
+* **The neutral control did not receive the agent's own validation
+  feedback.** This comparison does not establish an incremental benefit
+  beyond validation.
+
+**V0.10c findings** (12 branch points, 3 arms, Gemma 10 and Qwen 20
+draws, 600 of 600 requests). The arms were:
+* A, a neutral continuation;
+* B, the engine's actual validation response;
+* C, the full preview response.
+
+The information inventory found that the preview's per-action results
+equal validation's in all 56 recorded staffing proposals.
+* For a refused proposal the preview adds only `asOf` and, for
+  insufficient funds, the funding test.
+* For a valid one it adds the funding test, money lines, item details,
+  slots and displacements.
+
+| Point | Proposal | A | B | C |
+|---|---|---|---|---|
+| ss-gemma-pv-s42001-p14 | accepted | 10/0/0/0 | 10/0/0/0 | 10/0/0/0 |
+| fl-gemma-s41901-p26 | refused | 10/0/0/0 | 0/10/0/0 | 0/10/0/0 |
+| fl-gemma-s41901-p28 | refused | 10/0/0/0 | 0/10/0/0 | 0/10/0/0 |
+| fl-gemma-s41901-p27 | refused | 10/0/0/0 | 0/0/10/0 | 0/0/10/0 |
+| ss-qwen-pv-s42002-p6 | accepted | 12/7/0/1 | 0/20/0/0 | 20/0/0/0 |
+| ss-qwen-s42002-p7 | accepted | 20/0/0/0 | 0/20/0/0 | 20/0/0/0 |
+| fp-qwen-s41901-p26 | accepted | 20/0/0/0 | 0/20/0/0 | 0/20/0/0 |
+| ss-qwen-s42001-p20 | accepted | 20/0/0/0 | 0/20/0/0 | 17/3/0/0 |
+| fl-qwen-s41901-p9 | refused | 0/19/0/1 | 0/18/2/0 | 0/20/0/0 |
+| fl-qwen-s41901-p11 | refused | 20/0/0/0 | 0/0/20/0 | 0/0/20/0 |
+| ss-qwen-s42001-p23 | refused | 0/20/0/0 | 0/17/3/0 | 0/19/1/0 |
+| fp-qwen-s42001-p27 | refused | 20/0/0/0 | 0/20/0/0 | 0/20/0/0 |
+
+(kept / revised / abandoned / invalid)
+* **Preview and validation gave the same decisions at 7 of 12 branch
+  points.**
+* **Refused proposals were often corrected by either.** The preview
+  produced more valid revisions at two Qwen points: 20 against 2 of 20,
+  and 16 against 5.
+* **Accepted Qwen proposals:** validation caused revisions at all four,
+  20 of 20 each. The preview preserved the proposal at three (20, 20 and
+  17 of 20); at the fourth, both dropped the same no-op action.
+* **Gemma's validation and preview decisions matched at all four of its
+  points.**
+* The results differ by branch point and are reported per point. The
+  repeated draws are repetitions of one request each, not independent
+  cases.
+
+**Financial findings** (direct, financial evidence v1):
+* **Qwen s42002-p6:** the original commitment was $44,687.30,
+  credit-supported. Validation reduced it to $303.75 in every draw, by
+  dropping two reading allocations. The preview retained the full
+  commitment in every draw.
+* **Qwen s42002-p7:** validation removed a teleradiology contract,
+  changing the commitment from $3,228.33 to $135.00.
+* **Credit-supported commitments submitted:** neutral 12 draws,
+  validation 10, preview 34.
+* A larger or smaller commitment is not inherently better, and no
+  financial benefit of the preview is claimed.
+
+**Limitations:**
+* **Scope:**
+  * a synthetic radiology practice;
+  * development-only contexts (the V0.8c and V0.9c recordings);
+  * two local models;
+  * twelve V0.10c branch points.
+* **The points:**
+  * Gemma has only one accepted-preview context;
+  * the branch points are a declared selection, not a representative
+    population.
+* **The arms:**
+  * preview and validation messages differ in length and content (the
+    preview up to 12.8 times longer at accepted points);
+  * validation arm B is broader than llm-agent 3's own feedback, which
+    shows only refused results' codes and messages after a refusal.
+* **The replies:** one inference response per draw, without the agent's
+  retry loop.
+* **Outcomes:**
+  * no live multi-day continuation;
+  * no demonstrated long-run financial effect;
+  * no clinical validation.
+* **Not confirmatory:** V0.10b informed V0.10c's design and branch-point
+  selection. V0.10c is therefore not an untouched confirmatory holdout,
+  though its rule reads no model response.
+* The independent evidence review remains **PENDING**.
+
+**Reproducibility.** Every analysis was regenerated from the committed
+responses and the engine on the Pi, on horo (linux/amd64) and on the
+three CI platforms, byte-identical:
+* the V0.10a analysis and prototype;
+* the V0.10b points, schedule and analysis;
+* the V0.10c inventory, points, schedule and analysis.
+
+No live inference was rerun. Historical recordings, the frozen evidence
+contracts, the golden references and the benchmark suites are unchanged
+([docs/audits/v0.10.0-release-baseline.md](audits/v0.10.0-release-baseline.md)).
+0.10.0-dev.3 is registered for replay (`mini-seed52-v0103`, batch mode
+`v0.10_dev3`), with every earlier batch mode kept.
+
+---
+
 ## V0.9.0 — financial decision evidence and preview-based decision support
 
 V0.9 adds **evidence and evaluation capabilities** for the financial

@@ -37,7 +37,10 @@ V0.7c (0.7.0-dev.3) evaluates the frozen LLM agents and the baselines on
 version 3 ([benchmark/v07c-dev/](benchmark/v07c-dev/README.md)); CI
 replays its recordings. Released in V0.7.0. The harness and the policy protocol are
 unchanged. Ordinary benchmarks and their files are
-unchanged.
+unchanged. Through V0.10.0 the harness and the policy protocol are unchanged.
+V0.10 adds live-inference repeatability measurement and the shared-prefix
+decision experiments (v1–v3, §11a–§11c). They run beside the harness, on
+its replays, and CI reproduces them across platforms.
 
 ## 1. Commands
 

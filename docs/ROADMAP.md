@@ -21,7 +21,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.7** (released, `v0.7.0`: financial realism, V0.7a–V0.7c, by the owner's release decision 2026-10-30) | Simulator realism: paid radiologist overtime and opt-in financial solvency (credit, interest, distress, affordability of new commitments), versioned benchmark suites, and a frozen-agent evaluation under the new economics (§7a) | V0.6 benchmark |
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
-| **V0.10** (in development: V0.10a accepted; V0.10a and V0.10b accepted; V0.10c, `0.10.0-dev.3`, authorized by the owner 2026-11-01, done, awaiting owner review) | Experimental validity: inference repeatability, shared-prefix decision interventions, a prospective controlled evaluation (§7d) | V0.9 |
+| **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
+| **V0.11** (proposed, not approved) | Agent decision workflow and independent evidence review (§7e) | V0.10 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1007,7 +1008,7 @@ Each rule change is a new, separately versioned rule, and earlier
 findings stay under their original versions. V0.9a, V0.9b and V0.9c are
 accepted and V0.9.0 is released. Later steps each need the owner's GO.
 
-## 7d. V0.10 — experimental validity (in development)
+## 7d. V0.10 — experimental validity (released)
 
 The owner's recommendation after V0.9c. DreamTeam can replay an
 experiment exactly; the next question is whether an experiment can
@@ -1019,8 +1020,8 @@ than more financial features.
 |---|---|---|
 | V0.10a | Inference repeatability and controlled-comparison design | accepted 2026-11-01 (de8ac79, CI 41326685680) |
 | V0.10b | Live shared-prefix decision experiments | accepted 2026-11-01 (ab1d8d1, d3da060; CI 41349684200) |
-| V0.10c | Validation feedback against preview information | authorized 2026-11-01; declared at 679483e before any request; done (0.10.0-dev.3), awaiting owner review |
-| V0.10.0 | Release | pending |
+| V0.10c | Validation feedback against preview information | accepted 2026-11-01 (679483e, 222168e; CI 41378207630) |
+| V0.10.0 | Release | released 2026-11-01, tag `v0.10.0` |
 
 Proposed work:
 * **independent evidence review:** label the frozen 98-item package by an
@@ -1122,7 +1123,57 @@ with a neutral message.
   * **Recommendation:** release V0.10.0 as a methodology and measurement
     release, with no agent change.
 
-The other items above remain proposed. Each step needs the owner's GO.
+**V0.10c accepted; V0.10.0 released** (owner, 2026-11-01), as a
+methodology and measurement release, with no change to llm-agent 3 or 4.
+The owner's verdicts:
+
+| Component | Decision |
+|---|---|
+| Inference repeatability | PASS |
+| Shared-prefix methodology v1–v3 | PASS |
+| Prospective experiments | PASS |
+| Information inventory | PASS |
+| Recorded replay | PASS |
+| Cross-platform reproducibility | PASS |
+| Historical compatibility | PASS |
+| Causal financial benefit | not established |
+| Independent evidence review | PENDING |
+
+* **The central question:** does the full preview give meaningfully
+  different decision support from ordinary validation feedback? Yes in
+  some contexts, but not consistently, and with no demonstrated financial
+  or operational benefit.
+* **Validation and preview serve different purposes:** validation
+  establishes whether an action is permitted; the preview supplies
+  information about its consequences. Neither establishes whether the
+  action is a good management decision.
+* The findings argue against automatically inserting the full preview
+  into every agent decision.
+
+No V0.10d. Each later step needs the owner's GO.
+
+## 7e. V0.11 — proposed (not approved)
+
+The owner's recommendation after V0.10.0: shift from methodology
+experiments to the agent's decision workflow. Nothing here is approved
+or built.
+
+**A proposed workflow,** not yet an empirically validated improvement:
+1. always validate a proposed action before submission;
+2. return concise refusal feedback when validation fails;
+3. offer detailed preview information selectively, for financially
+   consequential valid actions;
+4. never treat an accepted preview as a recommendation to proceed;
+5. preserve the complete decision and feedback record.
+
+**Directions:**
+* **independent evidence review:** complete the 98-item review with a
+  genuinely independent reviewer before relying on the consistency
+  findings for broader model-quality claims (a priority);
+* better integration of validation feedback into agents;
+* financial consequence communication;
+* decision-level intervention evaluation;
+* broader prospective studies.
 
 ## 8. Testing strategy (all versions)
 

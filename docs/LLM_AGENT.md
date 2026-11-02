@@ -27,7 +27,14 @@ llm-agent 1 and 2 unchanged; every earlier recording replays with
 llm-agent 3, loaded unchanged, that shows the model the simulator's
 existing preview of a staffing proposal before submitting it. Released
 in V0.9.0, with llm-agent 1, 2 and 3 unchanged. Its prospective evaluation
-established no financial benefit of the preview (§14.5).
+established no financial benefit of the preview (§14.5). Released unchanged in V0.10.0. V0.10 measured the agents' setting
+and the preview step at fixed decision points, with no change to any
+agent:
+* inference repeatability (§15);
+* the preview against a neutral message (§16);
+* the preview against the engine's validation answer (§17).
+
+No financial or operational benefit of the preview was established.
 
 ```
 dreamteam benchmark run CONFIG

@@ -7,77 +7,50 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.9** (`0.9.0`, financial decision evidence and preview-based
-decision support) is the current release. It adds evidence and evaluation
-capabilities, not clinical validation or a predictive financial model,
-and changes no simulator behaviour:
-* **financial decision evidence** (`docs/FINANCIAL_EVIDENCE.md`): for every
-  recorded management decision, separately and with no score, what it
-  committed the practice to and whether the credit line funded it, how far
-  the simulator's rules let it be undone, and which resources it changed
-  directly. Every value comes from the engine's own preview at the
-  decision point;
-* **parameter evidence v1, frozen** (`docs/PARAMETER_EVIDENCE.md`): whether
-  amounts, targets, dates, durations and directions stated in a reason
-  agree with the submitted action;
-* **an offline review UI, import and metrics** for the frozen 98-item
-  evidence review. The review is still **pending**: no rule is
-  independently validated;
-* **llm-agent 4** (`agents/llm/llm_agent4.py`, `docs/LLM_AGENT.md` §14),
-  which shows the model the simulator's existing preview of a staffing
-  proposal before submitting it, recorded completely
-  (`dreamteam.llm-decision-record/v4`) and replayable without a model;
-* **a prospective preview evaluation** (`docs/benchmark/v09c-dev/`),
-  declared before any live run: 16 live runs on two models, two scenarios
-  and two seeds, against llm-agent 3 unchanged.
-  * In the nine preview interactions, the agents kept the proposals the
-    preview showed as accepted (4) and revised (4) or abandoned (1) those
-    it showed as refused.
-  * **No financial benefit of preview access was established.** The model
-    server gave different outputs at identical requests at temperature
-    zero, and every Qwen pair diverged before any preview, so the paired
-    differences are not attributed to the preview.
+Status: **V0.10** (`0.10.0`, inference repeatability and controlled
+decision experiments) is the current release. It is a methodology and
+measurement release: research and evaluation capabilities, not evidence
+of improved management performance, and no change to the simulator, the
+agents, prompts, models or scoring.
+* **Inference repeatability** (`docs/benchmark/v10a-dev/`): 25 recorded
+  requests (24 distinct) were sent again 15 times each to two local
+  models at temperature zero, 375 requests in all.
+  * **Temperature zero did not guarantee identical output:** the raw text
+    was identical across all 15 for 2 of 25 prompts.
+  * The proposed actions were identical for 13 of 25 and the decision for
+    17 of 25. A different explanation was not necessarily a different
+    management decision.
+  * Requests sent two at a time varied more than requests sent one at a
+    time. That is observed, not attributed: the server's state was not
+    controlled.
+* **Shared-prefix decision experiments** (`shared-prefix/v1` to `v3`,
+  `analysis/repeatability/`):
+  * the arms start from one recorded state, conversation and initial
+    proposal;
+  * they differ only by the next message;
+  * they are replayed exactly without a model and are byte-identical
+    across platforms.
+* **V0.10b** (`docs/benchmark/v10b-dev/`): preview against a neutral
+  message, 8 points, 320 requests. At five refused-preview points the
+  preview changed 99 of 100 proposals, and the neutral control retained
+  77 of 100 refused proposals. The control did not receive the agent's
+  own validation feedback, so this does not establish a benefit beyond
+  validation.
+* **V0.10c** (`docs/benchmark/v10c-dev/`): neutral, validation and
+  preview, 12 points, 600 requests.
+  * Preview and validation gave the same decisions at 7 of 12 points.
+  * At accepted Qwen proposals, validation led to revisions where the
+    preview mostly preserved them.
+  * **No financial or operational benefit of the preview was
+    established.**
 
 Every earlier scenario, save, golden reference, recording and benchmark
-result is unchanged.
+result is unchanged. The independent evidence review is still
+**pending**.
 
-In development, not released (`0.10.0-dev.3`): **V0.10c**
-(`docs/benchmark/v10c-dev/`), validation feedback against preview
-information. At 12 recorded branch points the model is shown one of
-three messages: a neutral one, the engine's validation of its staffing
-proposal, or the engine's preview of it. The primary comparison is
-preview against validation. It was declared before any request.
-* For refused proposals, validation alone produced nearly the same
-  decisions as the preview.
-* For valid ones, validation led Qwen to revise or cut them, while the
-  preview mostly kept them.
-
-Before it, **V0.10b**
-(`docs/benchmark/v10b-dev/`, accepted), a live shared-prefix decision experiment.
-At 8 recorded branch points the state and the initial staffing proposal
-are held fixed. The model is then shown either a neutral continuation or
-the engine's exact preview, 20 times each. It was declared before any
-request.
-* Where the preview showed a refusal, the model changed its decision in
-  99 of 100 draws. Without the preview it resubmitted the refused
-  proposal in 77.
-* Where the preview showed nothing refused, the decisions were the same
-  at 2 of 3 points.
-* The control sees no validation feedback, so this is the preview against
-  no information, not against an agent's retry loop.
-
-Before it, **V0.10a** (`docs/benchmark/v10a-dev/`, accepted): inference
-repeatability and controlled comparison design. Its protocol was declared
-before any request.
-* **The measurement:** 25 recorded requests were sent again 15 times each
-  to the same models.
-  * The text was identical across all 15 for 2 of 25.
-  * The decision was the same for 17 of 25.
-  * Sending requests at once added variation.
-* **The design:** a shared-prefix comparison that holds the state and the
-  initial proposal fixed, prototyped offline.
-
-It builds on V0.8 (`0.8.0`, auditable decision evidence: deterministic,
+It builds on V0.9 (`0.9.0`, financial decision evidence and preview-based
+decision support: financial evidence v1, parameter evidence v1 frozen, an
+offline review workflow and llm-agent 4, `docs/FINANCIAL_EVIDENCE.md`), V0.8 (`0.8.0`, auditable decision evidence: deterministic,
 versioned consistency rules for agents' stated reasons, a frozen review
 package, complete attempt recording with llm-agent 3,
 `docs/DECISION_EVIDENCE.md`), V0.7 (`0.7.0`, financial realism: paid
@@ -505,7 +478,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.9, V0.10 proposed, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.10, V0.11 proposed, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |

@@ -7,6 +7,50 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.10.0 — release: inference repeatability and controlled decision experiments
+
+V0.10c was accepted (679483e, 222168e; CI 41378207630), and the owner
+gave GO for the V0.10.0 release. This is release-only: no change to
+mechanics, actions, scoring, scenarios, agents, prompts, models or any
+experimental result.
+
+* **Version** 0.10.0.
+* **Replay:** 0.10.0-dev.3 (V0.10c) is registered for historical replay
+  in batch mode `v0.10_dev3`, with the `mini-seed52-v0103` fixture (made
+  from a clean 222168e worktree) and its tests. Every earlier batch mode
+  is kept.
+* **Release notes** (`docs/RELEASE_NOTES.md`): the sixteen capabilities;
+  the V0.10a, V0.10b and V0.10c findings, financial findings and
+  limitations. V0.10c is not an untouched confirmatory holdout.
+* **Documentation:**
+  * README, ROADMAP (§7d released; §7e V0.11 proposed, not approved);
+  * the status lines of BENCHMARK and LLM_AGENT.
+* **Release baseline:** `docs/audits/v0.10.0-release-baseline.md`. Every
+  set is unchanged except the session registration and two added
+  fixture files.
+* **Preserved byte for byte:** the V0.10a, V0.10b and V0.10c development
+  evidence.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Python tests: agents (`agents/llm`), evidence (`analysis/evidence`), repeatability (`analysis/repeatability`) | horo and CI | 60, 147 and 74 tests, OK |
+| Go suite (`go test ./...`), golden references, seed guards (`internal/eval`), historical session replay (`internal/session`, the new `v0103` tests included) | CI, three platforms; race run on horo | passed |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64 | exit 0; 10 packages ok, no failure |
+| `go vet ./...` (default, calibration, acceptance tags), `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64) | horo | all ok |
+| Historical replays, benchmark verify and reproduce, benchmark fingerprints | CI | passed on the release commit |
+| V0.10a, V0.10b and V0.10c analyses regenerated (sample, points, inventory, schedules, analyses, prototype, financial evidence, continuation) and compared | CI, three platforms | byte-identical to the committed files |
+| Cross-platform comparison (linux/amd64, linux/arm64, darwin/arm64) | CI | passed on the release commit |
+
+Not run: no live inference, no clinical suite, no historical live
+evaluation.
+
+**Not done:** no live inference, no clinical suite, no historical live
+evaluation.
+
+---
+
 ## V0.10c — validation feedback against preview information (0.10.0-dev.3): results
 
 The experiment declared at 679483e (below), run and analysed. Report:
