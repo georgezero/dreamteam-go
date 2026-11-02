@@ -700,6 +700,15 @@ V0.11b ran 14 points and 720 draws:
 * validation-first feedback produced valid corrections at 3 refused Qwen
   points where llm-agent 3's retry loop did not (B − A).
 
+**V0.11.0.** The two llm-agent 5 workflows are selectable as an external
+policy: `./agents/llm/llm_agent5.py --settings FILE` runs
+`validation-first`, the default, which is V0.11b's arm B. Adding
+`--workflow validation-first-preview` runs arm C. A benchmark
+configuration that compares them names the workflow in each policy's
+command. A replay uses the recording's workflow
+([LLM_AGENT.md](LLM_AGENT.md) §20). Validation by the harness and the
+agent is a permission check, not a measure of decision quality.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

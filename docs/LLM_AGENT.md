@@ -36,6 +36,14 @@ agent:
 
 No financial or operational benefit of the preview was established.
 
+V0.11 adds llm-agent 5 (`agents/llm/llm_agent5.py`, §18), released in
+V0.11.0 with llm-agent 1 to 4 unchanged. It validates first, answers a
+refusal with the engine's own results and submits only validated batches.
+Its workflow is chosen with `--workflow`: `validation-first`, the
+default, or the opt-in `validation-first-preview` (§20). V0.11b compared
+it with llm-agent 3 at fixed decision points (§19). A valid decision is
+not shown to be a better one.
+
 ```
 dreamteam benchmark run CONFIG
         │  benchmark-policy/v1 over stdio (one process per run)
@@ -1111,10 +1119,13 @@ after a refusal (codes and messages only) was not an arm.
 
 ## 18. llm-agent 5: the validation-first workflow (V0.11a)
 
-`agents/llm/llm_agent5.py`, version 5, built in V0.11a (0.11.0-dev.1), is
-unreleased and untested on a live model. It is versions 3 and 4 loaded
-unchanged, run in the workflow `llm-agent-workflow/v1`
-([V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md)):
+`agents/llm/llm_agent5.py`, version 5, was built in V0.11a (0.11.0-dev.1)
+and released in V0.11.0. It is versions 3 and 4 loaded unchanged. This
+section describes its V0.11a workflow, `llm-agent-workflow/v1`
+([V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md)). Since V0.11.0 that
+workflow is the opt-in `--workflow validation-first-preview`. The
+default, `validation-first`, is the same without the selective preview
+(§20).
 * **validate first:** every batch of every parsed proposal;
 * **exact refusal feedback:** `llm-agent-validation-feedback/v1`, the
   engine's results for the refused actions, verbatim. The model revises
@@ -1137,8 +1148,8 @@ version 3's. Every earlier version is unchanged, and each replays only
 its own recordings.
 
 ```
-dreamteam benchmark run CONFIG    # with ./agents/llm/llm_agent5.py --settings FILE as an external policy
-python3 -I -B agents/llm/llm_agent5.py --replay decisions.jsonl   # no model
+dreamteam benchmark run CONFIG    # with ./agents/llm/llm_agent5.py --settings FILE [--workflow W] as an external policy
+python3 -I -B agents/llm/llm_agent5.py --replay decisions.jsonl   # no model; the recording's workflow
 ```
 
 ## 19. llm-agent 5 against llm-agent 3, at fixed decision points (V0.11b)
@@ -1168,3 +1179,54 @@ Draws were 10 (Gemma) or 20 (Qwen) per arm.
   and B submit without asking the model again.
 
 None of this shows that the decisions are better.
+
+## 20. The workflow selector (V0.11.0)
+
+V0.11.0 releases llm-agent 5 with two workflows, chosen with `--workflow`.
+They share the proposal, the validation of every batch, the exact
+refusal feedback, the bounded retries (`maxRetries`), the details turn
+and the submission of validated batches only. The only difference is
+whether the selective preview step occurs.
+
+| `--workflow` | Identity (SHA-256) | Preview |
+|---|---|---|
+| `validation-first` (**the default**) | `llm-agent-validation-first-workflow/v1` (`a0204f628c76…`: the version, the feedback text and the rule "no preview: a fully validated proposal is submitted") | never asked for |
+| `validation-first-preview` | `llm-agent-workflow/v1` (`3ee7d66f4f10…`, unchanged since V0.11a) | as in §18 |
+
+* **Why validation-first is the default:** the owner's decision after
+  V0.11b (§19). Validation-first feedback produced most of the measured
+  difference from llm-agent 3. The preview changed decisions at 4 of 14
+  points and made more model calls (312 against 130). Neither workflow
+  was shown to improve financial or operational outcomes.
+* **What changed for llm-agent 5:** before V0.11.0 it was unreleased,
+  and its only workflow included the preview. A run that names no
+  workflow is now validation-first. To keep the V0.11a behaviour, give
+  `--workflow validation-first-preview`. The settings file is version 3's,
+  unchanged; the selector is a command-line choice, not a setting.
+* **Recording:** every live record names its workflow (`"workflow"`)
+  beside its identity (`workflowVersion`, `workflowSha256`), and so does
+  `agent.json`.
+* **Replay** takes the workflow from the recording, never from the
+  command line:
+  * a record without `"workflow"` was made before the selector. It must
+    be `llm-agent-workflow/v1`, and it replays with the preview, as it
+    was made (the V0.11a scripted evidence, for example);
+  * an unknown identity, a selection that contradicts the identity, a
+    recording that mixes workflows, and a `--workflow` that contradicts
+    the recording are refused. One workflow is never taken for the
+    other.
+* **Tests:**
+  * `agents/llm/test_llm_agent5_workflows.py` (18) covers the default,
+    explicit and invalid choices, both workflows' messages, identities,
+    legacy, unknown and tampered records, model-free replay, and a hash
+    of every scripted case's validation-first output checked on every CI
+    platform;
+  * `analysis/repeatability/test_workflow_selector.py` (3) shows that
+    `validation-first` sends exactly the messages of V0.11b's arm B, and
+    `validation-first-preview` those of arm C;
+  * `internal/bench/llm_agent5_test.go` covers both workflows against
+    the real engine.
+* **Validation success is not decision quality.** A valid termination is
+  irreversible and can displace booked appointments, and a valid staffing
+  action can create retained obligations. Neither validation nor a
+  preview the model accepts is a recommendation to proceed.

@@ -22,7 +22,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.8** (released, `v0.8.0`: auditable decision evidence, V0.8a–V0.8c, by the owner's release decision 2026-10-31) | Auditable decision evidence for practice-management agents: deterministic, versioned consistency rules with abstention, a frozen review package (review pending), paired financial outcomes, refusal probes, complete attempt recording (llm-agent 3) and a prospective funding-refusal evaluation (§7b). Evaluation and auditability, not clinical validation | V0.7 |
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
-| **V0.11** (in development: V0.11a accepted; V0.11b, `0.11.0-dev.2`, authorized by the owner 2026-11-02, done, awaiting owner review) | Agent decision workflow: validate first, preview selectively, a controlled decision-level evaluation (§7e) | V0.10 |
+| **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
+| **V0.12** (proposed, not approved) | Decision safeguards for irreversible actions; operational exposure before commitment; independent evidence review; financial decision-quality evaluation (§7f) | V0.11 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1152,7 +1153,7 @@ The owner's verdicts:
 
 No V0.10d. Each later step needs the owner's GO.
 
-## 7e. V0.11 — agent decision workflow (in development)
+## 7e. V0.11 — agent decision workflow (released)
 
 The owner's recommendation after V0.10.0: shift from methodology
 experiments to the agent's decision workflow. Nothing here is approved
@@ -1183,9 +1184,9 @@ prepared and verified but does not block engineering.
 | Milestone | Scope | Status |
 |---|---|---|
 | V0.11a | Validation-first agent workflow | accepted 2026-11-02 (e6bb386, CI 41448551855) |
-| V0.11b | Controlled evaluation of the validation-first workflow | authorized 2026-11-02; declared at 562ed93 before any request; done (0.11.0-dev.2), awaiting owner review |
-| V0.11c | Multi-day evaluation, if justified | proposed |
-| V0.11.0 | Release | pending |
+| V0.11b | Controlled evaluation of the validation-first workflow | accepted 2026-11-02 (562ed93, 26005b3; CI 41498797098) |
+| V0.11c | Multi-day evaluation, if justified | not pursued: prospective multi-day testing is proposed for V0.12, after safeguards are independently reviewed |
+| V0.11.0 | Release, with the workflow selector (b44384a) | released 2026-11-02, tag `v0.11.0` |
 
 * **V0.11a, done:** llm-agent 5 (`agents/llm/llm_agent5.py`,
   [V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md)).
@@ -1223,6 +1224,46 @@ and llm-agent 5 (C). The eligibility rule stays unchanged.
     terminate staff.
   * **Recommendation:** prepare V0.11.0. The owner decides whether B or
     C is the default.
+
+**V0.11b accepted; conditional GO for V0.11.0** (owner, 2026-11-02):
+* **The default workflow is validation-first without the preview (B).**
+  B produced most of the observed validation improvement. C made more
+  model calls without a consistent additional benefit, though it
+  occasionally reduced commitments.
+* **The selective preview (C) stays available,** opt-in.
+* **llm-agent 3 and 4 remain** available and unchanged.
+* **Option A, authorized:** a bounded `--workflow` selector for
+  llm-agent 5 (b44384a), with its recording, replay and tests, as part of
+  the release, not a separate V0.11c. `llm-agent-workflow/v1` keeps its
+  identity and is the opt-in `validation-first-preview`. The new
+  `llm-agent-validation-first-workflow/v1` is the default.
+* **The safety concern:** validation-first turned refused actions into
+  valid irreversible terminations, one displacing 100 booked
+  appointments. A technically valid correction is not necessarily a
+  good management decision. No approval mechanism was added before the
+  release. Irreversible and high-exposure actions are disclosed in the
+  agent's evidence and the release documentation, and decision
+  safeguards are proposed for V0.12.
+
+## 7f. V0.12 — decision safeguards (proposed, not approved)
+
+The owner's recommendation after V0.11.0: decision safeguards,
+especially for irreversible staffing decisions. Syntactic validity and
+financial affordability are insufficient as management safeguards.
+Nothing here is approved or built.
+* **Decision safeguards for irreversible actions:** an explicit,
+  engine-backed consequence acknowledgment before high-impact actions,
+  such as terminations and displaced bookings. This would not be an
+  automatic refusal or a new scoring rule.
+* **Explicit operational exposure before commitment:** what an action
+  displaces, retains or makes irreversible, from the engine's own
+  answer.
+* **Independent evidence review** (still PENDING).
+* **Financial decision-quality evaluation.**
+* **Prospective multi-day testing,** only after the safeguards are
+  independently reviewed.
+
+Each step needs the owner's GO.
 
 ## 8. Testing strategy (all versions)
 

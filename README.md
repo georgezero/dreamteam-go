@@ -7,61 +7,48 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.10** (`0.10.0`, inference repeatability and controlled
-decision experiments) is the current release. It is a methodology and
-measurement release: research and evaluation capabilities, not evidence
-of improved management performance, and no change to the simulator, the
-agents, prompts, models or scoring.
-* **Inference repeatability** (`docs/benchmark/v10a-dev/`): 25 recorded
-  requests (24 distinct) were sent again 15 times each to two local
-  models at temperature zero, 375 requests in all.
-  * **Temperature zero did not guarantee identical output:** the raw text
-    was identical across all 15 for 2 of 25 prompts.
-  * The proposed actions were identical for 13 of 25 and the decision for
-    17 of 25. A different explanation was not necessarily a different
-    management decision.
-  * Requests sent two at a time varied more than requests sent one at a
-    time. That is observed, not attributed: the server's state was not
-    controlled.
-* **Shared-prefix decision experiments** (`shared-prefix/v1` to `v3`,
-  `analysis/repeatability/`):
-  * the arms start from one recorded state, conversation and initial
-    proposal;
-  * they differ only by the next message;
-  * they are replayed exactly without a model and are byte-identical
-    across platforms.
-* **V0.10b** (`docs/benchmark/v10b-dev/`): preview against a neutral
-  message, 8 points, 320 requests. At five refused-preview points the
-  preview changed 99 of 100 proposals, and the neutral control retained
-  77 of 100 refused proposals. The control did not receive the agent's
-  own validation feedback, so this does not establish a benefit beyond
-  validation.
-* **V0.10c** (`docs/benchmark/v10c-dev/`): neutral, validation and
-  preview, 12 points, 600 requests.
-  * Preview and validation gave the same decisions at 7 of 12 points.
-  * At accepted Qwen proposals, validation led to revisions where the
-    preview mostly preserved them.
-  * **No financial or operational benefit of the preview was
-    established.**
+Status: **V0.11** (`0.11.0`, the validation-first agent workflow) is the
+current release. It adds agent workflow and evaluation capabilities, not
+evidence of improved management or financial decisions. No change to the
+simulator, actions, accounting, scoring or prompts.
+* **llm-agent 5** (`agents/llm/llm_agent5.py`, `docs/V0.11_AGENT_WORKFLOW.md`)
+  validates every proposal first. It answers a refusal with the engine's
+  own results, retries a bounded number of times, and submits only
+  validated batches.
+* **Two workflows,** chosen with `--workflow`:
+  * `validation-first` is **the default**;
+  * `validation-first-preview` is opt-in. It adds the engine's preview for
+    a valid staffing proposal with a direct financial or capacity effect,
+    in neutral wording: passing validation and the preview do not
+    establish that the decision is beneficial.
+
+  Every recording names its workflow, and replay takes it from the
+  recording, without a model.
+* **V0.11b** (`docs/benchmark/v11b-dev/`): a prospectively declared
+  evaluation of llm-agent 3, validation-first and validation-first with
+  the preview. It covered 14 development branch points, 720 draws and two
+  local models.
+  * Validation-first made valid corrections at three of five refused Qwen
+    proposals where llm-agent 3 made none.
+  * **Two of those corrections terminate a technologist, displacing 100
+    and 8 booked appointments.**
+  * The preview gave the same decisions as validation-first at 10 of 14
+    points, and did not increase a commitment at any valid point.
+
+**A valid action is not necessarily a good decision.** Validation checks
+that an action is permitted and funded now. It does not show that the
+action is wise, and the preview is not a recommendation. Terminations
+cannot be reversed and can displace booked appointments, and a valid
+staffing action can create retained obligations.
 
 Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged. The independent evidence review is still
 **pending**.
 
-In development, not released (`0.11.0-dev.1`): **V0.11a**, a
-validation-first agent workflow. llm-agent 5 (`agents/llm/llm_agent5.py`,
-`docs/V0.11_AGENT_WORKFLOW.md`):
-* validates every proposal first and answers refusals with the engine's
-  own results;
-* shows the engine's preview only for valid staffing proposals with a
-  direct financial or capacity effect, saying that acceptance does not
-  establish benefit;
-* submits only validated batches.
-
-It is tested with scripted models only, and whether it improves decisions
-is untested.
-
-It builds on V0.9 (`0.9.0`, financial decision evidence and preview-based
+It builds on V0.10 (`0.10.0`, inference repeatability and controlled
+decision experiments: temperature zero did not guarantee identical output;
+the shared-prefix method with model-free replay, `docs/benchmark/v10a-dev/`
+to `v10c-dev/`), V0.9 (`0.9.0`, financial decision evidence and preview-based
 decision support: financial evidence v1, parameter evidence v1 frozen, an
 offline review workflow and llm-agent 4, `docs/FINANCIAL_EVIDENCE.md`), V0.8 (`0.8.0`, auditable decision evidence: deterministic,
 versioned consistency rules for agents' stated reasons, a frozen review
@@ -389,6 +376,22 @@ Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/benchmark/v05b-dev/`; the multi-model development evaluation, three
 local models with a memory-off control: `docs/benchmark/v05c-dev/`.
 
+### LLM agent workflows (V0.11)
+
+`agents/llm/llm_agent5.py` is llm-agent 5: version 3's prompt, memory and
+parser, with a validation-first workflow.
+
+    python3 agents/llm/llm_agent5.py --settings settings.json                                       # validation-first (default)
+    python3 agents/llm/llm_agent5.py --settings settings.json --workflow validation-first-preview   # opt-in preview
+    python3 agents/llm/llm_agent5.py --replay decisions.jsonl                                       # the recording's workflow
+
+| Workflow | Identity | After a refusal | After a valid proposal |
+|---|---|---|---|
+| `validation-first` (default) | `llm-agent-validation-first-workflow/v1` | the engine's results for the refused actions, verbatim; bounded retries | submitted |
+| `validation-first-preview` | `llm-agent-workflow/v1` (V0.11a, unchanged) | the same | the engine's preview when it shows a direct effect, in neutral wording; the model keeps, revises or abandons, and the reply is validated again |
+
+llm-agent 1 to 4 are unchanged. Details: `docs/LLM_AGENT.md` §18–20.
+
 ### Benchmark scenario suite (V0.6)
 
 Five development scenarios, each a bundled scenario, pose different
@@ -491,7 +494,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.10, V0.11 proposed, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.11, V0.12 proposed, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -504,13 +507,45 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/DECISION_EVIDENCE.md` | decision evidence: whether recorded agent reasons agree with their actions; its versions, defects and the refusal-response and repeat evidence (V0.8) |
 | `docs/PARAMETER_EVIDENCE.md` | parameter evidence: whether stated amounts, targets, dates, durations and directions agree with the submitted action (V0.9a, frozen in V0.9b) |
 | `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9) |
+| `docs/V0.11_AGENT_WORKFLOW.md` | the validation-first agent workflow, its two selectable forms and their limits (V0.11) |
+| `docs/REVIEWER_HANDOFF.md` | what an independent evidence review covers, and where the evidence is |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
 | `docs/MEASUREMENTS.md` | performance measurements |
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.9)
+## Known limitations (V0.11)
+
+* **Validation success does not establish decision quality.** A valid
+  action is permitted and, where funding is tested, funded now. That does
+  not mean it is financially wise, and the preview is not a
+  recommendation.
+  * **Terminations can be irreversible** and can displace booked
+    appointments. In V0.11b, one corrected termination displaced 100
+    bookings and another 8, and a valid termination displaced 6 bookings
+    under every workflow.
+  * **A valid staffing action can create retained obligations,** such as
+    a teleradiology retainer to the earliest end.
+* **V0.11b is small and local.** It covers a synthetic practice, 14
+  development branch points and two local models, with few Gemma
+  contexts. Earlier experiments influenced the selection of branch
+  points. The workflows made different numbers of model calls. There was
+  no long-run live continuation, no demonstrated improvement in financial
+  outcomes and no clinical validation.
+* **No new safeguard.** No approval rule or threshold was added. Decision
+  safeguards for irreversible actions are proposed for V0.12.
+* The independent evidence review remains **pending**.
+
+Details: `docs/RELEASE_NOTES.md` (V0.11.0), `docs/benchmark/v11b-dev/README.md` §12.
+
+### From V0.10
+
+* **Temperature zero did not guarantee identical output,** and requests
+  sent two at a time varied more. A live rerun is not exact; recorded
+  inference replays exactly.
+
+### From V0.9
 
 * **No causal effect of the preview was identified.** The V0.9c
   evaluation measured how the agents responded to the preview, not its

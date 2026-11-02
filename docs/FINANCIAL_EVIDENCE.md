@@ -271,3 +271,40 @@ affordability record, or the analysis stops.
 
 The adapters are V0.9c's; the V0.9b outputs are unchanged.
 
+
+## 10. What validation and the preview do not establish (V0.11)
+
+Financial evidence v1 is unchanged in V0.11. V0.11b
+([benchmark/v11b-dev/](benchmark/v11b-dev/README.md) §8) used it on every
+distinct final decision of its three workflows, at the recorded state.
+Its results show why a valid decision, or one whose preview a model
+accepted, is not evidence of a good one:
+* **Terminations can be irreversible.** The REVERSIBILITY record of a
+  termination is `irreversible`: severance is paid and the employee is
+  gone.
+* **Terminations can displace booked appointments.** In V0.11b:
+  * one corrected termination displaced 100 bookings
+    (`fl-qwen-s41902-p27`, under validation-first with and without the
+    preview, 20 of 20 draws each);
+  * another displaced 8 (`fl-qwen-s41901-p9`, 13 and 12 of 20 draws);
+  * a valid termination proposal displaced 6 under every workflow
+    (`fl-qwen-s41902-p24`).
+
+  Under llm-agent 3's retry loop, the first two ended with nothing
+  submitted.
+* **A valid staffing action can create retained obligations.** For
+  example, a teleradiology retainer is owed to the contract's earliest
+  end, even with no reads (`fp-qwen-s42001-p24`: $2,225.80 in 5 and 4
+  draws where llm-agent 3 started none).
+* **Funding approval does not mean an action is wise.** The funding test
+  says only whether the commitment fits the headroom now. A
+  credit-supported $44,687.30 allocation passed validation and was
+  submitted in every draw by both workflows.
+* **A preview is not a recommendation.** It reports the engine's direct
+  commitments and effects. Its message says that passing validation and
+  the preview does not establish that the decision is beneficial.
+
+These are direct effects at one decision point. **No downstream outcome
+is attributed to an individual action,** and no long-run continuation
+was run. V0.11 adds no approval rule or threshold. Decision safeguards
+for irreversible actions are proposed for V0.12.

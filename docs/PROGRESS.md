@@ -7,6 +7,82 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.11.0 — release: the validation-first agent workflow (0.11.0)
+
+V0.11b was accepted (26005b3, CI 41498797098), with a conditional GO for
+V0.11.0 from the owner. The default is validation-first without the
+preview (B), and the preview (C) is opt-in. The owner authorized one
+bounded change for the release (Option A): a workflow selector for
+llm-agent 5.
+
+**The selector** (b44384a, a separate commit before the release):
+* `llm_agent5.py --workflow validation-first | validation-first-preview`.
+  When omitted, the workflow is validation-first.
+* **Identities:**
+  * `llm-agent-workflow/v1` (`3ee7d66f…`) is unchanged byte for byte. It
+    is now the opt-in `validation-first-preview`.
+  * `llm-agent-validation-first-workflow/v1` (`a0204f62…`) is new: the
+    version, the unchanged feedback text and the no-preview rule.
+* **The only behavioural difference** between the two is whether the
+  selective preview step occurs. Validation, refusal feedback, retries
+  and submission are shared.
+* **Recording:** every live record and `agent.json` name the workflow.
+* **Replay** takes the workflow from the recording. A record without a
+  selection must be `llm-agent-workflow/v1` and replays with the preview.
+  Unknown identities, contradictory selections, mixed recordings and a
+  contradicting `--workflow` are refused.
+* `ask()` keeps its V0.11a default for callers that name no workflow.
+  So the V0.11a scripted evidence and the V0.11b fidelity tests are
+  unchanged, and CI regenerates the evidence equal.
+* **Tests:**
+  * `agents/llm/test_llm_agent5_workflows.py` (18);
+  * `analysis/repeatability/test_workflow_selector.py` (3; B and C equal
+    to the V0.11b drivers);
+  * `internal/bench/llm_agent5_test.go`: the existing tests name the
+    preview workflow, and `TestLLMAgent5ValidationFirst` covers the
+    default and explicit validation-first against the real engine, with
+    replay.
+
+**The release:**
+* Version 0.11.0.
+* 0.11.0-dev.2 registered for replay: batch mode `v0.11_dev2`, the
+  `mini-seed52-v0112` fixture made from a clean b44384a worktree, and
+  `internal/session/v0112_test.go`. Every earlier batch mode is kept.
+* Release notes, README, ROADMAP (V0.11 released; V0.12 proposed, not
+  approved), LLM_AGENT §18–20, BENCHMARK §11e, FINANCIAL_EVIDENCE §10,
+  V0.11_AGENT_WORKFLOW §10, and the release baseline
+  (`docs/audits/v0.11.0-release-baseline.md`).
+* The safety disclosure: validation success does not establish decision
+  quality. It covers the V0.11b terminations (100, 8 and 6 displaced
+  bookings), retained obligations, funding approval, and the preview not
+  being a recommendation.
+
+**Quality gates:**
+| Gate | Where | Result |
+|---|---|---|
+| Python tests: agents (`agents/llm`, including the 18 new workflow tests), evidence (`analysis/evidence`), repeatability (`analysis/repeatability`, including the 3 new selector tests) | horo and CI | 107, 147 and 88 tests, OK |
+| Go suite (`go test ./...`, including `TestLLMAgent5ValidationFirst` and the new `v0112` session tests), golden references, seed guards (`internal/eval`), historical session replay | CI, three platforms; race run on horo | passed |
+| Race (`go test -race -timeout 90m ./...`) | horo, linux/amd64 | exit 0; 10 packages ok, no failure |
+| `go vet ./...`, `gofmt -l` | horo, and CI | vet ok; gofmt clean |
+| Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64) | horo | all ok |
+| Historical model-free replays (V0.8c financial-pressure credit and low-liquidity; V0.9c financial-pressure and staffing-shortage credit) with the 0.11.0 binary | horo | 4 × 104 checks, 0 failed |
+| V0.11a scripted evidence regenerated after the selector | horo | `scripted-cases.json` and `.md` byte-identical |
+| V0.11b analysis reproduced (720 draws, 572 model calls, 2,299 engine requests replayed) | horo | `decisions.json`, `decision-tables.md`, `inference.json` byte-identical |
+| Benchmark verify and reproduce, benchmark fingerprints, frozen-evidence checks | CI | passed on the release commit |
+| Cross-platform comparison (linux/amd64, linux/arm64, darwin/arm64) | CI | passed on the release commit |
+| Selector commit `b44384a` | CI run 41522392152, three platforms | passed |
+
+Not run locally (covered by CI): the full Go suite, golden references and
+benchmark reproduction. Not run at all: live inference, the clinical
+suite, and historical live experiments.
+
+**No change to:** prompts, simulator mechanics, action schemas,
+financial accounting, scoring, llm-agent 1–4, the settings schema, or
+any recording or evidence. No live inference was rerun, and no clinical
+suite was run.
+
+---
+
 ## V0.11b — controlled evaluation of the validation-first workflow (0.11.0-dev.2): results
 
 The experiment declared at 562ed93 (below), run and analysed. Report:
