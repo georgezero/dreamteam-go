@@ -1108,3 +1108,35 @@ draws per arm.
 
 Neither effect is shown to improve outcomes. llm-agent 3's own feedback
 after a refusal (codes and messages only) was not an arm.
+
+## 18. llm-agent 5: the validation-first workflow (V0.11a)
+
+`agents/llm/llm_agent5.py`, version 5, built in V0.11a (0.11.0-dev.1), is
+unreleased and untested on a live model. It is versions 3 and 4 loaded
+unchanged, run in the workflow `llm-agent-workflow/v1`
+([V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md)):
+* **validate first:** every batch of every parsed proposal;
+* **exact refusal feedback:** `llm-agent-validation-feedback/v1`, the
+  engine's results for the refused actions, verbatim. The model revises
+  or abandons; nothing is rewritten for it;
+* **selective preview:** once per decision point, for the first fully
+  valid proposal with staffing actions.
+  * It is shown when the engine's answer has a measured commitment, a
+    new guaranteed obligation, a termination, displaced bookings or a
+    capacity change (`llm-agent-preview-eligibility/v1`, no threshold).
+  * Its message (`llm-agent-selective-preview/v1`) says acceptance does
+    not establish that the decision is beneficial;
+* **submit only what is validated,** after checking that validation and
+  preview changed no state.
+
+Its record, `dreamteam.llm-decision-record/v5`, separates proposed,
+validated, previewed, submitted and executed (the last read from the
+next point's action log). The settings file, the system prompt, the
+prompt (`llm-agent-prompt/v2`) and the memory (`llm-agent-memory/v1`) are
+version 3's. Every earlier version is unchanged, and each replays only
+its own recordings.
+
+```
+dreamteam benchmark run CONFIG    # with ./agents/llm/llm_agent5.py --settings FILE as an external policy
+python3 -I -B agents/llm/llm_agent5.py --replay decisions.jsonl   # no model
+```

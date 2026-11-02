@@ -354,6 +354,18 @@ jobs:
           cp $V/points/inventory.json out/v10c-inventory.json
           $P analysis/repeatability/feedback_experiment.py analyze --binary ./dt --replays . --dir $V --out v10c
           for f in decisions.json decision-tables.md inference.json; do cmp v10c/$f $V/$f; cp v10c/$f out/v10c-$f; done
+      - name: Validation-first agent workflow
+        # V0.11a, without any model: llm-agent 5's scripted cases (scripted
+        # model replies and engine answers) made again, equal to the
+        # committed evidence and compared across platforms below. Its unit
+        # tests run with the agents' tests above; its exchange with the
+        # engine and the mock model, in the Go suite.
+        shell: bash
+        run: |
+          set -euo pipefail
+          V=docs/benchmark/v11a-dev
+          python3 -I -B analysis/workflow/scripted_cases.py --out v11a
+          for f in scripted-cases.json scripted-cases.md; do cmp v11a/$f $V/$f; cp v11a/$f out/v11a-$f; done
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

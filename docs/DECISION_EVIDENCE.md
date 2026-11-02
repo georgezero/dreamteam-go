@@ -831,3 +831,20 @@ Nothing in §1–§17 changes.
   attributed to a single decision.
 
 **The independent review is still PENDING.**
+
+## 19. V0.11a: llm-agent 5's records
+
+llm-agent 5 (V0.11a, unreleased) records `dreamteam.llm-decision-record/v5`
+([V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md) §7). It keeps the
+evidence stages of §2 apart:
+* **proposed:** every attempt's reply, reason and actions;
+* **validated:** every batch's validate answer;
+* **previewed:** the preview answer, its eligibility and the message's
+  hash;
+* **submitted:** the batches;
+* **executed:** the next decision point's action log.
+
+No v5 recording exists yet, and the frozen rules (§11) and the financial
+evidence v1 corpus are unchanged. Reading v5 records with them is not
+done in V0.11a. The independent review remains PENDING
+([REVIEWER_HANDOFF.md](REVIEWER_HANDOFF.md)).

@@ -668,6 +668,21 @@ V0.10c ran 12 points, 600 requests, one at a time:
 * where it was refused, the preview's revisions were more often valid
   (2 Qwen points).
 
+## 11d. llm-agent 5 as a policy (V0.11a)
+
+llm-agent 5 (validation first, selective preview;
+[V0.11_AGENT_WORKFLOW.md](V0.11_AGENT_WORKFLOW.md)) is an external policy
+like versions 1–4. It uses only permitted operations (`validate`,
+`preview`, `observe`, `actions`, `digests`), and the harness applies its
+batches as it applies any policy's.
+
+Because the harness applies batches after the decision, the agent records
+how its previous decision was executed from the next observation's action
+log. A refused batch is recorded by the harness alone.
+
+`internal/bench/llm_agent5_test.go` runs it against the engine and the
+mock model, live and replayed.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

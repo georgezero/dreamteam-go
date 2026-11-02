@@ -579,3 +579,8 @@ The V0.10c file was made from 222168e (0.10.0-dev.3) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0103.actions.json`
 (the same batches as the 5C.4l file's). 0.10.0 replays it in batch mode
 `v0.10_dev3` with every digest verified (`internal/session/v0103_test.go`).
+
+The V0.10.0 file was made from 728fbf5 (0.10.0) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0100.actions.json`
+(the same batches as the 5C.4l file's). 0.11.0-dev.1 replays it in batch
+mode `v0.10.0` with every digest verified (`internal/session/v0100_test.go`).

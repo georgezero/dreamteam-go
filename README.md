@@ -48,6 +48,19 @@ Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged. The independent evidence review is still
 **pending**.
 
+In development, not released (`0.11.0-dev.1`): **V0.11a**, a
+validation-first agent workflow. llm-agent 5 (`agents/llm/llm_agent5.py`,
+`docs/V0.11_AGENT_WORKFLOW.md`):
+* validates every proposal first and answers refusals with the engine's
+  own results;
+* shows the engine's preview only for valid staffing proposals with a
+  direct financial or capacity effect, saying that acceptance does not
+  establish benefit;
+* submits only validated batches.
+
+It is tested with scripted models only, and whether it improves decisions
+is untested.
+
 It builds on V0.9 (`0.9.0`, financial decision evidence and preview-based
 decision support: financial evidence v1, parameter evidence v1 frozen, an
 offline review workflow and llm-agent 4, `docs/FINANCIAL_EVIDENCE.md`), V0.8 (`0.8.0`, auditable decision evidence: deterministic,
