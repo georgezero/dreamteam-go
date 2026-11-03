@@ -28,6 +28,7 @@ type ackItem struct {
 	Action       *int                      `json:"action"`
 	Type         string                    `json:"type"`
 	Target       any                       `json:"target"`
+	Actions      []int                     `json:"actions"`
 	Consequences map[string]map[string]any `json:"consequences"`
 }
 
@@ -45,19 +46,26 @@ type agentRecord6 struct {
 	Attempts []struct {
 		Input      map[string]any `json:"input"`
 		Assessment *struct {
-			Status           string         `json:"status"`
-			Answer           map[string]any `json:"answer"`
-			Items            []ackItem      `json:"items"`
-			DigestsUnchanged bool           `json:"digestsUnchanged"`
+			Status       string         `json:"status"`
+			Answer       map[string]any `json:"answer"`
+			AnswerSha256 string         `json:"answerSha256"`
+			Payload      *struct {
+				Sha256 string `json:"sha256"`
+			} `json:"payload"`
+			Items            []ackItem `json:"items"`
+			DigestsUnchanged bool      `json:"digestsUnchanged"`
 		} `json:"assessment"`
 		Acknowledgment *struct {
-			Match struct {
+			ForAttempt int `json:"forAttempt"`
+			Match      struct {
 				Accepted bool             `json:"accepted"`
 				Failures []map[string]any `json:"failures"`
 			} `json:"match"`
 		} `json:"acknowledgment"`
 		FinalCheck *struct {
-			Agrees bool `json:"agrees"`
+			Agrees           bool   `json:"agrees"`
+			AssessmentSha256 string `json:"assessmentSha256"`
+			PayloadSha256    string `json:"payloadSha256"`
 		} `json:"finalCheck"`
 		Used bool `json:"used"`
 	} `json:"attempts"`

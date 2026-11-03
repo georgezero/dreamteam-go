@@ -74,6 +74,17 @@ func (m *mockLLM) count(model string) int {
 //	            scope) from the earliest date
 //	ackgeneric  ackfire's termination, answered with "I understand."
 //	ackfireall  ackfire, terminating every active technologist in one batch
+//	ackdisp     on the day the earliest last day is 2026-10-29 (the third
+//	            decision point; the mini scenario then has bookings past
+//	            it), terminates the first active technologist then;
+//	            acknowledges every item listed
+//	ackdisp2    ackdisp, terminating the first two active technologists
+//	ackdispnone ackdisp, acknowledging every item but the displaced
+//	            bookings
+//	ackdispoff  ackdisp, acknowledging one displaced booking fewer
+//	ackdispswap ackdisp; answers the first acknowledgment request by
+//	            terminating the second technologist instead, with the first
+//	            proposal's acknowledgment, and acknowledges the next request
 //
 // (An acknowledgment request is llm-agent 6's message that begins
 // "ACKNOWLEDGMENT": agents/llm/llm_agent6.py.)
@@ -152,6 +163,47 @@ func (m *mockLLM) serve(w http.ResponseWriter, r *http.Request) {
 			content = teleDecision(prompt)
 		case strings.Contains(prompt, "No earlier decisions in this run."):
 			content = fireDecision(prompt, req.Model == "ackfireall")
+		}
+	case "ackdisp", "ackdisp2", "ackdispnone", "ackdispoff", "ackdispswap":
+		if !strings.Contains(prompt, `"earliestLastDay":"2026-10-29"`) {
+			break
+		}
+		last := req.Messages[len(req.Messages)-1].Content
+		requests := 0
+		for _, x := range req.Messages {
+			if x.Role == "user" && strings.HasPrefix(x.Content, "ACKNOWLEDGMENT") {
+				requests++
+			}
+		}
+		first := dispDecision(prompt, 0, req.Model == "ackdisp2")
+		switch {
+		case !strings.HasPrefix(last, "ACKNOWLEDGMENT"):
+			content = first
+		case req.Model == "ackdispswap" && requests == 1:
+			// The second technologist instead, carrying the acknowledgment
+			// of the first proposal.
+			var d, a map[string]any
+			json.Unmarshal([]byte(acknowledge(first, last, false)), &a)
+			json.Unmarshal([]byte(dispDecision(prompt, 1, false)), &d)
+			d["acknowledgment"] = a["acknowledgment"]
+			b, _ := json.Marshal(d)
+			content = string(b)
+		case req.Model == "ackdispswap":
+			content = acknowledge(dispDecision(prompt, 1, false), last, false)
+		default:
+			content = acknowledgeEdited(first, last, func(it map[string]any) bool {
+				if it["type"] != "staffing_batch" {
+					return true
+				}
+				switch req.Model {
+				case "ackdispnone":
+					return false
+				case "ackdispoff":
+					db := it["consequences"].(map[string]any)["displaced_bookings"].(map[string]any)
+					db["count"] = db["count"].(float64) - 1
+				}
+				return true
+			})
 		}
 	case "details":
 		content = `{"reason":"I need the allocation details","actions":[],"details":["set_reading_allocation","finance.cashHistory","worklist.recent"]}`
@@ -282,6 +334,50 @@ func teleDecision(prompt string) string {
 	}
 	return fmt.Sprintf(`{"reason":"night coverage","actions":[{"type":"contract_teleradiology","op":"start","plan":%q,"windows":["weeknights"],"scope":"urgent","effective":%q,"requestId":"tr-1"}]}`,
 		targets.Plans[0].ID, targets.EarliestEffective)
+}
+
+// dispDecision terminates the active technologist at index k of the
+// terminate targets (two, from k, if two) at their earliest last day.
+func dispDecision(prompt string, k int, two bool) string {
+	var targets []struct {
+		Employee        string `json:"employee"`
+		Role            string `json:"role"`
+		Employment      string `json:"employment"`
+		EarliestLastDay string `json:"earliestLastDay"`
+	}
+	var acts []string
+	if promptTargets(prompt, "terminate", &targets) {
+		n := 0
+		for _, x := range targets {
+			if x.Role != "technologist" || x.Employment != "active" {
+				continue
+			}
+			if n >= k && (len(acts) == 0 || two && len(acts) == 1) {
+				acts = append(acts, fmt.Sprintf(`{"type":"terminate","employee":%q,"lastDay":%q}`, x.Employee, x.EarliestLastDay))
+			}
+			n++
+		}
+	}
+	return `{"reason":"reduce labor cost","actions":[` + strings.Join(acts, ",") + `]}`
+}
+
+// acknowledgeEdited is acknowledge with each listed item passed to keep,
+// which may change it in place; an item it returns false for is left out.
+func acknowledgeEdited(proposal, request string, keep func(map[string]any) bool) string {
+	var d, a map[string]any
+	json.Unmarshal([]byte(acknowledge(proposal, request, false)), &a)
+	json.Unmarshal([]byte(proposal), &d)
+	ack := a["acknowledgment"].(map[string]any)
+	var items []any
+	for _, raw := range ack["items"].([]any) {
+		if it := raw.(map[string]any); keep(it) {
+			items = append(items, it)
+		}
+	}
+	ack["items"] = items
+	d["acknowledgment"] = ack
+	b, _ := json.Marshal(d)
+	return string(b)
 }
 
 var proposalToken = regexp.MustCompile(`\(proposal ([0-9a-f]{16})\)`)
