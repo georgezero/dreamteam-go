@@ -1291,6 +1291,14 @@ remains the released agent; version 6 is not a default anywhere.
   ([benchmark/v12b-dev/DISPLACEMENT.md](benchmark/v12b-dev/DISPLACEMENT.md));
 * 27 scripted cases in [benchmark/v12a-dev/](benchmark/v12a-dev/README.md).
 
+**Required consequence fields (V0.12b, audit F1, re-reviewed CLOSED):**
+llm-agent 6 withholds a proposal, before any acknowledgment request,
+when a consequence field it reads from the engine's preview is missing,
+null, mistyped, negative, not a date, duplicated or inconsistent
+([V0.12_CONSEQUENCE_INVENTORY.md](V0.12_CONSEQUENCE_INVENTORY.md) §4).
+The tests are `agents/llm/test_llm_agent6_fields.py` (18) and
+`internal/bench/llm_agent6_hire_test.go`, a real-engine hire.
+
 **Independent audit (V0.12b Stage A):** GO for the safeguard, with no
 blocking finding ([audits/v0.12b-safeguard-audit.md](audits/v0.12b-safeguard-audit.md)).
 Two limits are now stated in the specification:

@@ -735,6 +735,12 @@ benchmark result with llm-agent 6 and a live model exists yet.
   preview count. Withheld runs end with the same final digests as the
   no-op policy
   ([benchmark/v12b-dev/DISPLACEMENT.md](benchmark/v12b-dev/DISPLACEMENT.md)).
+* `TestLLMAgent6Hire` runs a hire as llm-agent 6's policy. It checks
+  the engine's exact recruiting fee and earliest-exit cost, and that an
+  empty or wrong acknowledgment leaves the session as the no-op run's.
+* The proposed Stage B experiment
+  ([benchmark/v12b-dev/PROTOCOL.md](benchmark/v12b-dev/PROTOCOL.md)) is
+  not run. CI checks its points and schedule.
 * A llm-agent 6 replay certifies consistency with the recorded replies,
   not their authorship. Keep each run's `model.jsonl`
   ([V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md) §7).

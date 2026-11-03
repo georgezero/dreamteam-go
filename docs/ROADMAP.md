@@ -23,7 +23,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
-| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A done, awaiting owner review; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B awaiting authorization); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
+| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A accepted and completed (F1 repaired, re-reviewed); Stage B protocol proposed, awaiting owner approval; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B proposed, live inference not authorized); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1277,8 +1277,8 @@ does not establish that an action is wise.
 | Milestone | Scope | Status |
 |---|---|---|
 | V0.12a | Engine-backed consequence acknowledgment | accepted 2026-11-02 (9871e37) |
-| V0.12b Stage A | Independent safeguard audit; real-engine displacement test | done 2026-11-02, awaiting owner review |
-| V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | conditional GO; needs the owner's approval of a frozen protocol |
+| V0.12b Stage A | Independent safeguard audit; real-engine displacement test; F1 repair; focused re-review; real-engine hire test | accepted 2026-11-03; completed 2026-11-03 (F1 CLOSED) |
+| V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | protocol proposed (`docs/benchmark/v12b-dev/PROTOCOL.md`); live inference not authorized |
 | V0.12c | Prospective multi-day agent evaluation | proposed |
 | V0.12.0 | Release | pending |
 
@@ -1339,6 +1339,35 @@ example, 100 displaced appointments changes what an agent does.
   proposals. It runs only after the owner approves a frozen protocol.
 * **Not affected:** the separate frozen 98-item evidence review remains
   PENDING.
+
+**Stage A accepted; F1 to fail closed** (owner, 2026-11-03). The owner's
+decisions:
+* **F2:** the current provenance is accepted. Replay plus the preserved
+  `model.jsonl` is enough, with no response signing and no claim of
+  authenticated model origin.
+* **Independence:** the separate reviewer instance is accepted for this
+  engineering gate. The 98-item human evidence review stays PENDING.
+* **Live inference:** not yet authorized.
+
+What followed:
+* **F1 repair:** 2c73c3b, 0.12.0-dev.2. The contract, identities and
+  token are unchanged.
+* **New tests:** 18 F1 regression cases from real engine answers, and a
+  real-engine hire test.
+* **Focused re-review**
+  ([audits/v0.12b-f1-rereview.md](audits/v0.12b-f1-rereview.md)): F1
+  CLOSED, no blocking defect, GO for protocol approval.
+* **The Stage B protocol, prepared and not run**
+  ([benchmark/v12b-dev/PROTOCOL.md](benchmark/v12b-dev/PROTOCOL.md)):
+  * llm-agent 5's validation-first preview against llm-agent 6;
+  * 12 branch points selected by a deterministic rule from existing
+    evidence;
+  * 420 draws, at most 1,680 model calls;
+  * the central distinction is acknowledged and proceeded against
+    acknowledged and reconsidered.
+
+  Two categories are unavailable in the corpus: a valid hire, and a
+  termination without displacement. They are reported, not filled.
 
 ## 8. Testing strategy (all versions)
 

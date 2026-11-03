@@ -1,0 +1,90 @@
+{
+ "schema": "dreamteam.acknowledgment-experiment/v1",
+ "id": "v12b-ack-1",
+ "status": "proposed: for owner approval; not frozen and not run. Freezing requires the driver and its fidelity tests (PROTOCOL.md §8) committed first, then this file with the driver's hash, committed before any request.",
+ "description": "V0.12b Stage B: at 12 recorded branch points, the recorded state, conversation and initial staffing proposal, then two whole decision workflows (A llm-agent 5 validation-first-preview, B llm-agent 6 consequence acknowledgment), Gemma 10 and Qwen 20 draws per arm per point, one model request at a time.",
+ "method": "shared-prefix/v4 (docs/benchmark/v11b-dev/SPEC.md), with arms A and B as below",
+ "points": "points",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp",
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp"
+ },
+ "modelOrder": [
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b"
+ ],
+ "arms": {
+  "A": {
+   "name": "llm-agent 5, validation-first-preview (llm-agent-workflow/v1)",
+   "agent": "agents/llm/llm_agent5.py",
+   "agentVersion": "5",
+   "workflowVersion": "llm-agent-workflow/v1",
+   "workflowSha256": "3ee7d66f4f10fd93e05a908725c792b16b76d01dc29095360dae9d67c0c09d0a",
+   "workflow": "validation first; a refusal answered with llm-agent-validation-feedback/v1; the read-only preview of the first fully valid proposal with staffing actions shown when llm-agent-preview-eligibility/v1 finds a reason, with llm-agent-selective-preview/v1; the reply validated again; V0.11b's arm C, unchanged"
+  },
+  "B": {
+   "name": "llm-agent 6, consequence acknowledgment (llm-agent-acknowledgment-workflow/v1)",
+   "agent": "agents/llm/llm_agent6.py",
+   "agentVersion": "6",
+   "workflowVersion": "llm-agent-acknowledgment-workflow/v1",
+   "workflowSha256": "b9cb79828f2657de91de69b1fa30019752ab73611d80fb6854c8f7a6488595a6",
+   "contract": "dreamteam.action-acknowledgment/v1",
+   "contractSha256": "33c116da979a5a1067a4f19163369a1092394ca9bfe9ec4aade2dab8cf9c4c9b",
+   "workflow": "validation first, as A, without the selective preview; a fully valid proposal's consequences read from the engine's preview; a qualifying proposal (termination, displaced bookings, hire, teleradiology start) answered with the acknowledgment request; matched exactly; final re-validation and re-preview; submitted only if both pass; otherwise withheld"
+  },
+  "shared": "every arm: the recorded state, the recorded request (system prompt, prompt, earlier exchanges), the recorded initial proposal as the model's first reply, maxRetries 1 and allowDetails as the frozen settings (failures and details already used before the proposal carried over); the same final-response schema; only a fully validated proposal submitted",
+  "differences": "at a valid qualifying proposal, A shows the selective preview when eligible and B the acknowledgment request; at a valid non-qualifying proposal, A shows the preview when eligible and B calls no model; at a refused proposal both answer with the same validation feedback, and then differ at the corrected proposal as above. Model calls are counted per draw, not equalized",
+  "primary": "B − A, per point"
+ },
+ "settings": {
+  "maxRetries": 1,
+  "allowDetails": true,
+  "decisionBudget": "not applied, as in V0.11b: not reached by one point's workflow and not reproducible"
+ },
+ "drawsPerArm": {
+  "gemma4-26b-a4b": 10,
+  "qwen36-35b-a3b": 20
+ },
+ "drawsBasis": "V0.10b, V0.10c and V0.11b: Gemma gave one decision per arm at every point in 10–20 draws; Qwen gave 1–6 distinct decisions per arm in 20",
+ "draws": 420,
+ "maxModelCallsPerDraw": 4,
+ "maxModelCalls": 1680,
+ "orderRule": "dreamteam-v12b-order/1",
+ "order": "per model in modelOrder; its draws as rounds; in each round every point and arm of the model once, in the order of SHA-256('dreamteam-v12b-order/1|<model>|<round>|<point id>|<arm>'); one draw, and one model request, at a time",
+ "concurrency": 1,
+ "preflight": "GET /health, /v1/models and /openapi.json only; no inference preflight",
+ "request": {
+  "body": "the recorded proposal request (model, messages, temperature 0, max_tokens 4096, response_format json_object) with its messages followed by the workflow's turns; nothing added",
+  "timeoutSeconds": 300,
+  "retries": "none beyond the workflow's own"
+ },
+ "server": {
+  "observed": "before the run, before each round and after: /health, server version, OpenAPI SHA-256, both models' entries; cached tokens per response",
+  "material": "server version, OpenAPI SHA-256 or either model's entry changes, or /health not healthy",
+  "unavailable": [
+   "cache clearing, cache disabling, cold starts, server settings: admin-only, not used"
+  ]
+ },
+ "engine": "one session per point on the recording's replay transcript, at the recorded digests; validate, preview, observe and digests only (read-only); every request and answer recorded with the draw",
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "wallClockSeconds": 14400,
+  "health": "an unhealthy /health before a round stops the run",
+  "serverChange": "a material change before a round stops the run",
+  "resume": "a stopped run is reported and analysed as far as it went, never resumed without the owner"
+ },
+ "failures": "every request recorded; a failure handled only by the arm's own workflow (a resend within its retries), never rerun outside it",
+ "outcomes": "PROTOCOL.md §5",
+ "statistics": "PROTOCOL.md §6: per point; Wilson 95% per arm; Newcombe 95% for B − A; no hypothesis test, no composite score, no ranking",
+ "replay": "PROTOCOL.md §7",
+ "seeds": "development recordings only (41901, 41902, 42001, 42002); no reference, holdout, reserved or clinical seed",
+ "agents": {
+  "llm_agent3.py": "ef2c17a06749d7c287cda918f77ff0e518d79475048e87fd3404848c2fb0015c",
+  "llm_agent4.py": "4cfc6a6906556b0cda50e95fa39263089d56e848adcef9bd04342e7f6aff998f",
+  "llm_agent5.py": "f89dd4e1950662c5e5b3d4e1dd48b8ee23b9ed7e3e4080dbb0ed136267c26cb0",
+  "llm_agent6.py": "b0e2914150e9cee18dbc6383f1ddd431a881cd36672353e4b9cbdec86fab98f2"
+ },
+ "systemPromptSha256": "0efc36e21b592abc4acb4c8b78ee7634b39755580a0f5ac348a5be1f8a80c4e1",
+ "driver": "to be implemented before freezing (PROTOCOL.md §8); its file SHA-256 is added here at freeze"
+}

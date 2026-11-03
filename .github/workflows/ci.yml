@@ -366,6 +366,18 @@ jobs:
           V=docs/benchmark/v11a-dev
           python3 -I -B analysis/workflow/scripted_cases.py --out v11a
           for f in scripted-cases.json scripted-cases.md; do cmp v11a/$f $V/$f; cp v11a/$f out/v11a-$f; done
+      - name: Acknowledgment evaluation points (V0.12b Stage B, proposed)
+        # Without any model: the Stage B branch points selected again from
+        # the committed inventory and contexts (each checked against its
+        # recording), and the schedule made again from the protocol; both
+        # equal to the committed files.
+        shell: bash
+        run: |
+          set -euo pipefail
+          V=docs/benchmark/v12b-dev
+          python3 -I -B analysis/acknowledgment/stage_b_points.py points --check $V/points
+          python3 -I -B analysis/acknowledgment/stage_b_points.py schedule --protocol $V/protocol.json --out v12b
+          cmp v12b/schedule.json $V/schedule.json
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

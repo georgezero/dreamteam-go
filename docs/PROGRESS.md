@@ -7,6 +7,98 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12b — Stage A completed (F1 repaired and re-reviewed); Stage B protocol proposed (0.12.0-dev.2)
+
+The owner accepted Stage A on 2026-11-03 and made these decisions:
+* **F1:** fail closed.
+* **F2:** accept the current provenance (replay plus `model.jsonl`, no
+  signing, no claim of authenticated model origin).
+* **Independence:** the separate reviewer instance is accepted for this
+  engineering gate. The 98-item human evidence review stays PENDING.
+* **Live inference:** not authorized.
+
+**F1 repair** (2c73c3b):
+* **Requirement:** llm-agent 6 requires every preview field that a
+  consequence is read from or identified by to be present, not `null`,
+  and of the engine's type: an integer ≥ 0 (not a boolean or float), a
+  real date, or non-empty text.
+* **Consistency:** each termination's batch count must equal the
+  displacement list, no entry may be left that the batch does not
+  account for, and no key may be given twice inside the preview.
+* **Reader:** llm-agent 6's own reader marks duplicate keys and refuses
+  `NaN` and `Infinity`.
+* **On failure:** the proposal is withheld as `consequences_unavailable`
+  before any acknowledgment request.
+* **Unchanged:** the contract, matching, token and identities. The
+  V0.12a evidence regenerates byte-identical, and all 13 recorded real
+  previews read cleanly.
+* **Fields:** `docs/V0.12_CONSEQUENCE_INVENTORY.md` §4.
+
+**Tests:**
+* `agents/llm/test_llm_agent6_fields.py`: 18 cases from real recorded
+  engine answers. Before the repair, 15 failed (confirmed by the
+  reviewer's reconstruction); after it, all pass.
+* `TestLLMAgent6Hire`: a real-engine hire, on two seeds.
+  * The fee is 300000 and the earliest exit 745706, both the engine's
+    own.
+  * An empty or wrong acknowledgment is withheld, and the session ends as
+    the no-op run's.
+  * The accurate acknowledgment is submitted and applied as H00001.
+  * The replay is byte-identical.
+
+**Version:** 0.12.0-dev.2. 0.12.0-dev.1 is registered as batch mode
+`v0.12_dev1`, with the fixture `mini-seed52-v0121`.
+
+**Focused re-review** (`docs/audits/v0.12b-f1-rereview.md`, verbatim at
+aa22530):
+* F1 CLOSED; no blocking defect; GO for protocol approval.
+* R1, Minor: the duplicate-key check covers objects inside `preview`,
+  not a duplicated `preview` key. The docs are narrowed.
+* R2, Minor: the maintainer's before-fix log came from a test draft; the
+  reviewer's log stands.
+* The agent's code is unchanged from the reviewed revision.
+
+**Stage B, proposed and not run** (`docs/benchmark/v12b-dev/PROTOCOL.md`):
+* **Arms:** A, llm-agent 5 validation-first-preview; B, llm-agent 6.
+* **Branch points:** 12, from the 20 pooled proposals that are eligible
+  under shared-prefix/v4 and already have committed contexts. Selected by
+  `dreamteam-v12b-select/1`, which reads no response.
+* **Unavailable:** no valid hire, and no termination without
+  displacement, exist in the corpus.
+* **Size:** 420 draws (Gemma 10, Qwen 20 per arm per point), at most
+  1,680 calls, a 4-hour stop.
+* **Central classes:** acknowledged and proceeded / revised / abandoned;
+  failed acknowledgment, withheld; no acknowledgment required.
+* **Statistics:** per point, Wilson and Newcombe intervals, with no
+  composite score.
+* **Before any request:** the driver and its fidelity tests, then a
+  freezing commit.
+* **Files:** the draft protocol `protocol.json`, its points and schedule,
+  with hashes in `docs/benchmark/v12b-dev/README.md`. CI checks them.
+
+**Quality gates:**
+
+| Where | Gate | Result |
+|---|---|---|
+| horo (linux/amd64, Go 1.27.0), 2c73c3b | Race, all packages, 90 min | exit 0, 10 packages ok |
+| horo | vet, gofmt | ok, clean |
+| horo | Five cross-builds | 5 of 5 ok |
+| horo | Frozen evidence | 4 × 104 checks, 0 failed |
+| horo | V0.11b | 720 draws replayed, all files reproduced |
+| horo | V0.11a and V0.12a scripted evidence | reproduced |
+| horo | Python suites | 156, 147, 88 tests ok |
+| Pi | Real-engine llm-agent 6 tests | `TestLLM*`, displacement and hire pass |
+| Pi | Session and golden tests | `TestV0121*`, `TestV0110*`, `cmd/dreamteam` golden, `internal/agent`, `internal/tui` pass |
+| CI on 2c73c3b | Full suite, golden, historical replay, benchmark verify/reproduce, cross-platform | green (41645751085) |
+
+* **Not repeated locally:** the follow-up documentation and protocol
+  commit, which changes no code; CI covers it.
+* **Not run:** live inference, the clinical suites, and historical live
+  experiments.
+* **Still PENDING:** the separate frozen 98-item human evidence review.
+
+---
+
 ## V0.12b Stage A — independent safeguard audit and real-engine displacement (0.12.0-dev.1)
 
 The owner accepted V0.12a (9871e37, CI 41564875041) on 2026-11-02 and
