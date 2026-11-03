@@ -728,6 +728,17 @@ engine-reported consequences of that exact proposal
 An acknowledged action is not an approved or recommended one. No
 benchmark result with llm-agent 6 and a live model exists yet.
 
+**V0.12b Stage A:**
+* `TestLLMAgent6Displacement` runs llm-agent 6 as a policy in the mini
+  scenario, at a point where terminations displace bookings. The
+  displaced-appointment metric of an applied run equals the acknowledged
+  preview count. Withheld runs end with the same final digests as the
+  no-op policy
+  ([benchmark/v12b-dev/DISPLACEMENT.md](benchmark/v12b-dev/DISPLACEMENT.md)).
+* A llm-agent 6 replay certifies consistency with the recorded replies,
+  not their authorship. Keep each run's `model.jsonl`
+  ([V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md) §7).
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

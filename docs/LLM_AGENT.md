@@ -1284,7 +1284,21 @@ remains the released agent; version 6 is not a default anywhere.
   model, with a termination, a teleradiology start, several terminations
   in one batch, and a generic acknowledgment that is withheld; replay
   and tampering;
+* `internal/bench/llm_agent6_displacement_test.go` (V0.12b Stage A):
+  the real engine where terminations displace bookings. It checks the
+  exact batch count, a missing or wrong count, and a changed proposal,
+  and that the applied displacement equals the acknowledged count
+  ([benchmark/v12b-dev/DISPLACEMENT.md](benchmark/v12b-dev/DISPLACEMENT.md));
 * 27 scripted cases in [benchmark/v12a-dev/](benchmark/v12a-dev/README.md).
+
+**Independent audit (V0.12b Stage A):** GO for the safeguard, with no
+blocking finding ([audits/v0.12b-safeguard-audit.md](audits/v0.12b-safeguard-audit.md)).
+Two limits are now stated in the specification:
+* the agent trusts the engine's preview for which fields are present and
+  their types (F1);
+* replay certifies that the workflow is consistent with the recorded
+  replies, not who wrote them. `model.jsonl` is the record of the model
+  calls (F2).
 
 **Acknowledgment is not approval.** It records that the reply stated the
 engine's reported direct consequences of the exact proposal. It does not

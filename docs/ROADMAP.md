@@ -23,7 +23,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
-| **V0.12** (in progress: V0.12a done, awaiting owner review; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b, proposed); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
+| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A done, awaiting owner review; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B awaiting authorization); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1276,8 +1276,9 @@ does not establish that an action is wise.
 
 | Milestone | Scope | Status |
 |---|---|---|
-| V0.12a | Engine-backed consequence acknowledgment | done 2026-11-02, awaiting owner review |
-| V0.12b | Independent safeguard review and decision-level evaluation | proposed |
+| V0.12a | Engine-backed consequence acknowledgment | accepted 2026-11-02 (9871e37) |
+| V0.12b Stage A | Independent safeguard audit; real-engine displacement test | done 2026-11-02, awaiting owner review |
+| V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | conditional GO; needs the owner's approval of a frozen protocol |
 | V0.12c | Prospective multi-day agent evaluation | proposed |
 | V0.12.0 | Release | pending |
 
@@ -1297,6 +1298,47 @@ does not establish that an action is wise.
   software defect. V0.12b should test whether the safeguard changes
   decisions, or merely creates a procedural acknowledgment that models
   learn to repeat.
+
+**V0.12a accepted; V0.12b authorized in two stages** (owner, 2026-11-02).
+The owner made these decisions:
+
+| Area | Decision |
+|---|---|
+| Independent safeguard audit | GO |
+| Real-engine displacement test | Required |
+| Live decision-level experiment | Conditional GO, after the audit |
+| Multi-day LLM evaluation | NO GO |
+| V0.12.0 release | Not yet |
+
+Security and correctness come before behavioural usefulness. The first
+question is whether the safeguard can be bypassed, or certify incorrect
+consequences. Only then does it make sense to ask whether seeing, for
+example, 100 displaced appointments changes what an agent does.
+
+* **Stage A, done:**
+  * **Real-engine displacement test**
+    ([benchmark/v12b-dev/DISPLACEMENT.md](benchmark/v12b-dev/DISPLACEMENT.md)).
+    Terminations that displace 7 to 22 bookings are acknowledged with the
+    engine's exact batch count. A missing or wrong count, or a changed
+    proposal, prevents submission. Applying displaces exactly the
+    acknowledged number, and replay is byte-identical.
+  * **Independent audit**
+    ([audits/v0.12b-safeguard-audit.md](audits/v0.12b-safeguard-audit.md)).
+    The safeguard is GO, with no blocking finding. Stage B is GO with
+    conditions on how its evidence is described. The two Major findings
+    are documented, not fixed, under the owner's rule (fix only
+    blockers):
+    * F1: the engine's preview fields are trusted for presence and type;
+    * F2: replay certifies consistency, not authorship.
+
+    The response is
+    [audits/v0.12b-safeguard-audit-response.md](audits/v0.12b-safeguard-audit-response.md).
+    It puts two decisions to the owner before Stage B.
+* **Stage B, not started:** it compares llm-agent 5's validation-first
+  preview workflow against llm-agent 6 at identical states and initial
+  proposals. It runs only after the owner approves a frozen protocol.
+* **Not affected:** the separate frozen 98-item evidence review remains
+  PENDING.
 
 ## 8. Testing strategy (all versions)
 

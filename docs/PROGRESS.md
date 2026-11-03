@@ -7,6 +7,90 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12b Stage A — independent safeguard audit and real-engine displacement (0.12.0-dev.1)
+
+The owner accepted V0.12a (9871e37, CI 41564875041) on 2026-11-02 and
+authorized V0.12b in two stages. Stage A comes first: an independent
+audit and a real-engine displacement test. The live evaluation (Stage B)
+needs separate approval of a frozen protocol. Multi-day LLM evaluation
+is NO GO. V0.12.0 is not released.
+
+**Baseline** (`docs/audits/v0.12b-stage-a-baseline.md`):
+* main was clean at 9871e37;
+* `v0.11.0` is unchanged (tag object d84e09a, commit a267cd3);
+* hashes are recorded for the simulator, llm-agent 1–6, the
+  acknowledgment contract and workflow identities, the record schemas,
+  the V0.12a evidence, the historical recordings, the frozen evidence
+  contracts and the golden references.
+
+**Real-engine displacement** (82cea3f,
+`internal/bench/llm_agent6_displacement_test.go`,
+`docs/benchmark/v12b-dev/DISPLACEMENT.md`):
+* **Setup:** the mini scenario on development seeds 739182645 and 5. At
+  the third decision point, terminations displace 7 to 22 bookings. Five
+  mock-model modes, ten runs.
+* **Exact count:** the batch item states the engine's exact count, over
+  every action. Each termination is its own item.
+* **Missing or wrong count:** leaving out the displacement
+  acknowledgment, or stating one fewer, gets 3 of 3 rejections
+  (`missing_item`, `wrong_value`). Nothing is submitted, and the session
+  ends byte-identical to the no-op run.
+* **Changed proposal:** a proposal changed after acknowledgment (10
+  displaced, then 7) is submitted only on its own acknowledgment.
+* **Final check and apply:** the final check's hashes equal the
+  acknowledged ones. Applying displaces exactly the acknowledged count.
+* **Replay:** byte-identical, with no model call.
+* **Sensitivity check:** making the agent ignore the displaced count
+  makes the test fail.
+
+**Independent audit** (`docs/audits/v0.12b-safeguard-audit.md`,
+committed verbatim at ca6b705):
+* **How it was done:** a separate reviewer worked on a read-only snapshot
+  of 82cea3f, with witnesses built in a work copy (82 scripted cases and
+  a real-engine witness test). The snapshot was verified before and
+  after.
+* **Verdicts:** GO for the safeguard; GO for Stage B, with two
+  conditions on how its evidence is described.
+* **No Blocking finding.**
+* **F1, Major:** the engine's preview fields are trusted for presence
+  and type. A field missing from the engine's answer would be listed as
+  `null` and could be acknowledged. The engine at this revision always
+  sends these fields.
+* **F2, Major:** replay certifies consistency, not authorship. A record
+  regenerated consistently from hand-written replies replays as
+  accepted.
+* **F3, Minor:** stale documentation.
+* **F4, Minor:** thin coverage of hires on the real engine.
+
+**Response** (`docs/audits/v0.12b-safeguard-audit-response.md`):
+* **Code:** none changed (fix only blockers). llm-agent 6, its
+  identities, the V0.12a evidence and the simulator are unchanged.
+* **Specification:** `docs/V0.12_ACKNOWLEDGMENT.md` is corrected:
+  * §2: the engine-contract reliance (F1);
+  * §7: what replay proves (F2);
+  * §8: the recorded answers reach 100 displaced bookings, not 8;
+  * §9: the limitations.
+* **For the owner:** two decisions before Stage B. Should F1's hardening
+  be applied (which would need a focused re-review)? Is replay, as now
+  documented, enough for Stage B evidence (F2)?
+
+**Version:** still 0.12.0-dev.1. Stage A adds only tests and documents;
+the engine and the agents did not change.
+
+**Quality gates:**
+* the displacement test, run locally on the Pi and again by the reviewer;
+* all `TestLLM*` bench tests on the Pi, which pass;
+* the reviewer's Python agent suites and historical-replay Go tests,
+  which pass;
+* CI on 82cea3f, which also covers the other gates the milestone lists.
+
+No race, cross-build or full-suite run was repeated locally for the
+documentation-only follow-up commit, because CI covers them. No live
+inference, clinical suite or historical live experiment was run. The
+separate frozen 98-item evidence review is still PENDING.
+
+---
+
 ## V0.12a — high-impact action acknowledgment (0.12.0-dev.1)
 
 V0.11.0 was accepted and closed (a267cd3, tag `v0.11.0`, CI 41534888421),

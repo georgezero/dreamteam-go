@@ -392,7 +392,7 @@ parser, with a validation-first workflow.
 
 llm-agent 1 to 4 are unchanged. Details: `docs/LLM_AGENT.md` §18–20.
 
-**In development (V0.12a, unreleased):** llm-agent 6
+**In development (V0.12, unreleased; V0.12a accepted, V0.12b Stage A done):** llm-agent 6
 (`agents/llm/llm_agent6.py`) adds, to the validation-first workflow, an
 acknowledgment of high-impact actions:
 * terminations, new retained obligations and displaced bookings need an
@@ -401,7 +401,8 @@ acknowledgment of high-impact actions:
 * anything else is withheld.
 
 Acknowledgment is not approval, and it has been tested with scripted
-models only. Details: `docs/V0.12_ACKNOWLEDGMENT.md`, `docs/LLM_AGENT.md`
+models only. An independent audit found no blocking defect
+(`docs/audits/v0.12b-safeguard-audit.md`). Details: `docs/V0.12_ACKNOWLEDGMENT.md`, `docs/LLM_AGENT.md`
 §21.
 
 ### Benchmark scenario suite (V0.6)
