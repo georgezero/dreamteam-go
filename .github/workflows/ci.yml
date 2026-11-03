@@ -366,18 +366,34 @@ jobs:
           V=docs/benchmark/v11a-dev
           python3 -I -B analysis/workflow/scripted_cases.py --out v11a
           for f in scripted-cases.json scripted-cases.md; do cmp v11a/$f $V/$f; cp v11a/$f out/v11a-$f; done
-      - name: Acknowledgment evaluation points (V0.12b Stage B, proposed)
-        # Without any model: the Stage B branch points selected again from
-        # the committed inventory and contexts (each checked against its
-        # recording), and the schedule made again from the protocol; both
-        # equal to the committed files.
+      - name: Acknowledgment evaluation driver (V0.12b Stage B)
+        # Without any model: the driver's unit tests (mock inference on the
+        # agents' scripted engines); the Stage B branch points selected
+        # again and the schedule made again, equal to the committed files;
+        # every point and arm started on the real engine (the V0.8c and
+        # V0.9c replays above) with the agent's first request equal to the
+        # recorded one, and the lock checked; the fidelity cases (the
+        # driver against the agents' own runs, scripted replies) and the
+        # scripted mock run, which stops PARTIAL by its scripted clock, with
+        # its analysis. Equal to the committed evidence and compared across
+        # platforms below.
         shell: bash
         run: |
           set -euo pipefail
-          V=docs/benchmark/v12b-dev
-          python3 -I -B analysis/acknowledgment/stage_b_points.py points --check $V/points
-          python3 -I -B analysis/acknowledgment/stage_b_points.py schedule --protocol $V/protocol.json --out v12b
+          P="python3 -I -B"; V=docs/benchmark/v12b-dev
+          python3 -B -m unittest discover -s analysis/acknowledgment 2>&1 | tail -1
+          $P analysis/acknowledgment/stage_b_points.py points --check $V/points
+          $P analysis/acknowledgment/stage_b.py schedule --protocol $V/protocol.json --out v12b
           cmp v12b/schedule.json $V/schedule.json
+          $P analysis/acknowledgment/stage_b.py check --binary ./dt --replays . --protocol $V/protocol.json
+          $P analysis/acknowledgment/stage_b_fidelity.py fidelity --binary ./dt --replays . --protocol $V/protocol.json \
+            --out v12b-fidelity
+          for f in fidelity.json fidelity.md; do cmp v12b-fidelity/$f $V/fidelity/$f; cp v12b-fidelity/$f out/v12b-$f; done
+          $P analysis/acknowledgment/stage_b_fidelity.py mockrun --binary ./dt --replays . --protocol $V/protocol.json \
+            --out v12b-mock
+          for f in live/draws.jsonl live/run.json decisions.json decision-tables.md inference.json; do
+            cmp v12b-mock/$f $V/fidelity/mock-run/$f; cp v12b-mock/$f out/v12b-mock-$(basename $f)
+          done
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

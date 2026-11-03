@@ -1,18 +1,20 @@
-# V0.12b Stage B: controlled acknowledgment evaluation (proposed protocol)
+# V0.12b Stage B: controlled acknowledgment evaluation (protocol)
 
-**Status: proposed, for owner approval. Not frozen and not run.** No
-request of this experiment has been sent, and no live model was contacted
-to prepare it.
+**Status: design approved by the owner; driver implemented; final draft
+for independent review. Not locked and not run.** No request of this
+experiment has been sent, and no live model was contacted to prepare it.
 
 | File | SHA-256 |
 |---|---|
 | Protocol: `protocol.json` (`v12b-ack-1`) | the SHA-256 is listed in `README.md` |
 | Points: `points/manifest.json`, `points/contexts.jsonl` | as listed in `README.md` |
 | Schedule: `schedule.json` | as listed in `README.md` |
+| Driver: `analysis/acknowledgment/stage_b.py` (`DRIVER.md`) | as listed in `README.md` |
 
-Freezing happens in two steps (§8). First the driver and its fidelity
-tests are committed. Then the final `protocol.json`, with the driver's
-hash, and its schedule are committed. Both come before any request.
+The lock (§8) pins every file the run depends on, in `protocol.json`'s
+`lock`, in a commit of its own, after the independent review. The lock
+does not authorize a run: only the owner's explicit authorization does,
+and the driver will not run without it (§4).
 
 ## 1. The question
 
@@ -141,10 +143,14 @@ the selective preview. A as specified includes the preview. So:
   calls no model. B − A at those points measures the preview's absence,
   not the acknowledgment.
 * **Model calls differ by arm** and are counted per draw, not equalized.
-  The bound is 4 per draw for both arms: the proposal is recorded; then
-  at most one review, preview or acknowledgment reply, one retry
-  (`maxRetries` 1), and one details answer. The driver's tests confirm
-  this bound (§8).
+  They are reported beside every outcome, so that a difference in calls
+  is not read as an acknowledgment effect.
+* **The bound on calls:** with `maxRetries` 1, neither workflow can make
+  more than **2 model calls** after the recorded proposal. Every path to a
+  model call closes the details option, and the first unaccepted reply
+  uses the only retry. The driver's tests run every sequence of three
+  reply kinds and find 2 as the maximum (`DRIVER.md` §2). The limit of 4
+  per draw is a guard: if it is ever reached, the run stops.
 
 ## 4. Draws, order and running
 
@@ -172,19 +178,42 @@ the selective preview. A as specified includes the preview. So:
   turns. Timeout 300 s, with no retries beyond the workflow's own.
 * **Engine:** read-only requests only (validate, preview, observe,
   digests). Every request and answer is recorded.
-* **Client:** the Pi, under `systemd-run --user --scope -p MemoryMax=2G
-  nice -n 10`.
+* **Client:** the Pi, under `systemd-run --user --scope -p MemoryMax=3G
+  nice -n 10`. That is up to 18 engine sessions of about 65 MB each (one
+  per point and arm of the model being run) and the driver. The approved
+  design said 2G; 3G leaves room for them.
 * **Server checks:** before the run, before each round and after.
-* **Stop conditions:**
-  * 5 consecutive transport failures;
-  * 4 hours of wall clock;
-  * an unhealthy `/health`;
-  * a material server change.
+* **Authorization:** `run` requires `--authorization`, the owner's
+  authorization quoted verbatim. It is recorded in `run.json`. The lock is
+  not an authorization.
+* **Limits,** checked before every model request:
+  * 4 calls in the draw;
+  * 1,680 calls in the run;
+  * the four-hour stop: a request starts only if its whole 300 s timeout
+    fits before 14,400 s, so no request is cut short and the run cannot
+    overrun.
 
-  A stopped run is reported and analysed as far as it went. It is never
-  resumed without the owner.
+  The same wall-clock test is applied before every draw.
+* **Stop conditions:**
+  * any limit above;
+  * 5 consecutive transport failures;
+  * an unhealthy `/health`;
+  * a material server change;
+  * a driver failure;
+  * the operator.
+* **A stopped run is PARTIAL** (`PROCEDURE.md` §4):
+  * a draw cut off by a limit is recorded as `interrupted` (replayed, not
+    classified);
+  * `run.json` says `PARTIAL`, with the coverage and the stop;
+  * the analysis reports only what was observed, with no B − A comparison
+    and no pooled summary;
+  * nothing is resumed, substituted or rerun. `run` refuses a directory
+    that holds a run, and the driver has no resume.
+  * Any continuation needs the owner's separate authorization and a
+    documented protocol decision, recorded below as an amendment.
 * **Failures:** every request is recorded. A failure is handled only by
-  the arm's own workflow, never rerun outside it.
+  the arm's own workflow (its retry or resend within `maxRetries`), never
+  rerun outside it.
 * **Inference budget:** at most 1,680 calls. Expect 1–2 hours, because
   acknowledgment replies restate the consequences and are longer than
   preview replies. The 4-hour stop is the time limit. There is no token
@@ -199,8 +228,9 @@ arm, with every draw counted.
 * **The proposal:**
   * kept, revised or abandoned (llm-agent 4's rule: the final submitted
     actions against the initial proposal, by canonical content);
-  * invalid (the workflow ended on an unreadable reply or a failed
-    request).
+  * or nothing submitted: refused (the last proposal was refused),
+    withheld (B's fail-closed withholding), or invalid (the workflow ended
+    on an unreadable reply or a failed request).
 * **The final proposal:**
   * whether it was valid, its last validation accepted;
   * whether it was submitted, handed to the harness;
@@ -215,15 +245,26 @@ arm, with every draw counted.
   server reports) and **latency**. Latency and tokens are live metadata,
   reported apart in `inference.json`, outside the deterministic replay.
 
-**The central classification** (B, at every draw):
+**The central classification** (B, at every completed draw). Acknowledgment
+is *required* from the first proposal at the point whose assessment
+qualified (the request was shown) or could not be read (fail-closed: it is
+withheld at once). Call that proposal R. For a valid initial proposal R is
+the initial proposal; for a refused one corrected into a qualifying one,
+it is the correction.
 
 | Class | Definition |
 |---|---|
-| **A. Acknowledged and proceeded** | An acknowledgment of the initial proposal was accepted, and the submitted actions equal the initial proposal. |
-| **B. Acknowledged and revised** | The acknowledgment request for the initial proposal was shown, and the submitted actions are a different non-empty proposal. If that proposal qualifies, it has its own accepted acknowledgment. |
-| **C. Acknowledged and abandoned** | The request was shown, and the model chose to submit nothing (`"actions": []`). |
-| **D. Failed acknowledgment, withheld** | The request was shown, no accepted acknowledgment led to a submission, and the model did not abandon. The proposal was withheld (`acknowledgment_not_accepted`, `final_check_disagrees`, `consequences_unavailable`, or the budget). |
-| **E. No acknowledgment required** | No request was shown: a non-qualifying proposal, a refused proposal not corrected into a qualifying one, or an ending before validation succeeded. |
+| **A. Acknowledged and proceeded** | R was submitted unchanged. An accepted acknowledgment and an agreeing final check are required for that, by the workflow. |
+| **B. Acknowledged and revised** | Other non-empty actions were submitted. If they qualify, they have their own accepted acknowledgment. |
+| **C. Acknowledged and abandoned** | The model chose to submit nothing (`"actions": []`). |
+| **D. Failed acknowledgment, withheld** | Nothing was submitted, and the model did not abandon: `acknowledgment_not_accepted` (wrong, stale, missing or malformed acknowledgments, retries spent), `final_check_disagrees`, `consequences_unavailable`, an unreadable reply or a failed request. |
+| **E. No acknowledgment required** | No proposal at the point needed acknowledgment: a non-qualifying valid proposal, a refused proposal not corrected into a qualifying one, or an ending before a proposal was validated. |
+
+* **Accurate before a change:** B and C record whether a reply that
+  changed the actions had first stated R's consequences exactly (checked
+  with llm-agent 6's own matcher). This keeps "accurate acknowledgment
+  followed by revision or abandonment" apart from a change made without
+  one.
 
 * **Copying is not the same as reconsidering.** An accurate
   acknowledgment counts as A only when the action is unchanged; a changed
@@ -275,6 +316,11 @@ evidence of a wise decision.
 
 ## 7. Replay and continuation
 
+* **Engine sessions:** one `dt agent --stdio` session per point and arm,
+  kept for that arm's draws at the point. The arms never share an engine
+  process. Every draw checks the state at its start and records it at its
+  end; the agents' requests at a point are read-only. A fresh engine per
+  draw would cost 5–36 s on the Pi and would not fit the four hours.
 * **Recording:** each draw is recorded as it ends (`live/draws.jsonl`):
   * its schedule entry;
   * every model call: request SHA-256, the full response and its
@@ -284,16 +330,26 @@ evidence of a wise decision.
     the items, the payload and token), the acknowledgment (given, match,
     failures), the final check, the stages and the submitted batches;
   * every engine request and answer.
-* **Replay, without a model:** every draw is run again on a fresh engine
-  session at the point, with the recorded responses matched to the
-  requests by SHA-256. The trace, every engine answer, the consequence
-  payloads, the acknowledgment matches and the final actions must equal
-  the recorded ones.
+* **Replay, without a model:** every recorded draw, completed or
+  interrupted, is run again with the same session pattern and the agent's
+  own `ask()`. Each recorded response is served only to the request with
+  its recorded SHA-256, and only if its body still has its SHA-256. The
+  decision record, every engine request and answer, the consequence
+  payloads, the acknowledgment matches, the final check, the batches and
+  the digests must equal the recorded ones, and every recorded response
+  must be used. Send times and latencies are live metadata, reported in
+  `inference.json` and excluded from the comparison.
+* **Schedule check:** the recorded draws must be the schedule's first
+  draws, in order and each once, each with its point, model, arm, draw and
+  expected start (digests, request and proposal hashes). Only the last may
+  be unfinished.
 * **Continuation:** each distinct final decision is applied at the
   recorded state, if valid. The no-action suffix of shared-prefix/v2
   follows, with financial evidence v1, recording the apply outcome, the
-  state digests and the financial ledger. It is a mechanics check with
-  no long-run claim.
+  state digests and the financial ledger (its SHA-256). It is a mechanics
+  check with no long-run claim. Severance and retained obligations are
+  the engine's previews' own values (`terminations[].severanceCents`,
+  the `guaranteed` lines); nothing is inferred.
 * **Provenance** (the owner's F2 decision):
   * replay establishes that the record is consistent with the recorded
     replies, not that a particular model produced them;
@@ -304,21 +360,40 @@ evidence of a wise decision.
 
 ## 8. Before the run (no live calls)
 
-1. **The driver:** `analysis/acknowledgment/stage_b.py`.
-   * Arm A is V0.11b's `workflow_experiment.run_arm("C")`, unchanged.
-   * Arm B follows llm-agent 6's own loop from the recorded proposal on,
-     with llm-agent 6's own functions: assessment, request and rejection
-     texts, matching, final check and withholding.
-2. **Fidelity tests:** on llm-agent 6's scripted engine and model, for
-   the same replies, B must send exactly llm-agent 6's messages and
-   submit or withhold exactly its batches. The tests cover every V0.12a
-   scripted case and the F1 field cases. A must send llm-agent 5's, as
-   in V0.11b. The tests also confirm the bound of 4 model calls per
-   draw.
-3. **Freeze:**
-   * add the driver's SHA-256 to `protocol.json`;
-   * regenerate `schedule.json`;
-   * commit both, with CI green, before any request.
+1. **The driver:** `analysis/acknowledgment/stage_b.py`
+   (`DRIVER.md`). It does not reimplement either workflow: each draw calls
+   the arm's agent's own `ask()` (llm-agent 5 with
+   `validation-first-preview`; llm-agent 6), with the model's frozen
+   settings file loaded by the agent's own loader, the agent's own
+   `ModelClient`, and the recording's memory text. The agent's first
+   request must equal the recorded request byte for byte; its reply is
+   the recorded proposal. This replaces the proposed design's use of
+   V0.11b's `run_arm("C")` for A and a re-implementation of llm-agent 6's
+   loop for B: calling the agents themselves leaves nothing to
+   approximate.
+2. **Fidelity:**
+   * on the agents' scripted engines (`test_stage_b.py`): every V0.12a
+     scripted case for B, V0.11b's arm C cases for A, the driver's draw
+     against the agent's own `ask()` with a plain client: the same
+     messages, record, batches and engine requests;
+   * on the real engine at all twelve points (`stage_b_fidelity.py`,
+     `fidelity/`): scripted cases per point and arm, the driver against
+     the agent run with its own `Harness` class on its own engine
+     session, its own payloads and Evidence writer; each driver draw
+     replayed; one apply per point and arm against the continuation;
+   * a scripted mock run of the real schedule that stops PARTIAL by its
+     scripted clock, with its analysis (`fidelity/mock-run/`);
+   * the call bound, the limits, the partial run and every schedule and
+     replay check (`test_stage_b.py`).
+3. **Independent review** of the driver and this protocol, committed
+   verbatim; any blocking defect repaired and re-reviewed.
+4. **Lock:** `protocol.json`'s `lock` pins the SHA-256 of the driver, its
+   fidelity code and tests, both agents (and llm-agent 3 and 4 beneath
+   them), the selection, the points, the schedule, the settings files and
+   this protocol's documents; its status becomes `LOCKED — NOT RUN`. A
+   separate commit, with CI green. `stage_b.py check` verifies the lock
+   against the files, and `run` refuses a protocol whose lock does not
+   hold.
 
    Any change after that is an amendment, recorded with its reason.
 

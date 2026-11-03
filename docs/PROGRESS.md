@@ -7,6 +7,93 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12b — Stage B preparation: the driver and its fidelity evidence (0.12.0-dev.3)
+
+The owner approved the Stage B design on 2026-11-03. That covers:
+* the 12 branch points and `dreamteam-v12b-select/1`;
+* 420 draws, at most 1,680 calls, sequential, a four-hour hard limit;
+* the unavailable categories, as limitations.
+
+Two requirements came with it:
+* the arms must start identically, while their model-call counts stay
+  visible;
+* a run stopped by the limit must be reported as partial.
+
+Live inference is not authorized.
+
+**The driver** (`analysis/acknowledgment/stage_b.py`,
+`docs/benchmark/v12b-dev/DRIVER.md`):
+* **How a draw runs:** each draw calls the arm's agent's own `ask()`,
+  llm-agent 5 with `validation-first-preview` or llm-agent 6. It uses:
+  * the model's frozen settings file, loaded by the agent's own loader;
+  * the agent's own `ModelClient` payloads;
+  * the recording's memory text, its SHA-256 checked.
+
+  The agent's first request must equal the recorded request byte for
+  byte, and its reply is the recorded proposal. Nothing of either
+  workflow is reimplemented.
+* **Engine sessions:** one per point and arm, the arms never sharing a
+  process. Each draw checks the digests at its start and records them at
+  its end. Each arm reads the engine's lines with its agent's own reader.
+* **Limits:** before every model request: 4 calls per draw, 1,680 per
+  run, and the four-hour stop, under which a request starts only if its
+  300 s timeout fits.
+* **Stops:** a stopped run is PARTIAL, with no resume. A run also needs
+  `--authorization`, the owner's text, recorded verbatim.
+* **Replay:** every recorded draw is replayed without a model, with
+  everything but send times and latencies identical.
+* **Classification:** the outcomes, B's classes A–E with "accurate
+  before a change", A's preview classes, and the engine-reported
+  exposure of each distinct decision.
+
+**Fidelity evidence:**
+* **The dry start** (`stage_b.py check`): at all 24 point-arm
+  combinations, the engine is at the recorded state, and the agent's
+  first request equals the recorded request byte for byte. That checks
+  the rebuilt prompt, memory and settings.
+* **The real engine** (`docs/benchmark/v12b-dev/fidelity/`): 113
+  scripted cases, each run through the driver and as the agent itself
+  (its own `Harness` class on its own engine session). All 113 are equal
+  in:
+  * every model request, byte for byte;
+  * every engine exchange;
+  * the decision record and the batches.
+
+  Every driver draw replays without a model. At the 6 points with a
+  submitted decision, applying it through the agent's harness gives the
+  same digests as the analysis continuation.
+* **A defect the evidence caught:** the first run labelled unchanged
+  proposals "revised". The Stage B contexts file stores actions with
+  sorted keys, and llm-agent 4's rule compares compact JSON. The
+  classification now compares against the agent's own parse of the
+  recorded proposal, with a regression test.
+* **The scripted engines** (`analysis/acknowledgment/test_stage_b.py`,
+  39 tests), with mock inference only:
+  * every V0.12a scripted case and V0.11b's arm C cases, the driver
+    against the agent's own `ask()`;
+  * the owner's 25 scenarios;
+  * the call bound: every sequence of three reply kinds at five starts
+    gives at most 2 calls per draw.
+* **The mock run** (`fidelity/mock-run/`): the real schedule, with
+  scripted replies and a scripted clock. MOCKRESULT
+
+**Version:** 0.12.0-dev.3. 0.12.0-dev.2 is registered as batch mode
+`v0.12_dev2`, with the fixture `mini-seed52-v0122`.
+
+**Known limitations:**
+* **Session reuse:** sessions are reused per point and arm. A fresh
+  engine per draw costs 5–36 s on the Pi and would not fit the four
+  hours. The digests are checked at every draw.
+* **Memory:** the memory text is the recording's replay's, checked by
+  hash and by the rebuilt prompt.
+* **Real-engine coverage:** the real-engine cases cover acknowledgment,
+  revision, abandonment, refusal and failures. Correcting a refused
+  proposal into a valid one is covered only on the scripted engines,
+  since no correction is known in advance at the real points.
+* **Not yet done:** the protocol is not yet locked or reviewed.
+
+---
+
 ## V0.12b — Stage A completed (F1 repaired and re-reviewed); Stage B protocol proposed (0.12.0-dev.2)
 
 The owner accepted Stage A on 2026-11-03 and made these decisions:

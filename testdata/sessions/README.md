@@ -605,3 +605,9 @@ with `-scenario mini -seed 52 -days 45 -actions
 testdata/sessions/mini-seed52-v0121.actions.json` (the same batches as the
 5C.4l file's). 0.12.0-dev.2 replays it in batch mode `v0.12_dev1` with
 every digest verified (`internal/session/v0121_test.go`).
+
+The 0.12.0-dev.2 file was made from 072f100 (0.12.0-dev.2, V0.12b Stage A)
+with `-scenario mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-v0122.actions.json` (the same batches as the
+5C.4l file's). 0.12.0-dev.3 replays it in batch mode `v0.12_dev2` with
+every digest verified (`internal/session/v0122_test.go`).

@@ -23,7 +23,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
-| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A accepted and completed (F1 repaired, re-reviewed); Stage B protocol proposed, awaiting owner approval; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B proposed, live inference not authorized); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
+| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A accepted and completed (F1 repaired, re-reviewed); Stage B design approved, driver implemented, review and lock next; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B driver implemented, live inference not authorized); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1278,7 +1278,7 @@ does not establish that an action is wise.
 |---|---|---|
 | V0.12a | Engine-backed consequence acknowledgment | accepted 2026-11-02 (9871e37) |
 | V0.12b Stage A | Independent safeguard audit; real-engine displacement test; F1 repair; focused re-review; real-engine hire test | accepted 2026-11-03; completed 2026-11-03 (F1 CLOSED) |
-| V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | protocol proposed (`docs/benchmark/v12b-dev/PROTOCOL.md`); live inference not authorized |
+| V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | design approved 2026-11-03; driver implemented with fidelity evidence (`docs/benchmark/v12b-dev/DRIVER.md`); independent review and lock next; live inference not authorized |
 | V0.12c | Prospective multi-day agent evaluation | proposed |
 | V0.12.0 | Release | pending |
 
@@ -1368,6 +1368,37 @@ What followed:
 
   Two categories are unavailable in the corpus: a valid hire, and a
   termination without displacement. They are reported, not filled.
+
+**Stage B design approved; driver GO** (owner, 2026-11-03). The owner
+approved:
+* the 12 branch points and the selection rule;
+* 420 draws, at most 1,680 calls, sequential, a four-hour hard limit;
+* the missing categories, as limitations.
+
+Before live inference, three things are required:
+* a driver;
+* an independent review of its fidelity;
+* a protocol lock.
+
+A partial run must be reported as partial, never silently resumed.
+
+* **The driver** (`analysis/acknowledgment/stage_b.py`,
+  [benchmark/v12b-dev/DRIVER.md](benchmark/v12b-dev/DRIVER.md)):
+  * it calls the agents' own `ask()` with the frozen settings, the
+    agents' own clients and the recordings' memory;
+  * the agent's first request must equal the recorded request byte for
+    byte, at all 12 points;
+  * per point, both arms get the same state, request and proposal;
+    model calls are counted per draw, at most 2;
+  * the limits are enforced before every request;
+  * a stopped run is PARTIAL, never resumed or substituted
+    ([benchmark/v12b-dev/PROCEDURE.md](benchmark/v12b-dev/PROCEDURE.md)).
+* **Fidelity evidence** (`docs/benchmark/v12b-dev/fidelity/`): on the
+  real engine, 113 scripted cases match the agents' own runs exactly, and
+  every draw replays without a model. A scripted mock run of the real
+  schedule stops PARTIAL and is analysed as partial.
+* **Next:** the independent review, then the lock (`LOCKED — NOT RUN`),
+  then the owner's decision on live inference.
 
 ## 8. Testing strategy (all versions)
 

@@ -1308,6 +1308,21 @@ Two limits are now stated in the specification:
   replies, not who wrote them. `model.jsonl` is the record of the model
   calls (F2).
 
+**The Stage B driver (V0.12b, not run):** `analysis/acknowledgment/stage_b.py`
+runs llm-agent 5 (`validation-first-preview`) and llm-agent 6 through
+their own `ask()` at recorded branch points
+([benchmark/v12b-dev/DRIVER.md](benchmark/v12b-dev/DRIVER.md)). Each agent
+uses:
+* its frozen settings file and its own `ModelClient`;
+* the recording's memory text, with its first request checked against
+  the recorded one byte for byte;
+* the recorded proposal as the reply to that first request.
+
+Neither agent is changed. On the real engine, the driver's draws match
+the agents' own runs (their `Harness` classes on their own sessions) in
+every model request, engine exchange, record and batch, across 113
+scripted cases.
+
 **Acknowledgment is not approval.** It records that the reply stated the
 engine's reported direct consequences of the exact proposal. It does not
 establish that the action is clinically or financially wise. The engine

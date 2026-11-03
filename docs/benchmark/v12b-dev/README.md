@@ -4,8 +4,10 @@
 * **Stage A** is done: the independent safeguard audit, the F1 repair,
   the focused re-review, and the real-engine displacement and hire
   tests.
-* **Stage B** is proposed. It is not frozen and not run, and **live
-  inference is not authorized**.
+* **Stage B:** the owner approved its design, and its driver is
+  implemented with fidelity evidence. The independent review and the lock
+  are next. It is not locked and not run, and **live inference is not
+  authorized**.
 
 V0.12.0 is unreleased.
 
@@ -37,24 +39,37 @@ The V0.12a scripted evidence regenerates byte-identical.
 | `internal/bench/llm_agent6_hire_test.go` | `be48a1563214f8d2cf2f3586765556dca73fa0e545a0d3ceb645254a754451d8` |
 | `internal/bench/llm_agent6_displacement_test.go` | `4a20c2de7592c9b78c43c12e4fc3bf796b09a6c4c36ab83474f2fcfd8aaaa57a` |
 
-## Stage B (proposed)
+## Stage B (design approved; driver implemented; not locked, not run)
 
-The protocol is [PROTOCOL.md](PROTOCOL.md). It needs three things before
-any request: the owner's approval, then the driver and its fidelity tests
-(PROTOCOL.md §8), then a freezing commit.
+| Document | What |
+|---|---|
+| [PROTOCOL.md](PROTOCOL.md) | The protocol: question, points, arms, limits, outcomes, statistics, replay, lock |
+| [DRIVER.md](DRIVER.md) | The driver's specification: how a draw runs, limits, replay, classification, limitations |
+| [PROCEDURE.md](PROCEDURE.md) | Run instructions and the partial-run procedure |
+| [fidelity/fidelity.md](fidelity/fidelity.md) | 113 scripted cases on the real engine: the driver against the agents' own runs |
+| [fidelity/mock-run/decision-tables.md](fidelity/mock-run/decision-tables.md) | A scripted mock run of the real schedule, PARTIAL by its scripted clock |
 
 | File | SHA-256 |
 |---|---|
-| `protocol.json` (`v12b-ack-1`, draft) | `b53d469c8ac7e68a9c612691f98c8b73c04d1721e8ad69b8610b74071dd57278` |
+| `protocol.json` (`v12b-ack-1`, final draft) | `70299a411cc4e7d7b3d66d0fcc31f4204b31ff30ed4a4874aabd8c2aea591e22` |
 | `points/manifest.json` | `e288fd702d8999b25b84e0b0625ed86d077f6045ace16ddb03bf63fbf1447134` |
 | `points/contexts.jsonl` | `759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511` |
-| `schedule.json` (420 draws) | `3714d792b2a823e58816ab4504c72bec1f1d3e6f641186af80f9723129989e2c` |
+| `schedule.json` (420 draws, each with its expected start) | `5067b4cdca2fc888fce5f5380c3666e1fa0c0fa766b506d6dba5625814298cf2` |
 | `analysis/acknowledgment/stage_b_points.py` | `e360ca1f10cdea269b4bde8031397dfb393a77bc9135a14e5592af80a6a8a8c7` |
+| `analysis/acknowledgment/stage_b.py` (the driver) | `6d3b7405f031cff8a00e0a211d1aa4ba5ddc0e6756924a098887f20b094442cb` |
+| `analysis/acknowledgment/stage_b_fidelity.py` | `88d5a432a888ea756025947717328a61ba2b12615cf10491e2fba380fe650e0a` |
+| `analysis/acknowledgment/test_stage_b.py` | `54fd37528c0346392412ec18b6b6d282df4a49dba886f45998d83aaa91a84dee` |
+| `fidelity/fidelity.json` | `1ab64e67911a22116856bd37d4004acd0654d96117a6d5de1fb20cdc2cba46ca` |
+| `fidelity/mock-run/live/draws.jsonl` | `1f1ea78a40ab1fcaa40c1d8f7d199c6efa0400cf5665abfa185362cfd97111a9` |
+| `fidelity/mock-run/decisions.json` | `aaf8bae3eac76f5d126888ca19648f0cde87f594932a3793c79838017e11fcb6` |
 
 Made with:
 
     python3 -I -B analysis/acknowledgment/stage_b_points.py points --out docs/benchmark/v12b-dev/points
-    python3 -I -B analysis/acknowledgment/stage_b_points.py schedule --protocol docs/benchmark/v12b-dev/protocol.json --out docs/benchmark/v12b-dev
+    python3 -I -B analysis/acknowledgment/stage_b.py schedule --protocol docs/benchmark/v12b-dev/protocol.json --out docs/benchmark/v12b-dev
+    python3 -I -B analysis/acknowledgment/stage_b_fidelity.py fidelity --binary ./dt --replays DIR --protocol docs/benchmark/v12b-dev/protocol.json --out docs/benchmark/v12b-dev/fidelity
+    python3 -I -B analysis/acknowledgment/stage_b_fidelity.py mockrun --binary ./dt --replays DIR --protocol docs/benchmark/v12b-dev/protocol.json --out docs/benchmark/v12b-dev/fidelity/mock-run
 
-CI checks both on every platform. No model was contacted to prepare
-them. The separate frozen 98-item human evidence review is still PENDING.
+where DIR holds the V0.8c and V0.9c replays (`PROCEDURE.md` §1). CI makes
+every one again and compares it on every platform. No model was contacted.
+The separate frozen 98-item human evidence review is still PENDING.
