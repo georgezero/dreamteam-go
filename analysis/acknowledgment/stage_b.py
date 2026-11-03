@@ -390,7 +390,7 @@ class PointModel:
         lat = self.now() - t0
         if self.limits is not None:
             self.limits.calls += 1
-        f = RR.response_fields(body) if body else {"parsedBody": False}
+        f = body_fields(body)
         self.calls.append({"n": len(self.calls) + 1, "requestSha256": sha256(data), "status": status, "error": err,
                            "body": body, "responseSha256": sha256(body or ""),
                            "usage": f.get("usage") if f.get("parsedBody") else None,
@@ -401,6 +401,17 @@ class PointModel:
 
     def spent(self, attempts):  # llm_agent6.LiveModel.spent, unchanged
         return bool(attempts) and self.now() - self.start >= self.settings["decisionBudgetSeconds"]
+
+
+def body_fields(body):
+    """repeat_run.response_fields, for any body: one that is not a JSON
+    object of the usual shape has no fields (re-review R3)."""
+    if not body:
+        return {"parsedBody": False}
+    try:
+        return RR.response_fields(body)
+    except (ValueError, AttributeError, TypeError, IndexError, KeyError):
+        return {"parsedBody": False}
 
 
 def replay_transport(e, recorded):
@@ -644,6 +655,7 @@ def run(proto, proto_sha, man, contexts, out, binary, replays, authorization, tr
                         stopped = {"code": "operator", "message": f"interrupted by the operator during draw {r['seq']}"}
                         break
                     if not isinstance(x, Exception):
+                        stopped = {"code": "driver", "message": f"draw {r['seq']}: {type(x).__name__}: {x}"}
                         raise
                     stopped = {"code": "driver", "message": f"draw {r['seq']}: {type(x).__name__}: {x}"}
                     break
@@ -710,7 +722,8 @@ def check_run_doc(run_doc, rows, sched):
         raise ExperimentError("run.json does not describe the recorded draws")
     if run_doc.get("drawInterrupted") != (last["seq"] if last and last["status"] == "interrupted" else None):
         raise ExperimentError("run.json's drawInterrupted is not the recorded interrupted draw")
-    if run_doc["status"] == "COMPLETE" and (run_doc.get("stopped") is not None or completed != len(sched)):
+    if run_doc["status"] == "COMPLETE" and (run_doc.get("stopped") is not None or completed != len(sched)
+                                            or run_doc.get("drawAborted") is not None):
         raise ExperimentError("run.json says COMPLETE, but not every scheduled draw was completed without a stop")
     if run_doc["status"] == "PARTIAL" and run_doc.get("stopped") is None and completed == len(sched):
         raise ExperimentError("run.json says PARTIAL with every draw completed and no stop")
@@ -746,7 +759,7 @@ def replay_draw(r, e, arm_settings, opener, mem):
     if left:
         raise ExperimentError(f"draw {r['seq']}: recorded responses the workflow did not use")
     for c in r["calls"]:  # the body-derived metadata, from the hash-checked body (review D5)
-        f = RR.response_fields(c["body"]) if c["body"] else {"parsedBody": False}
+        f = body_fields(c["body"])
         derived = {k: f.get(k) if f.get("parsedBody") else None for k in ("usage", "finishReason", "servedModel")}
         if derived != {k: c.get(k) for k in derived}:
             raise ExperimentError(f"draw {r['seq']}, call {c['n']}: usage, finish reason or served model is not "
@@ -803,13 +816,15 @@ def classify(r, e):
     # order: llm-agent 4's rule compares actions by their compact JSON,
     # which the Stage B contexts file (keys sorted) would not match.
     initial = atts[0]["actions"]
-    used = rec["final"]["attempt"]
+    # Nothing submitted when the agent's outcome is fallback, even with a
+    # used attempt: a state_changed withholding (re-review R2).
+    used = rec["final"]["attempt"] if rec["outcome"] != "fallback" else None
     final = atts[used - 1]["actions"] if used else None
     if final is not None:
-        outcome = A4.response_of(initial, final)
+        outcome = response_of(initial, final)
     elif atts[-1].get("refusals"):
         outcome = "refused"
-    elif rec.get("withheld"):
+    elif rec.get("withheld") or rec["final"]["attempt"] is not None:
         outcome = "withheld"
     else:
         outcome = "invalid"
@@ -857,7 +872,7 @@ def d_reason(rec, atts):
     how the workflow ended when it records none (review D4)."""
     w = (rec.get("withheld") or {}).get("reason")
     if w:
-        return w
+        return w  # the agent's: acknowledgment_not_accepted, final_check_disagrees, consequences_unavailable, state_changed
     last = atts[-1]
     if last.get("refusals"):
         return "revision_refused"
@@ -866,12 +881,27 @@ def d_reason(rec, atts):
     return "invalid_reply"
 
 
+def same_content(a, b):
+    """The same actions by canonical content: each action's keys sorted,
+    the actions in any order (llm-agent 4's same_actions compares compact
+    JSON, which is sensitive to key order; re-review R1)."""
+    return sorted(canon(x) for x in a) == sorted(canon(x) for x in b)
+
+
+def response_of(proposal, actions):
+    """llm-agent 4's kept, revised or abandoned, by canonical content."""
+    if same_content(proposal, actions):
+        return "kept"
+    return "abandoned" if not actions else "revised"
+
+
 def unchanged(final, actions):
-    """(the same actions as `actions`, by llm-agent 4's canonical content in
-    any order: the outcome's rule; and only reordered). One rule for
-    "unchanged" in every classification (review D1); a reordered
-    resubmission, which llm-agent 6 treats as a new proposal, is flagged."""
-    same = A4.same_actions(actions, final)
+    """(the same actions as `actions` by canonical content: the outcome's
+    rule; and only reordered). One rule for "unchanged" in every
+    classification (review D1, re-review R1); a resubmission that reorders
+    the list, which llm-agent 6 treats as a new proposal, is flagged. Key
+    order inside an action is no change at all."""
+    same = same_content(actions, final)
     return same, same and not A6.same(final, actions)
 
 

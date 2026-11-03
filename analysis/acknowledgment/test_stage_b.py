@@ -621,6 +621,57 @@ class Review(unittest.TestCase):
             B.EngineHarness(NoProtocol(T6.Engine())).request("digests")
 
 
+class Rereview(unittest.TestCase):
+    """The focused re-review's findings (docs/audits/v0.12b-stage-b-driver-rereview.md)."""
+
+    def test_r1_key_order_inside_an_action_is_no_change(self):
+        rev = dict(reversed(list(FIRE.items())))
+        d, e, _, _ = draw("B", [r("Riley.", [FIRE]), r("Ack.", [rev], ack([FIRE]))])
+        x = B.classify(d, e)
+        self.assertEqual((x["outcome"], x["class"], x["reorderedOnly"], x["submitted"]),
+                         ("kept", "A_proceeded", False, True))
+        rs = dict(reversed(list(STAFF.items())))
+        d, e, _, _ = draw("A", [TW.d("x", [STAFF]), TW.d("same", [rs])], (["ok"] * 2, [TW.C]))
+        x = B.classify(d, e)
+        self.assertEqual((x["outcome"], x["preview"]["class"]), ("kept", "proceeded"))
+
+    def test_r2_state_changed_is_withheld(self):
+        class Drift(T6.Engine):
+            n = 0
+
+            def request(self, op, args=None):
+                a = super().request(op, args)
+                if op == "digests":
+                    Drift.n += 1
+                    if Drift.n >= 6:
+                        a = copy.deepcopy(a)
+                        a["digests"]["state"] = "1" * 64
+                return a
+        eng = Drift()
+        e = point(copy.deepcopy(T6.Engine()), r("Riley.", [FIRE]), settings())
+        Drift.n = 0
+        d = B.run_draw(entry(e, "B"), e, settings(), lambda *a: FakeSession(eng), B.FixedMemory(""),
+                       Replies([r("Ack.", [FIRE], ack([FIRE]))]), None)
+        self.assertEqual(d["record"]["withheld"]["reason"], "state_changed")
+        x = B.classify(d, e)
+        self.assertEqual((x["outcome"], x["class"], x["dReason"], x["submitted"]),
+                         ("withheld", "D_withheld", "state_changed", False))
+
+    def test_r3_a_body_that_is_not_an_object(self):
+        for body in ("null", "[]", '{"choices":[null]}'):
+            with self.subTest(body):
+                with tempfile.TemporaryDirectory() as tmp:
+                    doc, rows, _, _, _ = Runs.go(None, tmp, lambda p, b=body: (200, b, None))
+                self.assertEqual(doc["modelCalls"], sum(len(x["calls"]) for x in rows))
+                self.assertIsNone(doc["drawAborted"])
+
+    def test_r5_complete_with_an_aborted_draw_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            doc, rows, sched, _, _ = Runs.go(None, tmp, SF.mock_transport("t"))
+        with self.assertRaises(B.ExperimentError):
+            B.check_run_doc(dict(doc, drawAborted=2), rows, sched)
+
+
 class Schedule(unittest.TestCase):
     def test_committed_schedule(self):
         p = os.path.join(ROOT, "docs", "benchmark", "v12b-dev", "protocol.json")

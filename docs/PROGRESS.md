@@ -97,7 +97,13 @@ verbatim at 1fb619c):
   * D11: `run.json` checked against the rows;
   * D12: the protocol field;
   * D13: recorded.
-* **Tests:** 8 regression tests, each failing before the fix; 47 in all.
+* **Tests:** 8 regression tests, each failing before the fix.
+
+**Focused re-review** (`docs/audits/v0.12b-stage-b-driver-rereview.md`,
+verbatim at 75038a3): GO for writing the lock; D1–D13 closed (D9 by the
+lock). New: R1 (Major: key order inside an action counted as a change),
+R2–R4 (Minor), R5 (Note), all fixed before the lock with 4 regression
+tests; 51 tests in all.
 
 **Version:** 0.12.0-dev.3. 0.12.0-dev.2 is registered as batch mode
 `v0.12_dev2`, with the fixture `mini-seed52-v0122`.

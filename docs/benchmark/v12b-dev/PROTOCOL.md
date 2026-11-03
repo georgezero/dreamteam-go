@@ -231,7 +231,9 @@ arm, with every draw counted.
 **Per draw:**
 * **The proposal:**
   * kept, revised or abandoned (llm-agent 4's rule: the final submitted
-    actions against the initial proposal, by canonical content);
+    actions against the initial proposal, by canonical content: each
+    action's keys sorted, the actions in any order; key order inside an
+    action is never a change);
   * or nothing submitted: refused (the last proposal was refused),
     withheld (B's fail-closed withholding), or invalid (the workflow ended
     on an unreadable reply or a failed request).
@@ -263,7 +265,7 @@ it is the correction.
 | **A. Acknowledged and proceeded** | R was submitted unchanged: the same actions by canonical content, in any order (the proposal outcome's rule). An accepted acknowledgment and an agreeing final check are required for that, by the workflow. A resubmission that only reorders R, which llm-agent 6 treats as a new proposal with its own request, is A and is flagged "reordered only". |
 | **B. Acknowledged and revised** | Other non-empty actions were submitted. If they qualify, they have their own accepted acknowledgment. |
 | **C. Acknowledged and abandoned** | The model chose to submit nothing (`"actions": []`). |
-| **D. Failed acknowledgment, withheld** | Nothing was submitted, and the model did not abandon. Each D draw records why: the agent's withheld reason (`acknowledgment_not_accepted`: wrong, stale, missing or malformed acknowledgments with the retries spent; `final_check_disagrees`; `consequences_unavailable`) or, where the agent records none, `revision_refused` (a revision answering the request was refused and no retry was left), `invalid_reply` or `failed_request`. |
+| **D. Failed acknowledgment, withheld** | Nothing was submitted, and the model did not abandon. Each D draw records why: the agent's withheld reason (`acknowledgment_not_accepted`: wrong, stale, missing or malformed acknowledgments with the retries spent; `final_check_disagrees`; `consequences_unavailable`) or, where the agent records none, `revision_refused` (a revision answering the request was refused and no retry was left), `invalid_reply` or `failed_request`. `state_changed` (the digests changed before submission) is the agent's reason too; unreachable on the read-only pooled sessions, it is classified D, never A. |
 | **E. No acknowledgment required** | No proposal at the point needed acknowledgment: a non-qualifying valid proposal, a refused proposal not corrected into a qualifying one, or an ending before a proposal was validated. |
 
 * **Accurate before a change:** B and C record whether a reply that
@@ -280,8 +282,8 @@ it is the correction.
   action is B or C, whatever the acknowledgment said.
 * **No reasoning is inferred** from the acknowledgment text or the
   reason. Classes B and C record that the decision changed, not why.
-* **A's matching classes:** kept, revised or abandoned after a shown
-  preview; no preview shown.
+* **A's matching classes:** after a shown preview, proceeded, revised,
+  abandoned, or failed (nothing submitted); or no preview shown.
 
 **Financial and operational exposure** (financial evidence v1,
 unchanged): for each distinct final decision against the initial
@@ -402,8 +404,11 @@ evidence of a wise decision.
    shared-prefix, feedback, decision, sample and repeat modules and
    financial evidence v1 it runs through; the selection, its inputs (the
    V0.10b, V0.10c and V0.11b contexts, the inventory, the V0.11b manifest)
-   and the twelve recordings; the points; the settings files; and this
-   protocol's documents. The schedule is pinned by its entries
+   and the twelve recordings; the replay configurations; the points; the
+   settings files; and this protocol's documents, PROTOCOL.md, DRIVER.md
+   and PROCEDURE.md. `README.md` (which lists `protocol.json`'s own hash
+   and the hashes of files regenerated after the lock), the audits and
+   PROGRESS.md are outside the lock. The schedule is pinned by its entries
    (`lock.scheduleEntriesSha256`): `schedule.json` names the protocol's
    SHA-256, so its file hash cannot be pinned inside the protocol. The
    status becomes `LOCKED — NOT RUN`. The lock commit is made in this

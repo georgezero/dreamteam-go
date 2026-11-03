@@ -58,9 +58,9 @@ The V0.12a scripted evidence regenerates byte-identical.
 | `points/contexts.jsonl` | `759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511` |
 | `schedule.json` (420 draws, each with its expected start) | `5067b4cdca2fc888fce5f5380c3666e1fa0c0fa766b506d6dba5625814298cf2` |
 | `analysis/acknowledgment/stage_b_points.py` | `e360ca1f10cdea269b4bde8031397dfb393a77bc9135a14e5592af80a6a8a8c7` |
-| `analysis/acknowledgment/stage_b.py` (the driver) | `7591b97d6cc0cadeb7c2f8e788ed6fccb86c18301e7c7d334d77b425e2fa56be` |
+| `analysis/acknowledgment/stage_b.py` (the driver) | `d870fd39a69c7e7e4b0d2e42de118a04e2431fe3b85938b336aa6e7bdfa04b6a` |
 | `analysis/acknowledgment/stage_b_fidelity.py` | `88d5a432a888ea756025947717328a61ba2b12615cf10491e2fba380fe650e0a` |
-| `analysis/acknowledgment/test_stage_b.py` | `3337e65185994e8e8261a7aa678a95d775aae69ba8cccdc7c6ade8968fd3063f` |
+| `analysis/acknowledgment/test_stage_b.py` | `7ba5ac48d7ba863f61dbfbf852dae0d7eba6760909f054ffb2ea44cf07f41e13` |
 | `fidelity/fidelity.json` | `1ab64e67911a22116856bd37d4004acd0654d96117a6d5de1fb20cdc2cba46ca` |
 | `fidelity/mock-run/live/draws.jsonl` | `1f1ea78a40ab1fcaa40c1d8f7d199c6efa0400cf5665abfa185362cfd97111a9` |
 | `fidelity/mock-run/decisions.json` | `4c7d2639b7e4d867fe5b6f6b176bd494b9225370a33f1a14ec545f669f1a5df2` |
