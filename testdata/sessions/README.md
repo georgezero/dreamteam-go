@@ -594,3 +594,8 @@ The V0.11b file was made from b44384a (0.11.0-dev.2) with `-scenario mini
 -seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0112.actions.json`
 (the same batches as the 5C.4l file's). 0.11.0 replays it in batch mode
 `v0.11_dev2` with every digest verified (`internal/session/v0112_test.go`).
+
+The V0.11.0 file was made from a267cd3 (0.11.0) with `-scenario mini
+-seed 52 -days 45 -actions testdata/sessions/mini-seed52-v0110.actions.json`
+(the same batches as the 5C.4l file's). 0.12.0-dev.1 replays it in batch
+mode `v0.11.0` with every digest verified (`internal/session/v0110_test.go`).

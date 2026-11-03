@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"sync"
@@ -66,6 +67,16 @@ func (m *mockLLM) count(model string) int {
 //	pvkeep      raise's decision, and the same again after a preview
 //	pvrevise    raise's decision, then mixed's after a preview
 //	pvabandon   raise's decision, then no action after a preview
+//	ackfire     at the first decision point, terminates the first active
+//	            technologist at the earliest last day; answers an
+//	            acknowledgment request by acknowledging every item it lists
+//	acktele     the same with a weeknights teleradiology contract (urgent
+//	            scope) from the earliest date
+//	ackgeneric  ackfire's termination, answered with "I understand."
+//	ackfireall  ackfire, terminating every active technologist in one batch
+//
+// (An acknowledgment request is llm-agent 6's message that begins
+// "ACKNOWLEDGMENT": agents/llm/llm_agent6.py.)
 //
 // (A preview is the preview-enabled agent's message that begins
 // "PREVIEW.": agents/llm/llm_agent4.py.)
@@ -131,6 +142,16 @@ func (m *mockLLM) serve(w http.ResponseWriter, r *http.Request) {
 			case "pvabandon":
 				content = `{"reason":"the preview shows the cost; no change","actions":[]}`
 			}
+		}
+	case "ackfire", "acktele", "ackgeneric", "ackfireall":
+		last := req.Messages[len(req.Messages)-1].Content
+		switch {
+		case strings.HasPrefix(last, "ACKNOWLEDGMENT") && len(req.Messages) > 2:
+			content = acknowledge(req.Messages[2].Content, last, req.Model == "ackgeneric")
+		case strings.Contains(prompt, "No earlier decisions in this run.") && req.Model == "acktele":
+			content = teleDecision(prompt)
+		case strings.Contains(prompt, "No earlier decisions in this run."):
+			content = fireDecision(prompt, req.Model == "ackfireall")
 		}
 	case "details":
 		content = `{"reason":"I need the allocation details","actions":[],"details":["set_reading_allocation","finance.cashHistory","worklist.recent"]}`
@@ -225,6 +246,71 @@ func mixedDecision(prompt string) string {
 		}
 	}
 	return `{"reason":"more capacity","actions":[` + strings.Join(acts, ",") + `]}`
+}
+
+// fireDecision terminates the first active technologist in the
+// terminate targets (all of them) at their earliest last day.
+func fireDecision(prompt string, all bool) string {
+	var targets []struct {
+		Employee        string `json:"employee"`
+		Role            string `json:"role"`
+		Employment      string `json:"employment"`
+		EarliestLastDay string `json:"earliestLastDay"`
+	}
+	var acts []string
+	if promptTargets(prompt, "terminate", &targets) {
+		for _, x := range targets {
+			if x.Role == "technologist" && x.Employment == "active" && (all || len(acts) == 0) {
+				acts = append(acts, fmt.Sprintf(`{"type":"terminate","employee":%q,"lastDay":%q}`, x.Employee, x.EarliestLastDay))
+			}
+		}
+	}
+	return `{"reason":"reduce labor cost","actions":[` + strings.Join(acts, ",") + `]}`
+}
+
+// teleDecision starts a weeknights teleradiology contract for urgent
+// studies on the first plan from the earliest date.
+func teleDecision(prompt string) string {
+	var targets struct {
+		Plans []struct {
+			ID string `json:"id"`
+		} `json:"plans"`
+		EarliestEffective string `json:"earliestEffective"`
+	}
+	if !promptTargets(prompt, "contract_teleradiology", &targets) || len(targets.Plans) == 0 {
+		return `{"reason":"no plan","actions":[]}`
+	}
+	return fmt.Sprintf(`{"reason":"night coverage","actions":[{"type":"contract_teleradiology","op":"start","plan":%q,"windows":["weeknights"],"scope":"urgent","effective":%q,"requestId":"tr-1"}]}`,
+		targets.Plans[0].ID, targets.EarliestEffective)
+}
+
+var proposalToken = regexp.MustCompile(`\(proposal ([0-9a-f]{16})\)`)
+
+// acknowledge answers an acknowledgment request: the proposal again (the
+// model's first reply), with every item the request lists acknowledged as
+// listed, or, generic, with "I understand.".
+func acknowledge(proposal, request string, generic bool) string {
+	var d map[string]any
+	if json.Unmarshal([]byte(proposal), &d) != nil {
+		return proposal
+	}
+	if generic {
+		d["acknowledgment"] = "I understand."
+	} else {
+		items := []json.RawMessage{}
+		for _, l := range strings.Split(request, "\n") {
+			if strings.HasPrefix(l, `{"id":"C`) {
+				items = append(items, json.RawMessage(l))
+			}
+		}
+		token := ""
+		if m := proposalToken.FindStringSubmatch(request); m != nil {
+			token = m[1]
+		}
+		d["acknowledgment"] = map[string]any{"proposal": token, "items": items}
+	}
+	b, _ := json.Marshal(d)
+	return string(b)
 }
 
 func addMinutes(hhmm string, m int) string {

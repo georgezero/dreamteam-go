@@ -709,6 +709,25 @@ command. A replay uses the recording's workflow
 ([LLM_AGENT.md](LLM_AGENT.md) §20). Validation by the harness and the
 agent is a permission check, not a measure of decision quality.
 
+## 11f. llm-agent 6 as a policy (V0.12a)
+
+llm-agent 6 (`./agents/llm/llm_agent6.py --settings FILE`) is an
+external policy like llm-agent 5, with the same permitted operations
+(`validate`, `preview`, `digests` and the observation requests). It
+submits a termination, a new retained obligation or a batch that
+displaces bookings only after the model acknowledges the
+engine-reported consequences of that exact proposal
+([V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md)).
+* The harness and the simulator are unchanged: they accept and apply
+  batches exactly as before.
+* A withheld proposal reaches the harness as no batch, like any other
+  decision to submit nothing. Its reason is in the agent's own record.
+* The replay (`--replay FILE`) re-runs the workflow with the recorded
+  replies and requires the identical record.
+
+An acknowledged action is not an approved or recommended one. No
+benchmark result with llm-agent 6 and a live model exists yet.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

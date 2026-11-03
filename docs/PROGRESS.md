@@ -7,6 +7,135 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12a — high-impact action acknowledgment (0.12.0-dev.1)
+
+V0.11.0 was accepted and closed (a267cd3, tag `v0.11.0`, CI 41534888421),
+and V0.12a was authorized with scripted models only. This was an
+implementation and deterministic-testing milestone: no live model was
+run, and the engine is unchanged.
+
+**Built:**
+* **The consequence inventory**
+  (`docs/V0.12_CONSEQUENCE_INVENTORY.md`), written first. For every
+  consequence, it records what the engine's validate and preview
+  requests report exactly (A), what can be derived without changing
+  engine semantics (B), and what is unavailable (C).
+  * The three conditions are identifiable:
+    * termination (A);
+    * displaced bookings (A), as a whole-batch count;
+    * new retained obligations: a hire's fee and earliest exit (B, from
+      the engine's documented line order, label-checked), or a
+      teleradiology start's guaranteed retainer (A).
+  * Allocation changes (withdrawable), roster changes that displace
+    nothing, teleradiology cancellations and operations actions are not
+    high-impact.
+* **The contract** `dreamteam.action-acknowledgment/v1` (`33c116da979a…`).
+  * Items carry exact engine values, with their sources.
+  * A payload hash (canonical JSON) and a proposal token.
+  * Strict matching: the action, type, target, consequence types and
+    every value must be exact, with the same JSON type. Generic,
+    malformed, missing, incomplete, other-action, other-proposal (stale)
+    and changed-proposal acknowledgments are not accepted.
+* **llm-agent 6** (`agents/llm/llm_agent6.py`,
+  `llm-agent-acknowledgment-workflow/v1`, `b9cb79828f26…`). It loads
+  llm-agent 5 unchanged. The steps are:
+  1. propose;
+  2. validate (version 5's feedback);
+  3. read the consequences from the staffing batch's preview;
+  4. request acknowledgment;
+  5. match;
+  6. run the final check (validate again, preview again, digests);
+  7. submit.
+
+  It fails closed: anything not acknowledged is withheld, with the
+  reason, and the proposal's operations batch is not submitted on its
+  own. There is no threshold, score or recommendation.
+* **Record** `dreamteam.llm-decision-record/v6`. It holds the proposal,
+  the validation requests and answers, the consequence source and values,
+  the payload hash, the request (by hash), the model's acknowledgment
+  (its full reply), the parsed acknowledgment, the match, the final
+  check, the withheld batches, the submitted batches, the digests, and
+  the stages: proposed, validated, previewed, acknowledgment requested,
+  acknowledged, submitted (executed at the next point).
+* **Replay** re-runs the workflow against the engine with the recorded
+  replies, without a model, and requires the identical record. Any
+  tampered field is named and refused.
+* **Docs:**
+  * `docs/V0.12_ACKNOWLEDGMENT.md`;
+  * `docs/benchmark/v12a-dev/` (baseline, changes, scripted evidence,
+    gates);
+  * LLM_AGENT §21, BENCHMARK §11f, ROADMAP §7f (the V0.12 table: V0.12a
+    done; V0.12b and V0.12c proposed; V0.12.0 pending), README.
+
+**Tested:**
+* `agents/llm/test_llm_agent6.py` (31). Tests 01–29 are the 29 named
+  behaviours, from an ordinary action to cross-platform determinism. The
+  suite also reads items from 13 distinct real engine preview answers
+  recorded in V0.11b (6 terminations, 5 displacement items, 4
+  teleradiology starts, 1 hire), and pins the identities. Every scripted
+  case also replays without the model.
+* `internal/bench/llm_agent6_test.go`: the real engine and the mock
+  model, two seeds:
+  * a termination and a teleradiology start, acknowledged and applied;
+  * several terminations in one batch;
+  * a generic "I understand." that withholds the termination;
+  * every item checked against the engine's answer;
+  * a byte-identical model-free replay;
+  * tampered value, acknowledgment, action and v5 records refused.
+* `docs/benchmark/v12a-dev/scripted-cases.{json,md}`: 27 cases, made by
+  `analysis/acknowledgment/scripted_cases.py` and compared by CI across
+  platforms.
+
+**Quality gates:**
+Run locally on horo (linux/amd64, Go 1.27.0) from the working tree:
+
+| Gate | Result |
+|---|---|
+| Race, all packages (`go test -race -timeout 90m ./...`) | exit 0; 10 packages ok, no failures |
+| `go vet ./...` | ok |
+| `gofmt -l` | clean |
+| Cross-builds: linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64 | 5 of 5 ok |
+| Frozen evidence checks: v08c credit/low-liquidity, v09c credit/staffing-shortage | 4 × 104 checks, 0 failed |
+| Shared-prefix v4 points | 14 contexts, selection and requests verified |
+| V0.11b workflow analysis | 720 draws replayed without a model; decisions.json, decision-tables.md, inference.json reproduced |
+| V0.11a scripted evidence (20 cases) | scripted-cases.json and .md reproduced |
+| V0.12a scripted evidence (27 cases) | scripted-cases.json and .md reproduced |
+| Python: agents/llm | 138 tests ok (31 for llm-agent 6) |
+| Python: analysis/evidence | 147 tests ok |
+| Python: analysis/repeatability | 88 tests ok |
+
+On the Pi: `TestLLMAgent6Acknowledgment` (real engine) and `TestV0110Record*` pass.
+
+The CI run on the commit covers the rest, so these were not repeated locally: the full non-race Go suite, golden references, historical replay, benchmark verify/reproduce, the V0.12a evidence regeneration, and the Linux/macOS/Windows matrix.
+
+Not run: live inference, the clinical suites, and historical live reruns. The owner's instructions exclude all three.
+
+**Not changed:**
+* the simulator, actions, accounting or scoring;
+* llm-agent 1–5, their workflow identities and hashes, or the frozen
+  llm-agent 3 settings schema;
+* any recording or evidence.
+
+No live inference, clinical suite or historical live experiment was run.
+The independent review is still PENDING.
+
+**Known limitations:**
+* scripted models only;
+* restating exact values is not understanding;
+* displacement is a batch fact;
+* the hire amounts are class B;
+* the mini scenario displaces no bookings, so real-engine displacement
+  is covered by the recorded V0.11b answers;
+* direct consequences only;
+* no cross-batch atomicity.
+
+The details are in `docs/V0.12_ACKNOWLEDGMENT.md` §9.
+
+**Engine:** unchanged. 0.11.0 is registered for replay
+(`mini-seed52-v0110`, batch mode `v0.11.0`).
+
+---
+
 ## V0.11.0 — release: the validation-first agent workflow (0.11.0)
 
 V0.11b was accepted (26005b3, CI 41498797098), with a conditional GO for

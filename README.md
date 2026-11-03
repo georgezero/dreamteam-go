@@ -392,6 +392,18 @@ parser, with a validation-first workflow.
 
 llm-agent 1 to 4 are unchanged. Details: `docs/LLM_AGENT.md` §18–20.
 
+**In development (V0.12a, unreleased):** llm-agent 6
+(`agents/llm/llm_agent6.py`) adds, to the validation-first workflow, an
+acknowledgment of high-impact actions:
+* terminations, new retained obligations and displaced bookings need an
+  acknowledgment that states the engine's exact consequences for that
+  proposal before they are submitted;
+* anything else is withheld.
+
+Acknowledgment is not approval, and it has been tested with scripted
+models only. Details: `docs/V0.12_ACKNOWLEDGMENT.md`, `docs/LLM_AGENT.md`
+§21.
+
 ### Benchmark scenario suite (V0.6)
 
 Five development scenarios, each a bundled scenario, pose different
@@ -494,7 +506,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.11, V0.12 proposed, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.11, V0.12 in progress, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -508,6 +520,8 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PARAMETER_EVIDENCE.md` | parameter evidence: whether stated amounts, targets, dates, durations and directions agree with the submitted action (V0.9a, frozen in V0.9b) |
 | `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9) |
 | `docs/V0.11_AGENT_WORKFLOW.md` | the validation-first agent workflow, its two selectable forms and their limits (V0.11) |
+| `docs/V0.12_CONSEQUENCE_INVENTORY.md` | what the engine reports about each action's direct consequences: exact, derivable, unavailable (V0.12a) |
+| `docs/V0.12_ACKNOWLEDGMENT.md` | high-impact action acknowledgment: the contract, workflow, recording, replay and limits (V0.12a, unreleased) |
 | `docs/REVIEWER_HANDOFF.md` | what an independent evidence review covers, and where the evidence is |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |

@@ -366,6 +366,19 @@ jobs:
           V=docs/benchmark/v11a-dev
           python3 -I -B analysis/workflow/scripted_cases.py --out v11a
           for f in scripted-cases.json scripted-cases.md; do cmp v11a/$f $V/$f; cp v11a/$f out/v11a-$f; done
+      - name: High-impact action acknowledgment
+        # V0.12a, without any model: llm-agent 6's scripted cases (scripted
+        # model replies and a scripted engine with the real engine's preview
+        # shape), each replayed without the model, made again, equal to the
+        # committed evidence and compared across platforms below. Its unit
+        # tests run with the agents' tests above; its exchange with the
+        # engine and the mock model, in the Go suite.
+        shell: bash
+        run: |
+          set -euo pipefail
+          V=docs/benchmark/v12a-dev
+          python3 -I -B analysis/acknowledgment/scripted_cases.py --out v12a
+          for f in scripted-cases.json scripted-cases.md; do cmp v12a/$f $V/$f; cp v12a/$f out/v12a-$f; done
       - name: Workflow evaluation
         # V0.11b, without any model: the branch points selected again from
         # the V0.10c inventory and the recordings, every context checked;

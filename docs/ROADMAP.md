@@ -23,7 +23,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
-| **V0.12** (proposed, not approved) | Decision safeguards for irreversible actions; operational exposure before commitment; independent evidence review; financial decision-quality evaluation (§7f) | V0.11 |
+| **V0.12** (in progress: V0.12a done, awaiting owner review; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b, proposed); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1245,7 +1245,7 @@ and llm-agent 5 (C). The eligibility rule stays unchanged.
   agent's evidence and the release documentation, and decision
   safeguards are proposed for V0.12.
 
-## 7f. V0.12 — decision safeguards (proposed, not approved)
+## 7f. V0.12 — decision safeguards (in progress)
 
 The owner's recommendation after V0.11.0: decision safeguards,
 especially for irreversible staffing decisions. Syntactic validity and
@@ -1264,6 +1264,39 @@ Nothing here is approved or built.
   independently reviewed.
 
 Each step needs the owner's GO.
+
+**V0.11.0 accepted; V0.12a authorized** (owner, 2026-11-02), with
+scripted models only. The priority is not more valid submissions but
+explicit recognition of consequential actions before they are committed.
+The safeguard works at the agent workflow layer and does not change the
+simulator's action rules. An acknowledgment must name the specific
+action and its consequences with exact engine-derived values, so that it
+is auditable rather than ceremonial. Acknowledgment is not approval, and
+does not establish that an action is wise.
+
+| Milestone | Scope | Status |
+|---|---|---|
+| V0.12a | Engine-backed consequence acknowledgment | done 2026-11-02, awaiting owner review |
+| V0.12b | Independent safeguard review and decision-level evaluation | proposed |
+| V0.12c | Prospective multi-day agent evaluation | proposed |
+| V0.12.0 | Release | pending |
+
+* **V0.12a, done:** llm-agent 6 (`agents/llm/llm_agent6.py`,
+  [V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md)), with the
+  consequence inventory written first
+  ([V0.12_CONSEQUENCE_INVENTORY.md](V0.12_CONSEQUENCE_INVENTORY.md)).
+  * `dreamteam.action-acknowledgment/v1` covers terminations, new
+    retained obligations (hires and teleradiology starts) and displaced
+    bookings, with exact engine values, a proposal token, fail-closed
+    withholding and a final check.
+  * The record is v6, and its model-free replay re-runs the workflow.
+  * Testing used scripted models and the real engine; no live model was
+    run. Evidence: [benchmark/v12a-dev/](benchmark/v12a-dev/README.md).
+* **The concern for V0.12b:** a model may acknowledge accurately that a
+  termination displaces 100 appointments and still proceed. That is not a
+  software defect. V0.12b should test whether the safeguard changes
+  decisions, or merely creates a procedural acknowledgment that models
+  learn to repeat.
 
 ## 8. Testing strategy (all versions)
 

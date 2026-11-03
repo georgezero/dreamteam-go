@@ -44,6 +44,13 @@ default, or the opt-in `validation-first-preview` (§20). V0.11b compared
 it with llm-agent 3 at fixed decision points (§19). A valid decision is
 not shown to be a better one.
 
+V0.12a (unreleased) adds llm-agent 6 (`agents/llm/llm_agent6.py`, §21).
+It is llm-agent 5's validation-first workflow, loaded unchanged, with one
+added safeguard: a termination, a new retained obligation or displaced
+bookings must be acknowledged, with the engine's exact values, before
+submission. Acknowledgment is not approval. It has been tested with
+scripted models only.
+
 ```
 dreamteam benchmark run CONFIG
         │  benchmark-policy/v1 over stdio (one process per run)
@@ -1230,3 +1237,59 @@ whether the selective preview step occurs.
   irreversible and can displace booked appointments, and a valid staffing
   action can create retained obligations. Neither validation nor a
   preview the model accepts is a recommendation to proceed.
+
+## 21. llm-agent 6: high-impact action acknowledgment (V0.12a)
+
+`agents/llm/llm_agent6.py` is llm-agent 5's validation-first workflow
+(loaded unchanged, with llm-agent 3 and 4 beneath it) and one safeguard,
+at the agent workflow layer. The specification is
+[V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md); what the engine
+reports is in [V0.12_CONSEQUENCE_INVENTORY.md](V0.12_CONSEQUENCE_INVENTORY.md).
+
+| | |
+|---|---|
+| Workflow | `llm-agent-acknowledgment-workflow/v1` (`b9cb79828f26…`) |
+| Contract | `dreamteam.action-acknowledgment/v1` (`33c116da979a…`) |
+| Record | `dreamteam.llm-decision-record/v6` |
+| Settings | version 3's file, unchanged (`dreamteam.llm-agent-settings/v1`) |
+
+**How it works:**
+* A fully validated proposal with staffing actions has its staffing
+  batch previewed. The engine's answer gives the consequence items:
+  * each termination (last day, notice, severance and its payday);
+  * each new retained obligation: a hire's recruiting fee and earliest
+    lawful exit, or a teleradiology start's guaranteed retainer;
+  * the batch's displaced bookings, a whole-batch count.
+* If there are any items, the model is shown them with the proposal's
+  token. It must acknowledge each item for that exact proposal, with
+  every value exact, or revise, or submit nothing.
+* An accepted acknowledgment is followed by a final check (validation,
+  preview, digests) before submission.
+* Anything else is withheld, with the reason recorded. The proposal is
+  never rewritten, and its operations batch is never submitted on its
+  own.
+* There is no threshold, recommendation or score, and a valid action is
+  never blocked for being large.
+
+**Replay** (`--replay FILE`) re-runs the workflow against the engine
+with the recorded replies, without a model, and requires an identical
+record. llm-agent 1 to 5 and their recordings are unchanged. llm-agent 5
+remains the released agent; version 6 is not a default anywhere.
+
+**Tests:**
+* `agents/llm/test_llm_agent6.py` (31): the 29 behaviours the milestone
+  named, the items read from real engine answers recorded in V0.11b, and
+  the pinned identities;
+* `internal/bench/llm_agent6_test.go`: the real engine and the mock
+  model, with a termination, a teleradiology start, several terminations
+  in one batch, and a generic acknowledgment that is withheld; replay
+  and tampering;
+* 27 scripted cases in [benchmark/v12a-dev/](benchmark/v12a-dev/README.md).
+
+**Acknowledgment is not approval.** It records that the reply stated the
+engine's reported direct consequences of the exact proposal. It does not
+establish that the action is clinically or financially wise. The engine
+reports direct consequences, not all future outcomes. No live model has
+been run: whether the safeguard changes decisions, or becomes a
+procedure that models learn to repeat, is untested.
+
