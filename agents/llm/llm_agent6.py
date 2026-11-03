@@ -51,10 +51,12 @@ final check is recomputed, and any difference is refused.
 """
 
 import argparse
+import datetime
 import hashlib
 import importlib.util
 import json
 import os
+import re
 import sys
 import time
 
@@ -148,7 +150,138 @@ def same(a, b):
     return a == b
 
 
+# --- reading the engine --------------------------------------------------
+
+class _Duplicated(dict):
+    """A JSON object read from the engine with a key given more than once
+    (the last value is kept, as json does; `duplicates` names the keys)."""
+    duplicates = ()
+
+
+def _pairs(pairs):
+    keys = [k for k, _ in pairs]
+    if len(set(keys)) == len(keys):
+        return dict(pairs)
+    d = _Duplicated(pairs)
+    d.duplicates = sorted({k for k in keys if keys.count(k) > 1})
+    return d
+
+
+def _not_json(name):
+    raise ValueError(f"{name} is not JSON")
+
+
+def json_loads(text):
+    """An engine line read as JSON, with every object that repeats a key
+    marked (_Duplicated), and NaN and Infinity (which Python's json would
+    accept, and the engine never sends) refused: the reading is otherwise
+    json's own."""
+    return json.loads(text, object_pairs_hook=_pairs, parse_constant=_not_json)
+
+
+class Harness(A3.Harness):
+    """llm-agent 3's exchange with the harness, unchanged, except that its
+    lines are read with json_loads, so a consequence field the engine sent
+    twice is seen (see consequences)."""
+
+    def _read(self):
+        line = self._in.readline()
+        if not line:
+            raise ExchangeError("the harness closed the exchange")
+        try:
+            return json_loads(line)
+        except ValueError as e:  # json.JSONDecodeError is one
+            raise ExchangeError(f"a line that is not JSON: {e}")
+
+
 # --- consequences --------------------------------------------------------
+
+# The engine's preview fields the consequences are read from or identified
+# by (internal/api/api.go; none of them is omitempty), and what each must
+# be: "count" and "cents" an integer >= 0 (not a boolean, not a float),
+# "date" a calendar date YYYY-MM-DD, "text" a non-empty string. A field
+# that is missing, null, of another type, negative or not a date makes the
+# consequences unavailable: nothing is defaulted, coerced or acknowledged.
+TERMINATION_FIELDS = (("employee", "text"), ("lastDay", "date"), ("endDate", "date"), ("noticeDays", "count"),
+                      ("severanceCents", "cents"), ("severancePayday", "date"), ("displaced", "count"))
+HIRE_FIELDS = (("requestId", "text"), ("offer", "text"))
+LINE_FIELDS = (("label", "text"), ("cents", "cents"))
+TELE_FIELDS = (("op", "teleop"),)
+TELE_START_FIELDS = (("plan", "text"), ("effective", "date"), ("minimumTermEnd", "date"),
+                     ("guaranteedCents", "cents"), ("guaranteedThrough", "date"))
+DISPLACEMENT_FIELDS = (("appointment", "text"),)
+RESULT_FIELDS = (("ok", "bool"),)
+KINDS = {"count": "an integer >= 0", "cents": "an integer >= 0", "date": "a date YYYY-MM-DD",
+         "text": "a non-empty string", "bool": "true or false", "teleop": "start or cancel"}
+_DATE = re.compile(r"[0-9]{4}-[0-9]{2}-[0-9]{2}")
+
+
+def _is(v, kind):
+    if kind in ("count", "cents"):
+        return type(v) is int and v >= 0
+    if kind == "date":
+        if not isinstance(v, str) or not _DATE.fullmatch(v):
+            return False
+        try:
+            datetime.date.fromisoformat(v)
+        except ValueError:
+            return False
+        return True
+    if kind == "text":
+        return isinstance(v, str) and v != ""
+    if kind == "bool":
+        return type(v) is bool
+    if kind == "teleop":
+        return v in ("start", "cancel")
+    return False
+
+
+def _fields(x, path, spec, problems):
+    """Whether entry x (at path) has every field of spec, of its kind; each
+    field that has not is a problem."""
+    if not isinstance(x, dict):
+        problems.append(f"{path}: not an object")
+        return False
+    ok = True
+    for f, kind in spec:
+        if f not in x:
+            problems.append(f"{path}.{f}: missing")
+        elif x[f] is None:
+            problems.append(f"{path}.{f}: null")
+        elif not _is(x[f], kind):
+            problems.append(f"{path}.{f}: not {KINDS[kind]} ({A3.clip(compact(x[f]), 40)})")
+        else:
+            continue
+        ok = False
+    return ok
+
+
+def _section(p, key, problems):
+    """A list section of the preview: absent (the engine omits an empty
+    one) is empty; anything but a list of objects is a problem."""
+    if key not in p:
+        return []
+    v = p[key]
+    if not isinstance(v, list):
+        problems.append(f"preview.{key}: not a list")
+        return []
+    bad = [k for k, x in enumerate(v) if not isinstance(x, dict)]
+    if bad:
+        problems.append(f"preview.{key}[{bad[0]}]: not an object")
+        return []
+    return v
+
+
+def _duplicates(o, path, problems):
+    if isinstance(o, dict):
+        if getattr(o, "duplicates", ()):
+            problems.append(f"{path}: duplicate field {', '.join(o.duplicates)}")
+        for k, v in o.items():
+            _duplicates(v, f"{path}.{k}", problems)
+    elif isinstance(o, list):
+        for k, v in enumerate(o):
+            _duplicates(v, f"{path}[{k}]", problems)
+
 
 def consequences(staff, idx, answer):
     """The consequence items of a valid staffing batch, from the engine's
@@ -158,13 +291,39 @@ def consequences(staff, idx, answer):
     if not isinstance(p, dict):
         return [], ["the preview answer has no preview"]
     problems, items = [], []
-    res = p.get("results") or []
-    if p.get("ok") is not True or len(res) != len(staff) or not all(r.get("ok") for r in res):
+    _duplicates(p, "preview", problems)
+    if "results" in p and not isinstance(p["results"], list):
+        problems.append("preview.results: not a list")
+    res = _section(p, "results", [])
+    if p.get("ok") is not True or len(res) != len(staff) or \
+            not all(_fields(r, f"preview.results[{k}]", RESULT_FIELDS, []) and r["ok"] for k, r in enumerate(res)):
         problems.append("the preview does not accept every action that validation accepted")
-    terms = p.get("terminations") or []
-    hires = p.get("hires") or []
-    teles = p.get("teleradiology") or []
-    guar = p.get("guaranteed") or []
+    terms = _section(p, "terminations", problems)
+    hires = _section(p, "hires", problems)
+    teles = _section(p, "teleradiology", problems)
+    guar = _section(p, "guaranteed", problems)
+    disp = _section(p, "displacements", problems)
+    term_ok = [_fields(x, f"preview.terminations[{k}]", TERMINATION_FIELDS, problems) for k, x in enumerate(terms)]
+    for k, x in enumerate(terms):
+        if term_ok[k] and x["displaced"] != len(disp):
+            problems.append(f"preview.terminations[{k}].displaced: {x['displaced']}, but the batch's displacements "
+                            f"list {len(disp)}")
+    for k, x in enumerate(disp):
+        _fields(x, f"preview.displacements[{k}]", DISPLACEMENT_FIELDS, problems)
+    appts = [x.get("appointment") for x in disp]
+    if len(set(map(str, appts))) != len(appts):
+        problems.append("preview.displacements: an appointment is listed more than once")
+    for k, x in enumerate(hires):
+        _fields(x, f"preview.hires[{k}]", HIRE_FIELDS, problems)
+    n_hires = sum(1 for a in staff if a.get("type") == "hire")
+    if len(hires) != n_hires:
+        problems.append(f"preview.hires: {len(hires)} entries for {n_hires} hire actions")
+    for k, x in enumerate(teles):
+        if _fields(x, f"preview.teleradiology[{k}]", TELE_FIELDS, problems) and x["op"] == "start":
+            _fields(x, f"preview.teleradiology[{k}]", TELE_START_FIELDS, problems)
+    n_teles = sum(1 for a in staff if a.get("type") == "contract_teleradiology")
+    if len(teles) != n_teles:
+        problems.append(f"preview.teleradiology: {len(teles)} entries for {n_teles} teleradiology actions")
     used_terms, tele_k = set(), 0
     for j, a in enumerate(staff):
         n, t = idx[j], a.get("type")
@@ -175,11 +334,13 @@ def consequences(staff, idx, answer):
                 continue
             used_terms.add(m[0])
             x = terms[m[0]]
+            if not term_ok[m[0]]:
+                continue
             items.append({"action": n, "type": t, "target": x["employee"],
-                          "consequences": {"termination": {"lastDay": x.get("lastDay"),
-                                                           "noticeDays": x.get("noticeDays")},
-                                           "severance": {"severanceCents": x.get("severanceCents"),
-                                                         "severancePayday": x.get("severancePayday")}},
+                          "consequences": {"termination": {"lastDay": x["lastDay"],
+                                                           "noticeDays": x["noticeDays"]},
+                                           "severance": {"severanceCents": x["severanceCents"],
+                                                         "severancePayday": x["severancePayday"]}},
                           "source": f"preview.terminations[{m[0]}]"})
         elif t == "hire":
             m = [k for k, x in enumerate(hires) if x.get("requestId") == a.get("requestId")]
@@ -193,9 +354,12 @@ def consequences(staff, idx, answer):
             if len(hires) * 3 > len(guar) or [g.get("label") for g in lines] != want:
                 problems.append(f"action {n}: the hire's guaranteed lines are not where the engine places them")
                 continue
+            if not all([_fields(g, f"preview.guaranteed[{3 * k + i}]", LINE_FIELDS, problems)
+                        for i, g in enumerate(lines)]):
+                continue
             items.append({"action": n, "type": t, "target": a.get("requestId"),
-                          "consequences": {"retained_obligation": {"recruitingFeeCents": lines[0].get("cents"),
-                                                                   "earliestExitCents": lines[2].get("cents")}},
+                          "consequences": {"retained_obligation": {"recruitingFeeCents": lines[0]["cents"],
+                                                                   "earliestExitCents": lines[2]["cents"]}},
                           "source": f"preview.hires[{k}]; preview.guaranteed[{3 * k}], [{3 * k + 2}]"})
         elif t == "contract_teleradiology":
             if tele_k >= len(teles):
@@ -208,15 +372,16 @@ def consequences(staff, idx, answer):
                 problems.append(f"action {n}: the teleradiology entry is not this action's")
                 continue
             if a.get("op") == "start":
-                items.append({"action": n, "type": t, "target": x.get("plan"),
+                if not _fields(x, "", TELE_START_FIELDS, []):
+                    continue  # its problems are listed above
+                items.append({"action": n, "type": t, "target": x["plan"],
                               "consequences": {"retained_obligation": {
-                                  "guaranteedCents": x.get("guaranteedCents"),
-                                  "guaranteedThrough": x.get("guaranteedThrough"),
-                                  "minimumTermEnd": x.get("minimumTermEnd")}},
+                                  "guaranteedCents": x["guaranteedCents"],
+                                  "guaranteedThrough": x["guaranteedThrough"],
+                                  "minimumTermEnd": x["minimumTermEnd"]}},
                               "source": f"preview.teleradiology[{k}]"})
     if len(used_terms) != len(terms):
         problems.append("the preview lists terminations that are not the batch's")
-    disp = p.get("displacements") or []
     if disp:
         items.append({"actions": list(idx), "type": "staffing_batch", "target": "staffing batch",
                       "consequences": {"displaced_bookings": {"count": len(disp)}},
@@ -258,8 +423,9 @@ def assess(h, actions, clock):
         out["status"] = "unavailable"
         out["error"] = {"code": e.code, "message": A3.clip(e.message or "", A3.MAX_MESSAGE)}
     else:
-        out["answer"], out["answerSha256"] = ans, sha256(compact(ans))
         out["items"], out["problems"] = consequences(staff, idx, ans)
+        ans = json.loads(compact(ans))  # recorded as plain JSON (no duplicate marks)
+        out["answer"], out["answerSha256"] = ans, sha256(compact(ans))
         if out["problems"]:
             out["status"] = "unavailable"
         elif out["items"]:
@@ -897,7 +1063,7 @@ def main(argv=None):
     replayer = A3.Replayer(recordings) if recordings else None
     memory = A3.Memory(settings["memoryDecisions"], settings["memoryMetricPoints"],
                        settings["memoryMaxChars"]) if settings else None
-    h = A3.Harness(sys.stdin, sys.stdout)
+    h = Harness(sys.stdin, sys.stdout)
     records = []
 
     def finish():

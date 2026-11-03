@@ -85,6 +85,11 @@ func (m *mockLLM) count(model string) int {
 //	ackdispswap ackdisp; answers the first acknowledgment request by
 //	            terminating the second technologist instead, with the first
 //	            proposal's acknowledgment, and acknowledges the next request
+//	ackhire     at the first decision point, hires an XR technologist at the
+//	            standard rate and lead (Mon–Fri 08:00–16:30 in an XR room);
+//	            acknowledges every item listed
+//	ackhirenone ackhire, acknowledging nothing (an empty items list)
+//	ackhireoff  ackhire, acknowledging a recruiting fee $1 higher
 //
 // (An acknowledgment request is llm-agent 6's message that begins
 // "ACKNOWLEDGMENT": agents/llm/llm_agent6.py.)
@@ -201,6 +206,27 @@ func (m *mockLLM) serve(w http.ResponseWriter, r *http.Request) {
 				case "ackdispoff":
 					db := it["consequences"].(map[string]any)["displaced_bookings"].(map[string]any)
 					db["count"] = db["count"].(float64) - 1
+				}
+				return true
+			})
+		}
+	case "ackhire", "ackhirenone", "ackhireoff":
+		if !strings.Contains(prompt, "No earlier decisions in this run.") {
+			break
+		}
+		last := req.Messages[len(req.Messages)-1].Content
+		first := hireDecision(prompt)
+		switch {
+		case !strings.HasPrefix(last, "ACKNOWLEDGMENT"):
+			content = first
+		default:
+			content = acknowledgeEdited(first, last, func(it map[string]any) bool {
+				switch req.Model {
+				case "ackhirenone":
+					return false
+				case "ackhireoff":
+					ro := it["consequences"].(map[string]any)["retained_obligation"].(map[string]any)
+					ro["recruitingFeeCents"] = ro["recruitingFeeCents"].(float64) + 100
 				}
 				return true
 			})
@@ -361,6 +387,54 @@ func dispDecision(prompt string, k int, two bool) string {
 	return `{"reason":"reduce labor cost","actions":[` + strings.Join(acts, ",") + `]}`
 }
 
+// hireDecision hires an XR technologist from the hire targets: the XR
+// offer at its standard rate, starting its standard lead after the earliest
+// start date, Mon–Fri 08:00–16:30 (a 30-minute break) in the first XR
+// room, both rota weeks.
+func hireDecision(prompt string) string {
+	var targets struct {
+		Offers []struct {
+			Role              string   `json:"role"`
+			Skills            []string `json:"skills"`
+			StandardRateCents int64    `json:"standardRateCents"`
+			StandardLeadDays  int64    `json:"standardLeadDays"`
+		} `json:"offers"`
+		EarliestStartDate string `json:"earliestStartDate"`
+		Rooms             []struct {
+			ID       string `json:"id"`
+			Modality string `json:"modality"`
+		} `json:"rooms"`
+	}
+	if !promptTargets(prompt, "hire", &targets) {
+		return `{"reason":"no hire targets","actions":[]}`
+	}
+	room := ""
+	for _, r := range targets.Rooms {
+		if r.Modality == "XR" && room == "" {
+			room = r.ID
+		}
+	}
+	for _, o := range targets.Offers {
+		if o.Role != "technologist" || len(o.Skills) != 1 || o.Skills[0] != "XR" || room == "" {
+			continue
+		}
+		start, err := time.Parse("2006-01-02", targets.EarliestStartDate)
+		if err != nil {
+			break
+		}
+		day := map[string]any{"start": "08:00", "end": "16:30", "breaks": [][]string{{"12:30", "13:00"}},
+			"assignment": room, "covers": []string{}}
+		week := map[string]any{"Mon": day, "Tue": day, "Wed": day, "Thu": day, "Fri": day, "Sat": nil, "Sun": nil}
+		b, _ := json.Marshal(map[string]any{"reason": "more XR capacity", "actions": []any{map[string]any{
+			"type": "hire", "requestId": "hire-xr-1", "role": "technologist", "skills": []string{"XR"},
+			"rateCents": o.StandardRateCents, "contractedWeeklyMinutes": 2400,
+			"startDate": start.AddDate(0, 0, int(o.StandardLeadDays)).Format("2006-01-02"),
+			"roster":    map[string]any{"A": week, "B": week}}}})
+		return string(b)
+	}
+	return `{"reason":"no XR offer","actions":[]}`
+}
+
 // acknowledgeEdited is acknowledge with each listed item passed to keep,
 // which may change it in place; an item it returns false for is left out.
 func acknowledgeEdited(proposal, request string, keep func(map[string]any) bool) string {
@@ -368,7 +442,7 @@ func acknowledgeEdited(proposal, request string, keep func(map[string]any) bool)
 	json.Unmarshal([]byte(acknowledge(proposal, request, false)), &a)
 	json.Unmarshal([]byte(proposal), &d)
 	ack := a["acknowledgment"].(map[string]any)
-	var items []any
+	items := []any{} // an empty list, not null
 	for _, raw := range ack["items"].([]any) {
 		if it := raw.(map[string]any); keep(it) {
 			items = append(items, it)
