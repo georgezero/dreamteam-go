@@ -4,10 +4,10 @@
 * **Stage A** is done: the independent safeguard audit, the F1 repair,
   the focused re-review, and the real-engine displacement and hire
   tests.
-* **Stage B:** the owner approved its design, and its driver is
-  implemented with fidelity evidence, independently reviewed (GO with
-  conditions, no Blocker) and remediated. The lock is next. It is not locked and not run, and **live inference is not
-  authorized**.
+* **Stage B: LOCKED — NOT RUN.** The design was approved by the owner.
+  The driver was implemented with fidelity evidence, independently
+  reviewed and re-reviewed (GO), and remediated. The protocol is locked.
+  **Live inference is not authorized**; the lock does not authorize it.
 
 V0.12.0 is unreleased.
 
@@ -39,31 +39,56 @@ The V0.12a scripted evidence regenerates byte-identical.
 | `internal/bench/llm_agent6_hire_test.go` | `be48a1563214f8d2cf2f3586765556dca73fa0e545a0d3ceb645254a754451d8` |
 | `internal/bench/llm_agent6_displacement_test.go` | `4a20c2de7592c9b78c43c12e4fc3bf796b09a6c4c36ab83474f2fcfd8aaaa57a` |
 
-## Stage B (design approved; driver implemented; not locked, not run)
+## Stage B (LOCKED — NOT RUN)
 
 | Document | What |
 |---|---|
-| [PROTOCOL.md](PROTOCOL.md) | The protocol: question, points, arms, limits, outcomes, statistics, replay, lock |
+| [PROTOCOL.md](PROTOCOL.md) | The locked protocol: question, points, arms, limits, outcomes, statistics, replay, lock |
 | [DRIVER.md](DRIVER.md) | The driver's specification: how a draw runs, limits, replay, classification, limitations |
 | [PROCEDURE.md](PROCEDURE.md) | Run instructions and the partial-run procedure |
 | [fidelity/fidelity.md](fidelity/fidelity.md) | 113 scripted cases on the real engine: the driver against the agents' own runs |
 | [fidelity/mock-run/decision-tables.md](fidelity/mock-run/decision-tables.md) | A scripted mock run of the real schedule, PARTIAL by its scripted clock |
 | `docs/audits/v0.12b-stage-b-driver-review.md` | The independent review of the driver (c9ba751): GO with conditions |
-| `docs/audits/v0.12b-stage-b-driver-review-response.md` | The response: D1–D13 answered before the lock |
+| `docs/audits/v0.12b-stage-b-driver-rereview.md` | The focused re-review of the remediation (81bb0cf): GO for the lock |
+| `docs/audits/v0.12b-stage-b-driver-review-response.md` | The response: D1–D13 and R1–R5 answered before the lock |
+
+**The lock** (`protocol.json` → `lock`, status `LOCKED — NOT RUN`):
+* **Files:** the SHA-256 of 48 files the run executes or reads:
+  * the driver, its fidelity code and tests;
+  * the agents and the fixtures they import;
+  * the shared-prefix, feedback, decision, sample and repeat modules, and
+    financial evidence v1;
+  * the selection, its inputs and the twelve recordings;
+  * the replay configurations, the points and the settings files;
+  * PROTOCOL.md, DRIVER.md and PROCEDURE.md.
+* **Schedule:** pinned by its entries,
+  `5f0918131b83cd75b9a2966bd25a3e7e95577b016c34ef9761bcb3fd54569c7e`.
+* **Driver:** `d870fd39a69c7e7e4b0d2e42de118a04e2431fe3b85938b336aa6e7bdfa04b6a`.
+* **Agents:**
+  * A: llm-agent 5, `llm-agent-workflow/v1`
+    (`3ee7d66f4f10fd93e05a908725c792b16b76d01dc29095360dae9d67c0c09d0a`);
+  * B: llm-agent 6, `llm-agent-acknowledgment-workflow/v1`
+    (`b9cb79828f2657de91de69b1fa30019752ab73611d80fb6854c8f7a6488595a6`),
+    contract `dreamteam.action-acknowledgment/v1`
+    (`33c116da979a5a1067a4f19163369a1092394ca9bfe9ec4aade2dab8cf9c4c9b`).
+* **Engine:** 0.12.0-dev.3.
+* **Checking it:** `stage_b.py check` verifies every pin against the files
+  and exits non-zero if one does not hold. `run` refuses a protocol whose
+  lock does not hold, and requires the owner's `--authorization`.
 
 | File | SHA-256 |
 |---|---|
-| `protocol.json` (`v12b-ack-1`, final draft) | `70299a411cc4e7d7b3d66d0fcc31f4204b31ff30ed4a4874aabd8c2aea591e22` |
+| `protocol.json` (`v12b-ack-1`, locked) | `6e8a748885a636c2f02c90f87fb221eccc965a24c1eabb73e27128bece82b783` |
 | `points/manifest.json` | `e288fd702d8999b25b84e0b0625ed86d077f6045ace16ddb03bf63fbf1447134` |
 | `points/contexts.jsonl` | `759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511` |
-| `schedule.json` (420 draws, each with its expected start) | `5067b4cdca2fc888fce5f5380c3666e1fa0c0fa766b506d6dba5625814298cf2` |
+| `schedule.json` (420 draws, each with its expected start) | `4c4c555e595ed0cc18116e57a6553f66257eb923832e1f63e059923bb4f04079` |
 | `analysis/acknowledgment/stage_b_points.py` | `e360ca1f10cdea269b4bde8031397dfb393a77bc9135a14e5592af80a6a8a8c7` |
 | `analysis/acknowledgment/stage_b.py` (the driver) | `d870fd39a69c7e7e4b0d2e42de118a04e2431fe3b85938b336aa6e7bdfa04b6a` |
 | `analysis/acknowledgment/stage_b_fidelity.py` | `88d5a432a888ea756025947717328a61ba2b12615cf10491e2fba380fe650e0a` |
 | `analysis/acknowledgment/test_stage_b.py` | `7ba5ac48d7ba863f61dbfbf852dae0d7eba6760909f054ffb2ea44cf07f41e13` |
 | `fidelity/fidelity.json` | `1ab64e67911a22116856bd37d4004acd0654d96117a6d5de1fb20cdc2cba46ca` |
 | `fidelity/mock-run/live/draws.jsonl` | `1f1ea78a40ab1fcaa40c1d8f7d199c6efa0400cf5665abfa185362cfd97111a9` |
-| `fidelity/mock-run/decisions.json` | `4c7d2639b7e4d867fe5b6f6b176bd494b9225370a33f1a14ec545f669f1a5df2` |
+| `fidelity/mock-run/decisions.json` | `3ae4a20a8defeec7a78fa1eafa5a9971945b6bfd4982449ce72366f7710d5c94` |
 
 Made with:
 

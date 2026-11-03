@@ -1,7 +1,7 @@
 {
  "schema": "dreamteam.acknowledgment-experiment/v1",
  "id": "v12b-ack-1",
- "status": "final draft: the design approved by the owner; the driver implemented, for independent review; not locked and not run. The lock (PROTOCOL.md §8) pins every file in \"lock\", in a commit of its own; it does not authorize a run.",
+ "status": "LOCKED — NOT RUN",
  "description": "V0.12b Stage B: at 12 recorded branch points, the recorded state, conversation and initial staffing proposal, then two whole decision workflows (A llm-agent 5 validation-first-preview, B llm-agent 6 consequence acknowledgment), Gemma 10 and Qwen 20 draws per arm per point, one model request at a time.",
  "method": "shared-prefix/v4 (docs/benchmark/v11b-dev/SPEC.md), with arms A and B as below",
  "points": "points",
@@ -111,5 +111,116 @@
  "shared": "every arm: the recorded state (the point's digests, checked at every draw's start); the recorded request (system prompt and prompt), which the agent's own first request must equal byte for byte, its prompt rebuilt from the engine and the recording's memory text; the recorded initial proposal as the reply to it; the model's frozen settings file, loaded by the agent's own loader (maxRetries 1, allowDetails, timeout 300 s, decision budget 900 s); the same final-response schema; only a fully validated proposal submitted",
  "differences": "at a valid qualifying proposal, A shows the selective preview when eligible and B the acknowledgment request; at a valid non-qualifying proposal, A shows the preview when eligible and B calls no model; at a refused proposal both answer with the same validation feedback, and then differ at the corrected proposal as above. Model calls are counted and reported per draw, not equalized; at most 2 per draw in either arm (maxRetries 1)",
  "authorization": "run requires --authorization, the owner's authorization of this run quoted verbatim, recorded in run.json; the lock is not an authorization",
- "client": "the Pi, systemd-run --user --scope -p MemoryMax=3G nice -n 10 (PROCEDURE.md §2)"
+ "client": "the Pi, systemd-run --user --scope -p MemoryMax=3G nice -n 10 (PROCEDURE.md §2)",
+ "lock": {
+  "statement": "LOCKED — NOT RUN. The lock pins every file the run executes or reads; it does not authorize live inference. Only the owner does, by an explicit authorization quoted in run --authorization.",
+  "driver": "dreamteam-v12b-driver/1",
+  "driverSha256": "d870fd39a69c7e7e4b0d2e42de118a04e2431fe3b85938b336aa6e7bdfa04b6a",
+  "agents": {
+   "A": {
+    "file": "agents/llm/llm_agent5.py",
+    "workflow": "validation-first-preview",
+    "workflowVersion": "llm-agent-workflow/v1",
+    "workflowSha256": "3ee7d66f4f10fd93e05a908725c792b16b76d01dc29095360dae9d67c0c09d0a"
+   },
+   "B": {
+    "file": "agents/llm/llm_agent6.py",
+    "workflowVersion": "llm-agent-acknowledgment-workflow/v1",
+    "workflowSha256": "b9cb79828f2657de91de69b1fa30019752ab73611d80fb6854c8f7a6488595a6",
+    "contract": "dreamteam.action-acknowledgment/v1",
+    "contractSha256": "33c116da979a5a1067a4f19163369a1092394ca9bfe9ec4aade2dab8cf9c4c9b"
+   }
+  },
+  "scheduleEntriesSha256": "5f0918131b83cd75b9a2966bd25a3e7e95577b016c34ef9761bcb3fd54569c7e",
+  "pointsContextsFileSha256": "759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511",
+  "outcomes": {
+   "outcomes": [
+    "kept",
+    "revised",
+    "abandoned",
+    "refused",
+    "withheld",
+    "invalid"
+   ],
+   "classes": [
+    "A_proceeded",
+    "B_revised",
+    "C_abandoned",
+    "D_withheld",
+    "E_not_required"
+   ],
+   "previewClasses": [
+    "proceeded",
+    "revised",
+    "abandoned",
+    "failed",
+    "not_shown"
+   ],
+   "definitions": "PROTOCOL.md §5, as implemented by stage_b.classify (both pinned)"
+  },
+  "limits": {
+   "draws": 420,
+   "maxModelCallsPerDraw": 4,
+   "maxModelCalls": 1680,
+   "wallClockSeconds": 14400,
+   "requestTimeoutSeconds": 300,
+   "consecutiveTransportFailures": 5,
+   "concurrency": 1
+  },
+  "analysis": "stage_b.analyze, stage_b.summarize, stage_b.tables, stage_b.inference (in the pinned driver)",
+  "files": {
+   "agents/llm/llm_agent.py": "5214e7bfb456075f38aca92a5c45a6db3141d4042fb1cd5822c8c1c65c286d87",
+   "agents/llm/llm_agent3.py": "ef2c17a06749d7c287cda918f77ff0e518d79475048e87fd3404848c2fb0015c",
+   "agents/llm/llm_agent4.py": "4cfc6a6906556b0cda50e95fa39263089d56e848adcef9bd04342e7f6aff998f",
+   "agents/llm/llm_agent5.py": "f89dd4e1950662c5e5b3d4e1dd48b8ee23b9ed7e3e4080dbb0ed136267c26cb0",
+   "agents/llm/llm_agent6.py": "b0e2914150e9cee18dbc6383f1ddd431a881cd36672353e4b9cbdec86fab98f2",
+   "agents/llm/test_llm_agent4.py": "39b47899aa5721f5b3bb9bc304dc9d2f7c0e227fc4a2a25346591fffff881ca5",
+   "agents/llm/test_llm_agent5.py": "8072145ae3e4b78ccfce493f90950fe4ed53a6f76702cb31b08ddb49d1db8fb0",
+   "agents/llm/test_llm_agent6.py": "426ef21731236288da04fe37c4b49684bff2b6127770290f5e5beeb60914a336",
+   "agents/llm/testdata/v05a-point0.json": "661146e0e84ae48b01e1c54a8d610b79385bed7b1059df9acfede8498358a1df",
+   "analysis/acknowledgment/scripted_cases.py": "6eb4025ac143ebca15b94e707198e757ad93a045f9620a7d337b317a2b2184ec",
+   "analysis/acknowledgment/stage_b.py": "d870fd39a69c7e7e4b0d2e42de118a04e2431fe3b85938b336aa6e7bdfa04b6a",
+   "analysis/acknowledgment/stage_b_fidelity.py": "88d5a432a888ea756025947717328a61ba2b12615cf10491e2fba380fe650e0a",
+   "analysis/acknowledgment/stage_b_points.py": "e360ca1f10cdea269b4bde8031397dfb393a77bc9135a14e5592af80a6a8a8c7",
+   "analysis/acknowledgment/test_stage_b.py": "7ba5ac48d7ba863f61dbfbf852dae0d7eba6760909f054ffb2ea44cf07f41e13",
+   "analysis/evidence/decision_evidence.py": "1cc9f9bac9254eeb013caa986a5114fe811f10f8246ddc8de9ca503907a7e7ba",
+   "analysis/evidence/financial_evidence.py": "8158addf8a8236b5b0426d7e520b13325291aa8b7804d81c8f8959de51cbe4b8",
+   "analysis/evidence/financial_outcomes.py": "88d07311ac15e5a8e54c007a193473f36085272347860568ccfe6905a2bde1f8",
+   "analysis/repeatability/decision_experiment.py": "88fa1c6e764a110dc11ad5cbfb65733506467a28a4f47bb25f171071baa62b7a",
+   "analysis/repeatability/feedback_experiment.py": "baa42d6c2656abb02ef6fb82f9da188822513d2b60a1d856ea94af8c8f06a9f1",
+   "analysis/repeatability/prompt_sample.py": "aaa868428d8ae8b95fb9ed05fc0311c9382fdc9d5b17c5040641122f3190b7fe",
+   "analysis/repeatability/repeat_run.py": "4058f2b7b54d71094010b1585161f52e8ff61ada57bbaf408822872f73f5c2ac",
+   "analysis/repeatability/test_workflow_experiment.py": "e28a289ca871f3587550d8c3372579fa4037b40ecbaf3146c69e428c8237b172",
+   "analysis/repeatability/workflow_experiment.py": "3d93eec2d4c916a6cd9b440b60351580ac24c7870e85dc308e69dbc86c5ecf98",
+   "docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json": "1a1edae5a492b67a72086bec51faecc8ed0930800bdb6e548412b65fa444aa6a",
+   "docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json": "e19a47dce948a8acbd3262ef5053b89f1e23c32603860e03628d38b184acbf5d",
+   "docs/benchmark/v08c-dev/eval-replay-financial-pressure-credit.json": "3585c0f114db51b9d87301030b0f0ccfd94fbcad3d5930123f95a58b5e18f25a",
+   "docs/benchmark/v08c-dev/eval-replay-financial-pressure-lowliquidity.json": "03cdfa32d192e6791c0c0b022915949fe55ec71b4e3f287c035f9a9ea38052a7",
+   "docs/benchmark/v08c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s41901-decisions.jsonl": "61b2ef115cd490e716a4ec0a77b2ec6715c7f0e78c8aaab88bbf0fe9c9bff7a0",
+   "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-gemma4-26b-a4b-s41901-decisions.jsonl": "7874fe8fbf6166c9c92e63764bbdc91fecb2384e9c648bbb93fb19b7cb43ee6c",
+   "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41901-decisions.jsonl": "4cd75fccecaa7eb7a554afcc8f015945ef662e347e656490dd49d8f0f945146c",
+   "docs/benchmark/v08c-dev/eval/financial-pressure-lowliquidity-qwen36-35b-a3b-s41902-decisions.jsonl": "3dfb5c4ebab599c198c3712132c5438d4e09fa26e814c27bff2918dae69fc4d3",
+   "docs/benchmark/v09c-dev/eval-replay-financial-pressure-credit.json": "e613badade3c205f5740740e0d7e200fb7488926a58bc8193af3937539c07ba8",
+   "docs/benchmark/v09c-dev/eval-replay-staffing-shortage-credit.json": "1e5fed51530be1b153b91a3f30ca8b301d808650a620d0e1cf1f18b9d454e76b",
+   "docs/benchmark/v09c-dev/eval/financial-pressure-credit-qwen36-35b-a3b-s42001-decisions.jsonl": "fde6c0d0c1ae2486fd9d18b221d55a8646189f9323e5ce231fa92611428e9569",
+   "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-gemma4-26b-a4b-preview-s42001-decisions.jsonl": "c98da4640ad69abb24590c3b68cfefecf173d14159f16df3ca93f728a95ddf7c",
+   "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-preview-s42002-decisions.jsonl": "52ee0ad7502ac0efac9b8563685134a44641aa5d47d7520a786c495ce2e8f9ad",
+   "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42001-decisions.jsonl": "596775f40fc06b10c5a37c654bd7f50a1eacc5508e4c8479d3434bccc9571c3c",
+   "docs/benchmark/v09c-dev/eval/staffing-shortage-credit-qwen36-35b-a3b-s42002-decisions.jsonl": "c2451afd7c20b9e8f6cc4745db13685877f70a4ec37688287025cfa38eb55869",
+   "docs/benchmark/v10b-dev/points/contexts.jsonl": "224585dfa5eda8ef1d602b16fa20de9f1199ac972e9c094d06926a856ee0779d",
+   "docs/benchmark/v10c-dev/points/contexts.jsonl": "a27304c9e770cdfa89782474ca0b6ac816f1ebea6c8e19c50ad4512f9aad4fca",
+   "docs/benchmark/v10c-dev/points/inventory.json": "e193c5beb152c1e63421fe2fc9db6ebd439ad5d2ffe325dc68f37ef71b5fec3d",
+   "docs/benchmark/v11b-dev/points/contexts.jsonl": "9d4e7644198d16e9569c236af6c3693dbf357f2165904e9bdea02577b0c1aa20",
+   "docs/benchmark/v11b-dev/points/manifest.json": "058cb933c8312ce18e943c277e500d26559453769fa798efd451011b0144f99b",
+   "docs/benchmark/v12b-dev/DRIVER.md": "6d3a236c8e28792785b5ff98268299226cd8e5a1b115d360337b1953898f02b2",
+   "docs/benchmark/v12b-dev/PROCEDURE.md": "dfa4e5bf61fcaf487118bf6af716f4ddc73efa30aedac110e900d8ae81bd07dd",
+   "docs/benchmark/v12b-dev/PROTOCOL.md": "16a8f977e720b2d5b4d405bcea3566bd8c84a742de5e505958f4c61f86ab749e",
+   "docs/benchmark/v12b-dev/points/contexts.jsonl": "759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511",
+   "docs/benchmark/v12b-dev/points/manifest.json": "e288fd702d8999b25b84e0b0625ed86d077f6045ace16ddb03bf63fbf1447134"
+  },
+  "engine": {
+   "version": "0.12.0-dev.3",
+   "build": "go build ./cmd/dreamteam from a clean checkout of the lock commit (PROCEDURE.md §1); the replays are made with it"
+  }
+ }
 }

@@ -7,7 +7,7 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
-## V0.12b — Stage B preparation: the driver and its fidelity evidence (0.12.0-dev.3)
+## V0.12b — Stage B preparation: the driver, its review, and the protocol lock (LOCKED — NOT RUN; 0.12.0-dev.3)
 
 The owner approved the Stage B design on 2026-11-03. That covers:
 * the 12 branch points and `dreamteam-v12b-select/1`;
@@ -118,7 +118,19 @@ tests; 51 tests in all.
   revision, abandonment, refusal and failures. Correcting a refused
   proposal into a valid one is covered only on the scripted engines,
   since no correction is known in advance at the real points.
-* **Not yet done:** the protocol is not yet locked or reviewed.
+
+**The lock:** the protocol was locked in a commit of its own after the
+review, the re-review and their fixes. Its status is `LOCKED — NOT RUN`.
+* **Pinned:** 48 files (the driver, its fidelity code and tests; the
+  agents, modules, points, recordings, settings and documents), plus the
+  schedule's entries (`5f0918131b83…`), the driver (`d870fd39a69c…`), both
+  agents' identities, the outcome definitions, the limits and the engine
+  version.
+* **Checked:** `stage_b.py check` on the locked tree reports `lock: holds`
+  at all 24 point-arm starts. The mock run was regenerated for the locked
+  protocol.
+* **Not authorized:** the lock does not authorize live inference. Stage B
+  awaits the owner's explicit authorization.
 
 ---
 

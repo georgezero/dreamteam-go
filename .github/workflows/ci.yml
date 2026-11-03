@@ -385,7 +385,7 @@ jobs:
           $P analysis/acknowledgment/stage_b_points.py points --check $V/points
           $P analysis/acknowledgment/stage_b.py schedule --protocol $V/protocol.json --out v12b
           cmp v12b/schedule.json $V/schedule.json
-          $P analysis/acknowledgment/stage_b.py check --binary ./dt --replays . --protocol $V/protocol.json --unlocked-ok
+          $P analysis/acknowledgment/stage_b.py check --binary ./dt --replays . --protocol $V/protocol.json
           $P analysis/acknowledgment/stage_b_fidelity.py fidelity --binary ./dt --replays . --protocol $V/protocol.json \
             --out v12b-fidelity
           for f in fidelity.json fidelity.md; do cmp v12b-fidelity/$f $V/fidelity/$f; cp v12b-fidelity/$f out/v12b-$f; done

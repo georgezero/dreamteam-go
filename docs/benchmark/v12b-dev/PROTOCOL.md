@@ -1,8 +1,11 @@
 # V0.12b Stage B: controlled acknowledgment evaluation (protocol)
 
-**Status: design approved by the owner; driver implemented; final draft
-for independent review. Not locked and not run.** No request of this
-experiment has been sent, and no live model was contacted to prepare it.
+**Status: LOCKED — NOT RUN.** The design was approved by the owner, the
+driver implemented, independently reviewed and re-reviewed (GO for the
+lock; every finding answered), and the lock written in `protocol.json`
+(§8). No request of this experiment has been sent, and no live model was
+contacted to prepare it. **The lock does not authorize live inference:**
+only the owner's explicit authorization does (§4).
 
 | File | SHA-256 |
 |---|---|
@@ -442,4 +445,5 @@ evidence of a wise decision.
 
 ## Amendments
 
-None. This protocol is not yet frozen.
+None. Any change to a pinned file after the lock is an amendment,
+recorded here with its reason.
