@@ -35,37 +35,37 @@ A PARTIAL run: the counts below are what was observed, out of the observed draws
 
 ## Arm B: acknowledgment classes
 
-| Point | A proceeded | B revised | C abandoned | D withheld | E not required | Accurate before a change | Failure codes | Withheld |
-|---|---|---|---|---|---|---|---|---|
-| ss-gemma-pv-s42001-p14 | 2 | 0 | 4 | 1 | 0 | 0 | missing 1, wrong_value 1 | acknowledgment_not_accepted 1 |
-| fl-gemma-s41901-p28 | 0 | 0 | 0 | 0 | 7 | 0 | — | — |
-| fl-gemma-s41901-p26 | 0 | 0 | 0 | 0 | 7 | 0 | — | — |
-| fl-qwen-s41902-p24 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| ss-qwen-s42002-p7 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| ss-qwen-s42001-p20 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| ss-qwen-pv-s42002-p6 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| fl-qwen-s41902-p27 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| fl-qwen-s41901-p9 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| fp-qwen-s42001-p7 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| ss-qwen-s42001-p23 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
-| fp-qwen-s41901-p25 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| Point | A proceeded | B revised | C abandoned | D withheld | E not required | Accurate before a change | Reordered only | Failure codes | Why D |
+|---|---|---|---|---|---|---|---|---|---|
+| ss-gemma-pv-s42001-p14 | 2 | 0 | 4 | 1 | 0 | 0 | 0 | missing 1, wrong_value 1 | acknowledgment_not_accepted 1 |
+| fl-gemma-s41901-p28 | 0 | 0 | 0 | 0 | 7 | 0 | 0 | — | — |
+| fl-gemma-s41901-p26 | 0 | 0 | 0 | 0 | 7 | 0 | 0 | — | — |
+| fl-qwen-s41902-p24 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| ss-qwen-s42002-p7 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| ss-qwen-s42001-p20 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| ss-qwen-pv-s42002-p6 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| fl-qwen-s41902-p27 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| fl-qwen-s41901-p9 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| fp-qwen-s42001-p7 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| ss-qwen-s42001-p23 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
+| fp-qwen-s41901-p25 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | — | — |
 
 ## Arm A: the selective preview
 
-| Point | Proceeded | Revised | Abandoned | Failed | Not shown |
-|---|---|---|---|---|---|
-| ss-gemma-pv-s42001-p14 | 1 | 0 | 5 | 2 | 0 |
-| fl-gemma-s41901-p28 | 0 | 0 | 0 | 0 | 7 |
-| fl-gemma-s41901-p26 | 0 | 0 | 0 | 0 | 8 |
-| fl-qwen-s41902-p24 | 0 | 0 | 0 | 0 | 0 |
-| ss-qwen-s42002-p7 | 0 | 0 | 0 | 0 | 0 |
-| ss-qwen-s42001-p20 | 0 | 0 | 0 | 0 | 0 |
-| ss-qwen-pv-s42002-p6 | 0 | 0 | 0 | 0 | 0 |
-| fl-qwen-s41902-p27 | 0 | 0 | 0 | 0 | 0 |
-| fl-qwen-s41901-p9 | 0 | 0 | 0 | 0 | 0 |
-| fp-qwen-s42001-p7 | 0 | 0 | 0 | 0 | 0 |
-| ss-qwen-s42001-p23 | 0 | 0 | 0 | 0 | 0 |
-| fp-qwen-s41901-p25 | 0 | 0 | 0 | 0 | 0 |
+| Point | Proceeded | Revised | Abandoned | Failed | Not shown | Reordered only |
+|---|---|---|---|---|---|---|
+| ss-gemma-pv-s42001-p14 | 1 | 0 | 5 | 2 | 0 | 0 |
+| fl-gemma-s41901-p28 | 0 | 0 | 0 | 0 | 7 | 0 |
+| fl-gemma-s41901-p26 | 0 | 0 | 0 | 0 | 8 | 0 |
+| fl-qwen-s41902-p24 | 0 | 0 | 0 | 0 | 0 | 0 |
+| ss-qwen-s42002-p7 | 0 | 0 | 0 | 0 | 0 | 0 |
+| ss-qwen-s42001-p20 | 0 | 0 | 0 | 0 | 0 | 0 |
+| ss-qwen-pv-s42002-p6 | 0 | 0 | 0 | 0 | 0 | 0 |
+| fl-qwen-s41902-p27 | 0 | 0 | 0 | 0 | 0 | 0 |
+| fl-qwen-s41901-p9 | 0 | 0 | 0 | 0 | 0 | 0 |
+| fp-qwen-s42001-p7 | 0 | 0 | 0 | 0 | 0 | 0 |
+| ss-qwen-s42001-p23 | 0 | 0 | 0 | 0 | 0 | 0 |
+| fp-qwen-s41901-p25 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Engine-reported direct consequences of the distinct final decisions
 

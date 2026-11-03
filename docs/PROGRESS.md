@@ -68,7 +68,7 @@ Live inference is not authorized.
   classification now compares against the agent's own parse of the
   recorded proposal, with a regression test.
 * **The scripted engines** (`analysis/acknowledgment/test_stage_b.py`,
-  39 tests), with mock inference only:
+  39 tests at first, 47 after the review), with mock inference only:
   * every V0.12a scripted case and V0.11b's arm C cases, the driver
     against the agent's own `ask()`;
   * the owner's 25 scenarios;
@@ -76,6 +76,28 @@ Live inference is not authorized.
     gives at most 2 calls per draw.
 * **The mock run** (`fidelity/mock-run/`): the real schedule, with
   scripted replies and a scripted clock. MOCKRESULT
+
+**Independent review** (`docs/audits/v0.12b-stage-b-driver-review.md`,
+verbatim at 1fb619c):
+* **Verdict:** GO for locking the protocol, with conditions; no Blocker.
+* **Clean areas:** fidelity, initial-state equality under pooled
+  sessions (checked on the real engine against fresh sessions), arm
+  isolation, ordering, the 2-call bound, limits and replay.
+* **Findings:** D1 (Major) and D2–D13 (Minor and Note). Every one is
+  answered in `docs/audits/v0.12b-stage-b-driver-review-response.md`:
+  * D1: one rule for "unchanged", with reorders flagged;
+  * D2: the final proposal's validity;
+  * D3: wording;
+  * D4: a reason for every class D draw;
+  * D5: body-derived metadata checked in replay;
+  * D6, D7: aborted draws recorded and counted;
+  * D8: wording;
+  * D9: the lock's contents and order;
+  * D10: `check`'s exit code;
+  * D11: `run.json` checked against the rows;
+  * D12: the protocol field;
+  * D13: recorded.
+* **Tests:** 8 regression tests, each failing before the fix; 47 in all.
 
 **Version:** 0.12.0-dev.3. 0.12.0-dev.2 is registered as batch mode
 `v0.12_dev2`, with the fixture `mini-seed52-v0122`.

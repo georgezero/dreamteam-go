@@ -158,7 +158,7 @@ def schedule_doc(proto, proto_sha, man, sched):
             "maxModelCalls": proto["maxModelCalls"], "schedule": sched}
 
 
-def check_schedule(proto, sched, path):
+def check_schedule(proto, sched, path, proto_sha=None):
     """The committed schedule file: the one the protocol and points make,
     byte for byte, and the one the protocol pins."""
     with open(path, "rb") as f:
@@ -166,6 +166,8 @@ def check_schedule(proto, sched, path):
     doc = json.loads(raw)
     if doc.get("schedule") != sched:
         raise ExperimentError("schedule.json is not the schedule the protocol and points make")
+    if proto_sha is not None and (doc.get("schema") != SCHEDULE_SCHEMA or doc.get("protocolSha256") != proto_sha):
+        raise ExperimentError("schedule.json is not made from this protocol (schema or protocolSha256)")
     pin = (proto.get("lock") or {}).get("scheduleEntriesSha256")  # the entries: the file names the protocol's hash
     if pin is not None and pin != sha256(canon(doc["schedule"])):
         raise ExperimentError("schedule.json is not the schedule the protocol pins")
@@ -244,8 +246,8 @@ class EngineHarness:
         self.n += 1
         rid = f"r{self.n}"
         a = self.ses.request(rid, op, args)
-        if a.get("id") != rid:
-            raise ExperimentError(f"the engine answered {a.get('id')!r} to {rid}")
+        if a.get("id") != rid or a.get("protocol") != A3.AGENT_PROTOCOL:  # as llm_agent3.Harness.request
+            raise ExperimentError(f"the engine answered {a.get('id')!r} ({a.get('protocol')!r}) to {rid}")
         self.log.append({"op": op, "args": args, "answer": a})
         if not a.get("ok"):
             raise A3.ProtocolError(op, a.get("error") or {})
@@ -375,7 +377,16 @@ class PointModel:
         if self.limits is not None:
             self.limits.before_call(len(self.calls))
         sent, t0 = self.utc(), self.now()
-        status, body, err = self.transport(payload)
+        try:
+            status, body, err = self.transport(payload)
+        except BaseException as x:  # recorded and counted, then raised on (review D6, D7)
+            if self.limits is not None:
+                self.limits.calls += 1
+            self.calls.append({"n": len(self.calls) + 1, "requestSha256": sha256(data), "status": None,
+                               "error": f"client: {type(x).__name__}: {x}", "body": None,
+                               "responseSha256": sha256(""), "usage": None, "finishReason": None,
+                               "servedModel": None, "sent": sent, "latencyMs": round((self.now() - t0) * 1000)})
+            raise
         lat = self.now() - t0
         if self.limits is not None:
             self.limits.calls += 1
@@ -453,6 +464,11 @@ def run_draw(entry, e, arm_settings, opener, mem, transport, limits, utc=RR.utc,
         out["engine"] = h.log
         h.log = []
         out["digestsAfter"] = h.request("digests")["digests"]
+    except BaseException as x:  # the unfinished draw goes with the exception (review D6, D7)
+        out["status"] = "aborted"
+        out["engine"] = out["engine"] or h.log
+        x.partialDraw = out
+        raise
     finally:
         out["calls"] = model.calls
         ses.close()
@@ -579,7 +595,8 @@ def run(proto, proto_sha, man, contexts, out, binary, replays, authorization, tr
         if problems:
             raise ExperimentError("the protocol lock does not hold: " + "; ".join(problems))
     sched = schedule(proto, man, contexts)
-    check_schedule(proto, sched, os.path.join(os.path.dirname(os.path.abspath(proto_path)), "schedule.json"))
+    check_schedule(proto, sched, os.path.join(os.path.dirname(os.path.abspath(proto_path)), "schedule.json"),
+                   proto_sha if lock_check else None)
     pts = pts or Points(proto, contexts, replays, env)
     opener = pts.opener(binary)
     os.makedirs(live)
@@ -590,7 +607,7 @@ def run(proto, proto_sha, man, contexts, out, binary, replays, authorization, tr
     before = state_fn(base)
     write_json(os.path.join(live, "server-before.json"), before)
     sig = X.server_signature(before)
-    fails, completed, stopped, checks, prev, interrupted, failed = 0, 0, None, [], None, None, None
+    fails, completed, stopped, checks, prev, interrupted, aborted = 0, 0, None, [], None, None, None
     if (before.get("health") or {}).get("status") != "healthy":
         stopped = {"code": "health", "message": "the server did not answer healthy before the run"}
     transports = {m: transport_factory(pts.settings[m]) for m in proto["modelOrder"]}
@@ -619,8 +636,16 @@ def run(proto, proto_sha, man, contexts, out, binary, replays, authorization, tr
                 try:
                     d = run_draw(r, e, pts.settings[r["model"]], opener, FixedMemory(pts.mem[e["id"]]),
                                  transports[r["model"]], limits, utc=utc, now=now)
-                except Exception as x:  # noqa: BLE001  (the run ends cleanly, and says why)
-                    failed, stopped = r["seq"], {"code": "driver", "message": f"draw {r['seq']}: {type(x).__name__}: {x}"}
+                except BaseException as x:  # the run ends cleanly, and says why
+                    aborted = r["seq"]
+                    if getattr(x, "partialDraw", None) is not None:  # its calls and engine requests so far
+                        write_json(os.path.join(live, "aborted-draw.json"), x.partialDraw)
+                    if isinstance(x, KeyboardInterrupt):
+                        stopped = {"code": "operator", "message": f"interrupted by the operator during draw {r['seq']}"}
+                        break
+                    if not isinstance(x, Exception):
+                        raise
+                    stopped = {"code": "driver", "message": f"draw {r['seq']}: {type(x).__name__}: {x}"}
                     break
                 f.write(json.dumps(d, sort_keys=True, ensure_ascii=False) + "\n")
                 f.flush()
@@ -644,7 +669,7 @@ def run(proto, proto_sha, man, contexts, out, binary, replays, authorization, tr
                "contextsFileSha256": man["contextsFileSha256"], "authorization": authorization,
                "started": started, "ended": utc(), "status": status,
                "drawsScheduled": len(sched), "drawsCompleted": completed, "drawInterrupted": interrupted,
-               "drawFailed": failed, "drawsNotRun": len(sched) - completed - (1 if interrupted else 0),
+               "drawAborted": aborted, "drawsNotRun": len(sched) - completed - (1 if interrupted else 0) - (1 if aborted else 0),
                "modelCalls": limits.calls, "elapsedSeconds": round(limits.elapsed(), 1), "stopped": stopped,
                "serverChecks": checks, "sameConfigurationAfter": X.server_signature(after) == sig,
                "resume": "never: a continuation needs the owner's separate authorization and a documented "
@@ -676,6 +701,21 @@ def check_rows(sched, rows):
             raise ExperimentError(f"draw {r['seq']}: unknown status {r['status']!r}")
 
 
+def check_run_doc(run_doc, rows, sched):
+    """run.json against the recorded draws (review D11): its counts, its
+    interrupted draw and its status."""
+    completed = sum(1 for r in rows if r["status"] == "completed")
+    last = rows[-1] if rows else None
+    if run_doc["status"] not in ("COMPLETE", "PARTIAL") or run_doc["drawsCompleted"] != completed:
+        raise ExperimentError("run.json does not describe the recorded draws")
+    if run_doc.get("drawInterrupted") != (last["seq"] if last and last["status"] == "interrupted" else None):
+        raise ExperimentError("run.json's drawInterrupted is not the recorded interrupted draw")
+    if run_doc["status"] == "COMPLETE" and (run_doc.get("stopped") is not None or completed != len(sched)):
+        raise ExperimentError("run.json says COMPLETE, but not every scheduled draw was completed without a stop")
+    if run_doc["status"] == "PARTIAL" and run_doc.get("stopped") is None and completed == len(sched):
+        raise ExperimentError("run.json says PARTIAL with every draw completed and no stop")
+
+
 def replay_draw(r, e, arm_settings, opener, mem):
     """One recorded draw run again without a model: a fresh engine, the
     agent's ask(), the recorded responses. Everything but the live metadata
@@ -705,6 +745,12 @@ def replay_draw(r, e, arm_settings, opener, mem):
     again = run_draw(entry, e, arm_settings, opener, mem, transport, limits, utc=lambda: None, now=lambda: 0.0)
     if left:
         raise ExperimentError(f"draw {r['seq']}: recorded responses the workflow did not use")
+    for c in r["calls"]:  # the body-derived metadata, from the hash-checked body (review D5)
+        f = RR.response_fields(c["body"]) if c["body"] else {"parsedBody": False}
+        derived = {k: f.get(k) if f.get("parsedBody") else None for k in ("usage", "finishReason", "servedModel")}
+        if derived != {k: c.get(k) for k in derived}:
+            raise ExperimentError(f"draw {r['seq']}, call {c['n']}: usage, finish reason or served model is not "
+                                  "the recorded body's")
     got, want = deterministic(again), deterministic(r)
     if got != want:
         raise ExperimentError(f"draw {r['seq']}: the replayed draw differs from the recorded one at "
@@ -767,12 +813,17 @@ def classify(r, e):
         outcome = "withheld"
     else:
         outcome = "invalid"
+    # The final proposal's validity: the last validation of the last
+    # proposal's actions (an acknowledgment reply repeating them is
+    # validated only by the final check, when accepted; review D2).
     lp = last_proposal(atts)
-    lp_valid = bool(lp and lp.get("validation") is not None and not lp.get("refusals") and lp.get("protocolError") is None
-                    and all((v.get("answer") or {}).get("valid") for v in lp["validation"]))
+    lv = next((a for a in reversed(atts) if lp is not None and a.get("validation") is not None
+               and isinstance(a.get("actions"), list) and A6.same(a["actions"], lp["actions"])), None)
+    lp_valid = bool(lv and not lv.get("refusals") and lv.get("protocolError") is None
+                    and all((v.get("answer") or {}).get("valid") for v in lv["validation"]))
     out = {"seq": r["seq"], "point": r["point"], "model": r["model"], "arm": r["arm"], "draw": r["draw"],
            "outcome": outcome, "finalActions": final, "finalActionsKey": sha256(canon(final)) if final is not None else None,
-           "lastProposalValid": lp_valid, "submitted": bool(r["batches"]), "noAction": rec["outcome"] == "no_action",
+           "finalProposalValid": lp_valid, "submitted": bool(r["batches"]), "noAction": rec["outcome"] == "no_action",
            "modelCalls": len(r["calls"]), "attempts": len(atts),
            "retries": sum(1 for a in atts if a.get("turn") == "retry"),
            "inputs": [(a.get("input") or {}).get("kind") for a in atts[1:]],
@@ -791,51 +842,79 @@ def classify(r, e):
                                None),
             "withheld": (rec.get("withheld") or {}).get("reason"),
             "assessments": [a["assessment"]["status"] for a in atts if a.get("assessment")]}
-        out["class"] = ack_class(reqs, acks, used, final, atts)
+        out["class"], out["reorderedOnly"] = ack_class(reqs, acks, used, final, atts)
         out["accurateBeforeChange"] = any(x["accurate"] and not x["sameActions"] for x in acks) if \
             out["class"] in ("B_revised", "C_abandoned") else None
+        out["dReason"] = d_reason(rec, atts) if out["class"] == "D_withheld" else None
     else:
         out["preview"] = preview_class(atts, used, final)
+        out["reorderedOnly"] = out["preview"].pop("reorderedOnly")
     return out
 
 
+def d_reason(rec, atts):
+    """Why a class D draw submitted nothing: the agent's withheld reason, or
+    how the workflow ended when it records none (review D4)."""
+    w = (rec.get("withheld") or {}).get("reason")
+    if w:
+        return w
+    last = atts[-1]
+    if last.get("refusals"):
+        return "revision_refused"
+    if last.get("output") is None:
+        return "failed_request"
+    return "invalid_reply"
+
+
+def unchanged(final, actions):
+    """(the same actions as `actions`, by llm-agent 4's canonical content in
+    any order: the outcome's rule; and only reordered). One rule for
+    "unchanged" in every classification (review D1); a reordered
+    resubmission, which llm-agent 6 treats as a new proposal, is flagged."""
+    same = A4.same_actions(actions, final)
+    return same, same and not A6.same(final, actions)
+
+
 def ack_class(reqs, acks, used, final, atts):
-    """Arm B's class. Acknowledgment is required at the first proposal
-    whose assessment qualified (a request was shown) or could not be read
-    (unavailable: withheld, fail-closed). Then: A proceeded (that proposal
-    submitted unchanged), B revised (other non-empty actions submitted), C
+    """Arm B's class and whether the submission only reordered R.
+    Acknowledgment is required at the first proposal (R) whose assessment
+    qualified (a request was shown) or could not be read (unavailable:
+    withheld, fail-closed). Then: A proceeded (R submitted unchanged, in
+    canonical content), B revised (other non-empty actions submitted), C
     abandoned ("actions": [] submitted), D withheld (nothing submitted).
     E: acknowledgment never required."""
     first = next((a for a in atts if (a.get("assessment") or {}).get("status") in ("qualifying", "unavailable")), None)
     if first is None:
-        return "E_not_required"
+        return "E_not_required", False
     if used is None:
-        return "D_withheld"
+        return "D_withheld", False
     if first["assessment"]["status"] == "unavailable":
         raise ExperimentError("a proposal whose consequences could not be read was followed by a submission")
     if final == []:
-        return "C_abandoned"
-    if A6.same(final, first["actions"]):
+        return "C_abandoned", False
+    same, reordered = unchanged(final, first["actions"])
+    if same:
         if not any(x["accepted"] for x in acks):
             raise ExperimentError("a qualifying proposal was submitted without an accepted acknowledgment")
-        return "A_proceeded"
-    return "B_revised"
+        return "A_proceeded", reordered
+    return "B_revised", False
 
 
 def preview_class(atts, used, final):
     """Arm A: the selective preview and what followed it."""
     pv = next((a for a in atts if a.get("preview")), None)
     if pv is None:
-        return {"status": "none", "class": "not_shown", "reasons": None}
+        return {"status": "none", "class": "not_shown", "reasons": None, "reorderedOnly": False}
     p = pv["preview"]
-    info = {"status": p["status"], "reasons": (p.get("eligibility") or {}).get("reasons")}
+    info = {"status": p["status"], "reasons": (p.get("eligibility") or {}).get("reasons"), "reorderedOnly": False}
     if p["status"] != "shown":
         return dict(info, **{"class": "not_shown"})
     if used is None:
         return dict(info, **{"class": "failed"})
     if final == []:
         return dict(info, **{"class": "abandoned"})
-    return dict(info, **{"class": "proceeded" if A6.same(final, pv["actions"]) else "revised"})
+    same, reordered = unchanged(final, pv["actions"])
+    return dict(info, **{"class": "proceeded" if same else "revised", "reorderedOnly": reordered})
 
 
 def tokens(calls):
@@ -900,7 +979,8 @@ def arm_summary(ds, scheduled, arm):
          "outcomes": {o: {"count": cnt.get(o, 0), "wilson95": wilson(cnt.get(o, 0), n)} for o in OUTCOMES},
          "submitted": sum(1 for x in ds if x["submitted"]), "noAction": sum(1 for x in ds if x["noAction"]),
          "executed": sum(1 for x in ds if x.get("executed")),
-         "lastProposalValid": sum(1 for x in ds if x["lastProposalValid"]),
+         "finalProposalValid": sum(1 for x in ds if x["finalProposalValid"]),
+         "reorderedOnly": sum(1 for x in ds if x["reorderedOnly"]),
          "modelCalls": sum(x["modelCalls"] for x in ds), "retries": sum(x["retries"] for x in ds),
          "callsPerDraw": dict(sorted(collections.Counter(str(x["modelCalls"]) for x in ds).items())),
          "distinctDecisions": len({x["finalActionsKey"] or "none:" + x["outcome"] for x in ds}),
@@ -913,6 +993,7 @@ def arm_summary(ds, scheduled, arm):
             f for x in ds for f in x["acknowledgment"]["failureCodes"]).items()))
         s["withheld"] = dict(sorted(collections.Counter(x["acknowledgment"]["withheld"] for x in ds
                                                         if x["acknowledgment"]["withheld"]).items()))
+        s["dReasons"] = dict(sorted(collections.Counter(x["dReason"] for x in ds if x["dReason"]).items()))
     else:
         c = collections.Counter(x["preview"]["class"] for x in ds)
         s["previewClasses"] = {k: c.get(k, 0) for k in PREVIEW_CLASSES}
@@ -977,6 +1058,7 @@ def analyze(binary, d, replays, proto_path):
     completed = [r for r in rows if r["status"] == "completed"]
     if run_doc["drawsCompleted"] != len(completed) or run_doc["status"] not in ("COMPLETE", "PARTIAL"):
         raise ExperimentError("run.json does not describe the recorded draws")
+    check_run_doc(run_doc, rows, sched)
     complete = run_doc["status"] == "COMPLETE" and len(completed) == len(sched)
     if run_doc["status"] == "COMPLETE" and not complete:
         raise ExperimentError("run.json says COMPLETE, but not every scheduled draw was completed")
@@ -1062,17 +1144,20 @@ def tables(doc):
                      f" | {x['submitted']} | {x['executed']} | {x['modelCalls']} | {x['retries']} |")
     L += ["", "## Arm B: acknowledgment classes", "",
           "| Point | A proceeded | B revised | C abandoned | D withheld | E not required | Accurate before a change | "
-          "Failure codes | Withheld |", "|---|---|---|---|---|---|---|---|---|"]
+          "Reordered only | Failure codes | Why D |", "|---|---|---|---|---|---|---|---|---|---|"]
     for r in s["points"]:
         x = r["arms"]["B"]
         L.append(f"| {r['id']} | " + " | ".join(str(x["classes"][k]["count"]) for k in CLASSES) +
-                 f" | {x['accurateBeforeChange']} | {', '.join(f'{k} {v}' for k, v in x['acknowledgmentFailures'].items()) or '—'}"
-                 f" | {', '.join(f'{k} {v}' for k, v in x['withheld'].items()) or '—'} |")
+                 f" | {x['accurateBeforeChange']} | {x['reorderedOnly']} | "
+                 f"{', '.join(f'{k} {v}' for k, v in x['acknowledgmentFailures'].items()) or '—'}"
+                 f" | {', '.join(f'{k} {v}' for k, v in x['dReasons'].items()) or '—'} |")
     L += ["", "## Arm A: the selective preview", "",
-          "| Point | Proceeded | Revised | Abandoned | Failed | Not shown |", "|---|---|---|---|---|---|"]
+          "| Point | Proceeded | Revised | Abandoned | Failed | Not shown | Reordered only |",
+          "|---|---|---|---|---|---|---|"]
     for r in s["points"]:
-        x = r["arms"]["A"]["previewClasses"]
-        L.append(f"| {r['id']} | " + " | ".join(str(x[k]) for k in PREVIEW_CLASSES) + " |")
+        x = r["arms"]["A"]
+        L.append(f"| {r['id']} | " + " | ".join(str(x["previewClasses"][k]) for k in PREVIEW_CLASSES) +
+                 f" | {x['reorderedOnly']} |")
     if doc["status"] == "COMPLETE":
         L += ["", "## B − A per point (Newcombe 95%)", "",
               "| Point | Kept | Revised | Abandoned | Refused | Withheld | Invalid | Submitted | Executed | Same action content |",
@@ -1109,6 +1194,8 @@ def main(argv=None):
     s.add_argument("--out", required=True)
     c = sub.add_parser("check")
     r = sub.add_parser("run")
+    c.add_argument("--unlocked-ok", action="store_true",
+                   help="exit 0 although the protocol is not locked (only before the lock commit)")
     for q in (c, r):
         q.add_argument("--binary", required=True)
         q.add_argument("--replays", required=True)
@@ -1142,13 +1229,14 @@ def main(argv=None):
             return 0
         if x.cmd == "check":
             problems = check_lock(proto, x.protocol)
-            check_schedule(proto, sched, os.path.join(os.path.dirname(os.path.abspath(x.protocol)), "schedule.json"))
+            check_schedule(proto, sched, os.path.join(os.path.dirname(os.path.abspath(x.protocol)), "schedule.json"),
+                           proto_sha)
             pts = Points(proto, contexts, x.replays, {SETTINGS_ENV: REPLAY_URL})
             res = check_points_run(x.binary, proto, pts)
             bad = [y for y in res if not y["stateUnchanged"]]
             print(f"stage B check: {len(res)} point-arm starts, each at the recorded state with the agent's first "
                   f"request equal to the recorded request; lock: {'; '.join(problems) or 'holds'}")
-            return 1 if bad else 0
+            return 1 if bad or (problems and not x.unlocked_ok) else 0
         base = os.environ.get(proto["endpointEnv"])
         if not base:
             raise ExperimentError(f"set {proto['endpointEnv']}")

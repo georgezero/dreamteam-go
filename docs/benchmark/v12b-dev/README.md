@@ -5,8 +5,8 @@
   the focused re-review, and the real-engine displacement and hire
   tests.
 * **Stage B:** the owner approved its design, and its driver is
-  implemented with fidelity evidence. The independent review and the lock
-  are next. It is not locked and not run, and **live inference is not
+  implemented with fidelity evidence, independently reviewed (GO with
+  conditions, no Blocker) and remediated. The lock is next. It is not locked and not run, and **live inference is not
   authorized**.
 
 V0.12.0 is unreleased.
@@ -48,6 +48,8 @@ The V0.12a scripted evidence regenerates byte-identical.
 | [PROCEDURE.md](PROCEDURE.md) | Run instructions and the partial-run procedure |
 | [fidelity/fidelity.md](fidelity/fidelity.md) | 113 scripted cases on the real engine: the driver against the agents' own runs |
 | [fidelity/mock-run/decision-tables.md](fidelity/mock-run/decision-tables.md) | A scripted mock run of the real schedule, PARTIAL by its scripted clock |
+| `docs/audits/v0.12b-stage-b-driver-review.md` | The independent review of the driver (c9ba751): GO with conditions |
+| `docs/audits/v0.12b-stage-b-driver-review-response.md` | The response: D1–D13 answered before the lock |
 
 | File | SHA-256 |
 |---|---|
@@ -56,12 +58,12 @@ The V0.12a scripted evidence regenerates byte-identical.
 | `points/contexts.jsonl` | `759831a3b05629bdac8b08473eae4efd8e8897763285b714e770bda6e2690511` |
 | `schedule.json` (420 draws, each with its expected start) | `5067b4cdca2fc888fce5f5380c3666e1fa0c0fa766b506d6dba5625814298cf2` |
 | `analysis/acknowledgment/stage_b_points.py` | `e360ca1f10cdea269b4bde8031397dfb393a77bc9135a14e5592af80a6a8a8c7` |
-| `analysis/acknowledgment/stage_b.py` (the driver) | `6d3b7405f031cff8a00e0a211d1aa4ba5ddc0e6756924a098887f20b094442cb` |
+| `analysis/acknowledgment/stage_b.py` (the driver) | `7591b97d6cc0cadeb7c2f8e788ed6fccb86c18301e7c7d334d77b425e2fa56be` |
 | `analysis/acknowledgment/stage_b_fidelity.py` | `88d5a432a888ea756025947717328a61ba2b12615cf10491e2fba380fe650e0a` |
-| `analysis/acknowledgment/test_stage_b.py` | `54fd37528c0346392412ec18b6b6d282df4a49dba886f45998d83aaa91a84dee` |
+| `analysis/acknowledgment/test_stage_b.py` | `3337e65185994e8e8261a7aa678a95d775aae69ba8cccdc7c6ade8968fd3063f` |
 | `fidelity/fidelity.json` | `1ab64e67911a22116856bd37d4004acd0654d96117a6d5de1fb20cdc2cba46ca` |
 | `fidelity/mock-run/live/draws.jsonl` | `1f1ea78a40ab1fcaa40c1d8f7d199c6efa0400cf5665abfa185362cfd97111a9` |
-| `fidelity/mock-run/decisions.json` | `aaf8bae3eac76f5d126888ca19648f0cde87f594932a3793c79838017e11fcb6` |
+| `fidelity/mock-run/decisions.json` | `4c7d2639b7e4d867fe5b6f6b176bd494b9225370a33f1a14ec545f669f1a5df2` |
 
 Made with:
 

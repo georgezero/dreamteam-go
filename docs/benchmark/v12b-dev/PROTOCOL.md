@@ -190,8 +190,10 @@ the selective preview. A as specified includes the preview. So:
   * 4 calls in the draw;
   * 1,680 calls in the run;
   * the four-hour stop: a request starts only if its whole 300 s timeout
-    fits before 14,400 s, so no request is cut short and the run cannot
-    overrun.
+    fits before 14,400 s, so no request is cut short and no model request
+    can overrun it. Engine time after the last request (a session opening,
+    the draw's remaining read-only requests; about a minute at most on the
+    Pi) is not bounded by it.
 
   The same wall-clock test is applied before every draw.
 * **Stop conditions:**
@@ -203,7 +205,9 @@ the selective preview. A as specified includes the preview. So:
   * the operator.
 * **A stopped run is PARTIAL** (`PROCEDURE.md` §4):
   * a draw cut off by a limit is recorded as `interrupted` (replayed, not
-    classified);
+    classified); a draw ended by an exception or by the operator is written
+    to `live/aborted-draw.json` with its calls and engine requests so far,
+    and every model call made is counted and recorded;
   * `run.json` says `PARTIAL`, with the coverage and the stop;
   * the analysis reports only what was observed, with no B − A comparison
     and no pooled summary;
@@ -232,7 +236,9 @@ arm, with every draw counted.
     withheld (B's fail-closed withholding), or invalid (the workflow ended
     on an unreadable reply or a failed request).
 * **The final proposal:**
-  * whether it was valid, its last validation accepted;
+  * whether it was valid: the last validation of the last proposal's
+    actions accepted (an acknowledgment reply that repeats them is
+    validated only by the final check, when it is accepted);
   * whether it was submitted, handed to the harness;
   * whether it was executed: applied at the recorded state in the
     continuation (§7), and accepted by the engine.
@@ -254,17 +260,20 @@ it is the correction.
 
 | Class | Definition |
 |---|---|
-| **A. Acknowledged and proceeded** | R was submitted unchanged. An accepted acknowledgment and an agreeing final check are required for that, by the workflow. |
+| **A. Acknowledged and proceeded** | R was submitted unchanged: the same actions by canonical content, in any order (the proposal outcome's rule). An accepted acknowledgment and an agreeing final check are required for that, by the workflow. A resubmission that only reorders R, which llm-agent 6 treats as a new proposal with its own request, is A and is flagged "reordered only". |
 | **B. Acknowledged and revised** | Other non-empty actions were submitted. If they qualify, they have their own accepted acknowledgment. |
 | **C. Acknowledged and abandoned** | The model chose to submit nothing (`"actions": []`). |
-| **D. Failed acknowledgment, withheld** | Nothing was submitted, and the model did not abandon: `acknowledgment_not_accepted` (wrong, stale, missing or malformed acknowledgments, retries spent), `final_check_disagrees`, `consequences_unavailable`, an unreadable reply or a failed request. |
+| **D. Failed acknowledgment, withheld** | Nothing was submitted, and the model did not abandon. Each D draw records why: the agent's withheld reason (`acknowledgment_not_accepted`: wrong, stale, missing or malformed acknowledgments with the retries spent; `final_check_disagrees`; `consequences_unavailable`) or, where the agent records none, `revision_refused` (a revision answering the request was refused and no retry was left), `invalid_reply` or `failed_request`. |
 | **E. No acknowledgment required** | No proposal at the point needed acknowledgment: a non-qualifying valid proposal, a refused proposal not corrected into a qualifying one, or an ending before a proposal was validated. |
 
 * **Accurate before a change:** B and C record whether a reply that
-  changed the actions had first stated R's consequences exactly (checked
-  with llm-agent 6's own matcher). This keeps "accurate acknowledgment
-  followed by revision or abandonment" apart from a change made without
-  one.
+  changed the actions carried an acknowledgment stating exactly the
+  consequences of the request it answered (the latest request shown;
+  checked with llm-agent 6's own matcher). This keeps "accurate
+  acknowledgment followed by revision or abandonment" apart from a change
+  made without one.
+* **One rule for "unchanged":** the proposal outcome (kept), class A and
+  A's "proceeded" all compare actions by canonical content in any order.
 
 * **Copying is not the same as reconsidering.** An accurate
   acknowledgment counts as A only when the action is unchanged; a changed
@@ -387,13 +396,22 @@ evidence of a wise decision.
      replay check (`test_stage_b.py`).
 3. **Independent review** of the driver and this protocol, committed
    verbatim; any blocking defect repaired and re-reviewed.
-4. **Lock:** `protocol.json`'s `lock` pins the SHA-256 of the driver, its
-   fidelity code and tests, both agents (and llm-agent 3 and 4 beneath
-   them), the selection, the points, the schedule, the settings files and
-   this protocol's documents; its status becomes `LOCKED — NOT RUN`. A
-   separate commit, with CI green. `stage_b.py check` verifies the lock
-   against the files, and `run` refuses a protocol whose lock does not
-   hold.
+4. **Lock:** `protocol.json`'s `lock.files` pins the SHA-256 of every
+   file the run executes or reads: the driver, its fidelity code and
+   tests; the four agents and the agents' test fixtures it imports; the
+   shared-prefix, feedback, decision, sample and repeat modules and
+   financial evidence v1 it runs through; the selection, its inputs (the
+   V0.10b, V0.10c and V0.11b contexts, the inventory, the V0.11b manifest)
+   and the twelve recordings; the points; the settings files; and this
+   protocol's documents. The schedule is pinned by its entries
+   (`lock.scheduleEntriesSha256`): `schedule.json` names the protocol's
+   SHA-256, so its file hash cannot be pinned inside the protocol. The
+   status becomes `LOCKED — NOT RUN`. The lock commit is made in this
+   order: write the lock; regenerate `schedule.json`; regenerate the
+   fidelity mock run (its records name the protocol's SHA-256); update
+   `README.md`'s hashes; then commit, with CI green. `stage_b.py check`
+   verifies the lock against the files and exits non-zero if it does not
+   hold; `run` refuses a protocol whose lock does not hold.
 
    Any change after that is an amendment, recorded with its reason.
 

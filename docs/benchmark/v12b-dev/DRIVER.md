@@ -29,7 +29,8 @@ point's state digests, of the initial request and of the initial proposal.
    * returns the result;
    * raises the agent's own `ProtocolError` on a refusal, as
      `llm_agent3.Harness.request` does;
-   * uses the agent's request ids `r1, r2, …`;
+   * uses the agent's request ids `r1, r2, …`, and checks each answer's
+     id and protocol, as the agent's harness does;
    * reads the engine's lines with the arm's agent's own reader:
      `json.loads` for A, and `llm_agent6.json_loads` for B (duplicate keys
      marked, NaN and Infinity refused);
@@ -118,7 +119,9 @@ Before every model request (`Limits.before_call`), in this order:
   timeout would pass 14,400 s: `wall_clock`.
   * A request starts only if its whole timeout fits.
   * No request is cut short.
-  * The run cannot overrun four hours by a request.
+  * The run cannot overrun four hours by a model request. Engine time
+    after the last request (a session opening, the draw's remaining
+    read-only requests: about a minute at most on the Pi) is not bounded.
 
 Before every draw (`Limits.before_draw`), the same wall-clock test is
 applied.
@@ -133,9 +136,13 @@ The other stop conditions, as in V0.11b:
   a `ProtocolError`, so no agent catches it. The draw is recorded as
   `interrupted`, with the calls it made and no decision record. The run
   stops.
-* **On any other exception:** the run stops, records `drawFailed`, and
-  still writes `run.json`.
-* **Ctrl-C:** the run stops, as `operator`.
+* **On any other exception:** the run stops and still writes `run.json`,
+  which names `drawAborted`. The unfinished draw is written to
+  `live/aborted-draw.json` with its calls and engine requests so far. A
+  model call whose transport raised is recorded (`client: <type>`) and
+  counted, so `modelCalls` always equals the recorded calls.
+* **Ctrl-C:** the run stops, as `operator`, with the same record of an
+  unfinished draw.
 
 **`run.json`** (`dreamteam.acknowledgment-run/v1`):
 * `status`: **COMPLETE** only if all 420 draws completed with no stop;
@@ -166,9 +173,12 @@ Everything deterministic must be identical (`deterministic()`):
 * every engine request and answer;
 * each call's request hash, status, error and response hash.
 
-Every recorded response must be used. Send times and latencies are live
-metadata. They are excluded from the comparison and reported only in
-`inference.json`.
+Every recorded response must be used. Usage, finish reason and served
+model are recomputed from each hash-checked body and must equal the
+recorded ones. Send times and latencies are live metadata. They are
+excluded from the comparison and reported only in `inference.json`.
+`run.json` is checked against the rows: its completed count, its
+interrupted draw and its status.
 
 Before replaying, the recorded draws must be the schedule's first draws:
 * in order and each once;
@@ -185,14 +195,15 @@ Every completed draw is classified. The definitions are in `PROTOCOL.md`
 
 **The proposal:**
 * kept, revised or abandoned (llm-agent 4's rule, against the initial
-  proposal);
+  proposal; actions compared by canonical content in any order, the one
+  rule for "unchanged" in every classification);
 * or nothing submitted:
   * **refused:** the last attempt was refused;
   * **withheld:** B's fail-closed withholding;
   * **invalid:** an unreadable reply or a failed request.
 
 **The final proposal:**
-* whether it was valid;
+* whether it was valid (the last validation of its actions);
 * whether it was submitted (or `"actions": []`);
 * whether it was executed (applied at the recorded state in the
   continuation).
@@ -200,12 +211,14 @@ Every completed draw is classified. The definitions are in `PROTOCOL.md`
 **Arm B's class:**
 * **A proceeded, B revised, C abandoned, D withheld:** these apply from
   the first proposal whose consequences qualified (a request shown) or
-  could not be read (withheld, fail-closed).
+  could not be read (withheld, fail-closed). A resubmission that only
+  reorders that proposal is A, flagged "reordered only". Every D draw
+  records why (`dReason`).
 * **E:** acknowledgment was never required.
 * **Two qualifiers:**
-  * whether a reply that changed the actions had first stated the
-    request's consequences exactly ("accurate before a change", checked
-    with `llm_agent6.match`);
+  * whether a reply that changed the actions carried an acknowledgment
+    stating exactly the consequences of the request it answered
+    ("accurate before a change", checked with `llm_agent6.match`);
   * every acknowledgment failure code.
 
 **Arm A:** the selective preview's status, and what followed a shown one:
@@ -263,6 +276,10 @@ documented protocol decision (`PROCEDURE.md`).
 * **The memory text** comes from the recording's replay. It is not
   rebuilt from the run's earlier points; its SHA-256 and the rebuilt
   prompt's bytes are checked instead.
+* **Two record fields differ from a mid-run agent record by
+  construction:** `previousExecution` is always `null` (the driver gives
+  no previous point), and request ids restart at `r1` per draw. Neither
+  enters a prompt, a message or a classification.
 * **The decision budget:** with at most 2 calls of at most 300 s, it
   cannot be reached. If it ever were, the record would show it, and
   replay, which has no wall clock, would refuse that draw.

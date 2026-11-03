@@ -543,6 +543,84 @@ class Recorded(unittest.TestCase):
                          B.sha256(B.canon([B.deterministic(x) for x in self.rows])))
 
 
+class Review(unittest.TestCase):
+    """The independent review's findings (docs/audits/v0.12b-stage-b-driver-review.md)."""
+
+    def test_d1_one_rule_for_unchanged(self):
+        d, e, _, _ = draw("B", [r("Both.", [FIRE, FIRE2]), r("Same.", [FIRE2, FIRE], ack([FIRE, FIRE2])),
+                                r("Ack.", [FIRE2, FIRE], ack([FIRE2, FIRE]))])
+        x = B.classify(d, e)
+        self.assertEqual((x["outcome"], x["class"], x["reorderedOnly"]), ("kept", "A_proceeded", True))
+        d, e, _, _ = draw("A", [TW.d("x", [STAFF, OPS]), TW.d("same", [OPS, STAFF])], (["ok"] * 4, [TW.C]))
+        x = B.classify(d, e)
+        self.assertEqual((x["outcome"], x["preview"]["class"], x["reorderedOnly"]), ("kept", "proceeded", True))
+
+    def test_d2_final_proposal_valid_after_rejected_acknowledgments(self):
+        bad = SC.changed([FIRE], item=0, path=("consequences", "severance", "severanceCents"), value=1)
+        d, e, _, _ = draw("B", [r("Riley.", [FIRE]), r("Ack.", [FIRE], bad), r("Ack.", [FIRE], bad)])
+        x = B.classify(d, e)
+        self.assertEqual((x["class"], x["finalProposalValid"]), ("D_withheld", True))
+
+    def test_d4_class_d_always_has_a_reason(self):
+        d, e, _, _ = draw("B", [r("Riley.", [FIRE]), r("Sam.", [FIRE2]), r("Sam.", [FIRE2])],
+                          {"final": "notice_too_short", "final_after": 1})
+        x = B.classify(d, e)
+        self.assertEqual((x["class"], x["dReason"], x["acknowledgment"]["withheld"]),
+                         ("D_withheld", "revision_refused", None))
+
+    def test_d5_body_derived_metadata_is_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            _, rows, _, pts, _ = Runs.go(None, tmp, SF.mock_transport("t"))
+        row = copy.deepcopy(next(x for x in rows if x["calls"]))
+        row["calls"][0]["servedModel"] = "another-model"
+        with self.assertRaises(B.ExperimentError):
+            B.replay_draw(row, pts.by_id[row["point"]], settings(), lambda *a: FakeSession(T6.Engine()),
+                          B.FixedMemory(""))
+
+    def aborting(self, exc):
+        with tempfile.TemporaryDirectory() as tmp:
+            n = [0]
+
+            def tr(payload):
+                n[0] += 1
+                if n[0] == 2:
+                    raise exc
+                return 200, SF.body_of(payload, "garbage"), None
+            doc, rows, _, _, out = Runs.go(None, tmp, tr)
+            with open(os.path.join(out, "live", "aborted-draw.json")) as f:
+                ab = json.load(f)
+        recorded = sum(len(x["calls"]) for x in rows) + len(ab["calls"])
+        self.assertEqual((doc["status"], doc["drawAborted"], ab["status"]), ("PARTIAL", ab["seq"], "aborted"))
+        self.assertEqual(doc["modelCalls"], recorded)
+        self.assertTrue(ab["calls"][-1]["error"].startswith("client: "))
+        return doc
+
+    def test_d6_an_uncaught_client_exception_is_recorded(self):
+        import http.client
+        self.assertEqual(self.aborting(http.client.IncompleteRead(b""))["stopped"]["code"], "driver")
+
+    def test_d7_ctrl_c_during_a_draw_is_recorded(self):
+        self.assertEqual(self.aborting(KeyboardInterrupt())["stopped"]["code"], "operator")
+
+    def test_d11_run_doc_against_the_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            doc, rows, sched, _, _ = Runs.go(None, tmp, SF.mock_transport("t"))
+        B.check_run_doc(doc, rows, sched)
+        for bad in (dict(doc, drawInterrupted=3), dict(doc, stopped={"code": "x"}), dict(doc, drawsCompleted=2),
+                    dict(doc, status="DONE")):
+            with self.assertRaises(B.ExperimentError):
+                B.check_run_doc(bad, rows, sched)
+
+    def test_d12_the_protocol_field_is_checked(self):
+        class NoProtocol(FakeSession):
+            def request(self, rid, op, args=None):
+                a = super().request(rid, op, args)
+                a.pop("protocol")
+                return a
+        with self.assertRaises(B.ExperimentError):
+            B.EngineHarness(NoProtocol(T6.Engine())).request("digests")
+
+
 class Schedule(unittest.TestCase):
     def test_committed_schedule(self):
         p = os.path.join(ROOT, "docs", "benchmark", "v12b-dev", "protocol.json")
