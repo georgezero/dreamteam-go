@@ -741,7 +741,10 @@ benchmark result with llm-agent 6 and a live model exists yet.
 * **The Stage B experiment**
   ([benchmark/v12b-dev/PROTOCOL.md](benchmark/v12b-dev/PROTOCOL.md)) was
   run once, as authorized: COMPLETE, 420 of 420 draws
-  ([benchmark/v12b-dev/RESULTS.md](benchmark/v12b-dev/RESULTS.md)).
+  ([benchmark/v12b-dev/RESULTS.md](benchmark/v12b-dev/RESULTS.md)). Acknowledgment did not change any high-impact action
+  after it was shown, and no decision-quality benefit was established.
+  llm-agent 6 is released in V0.12.0 as an explicitly selected
+  experimental policy.
   * **The driver** (`analysis/acknowledgment/stage_b.py`,
     [benchmark/v12b-dev/DRIVER.md](benchmark/v12b-dev/DRIVER.md)) calls
     llm-agent 5's and 6's own `ask()` at the recorded points.

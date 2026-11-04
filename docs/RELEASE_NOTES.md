@@ -5,6 +5,193 @@ evidence in `docs/ACCEPTANCE.md`.
 
 ---
 
+## V0.12.0 — high-impact action acknowledgment and reproducible decision evidence
+
+V0.12 adds an **auditable acknowledgment capability and the evidence
+around it**. llm-agent 6 requires, before a high-impact staffing action
+is submitted, an acknowledgment that states the engine's exact direct
+consequences of that exact proposal. One prospectively locked live
+evaluation compared it with llm-agent 5's selective preview at 12
+recorded branch points.
+
+**The acknowledgment works technically. It did not improve decisions.**
+In the live evaluation every acknowledgment was accurate, and none led
+the agent to revise or abandon a high-impact action. V0.12.0 does not
+claim any improvement in financial or operational decision quality.
+
+No mechanic, scenario behaviour, action schema, accounting or scoring
+rule changes. No prompt changes. llm-agent 1–5 are as in V0.11.0, and
+**llm-agent 5's validation-first workflow stays the default**. llm-agent
+6 is an **explicitly selected, experimental** agent: it runs only when
+`agents/llm/llm_agent6.py` is invoked, and nothing selects it by default.
+Every earlier scenario, save, golden reference, recording and benchmark
+result is unchanged.
+
+| | |
+|---|---|
+| Agent | llm-agent 6, `agents/llm/llm_agent6.py` (experimental, explicit selection) |
+| Workflow | `llm-agent-acknowledgment-workflow/v1` (`b9cb79828f26…`) |
+| Contract | `dreamteam.action-acknowledgment/v1` (`33c116da979a…`) |
+| Record | `dreamteam.llm-decision-record/v6` |
+| Specification | `docs/V0.12_ACKNOWLEDGMENT.md`, `docs/V0.12_CONSEQUENCE_INVENTORY.md`, `docs/LLM_AGENT.md` §21 |
+
+    python3 agents/llm/llm_agent6.py --settings settings.json      # llm-agent 6, live
+    python3 agents/llm/llm_agent6.py --replay decisions.jsonl      # model-free replay
+
+**Capabilities:**
+1. **llm-agent 6.** llm-agent 5's validation-first workflow, loaded
+   unchanged (with versions 3 and 4 beneath it), plus one safeguard at the
+   agent workflow layer. Version 3's prompt, memory, parser and settings
+   are unchanged.
+2. **Consequence inventory** (`docs/V0.12_CONSEQUENCE_INVENTORY.md`),
+   written before the safeguard: what the engine's read-only validate and
+   preview answers report about each action, as exact, derivable or
+   unavailable, and the fields the safeguard requires.
+3. **Engine-backed acknowledgment.** A fully valid proposal with staffing
+   actions has its staffing batch previewed. The items are read from the
+   engine's own answer: each termination (last day, notice, severance and
+   its payday), each new retained obligation (a hire's recruiting fee and
+   earliest lawful exit; a teleradiology start's guaranteed retainer) and
+   the batch's displaced bookings. There is no threshold: a valid action
+   is never blocked for being large.
+4. **Exact consequence matching.** Each item must be acknowledged with
+   its action, type, target and every value exactly. A generic reply, a
+   wrong value or another action's acknowledgment is not accepted, and
+   the failures are shown.
+5. **Proposal-bound acknowledgment.** Every request carries the
+   proposal's token. An acknowledgment of an earlier or different
+   proposal is refused, and a revision needs its own acknowledgment.
+6. **Fail-closed behaviour.** A qualifying proposal is never submitted
+   without an accepted acknowledgment. If the consequences cannot be read
+   (including a missing, null, mistyped, duplicated or inconsistent
+   required field: the audit's F1, repaired), if retries run out, or if
+   the final check disagrees, nothing is submitted and the reason is
+   recorded. The proposal is never rewritten.
+7. **Final validation and re-preview.** After an accepted
+   acknowledgment, every batch is validated again and the staffing batch
+   previewed again. Both must equal what was acknowledged, with the state
+   unchanged, before submission.
+8. **Mixed-batch handling.** The operations and staffing batches stay
+   separate and non-atomic, as before. Each qualifying action has its own
+   item, and a withheld staffing batch also withholds the proposal's
+   operations batch.
+9. **Complete decision recording v6.** Every attempt, validation,
+   preview, consequence item, request, token, acknowledgment, match
+   result, final check and withholding.
+10. **Model-free exact replay.** `--replay` re-runs the workflow against
+    the engine with the recorded replies and requires an identical
+    record. Replay certifies consistency with the recorded replies, not
+    their authorship.
+11. **Real-engine displacement tests** (`internal/bench/llm_agent6_displacement_test.go`):
+    the exact batch count of displaced bookings, a missing or wrong count
+    withheld, a changed proposal re-acknowledged, and the applied
+    displacement equal to the acknowledged count.
+12. **Real-engine hire tests** (`internal/bench/llm_agent6_hire_test.go`):
+    the engine's exact recruiting fee and earliest-exit cost; an empty or
+    $1-wrong acknowledgment withheld, leaving the session as no action.
+13. **Independent safeguard audit** (`docs/audits/v0.12b-safeguard-audit.md`):
+    GO for the safeguard, no blocking finding.
+14. **Focused re-review** (`docs/audits/v0.12b-f1-rereview.md`): the F1
+    repair CLOSED, no blocking defect.
+15. **Prospective Stage B experiment** (`docs/benchmark/v12b-dev/`): a
+    driver that runs both agents' own code, 113 fidelity cases against the
+    agents' own runs, an independent driver review and re-review, a
+    locked protocol (5b8879f), then one authorized live run.
+16. **Cross-platform reproducibility.** Every Stage B draw replays without
+    a model, and its analysis is byte-identical on the Pi (arm64), horo
+    (amd64) and the three CI platforms. The V0.12a scripted evidence is
+    regenerated by CI on every platform.
+
+Tests: `agents/llm/test_llm_agent6.py` (31), `test_llm_agent6_fields.py`
+(18), `internal/bench/llm_agent6_test.go`, the displacement and hire
+tests, 27 scripted cases (`docs/benchmark/v12a-dev/`) and the Stage B
+driver's 51 tests (`analysis/acknowledgment/test_stage_b.py`).
+
+**V0.12b Stage B findings** (2026-11-04, `docs/benchmark/v12b-dev/RESULTS.md`):
+* **Scope:** 12 development branch points, two local models
+  (`gemma-4-26B-A4B-it-oQ4e-mtp`, `Qwen3.6-35B-A3B-oQ4e-mtp`), 420
+  completed draws of 420, 524 model calls (A 275, B 249), all completed
+  normally.
+  * **A** is llm-agent 5 with the selective preview.
+  * **B** is llm-agent 6.
+
+| Arm B | Draws |
+|---|---|
+| Acknowledgment requests, all answered accurately | 153 |
+| Acknowledged and proceeded | 153 |
+| Acknowledged and revised | 0 |
+| Acknowledged and abandoned | 0 |
+| Acknowledgment failed or withheld (after retries) | 0 |
+| No acknowledgment required | 77 |
+
+* **Acknowledgment did not change any high-impact action after it was
+  shown.** In these experiments it behaved like a procedural
+  confirmation, not a decision-changing safeguard.
+* **Most revisions occurred earlier,** following the engine's validation
+  refusals, before any preview or acknowledgment. The two arms' results
+  there are very similar.
+* **Arm A's preview:** of 170 shown, 166 proceeded, 3 revised and 1
+  failed.
+* **Every B − A interval contains 0.** No decision-quality benefit was
+  established.
+* **Reliability:** at one termination point, 16 of 20 first
+  acknowledgment replies were malformed JSON. The workflow's retry
+  recovered all 16.
+
+**Safety disclosure:**
+* **Acknowledgment is not approval,** and it is not evidence of good
+  judgment. An accurate acknowledgment followed by the same action is a
+  statement of the consequences.
+* **Valid actions can be harmful.** Validation shows that an action is
+  permitted and funded now, not that it is wise.
+* **Terminations may displace booked appointments.** In Stage B:
+  * one termination displaced 100 appointments;
+  * two terminations together displaced 6.
+* **Financial commitments may create retained obligations.** A
+  credit-supported allocation commitment of $44,687.30 was executed in
+  38 of 40 draws.
+* **Roster changes can displace appointments:** one roster change
+  displaced 405.
+* **Funding approval is not financial advice.**
+* **Engine previews report direct consequences,** not all future
+  outcomes. No downstream outcome is attributed to an individual action.
+
+**Limitations:**
+* synthetic practices and development-only contexts (the V0.8c and V0.9c
+  recordings);
+* two models and twelve branch points (Gemma 3, Qwen 9);
+* repeated draws are not independent practice cases, and there is no
+  representative population;
+* no long-run agent continuation;
+* no demonstrated financial or clinical benefit;
+* no model ranking, and no causal claim about internal model reasoning;
+* different model-call counts between arms (A 275, B 249);
+* the server version changed from earlier experiments (oMLX 0.7.3;
+  V0.11b recorded 0.7.0). It was unchanged within the run, so the
+  comparison between arms is not affected;
+* initial malformed acknowledgment replies occurred and recovered through
+  retries;
+* no valid hire and no termination without displacement among the
+  branch points;
+* the independent 98-item human evidence review remains **PENDING**.
+
+**Reproducibility and compatibility.**
+* No live inference was run for the release.
+* Unchanged: the historical recordings, the frozen evidence contracts,
+  the golden references, the benchmark suites, the V0.10 and V0.11
+  experiments, the V0.12a scripted evidence and the V0.12b locked
+  protocol, run record and results
+  ([docs/audits/v0.12.0-release-baseline.md](audits/v0.12.0-release-baseline.md)).
+* llm-agent 1–6 recordings replay with their own versions.
+* 0.12.0-dev.3 is registered for replay (`mini-seed52-v0123`, batch mode
+  `v0.12_dev3`), with every earlier batch mode kept.
+
+**Next:** V0.13 is proposed (`docs/ROADMAP.md` §7g): decision safeguards
+beyond acknowledgment, starting with explicit comparison of alternatives'
+engine-derived consequences before irreversible actions.
+
+---
+
 ## V0.11.0 — the validation-first agent workflow
 
 V0.11 adds **agent workflow and evaluation capabilities**. llm-agent 5

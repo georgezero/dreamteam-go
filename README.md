@@ -7,45 +7,41 @@ take over a struggling imaging center on a Tuesday morning and run it from a
 terminal UI; the same engine runs headless for research and, later, as an
 AI-agent benchmark.
 
-Status: **V0.11** (`0.11.0`, the validation-first agent workflow) is the
-current release. It adds agent workflow and evaluation capabilities, not
-evidence of improved management or financial decisions. No change to the
-simulator, actions, accounting, scoring or prompts.
-* **llm-agent 5** (`agents/llm/llm_agent5.py`, `docs/V0.11_AGENT_WORKFLOW.md`)
-  validates every proposal first. It answers a refusal with the engine's
-  own results, retries a bounded number of times, and submits only
-  validated batches.
-* **Two workflows,** chosen with `--workflow`:
-  * `validation-first` is **the default**;
-  * `validation-first-preview` is opt-in. It adds the engine's preview for
-    a valid staffing proposal with a direct financial or capacity effect,
-    in neutral wording: passing validation and the preview do not
-    establish that the decision is beneficial.
+Status: **V0.12** (`0.12.0`, high-impact action acknowledgment and
+reproducible decision evidence) is the current release. It adds an
+auditable acknowledgment capability and its evidence, **not an improved
+decision-quality system**. No change to the simulator, actions,
+accounting, scoring or prompts.
+* **llm-agent 6** (`agents/llm/llm_agent6.py`, `docs/V0.12_ACKNOWLEDGMENT.md`)
+  is llm-agent 5's validation-first workflow plus one safeguard. Before a
+  termination, a new retained obligation (a hire, a teleradiology start)
+  or displaced bookings are submitted, the model must state the engine's
+  exact consequences for that exact proposal. Otherwise nothing is
+  submitted. It is **experimental and explicitly selected**; llm-agent
+  5's validation-first workflow stays the default.
+* **V0.12b** (`docs/benchmark/v12b-dev/`): an independent safeguard audit
+  and a prospectively locked live evaluation of llm-agent 6 against
+  llm-agent 5's preview, at 12 development branch points with two local
+  models (420 draws, 524 model calls).
+  * **All 153 acknowledgments were accurate, and none led the agent to
+    revise or abandon a high-impact action.** Most revisions followed
+    validation refusals, earlier.
+  * No difference between the arms was established. Here acknowledgment
+    behaved like a procedural confirmation, not a decision-changing
+    safeguard.
 
-  Every recording names its workflow, and replay takes it from the
-  recording, without a model.
-* **V0.11b** (`docs/benchmark/v11b-dev/`): a prospectively declared
-  evaluation of llm-agent 3, validation-first and validation-first with
-  the preview. It covered 14 development branch points, 720 draws and two
-  local models.
-  * Validation-first made valid corrections at three of five refused Qwen
-    proposals where llm-agent 3 made none.
-  * **Two of those corrections terminate a technologist, displacing 100
-    and 8 booked appointments.**
-  * The preview gave the same decisions as validation-first at 10 of 14
-    points, and did not increase a commitment at any valid point.
-
-**A valid action is not necessarily a good decision.** Validation checks
-that an action is permitted and funded now. It does not show that the
-action is wise, and the preview is not a recommendation. Terminations
-cannot be reversed and can displace booked appointments, and a valid
-staffing action can create retained obligations.
+**Acknowledgment is not approval** and not evidence of good judgment. A
+valid action can be harmful: in V0.12b a termination displaced 100
+booked appointments, a roster change 405, and a credit-supported
+commitment of $44,687.30 was executed. Engine previews report direct
+consequences, not all future outcomes.
 
 Every earlier scenario, save, golden reference, recording and benchmark
 result is unchanged. The independent evidence review is still
 **pending**.
 
-It builds on V0.10 (`0.10.0`, inference repeatability and controlled
+It builds on V0.11 (`0.11.0`, the validation-first agent workflow:
+llm-agent 5, `docs/V0.11_AGENT_WORKFLOW.md`), V0.10 (`0.10.0`, inference repeatability and controlled
 decision experiments: temperature zero did not guarantee identical output;
 the shared-prefix method with model-free replay, `docs/benchmark/v10a-dev/`
 to `v10c-dev/`), V0.9 (`0.9.0`, financial decision evidence and preview-based
@@ -376,7 +372,7 @@ Settings, prompt, memory, decision format, evidence, usage and replay:
 `docs/benchmark/v05b-dev/`; the multi-model development evaluation, three
 local models with a memory-off control: `docs/benchmark/v05c-dev/`.
 
-### LLM agent workflows (V0.11)
+### LLM agent workflows (V0.11, V0.12)
 
 `agents/llm/llm_agent5.py` is llm-agent 5: version 3's prompt, memory and
 parser, with a validation-first workflow.
@@ -392,18 +388,25 @@ parser, with a validation-first workflow.
 
 llm-agent 1 to 4 are unchanged. Details: `docs/LLM_AGENT.md` §18–20.
 
-**In development (V0.12, unreleased; V0.12a accepted, V0.12b Stage A done):** llm-agent 6
-(`agents/llm/llm_agent6.py`) adds, to the validation-first workflow, an
-acknowledgment of high-impact actions:
+**High-impact action acknowledgment (V0.12, experimental):** llm-agent 6
+(`agents/llm/llm_agent6.py`) is selected explicitly, by running it:
+
+    python3 agents/llm/llm_agent6.py --settings settings.json      # live
+    python3 agents/llm/llm_agent6.py --replay decisions.jsonl      # model-free replay
+
+It adds, to the validation-first workflow, an acknowledgment of
+high-impact actions:
 * terminations, new retained obligations and displaced bookings need an
   acknowledgment that states the engine's exact consequences for that
-  proposal before they are submitted;
-* anything else is withheld.
+  proposal (`dreamteam.action-acknowledgment/v1`), followed by a final
+  validation and re-preview, before they are submitted;
+* anything else is withheld (fail-closed), and the record (v6) replays
+  exactly without a model.
 
-Acknowledgment is not approval, and it has been tested with scripted
-models only. An independent audit found no blocking defect
-(`docs/audits/v0.12b-safeguard-audit.md`). Details: `docs/V0.12_ACKNOWLEDGMENT.md`, `docs/LLM_AGENT.md`
-§21.
+In the V0.12b live evaluation every acknowledgment was accurate and none
+changed a high-impact action (`docs/benchmark/v12b-dev/RESULTS.md`).
+Acknowledgment is not approval. Details: `docs/V0.12_ACKNOWLEDGMENT.md`,
+`docs/LLM_AGENT.md` §21.
 
 ### Benchmark scenario suite (V0.6)
 
@@ -507,7 +510,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/PLAN.md` | vision, decisions, scenarios |
 | `docs/SIMULATION_DESIGN.md` | domain model, engine, randomness, finance, invariants, metrics |
 | `docs/TUI_DESIGN.md` | screens and controls |
-| `docs/ROADMAP.md` | milestones V0.1–V0.11, V0.12 in progress, acceptance criteria |
+| `docs/ROADMAP.md` | milestones V0.1–V0.12, V0.13 proposed, acceptance criteria |
 | `docs/ACCEPTANCE.md` | V0.1 acceptance checklist with evidence |
 | `docs/v02-acceptance/` | V0.2 acceptance pass, matrix and findings |
 | `docs/V0.2_DESIGN.md` | V0.2 design: staffing, reading coverage, the T90 evaluation |
@@ -522,7 +525,7 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/FINANCIAL_EVIDENCE.md` | financial decision evidence: affordability, reversibility and direct operational exposure of each recorded decision, from the engine's own preview (V0.9) |
 | `docs/V0.11_AGENT_WORKFLOW.md` | the validation-first agent workflow, its two selectable forms and their limits (V0.11) |
 | `docs/V0.12_CONSEQUENCE_INVENTORY.md` | what the engine reports about each action's direct consequences: exact, derivable, unavailable (V0.12a) |
-| `docs/V0.12_ACKNOWLEDGMENT.md` | high-impact action acknowledgment: the contract, workflow, recording, replay and limits (V0.12a, unreleased) |
+| `docs/V0.12_ACKNOWLEDGMENT.md` | high-impact action acknowledgment: the contract, workflow, recording, replay and limits (V0.12) |
 | `docs/REVIEWER_HANDOFF.md` | what an independent evidence review covers, and where the evidence is |
 | `docs/RELEASE_NOTES.md` | release notes |
 | `docs/PROGRESS.md` | what each step built and how it was tested |
@@ -530,7 +533,35 @@ reference policy) and `agents/llm` (the LLM agent).
 | `docs/calibration/` | calibration report, experiment manifests and results |
 | `docs/reviews/` | external design reviews and their resolutions |
 
-## Known limitations (V0.11)
+## Known limitations (V0.12)
+
+* **Acknowledgment did not change decisions.** In V0.12b, 153 of 153
+  acknowledgments were accurate and every one was followed by the same
+  action. No decision-quality benefit was established, and no financial
+  or operational improvement is claimed.
+* **Acknowledgment is not approval** and not evidence of good judgment.
+  Valid actions can be harmful:
+  * **terminations may displace booked appointments** (100 for one
+    termination, 6 for two together, in V0.12b);
+  * **financial commitments may create retained obligations** (a
+    credit-supported commitment of $44,687.30);
+  * **funding approval is not financial advice;**
+  * **engine previews report direct consequences,** not all future
+    outcomes, and no downstream outcome is attributed to an individual
+    action.
+* **V0.12b is small and local:** synthetic practices, development-only
+  contexts, two models and 12 branch points. Repeated draws are not
+  independent practice cases, and there is no representative
+  population, no long-run continuation, no model ranking and no causal
+  claim about model reasoning. The arms made different numbers of model
+  calls. The server version differs from earlier experiments.
+* **Reliability:** at one point, 16 of 20 first acknowledgment replies
+  were malformed JSON; all recovered on the retry.
+* The independent evidence review remains **pending**.
+
+Details: `docs/RELEASE_NOTES.md` (V0.12.0), `docs/benchmark/v12b-dev/RESULTS.md`.
+
+### From V0.11
 
 * **Validation success does not establish decision quality.** A valid
   action is permitted and, where funding is tested, funded now. That does

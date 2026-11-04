@@ -611,3 +611,10 @@ with `-scenario mini -seed 52 -days 45 -actions
 testdata/sessions/mini-seed52-v0122.actions.json` (the same batches as the
 5C.4l file's). 0.12.0-dev.3 replays it in batch mode `v0.12_dev2` with
 every digest verified (`internal/session/v0122_test.go`).
+
+The 0.12.0-dev.3 file was made from 59676a3 (0.12.0-dev.3, V0.12b Stage B;
+the engine sources are those of the lock commit 5b8879f) with `-scenario
+mini -seed 52 -days 45 -actions
+testdata/sessions/mini-seed52-v0123.actions.json` (the same batches as the
+5C.4l file's). 0.12.0 replays it in batch mode `v0.12_dev3` with every
+digest verified (`internal/session/v0123_test.go`).

@@ -23,7 +23,8 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.9** (released, `v0.9.0`: financial decision evidence and preview-based decision support, V0.9a–V0.9c, by the owner's release decision 2026-11-01) | Evidence and evaluation capabilities: frozen parameter evidence, an offline review workflow (review pending), financial decision evidence (affordability, reversibility, operational exposure), an engine-backed preview agent (llm-agent 4) with complete recording, and a prospective preview evaluation that established no financial benefit (§7c). Not clinical validation | V0.8 |
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
-| **V0.12** (in progress: V0.12a accepted; V0.12b Stage A accepted and completed (F1 repaired, re-reviewed); Stage B run once under the locked protocol, COMPLETE, results awaiting owner review; unreleased) | Decision safeguards: engine-backed acknowledgment of high-impact actions (V0.12a); independent safeguard review and decision-level evaluation (V0.12b: Stage A done, Stage B run COMPLETE, 420 draws, `docs/benchmark/v12b-dev/RESULTS.md`); prospective multi-day evaluation (V0.12c, proposed) (§7f) | V0.11 |
+| **V0.12** (released, `v0.12.0`: high-impact action acknowledgment and reproducible decision evidence, V0.12a–V0.12b, by the owner's release decision 2026-11-04) | Decision safeguards: llm-agent 6, engine-backed acknowledgment of high-impact actions, an explicitly selected experimental agent (llm-agent 5's validation-first stays the default); an independent safeguard audit; a prospective live evaluation against llm-agent 5's preview (420 draws): every acknowledgment accurate, none changed a high-impact action (§7f). No decision-quality benefit established; not clinical validation | V0.11 |
+| **V0.13** (proposed, not started) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1245,7 +1246,7 @@ and llm-agent 5 (C). The eligibility rule stays unchanged.
   agent's evidence and the release documentation, and decision
   safeguards are proposed for V0.12.
 
-## 7f. V0.12 — decision safeguards (in progress)
+## 7f. V0.12 — decision safeguards (released)
 
 The owner's recommendation after V0.11.0: decision safeguards,
 especially for irreversible staffing decisions. Syntactic validity and
@@ -1279,8 +1280,8 @@ does not establish that an action is wise.
 | V0.12a | Engine-backed consequence acknowledgment | accepted 2026-11-02 (9871e37) |
 | V0.12b Stage A | Independent safeguard audit; real-engine displacement test; F1 repair; focused re-review; real-engine hire test | accepted 2026-11-03; completed 2026-11-03 (F1 CLOSED) |
 | V0.12b Stage B | Prospective live decision-level evaluation: llm-agent 5 (validation-first-preview) against llm-agent 6 | design approved 2026-11-03; driver implemented, independently reviewed and re-reviewed (GO); protocol locked at 5b8879f (`docs/benchmark/v12b-dev/PROTOCOL.md`); the single authorized run COMPLETE, 420 of 420 draws, 524 model calls (`RESULTS.md`) |
-| V0.12c | Prospective multi-day agent evaluation | proposed |
-| V0.12.0 | Release | pending |
+| V0.12c | Prospective multi-day agent evaluation | not started; moved to V0.13, after the safeguards are reviewed |
+| V0.12.0 | Release: high-impact action acknowledgment and reproducible decision evidence | released 2026-11-04 (`v0.12.0`) |
 
 * **V0.12a, done:** llm-agent 6 (`agents/llm/llm_agent6.py`,
   [V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md)), with the
@@ -1406,8 +1407,57 @@ A partial run must be reported as partial, never silently resumed.
     gave GO for the lock.
   * Every finding was answered
     ([audits/v0.12b-stage-b-driver-review-response.md](audits/v0.12b-stage-b-driver-review-response.md)).
-  * The protocol is **LOCKED — NOT RUN**.
-* **Next:** the owner's decision on live inference.
+  * The protocol was locked at 5b8879f.
+* **The run** (authorized by the owner, 2026-11-03): COMPLETE, 420 of 420
+  draws, 524 model calls, replayed without a model and reproduced on
+  arm64, amd64 and the three CI platforms
+  ([benchmark/v12b-dev/RESULTS.md](benchmark/v12b-dev/RESULTS.md)).
+  * Arm B: 153 acknowledgment requests, all answered accurately and
+    followed by the same action. **No action was revised or abandoned
+    after an acknowledgment was shown.** 77 draws needed none.
+  * Most revisions in both arms followed the engine's validation
+    refusals, before any preview or acknowledgment. Every B − A
+    interval contains 0.
+  * At one point, 16 of 20 first acknowledgment replies were malformed
+    JSON; all recovered on the retry.
+* **Owner acceptance (2026-11-04):** Stage B accepted and closed. The
+  mechanism works technically in the tested contexts; it does not
+  establish better decisions. Here acknowledgment behaved like a
+  procedural confirmation, not a decision-changing safeguard.
+
+**V0.12.0 released** (2026-11-04, `v0.12.0`) as high-impact action
+acknowledgment and reproducible decision evidence, not as an improved
+decision-quality system. llm-agent 6 is an explicitly selected
+experimental agent; llm-agent 5's validation-first workflow stays the
+default. Release baseline:
+[audits/v0.12.0-release-baseline.md](audits/v0.12.0-release-baseline.md).
+
+## 7g. V0.13 — decision safeguards beyond acknowledgment (proposed)
+
+The owner's direction after V0.12.0: do not build another acknowledgment
+mechanism. Requiring a model to restate consequences did not make it
+reconsider an action. Nothing here is approved or built.
+
+**Priorities:**
+1. **Complete the independent human evidence review** (the frozen
+   98-item review, still PENDING).
+2. **Decision safeguards that go beyond acknowledgment.**
+3. **Explicit consequence comparison before irreversible actions.**
+   Before a termination, for example, the agent would be shown the
+   proposed action, keeping the current arrangement and any other valid
+   alternatives, each with its engine-derived consequences. This is a new
+   decision-support capability, not another confirmation step. The
+   measure is whether the agent evaluates the alternatives, not whether
+   it can repeat the numbers.
+4. **Financial decision-quality evaluation.**
+5. **Multi-day prospective agent testing,** only after the safeguards are
+   reviewed.
+
+**V0.13a (proposed scope):** a design and inventory milestone. It would
+define which alternatives the engine can derive exactly, for which
+actions (termination first), how they are presented, and what would
+count as evaluating them. No live inference until the owner approves a
+protocol.
 
 ## 8. Testing strategy (all versions)
 

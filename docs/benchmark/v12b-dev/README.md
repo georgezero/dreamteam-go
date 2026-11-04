@@ -11,7 +11,7 @@
   420 of 420 draws with 524 model calls ([RESULTS.md](RESULTS.md)). No
   further run is authorized.
 
-V0.12.0 is unreleased (NO GO until the owner has reviewed the results).
+The owner accepted and closed Stage B on 2026-11-04. Released in V0.12.0.
 
 ## Stage A
 

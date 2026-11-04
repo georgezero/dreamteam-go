@@ -7,6 +7,47 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12.0 — release: high-impact action acknowledgment and reproducible decision evidence (0.12.0)
+
+The owner accepted and closed V0.12b Stage B on 2026-11-04 and gave GO
+for the V0.12.0 release, a release-only milestone: no change to
+simulator mechanics, agent workflows, acknowledgment rules, prompts,
+models, scoring or experimental evidence.
+
+**Released as** high-impact action acknowledgment and reproducible
+decision evidence, **not** as an improved decision-quality system.
+llm-agent 6 is an explicitly selected experimental agent; llm-agent 5's
+validation-first workflow stays the default.
+
+**What changed:**
+* the version, `0.12.0`, and `testdata/golden/MIGRATIONS.json`;
+* 0.12.0-dev.3 registered for replay (batch mode `v0.12_dev3`, every
+  earlier mode kept), with the fixture `mini-seed52-v0123` made from a
+  clean archive of 59676a3 and `internal/session/v0123_test.go`;
+* documentation: README, RELEASE_NOTES, ROADMAP (V0.12 released, V0.13
+  proposed, §7g), LLM_AGENT §21, BENCHMARK, V0.12_ACKNOWLEDGMENT (§10,
+  the live evaluation) and the Stage B README's status;
+* the release baseline, `docs/audits/v0.12.0-release-baseline.md`.
+
+**Preserved byte for byte:** the simulator, llm-agent 1 to 6, every
+prompt, workflow identity and contract, the historical recordings, the
+frozen evidence, the golden references, the V0.12a scripted evidence and
+the V0.12b locked protocol, run record and results (the lock's 48 pins
+hold).
+
+**Development findings, as released:** 420 completed draws, 524 model
+calls, 12 branch points, two local models; 153 accurate
+acknowledgments, 153 acknowledged and proceeded, 0 revised, 0 abandoned,
+0 failures after retries, 77 draws needing none. Acknowledgment did not
+change any high-impact action after it was shown; most revisions
+followed validation refusals earlier; no decision-quality benefit was
+established.
+
+**Gates:** all passed; listed in `docs/audits/v0.12.0-release-baseline.md`. No live model was contacted,
+and no clinical suite or historical live experiment was rerun.
+
+---
+
 ## V0.12b — Stage B live run: COMPLETE (results; 0.12.0-dev.3, unchanged)
 
 The owner authorized the single Stage B run of the locked protocol

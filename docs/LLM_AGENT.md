@@ -44,7 +44,7 @@ default, or the opt-in `validation-first-preview` (§20). V0.11b compared
 it with llm-agent 3 at fixed decision points (§19). A valid decision is
 not shown to be a better one.
 
-V0.12a (unreleased) adds llm-agent 6 (`agents/llm/llm_agent6.py`, §21).
+V0.12.0 releases llm-agent 6, an explicitly selected experimental agent (`agents/llm/llm_agent6.py`, §21).
 It is llm-agent 5's validation-first workflow, loaded unchanged, with one
 added safeguard: a termination, a new retained obligation or displaced
 bookings must be acknowledged, with the engine's exact values, before
@@ -1238,7 +1238,7 @@ whether the selective preview step occurs.
   action can create retained obligations. Neither validation nor a
   preview the model accepts is a recommendation to proceed.
 
-## 21. llm-agent 6: high-impact action acknowledgment (V0.12a)
+## 21. llm-agent 6: high-impact action acknowledgment (V0.12a, released in V0.12.0)
 
 `agents/llm/llm_agent6.py` is llm-agent 5's validation-first workflow
 (loaded unchanged, with llm-agent 3 and 4 beneath it) and one safeguard,
@@ -1273,8 +1273,12 @@ reports is in [V0.12_CONSEQUENCE_INVENTORY.md](V0.12_CONSEQUENCE_INVENTORY.md).
 
 **Replay** (`--replay FILE`) re-runs the workflow against the engine
 with the recorded replies, without a model, and requires an identical
-record. llm-agent 1 to 5 and their recordings are unchanged. llm-agent 5
-remains the released agent; version 6 is not a default anywhere.
+record. llm-agent 1 to 5 and their recordings are unchanged.
+
+**Selection (V0.12.0):** llm-agent 6 is released as an **experimental**
+agent and runs only when `agents/llm/llm_agent6.py` is invoked. It is not
+a default anywhere: llm-agent 5's `validation-first` stays the default
+workflow.
 
 **Tests:**
 * `agents/llm/test_llm_agent6.py` (31): the 29 behaviours the milestone
@@ -1308,7 +1312,7 @@ Two limits are now stated in the specification:
   replies, not who wrote them. `model.jsonl` is the record of the model
   calls (F2).
 
-**The Stage B driver (V0.12b, not run):** `analysis/acknowledgment/stage_b.py`
+**The Stage B driver (V0.12b):** `analysis/acknowledgment/stage_b.py`
 runs llm-agent 5 (`validation-first-preview`) and llm-agent 6 through
 their own `ask()` at recorded branch points
 ([benchmark/v12b-dev/DRIVER.md](benchmark/v12b-dev/DRIVER.md)). Each agent
@@ -1326,7 +1330,20 @@ scripted cases.
 **Acknowledgment is not approval.** It records that the reply stated the
 engine's reported direct consequences of the exact proposal. It does not
 establish that the action is clinically or financially wise. The engine
-reports direct consequences, not all future outcomes. No live model has
-been run: whether the safeguard changes decisions, or becomes a
-procedure that models learn to repeat, is untested.
+reports direct consequences, not all future outcomes.
+
+**The Stage B live run (V0.12b, 2026-11-04;
+[benchmark/v12b-dev/RESULTS.md](benchmark/v12b-dev/RESULTS.md)):** the
+locked protocol, run once: 12 branch points, two local models, 420 of
+420 draws, 524 model calls, replayed without a model and reproduced
+across platforms.
+* llm-agent 6 showed 153 acknowledgment requests. All 153 were answered
+  accurately and followed by the same action: 0 revised, 0 abandoned, 0
+  failed or withheld after retries. 77 draws needed no acknowledgment.
+* **Acknowledgment did not change any high-impact action after it was
+  shown.** Most revisions in both agents followed validation refusals,
+  earlier. Every B − A interval contains 0: no decision-quality benefit
+  was established.
+* At one point 16 of 20 first acknowledgment replies were malformed
+  JSON; the workflow's retry recovered all of them.
 
