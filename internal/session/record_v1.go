@@ -255,6 +255,7 @@ var earlierV2Engines = map[string]string{
 	"0.12.0-dev.1": batchModeV0121,  // V0.12a (high-impact action acknowledgment): this build's action set and rules
 	"0.12.0-dev.2": batchModeV0122,  // V0.12b Stage A (the F1 repair of llm-agent 6): this build's action set and rules
 	"0.12.0-dev.3": batchModeV0123,  // V0.12b Stage B (the acknowledgment evaluation driver and its live run): this build's action set and rules
+	"0.12.0":       batchModeV0120,  // the V0.12 release: this build's action set and rules
 }
 
 // legacyState returns the state encoding of a registered legacy engine.

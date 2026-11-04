@@ -758,6 +758,32 @@ benchmark result with llm-agent 6 and a live model exists yet.
   not their authorship. Keep each run's `model.jsonl`
   ([V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md) §7).
 
+## 11g. Management alternatives (V0.13a, design only)
+
+V0.13a adds no policy, suite, metric or run to the benchmark. It
+designs what a later milestone would add
+([V0.13_MANAGEMENT_ALTERNATIVES.md](V0.13_MANAGEMENT_ALTERNATIVES.md)).
+
+**What it designs:**
+* A comparison of the alternatives to an irreversible action, built
+  from existing actions only. The termination case comes first.
+* The comparison separates:
+  * the engine's exact immediate facts;
+  * deterministic projections under a declared continuation
+    (`dreamteam.continuation/no-further-action-v1`);
+  * what is unavailable.
+* Projections are made by rebuilding paired branches from a recorded
+  decision point. The engine's keyed randomness gives both branches the
+  same exogenous world.
+* Projections use the simulator's realized future. They are evaluation
+  material and are not shown to an agent.
+
+**What it does not add:**
+* No composite score, rank or verdict is defined.
+* A projected money difference is never a saving, and a cheaper
+  alternative is never a better decision.
+* Benchmark results, policies and suites are unchanged.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

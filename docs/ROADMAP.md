@@ -24,7 +24,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
 | **V0.12** (released, `v0.12.0`: high-impact action acknowledgment and reproducible decision evidence, V0.12a–V0.12b, by the owner's release decision 2026-11-04) | Decision safeguards: llm-agent 6, engine-backed acknowledgment of high-impact actions, an explicitly selected experimental agent (llm-agent 5's validation-first stays the default); an independent safeguard audit; a prospective live evaluation against llm-agent 5's preview (420 draws): every acknowledgment accurate, none changed a high-impact action (§7f). No decision-quality benefit established; not clinical validation | V0.11 |
-| **V0.13** (proposed, not started) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
+| **V0.13** (in progress: V0.13a done, awaiting review) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1453,11 +1453,45 @@ reconsider an action. Nothing here is approved or built.
 5. **Multi-day prospective agent testing,** only after the safeguards are
    reviewed.
 
-**V0.13a (proposed scope):** a design and inventory milestone. It would
-define which alternatives the engine can derive exactly, for which
-actions (termination first), how they are presented, and what would
-count as evaluating them. No live inference until the owner approves a
-protocol.
+**The owner's plan for V0.13:**
+
+| Milestone | Scope | Status |
+|---|---|---|
+| V0.13a | Alternative-action inventory and design | **done** (0.13.0-dev.1), awaiting owner review |
+| V0.13b | Deterministic alternative-comparison implementation | proposed |
+| V0.13c | Controlled decision-level evaluation | proposed |
+| V0.13.0 | Release | pending |
+
+**V0.13a (done, 0.13.0-dev.1):** design and inventory only.
+* Documents: `docs/V0.13_MANAGEMENT_ALTERNATIVES.md` and `docs/v13a/`.
+* No agent workflow, no model request, and no change to simulator
+  mechanics, accounting, schemas or scoring.
+
+**What V0.13a found:**
+* Every action has a meaningful no-action alternative.
+* A termination's direct terms are exact in the preview.
+* Keeping the employee keeps the weekly guarantee and the severance
+  exposure.
+* The preview does not report capacity lost by a termination-only batch
+  (G1).
+* Exact branching is possible by rebuilding from the record, not by
+  copying in memory. A mechanics check verified it.
+* Keyed randomness gives paired branches the same exogenous world.
+* Projections use the realized future. They belong to evaluation, not
+  to the agent's presentation.
+
+**V0.13a's recommendation for V0.13b (not started; owner decision
+needed):**
+* Deterministic work only:
+  * the branch builder, branch identities and comparison reader (E1–E3,
+    read-only, in `internal/session`);
+  * the comparison contract;
+  * the candidate rule;
+  * a fixed, hashed presentation template;
+  * paired scripted cases.
+* No live inference.
+* E4, an opt-in `slotsClosed` for termination-only previews, needs the
+  owner's decision.
 
 ## 8. Testing strategy (all versions)
 

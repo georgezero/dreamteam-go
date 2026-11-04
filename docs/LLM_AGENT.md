@@ -1347,3 +1347,32 @@ across platforms.
 * At one point 16 of 20 first acknowledgment replies were malformed
   JSON; the workflow's retry recovered all of them.
 
+## 22. Management alternatives (V0.13a, design only)
+
+No agent was added or changed in V0.13a. llm-agent 5 (validation-first)
+remains the default, and llm-agent 6 remains experimental.
+
+**What V0.13a designed:**
+* a comparison to show an agent before an irreversible action,
+  terminations first
+  ([V0.13_MANAGEMENT_ALTERNATIVES.md](V0.13_MANAGEMENT_ALTERNATIVES.md));
+* at most four alternatives, built by a fixed rule from existing actions
+  (`dreamteam.alternative-selection/v1`):
+  * the proposal;
+  * no action;
+  * a leave-one-out or bounded adjustment;
+* the engine's exact facts for each, with the engine's estimates and
+  the unavailable items kept apart;
+* no projection of the realized future, and no recommendation.
+
+**Replies:** the agent would reply with exactly one of
+`select:<id>`, `revise` or `abandon`. Nothing would ever be defaulted.
+
+**How it would be evaluated** (`docs/v13a/EVALUATION_CONTRACT.md`):
+* by observable behaviour:
+  * `inspect` requests;
+  * citations of shown values that are checked against the engine;
+  * decision sensitivity in paired cases;
+* never by scoring the model's explanation.
+
+No template has been written or shown to a model.

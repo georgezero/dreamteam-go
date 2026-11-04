@@ -7,6 +7,97 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13a — engine-backed management alternatives: inventory and design (0.13.0-dev.1)
+
+On 2026-11-04 the owner accepted and closed V0.12.0, and gave GO for
+V0.13a.
+
+**What V0.13a is:**
+* a design and inventory milestone only;
+* no agent workflow, no live model, and no change to simulator
+  mechanics, financial accounting, action schemas, scoring or
+  historical evidence.
+
+V0.13.0 remains unreleased.
+
+**The question:** can the existing engine represent and compare,
+exactly, the alternatives to an irreversible or financially
+consequential action before it is taken? Termination versus keeping
+the employee came first.
+
+**What was built:**
+* **Documents:**
+  * `docs/V0.13_MANAGEMENT_ALTERNATIVES.md`, the overview and the
+    recommendation;
+  * `docs/v13a/`, with nine documents:
+    * the action inventory;
+    * the termination-versus-keep case;
+    * the comparison contract `dreamteam.management-alternatives/v1`
+      (proposed);
+    * branching feasibility;
+    * the continuation design
+      (`dreamteam.continuation/no-further-action-v1`, proposed);
+    * alternative selection (`dreamteam.alternative-selection/v1`,
+      proposed);
+    * the agent presentation proposal;
+    * the evaluation contract;
+    * the known limitations.
+* **The baseline:** `docs/audits/v0.13a-baseline.md`.
+  * Hashes at `8bbeca2` for the simulator, action schemas, validation,
+    preview, session API, accounting, randomness, the evaluation policy,
+    llm-agent 5 and 6, the acknowledgment contract, the recordings, the
+    frozen evidence and the goldens.
+  * Every set from the V0.12.0 release baseline is unchanged.
+* **The version:** `0.13.0-dev.1`. 0.12.0 is registered for replay
+  (batch mode `v0.12.0`), with the fixture `mini-seed52-v0120`, made
+  from a clean archive of `8bbeca2`, and
+  `internal/session/v0120_test.go`.
+
+**Findings:**
+1. Every existing action has a meaningful no-action alternative. Every
+   alternative proposed is an existing action with existing parameters.
+2. A termination's direct terms are exact engine facts:
+   * last day, end date and notice;
+   * severance and payday;
+   * contract pay to the last day;
+   * displaced bookings;
+   * voided items.
+3. Keeping the employee is not free. The weekly guarantee and the
+   severance exposure continue, and the engine has no resignation.
+4. The preview does not report capacity lost by a termination-only
+   batch. In the example, 0 bookings were displaced, while the 45-day
+   projection lost 177 more orders.
+5. Exact branching is possible by rebuilding from the record, not by
+   copying in memory. A mechanics check saved, replayed and verified
+   both branches, and reran one identically.
+6. The engine's keyed randomness gives paired branches the same
+   exogenous world: 2,224 orders in both.
+7. Projections use the realized future. They are evaluation material,
+   not information to show the agent.
+
+**Design validation:**
+* Read-only inspection of the engine.
+* One decision-point probe (`validate`, `preview`, digests unchanged).
+* One pair of branch runs on `mini`, seed 52 (a development seed).
+* The session-registration tests and the golden tests.
+* No model request, no reserved or holdout seed, no clinical suite.
+* Cross-platform CI runs the full suite on the commit.
+
+**Recommendation:** GO for a deterministic V0.13b, with no live
+inference:
+* E1–E3: the branch builder, identities and comparison reader;
+* the contract;
+* the candidate rule;
+* the hashed template;
+* paired scripted cases.
+
+E4 (an opt-in `slotsClosed` for termination previews) needs an owner
+decision.
+
+**Stopped for owner review.**
+
+---
+
 ## V0.12.0 — release: high-impact action acknowledgment and reproducible decision evidence (0.12.0)
 
 The owner accepted and closed V0.12b Stage B on 2026-11-04 and gave GO
