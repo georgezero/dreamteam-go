@@ -739,8 +739,9 @@ benchmark result with llm-agent 6 and a live model exists yet.
   the engine's exact recruiting fee and earliest-exit cost, and that an
   empty or wrong acknowledgment leaves the session as the no-op run's.
 * **The Stage B experiment**
-  ([benchmark/v12b-dev/PROTOCOL.md](benchmark/v12b-dev/PROTOCOL.md)) is
-  not run, and live inference is not authorized.
+  ([benchmark/v12b-dev/PROTOCOL.md](benchmark/v12b-dev/PROTOCOL.md)) was
+  run once, as authorized: COMPLETE, 420 of 420 draws
+  ([benchmark/v12b-dev/RESULTS.md](benchmark/v12b-dev/RESULTS.md)).
   * **The driver** (`analysis/acknowledgment/stage_b.py`,
     [benchmark/v12b-dev/DRIVER.md](benchmark/v12b-dev/DRIVER.md)) calls
     llm-agent 5's and 6's own `ask()` at the recorded points.
@@ -749,6 +750,7 @@ benchmark result with llm-agent 6 and a live model exists yet.
     * runs its fidelity cases against the agents' own runs on the real
       engine;
     * runs a scripted mock run that stops PARTIAL, with its analysis.
+    * replays the live run without a model and compares its analysis.
 * A llm-agent 6 replay certifies consistency with the recorded replies,
   not their authorship. Keep each run's `model.jsonl`
   ([V0.12_ACKNOWLEDGMENT.md](V0.12_ACKNOWLEDGMENT.md) §7).

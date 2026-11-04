@@ -394,6 +394,12 @@ jobs:
           for f in live/draws.jsonl live/run.json decisions.json decision-tables.md inference.json; do
             cmp v12b-mock/$f $V/fidelity/mock-run/$f; cp v12b-mock/$f out/v12b-mock-$(basename $f)
           done
+          # The live run (live/), replayed without a model: every draw,
+          # model call and engine request identical, and the analysis equal
+          # to the committed one.
+          $P analysis/acknowledgment/stage_b.py analyze --binary ./dt --replays . --dir $V --protocol $V/protocol.json \
+            --out v12b-run
+          for f in decisions.json decision-tables.md inference.json; do cmp v12b-run/$f $V/$f; cp v12b-run/$f out/v12b-run-$f; done
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

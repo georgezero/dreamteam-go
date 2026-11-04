@@ -4,12 +4,14 @@
 * **Stage A** is done: the independent safeguard audit, the F1 repair,
   the focused re-review, and the real-engine displacement and hire
   tests.
-* **Stage B: LOCKED — NOT RUN.** The design was approved by the owner.
+* **Stage B: run once, COMPLETE.** The design was approved by the owner.
   The driver was implemented with fidelity evidence, independently
-  reviewed and re-reviewed (GO), and remediated. The protocol is locked.
-  **Live inference is not authorized**; the lock does not authorize it.
+  reviewed and re-reviewed (GO), and remediated, and the protocol locked
+  (5b8879f). The owner then authorized the single live run. It completed
+  420 of 420 draws with 524 model calls ([RESULTS.md](RESULTS.md)). No
+  further run is authorized.
 
-V0.12.0 is unreleased.
+V0.12.0 is unreleased (NO GO until the owner has reviewed the results).
 
 ## Stage A
 
@@ -39,10 +41,13 @@ The V0.12a scripted evidence regenerates byte-identical.
 | `internal/bench/llm_agent6_hire_test.go` | `be48a1563214f8d2cf2f3586765556dca73fa0e545a0d3ceb645254a754451d8` |
 | `internal/bench/llm_agent6_displacement_test.go` | `4a20c2de7592c9b78c43c12e4fc3bf796b09a6c4c36ab83474f2fcfd8aaaa57a` |
 
-## Stage B (LOCKED — NOT RUN)
+## Stage B (locked at 5b8879f; run once, COMPLETE)
 
 | Document | What |
 |---|---|
+| [RESULTS.md](RESULTS.md) | The live run's results: execution, acknowledgment classes, preview classes, outcomes, exposure, limitations |
+| `live/` | The live run record, as the driver wrote it (committed separately, before the analysis) |
+| `decisions.json`, `decision-tables.md`, `inference.json` | The run's analysis, by the pinned driver, replayed without a model; reproduced on arm64 and amd64 and in CI |
 | [PROTOCOL.md](PROTOCOL.md) | The locked protocol: question, points, arms, limits, outcomes, statistics, replay, lock |
 | [DRIVER.md](DRIVER.md) | The driver's specification: how a draw runs, limits, replay, classification, limitations |
 | [PROCEDURE.md](PROCEDURE.md) | Run instructions and the partial-run procedure |
@@ -98,5 +103,10 @@ Made with:
     python3 -I -B analysis/acknowledgment/stage_b_fidelity.py mockrun --binary ./dt --replays DIR --protocol docs/benchmark/v12b-dev/protocol.json --out docs/benchmark/v12b-dev/fidelity/mock-run
 
 where DIR holds the V0.8c and V0.9c replays (`PROCEDURE.md` §1). CI makes
-every one again and compares it on every platform. No model was contacted.
+every one again and compares it on every platform. No model was contacted
+for any of these. The live run's analysis is made with
+
+    python3 -I -B analysis/acknowledgment/stage_b.py analyze --binary ./dt --replays DIR --dir docs/benchmark/v12b-dev --protocol docs/benchmark/v12b-dev/protocol.json --out OUT
+
+which replays every draw without a model; CI does so on every platform.
 The separate frozen 98-item human evidence review is still PENDING.

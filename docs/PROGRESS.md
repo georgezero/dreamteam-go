@@ -7,6 +7,57 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.12b — Stage B live run: COMPLETE (results; 0.12.0-dev.3, unchanged)
+
+The owner authorized the single Stage B run of the locked protocol
+`v12b-ack-1` (lock commit 5b8879f) on 2026-11-03. Nothing else was
+authorized: no amendment, no tuning, no repeated or substituted draws.
+
+**Before the run:**
+* HEAD was the lock commit, and the engine was built from it
+  (`0.12.0-dev.3`).
+* All 48 pinned files, the schedule's entries and both settings files
+  were checked independently, and `stage_b.py check` reported all 24
+  point-arm starts at the recorded state and `lock: holds`.
+* The server answered healthy and listed both protocol models with the
+  entries V0.11b recorded. It reported oMLX 0.7.3 (V0.11b: 0.7.0); the
+  protocol does not pin the version.
+* The output directory was new, and no Stage B run record existed.
+
+**The run** (`docs/benchmark/v12b-dev/live/`, committed by itself):
+the exact command of `PROCEDURE.md` §2, with the owner's authorization
+verbatim. **COMPLETE**: 420 of 420 draws, no stop; 524 model calls (limit
+1,680), all HTTP 200; 3,633 s (limit 14,400 s); 30 server checks, all
+healthy and unchanged.
+
+**The analysis** (`decisions.json`, `decision-tables.md`,
+`inference.json`, [RESULTS.md](benchmark/v12b-dev/RESULTS.md)):
+* every draw, model call and engine request replayed without a model,
+  identical; the same analysis on the Pi (arm64) and horo (amd64);
+* arm B: 153 acknowledgment requests, all followed by an accurate
+  acknowledgment and the same action (class A, "acknowledged and
+  proceeded"); no revision, abandonment or withholding after a request;
+  77 draws needed none (E). At one termination point, 16 of 20 first
+  acknowledgment replies were malformed JSON and were accepted on the
+  retry;
+* arm A: of 170 shown previews, 166 proceeded, 3 revised and 1 failed;
+* both arms' revisions and abandonments otherwise follow the engine's
+  validation refusals, with very similar distributions; every B − A
+  interval contains 0;
+* the same high-impact actions were executed in both arms (terminations
+  at three points, an unfunded hire, a $44,687.30 allocation
+  commitment).
+
+**Not claimed:** no financial or clinical improvement, no model ranking,
+and acknowledgment is not read as approval.
+
+**CI** now also replays the live run and compares its analysis on every
+platform. The agents, the simulator, the scoring and the locked
+documents are unchanged. The version is not bumped: the run's engine is
+the locked `0.12.0-dev.3`.
+
+---
+
 ## V0.12b — Stage B preparation: the driver, its review, and the protocol lock (LOCKED — NOT RUN; 0.12.0-dev.3)
 
 The owner approved the Stage B design on 2026-11-03. That covers:
