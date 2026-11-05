@@ -57,6 +57,16 @@ reason. An operations batch has no preview, so it is out of scope.
   start for every hire.
 * The tier adjustment is deferred.
 
+**Two behaviours to note (review F6 and F4):**
+* `applies` reads the staffing preview's displacement count, as §1
+  says. The text's last sentence names only "the engine's validation
+  answers" among the inputs.
+* A proposal that holds the same action twice gives identical
+  leave-one-out candidates. Both are listed, and that comparison cannot
+  be branched, because `Branch` refuses equal batches. The engine
+  refuses such a proposal anyway. Collapsing equal candidates would be a
+  new rule version, so it awaits the owner's decision.
+
 ## 3. Determinism and replay
 
 **The selection is a pure function of four inputs:**

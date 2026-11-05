@@ -47,8 +47,21 @@ A1, with the engine's own "estimate" basis.
 * requires a `compared` table that follows from the alternatives;
 * requires a matching SHA-256.
 
+* refuses a class A value whose `source` is not a decision-point
+  request (`preview.`, `preview(proposal).`, `slotsClosed.`, `observe.`,
+  `rosterPlan(`, `schedule(`), or one of the stated rules `no batch` and
+  `engine rule`. This was added after review F2.
+
+**`DecodeAgent` is structural:** it cannot tell whether a value is the
+engine's.
+
 **`VerifyAgent`:** rebuilds the comparison from the session and
-requires it equal, byte for byte.
+requires it equal, byte for byte. `DecodeAgentAt` does both, and
+anything shown to an agent must pass it.
+
+**Engine facts:** these include values given by the stated rules: the
+zeros under no action (`no batch`) and reversibility (`engine rule`).
+Each prints its derivation or basis (review F8).
 
 **The evaluation audience (`Evaluation`):**
 * It is built only after the decision, by `BuildEvaluation(record,
@@ -61,7 +74,9 @@ requires it equal, byte for byte.
   * each branch's identity, replay verification, digests at both ends,
     class B projections and class C items;
   * paired differences.
-* `DecodeEvaluation` and `VerifyEvaluation` apply the same rules, and
+* `DecodeEvaluation` is structural. Only `VerifyEvaluation`, which
+  rebuilds the evaluation from the record, binds it (review F9).
+* Both apply the same rules, and
   require every branch to be replay-verified, to match its alternative,
   and to share one continuation, horizon and source.
 * Building the evaluation does not change the agent comparison. A test

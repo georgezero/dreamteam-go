@@ -3,6 +3,7 @@ package alternatives
 import (
 	"bytes"
 	"encoding/json"
+	"maps"
 	"slices"
 	"strings"
 
@@ -219,7 +220,8 @@ func verifyCitations(a *Agent, cs []Citation, chosen string) (bool, []string) {
 		}
 		other := false
 		var seen []string
-		for id, raw := range c.Values {
+		for _, id := range slices.Sorted(maps.Keys(c.Values)) {
+			raw := c.Values[id]
 			if id != chosen {
 				other = true
 			}

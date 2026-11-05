@@ -535,12 +535,27 @@ func checkValue(v Value, classes ...string) error {
 		return fmt.Errorf("%w: %s: unit %q", ErrContract, v.Key, v.Unit)
 	}
 	low := strings.ToLower(v.Key + " " + v.Label)
+	if (v.Class == ClassReported || v.Class == ClassDerived) && !decisionPointSource(v.Source) {
+		return fmt.Errorf("%w: %s: source %q is not a decision-point request", ErrContract, v.Key, v.Source)
+	}
 	for _, w := range forbidden {
 		if strings.Contains(low, w) {
 			return fmt.Errorf("%w: %s: %q", ErrContract, v.Key, w)
 		}
 	}
 	return nil
+}
+
+// decisionPointSources are the only sources a class A value may name:
+// the engine requests BuildAgent makes at the decision point, and the two
+// stated rules. A branch, window or end-of-run source is refused.
+var decisionPointSources = []string{"preview.", "preview(proposal).", "slotsClosed.", "observe.", "rosterPlan(", "schedule("}
+
+func decisionPointSource(src string) bool {
+	if src == "no batch" || src == "engine rule" {
+		return true
+	}
+	return slices.ContainsFunc(decisionPointSources, func(p string) bool { return strings.HasPrefix(src, p) })
 }
 
 // check enforces the agent audience's rules.
@@ -611,8 +626,13 @@ func jsonEqual(x, y any) bool {
 	return bytes.Equal(a, b)
 }
 
-// DecodeAgent reads an agent-audience comparison and checks every rule:
-// unknown fields (a projection included) are refused.
+// DecodeAgent reads an agent-audience comparison and checks every rule
+// that can be checked without the engine: unknown fields (a projection
+// field among them), classes other than A1, A2 and C, and class A values
+// whose source is not a decision-point request are refused. It cannot
+// tell whether a value is the engine's: only VerifyAgent, which rebuilds
+// the comparison from the decision-point session, binds it to the engine.
+// Anything shown to an agent must pass VerifyAgent (DecodeAgentAt).
 func DecodeAgent(raw []byte) (*Agent, error) {
 	var a Agent
 	dec := json.NewDecoder(bytes.NewReader(raw))
@@ -645,4 +665,17 @@ func VerifyAgent(s *session.Session, sel *Selection, a *Agent) error {
 		return fmt.Errorf("%w: the comparison does not rebuild", ErrContract)
 	}
 	return nil
+}
+
+// DecodeAgentAt decodes a comparison and binds it to the decision point:
+// DecodeAgent, then VerifyAgent against s and sel.
+func DecodeAgentAt(raw []byte, s *session.Session, sel *Selection) (*Agent, error) {
+	a, err := DecodeAgent(raw)
+	if err != nil {
+		return nil, err
+	}
+	if err := VerifyAgent(s, sel, a); err != nil {
+		return nil, err
+	}
+	return a, nil
 }

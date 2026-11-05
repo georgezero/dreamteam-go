@@ -7,6 +7,130 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13b — deterministic management alternatives (0.13.0-dev.2)
+
+On 2026-11-04 the owner accepted and closed V0.13a and gave GO for
+V0.13b:
+* E1–E3 approved;
+* E4 approved narrowly: exact scheduled capacity only, never future lost
+  orders;
+* live inference: NO GO.
+
+V0.13.0 remains unreleased.
+
+**What was built** (`docs/v13b/IMPLEMENTATION_REPORT.md`):
+* **Branching (E1, E2).** `session.Branch` rebuilds every alternative
+  from the same saved decision-point record:
+  * a fresh replay, verified;
+  * the alternative's batch at the decision instant;
+  * no further action to a common horizon
+    (`dreamteam.continuation/no-further-action-v1`).
+
+  Every branch is its own replayable record with a
+  `dreamteam.branch-identity/v1` identity. `VerifyBranch` and
+  `VerifyBranchSet` check identities, records, the horizon rule and a
+  fresh replay. Records under earlier rules or another state encoding
+  are refused, anywhere in their prefix chain.
+* **Slots closed (E4).** `PreviewSlotsClosed` is a separate, opt-in,
+  read-only `dreamteam.slots-closed/v1` report for termination-only
+  batches. It counts the template slots, booked or not, that staffing
+  makes bookable now and the termination leaves unstaffed, from the end
+  date to the last materialized day. It is capacity, not demand.
+  `PreviewStaffing` is unchanged.
+* **The comparison (E3).** `internal/alternatives` holds:
+  * the candidate rule `dreamteam.alternative-selection/v1` (pinned;
+    at most four candidates);
+  * `dreamteam.management-alternatives/v1`, with an agent audience that
+    cannot hold class B, decoded with refusal of unknown fields, of
+    classes other than A1, A2 and C, and of sources that are not
+    decision-point requests, and bound to the session by `VerifyAgent`;
+  * an evaluation audience with the class B projections of verified
+    branches and paired differences;
+  * the presentation template `dreamteam.alternatives-presentation/v1`
+    (pinned; summary, then detail on `inspect:<id>`);
+  * the classification of scripted replies.
+* **Evidence** (`docs/benchmark/v13b-dev/`): the termination case in both
+  audiences and as presented; ten scripted decision cases; three
+  decision-sensitivity pairs from real engine states. CI compares the
+  files byte for byte.
+* **Registration:** 0.13.0-dev.1 as batch mode `v0.13_dev1`, with a fixture
+  made from a clean archive of `1c75c93`.
+
+**Termination versus keep** (mini, seed 52, 2026-10-13 07:00, Sam
+(E04), last day 2026-10-27).
+
+The agent sees:
+* notice of 14 days;
+* severance of $3,950.00, recognized now and paid 2026-10-30;
+* contract pay to the last day, $4,350.00;
+* 0 displaced bookings;
+* 2,481 slots no longer staffed to 2027-02-10, 0 of them booked now;
+* the engine's estimate of $1,975.00 a week no longer owed.
+
+For keeping, the agent sees:
+* the weekly guarantee of $1,975.00, which continues;
+* severance if terminated later;
+* the employment stage, contracted and rostered minutes;
+* payroll, payables and appointments booked ahead.
+
+Evaluation only, to 2026-12-11:
+* orders received were 2,881 in every branch;
+* orders lost were 407 (proposal), 125 (no action) and 337 (adjusted).
+
+**Tests:**
+* 24 safety requirements are mapped to tests in the implementation
+  report, §3.
+* 22 mutations of the safety boundaries are all caught. The first pass
+  caught 18, and the four tests that missed were strengthened.
+* An accepted no-effect batch, and a refused batch, leave the ledger
+  and every reported metric equal to no action. The V0.13a accrual
+  question is closed for that case.
+
+**Independent review** (`docs/audits/v0.13b-independent-review.md`,
+verbatim, `c79f800`): no BLOCKER.
+* **Fixed:**
+  * F1: evidence regenerated after the version bump;
+  * F2: the agent decoder refuses non-decision-point sources, and
+    `DecodeAgentAt` binds;
+  * F3: the whole prefix chain is checked;
+  * F5: citation checks are in a fixed order.
+* **Awaiting the owner:** F4, identical leave-one-out candidates. Fixing
+  it changes the rule.
+* **Recorded:** F6–F10 (`docs/audits/v0.13b-review-response.md`).
+
+**A finding from the gates:**
+* The race run found that the holdout containment test does not list
+  `branchSource`, which calls the embedded manifest's guard.
+* The call is of the same kind as the reviewed T90 and benchmark sites.
+  It refuses a holdout seed before anything runs, and its error never
+  names a seed.
+* It is now listed in `holdoutReach`, with that reason.
+
+**Quality gates:**
+
+| Where | Gate | Result |
+|---|---|---|
+| horo (linux/amd64, Go 1.27.0), reviewed tree | Race, all packages, 90 min | 11 of 13 packages ok; `internal/alternatives` failed (F1, stale evidence) and `internal/eval` failed (`TestHoldoutContainment`, above); both fixed |
+| horo, fixed tree | Race: `internal/alternatives`, `internal/session`, `internal/sim` | exit 0; 3 of 3 packages ok, no failure |
+| Pi (linux/arm64) | `TestHoldoutContainment` after the fix; the V0.13b focused tests (`TestBranch*`, `TestSlotsClosed*`, `TestV0131*`, every `internal/alternatives` test) | ok |
+| horo, both trees | Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64), vet, gofmt | 5 of 5 ok; vet ok; gofmt clean |
+| horo | Frozen evidence (V0.8c credit and low liquidity, V0.9c credit and staffing shortage) | 4 × 104 checks, 0 failed |
+| horo | Shared-prefix v4 points; V0.11b analysis replayed without a model (720 draws); V0.11a and V0.12a scripted evidence | verified; reproduced |
+| horo | Python: agents/llm, analysis/evidence, analysis/repeatability | 156, 147 and 88 tests ok |
+| horo, fixed tree | V0.13b evidence on amd64 (inside the race run of `internal/alternatives`) | byte-identical |
+| CI | Full Go suite, golden references, historical replay, benchmark verify and reproduce, Linux, macOS and arm64 | run by CI on this commit |
+
+**Not run:** live inference, the clinical suites, historical live reruns,
+and any reserved or holdout seed.
+
+**Not changed:**
+* simulator mechanics, accounting, action schemas, scoring, the default
+  preview;
+* every historical recording, agent, prompt and frozen contract
+  (`docs/audits/v0.13b-baseline.md`).
+
+---
+
 ## V0.13a — engine-backed management alternatives: inventory and design (0.13.0-dev.1)
 
 On 2026-11-04 the owner accepted and closed V0.12.0, and gave GO for

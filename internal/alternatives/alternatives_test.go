@@ -252,6 +252,39 @@ func TestAgentAudienceBoundary(t *testing.T) {
 			t.Errorf("%s: %v", name, err)
 		}
 	}
+	// A projection relabelled as an engine fact, with a branch source, is
+	// refused even with the compared table and digest recomputed; with a
+	// decision-point source it decodes but does not bind to the session.
+	smuggle := func(src string) []byte {
+		var x Agent
+		json.Unmarshal(raw, &x)
+		x.Alternatives = slices.Clone(x.Alternatives)
+		for i := range x.Alternatives {
+			if x.Alternatives[i].Validation.OK {
+				x.Alternatives[i].Facts = append(slices.Clone(x.Alternatives[i].Facts), Value{Key: "cash_at_horizon", Label: "Cash at the horizon",
+					Class: ClassReported, Unit: UnitCents, Number: num(1000000 + int64(i)), When: "2026-12-11", Source: src})
+			}
+		}
+		x.Compared = compare(x.Alternatives)
+		x.Sha256 = x.digest()
+		b, _ := json.Marshal(&x)
+		return b
+	}
+	for _, src := range []string{"end.balances.cashCents", "branch.proposal", "window.money.netRevenueCents"} {
+		if _, err := DecodeAgent(smuggle(src)); !errors.Is(err, ErrContract) {
+			t.Errorf("smuggled projection with source %s: %v", src, err)
+		}
+	}
+	disguised := smuggle("observe.finance.cashCents")
+	if _, err := DecodeAgent(disguised); err != nil {
+		t.Fatalf("structural decode: %v", err)
+	}
+	if _, err := DecodeAgentAt(disguised, s, sel); !errors.Is(err, ErrContract) {
+		t.Fatalf("a disguised projection bound to the session: %v", err)
+	}
+	if _, err := DecodeAgentAt(raw, s, sel); err != nil {
+		t.Fatal(err)
+	}
 	// The evaluation audience holds the agent's bytes and projections.
 	r, _ := s.Record()
 	e, err := BuildEvaluation(r, a, session.BranchOptions{Continuation: session.NoFurtherAction()})
@@ -491,6 +524,14 @@ func TestClassify(t *testing.T) {
 	}
 	if d := Classify(a, nil, &Reply{Kind: ReplySelect, ID: IDProposal, Comparison: four[2:]}, rv); !slices.Contains(d.Flags, FlagCompared) {
 		t.Fatalf("two verified entries: %v", d.CitationChecks)
+	}
+	// Citation checks are in a fixed order (they are part of the record).
+	multi := []Citation{cite("severance_recognized_now.E04", map[string]any{"alpha": 1, "beta": 2, "gamma": 3, IDProposal: 1})}
+	first := Classify(a, nil, &Reply{Kind: ReplySelect, ID: IDProposal, Comparison: multi}, rv)
+	for range 50 {
+		if again := Classify(a, nil, &Reply{Kind: ReplySelect, ID: IDProposal, Comparison: multi}, rv); !slices.Equal(again.CitationChecks, first.CitationChecks) {
+			t.Fatal("citation checks change order")
+		}
 	}
 	// The reason is never read.
 	x := Classify(a, nil, &Reply{Kind: ReplySelect, ID: IDProposal, Reason: "I compared every alternative carefully"}, rv)

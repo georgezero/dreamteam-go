@@ -243,6 +243,36 @@ func TestBranchHistoricalRules(t *testing.T) {
 	if _, err := s.Branch([]Alternative{{ID: "no_action"}}, defaultOpts()); !errors.Is(err, ErrBranchRules) {
 		t.Fatalf("continuing a slice 2 record: %v", err)
 	}
+	// A deeper prefix under earlier rules: a 0.2.0-dev.6 record continued
+	// by a 0.13.0-dev.1 session (same rules as this build), continued
+	// again here. The immediate prefix uses this build's rules; the one
+	// below it does not.
+	d6, _, err := Load("../../testdata/sessions/mini-seed26-dev6.session.json", ReplayOptions{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	d6.Advance(simtime.Hour, Options{})
+	r1, err := d6.Record()
+	if err != nil {
+		t.Fatal(err)
+	}
+	r1.Engine = "0.13.0-dev.1" // as that build would have saved it
+	r1.Checksum = r1.checksum()
+	c1, rep1, err := Replay(r1, ReplayOptions{})
+	if err != nil {
+		t.Fatalf("%v %v", err, rep1)
+	}
+	c1.Advance(simtime.Hour, Options{})
+	r2, err := c1.Record()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if r2.Legacy == nil || r2.Legacy.BatchMode != batchModeV0131 {
+		t.Fatalf("prefix %+v", r2.Legacy)
+	}
+	if _, err := Branch(r2, []Alternative{{ID: "no_action"}}, defaultOpts()); !errors.Is(err, ErrBranchRules) {
+		t.Fatalf("a dev.6 record two prefixes down: %v", err)
+	}
 	r, err = ReadRecord(v0120Fixture)
 	if err != nil {
 		t.Fatal(err)

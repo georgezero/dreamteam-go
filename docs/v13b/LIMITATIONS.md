@@ -61,6 +61,13 @@ still apply; this list adds what implementation showed.
   * The rule never substitutes another action type (for example a
     reduced roster instead of a termination). The agent may propose
     one as a revision.
+  * A proposal that holds the same action twice (which the engine
+    refuses) gives two identical leave-one-out candidates. Its comparison
+    cannot be branched for evaluation. Fixing this changes the rule, so
+    it awaits the owner (review F4).
+* **Decoding is structural.** `DecodeAgent` and `DecodeEvaluation`
+  check form, classes and sources. Only `VerifyAgent` and
+  `VerifyEvaluation` bind a comparison to the engine, by rebuilding it.
 * **Keeping.**
   * The weekly guarantee kept under no action is read from the
     proposal's preview and cross-checked against the observed

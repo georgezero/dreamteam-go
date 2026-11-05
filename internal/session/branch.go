@@ -276,8 +276,20 @@ func branchSource(r *Record) (BranchSource, *Session, error) {
 	if err := eval.GuardManifest(evaluation.Holdout, []int64{r.Seed}); err != nil {
 		return BranchSource{}, nil, err
 	}
-	if !currentRules(batchMode(r)) || (r.Legacy != nil && !currentRules(r.Legacy.BatchMode)) {
-		return BranchSource{}, nil, ErrBranchRules
+	// Every record in the chain (the record, its prefix, the prefix's
+	// prefix, …) must use this build's action set and rules.
+	for p := r; ; {
+		if !currentRules(batchMode(p)) || (p.Legacy != nil && !currentRules(p.Legacy.BatchMode)) {
+			return BranchSource{}, nil, ErrBranchRules
+		}
+		if p.Legacy == nil {
+			break
+		}
+		next, err := p.prefix()
+		if err != nil {
+			return BranchSource{}, nil, err
+		}
+		p = next
 	}
 	s, rep, err := Replay(r, ReplayOptions{})
 	if err != nil {
