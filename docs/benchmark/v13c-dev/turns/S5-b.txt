@@ -1,0 +1,85 @@
+=== control
+Final decision at 2026-10-13T07:00:00
+Your proposal has been validated: accepted.
+  Action: [{"type":"contract_teleradiology","requestId":"tele-1","op":"start","effective":"2026-10-27","plan":"standard-v1","windows":["weeknights"],"scope":"all"}]
+Nothing has been applied yet. Reply with exactly one of: select:proposal (submit it unchanged), revise (with a new batch), or abandon (no action). Give a short reason; it is recorded as text.
+
+=== treatment
+Management alternatives at 2026-10-13T07:00:00
+The alternatives below are listed in a fixed order: your proposal first, then no action, then any others the candidate rule lists. The order says nothing about any alternative. No alternative is a default.
+Each alternative's detail has the same sections: action, validation, engine facts, engine estimates, obligations that continue, reversibility, and what is not available before deciding. Engine facts are values the engine reports now. Engine estimates are the engine's own figures, labelled estimate by the engine. Items not available have no value.
+
+Alternative 1 of 3: proposal (your proposal)
+  Action: [{"type":"contract_teleradiology","requestId":"tele-1","op":"start","effective":"2026-10-27","plan":"standard-v1","windows":["weeknights"],"scope":"all"}]
+  Validation: accepted
+  Detail: 3 engine facts, 2 engine estimates, 2 obligations, 2 items not available
+
+Alternative 2 of 3: no_action
+  Action: []
+  Validation: accepted (nothing to apply)
+  Detail: 2 engine facts, 0 engine estimates, 2 obligations, 2 items not available
+
+Alternative 3 of 3: adjusted
+  Action: [{"type":"contract_teleradiology","requestId":"tele-1","op":"start","effective":"2026-10-27","plan":"standard-v1","windows":["weeknights"],"scope":"urgent"}]
+  Validation: accepted
+  Detail: 3 engine facts, 2 engine estimates, 2 obligations, 2 items not available
+
+To see an alternative's detail, request inspect:<id>. Then reply with exactly one of: select:<id> (one of the alternatives listed), revise (with a new batch), or abandon (no action). Give a short reason; it is recorded as text.
+
+--- inspect:proposal
+Alternative proposal (your proposal)
+  Action: [{"type":"contract_teleradiology","requestId":"tele-1","op":"start","effective":"2026-10-27","plan":"standard-v1","windows":["weeknights"],"scope":"all"}]
+  Description: contract_teleradiology start standard-v1, scope all, effective 2026-10-27
+  Validation: accepted
+  Engine facts:
+    - Booked appointments displaced (whole batch): 0 · derived: the number of displacements listed
+    - Teleradiology retainer to the earliest end · new weeknights contract: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - Retainer run rate while open-ended · new weeknights contract: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end
+    - Remote read fees at trailing demand · new weeknights contract (0 studies): $0.00 · per 28 days · studies that waited unread in these windows and scope in the last 28 days: an upper bound (two lanes; employed readers claim first)
+  Obligations that continue:
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: irreversible · a contract start binds its minimum term
+  Not available before deciding:
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+--- inspect:no_action
+Alternative no_action
+  Action: []
+  Description: No batch: current staffing and every existing commitment continue
+  Validation: accepted (nothing to apply)
+  Engine facts:
+    - Booked appointments displaced (whole batch): 0 · derived: no batch is applied, so no booking loses coverage
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - none
+  Obligations that continue:
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: nothing to reverse · no batch; a termination stays possible later with at least 14 days' notice
+  Not available before deciding:
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+--- inspect:adjusted
+Alternative adjusted
+  Action: [{"type":"contract_teleradiology","requestId":"tele-1","op":"start","effective":"2026-10-27","plan":"standard-v1","windows":["weeknights"],"scope":"urgent"}]
+  Description: contract_teleradiology start standard-v1, scope urgent, effective 2026-10-27
+  Validation: accepted
+  Engine facts:
+    - Booked appointments displaced (whole batch): 0 · derived: the number of displacements listed
+    - Teleradiology retainer to the earliest end · new weeknights contract: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - Retainer run rate while open-ended · new weeknights contract: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end
+    - Remote read fees at trailing demand · new weeknights contract (0 studies): $0.00 · per 28 days · studies that waited unread in these windows and scope in the last 28 days: an upper bound (two lanes; employed readers claim first)
+  Obligations that continue:
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: irreversible · a contract start binds its minimum term
+  Not available before deciding:
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine

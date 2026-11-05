@@ -567,15 +567,21 @@ func (a *Agent) check() error {
 		return fmt.Errorf("%w: digest", ErrContract)
 	case a.DecisionPoint.Engine == "" || a.DecisionPoint.Scenario == "" || a.DecisionPoint.Time == "" || a.DecisionPoint.StateDigest == "":
 		return fmt.Errorf("%w: decision point incomplete", ErrContract)
-	case a.Selection.Rule != SelectionRule || a.Selection.RuleSha256 != SelectionRuleSha256:
+	case ruleSha256(a.Selection.Rule) == "" || a.Selection.RuleSha256 != ruleSha256(a.Selection.Rule):
 		return fmt.Errorf("%w: selection rule", ErrContract)
 	case len(a.Alternatives) < 2 || len(a.Alternatives) > MaxCandidates:
 		return fmt.Errorf("%w: %d alternatives", ErrContract, len(a.Alternatives))
 	case a.Alternatives[0].ID != IDProposal || a.Alternatives[1].ID != IDNoAction || len(a.Alternatives[1].Actions) != 0:
 		return fmt.Errorf("%w: the proposal and no action must come first", ErrContract)
 	}
-	ids := map[string]bool{}
+	ids, batches := map[string]bool{}, map[string]bool{}
 	for _, alt := range a.Alternatives {
+		// Rule v2 never lists one batch twice.
+		if k := batchKey(alt.Actions); a.Selection.Rule == SelectionRuleV2 && batches[k] {
+			return fmt.Errorf("%w: %s repeats an earlier alternative's batch", ErrContract, alt.ID)
+		} else {
+			batches[k] = true
+		}
 		if alt.ID == "" || ids[alt.ID] || alt.Actions == nil || alt.Validation.Results == nil || alt.Facts == nil || alt.Estimates == nil ||
 			alt.Obligations == nil || alt.Unavailable == nil || alt.CandidateSha256 == "" || alt.Description == "" {
 			return fmt.Errorf("%w: alternative %q incomplete or repeated", ErrContract, alt.ID)

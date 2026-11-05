@@ -1,0 +1,512 @@
+{
+ "schema": "dreamteam.alternatives-experiment/v1",
+ "id": "v13c-alt-1",
+ "status": "DRAFT — NOT LOCKED — NOT AUTHORIZED",
+ "lockRequires": [
+  "the independent technical review clean (docs/audits/v0.13c-independent-review.md and the response)",
+  "the human presentation review complete and accepted (docs/v13c/PRESENTATION_REVIEW.md: PENDING)",
+  "the owner's decisions D1-D6 (docs/v13c/EXPERIMENTAL_DESIGN.md §8)",
+  "V0.13d's agent workflow and driver implemented, reviewed and pinned"
+ ],
+ "description": "At 9 historical branch points and 12 constructed sensitivity members, the same validation-first workflow with a final-decision turn: A control (the proposal and its validation), B treatment (the neutral management-alternative comparison, agent audience only); Gemma 10 and Qwen 20 draws per arm per unit; one model request at a time.",
+ "endpointEnv": "DREAMTEAM_LLM_BASE_URL",
+ "models": {
+  "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp",
+  "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp"
+ },
+ "modelOrder": [
+  "gemma4-26b-a4b",
+  "qwen36-35b-a3b"
+ ],
+ "settings": {
+  "files": {
+   "gemma4-26b-a4b": {
+    "file": "docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+    "sha256": "1a1edae5a492b67a72086bec51faecc8ed0930800bdb6e548412b65fa444aa6a"
+   },
+   "qwen36-35b-a3b": {
+    "file": "docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+    "sha256": "e19a47dce948a8acbd3262ef5053b89f1e23c32603860e03628d38b184acbf5d"
+   }
+  },
+  "maxRetries": 1,
+  "allowDetails": true
+ },
+ "request": {
+  "temperature": 0,
+  "max_tokens": 4096,
+  "response_format": "json_object",
+  "seed": null,
+  "timeoutSeconds": 300,
+  "retries": "none beyond the workflow's own"
+ },
+ "systemPromptSha256": "0efc36e21b592abc4acb4c8b78ee7634b39755580a0f5ac348a5be1f8a80c4e1",
+ "arms": {
+  "A": {
+   "name": "control: validation-first with the control turn",
+   "workflowBase": "llm-agent-validation-first-workflow/v1",
+   "workflowBaseSha256": "a0204f628c7631d43ebfbb48e3b6e31071b67252daa76f141e3ad3a43ff5f184",
+   "turn": "dreamteam.alternatives-control/v1",
+   "turnSha256": "331a1542ed79e15fcf10965fb924b134cd5ca206f740be96a51d4ce49f65d5a9",
+   "agent": "llm-agent 7 (V0.13d; pinned at lock)"
+  },
+  "B": {
+   "name": "treatment: validation-first with the alternatives turn",
+   "workflowBase": "llm-agent-validation-first-workflow/v1",
+   "workflowBaseSha256": "a0204f628c7631d43ebfbb48e3b6e31071b67252daa76f141e3ad3a43ff5f184",
+   "turn": "dreamteam.alternatives-presentation/v1",
+   "turnSha256": "5bf586cf12c83c157a8f31db05cd8f5cc68c0503b3bf99b1a89102198313b89f",
+   "agent": "llm-agent 7 (V0.13d; pinned at lock)"
+  },
+  "due": "alternatives.Steps: rule v2 applies to the proposal's staffing batch and the engine accepts the proposal; one test for both arms",
+  "selectionRule": "dreamteam.alternative-selection/v2",
+  "selectionRuleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+  "boundary": "internal/alternatives/arms.go: agent audience only, DecodeAgentAt-bound, checkShown; the evaluation audience is never built"
+ },
+ "units": [
+  {
+   "unit": "fl-qwen-s41902-p24",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "termination_displacement",
+   "draws": {
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "ss-qwen-s42001-p20",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "staffing_adjustment_displacement",
+   "draws": {
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "ss-qwen-s42002-p7",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "retained_obligation",
+   "draws": {
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "ss-qwen-s42001-p1",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "retained_obligation",
+   "draws": {
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "ss-gemma-pv-s42001-p14",
+   "kind": "historical",
+   "models": [
+    "gemma4-26b-a4b"
+   ],
+   "category": "retained_obligation",
+   "draws": {
+    "gemma4-26b-a4b": 10
+   }
+  },
+  {
+   "unit": "ss-qwen-pv-s42002-p6",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "credit_supported_not_due",
+   "draws": {
+    "qwen36-35b-a3b": 1
+   }
+  },
+  {
+   "unit": "fp-qwen-s41901-p25",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "nonqualifying_control",
+   "draws": {
+    "qwen36-35b-a3b": 1
+   }
+  },
+  {
+   "unit": "fl-gemma-s41901-p28",
+   "kind": "historical",
+   "models": [
+    "gemma4-26b-a4b"
+   ],
+   "category": "refused_qualifying",
+   "draws": {
+    "gemma4-26b-a4b": 10
+   }
+  },
+  {
+   "unit": "fp-qwen-s42001-p7",
+   "kind": "historical",
+   "models": [
+    "qwen36-35b-a3b"
+   ],
+   "category": "refused_qualifying",
+   "draws": {
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S1-a",
+   "kind": "constructed",
+   "pair": "S1",
+   "fact": "displaced bookings: zero versus nonzero (decided two weeks apart)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S1-b",
+   "kind": "constructed",
+   "pair": "S1",
+   "fact": "displaced bookings: zero versus nonzero (decided two weeks apart)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-27T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-11-10"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S2-a",
+   "kind": "constructed",
+   "pair": "S2",
+   "fact": "displaced bookings: zero versus nonzero (same state)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-20T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2027-02-16"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S2-b",
+   "kind": "constructed",
+   "pair": "S2",
+   "fact": "displaced bookings: zero versus nonzero (same state)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-20T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2027-02-09"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S3-a",
+   "kind": "constructed",
+   "pair": "S3",
+   "fact": "severance",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E05",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S3-b",
+   "kind": "constructed",
+   "pair": "S3",
+   "fact": "severance",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E06",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S4-a",
+   "kind": "constructed",
+   "pair": "S4",
+   "fact": "an alternative available versus unavailable (the later-last-day adjustment)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E05",
+     "lastDay": "2027-01-26"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S4-b",
+   "kind": "constructed",
+   "pair": "S4",
+   "fact": "an alternative available versus unavailable (the later-last-day adjustment)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E05",
+     "lastDay": "2027-02-02"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S5-a",
+   "kind": "constructed",
+   "pair": "S5",
+   "fact": "guaranteed commitment (teleradiology retainer to the earliest end)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "contract_teleradiology",
+     "requestId": "tele-1",
+     "op": "start",
+     "effective": "2026-10-27",
+     "plan": "standard-v1",
+     "windows": [
+      "weeknights",
+      "saturday",
+      "sunday"
+     ],
+     "scope": "all"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S5-b",
+   "kind": "constructed",
+   "pair": "S5",
+   "fact": "guaranteed commitment (teleradiology retainer to the earliest end)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "contract_teleradiology",
+     "requestId": "tele-1",
+     "op": "start",
+     "effective": "2026-10-27",
+     "plan": "standard-v1",
+     "windows": [
+      "weeknights"
+     ],
+     "scope": "all"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S6-a",
+   "kind": "constructed",
+   "pair": "S6",
+   "fact": "capacity loss (scheduled slots no longer staffed)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  },
+  {
+   "unit": "S6-b",
+   "kind": "constructed",
+   "pair": "S6",
+   "fact": "capacity loss (scheduled slots no longer staffed)",
+   "models": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "scenario": "mini",
+   "seed": 52,
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2027-01-26"
+    }
+   ],
+   "draws": {
+    "gemma4-26b-a4b": 10,
+    "qwen36-35b-a3b": 20
+   }
+  }
+ ],
+ "pointsManifestSha256": "e8d29a9658b8b05d5eb05a536fbe7a6787bed7cb9c3ef4f724a6b5511c615b74",
+ "pointsInventorySha256": "786837addf58e4b74b81d073357538252688637b10b03fc5f6090540028add93",
+ "sensitivityPairsSha256": "fc8f00175aad45e85025aeaac4e7600eff964006d3dc76783793391c959156dc",
+ "draws": 964,
+ "maxModelCallsPerDraw": 5,
+ "maxModelCalls": 4820,
+ "wallClockSeconds": 28800,
+ "orderRule": "dreamteam-v13c-order/1",
+ "order": "per model in modelOrder; rounds; in each round every unit and arm of the model with draws left once, in the order of SHA-256('dreamteam-v13c-order/1|<model>|<round>|<unit>|<arm>'); the schedule is made and pinned at lock",
+ "concurrency": 1,
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "health": "an unhealthy /health stops the run",
+  "serverChange": "a material change stops the run",
+  "partial": "PARTIAL: the interrupted draw recorded and replayed, not classified; no sensitivity for a pair missing a cell",
+  "resume": "never; any continuation needs the owner's authorization and an amendment"
+ },
+ "outcomes": {
+  "results": [
+   "retained",
+   "selected",
+   "selected_no_action",
+   "revised",
+   "abandoned",
+   "invalid_alternative",
+   "no_decision"
+  ],
+  "flags": [
+   "inspected",
+   "compared",
+   "no_observable_comparison"
+  ],
+  "shared": {
+   "departure": "any result but retained",
+   "noActionSubmitted": "abandoned or selected_no_action"
+  },
+  "primary": "per sensitivity pair and model: (P_B(departure|b) - P_B(departure|a)) - (P_A(departure|b) - P_A(departure|a))"
+ },
+ "statistics": "Wilson 95% per arm and unit; Newcombe hybrid score 95% for differences; MOVER (Zou and Donner) for the difference of differences; no hypothesis test, composite score, ranking or pooling",
+ "seeds": "development only: 41901, 41902, 42001, 42002 (recordings) and mini 52; eval.GuardManifest before every session",
+ "client": "the Pi, systemd-run --user --scope -p MemoryMax=3G nice -n 10",
+ "authorization": "run requires the owner's authorization quoted verbatim, recorded in run.json; a lock is not an authorization",
+ "engine": "0.13.0-dev.2 at this draft; the run's engine pinned at lock"
+}

@@ -1,0 +1,1824 @@
+{
+ "schema": "dreamteam.v13c-selection-v2/v1",
+ "note": "Rule v1 (unchanged) and rule v2 on the same proposals at the same engine state (mini, seed 52). v2 removes a candidate whose canonical batch equals an earlier candidate's, and nothing else.",
+ "rules": {
+  "dreamteam.alternative-selection/v1": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+  "dreamteam.alternative-selection/v2": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9"
+ },
+ "cases": [
+  {
+   "case": "single termination (no duplicate)",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "3c1af5168488bbf9600453e55671edaba68c81dd61686c6b2089c492c00d0198"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "adjusted",
+      "source": "adjustment",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+        "effectiveAt": "2026-11-11"
+       }
+      ],
+      "sha256": "0a2faa9c231320933c99135eb0e954053001939c0ffefb46dfb36d03eee949bd"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "dd5bf14ace2801d22c4dd380b94ce8dc792942858183ef39e607b49948ccf237"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "adjusted",
+      "source": "adjustment",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+        "effectiveAt": "2026-11-11"
+       }
+      ],
+      "sha256": "05cfe60fad00728d752284e96dcce648bfadf2495060de40864e5b8ac91e6be7"
+     }
+    ],
+    "omitted": []
+   }
+  },
+  {
+   "case": "duplicate termination (F4)",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E04 is terminated twice in this batch."
+       }
+      ],
+      "sha256": "0a1d0c2be9d5fc1f2e9e52c9dfe46388a31298c6729046cd60c273cbd76bdbf6"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "f84ad929d3339d7f8e0798bec220138cefe38ccff039e3ee581f3d979259926e"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "2998842b11354a3d71c20643b4dd89d107f616135f97503887bde42798bc1690"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E04 is terminated twice in this batch."
+       }
+      ],
+      "sha256": "e828f6c959e5b75817138a84e6536eb745acaa8c365f6f78f5f47420ec82ade7"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "bbbd8473245798c0432f3d204e41416b59cbad7270f22c5da950ae9a4da6e035"
+     }
+    ],
+    "omitted": [],
+    "removed": [
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "sameAs": "without_1",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "batchSha256": "d0fd911dc959eda3a06cb375c278765bd0cb85afa4e71421945bc9ef7be67719"
+     }
+    ]
+   }
+  },
+  {
+   "case": "duplicate leave-one-out among three",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E03 is terminated twice in this batch."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (invalid_parameters) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "d0677911a7956aafbfbfdea6a87db9b0e87b67bd7ce74557957f48de922f1b80"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "b8b725b292351c8cd013ac51ee1f32782bc35082ce6298588963b4a95d447420"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "c0a59adeddb5b70f1241537b096d0d4d9ac6b622061a284f0bec9eead17cd827"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E03 is terminated twice in this batch."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (invalid_parameters) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "691ceccee418eb5520ceebaa57e3320cb59d67bcf7ff83f76da13a6f3556bf8e"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "f69a505523652d90a78e3a02d59fdb201da17264abc926bf529b20a84dcf3347"
+     }
+    ],
+    "omitted": [],
+    "removed": [
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "sameAs": "without_1",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "batchSha256": "aa8c8368a40212aa5e48ccbce464eabb80a0458fdf842495a3517fafdf803c2d"
+     }
+    ]
+   }
+  },
+  {
+   "case": "same actions, different order",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "set_worklist_policy",
+     "policy": "fifo"
+    },
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "set_worklist_policy",
+      "policy": "fifo"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (mixed_batch) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (mixed_batch) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "d653675152ea3d580ad6c4833da9aa0bfa4647814b4eba4164e3d04874d7eab1"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 1 of 2 (mixed_batch) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "b0ff58c8d1ce557df7551879c4abb88d5be6304af6ddedaa06264dd45a30444d"
+     },
+     {
+      "id": "without_3",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (mixed_batch) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       }
+      ],
+      "sha256": "790041fb99537ea1e95e0f4214748de5a5fa562e65eb701df049ee949132c175"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "set_worklist_policy",
+      "policy": "fifo"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (mixed_batch) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 3 (mixed_batch) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "a53405fc72afb169da6ffd675385db3cad36b58bab3cda210f75c2ec7ba288b4"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 1 of 2 (mixed_batch) was refused, so nothing in this batch was applied."
+       }
+      ],
+      "sha256": "9838bfb5c162e759758b96af7011478fb0850e6237e168b210ea582dbf52457c"
+     },
+     {
+      "id": "without_3",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "set_worklist_policy",
+        "policy": "fifo"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (mixed_batch) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "set_worklist_policy",
+         "policy": "fifo"
+        },
+        "ok": false,
+        "code": "mixed_batch",
+        "message": "\"set_worklist_policy\" cannot share a batch with V0.2 staffing actions (hire, terminate, set_roster): submit it in its own batch at the same time."
+       }
+      ],
+      "sha256": "910d5ebc4e7194ae8cc5599100d9addf9b06e7118c6dd58aed03bc74db80065c"
+     }
+    ],
+    "omitted": []
+   }
+  },
+  {
+   "case": "same employee, different last days",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-11-10"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E04 is terminated twice in this batch."
+       }
+      ],
+      "sha256": "a39ec9dde5630d2f9f4a84393436677d4ce627eaa545ff809a50eaa94c0f0e05"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+        "effectiveAt": "2026-11-11"
+       }
+      ],
+      "sha256": "11abf9d4d98b7341ebafdc150f62271e823a1cc2b229db20eac4ce2498b17b0e"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "2998842b11354a3d71c20643b4dd89d107f616135f97503887bde42798bc1690"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": false,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": false,
+        "code": "batch_rejected",
+        "message": "Batch refused: action 2 of 2 (invalid_parameters) was refused, so nothing in this batch was applied."
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": false,
+        "code": "invalid_parameters",
+        "message": "E04 is terminated twice in this batch."
+       }
+      ],
+      "sha256": "706ab41ded7b2b3ac6843393af710d0ab40844225bde6f8362fc2fee81aceb0b"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-11-10"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+        "effectiveAt": "2026-11-11"
+       }
+      ],
+      "sha256": "557c83e66dd818a8d80ba969548feaec5e08a8f500b9639050c8234591004608"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "9031b3c4db116d5363f6f8de53eb2c0a52f984861f09ef04f4a758044605a971"
+     }
+    ],
+    "omitted": []
+   }
+  },
+  {
+   "case": "two employees",
+   "at": "2026-10-13T07:00:00",
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2026-10-27"
+    },
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "v1": {
+    "rule": "dreamteam.alternative-selection/v1",
+    "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "36d317bd27c3f5466271ea858fa524ff5e98eb5fc08a4a4b2826438e5eb282d1"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "f84ad929d3339d7f8e0798bec220138cefe38ccff039e3ee581f3d979259926e"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "2466bfda1deb96cfb389f02df0e248688dd0d066a6613391facaae2f74bb4c12"
+     }
+    ],
+    "omitted": []
+   },
+   "v2": {
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "at": "2026-10-13T07:00:00",
+    "today": "2026-10-13",
+    "bookingHorizonDays": 120,
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2026-10-27"
+     },
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "applies": true,
+    "why": "holds an irreversible action",
+    "candidates": [
+     {
+      "id": "proposal",
+      "source": "proposal",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       },
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       },
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "f6f9ab72553c8c94c86c371c6c9ee88657bc5a7d178990363a2eade8a6e09384"
+     },
+     {
+      "id": "no_action",
+      "source": "no_action",
+      "actions": [],
+      "ok": true,
+      "validation": [],
+      "sha256": "c663292826e76855c26ccb27055aae66ab2271eac32a65470d96484d063f2a95"
+     },
+     {
+      "id": "without_1",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E04",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "bbbd8473245798c0432f3d204e41416b59cbad7270f22c5da950ae9a4da6e035"
+     },
+     {
+      "id": "without_2",
+      "source": "leave_one_out",
+      "actions": [
+       {
+        "type": "terminate",
+        "employee": "E03",
+        "lastDay": "2026-10-27"
+       }
+      ],
+      "ok": true,
+      "validation": [
+       {
+        "id": "",
+        "batch": 0,
+        "time": "2026-10-13T07:00:00",
+        "action": {
+         "type": "terminate",
+         "employee": "E03",
+         "lastDay": "2026-10-27"
+        },
+        "ok": true,
+        "code": "accepted",
+        "message": "Riley (E03) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,800/week guaranteed) · severance $3,600 recognized now, paid Fri Oct 30.",
+        "effectiveAt": "2026-10-28"
+       }
+      ],
+      "sha256": "088438cee0dc545d738f32b8d41d2b1fc0e90bc15d8172cc63957e538a1ed497"
+     }
+    ],
+    "omitted": []
+   }
+  }
+ ]
+}

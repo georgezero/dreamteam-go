@@ -21,15 +21,34 @@ import (
 )
 
 // SelectionRule identifies the candidate rule; its text is embedded and
-// pinned by SHA-256.
+// pinned by SHA-256. SelectionRuleV2 (V0.13c) is v1 with one change: a
+// candidate whose canonical batch equals an earlier candidate's is removed
+// (text/selection-v2.txt). v1 is kept unchanged: its recorded selections
+// and the evidence made with it replay as they were.
 const (
-	SelectionRule       = "dreamteam.alternative-selection/v1"
-	SelectionRuleSha256 = "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358"
-	MaxCandidates       = 4
+	SelectionRule         = "dreamteam.alternative-selection/v1"
+	SelectionRuleSha256   = "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358"
+	SelectionRuleV2       = "dreamteam.alternative-selection/v2"
+	SelectionRuleV2Sha256 = "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9"
+	MaxCandidates         = 4
 )
 
 //go:embed text/selection-v1.txt
 var selectionText []byte
+
+//go:embed text/selection-v2.txt
+var selectionTextV2 []byte
+
+// ruleSha256 is the pin of a rule this build implements ("" for none).
+func ruleSha256(rule string) string {
+	switch rule {
+	case SelectionRule:
+		return SelectionRuleSha256
+	case SelectionRuleV2:
+		return SelectionRuleV2Sha256
+	}
+	return ""
+}
 
 // Candidate IDs.
 const (
@@ -55,6 +74,17 @@ type Omitted struct {
 	Validation []api.ActionResult `json:"validation"`
 }
 
+// Removed is a candidate rule v2 removed because its batch equals an
+// earlier candidate's (SameAs). Nothing is listed in its place.
+type Removed struct {
+	ID      string       `json:"id"`
+	Source  string       `json:"source"`
+	SameAs  string       `json:"sameAs"`
+	Actions []api.Action `json:"actions"`
+	// BatchSha256 is the SHA-256 of the canonical batch both share.
+	BatchSha256 string `json:"batchSha256"`
+}
+
 // Selection is the rule's answer at one decision point.
 type Selection struct {
 	Rule        string       `json:"rule"`
@@ -67,6 +97,9 @@ type Selection struct {
 	Why         string       `json:"why"`
 	Candidates  []Candidate  `json:"candidates"`
 	Omitted     []Omitted    `json:"omitted"`
+	// Removed lists rule v2's removed duplicates; it is never set by v1,
+	// and is absent when nothing was removed.
+	Removed []Removed `json:"removed,omitempty"`
 }
 
 // irreversible reports the actions the rule leaves out one at a time.
@@ -82,12 +115,27 @@ func isStaffing(t string) bool {
 	return false
 }
 
-// Select applies the rule to proposal at s's current time. s is only
-// read (its digests are checked unchanged).
+// Select applies rule v1 to proposal at s's current time. s is only read
+// (its digests are checked unchanged).
 func Select(s *session.Session, proposal []api.Action) (*Selection, error) {
+	return SelectRule(s, SelectionRule, proposal)
+}
+
+// SelectV2 applies rule v2: v1's list, then later duplicates removed.
+func SelectV2(s *session.Session, proposal []api.Action) (*Selection, error) {
+	return SelectRule(s, SelectionRuleV2, proposal)
+}
+
+// SelectRule applies the named rule (v1 or v2) to proposal at s's current
+// time. s is only read (its digests are checked unchanged).
+func SelectRule(s *session.Session, rule string, proposal []api.Action) (*Selection, error) {
+	pin := ruleSha256(rule)
+	if pin == "" {
+		return nil, fmt.Errorf("alternatives: selection rule %q is not this build's", rule)
+	}
 	before := s.Digests()
 	o := s.Observe(0)
-	sel := &Selection{Rule: SelectionRule, RuleSha256: SelectionRuleSha256, At: o.Time, Today: o.Date,
+	sel := &Selection{Rule: rule, RuleSha256: pin, At: o.Time, Today: o.Date,
 		HorizonDays: o.Practice.BookingHorizonDays, Proposal: canon(proposal), Candidates: []Candidate{}, Omitted: []Omitted{}}
 	switch {
 	case len(proposal) == 0:
@@ -112,7 +160,7 @@ func Select(s *session.Session, proposal []api.Action) (*Selection, error) {
 			c.Sha256 = sha(struct {
 				Rule, ID string
 				Actions  []api.Action
-			}{SelectionRule, id, c.Actions})
+			}{rule, id, c.Actions})
 			sel.Candidates = append(sel.Candidates, c)
 		}
 		add(IDProposal, "proposal", proposal)
@@ -140,11 +188,37 @@ func Select(s *session.Session, proposal []api.Action) (*Selection, error) {
 			}
 		}
 	}
+	if rule == SelectionRuleV2 {
+		sel.Candidates, sel.Removed = dedupe(sel.Candidates)
+	}
 	if s.Digests() != before {
 		return nil, fmt.Errorf("alternatives: selection changed the session")
 	}
 	return sel, nil
 }
+
+// dedupe is rule v2's only change: of the candidates in their listed
+// order, each whose canonical batch equals an earlier one's is removed
+// (and recorded), the first kept. It removes, and never adds, reorders or
+// changes a candidate, so it cannot exceed the limit or repair anything.
+func dedupe(cands []Candidate) ([]Candidate, []Removed) {
+	kept, first := []Candidate{}, map[string]string{}
+	var removed []Removed
+	for _, c := range cands {
+		k := batchKey(c.Actions)
+		if id, ok := first[k]; ok {
+			removed = append(removed, Removed{ID: c.ID, Source: c.Source, SameAs: id, Actions: c.Actions, BatchSha256: k})
+			continue
+		}
+		first[k] = c.ID
+		kept = append(kept, c)
+	}
+	return kept, removed
+}
+
+// batchKey is the SHA-256 of a batch's canonical form, in batch order: the
+// identity the branch builder gives a batch (session.checkAlternatives).
+func batchKey(actions []api.Action) string { return sha(canon(actions)) }
 
 // adjust is the rule's one adjustment of a single action, if it defines
 // one within the booking horizon.
@@ -179,12 +253,13 @@ func adjust(a api.Action, sel *Selection) (api.Action, bool) {
 	return b, ok
 }
 
-// VerifySelection recomputes the selection at s and requires it equal.
+// VerifySelection recomputes the selection at s under its own rule and
+// requires it equal.
 func VerifySelection(s *session.Session, sel *Selection) error {
-	if sel.Rule != SelectionRule || sel.RuleSha256 != SelectionRuleSha256 {
+	if pin := ruleSha256(sel.Rule); pin == "" || sel.RuleSha256 != pin {
 		return fmt.Errorf("alternatives: selection rule %s (%s) is not this build's", sel.Rule, sel.RuleSha256)
 	}
-	again, err := Select(s, sel.Proposal)
+	again, err := SelectRule(s, sel.Rule, sel.Proposal)
 	if err != nil {
 		return err
 	}

@@ -400,6 +400,20 @@ jobs:
           $P analysis/acknowledgment/stage_b.py analyze --binary ./dt --replays . --dir $V --protocol $V/protocol.json \
             --out v12b-run
           for f in decisions.json decision-tables.md inference.json; do cmp v12b-run/$f $V/$f; cp v12b-run/$f out/v12b-run-$f; done
+      - name: Management-alternative branch points (V0.13c)
+        # Without any model: the V0.13c inventory of the V0.12b pool, each
+        # point opened on the real engine from the V0.8c and V0.9c replays
+        # above (the recorded requests fed through the agent protocol to the
+        # recorded digests), rule dreamteam.alternative-selection/v2 and both
+        # arms' decision turns built for the recorded proposal, and the
+        # selection dreamteam-v13c-select/1; equal to the committed files
+        # (docs/benchmark/v13c-dev/points) and compared across platforms.
+        shell: bash
+        run: |
+          set -euo pipefail
+          DREAMTEAM_V13C_REPLAYS="$PWD" go test ./internal/alternatives -run 'TestInventoryV13c$' -count=1 -v 2>&1 | tail -3
+          cp docs/benchmark/v13c-dev/points/inventory.json out/v13c-points-inventory.json
+          cp docs/benchmark/v13c-dev/points/manifest.json out/v13c-points-manifest.json
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

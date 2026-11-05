@@ -1,0 +1,119 @@
+=== control
+Final decision at 2026-10-13T07:00:00
+Your proposal has been validated: accepted.
+  Action: [{"type":"terminate","employee":"E05","lastDay":"2027-01-26"}]
+Nothing has been applied yet. Reply with exactly one of: select:proposal (submit it unchanged), revise (with a new batch), or abandon (no action). Give a short reason; it is recorded as text.
+
+=== treatment
+Management alternatives at 2026-10-13T07:00:00
+The alternatives below are listed in a fixed order: your proposal first, then no action, then any others the candidate rule lists. The order says nothing about any alternative. No alternative is a default.
+Each alternative's detail has the same sections: action, validation, engine facts, engine estimates, obligations that continue, reversibility, and what is not available before deciding. Engine facts are values the engine reports now. Engine estimates are the engine's own figures, labelled estimate by the engine. Items not available have no value.
+
+Alternative 1 of 3: proposal (your proposal)
+  Action: [{"type":"terminate","employee":"E05","lastDay":"2027-01-26"}]
+  Validation: accepted
+  Detail: 14 engine facts, 1 engine estimates, 2 obligations, 4 items not available
+
+Alternative 2 of 3: no_action
+  Action: []
+  Validation: accepted (nothing to apply)
+  Detail: 10 engine facts, 0 engine estimates, 4 obligations, 2 items not available
+
+Alternative 3 of 3: adjusted
+  Action: [{"type":"terminate","employee":"E05","lastDay":"2027-02-09"}]
+  Validation: accepted
+  Detail: 14 engine facts, 1 engine estimates, 2 obligations, 4 items not available
+
+To see an alternative's detail, request inspect:<id>. Then reply with exactly one of: select:<id> (one of the alternatives listed), revise (with a new batch), or abandon (no action). Give a short reason; it is recorded as text.
+
+--- inspect:proposal
+Alternative proposal (your proposal)
+  Action: [{"type":"terminate","employee":"E05","lastDay":"2027-01-26"}]
+  Description: terminate Casey (E05), last day 2027-01-26
+  Validation: accepted
+  Engine facts:
+    - Last day · Casey: 2027-01-26
+    - Not employed from · Casey: 2027-01-27
+    - Notice · Casey: 105 days
+    - Severance recognized now · Casey: $4,500.00 · recognized now, paid 2027-02-05
+    - Severance payday · Casey: 2027-02-05
+    - Pending roster versions voided · Casey: 0 · derived: the number of dates listed
+    - Approved extensions voided · Casey: 0 · derived: the number of extensions listed
+    - Booked appointments displaced (whole batch): 0 · derived: the number of displacements listed
+    - Severance · Casey (E05): $4,500.00 · recognized now, paid 2027-02-05 · two contracted weeks (40 h) at the base rate with benefits; independent of the roster
+    - Contract pay to the last day · Casey (E05): $34,200.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it
+    - Scheduled slots no longer staffed (booked or not): 99 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders
+    - Of these, booked now: 0
+    - Scheduled slots no longer staffed · MR: 99
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - Contract cost no longer owed · Casey (E05): $2,250.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled
+  Obligations that continue:
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: irreversible · already_terminating: notice cannot be moved or withdrawn; no action rehires
+  Not available before deciding:
+    - slots_beyond_horizon: slots after the booking horizon do not exist yet and are not counted
+    - demand_for_closed_slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+--- inspect:no_action
+Alternative no_action
+  Action: []
+  Description: No batch: current staffing and every existing commitment continue
+  Validation: accepted (nothing to apply)
+  Engine facts:
+    - Booked appointments displaced (whole batch): 0 · derived: no batch is applied, so no booking loses coverage
+    - Scheduled slots no longer staffed (booked or not): 0 · derived: no batch is applied, so no scheduled slot loses its staffing
+    - Severance recognized now · Casey: $0.00 · derived: no termination is committed, so no severance is recognized
+    - Employment · Casey: active
+    - Contracted weekly minutes · Casey: 2400
+    - Rostered minutes, week A · Casey: 2400
+    - Rostered minutes, week B · Casey: 2400
+    - Pending roster versions · Casey: 0 · derived: the number of versions marked pending
+    - Approved extensions · Casey: 0 · derived: the number of extensions listed for the employee
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - none
+  Obligations that continue:
+    - Severance if terminated later · Casey: $4,500.00 · owed only on a later termination · two contracted weeks with benefits
+    - Contract guarantee continues · Casey: $2,250.00 · per full week, until a later decision · derived: the engine's weekly guarantee with benefits for the employee, read from the proposal's preview; it continues with no action. Cross-checked: observe.staff.severanceCents / 2, within one cent
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: nothing to reverse · no batch; a termination stays possible later with at least 14 days' notice
+  Not available before deciding:
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+--- inspect:adjusted
+Alternative adjusted
+  Action: [{"type":"terminate","employee":"E05","lastDay":"2027-02-09"}]
+  Description: terminate Casey (E05), last day 2027-02-09
+  Validation: accepted
+  Engine facts:
+    - Last day · Casey: 2027-02-09
+    - Not employed from · Casey: 2027-02-10
+    - Notice · Casey: 119 days
+    - Severance recognized now · Casey: $4,500.00 · recognized now, paid 2027-02-19
+    - Severance payday · Casey: 2027-02-19
+    - Pending roster versions voided · Casey: 0 · derived: the number of dates listed
+    - Approved extensions voided · Casey: 0 · derived: the number of extensions listed
+    - Booked appointments displaced (whole batch): 0 · derived: the number of displacements listed
+    - Severance · Casey (E05): $4,500.00 · recognized now, paid 2027-02-19 · two contracted weeks (40 h) at the base rate with benefits; independent of the roster
+    - Contract pay to the last day · Casey (E05): $38,700.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it
+    - Scheduled slots no longer staffed (booked or not): 9 · 2027-02-10 to 2027-02-10 (1 days in the booking horizon) · template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders
+    - Of these, booked now: 0
+    - Scheduled slots no longer staffed · MR: 9
+    - Appointments booked from tomorrow in the booking horizon: 0 · derived: booked slots counted day by day, as the run result's bookedAhead
+  Engine estimates:
+    - Contract cost no longer owed · Casey (E05): $2,250.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled
+  Obligations that continue:
+    - Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - Accounts payable: $2,854.82
+  Reversibility: irreversible · already_terminating: notice cannot be moved or withdrawn; no action rehires
+  Not available before deciding:
+    - slots_beyond_horizon: slots after the booking horizon do not exist yet and are not counted
+    - demand_for_closed_slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding
+    - future_orders_and_revenue: orders, exams and revenue after today depend on future demand; not projected for the decision
+    - unmodeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
