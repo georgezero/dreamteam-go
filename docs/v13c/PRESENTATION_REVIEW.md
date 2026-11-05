@@ -103,6 +103,14 @@ the reviewer may accept, change or reject each.
   accepted … Nothing has been applied yet" should not suggest the
   proposal is endorsed.
 
+* **P8, framing (review F7, owner decision D8).** Only the control text
+  says "Nothing has been applied yet"; the treatment summary does not.
+  Should both say it?
+* **P9, free text (review F1, owner decision D7).** Action fields such as
+  `requestId`, and employee names, are printed as given. Is that
+  acceptable in front of a model, or should the turn show neutral
+  identifiers instead?
+
 ## 4. Independence
 
 The reviewer must not have written or reviewed the templates or the
@@ -119,7 +127,7 @@ texts without seeing any model's past decisions on these contexts.
 | Date | PENDING |
 | Files reviewed, with SHA-256 (§1) | PENDING |
 | Items 1–10: acceptable / with change / not acceptable, with reasons | PENDING |
-| P1–P7: accepted / changed / rejected | PENDING |
+| P1–P9: accepted / changed / rejected | PENDING |
 | Verdict: the texts may be shown to a model as they are / after the stated changes / not | PENDING |
 
 If any text changes, it gets a new identity and SHA-256, and the changed

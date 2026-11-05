@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 
@@ -587,6 +588,11 @@ func (a *Agent) check() error {
 			return fmt.Errorf("%w: alternative %q incomplete or repeated", ErrContract, alt.ID)
 		}
 		ids[alt.ID] = true
+		// The candidate's identity is checkable without the engine: the
+		// rule, the ID and the actions.
+		if alt.CandidateSha256 != candidateSha256(a.Selection.Rule, alt.ID, alt.Actions) {
+			return fmt.Errorf("%w: %s: candidate identity", ErrContract, alt.ID)
+		}
 		ok := len(alt.Validation.Results) == len(alt.Actions)
 		for _, r := range alt.Validation.Results {
 			ok = ok && (r.OK || !alt.Validation.OK)
@@ -646,7 +652,9 @@ func DecodeAgent(raw []byte) (*Agent, error) {
 	if err := dec.Decode(&a); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrContract, err)
 	}
-	if dec.More() {
+	// Exactly one JSON value: anything after it, a closing delimiter
+	// included, is refused (dec.More does not see a stray ']' or '}').
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		return nil, fmt.Errorf("%w: trailing data", ErrContract)
 	}
 	if err := a.check(); err != nil {

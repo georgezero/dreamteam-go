@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/session"
@@ -230,7 +231,9 @@ func DecodeEvaluation(raw []byte) (*Evaluation, error) {
 	if err := dec.Decode(&e); err != nil {
 		return nil, fmt.Errorf("%w: %v", ErrContract, err)
 	}
-	if dec.More() {
+	// Exactly one JSON value: anything after it, a closing delimiter
+	// included, is refused (dec.More does not see a stray ']' or '}').
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		return nil, fmt.Errorf("%w: trailing data", ErrContract)
 	}
 	if err := e.check(); err != nil {

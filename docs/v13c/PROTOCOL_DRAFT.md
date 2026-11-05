@@ -8,7 +8,8 @@
      and the response);
   2. the human presentation review is complete and accepted
      (`PRESENTATION_REVIEW.md`, now PENDING);
-  3. the owner has decided D1–D6 (`EXPERIMENTAL_DESIGN.md` §8);
+  3. the owner has decided D1–D10 (`EXPERIMENTAL_DESIGN.md` §8), D7, the
+     threat model for free-text fields, among them;
   4. V0.13d has implemented and reviewed the agent workflow and driver
      this draft names.
 * **A lock does not authorize inference.** Only the owner's explicit,
@@ -50,7 +51,9 @@ The question is in [EXPERIMENTAL_DESIGN.md](EXPERIMENTAL_DESIGN.md) §1.
 * Both arms' turns come from `alternatives.Steps` (engine 0.13.0-dev.2
   at this draft, pinned at lock), using rule
   `dreamteam.alternative-selection/v2` (`5f32b2c8…`), with the
-  information boundary in code (EXPERIMENTAL_DESIGN.md §3).
+  information boundary in code and its trusted-input threat model
+  (EXPERIMENTAL_DESIGN.md §3, D7). The turn is due only when the engine
+  accepts the reply's operations batch as well as its staffing batch.
 * The workflow identity (version and SHA-256) and the driver's are
   pinned at lock.
 * If the owner chooses D1's alternative, A is llm-agent 5's

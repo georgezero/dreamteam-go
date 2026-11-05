@@ -63,7 +63,7 @@
 * There are six: displacement across a date and within a state,
   severance, an alternative available or not, the guaranteed
   commitment, and capacity loss.
-* None isolates one fact. S5 comes closest, with 8 value differences.
+* None isolates one fact. S5 comes closest, with 6 value differences.
   All are listed.
 * Each pair's fact is detected by the scripted rule that reads it.
 

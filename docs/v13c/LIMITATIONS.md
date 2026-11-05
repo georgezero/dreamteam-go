@@ -18,6 +18,15 @@
 
 ## Design
 
+* **The boundary assumes trusted free-text inputs (V0.13c review F1).**
+  The structural and lexical guards cannot tell what a free-text field
+  means: an action's `requestId` or a scenario's employee name can carry
+  any text the engine accepts. The protocol relies on every such input
+  being a recording, a committed and pinned file, or the model's own
+  reply (owner decision D7).
+* **The framing differs (F7).** Only the control text says "Nothing has
+  been applied yet" (D8).
+
 * **The arms differ in more than the comparison's content:**
   * Treatment may spend one call on inspect.
   * Treatment's reply options include the listed alternatives.
@@ -55,7 +64,7 @@
   proposals, and the contexts are not historical behaviour.
 * **No pair isolates one fact.** Every other visible difference is
   listed (SENSITIVITY_CASES.md §3):
-  * the best isolated pair is S5, with 8 value differences;
+  * the best isolated pair is S5, with 6 value differences;
   * S1 changes the whole context, a two-week later state;
   * severance (S3) cannot vary without changing the employee;
   * S2's displacement contrast is a single booking.

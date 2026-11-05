@@ -1405,3 +1405,30 @@ prompt or protocol request uses what V0.13b built. No model has seen it.
   * the reason is never scored.
 
 Any live use needs an owner-approved, locked protocol (V0.13c, proposed).
+
+## 24. Management alternatives (V0.13c, protocol preparation; not shown to any model)
+
+No agent was added or changed in V0.13c. llm-agent 5 (validation-first)
+remains the default, and llm-agent 6 remains experimental.
+
+**What exists now, in Go only** (`internal/alternatives/arms.go`, `docs/v13c/`):
+* `Steps(session, reply)` builds both arms' final-decision turns:
+  * the reply split as the agents split it;
+  * rule `dreamteam.alternative-selection/v2` on the staffing batch;
+  * due only when the engine accepts the whole reply.
+* **Control** is `dreamteam.alternatives-control/v1`: the proposal and
+  its validation.
+* **Treatment** is the summary of the bound agent comparison, and each
+  alternative's detail on `inspect:<id>`.
+* `ClassifyControl` gives control's replies the results `Classify` gives
+  treatment's.
+* **What a future workflow must do:**
+  * send `Message` and the requested `Inspect` answers verbatim, and
+    nothing else;
+  * record the identities;
+  * call the holdout guard before opening a session.
+
+The agent workflow that does this (llm-agent 7) is V0.13d's work. It
+comes after the owner's decisions and the human presentation review,
+under a locked protocol, and runs only on the owner's explicit
+authorization.

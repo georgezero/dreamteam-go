@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strings"
 	"testing"
@@ -129,30 +131,50 @@ var sensitivityPairs = []sensitivityPair{
 		B: mini("terminate Sam (E04), last day Jan 26", "2026-10-13T07:00:00", term("E04", "2027-01-26"))},
 }
 
-// visible is every value a member's treatment turn shows, by
-// alternative, section and key, as displayed. The proposal's employee ID
-// in a key is written <employee>, so that two members terminating
-// different employees are compared item by item (the labels keep names).
+// visible is everything a member's treatment turn renders, item by item:
+// the decision time; each alternative's position, actions, description
+// and validation as rendered (an accepted action's message is not shown,
+// so it is not compared); each value's label, value, time, basis and
+// derivation as the template prints them; and the order of every list.
+// The proposal's employee ID in a key is written <employee>, so that two
+// members terminating different employees are compared item by item (the
+// labels keep names). TestVisibleLedgerComplete checks that every
+// rendered field reaches it.
 func visible(a *Agent, emp string) map[string]string {
-	out := map[string]string{}
+	out := map[string]string{"summary/time": a.DecisionPoint.Time, "summary/alternatives": fmt.Sprint(len(a.Alternatives))}
 	norm := func(k string) string {
 		if emp == "" {
 			return k
 		}
 		return strings.ReplaceAll(k, "."+emp, ".<employee>")
 	}
-	for _, x := range a.Alternatives {
-		out[x.ID+"/listed"] = "listed"
+	for i, x := range a.Alternatives {
+		out[x.ID+"/listed"] = fmt.Sprintf("listed, position %d", i+1)
 		out[x.ID+"/actions"] = mustJSON(x.Actions)
-		out[x.ID+"/validation"] = mustJSON(x.Validation)
-		for sec, list := range map[string][]Value{"fact": x.Facts, "estimate": x.Estimates, "obligation": x.Obligations, "reversibility": {x.Reversibility}} {
-			for _, v := range list {
-				out[x.ID+"/"+sec+"/"+norm(v.Key)] = v.Label + labelSep + formatValue(v) + " · " + v.When
-			}
+		out[x.ID+"/description"] = x.Description
+		var b bytes.Buffer
+		if err := presentation.ExecuteTemplate(&b, "validation", x); err != nil {
+			panic(err)
 		}
+		out[x.ID+"/validation"] = b.String()
+		for _, sec := range []struct {
+			name string
+			list []Value
+		}{{"fact", x.Facts}, {"estimate", x.Estimates}, {"obligation", x.Obligations}, {"reversibility", []Value{x.Reversibility}}} {
+			var order []string
+			for _, v := range sec.list {
+				k := norm(v.Key)
+				order = append(order, k)
+				out[x.ID+"/"+sec.name+"/"+k] = v.Label + labelSep + formatValue(v) + " · " + v.When + " · " + v.Basis + " · derived: " + v.Derivation
+			}
+			out[x.ID+"/"+sec.name+"/order"] = strings.Join(order, ", ")
+		}
+		var order []string
 		for _, u := range x.Unavailable {
+			order = append(order, u.Key)
 			out[x.ID+"/unavailable/"+u.Key] = u.Reason
 		}
+		out[x.ID+"/unavailable/order"] = strings.Join(order, ", ")
 	}
 	return out
 }
@@ -195,16 +217,17 @@ func TestEvidenceSensitivityPairs(t *testing.T) {
 		Values           map[string]string `json:"values"`
 	}
 	type pairOut struct {
-		ID            string               `json:"id"`
-		Fact          string               `json:"fact"`
-		SameState     bool                 `json:"sameState"`
-		ObservationEq bool                 `json:"observationEqual"`
-		A             side                 `json:"a"`
-		B             side                 `json:"b"`
-		Differ        []string             `json:"visibleItemsThatDiffer"`
-		ControlDiffer []string             `json:"controlLinesThatDiffer"`
-		Isolation     string               `json:"isolation"`
-		Sensitive     map[string][2]string `json:"scriptedResults"`
+		ID              string               `json:"id"`
+		Fact            string               `json:"fact"`
+		SameState       bool                 `json:"sameState"`
+		ObservationEq   bool                 `json:"observationEqual"`
+		A               side                 `json:"a"`
+		B               side                 `json:"b"`
+		Differ          []string             `json:"visibleItemsThatDiffer"`
+		ControlDiffer   []string             `json:"controlLinesThatDiffer"`
+		TreatmentDiffer []string             `json:"treatmentLinesThatDiffer"`
+		Isolation       string               `json:"isolation"`
+		Sensitive       map[string][2]string `json:"scriptedResults"`
 	}
 	out := struct {
 		Schema string            `json:"schema"`
@@ -212,13 +235,14 @@ func TestEvidenceSensitivityPairs(t *testing.T) {
 		Arms   map[string]string `json:"texts"`
 		Pairs  []pairOut         `json:"pairs"`
 	}{Schema: "dreamteam.v13c-sensitivity-pairs/v1",
-		Note: "Each member is a real engine state (mini, seed 52, reached from the start with no action) and a scripted proposal; no model made it. visibleItemsThatDiffer lists every value of the treatment turn (summary and every inspect answer) that differs between the members, by alternative/section/key; controlLinesThatDiffer every line of the control turn. Nothing is hidden or equalized: where the simulator does not permit isolating one fact, the other differences are listed here.",
+		Note: "Each member is a real engine state (mini, seed 52, reached from the start with no action) and a scripted proposal; no model made it. visibleItemsThatDiffer lists every item the treatment turn renders (summary and every inspect answer: time, positions, actions, descriptions, validation as shown, each value's label, value, time, basis and derivation, and the order of every list) that differs between the members, by alternative/section/key; treatmentLinesThatDiffer and controlLinesThatDiffer every rendered line that differs, position by position. Nothing is hidden or equalized: where the simulator does not permit isolating one fact, the other differences are listed here.",
 		Arms: map[string]string{SelectionRuleV2: SelectionRuleV2Sha256, ControlID: ControlSha256, PresentationID: PresentationSha256}}
 	for _, pr := range sensitivityPairs {
-		po := pairOut{ID: pr.ID, Fact: pr.Fact, SameState: pr.A.At == pr.B.At, Differ: []string{}, ControlDiffer: []string{}, Sensitive: map[string][2]string{}}
+		po := pairOut{ID: pr.ID, Fact: pr.Fact, SameState: pr.A.At == pr.B.At, Differ: []string{}, ControlDiffer: []string{}, TreatmentDiffer: []string{},
+			Sensitive: map[string][2]string{}}
 		var obs [2]string
 		var ag [2]*Agent
-		var ctl [2]string
+		var ctl, turn [2]string
 		var ss [2]*session.Session
 		for k, m := range []member{pr.A, pr.B} {
 			s := at(t, m.At)
@@ -240,6 +264,7 @@ func TestEvidenceSensitivityPairs(t *testing.T) {
 				text += "\n--- inspect:" + id + "\n" + tr.Inspect[id]
 			}
 			evidenceV13c(t, fmt.Sprintf("turns/%s-%c.txt", pr.ID, 'a'+k), []byte(text))
+			turn[k] = text[strings.Index(text, "=== treatment"):]
 			if k == 0 {
 				po.A = sd
 			} else {
@@ -282,6 +307,7 @@ func TestEvidenceSensitivityPairs(t *testing.T) {
 			}
 		}
 		po.ControlDiffer = append(po.ControlDiffer, lineDiff(ctl[0], ctl[1])...)
+		po.TreatmentDiffer = append(po.TreatmentDiffer, lineDiff(turn[0], turn[1])...)
 		for _, pol := range append(slices.Clone(policies), v13cPolicies...) {
 			ra, rpa := pol.rule(ag[0])
 			rb, rpb := pol.rule(ag[1])
@@ -334,4 +360,60 @@ var v13cPolicies = []scripted{
 		}
 		return []string{"inspect:proposal"}, &Reply{Kind: ReplySelect, ID: IDProposal}
 	}},
+}
+
+// TestVisibleLedgerComplete: every field the turn renders reaches the
+// ledger, and a field it does not render does not (the V0.13c review's F2
+// witnesses, now required to hold the other way).
+func TestVisibleLedgerComplete(t *testing.T) {
+	s := at(t, t0)
+	a := mustAgent(t, s, mustSelectV2(t, s, term("E04", "2026-10-27")))
+	render := func(x *Agent) string {
+		out, err := Summary(x)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, y := range x.Alternatives {
+			d, err := Detail(x, y.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			out += d
+		}
+		return out
+	}
+	edits := map[string]func(*Agent){
+		"description":   func(b *Agent) { b.Alternatives[0].Description += " more" },
+		"basis":         func(b *Agent) { b.Alternatives[0].Facts[0].Basis = "another basis" },
+		"derivation":    func(b *Agent) { b.Alternatives[0].Facts[0].Derivation = "another derivation" },
+		"when":          func(b *Agent) { b.Alternatives[0].Facts[0].When = "another time" },
+		"label":         func(b *Agent) { b.Alternatives[0].Facts[0].Label = "another label" },
+		"time":          func(b *Agent) { b.DecisionPoint.Time = "2026-10-13T08:00:00" },
+		"order":         func(b *Agent) { slices.Reverse(b.Alternatives[0].Facts) },
+		"unavailable":   func(b *Agent) { b.Alternatives[0].Unavailable[0].Reason = "another reason" },
+		"reversibility": func(b *Agent) { b.Alternatives[0].Reversibility.Basis = "another basis" },
+	}
+	for _, name := range slices.Sorted(maps.Keys(edits)) {
+		raw, _ := a.Encode()
+		b, err := DecodeAgent(raw)
+		if err != nil {
+			t.Fatal(err)
+		}
+		edits[name](b)
+		b.Compared = compare(b.Alternatives)
+		b.Sha256 = b.digest()
+		if render(a) == render(b) {
+			t.Fatalf("%s: the edit renders nothing", name)
+		}
+		if reflect.DeepEqual(visible(a, "E04"), visible(b, "E04")) {
+			t.Fatalf("%s: a rendered difference is not in the ledger", name)
+		}
+	}
+	raw, _ := a.Encode()
+	b, _ := DecodeAgent(raw)
+	b.Alternatives[0].Validation.Results[0].Message = "not shown for an accepted action"
+	b.Sha256 = b.digest()
+	if render(a) != render(b) || !reflect.DeepEqual(visible(a, "E04"), visible(b, "E04")) {
+		t.Fatal("an accepted action's message is not rendered, so it must not be in the ledger")
+	}
 }

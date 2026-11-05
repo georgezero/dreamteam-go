@@ -190,12 +190,12 @@ func TestArmsClassifyControl(t *testing.T) {
 		{&Reply{Kind: "submit"}, ResultNoDecision, false},
 		{nil, ResultNoDecision, false},
 	} {
-		d := ClassifyControl(c, p, []string{"inspect:no_action"}, x.reply, rv)
+		d := ClassifyControl(c, []string{"inspect:no_action"}, x.reply, rv)
 		if d.Result != x.result || (len(d.Submitted) > 0) != x.sub || !slices.Equal(d.Flags, []string{FlagNoComparison}) || d.ComparisonSha256 != "" {
 			t.Fatalf("%+v: %+v", x.reply, d)
 		}
 	}
-	if d := ClassifyControl(tr, p, nil, &Reply{Kind: ReplySelect, ID: IDProposal}, rv); d.Result != ResultNoDecision {
+	if d := ClassifyControl(tr, nil, &Reply{Kind: ReplySelect, ID: IDProposal}, rv); d.Result != ResultNoDecision {
 		t.Fatal("a treatment turn classified as control")
 	}
 	if !NoActionSubmitted(ResultAbandoned) || !NoActionSubmitted(ResultSelectedNoAction) || NoActionSubmitted(ResultRevised) {

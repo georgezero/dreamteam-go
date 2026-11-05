@@ -231,15 +231,7 @@ func inventoryRow(t *testing.T, s *session.Session, p poolEntry, cl contextLine)
 	// its operations actions, then its staffing actions. The comparison is
 	// of the staffing batch; the operations batch is validated and carried
 	// as the workflow carries it, the same in both arms.
-	var ops, staff []api.Action
-	for _, a := range cl.Proposal.Actions {
-		if isStaffing(a.Type) {
-			staff = append(staff, a)
-		} else {
-			ops = append(ops, a)
-		}
-	}
-	prop := canon(staff)
+	ops, prop := SplitReply(cl.Proposal.Actions)
 	r := InventoryRow{ID: p.ID, Model: p.Model, Recording: p.Recording, Point: p.Point, PriorExposure: p.PriorExposure, At: s.Observe(0).Time,
 		Proposal: prop, Operations: canon(ops), Codes: []string{}, Removed: []string{}, Omitted: []string{}, Alternatives: []string{},
 		StakeCents: p.StakeCents, Tags: p.Tags}
@@ -264,7 +256,7 @@ func inventoryRow(t *testing.T, s *session.Session, p poolEntry, cl contextLine)
 	if want := rec == "accepted"; want != r.Valid || p.Validation != rec {
 		t.Fatalf("%s: validation %v %v, recorded %s", p.ID, r.Valid, r.Codes, rec)
 	}
-	c, tr, sel, err := Steps(s, prop)
+	c, tr, sel, err := Steps(s, cl.Proposal.Actions)
 	if err != nil {
 		t.Fatalf("%s: %v", p.ID, err)
 	}
@@ -284,6 +276,9 @@ func inventoryRow(t *testing.T, s *session.Session, p poolEntry, cl contextLine)
 	r.StepDue, r.StepWhy = c.Due, c.Why
 	if c.Due != tr.Due || c.Why != tr.Why {
 		t.Fatalf("%s: the arms disagree on the step", p.ID)
+	}
+	if c.Due && !r.Valid {
+		t.Fatalf("%s: the turn is due for a reply the engine refuses", p.ID)
 	}
 	r.Treatment, r.Control = tr.MessageSha256, c.MessageSha256
 	return r
@@ -360,38 +355,54 @@ func replayRuns(t *testing.T, root string) map[string]string {
 // atPoint opens a session on the run's scenario and seed and feeds the
 // recorded requests through the agent protocol, every answer required to
 // be the recorded one (hello: its clock and scenario fingerprint), until
-// a digests answer equals the point's digests.
+// a digests answer equals the point's digests, and then the point's own
+// read-only requests (observe, actions) that follow it, as the V0.12b
+// driver's to_point does.
 func atPoint(t *testing.T, dir string, want session.Digests) *session.Session {
 	t.Helper()
+	s, err := atPointErr(dir, want)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return s
+}
+
+func atPointErr(dir string, want session.Digests) (*session.Session, error) {
 	var run struct {
 		Scenario struct {
 			Ref string `json:"ref"`
 		} `json:"scenario"`
 		Seed int64 `json:"seed"`
 	}
-	readJSON(t, filepath.Join(dir, "run.json"), &run)
+	raw0, err := os.ReadFile(filepath.Join(dir, "run.json"))
+	if err != nil {
+		return nil, err
+	}
+	if err := json.Unmarshal(raw0, &run); err != nil {
+		return nil, err
+	}
 	ref := run.Scenario.Ref
 	if _, err := os.Stat(filepath.Join("../..", ref)); err == nil {
 		ref = filepath.Join("../..", ref)
 	}
 	s, err := session.Open(ref, run.Seed)
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	h := agent.New(s)
 	raw, err := os.ReadFile(filepath.Join(dir, "transcript.jsonl"))
 	if err != nil {
-		t.Fatal(err)
+		return nil, err
 	}
 	var req []byte
-	n := 0
+	n, reached := 0, false
 	for _, line := range bytes.Split(raw, []byte("\n")) {
 		if len(bytes.TrimSpace(line)) == 0 {
 			continue
 		}
 		var probe map[string]json.RawMessage
 		if err := json.Unmarshal(line, &probe); err != nil {
-			t.Fatal(err)
+			return nil, err
 		}
 		if _, isReq := probe["op"]; isReq {
 			req = slices.Clone(line)
@@ -399,6 +410,13 @@ func atPoint(t *testing.T, dir string, want session.Digests) *session.Session {
 		}
 		if req == nil {
 			continue
+		}
+		var peek struct {
+			Op string `json:"op"`
+		}
+		_ = json.Unmarshal(req, &peek)
+		if reached && peek.Op != "observe" && peek.Op != "actions" {
+			break
 		}
 		n++
 		got := h.Handle(req)
@@ -415,16 +433,18 @@ func atPoint(t *testing.T, dir string, want session.Digests) *session.Session {
 			gs, _ := gr["scenario"].(map[string]any)
 			ws, _ := wr["scenario"].(map[string]any)
 			if !reflect.DeepEqual(gr["clock"], wr["clock"]) || !reflect.DeepEqual(gs["fingerprint"], ws["fingerprint"]) {
-				t.Fatalf("%s: request %d (hello) answered differently", dir, n)
+				return nil, fmt.Errorf("%s: request %d (hello) answered differently", dir, n)
 			}
 		} else if !reflect.DeepEqual(g, w) {
-			t.Fatalf("%s: request %d (%s) answered differently", dir, n, op.Op)
+			return nil, fmt.Errorf("%s: request %d (%s) answered differently", dir, n, op.Op)
 		}
 		req = nil
 		if op.Op == "digests" && s.Digests() == want {
-			return s
+			reached = true
 		}
 	}
-	t.Fatalf("%s: the point %s was not reached", dir, fmt.Sprint(want.State))
-	return nil
+	if !reached {
+		return nil, fmt.Errorf("%s: the point %s was not reached", dir, want.State)
+	}
+	return s, nil
 }

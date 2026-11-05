@@ -16,8 +16,11 @@ import (
 // The V0.13c experiment's final-decision turn (EXPERIMENTAL_DESIGN.md),
 // built by the engine for both arms from the same decision point:
 //
-//   - the step is due when rule v2 applies to the proposal and the engine
-//     accepts the proposal, the same test in both arms;
+//   - the reply is split as the agents split it (llm_agent3.split): its
+//     operations batch and its staffing batch; the comparison is of the
+//     staffing batch;
+//   - the step is due when rule v2 applies to the staffing batch and the
+//     engine accepts both batches, the same test in both arms;
 //   - control shows a fixed turn naming the proposal and its validation
 //     only (text/control-v1.tmpl);
 //   - treatment shows the agent audience of the comparison, through the
@@ -37,8 +40,9 @@ const (
 	ControlID          = "dreamteam.alternatives-control/v1"
 	ControlSha256      = "331a1542ed79e15fcf10965fb924b134cd5ca206f740be96a51d4ce49f65d5a9"
 	StepSelectionRule  = SelectionRuleV2
-	StepNotDueRule     = "not_due:rule"    // rule v2 does not apply to the proposal
-	StepNotDueRefused  = "not_due:refused" // the engine refuses the proposal; validation feedback comes first
+	StepNotDueRule     = "not_due:rule"               // rule v2 does not apply to the proposal
+	StepNotDueRefused  = "not_due:refused"            // the engine refuses the staffing batch; validation feedback comes first
+	StepNotDueOps      = "not_due:operations_refused" // the engine refuses the reply's operations batch
 	StepNotDueNoSelect = "not_due:no_alternatives"
 )
 
@@ -63,28 +67,56 @@ type Step struct {
 	// Allowed are the replies the turn accepts: select:<id>, revise,
 	// abandon.
 	Allowed []string `json:"allowed"`
-	// For the record, never sent: the rule, the template and the
+	// For the record, never sent: the batches the turn is about (the
+	// reply's staffing batch, which the comparison is of, and its
+	// operations batch, carried unchanged), the rule, the template and the
 	// comparison the text was rendered from.
-	Rule             string `json:"rule"`
-	RuleSha256       string `json:"ruleSha256"`
-	Template         string `json:"template"`
-	TemplateSha256   string `json:"templateSha256"`
-	ComparisonSha256 string `json:"comparisonSha256,omitempty"`
-	MessageSha256    string `json:"messageSha256"`
+	Proposal         []api.Action `json:"proposal"`
+	Operations       []api.Action `json:"operations"`
+	Rule             string       `json:"rule"`
+	RuleSha256       string       `json:"ruleSha256"`
+	Template         string       `json:"template"`
+	TemplateSha256   string       `json:"templateSha256"`
+	ComparisonSha256 string       `json:"comparisonSha256,omitempty"`
+	MessageSha256    string       `json:"messageSha256"`
 }
 
-// Steps builds both arms' turns for proposal at s's current time, from one
-// selection. s is only read (its digests are checked unchanged).
-func Steps(s *session.Session, proposal []api.Action) (control, treatment *Step, sel *Selection, err error) {
+// SplitReply is a reply's batches as the agents make them
+// (llm_agent3.split): its operations actions, then its staffing actions,
+// each in reply order, canonical.
+func SplitReply(reply []api.Action) (operations, staffing []api.Action) {
+	var ops, staff []api.Action
+	for _, a := range reply {
+		if isStaffing(a.Type) {
+			staff = append(staff, a)
+		} else {
+			ops = append(ops, a)
+		}
+	}
+	return canon(ops), canon(staff)
+}
+
+// Steps builds both arms' turns for a reply's actions at s's current time,
+// from one selection of its staffing batch. The turn is due only when the
+// engine accepts the operations batch as well. s is only read (its digests
+// are checked unchanged).
+func Steps(s *session.Session, reply []api.Action) (control, treatment *Step, sel *Selection, err error) {
 	before := s.Digests()
+	ops, proposal := SplitReply(reply)
 	sel, err = SelectV2(s, proposal)
 	if err != nil {
 		return nil, nil, nil, err
 	}
+	opsOK := true
+	if len(ops) > 0 {
+		for _, r := range s.ValidateBatch(ops...) {
+			opsOK = opsOK && r.OK
+		}
+	}
 	o := s.Observe(0)
 	mk := func(arm, tmpl, pin string) *Step {
-		return &Step{Arms: ArmsID, Arm: arm, Inspect: map[string]string{}, Allowed: []string{}, Rule: sel.Rule, RuleSha256: sel.RuleSha256,
-			Template: tmpl, TemplateSha256: pin}
+		return &Step{Arms: ArmsID, Arm: arm, Inspect: map[string]string{}, Allowed: []string{}, Proposal: proposal, Operations: ops,
+			Rule: sel.Rule, RuleSha256: sel.RuleSha256, Template: tmpl, TemplateSha256: pin}
 	}
 	control, treatment = mk(ArmControl, ControlID, ControlSha256), mk(ArmTreatment, PresentationID, PresentationSha256)
 	why := ""
@@ -95,6 +127,8 @@ func Steps(s *session.Session, proposal []api.Action) (control, treatment *Step,
 		why = StepNotDueNoSelect
 	case !sel.Candidates[0].OK:
 		why = StepNotDueRefused
+	case !opsOK:
+		why = StepNotDueOps
 	}
 	if why != "" {
 		control.Why, treatment.Why = why, why
@@ -161,7 +195,7 @@ func digestsUnchanged(s *session.Session, before session.Digests) error {
 // realized outcome. The structure is the first guard (only the agent
 // audience is rendered); this is the second.
 var (
-	hexRun      = regexp.MustCompile(`[0-9a-f]{16,}`)
+	hexRun      = regexp.MustCompile(`(?i)[0-9a-f]{16,}`)
 	shownBanned = []string{"seed", "digest", "sha256", "branch", "projection", "projected orders", "projected outcome", "realized", "evaluation", "continuation",
 		"orders lost", "lost orders", "orderslost", "profit", "future outcome", "hidden"}
 )
@@ -196,14 +230,14 @@ func (st *Step) checkShown() error {
 }
 
 // ClassifyControl classifies a reply to the control arm's turn, with the
-// results Classify uses: select:proposal is retained (the proposal
-// submitted after final validation), a revision to the same batch is
+// results Classify uses: select:proposal is retained (the step's own
+// proposal, the batch its text shows, submitted after final validation), a revision to the same batch is
 // retained, a different batch revised, abandon abandoned, any other
 // select an invalid alternative, and a missing or contradictory reply no
 // decision. Nothing is defaulted. The control turn shows no comparison, so
 // its only flag is no_observable_comparison; an inspect request is
 // recorded and has no answer.
-func ClassifyControl(st *Step, proposal []api.Action, requests []string, reply *Reply, revalidate func([]api.Action) []api.ActionResult) Decision {
+func ClassifyControl(st *Step, requests []string, reply *Reply, revalidate func([]api.Action) []api.ActionResult) Decision {
 	d := Decision{Requests: append([]string{}, requests...), Reply: reply, Flags: []string{FlagNoComparison},
 		CitationChecks: []string{}, Submitted: []api.Action{}, Revalidation: []api.ActionResult{}}
 	submit := func(batch []api.Action, result, why string) {
@@ -222,8 +256,12 @@ func ClassifyControl(st *Step, proposal []api.Action, requests []string, reply *
 			d.Alternative = IDProposal
 		}
 	}
+	var proposal []api.Action
+	if st != nil {
+		proposal = st.Proposal
+	}
 	switch {
-	case st == nil || !st.Due || st.Arm != ArmControl:
+	case st == nil || !st.Due || st.Arm != ArmControl || len(proposal) == 0:
 		d.Result, d.Why = ResultNoDecision, "no control turn was shown"
 	case reply == nil:
 		d.Result, d.Why = ResultNoDecision, "no usable reply"

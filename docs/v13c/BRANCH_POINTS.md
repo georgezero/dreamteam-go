@@ -32,14 +32,19 @@ eligible under shared-prefix/v4 and have a committed context
 3. A session is opened on the run's scenario and seed. The recorded
    requests are fed through the agent protocol (`agent.Handler`), and
    every answer must equal the recorded one: for hello, its clock and
-   scenario fingerprint. Feeding stops at the digests answer equal to
-   the context's digests, as the V0.12b driver's `to_point` does.
+   scenario fingerprint. Feeding continues to the digests answer equal to
+   the context's digests, then through the point's own read-only
+   requests (observe, actions) that follow it, each answer checked, as the
+   V0.12b driver's `to_point` does (V0.13c review F5).
 4. The recorded reply is split as the agents split it
    (`llm_agent3.split`): its operations batch, then its staffing batch.
    Both are validated, and the result must equal the recorded
    validation (the pool's, where a V0.10b line has none).
-5. Rule v2 and both arms' turns are built for the staffing batch
-   (`Steps`). The two arms must agree on whether the turn is due.
+5. Rule v2 and both arms' turns are built from the whole reply
+   (`Steps`): the comparison is of the staffing batch, and the turn is due
+   only if the engine accepts the operations batch too. The two arms must
+   agree on whether the turn is due, and it is never due for a reply the
+   engine refuses.
 6. The displaced count is recorded (staffing preview), and so are the
    slots closed when the batch is terminations only.
 

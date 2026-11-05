@@ -20,10 +20,17 @@
 decision date.
 
 **What is listed for each pair:**
-* every value of the treatment turn (summary and every inspect answer)
-  that differs between the members, by alternative, section and key. A
-  proposal employee's ID in a key is written `<employee>` so that
-  different employees compare item by item;
+* every item the treatment turn renders (summary and every inspect
+  answer) that differs between the members, by alternative, section and
+  key: the decision time, each alternative's position, actions,
+  description and validation as shown, each value's label, value, time,
+  basis and derivation, and the order of every list. An accepted action's
+  validation message is not rendered, so it is not compared. A proposal
+  employee's ID in a key is written `<employee>` so that different
+  employees compare item by item. `TestVisibleLedgerComplete` checks that
+  each rendered field reaches the ledger (V0.13c review F2);
+* every rendered line of the treatment turn that differs, position by
+  position (`treatmentLinesThatDiffer`), as a cross-check;
 * each difference classed as `[value]`, `[label only]` (the employee's
   name), or `[only in a]`/`[only in b]` (an item or alternative shown
   in one member only);
@@ -38,11 +45,11 @@ isolating one fact, the other differences are listed.
 
 | Pair | Fact | Member a | Member b | Same state | Differences (value / label only / one member only) |
 |---|---|---|---|---|---|
-| S1 | displaced bookings, zero versus nonzero, decided two weeks apart | terminate Sam (E04) with 14 days' notice, decided Oct 13: **0 displaced**, 2,481 slots closed | the same with 14 days' notice, decided Oct 27: **18 displaced** (18 booked now), 2,481 slots closed | no | 33 / 0 / 4 |
-| S2 | displaced bookings, zero versus nonzero, same state | terminate Riley (E03), last day Feb 16, decided Oct 20: **0 displaced**, 45 slots | last day Feb 9: **1 displaced**, 278 slots | yes | 12 / 0 / 2 |
-| S3 | severance | terminate Casey (E05), last day Oct 27: **$4,500.00** severance, guarantee $2,250.00 a week, 684 slots | terminate Morgan (E06): **$4,345.00**, $2,172.50 a week, 872 slots | yes | 18 / 17 / 4 |
-| S4 | an alternative available versus unavailable | terminate Casey (E05), last day Jan 26: the later-last-day adjustment **listed** (Feb 9, in the booking horizon) | last day Feb 2: the adjustment **not listed** (Feb 16 is past the booking horizon) | yes | 9 / 0 / 25 |
-| S5 | guaranteed commitment | teleradiology start, weeknights, Saturday and Sunday, from Oct 27: retainer to the earliest end **$3,083.34** | weeknights only: **$1,491.94** | yes | 8 / 2 / 0 |
+| S1 | displaced bookings, zero versus nonzero, decided two weeks apart | terminate Sam (E04) with 14 days' notice, decided Oct 13: **0 displaced**, 2,481 slots closed | the same with 14 days' notice, decided Oct 27: **18 displaced** (18 booked now), 2,481 slots closed | no | 38 / 0 / 4 |
+| S2 | displaced bookings, zero versus nonzero, same state | terminate Riley (E03), last day Feb 16, decided Oct 20: **0 displaced**, 45 slots | last day Feb 9: **1 displaced**, 278 slots | yes | 14 / 0 / 2 |
+| S3 | severance | terminate Casey (E05), last day Oct 27: **$4,500.00** severance, guarantee $2,250.00 a week, 684 slots | terminate Morgan (E06): **$4,345.00**, $2,172.50 a week, 872 slots | yes | 20 / 17 / 4 |
+| S4 | an alternative available versus unavailable | terminate Casey (E05), last day Jan 26: the later-last-day adjustment **listed** (Feb 9, in the booking horizon) | last day Feb 2: the adjustment **not listed** (Feb 16 is past the booking horizon) | yes | 10 / 0 / 31 |
+| S5 | guaranteed commitment | teleradiology start, weeknights, Saturday and Sunday, from Oct 27: retainer to the earliest end **$3,083.34** | weeknights only: **$1,491.94** | yes | 6 / 2 / 0 |
 | S6 | capacity loss | terminate Sam (E04), last day Oct 27: **2,481** slots no longer staffed | last day Jan 26: **362** | yes | 26 / 0 / 0 |
 
 ## 3. What else differs, pair by pair
@@ -79,8 +86,8 @@ isolating one fact, the other differences are listed.
 
 **S5:**
 * The best isolated pair. Only the windows, the retainer guarantee,
-  the run-rate estimate and the action text differ; nothing about
-  bookings or staff.
+  the run-rate and read-fee estimates and the action text differ;
+  nothing about bookings or staff.
 
 **S6:**
 * The last day moves three months. Notice (14 vs 105 days), contract

@@ -810,6 +810,30 @@ no score. It implements the comparison V0.13a designed
 * No composite score or rank is defined.
 * Benchmark results, policies and suites are unchanged.
 
+## 11i. Management alternatives (V0.13c, protocol preparation)
+
+V0.13c adds no policy, suite, metric or run to the benchmark, and changes
+no score.
+
+**What it prepares:**
+* A controlled, decision-level experiment
+  (`docs/v13c/EXPERIMENTAL_DESIGN.md`, `docs/v13c/PROTOCOL_DRAFT.md`):
+  * control is a validation-first workflow with a fixed confirmation
+    turn;
+  * treatment is the same workflow with the neutral comparison shown
+    before the final decision.
+* The primary outcome is decision sensitivity on paired real engine
+  states, Δ_treatment − Δ_control. It is not a score and not a measure
+  of decision quality.
+
+**Its evidence** (`docs/benchmark/v13c-dev/`):
+* rule v2 against v1;
+* the branch-point inventory and selection, rebuilt in CI from the
+  V0.8c and V0.9c replays;
+* the sensitivity pairs, with every turn text.
+
+The protocol is a draft. It is not locked and no run is authorized.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

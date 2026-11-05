@@ -157,10 +157,7 @@ func SelectRule(s *session.Session, rule string, proposal []api.Action) (*Select
 					c.OK = c.OK && r.OK
 				}
 			}
-			c.Sha256 = sha(struct {
-				Rule, ID string
-				Actions  []api.Action
-			}{rule, id, c.Actions})
+			c.Sha256 = candidateSha256(rule, id, c.Actions)
 			sel.Candidates = append(sel.Candidates, c)
 		}
 		add(IDProposal, "proposal", proposal)
@@ -214,6 +211,15 @@ func dedupe(cands []Candidate) ([]Candidate, []Removed) {
 		kept = append(kept, c)
 	}
 	return kept, removed
+}
+
+// candidateSha256 is a candidate's identity: the SHA-256 of the rule, its
+// ID and its canonical actions.
+func candidateSha256(rule, id string, actions []api.Action) string {
+	return sha(struct {
+		Rule, ID string
+		Actions  []api.Action
+	}{rule, id, canon(actions)})
 }
 
 // batchKey is the SHA-256 of a batch's canonical form, in batch order: the

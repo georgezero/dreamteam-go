@@ -7,6 +7,94 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13c — alternative comparison protocol preparation (0.13.0-dev.2, engine unchanged)
+
+On 2026-11-05 the owner accepted and closed V0.13b, approved the narrow
+F4 repair, and gave GO for V0.13c preparation only. Live inference: NO
+GO. V0.13.0 remains unreleased.
+
+**What was built** (`docs/v13c/IMPLEMENTATION_REPORT.md`):
+* **F4.** `dreamteam.alternative-selection/v2` (pinned `5f32b2c8…`) is
+  v1's list with later duplicate canonical batches removed and recorded.
+  * It never substitutes, refills, repairs or reorders anything.
+  * v1, its pin and all V0.13b evidence are unchanged.
+* **The arms.** `alternatives.Steps(session, reply)` builds the control
+  and treatment final-decision turns from one selection:
+  * the turn is due only when the engine accepts the whole reply;
+  * treatment shows only the bound agent comparison, through the pinned
+    template, with a text check on every message and inspect answer;
+  * `ClassifyControl` classifies control replies against the step's own
+    proposal.
+* **The branch-point inventory.** The V0.12b pool of 20 proposals was
+  opened on the engine at the recorded states, from the V0.8c and V0.9c
+  replays, and `dreamteam-v13c-select/1` was applied. Nine points are
+  selected, and CI rebuilds both files.
+* **Sensitivity pairs.** Six pairs of real engine states (mini, seed 52),
+  with every rendered difference listed and every turn text committed.
+* **Documents:**
+  * the experimental design, with the owner's decisions D1–D10;
+  * the presentation review package (PENDING);
+  * the draft protocol (not locked);
+  * limitations and the baseline.
+
+**Independent technical review** (`docs/audits/v0.13c-independent-review.md`,
+verbatim, `6cf962a`): do not lock yet. It found 1 BLOCKER, 2 MAJOR,
+6 MINOR and 1 NOTE.
+* **Fixed:**
+  * F1 in part: the digest check is case-insensitive;
+  * F2: the sensitivity ledger holds everything rendered;
+  * F3: candidate identities are checked structurally;
+  * F4: trailing JSON is refused;
+  * F5: the point's read-only tail is checked;
+  * F6: the turn is due only for a fully accepted reply;
+  * F8: control classification is bound to its step;
+  * F9: the budget is consistent.
+* **Awaiting the owner:**
+  * F1, the rest: meaning carried in free-text fields, under a
+    trusted-input threat model (D7);
+  * F7: the framing sentence (D8);
+  * N1: the estimand, the operations batch and the shared outcomes
+    (D9, D10).
+
+**Mutation checks:** 26 of 26 caught. That is 17 for F4 and the arms
+(15 caught first; the two weak tests were strengthened) and 9 for the
+review fixes.
+
+**The engine version is not bumped.** V0.13c changes no engine, session
+or simulator file. A bump would change the engine string embedded in
+V0.13b's evidence, which the owner asked to keep unchanged. This
+departs from the usual per-step version bump.
+
+**Quality gates:**
+
+| Where | Gate | Result |
+|---|---|---|
+| horo (linux/amd64), reviewed tree `e8470c0` | Race, all packages, 90 min | exit 0; 11 of 11 packages with tests ok |
+| horo, reviewed tree | Five cross-builds (linux/amd64, linux/arm64, darwin/arm64, darwin/amd64, windows/amd64); vet (default, calibration, acceptance); gofmt | 5 of 5 ok; vet ok; gofmt clean |
+| horo, reviewed tree | Golden references (four, through the migration manifest) | outcomes identical |
+| horo, reviewed tree | Benchmark verify and reproduce (`testdata/benchmark/ci.json`) | 86 and 59 checks, 0 failed |
+| horo, reviewed tree | V0.8c and V0.9c replays (historical replay, frozen evidence inputs) | 4 × 104 checks, 0 failed |
+| horo, reviewed tree | V0.12b Stage B check, and the live run analysis replayed without a model | 24 point-arm starts at the recorded state, lock holds; decisions, tables and inference reproduced |
+| horo, reviewed tree | Python: agents/llm, analysis/evidence, analysis/repeatability, analysis/acknowledgment | OK |
+| horo, fixed tree | vet, gofmt, five cross-builds | ok; clean; 5 of 5 |
+| horo, fixed tree | Race: `internal/alternatives` with the replay-backed inventory | ok |
+| horo, fixed tree | Race: `internal/agent`, `internal/eval` | ok (exit 0) |
+| horo, fixed tree | The inventory regenerated and compared | byte-identical to the reviewed tree's |
+| Pi (linux/arm64), fixed tree | Every `internal/alternatives` test; `internal/agent` | ok |
+| CI | Full Go suite, golden references, historical replay, benchmark verify and reproduce, frozen evidence, the V0.13c inventory step, on Linux amd64, Linux arm64 and macOS | run by CI on this commit |
+
+**Not run:** live inference, the clinical suites, historical live reruns,
+and any reserved or holdout seed.
+
+**Not changed:**
+* simulator mechanics, accounting, action schemas, scoring;
+* the session API and agent protocol;
+* every agent, prompt, recording and frozen contract;
+* V0.13b's evidence, presentation template and rule v1
+  (`docs/audits/v0.13c-baseline.md`).
+
+---
+
 ## V0.13b — deterministic management alternatives (0.13.0-dev.2)
 
 On 2026-11-04 the owner accepted and closed V0.13a and gave GO for
