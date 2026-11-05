@@ -1,0 +1,1757 @@
+{
+ "schema": "dreamteam.management-alternatives/v1",
+ "audience": "evaluation",
+ "agent": {
+  "schema": "dreamteam.management-alternatives/v1",
+  "audience": "agent",
+  "decisionPoint": {
+   "engine": "0.13.0-dev.1",
+   "scenarioFingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+   "time": "2026-10-13T07:00:00",
+   "stateDigest": "1250d645b013bc5725fe12f089faef933dc7eceb44a10a15f558a5cdcd7f284c"
+  },
+  "selection": {
+   "rule": "dreamteam.alternative-selection/v1",
+   "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+   "why": "holds an irreversible action"
+  },
+  "alternatives": [
+   {
+    "id": "proposal",
+    "source": "proposal",
+    "candidateSha256": "3c1af5168488bbf9600453e55671edaba68c81dd61686c6b2089c492c00d0198",
+    "actions": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "description": "terminate Sam (E04), last day 2026-10-27",
+    "validation": {
+     "ok": true,
+     "results": [
+      {
+       "id": "",
+       "batch": 0,
+       "time": "2026-10-13T07:00:00",
+       "action": {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-10-27"
+       },
+       "ok": true,
+       "code": "accepted",
+       "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+       "effectiveAt": "2026-10-28"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "key": "last_day.E04",
+      "label": "Last day · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-10-27",
+      "source": "preview.terminations[0].lastDay"
+     },
+     {
+      "key": "end_date.E04",
+      "label": "Not employed from · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-10-28",
+      "source": "preview.terminations[0].endDate"
+     },
+     {
+      "key": "notice_days.E04",
+      "label": "Notice · Sam",
+      "class": "A1",
+      "unit": "days",
+      "number": 14,
+      "source": "preview.terminations[0].noticeDays"
+     },
+     {
+      "key": "severance_recognized_now.E04",
+      "label": "Severance recognized now · Sam",
+      "class": "A1",
+      "unit": "cents",
+      "number": 395000,
+      "when": "recognized now, paid 2026-10-30",
+      "source": "preview.terminations[0].severanceCents"
+     },
+     {
+      "key": "severance_payday.E04",
+      "label": "Severance payday · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-10-30",
+      "source": "preview.terminations[0].severancePayday"
+     },
+     {
+      "key": "voided_rosters.E04",
+      "label": "Pending roster versions voided · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.terminations[0].voidedRosters",
+      "derivation": "the number of dates listed"
+     },
+     {
+      "key": "voided_extensions.E04",
+      "label": "Approved extensions voided · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.terminations[0].voidedExtensions",
+      "derivation": "the number of extensions listed"
+     },
+     {
+      "key": "displaced_bookings",
+      "label": "Booked appointments displaced (whole batch)",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.displacements",
+      "derivation": "the number of displacements listed"
+     },
+     {
+      "key": "guaranteed.0",
+      "label": "Severance · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 395000,
+      "when": "recognized now, paid 2026-10-30",
+      "source": "preview.guaranteed[0].cents",
+      "basis": "two contracted weeks (39.5 h) at the base rate with benefits; independent of the roster"
+     },
+     {
+      "key": "guaranteed.1",
+      "label": "Contract pay to the last day · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 435000,
+      "when": "today to 2026-10-27",
+      "source": "preview.guaranteed[1].cents",
+      "basis": "minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it"
+     },
+     {
+      "key": "slots_closed",
+      "label": "Scheduled slots no longer staffed (booked or not)",
+      "class": "A1",
+      "unit": "count",
+      "number": 2481,
+      "when": "2026-10-28 to 2027-02-10 (106 days in the booking horizon)",
+      "source": "slotsClosed.total",
+      "basis": "template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders"
+     },
+     {
+      "key": "slots_closed_booked_now",
+      "label": "Of these, booked now",
+      "class": "A1",
+      "unit": "count",
+      "number": 0,
+      "source": "slotsClosed.bookedNow"
+     },
+     {
+      "key": "slots_closed.XR",
+      "label": "Scheduled slots no longer staffed · XR",
+      "class": "A1",
+      "unit": "count",
+      "number": 1095,
+      "source": "slotsClosed.byModality[0].count"
+     },
+     {
+      "key": "slots_closed.CT",
+      "label": "Scheduled slots no longer staffed · CT",
+      "class": "A1",
+      "unit": "count",
+      "number": 1386,
+      "source": "slotsClosed.byModality[1].count"
+     },
+     {
+      "key": "booked_ahead",
+      "label": "Appointments booked from tomorrow in the booking horizon",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "schedule(+1..+bookingHorizonDays)",
+      "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+     }
+    ],
+    "estimates": [
+     {
+      "key": "forecast.0",
+      "label": "Contract cost no longer owed · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 197500,
+      "when": "per full week from 2026-10-28",
+      "source": "preview.forecast[0].cents",
+      "basis": "estimate: the contract guarantee with benefits; overtime and hold-over not modeled"
+     }
+    ],
+    "obligations": [
+     {
+      "key": "next_payroll",
+      "label": "Payroll accrued, next payday",
+      "class": "A1",
+      "unit": "cents",
+      "number": 213355,
+      "when": "paid 2026-10-16",
+      "source": "observe.finance.nextPayroll"
+     },
+     {
+      "key": "payables",
+      "label": "Accounts payable",
+      "class": "A1",
+      "unit": "cents",
+      "number": 285482,
+      "source": "observe.finance.apCents"
+     }
+    ],
+    "reversibility": {
+     "key": "reversibility",
+     "label": "Reversibility",
+     "class": "A1",
+     "unit": "text",
+     "text": "irreversible",
+     "source": "engine rule",
+     "basis": "already_terminating: notice cannot be moved or withdrawn; no action rehires"
+    },
+    "unavailable": [
+     {
+      "key": "slots_beyond_horizon",
+      "class": "C",
+      "reason": "slots after the booking horizon do not exist yet and are not counted"
+     },
+     {
+      "key": "demand_for_closed_slots",
+      "class": "C",
+      "reason": "whether a closed slot would have been booked depends on future orders, which are not known before deciding"
+     },
+     {
+      "key": "future_orders_and_revenue",
+      "class": "C",
+      "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+     },
+     {
+      "key": "unmodeled",
+      "class": "C",
+      "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+     }
+    ]
+   },
+   {
+    "id": "no_action",
+    "source": "no_action",
+    "candidateSha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076",
+    "actions": [],
+    "description": "No batch: current staffing and every existing commitment continue",
+    "validation": {
+     "ok": true,
+     "results": []
+    },
+    "facts": [
+     {
+      "key": "displaced_bookings",
+      "label": "Booked appointments displaced (whole batch)",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "no batch",
+      "derivation": "no batch is applied, so no booking loses coverage"
+     },
+     {
+      "key": "slots_closed",
+      "label": "Scheduled slots no longer staffed (booked or not)",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "no batch",
+      "derivation": "no batch is applied, so no scheduled slot loses its staffing"
+     },
+     {
+      "key": "severance_recognized_now.E04",
+      "label": "Severance recognized now · Sam",
+      "class": "A2",
+      "unit": "cents",
+      "number": 0,
+      "source": "no batch",
+      "derivation": "no termination is committed, so no severance is recognized"
+     },
+     {
+      "key": "employment.E04",
+      "label": "Employment · Sam",
+      "class": "A1",
+      "unit": "text",
+      "text": "active",
+      "source": "observe.staff[3].employment"
+     },
+     {
+      "key": "contract_minutes.E04",
+      "label": "Contracted weekly minutes · Sam",
+      "class": "A1",
+      "unit": "count",
+      "number": 2370,
+      "source": "observe.staff[3].contractMin"
+     },
+     {
+      "key": "roster_minutes_week_a.E04",
+      "label": "Rostered minutes, week A · Sam",
+      "class": "A1",
+      "unit": "count",
+      "number": 2370,
+      "source": "rosterPlan(E04).versions[0].netMinA"
+     },
+     {
+      "key": "roster_minutes_week_b.E04",
+      "label": "Rostered minutes, week B · Sam",
+      "class": "A1",
+      "unit": "count",
+      "number": 2370,
+      "source": "rosterPlan(E04).versions[0].netMinB"
+     },
+     {
+      "key": "pending_rosters.E04",
+      "label": "Pending roster versions · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "rosterPlan(E04).versions",
+      "derivation": "the number of versions marked pending"
+     },
+     {
+      "key": "approved_extensions.E04",
+      "label": "Approved extensions · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "observe.extensions",
+      "derivation": "the number of extensions listed for the employee"
+     },
+     {
+      "key": "booked_ahead",
+      "label": "Appointments booked from tomorrow in the booking horizon",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "schedule(+1..+bookingHorizonDays)",
+      "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+     }
+    ],
+    "estimates": [],
+    "obligations": [
+     {
+      "key": "severance_if_terminated_later.E04",
+      "label": "Severance if terminated later · Sam",
+      "class": "A1",
+      "unit": "cents",
+      "number": 395000,
+      "when": "owed only on a later termination",
+      "source": "observe.staff[3].severanceCents",
+      "basis": "two contracted weeks with benefits"
+     },
+     {
+      "key": "weekly_guarantee.E04",
+      "label": "Contract guarantee continues · Sam",
+      "class": "A2",
+      "unit": "cents",
+      "number": 197500,
+      "when": "per full week, until a later decision",
+      "source": "preview(proposal).forecast[0].cents",
+      "derivation": "the engine's weekly guarantee with benefits for the employee, read from the proposal's preview; it continues with no action. Cross-checked: observe.staff.severanceCents / 2, within one cent"
+     },
+     {
+      "key": "next_payroll",
+      "label": "Payroll accrued, next payday",
+      "class": "A1",
+      "unit": "cents",
+      "number": 213355,
+      "when": "paid 2026-10-16",
+      "source": "observe.finance.nextPayroll"
+     },
+     {
+      "key": "payables",
+      "label": "Accounts payable",
+      "class": "A1",
+      "unit": "cents",
+      "number": 285482,
+      "source": "observe.finance.apCents"
+     }
+    ],
+    "reversibility": {
+     "key": "reversibility",
+     "label": "Reversibility",
+     "class": "A1",
+     "unit": "text",
+     "text": "nothing to reverse",
+     "source": "engine rule",
+     "basis": "no batch; a termination stays possible later with at least 14 days' notice"
+    },
+    "unavailable": [
+     {
+      "key": "future_orders_and_revenue",
+      "class": "C",
+      "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+     },
+     {
+      "key": "unmodeled",
+      "class": "C",
+      "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+     }
+    ]
+   },
+   {
+    "id": "adjusted",
+    "source": "adjustment",
+    "candidateSha256": "0a2faa9c231320933c99135eb0e954053001939c0ffefb46dfb36d03eee949bd",
+    "actions": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "description": "terminate Sam (E04), last day 2026-11-10",
+    "validation": {
+     "ok": true,
+     "results": [
+      {
+       "id": "",
+       "batch": 0,
+       "time": "2026-10-13T07:00:00",
+       "action": {
+        "type": "terminate",
+        "employee": "E04",
+        "lastDay": "2026-11-10"
+       },
+       "ok": true,
+       "code": "accepted",
+       "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+       "effectiveAt": "2026-11-11"
+      }
+     ]
+    },
+    "facts": [
+     {
+      "key": "last_day.E04",
+      "label": "Last day · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-11-10",
+      "source": "preview.terminations[0].lastDay"
+     },
+     {
+      "key": "end_date.E04",
+      "label": "Not employed from · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-11-11",
+      "source": "preview.terminations[0].endDate"
+     },
+     {
+      "key": "notice_days.E04",
+      "label": "Notice · Sam",
+      "class": "A1",
+      "unit": "days",
+      "number": 28,
+      "source": "preview.terminations[0].noticeDays"
+     },
+     {
+      "key": "severance_recognized_now.E04",
+      "label": "Severance recognized now · Sam",
+      "class": "A1",
+      "unit": "cents",
+      "number": 395000,
+      "when": "recognized now, paid 2026-11-13",
+      "source": "preview.terminations[0].severanceCents"
+     },
+     {
+      "key": "severance_payday.E04",
+      "label": "Severance payday · Sam",
+      "class": "A1",
+      "unit": "date",
+      "date": "2026-11-13",
+      "source": "preview.terminations[0].severancePayday"
+     },
+     {
+      "key": "voided_rosters.E04",
+      "label": "Pending roster versions voided · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.terminations[0].voidedRosters",
+      "derivation": "the number of dates listed"
+     },
+     {
+      "key": "voided_extensions.E04",
+      "label": "Approved extensions voided · Sam",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.terminations[0].voidedExtensions",
+      "derivation": "the number of extensions listed"
+     },
+     {
+      "key": "displaced_bookings",
+      "label": "Booked appointments displaced (whole batch)",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "preview.displacements",
+      "derivation": "the number of displacements listed"
+     },
+     {
+      "key": "guaranteed.0",
+      "label": "Severance · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 395000,
+      "when": "recognized now, paid 2026-11-13",
+      "source": "preview.guaranteed[0].cents",
+      "basis": "two contracted weeks (39.5 h) at the base rate with benefits; independent of the roster"
+     },
+     {
+      "key": "guaranteed.1",
+      "label": "Contract pay to the last day · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 830000,
+      "when": "today to 2026-11-10",
+      "source": "preview.guaranteed[1].cents",
+      "basis": "minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it"
+     },
+     {
+      "key": "slots_closed",
+      "label": "Scheduled slots no longer staffed (booked or not)",
+      "class": "A1",
+      "unit": "count",
+      "number": 2155,
+      "when": "2026-11-11 to 2027-02-10 (92 days in the booking horizon)",
+      "source": "slotsClosed.total",
+      "basis": "template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders"
+     },
+     {
+      "key": "slots_closed_booked_now",
+      "label": "Of these, booked now",
+      "class": "A1",
+      "unit": "count",
+      "number": 0,
+      "source": "slotsClosed.bookedNow"
+     },
+     {
+      "key": "slots_closed.XR",
+      "label": "Scheduled slots no longer staffed · XR",
+      "class": "A1",
+      "unit": "count",
+      "number": 951,
+      "source": "slotsClosed.byModality[0].count"
+     },
+     {
+      "key": "slots_closed.CT",
+      "label": "Scheduled slots no longer staffed · CT",
+      "class": "A1",
+      "unit": "count",
+      "number": 1204,
+      "source": "slotsClosed.byModality[1].count"
+     },
+     {
+      "key": "booked_ahead",
+      "label": "Appointments booked from tomorrow in the booking horizon",
+      "class": "A2",
+      "unit": "count",
+      "number": 0,
+      "source": "schedule(+1..+bookingHorizonDays)",
+      "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+     }
+    ],
+    "estimates": [
+     {
+      "key": "forecast.0",
+      "label": "Contract cost no longer owed · Sam (E04)",
+      "class": "A1",
+      "unit": "cents",
+      "number": 197500,
+      "when": "per full week from 2026-11-11",
+      "source": "preview.forecast[0].cents",
+      "basis": "estimate: the contract guarantee with benefits; overtime and hold-over not modeled"
+     }
+    ],
+    "obligations": [
+     {
+      "key": "next_payroll",
+      "label": "Payroll accrued, next payday",
+      "class": "A1",
+      "unit": "cents",
+      "number": 213355,
+      "when": "paid 2026-10-16",
+      "source": "observe.finance.nextPayroll"
+     },
+     {
+      "key": "payables",
+      "label": "Accounts payable",
+      "class": "A1",
+      "unit": "cents",
+      "number": 285482,
+      "source": "observe.finance.apCents"
+     }
+    ],
+    "reversibility": {
+     "key": "reversibility",
+     "label": "Reversibility",
+     "class": "A1",
+     "unit": "text",
+     "text": "irreversible",
+     "source": "engine rule",
+     "basis": "already_terminating: notice cannot be moved or withdrawn; no action rehires"
+    },
+    "unavailable": [
+     {
+      "key": "slots_beyond_horizon",
+      "class": "C",
+      "reason": "slots after the booking horizon do not exist yet and are not counted"
+     },
+     {
+      "key": "demand_for_closed_slots",
+      "class": "C",
+      "reason": "whether a closed slot would have been booked depends on future orders, which are not known before deciding"
+     },
+     {
+      "key": "future_orders_and_revenue",
+      "class": "C",
+      "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+     },
+     {
+      "key": "unmodeled",
+      "class": "C",
+      "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+     }
+    ]
+   }
+  ],
+  "compared": [
+   {
+    "key": "severance_recognized_now.E04",
+    "unit": "cents",
+    "values": {
+     "adjusted": 395000,
+     "no_action": 0,
+     "proposal": 395000
+    }
+   },
+   {
+    "key": "displaced_bookings",
+    "unit": "count",
+    "values": {
+     "adjusted": 0,
+     "no_action": 0,
+     "proposal": 0
+    }
+   },
+   {
+    "key": "slots_closed",
+    "unit": "count",
+    "values": {
+     "adjusted": 2155,
+     "no_action": 0,
+     "proposal": 2481
+    }
+   },
+   {
+    "key": "booked_ahead",
+    "unit": "count",
+    "values": {
+     "adjusted": 0,
+     "no_action": 0,
+     "proposal": 0
+    }
+   }
+  ],
+  "provenance": [
+   {
+    "request": "observe",
+    "responseSha256": "914f7f8da2ce4e233e053b2a4b06c1802d6fd8c0086b6855c147bd4a2d2ffad5"
+   },
+   {
+    "request": "validate proposal",
+    "responseSha256": "50c80e901ec96843f365d60bb6daed50f36af4db6ce54a1d6bd2d9e639101164"
+   },
+   {
+    "request": "preview proposal",
+    "responseSha256": "e6f6a6f32c471055513a504d5e7a53bbba2d4f8397f582e9e149468ac99da35e"
+   },
+   {
+    "request": "slotsClosed proposal",
+    "responseSha256": "a120ac4ad96942a37f1f8a68e13d53f3c1a212629446d0ea6a176958ca4b102e"
+   },
+   {
+    "request": "validate no_action",
+    "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+   },
+   {
+    "request": "rosterPlan E04",
+    "responseSha256": "c200e70d4f27ef4c6b3af9cf7c553a565002bf0a045fb3ff8349b4e2c219a4dd"
+   },
+   {
+    "request": "validate adjusted",
+    "responseSha256": "622d4267eb12c342cf116f7b0e206b2086a80378770e00f179d0a784e130fe7e"
+   },
+   {
+    "request": "preview adjusted",
+    "responseSha256": "d827c02365aa3719425db872cf00a5352deabfc8163cd762fbc5d1c4d7051e7f"
+   },
+   {
+    "request": "slotsClosed adjusted",
+    "responseSha256": "2eb96114755b6025dabf485ca36c6eb1a78b1976ac83c2cbf72c791aefb0a9fd"
+   }
+  ],
+  "sha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb"
+ },
+ "source": {
+  "seed": 52,
+  "recordChecksum": "0c55b2660cc9cce562b58ffd8428d932e18d0c32bcd4d3717aa2771d6ac67bae",
+  "recordedBy": "0.13.0-dev.1",
+  "compatibility": "native_exact",
+  "digests": {
+   "log": "64853e8ea5fb4f1c9cf422a236752208917bcb7cb39f4dfa607bb54e8e36c567",
+   "ledger": "7b0934ce175b7fd50726222e771d6827559d9a8c23016d840eee8f73af103c16",
+   "actions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+   "state": "1250d645b013bc5725fe12f089faef933dc7eceb44a10a15f558a5cdcd7f284c",
+   "run": "45ddb600c4d9675b8a901893276eaec37f33687a8fd9de38032121fddbcc787f"
+  }
+ },
+ "continuation": {
+  "id": "dreamteam.continuation/no-further-action-v1",
+  "afterDecisionDays": 30,
+  "afterLatestEffectDays": 30
+ },
+ "continuationSha256": "3091480d8d3417f2221c9fbc4e7402c5a1ecc939a706b8f0a2a181a3db165fb4",
+ "continuationNote": "Every projection is exact for this seed, this engine and this continuation only: no management action of any kind after the decision instant. It uses the simulator's realized future, which no manager knows at the decision point. It is not a prediction, not a counterfactual truth outside the simulator, and not evidence of a good or bad decision.",
+ "horizonSec": 5097600,
+ "horizon": "2026-12-11T00:00:00",
+ "branches": [
+  {
+   "id": "proposal",
+   "identity": {
+    "schema": "dreamteam.branch-identity/v1",
+    "sourceChecksum": "0c55b2660cc9cce562b58ffd8428d932e18d0c32bcd4d3717aa2771d6ac67bae",
+    "scenarioFingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+    "seedDigest": "c70b58d3db7f0fb393d7769302c09b05221cc8018848d4f58b52733bcc6c4cad",
+    "decisionSec": 25200,
+    "decisionTime": "2026-10-13T07:00:00",
+    "decisionRunDigest": "45ddb600c4d9675b8a901893276eaec37f33687a8fd9de38032121fddbcc787f",
+    "engine": "0.13.0-dev.1",
+    "actions": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "actionsSha256": "d0fd911dc959eda3a06cb375c278765bd0cb85afa4e71421945bc9ef7be67719",
+    "continuation": {
+     "id": "dreamteam.continuation/no-further-action-v1",
+     "afterDecisionDays": 30,
+     "afterLatestEffectDays": 30
+    },
+    "continuationSha256": "3091480d8d3417f2221c9fbc4e7402c5a1ecc939a706b8f0a2a181a3db165fb4",
+    "horizonSec": 5097600,
+    "horizon": "2026-12-11T00:00:00",
+    "digest": "9506e84a810a8985eab84238587c863e9a8791fa90528b7600a7ee5ea448ceec"
+   },
+   "replayVerified": true,
+   "atDecision": {
+    "log": "2e27d5b0466e7a01b66a36733a750711492c25bc8a0ddc332c3736f7cf83eaf2",
+    "ledger": "4ca405cbc21961c809497248485a5fbade577fa264ff3c548a903596f6b7171e",
+    "actions": "02fdefc872cdff247c504ea31ee0ea185a81e5066807a8477e7907bb0cfaa08e",
+    "state": "9fc7fefadf61e967c365c118e7d2c5a59e8d6b673be56f69612e6669a810b227",
+    "run": "d63f3eea323d22ccec43c8410cf91271dc7986e3b39817aed06e90796b450b6f"
+   },
+   "atHorizon": {
+    "log": "2194903f10e78d424b4785d4360e88a069149fb4432fafd82cb866a4dbeeb4c8",
+    "ledger": "267b4ccdaf68f1e02e3f6eb78f2e2a4737cfe4c25beeec63c2a30d725b2cc8b2",
+    "actions": "02fdefc872cdff247c504ea31ee0ea185a81e5066807a8477e7907bb0cfaa08e",
+    "state": "c36da6e24a1db013f5dd65ab218dc319d6608adae26d821bc0e067cebcbeb369",
+    "run": "29692047a692b6bcdb8bc4afb9e0df68442c1fb9d6846b192b329521950204a5"
+   },
+   "projected": [
+    {
+     "key": "orders_received",
+     "label": "Orders received (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2881,
+     "source": "end.window.ops.demand.received - start.window.ops.demand.received"
+    },
+    {
+     "key": "orders_booked",
+     "label": "Orders booked (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2561,
+     "source": "end.window.ops.demand.booked - start.window.ops.demand.booked"
+    },
+    {
+     "key": "orders_lost",
+     "label": "Orders lost (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 407,
+     "source": "end.window.ops.demand.lost - start.window.ops.demand.lost"
+    },
+    {
+     "key": "appointments_cancelled",
+     "label": "Appointments cancelled by patients (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 158,
+     "source": "end.window.ops.demand.cancelled - start.window.ops.demand.cancelled"
+    },
+    {
+     "key": "walkins_arrived",
+     "label": "Walk-ins arrived (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 438,
+     "source": "end.window.ops.walkIns.arrived - start.window.ops.walkIns.arrived"
+    },
+    {
+     "key": "exams",
+     "label": "Exams performed (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 1963,
+     "source": "end.window.ops.exams - start.window.ops.exams"
+    },
+    {
+     "key": "reports_final",
+     "label": "Reports finalized (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 1963,
+     "source": "end.window.ops.reporting.final - start.window.ops.reporting.final"
+    },
+    {
+     "key": "net_revenue",
+     "label": "Net revenue (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 28073366,
+     "source": "end.window.money.netRevenueCents - start.window.money.netRevenueCents"
+    },
+    {
+     "key": "wages",
+     "label": "Wages (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 15546882,
+     "source": "end.window.money.ledger.wagesCents - start.window.money.ledger.wagesCents"
+    },
+    {
+     "key": "benefits",
+     "label": "Benefits (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 3886742,
+     "source": "end.window.money.ledger.benefitsCents - start.window.money.ledger.benefitsCents"
+    },
+    {
+     "key": "severance",
+     "label": "Severance recognized (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 395000,
+     "source": "end.window.money.ledger.severanceCents - start.window.money.ledger.severanceCents"
+    },
+    {
+     "key": "operating_expense",
+     "label": "Operating expense (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 40314830,
+     "source": "end.window.money.operatingExpenseCents - start.window.money.operatingExpenseCents"
+    },
+    {
+     "key": "operating_profit",
+     "label": "Operating profit (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": -12241464,
+     "source": "end.window.money.operatingProfitCents - start.window.money.operatingProfitCents"
+    },
+    {
+     "key": "wait_to_exam_p50",
+     "label": "Wait to exam, 50th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 901,
+     "source": "end.window.ops.waits.toExam.p50Sec"
+    },
+    {
+     "key": "wait_to_exam_p90",
+     "label": "Wait to exam, 90th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 2598,
+     "source": "end.window.ops.waits.toExam.p90Sec"
+    },
+    {
+     "key": "cash_at_horizon",
+     "label": "Cash at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": -13486702,
+     "source": "end.balances.cashCents"
+    },
+    {
+     "key": "lowest_cash",
+     "label": "Lowest cash since day 1",
+     "class": "B",
+     "unit": "cents",
+     "number": -13486702,
+     "source": "end.balances.minCashCents"
+    },
+    {
+     "key": "days_below_zero",
+     "label": "Days below zero cash since day 1",
+     "class": "B",
+     "unit": "days",
+     "number": 20,
+     "source": "end.balances.daysBelowZero"
+    },
+    {
+     "key": "payables_at_horizon",
+     "label": "Accounts payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 3820208,
+     "source": "end.balances.payablesCents"
+    },
+    {
+     "key": "severance_payable_at_horizon",
+     "label": "Severance payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 0,
+     "source": "end.balances.severancePayableCents"
+    },
+    {
+     "key": "booked_ahead_at_horizon",
+     "label": "Appointments booked ahead at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 611,
+     "source": "end.obligations.bookedAhead"
+    },
+    {
+     "key": "unread_at_horizon",
+     "label": "Studies unread at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 0,
+     "source": "end.obligations.unread"
+    }
+   ],
+   "unavailable": []
+  },
+  {
+   "id": "no_action",
+   "identity": {
+    "schema": "dreamteam.branch-identity/v1",
+    "sourceChecksum": "0c55b2660cc9cce562b58ffd8428d932e18d0c32bcd4d3717aa2771d6ac67bae",
+    "scenarioFingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+    "seedDigest": "c70b58d3db7f0fb393d7769302c09b05221cc8018848d4f58b52733bcc6c4cad",
+    "decisionSec": 25200,
+    "decisionTime": "2026-10-13T07:00:00",
+    "decisionRunDigest": "45ddb600c4d9675b8a901893276eaec37f33687a8fd9de38032121fddbcc787f",
+    "engine": "0.13.0-dev.1",
+    "actions": [],
+    "actionsSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "continuation": {
+     "id": "dreamteam.continuation/no-further-action-v1",
+     "afterDecisionDays": 30,
+     "afterLatestEffectDays": 30
+    },
+    "continuationSha256": "3091480d8d3417f2221c9fbc4e7402c5a1ecc939a706b8f0a2a181a3db165fb4",
+    "horizonSec": 5097600,
+    "horizon": "2026-12-11T00:00:00",
+    "digest": "93065062e5ffb58a71afb6a064cc7bb0d687e9caa3f2b1c99dabc7b3c2ba2df2"
+   },
+   "replayVerified": true,
+   "atDecision": {
+    "log": "64853e8ea5fb4f1c9cf422a236752208917bcb7cb39f4dfa607bb54e8e36c567",
+    "ledger": "7b0934ce175b7fd50726222e771d6827559d9a8c23016d840eee8f73af103c16",
+    "actions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    "state": "1250d645b013bc5725fe12f089faef933dc7eceb44a10a15f558a5cdcd7f284c",
+    "run": "45ddb600c4d9675b8a901893276eaec37f33687a8fd9de38032121fddbcc787f"
+   },
+   "atHorizon": {
+    "log": "63a1dd26eeb66cef36bb20def5ca89718412027b737ed33f37ab138de675e952",
+    "ledger": "c8e4e62bf07304bf211b3b59570a4d26e1bc08c6640c53d144b30e2100a944b3",
+    "actions": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+    "state": "b1e69b8ac53084571afc45cc1240e0ac1237d98f90066c48af03d0d7750c64b6",
+    "run": "399a5f2ea9319a0fbd29685fe259e4d128dfb8756a15e59691aa08998fea0218"
+   },
+   "projected": [
+    {
+     "key": "orders_received",
+     "label": "Orders received (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2881,
+     "source": "end.window.ops.demand.received - start.window.ops.demand.received"
+    },
+    {
+     "key": "orders_booked",
+     "label": "Orders booked (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2849,
+     "source": "end.window.ops.demand.booked - start.window.ops.demand.booked"
+    },
+    {
+     "key": "orders_lost",
+     "label": "Orders lost (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 125,
+     "source": "end.window.ops.demand.lost - start.window.ops.demand.lost"
+    },
+    {
+     "key": "appointments_cancelled",
+     "label": "Appointments cancelled by patients (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 192,
+     "source": "end.window.ops.demand.cancelled - start.window.ops.demand.cancelled"
+    },
+    {
+     "key": "walkins_arrived",
+     "label": "Walk-ins arrived (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 438,
+     "source": "end.window.ops.walkIns.arrived - start.window.ops.walkIns.arrived"
+    },
+    {
+     "key": "exams",
+     "label": "Exams performed (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2223,
+     "source": "end.window.ops.exams - start.window.ops.exams"
+    },
+    {
+     "key": "reports_final",
+     "label": "Reports finalized (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2223,
+     "source": "end.window.ops.reporting.final - start.window.ops.reporting.final"
+    },
+    {
+     "key": "net_revenue",
+     "label": "Net revenue (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 33768222,
+     "source": "end.window.money.netRevenueCents - start.window.money.netRevenueCents"
+    },
+    {
+     "key": "wages",
+     "label": "Wages (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 16599291,
+     "source": "end.window.money.ledger.wagesCents - start.window.money.ledger.wagesCents"
+    },
+    {
+     "key": "benefits",
+     "label": "Benefits (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 4149850,
+     "source": "end.window.money.ledger.benefitsCents - start.window.money.ledger.benefitsCents"
+    },
+    {
+     "key": "severance",
+     "label": "Severance recognized (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 0,
+     "source": "end.window.money.ledger.severanceCents - start.window.money.ledger.severanceCents"
+    },
+    {
+     "key": "operating_expense",
+     "label": "Operating expense (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 42216107,
+     "source": "end.window.money.operatingExpenseCents - start.window.money.operatingExpenseCents"
+    },
+    {
+     "key": "operating_profit",
+     "label": "Operating profit (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": -8447885,
+     "source": "end.window.money.operatingProfitCents - start.window.money.operatingProfitCents"
+    },
+    {
+     "key": "wait_to_exam_p50",
+     "label": "Wait to exam, 50th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 902,
+     "source": "end.window.ops.waits.toExam.p50Sec"
+    },
+    {
+     "key": "wait_to_exam_p90",
+     "label": "Wait to exam, 90th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 2850,
+     "source": "end.window.ops.waits.toExam.p90Sec"
+    },
+    {
+     "key": "cash_at_horizon",
+     "label": "Cash at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": -14113401,
+     "source": "end.balances.cashCents"
+    },
+    {
+     "key": "lowest_cash",
+     "label": "Lowest cash since day 1",
+     "class": "B",
+     "unit": "cents",
+     "number": -14113401,
+     "source": "end.balances.minCashCents"
+    },
+    {
+     "key": "days_below_zero",
+     "label": "Days below zero cash since day 1",
+     "class": "B",
+     "unit": "days",
+     "number": 21,
+     "source": "end.balances.daysBelowZero"
+    },
+    {
+     "key": "payables_at_horizon",
+     "label": "Accounts payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 4183589,
+     "source": "end.balances.payablesCents"
+    },
+    {
+     "key": "severance_payable_at_horizon",
+     "label": "Severance payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 0,
+     "source": "end.balances.severancePayableCents"
+    },
+    {
+     "key": "booked_ahead_at_horizon",
+     "label": "Appointments booked ahead at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 607,
+     "source": "end.obligations.bookedAhead"
+    },
+    {
+     "key": "unread_at_horizon",
+     "label": "Studies unread at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 0,
+     "source": "end.obligations.unread"
+    }
+   ],
+   "unavailable": []
+  },
+  {
+   "id": "adjusted",
+   "identity": {
+    "schema": "dreamteam.branch-identity/v1",
+    "sourceChecksum": "0c55b2660cc9cce562b58ffd8428d932e18d0c32bcd4d3717aa2771d6ac67bae",
+    "scenarioFingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+    "seedDigest": "c70b58d3db7f0fb393d7769302c09b05221cc8018848d4f58b52733bcc6c4cad",
+    "decisionSec": 25200,
+    "decisionTime": "2026-10-13T07:00:00",
+    "decisionRunDigest": "45ddb600c4d9675b8a901893276eaec37f33687a8fd9de38032121fddbcc787f",
+    "engine": "0.13.0-dev.1",
+    "actions": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "actionsSha256": "86deec3d6e78fac080b24b153861382a87b140bf6c4ef0279db54ff3067ebe2c",
+    "continuation": {
+     "id": "dreamteam.continuation/no-further-action-v1",
+     "afterDecisionDays": 30,
+     "afterLatestEffectDays": 30
+    },
+    "continuationSha256": "3091480d8d3417f2221c9fbc4e7402c5a1ecc939a706b8f0a2a181a3db165fb4",
+    "horizonSec": 5097600,
+    "horizon": "2026-12-11T00:00:00",
+    "digest": "39f072b3149721b3af0c69728fc5a3efa00be6cc9618579497936198bdf06cf3"
+   },
+   "replayVerified": true,
+   "atDecision": {
+    "log": "498d4c170e9f61a08f818410fc87bdccb014eed33128050db43888131baa316a",
+    "ledger": "4ca405cbc21961c809497248485a5fbade577fa264ff3c548a903596f6b7171e",
+    "actions": "722fbbe89efa7a42f0c371f456bd57d2b49d4da23288248e968762727eebb8ec",
+    "state": "46e187879741177bd256e9f1e3a9b25a4ab77da701d3284f9cda5c8684b08a90",
+    "run": "c5547c8bd9aeb8dc6388186f158f054e4d269ba52c53380c75491be8efd54b5e"
+   },
+   "atHorizon": {
+    "log": "e07df99f66578fd5cf558dc4f7af98e8e22742c384d2f817745a06a10048709b",
+    "ledger": "2b853dc300cb0b07b0beda02beb4d5019fd01a834003d2b804a94295d9e4a594",
+    "actions": "722fbbe89efa7a42f0c371f456bd57d2b49d4da23288248e968762727eebb8ec",
+    "state": "0249eac069fb5bdcde3c32d7df0036fc2b2bea9de616d8ddb7b879fa54707c14",
+    "run": "cbf40652ce624a4b46efc9791ef13b34923eebad72e141e9791f096bab498421"
+   },
+   "projected": [
+    {
+     "key": "orders_received",
+     "label": "Orders received (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2881,
+     "source": "end.window.ops.demand.received - start.window.ops.demand.received"
+    },
+    {
+     "key": "orders_booked",
+     "label": "Orders booked (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2629,
+     "source": "end.window.ops.demand.booked - start.window.ops.demand.booked"
+    },
+    {
+     "key": "orders_lost",
+     "label": "Orders lost (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 337,
+     "source": "end.window.ops.demand.lost - start.window.ops.demand.lost"
+    },
+    {
+     "key": "appointments_cancelled",
+     "label": "Appointments cancelled by patients (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 162,
+     "source": "end.window.ops.demand.cancelled - start.window.ops.demand.cancelled"
+    },
+    {
+     "key": "walkins_arrived",
+     "label": "Walk-ins arrived (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 438,
+     "source": "end.window.ops.walkIns.arrived - start.window.ops.walkIns.arrived"
+    },
+    {
+     "key": "exams",
+     "label": "Exams performed (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2035,
+     "source": "end.window.ops.exams - start.window.ops.exams"
+    },
+    {
+     "key": "reports_final",
+     "label": "Reports finalized (decision to horizon)",
+     "class": "B",
+     "unit": "count",
+     "number": 2035,
+     "source": "end.window.ops.reporting.final - start.window.ops.reporting.final"
+    },
+    {
+     "key": "net_revenue",
+     "label": "Net revenue (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 29532778,
+     "source": "end.window.money.netRevenueCents - start.window.money.netRevenueCents"
+    },
+    {
+     "key": "wages",
+     "label": "Wages (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 15856704,
+     "source": "end.window.money.ledger.wagesCents - start.window.money.ledger.wagesCents"
+    },
+    {
+     "key": "benefits",
+     "label": "Benefits (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 3964198,
+     "source": "end.window.money.ledger.benefitsCents - start.window.money.ledger.benefitsCents"
+    },
+    {
+     "key": "severance",
+     "label": "Severance recognized (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 395000,
+     "source": "end.window.money.ledger.severanceCents - start.window.money.ledger.severanceCents"
+    },
+    {
+     "key": "operating_expense",
+     "label": "Operating expense (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": 40966568,
+     "source": "end.window.money.operatingExpenseCents - start.window.money.operatingExpenseCents"
+    },
+    {
+     "key": "operating_profit",
+     "label": "Operating profit (window convention) (decision to horizon)",
+     "class": "B",
+     "unit": "cents",
+     "number": -11433790,
+     "source": "end.window.money.operatingProfitCents - start.window.money.operatingProfitCents"
+    },
+    {
+     "key": "wait_to_exam_p50",
+     "label": "Wait to exam, 50th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 905,
+     "source": "end.window.ops.waits.toExam.p50Sec"
+    },
+    {
+     "key": "wait_to_exam_p90",
+     "label": "Wait to exam, 90th percentile (takeover to horizon)",
+     "class": "B",
+     "unit": "seconds",
+     "number": 2687,
+     "source": "end.window.ops.waits.toExam.p90Sec"
+    },
+    {
+     "key": "cash_at_horizon",
+     "label": "Cash at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": -13422262,
+     "source": "end.balances.cashCents"
+    },
+    {
+     "key": "lowest_cash",
+     "label": "Lowest cash since day 1",
+     "class": "B",
+     "unit": "cents",
+     "number": -13422262,
+     "source": "end.balances.minCashCents"
+    },
+    {
+     "key": "days_below_zero",
+     "label": "Days below zero cash since day 1",
+     "class": "B",
+     "unit": "days",
+     "number": 24,
+     "source": "end.balances.daysBelowZero"
+    },
+    {
+     "key": "payables_at_horizon",
+     "label": "Accounts payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 3837189,
+     "source": "end.balances.payablesCents"
+    },
+    {
+     "key": "severance_payable_at_horizon",
+     "label": "Severance payable at the horizon",
+     "class": "B",
+     "unit": "cents",
+     "number": 0,
+     "source": "end.balances.severancePayableCents"
+    },
+    {
+     "key": "booked_ahead_at_horizon",
+     "label": "Appointments booked ahead at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 609,
+     "source": "end.obligations.bookedAhead"
+    },
+    {
+     "key": "unread_at_horizon",
+     "label": "Studies unread at the horizon",
+     "class": "B",
+     "unit": "count",
+     "number": 0,
+     "source": "end.obligations.unread"
+    }
+   ],
+   "unavailable": []
+  }
+ ],
+ "differences": [
+  {
+   "key": "orders_received",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 2881,
+    "no_action": 2881,
+    "proposal": 2881
+   },
+   "minusReference": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "orders_booked",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 2629,
+    "no_action": 2849,
+    "proposal": 2561
+   },
+   "minusReference": {
+    "adjusted": -220,
+    "no_action": 0,
+    "proposal": -288
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "orders_lost",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 337,
+    "no_action": 125,
+    "proposal": 407
+   },
+   "minusReference": {
+    "adjusted": 212,
+    "no_action": 0,
+    "proposal": 282
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "appointments_cancelled",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 162,
+    "no_action": 192,
+    "proposal": 158
+   },
+   "minusReference": {
+    "adjusted": -30,
+    "no_action": 0,
+    "proposal": -34
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "walkins_arrived",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 438,
+    "no_action": 438,
+    "proposal": 438
+   },
+   "minusReference": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "exams",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 2035,
+    "no_action": 2223,
+    "proposal": 1963
+   },
+   "minusReference": {
+    "adjusted": -188,
+    "no_action": 0,
+    "proposal": -260
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "reports_final",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 2035,
+    "no_action": 2223,
+    "proposal": 1963
+   },
+   "minusReference": {
+    "adjusted": -188,
+    "no_action": 0,
+    "proposal": -260
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "net_revenue",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 29532778,
+    "no_action": 33768222,
+    "proposal": 28073366
+   },
+   "minusReference": {
+    "adjusted": -4235444,
+    "no_action": 0,
+    "proposal": -5694856
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "wages",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 15856704,
+    "no_action": 16599291,
+    "proposal": 15546882
+   },
+   "minusReference": {
+    "adjusted": -742587,
+    "no_action": 0,
+    "proposal": -1052409
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "benefits",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 3964198,
+    "no_action": 4149850,
+    "proposal": 3886742
+   },
+   "minusReference": {
+    "adjusted": -185652,
+    "no_action": 0,
+    "proposal": -263108
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "severance",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 395000,
+    "no_action": 0,
+    "proposal": 395000
+   },
+   "minusReference": {
+    "adjusted": 395000,
+    "no_action": 0,
+    "proposal": 395000
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "operating_expense",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 40966568,
+    "no_action": 42216107,
+    "proposal": 40314830
+   },
+   "minusReference": {
+    "adjusted": -1249539,
+    "no_action": 0,
+    "proposal": -1901277
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "operating_profit",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": -11433790,
+    "no_action": -8447885,
+    "proposal": -12241464
+   },
+   "minusReference": {
+    "adjusted": -2985905,
+    "no_action": 0,
+    "proposal": -3793579
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "wait_to_exam_p50",
+   "unit": "seconds",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 905,
+    "no_action": 902,
+    "proposal": 901
+   },
+   "minusReference": {
+    "adjusted": 3,
+    "no_action": 0,
+    "proposal": -1
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "wait_to_exam_p90",
+   "unit": "seconds",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 2687,
+    "no_action": 2850,
+    "proposal": 2598
+   },
+   "minusReference": {
+    "adjusted": -163,
+    "no_action": 0,
+    "proposal": -252
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "cash_at_horizon",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": -13422262,
+    "no_action": -14113401,
+    "proposal": -13486702
+   },
+   "minusReference": {
+    "adjusted": 691139,
+    "no_action": 0,
+    "proposal": 626699
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "lowest_cash",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": -13422262,
+    "no_action": -14113401,
+    "proposal": -13486702
+   },
+   "minusReference": {
+    "adjusted": 691139,
+    "no_action": 0,
+    "proposal": 626699
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "days_below_zero",
+   "unit": "days",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 24,
+    "no_action": 21,
+    "proposal": 20
+   },
+   "minusReference": {
+    "adjusted": 3,
+    "no_action": 0,
+    "proposal": -1
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "payables_at_horizon",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 3837189,
+    "no_action": 4183589,
+    "proposal": 3820208
+   },
+   "minusReference": {
+    "adjusted": -346400,
+    "no_action": 0,
+    "proposal": -363381
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "severance_payable_at_horizon",
+   "unit": "cents",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "minusReference": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "booked_ahead_at_horizon",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 609,
+    "no_action": 607,
+    "proposal": 611
+   },
+   "minusReference": {
+    "adjusted": 2,
+    "no_action": 0,
+    "proposal": 4
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  },
+  {
+   "key": "unread_at_horizon",
+   "unit": "count",
+   "reference": "no_action",
+   "values": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "minusReference": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   },
+   "label": "difference from no_action under dreamteam.continuation/no-further-action-v1 to 2026-12-11T00:00:00; not a gain, a loss or a verdict"
+  }
+ ],
+ "sha256": "e9e71cda6206fe4e92d998ed6b6539aa8a97921d458375df750dd8595259e96d"
+}

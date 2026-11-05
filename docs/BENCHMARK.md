@@ -784,6 +784,32 @@ designs what a later milestone would add
   alternative is never a better decision.
 * Benchmark results, policies and suites are unchanged.
 
+## 11h. Management alternatives (V0.13b, deterministic)
+
+V0.13b adds no policy, suite, metric or run to the benchmark, and changes
+no score. It implements the comparison V0.13a designed
+([V0.13_MANAGEMENT_ALTERNATIVES.md](V0.13_MANAGEMENT_ALTERNATIVES.md),
+`docs/v13b/`).
+
+**What it adds:**
+* Paired branches of one recorded decision point (`session.Branch`).
+  Each branch is rebuilt from the record, verified digest for digest,
+  and advanced under `dreamteam.continuation/no-further-action-v1` to a
+  common horizon.
+* Class B projections of each branch, with paired differences. These are
+  in the evaluation audience only.
+* The classification of scripted replies:
+  * seven results;
+  * flags for inspection, verified comparison and no observable
+    comparison;
+  * decision sensitivity on paired real engine states.
+
+**Rules:**
+* A projected difference is labelled with its continuation and horizon,
+  and is never a gain, a loss or a verdict.
+* No composite score or rank is defined.
+* Benchmark results, policies and suites are unchanged.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

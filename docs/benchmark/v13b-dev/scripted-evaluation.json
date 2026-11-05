@@ -1,0 +1,687 @@
+{
+ "schema": "dreamteam.v13b-scripted-evaluation/v1",
+ "note": "Scripted replies only; no model. Results and flags follow EVALUATION_CONTRACT; a reason is recorded, never scored. Sensitivity pairs are real engine states of mini, seed 52, that differ in the fact named and possibly others (listed).",
+ "cases": [
+  {
+   "name": "alternative inspected",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [
+     "inspect:no_action",
+     "inspect:adjusted"
+    ],
+    "reply": {
+     "kind": "select",
+     "id": "proposal",
+     "reason": "scripted"
+    },
+    "result": "retained",
+    "alternative": "proposal",
+    "why": "the proposal, unchanged",
+    "flags": [
+     "inspected"
+    ],
+    "citationChecks": [],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-10-27"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+      "effectiveAt": "2026-10-28"
+     }
+    ]
+   }
+  },
+  {
+   "name": "alternative compared",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "select",
+     "id": "proposal",
+     "comparison": [
+      {
+       "item": "severance_recognized_now.E04",
+       "values": {
+        "no_action": 0,
+        "proposal": 395000
+       }
+      }
+     ],
+     "reason": "scripted"
+    },
+    "result": "retained",
+    "alternative": "proposal",
+    "why": "the proposal, unchanged",
+    "flags": [
+     "compared"
+    ],
+    "citationChecks": [],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-10-27"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+      "effectiveAt": "2026-10-28"
+     }
+    ]
+   }
+  },
+  {
+   "name": "original retained",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "select",
+     "id": "proposal"
+    },
+    "result": "retained",
+    "alternative": "proposal",
+    "why": "the proposal, unchanged",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-10-27"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+      "effectiveAt": "2026-10-28"
+     }
+    ]
+   }
+  },
+  {
+   "name": "another alternative selected",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [
+     "inspect:adjusted"
+    ],
+    "reply": {
+     "kind": "select",
+     "id": "adjusted"
+    },
+    "result": "selected",
+    "alternative": "adjusted",
+    "why": "a listed alternative other than the proposal",
+    "flags": [
+     "inspected"
+    ],
+    "citationChecks": [],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-11-10"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+      "effectiveAt": "2026-11-11"
+     }
+    ]
+   }
+  },
+  {
+   "name": "no action selected",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [
+     "inspect:no_action"
+    ],
+    "reply": {
+     "kind": "select",
+     "id": "no_action",
+     "comparison": [
+      {
+       "item": "severance_recognized_now.E04",
+       "values": {
+        "no_action": 0,
+        "proposal": 395000
+       }
+      }
+     ]
+    },
+    "result": "selected_no_action",
+    "alternative": "no_action",
+    "why": "no action selected; nothing submitted",
+    "flags": [
+     "inspected",
+     "compared"
+    ],
+    "citationChecks": [],
+    "submitted": [],
+    "revalidation": []
+   }
+  },
+  {
+   "name": "proposal revised",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "revise",
+     "actions": [
+      {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-11-03"
+      }
+     ]
+    },
+    "result": "revised",
+    "why": "a new batch, different from every listed alternative",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-03"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-11-03"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Nov 3, 21 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+      "effectiveAt": "2026-11-04"
+     }
+    ]
+   }
+  },
+  {
+   "name": "proposal abandoned",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "abandon",
+     "reason": "scripted"
+    },
+    "result": "abandoned",
+    "why": "abandoned; nothing submitted",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [],
+    "submitted": [],
+    "revalidation": []
+   }
+  },
+  {
+   "name": "invalid alternative",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "select",
+     "id": "without_1"
+    },
+    "result": "invalid_alternative",
+    "alternative": "without_1",
+    "why": "names an alternative that is not listed",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [],
+    "submitted": [],
+    "revalidation": []
+   }
+  },
+  {
+   "name": "no decision",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": null,
+    "result": "no_decision",
+    "why": "no usable reply",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [],
+    "submitted": [],
+    "revalidation": []
+   }
+  },
+  {
+   "name": "whole table copied",
+   "point": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "decision": {
+    "comparisonSha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb",
+    "requests": [],
+    "reply": {
+     "kind": "select",
+     "id": "proposal",
+     "comparison": [
+      {
+       "item": "severance_recognized_now.E04",
+       "values": {
+        "adjusted": 395000,
+        "no_action": 0,
+        "proposal": 395000
+       }
+      },
+      {
+       "item": "displaced_bookings",
+       "values": {
+        "adjusted": 0,
+        "no_action": 0,
+        "proposal": 0
+       }
+      },
+      {
+       "item": "slots_closed",
+       "values": {
+        "adjusted": 2155,
+        "no_action": 0,
+        "proposal": 2481
+       }
+      },
+      {
+       "item": "booked_ahead",
+       "values": {
+        "adjusted": 0,
+        "no_action": 0,
+        "proposal": 0
+       }
+      }
+     ]
+    },
+    "result": "retained",
+    "alternative": "proposal",
+    "why": "the proposal, unchanged",
+    "flags": [
+     "no_observable_comparison"
+    ],
+    "citationChecks": [
+     "too many entries: at most three, and fewer than the items shown",
+     "repeats every row of the compared table"
+    ],
+    "submitted": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "revalidation": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-10-27"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+      "effectiveAt": "2026-10-28"
+     }
+    ]
+   }
+  }
+ ],
+ "sensitivity": [
+  {
+   "fact": "displaced bookings",
+   "a": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "b": {
+    "label": "terminate E04, last day Nov 10, decided Oct 27",
+    "at": "2026-10-27T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ]
+   },
+   "comparedFactsThatDiffer": [
+    "displaced_bookings: 0 vs 18",
+    "slots_closed_booked_now: 0 vs 18",
+    "booked_ahead: 0 vs 277"
+   ],
+   "alternativesA": [
+    "proposal",
+    "no_action",
+    "adjusted"
+   ],
+   "alternativesB": [
+    "proposal",
+    "no_action",
+    "adjusted"
+   ],
+   "resultsByScriptedRule": {
+    "always-retain": [
+     "retained:proposal",
+     "retained:proposal"
+    ],
+    "later-last-day-if-listed": [
+     "selected:adjusted",
+     "selected:adjusted"
+    ],
+    "no-action-if-displacing": [
+     "retained:proposal",
+     "selected_no_action:no_action"
+    ]
+   },
+   "sensitive": {
+    "always-retain": false,
+    "later-last-day-if-listed": false,
+    "no-action-if-displacing": true
+   }
+  },
+  {
+   "fact": "severance",
+   "a": {
+    "label": "terminate E05, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E05",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "b": {
+    "label": "terminate E06, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E06",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "comparedFactsThatDiffer": [
+    "guaranteed.0: 450000 vs 434500",
+    "guaranteed.1: 495000 vs 477950",
+    "slots_closed: 684 vs 872"
+   ],
+   "alternativesA": [
+    "proposal",
+    "no_action",
+    "adjusted"
+   ],
+   "alternativesB": [
+    "proposal",
+    "no_action",
+    "adjusted"
+   ],
+   "resultsByScriptedRule": {
+    "always-retain": [
+     "retained:proposal",
+     "retained:proposal"
+    ],
+    "later-last-day-if-listed": [
+     "selected:adjusted",
+     "selected:adjusted"
+    ],
+    "no-action-if-displacing": [
+     "retained:proposal",
+     "retained:proposal"
+    ]
+   },
+   "sensitive": {
+    "always-retain": false,
+    "later-last-day-if-listed": false,
+    "no-action-if-displacing": false
+   }
+  },
+  {
+   "fact": "later-last-day alternative listed",
+   "a": {
+    "label": "terminate E04, last day Oct 27",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ]
+   },
+   "b": {
+    "label": "terminate E04, last day Feb 1",
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2027-02-01"
+     }
+    ]
+   },
+   "comparedFactsThatDiffer": [
+    "notice_days.E04: 14 vs 111",
+    "guaranteed.1: 435000 vs 3160000",
+    "slots_closed: 2481 vs 235",
+    "slots_closed.XR: 1095 vs 102",
+    "slots_closed.CT: 1386 vs 133"
+   ],
+   "alternativesA": [
+    "proposal",
+    "no_action",
+    "adjusted"
+   ],
+   "alternativesB": [
+    "proposal",
+    "no_action"
+   ],
+   "resultsByScriptedRule": {
+    "always-retain": [
+     "retained:proposal",
+     "retained:proposal"
+    ],
+    "later-last-day-if-listed": [
+     "selected:adjusted",
+     "retained:proposal"
+    ],
+    "no-action-if-displacing": [
+     "retained:proposal",
+     "retained:proposal"
+    ]
+   },
+   "sensitive": {
+    "always-retain": false,
+    "later-last-day-if-listed": true,
+    "no-action-if-displacing": false
+   }
+  }
+ ]
+}

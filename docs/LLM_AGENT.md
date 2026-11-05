@@ -1376,3 +1376,32 @@ remains the default, and llm-agent 6 remains experimental.
 * never by scoring the model's explanation.
 
 No template has been written or shown to a model.
+
+## 23. Management alternatives (V0.13b, deterministic; not shown to any model)
+
+No agent was added or changed in V0.13b. llm-agent 5 (validation-first)
+remains the default, and llm-agent 6 remains experimental. No agent,
+prompt or protocol request uses what V0.13b built. No model has seen it.
+
+**What exists now, in Go only** (`internal/alternatives`, `docs/v13b/`):
+* **The candidate rule** (`dreamteam.alternative-selection/v1`, pinned).
+  At most four alternatives: the proposal, no action, and leave-one-out
+  candidates or one adjustment the engine accepts.
+* **The agent audience** of `dreamteam.management-alternatives/v1`:
+  * exact facts, the engine's estimates, obligations that continue,
+    reversibility, and the items not available;
+  * no projection, horizon, seed or branch, and the type cannot hold
+    one.
+* **The presentation** (`dreamteam.alternatives-presentation/v1`,
+  pinned). A summary, then each alternative's detail on `inspect:<id>`,
+  in neutral, identical sections.
+* **The classification** of a reply (`select:<id>`, `revise`,
+  `abandon`):
+  * retained, selected, selected_no_action, revised, abandoned,
+    invalid_alternative or no_decision;
+  * the flags `inspected`, `compared` (verified citations only) and
+    `no_observable_comparison`;
+  * nothing is ever defaulted;
+  * the reason is never scored.
+
+Any live use needs an owner-approved, locked protocol (V0.13c, proposed).

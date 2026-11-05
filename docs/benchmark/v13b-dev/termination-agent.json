@@ -1,0 +1,708 @@
+{
+ "schema": "dreamteam.management-alternatives/v1",
+ "audience": "agent",
+ "decisionPoint": {
+  "engine": "0.13.0-dev.1",
+  "scenarioFingerprint": "bc16065565faafd3085a8172d5622c1083eaa7b0c55e38d4c55177a8d3574f88",
+  "time": "2026-10-13T07:00:00",
+  "stateDigest": "1250d645b013bc5725fe12f089faef933dc7eceb44a10a15f558a5cdcd7f284c"
+ },
+ "selection": {
+  "rule": "dreamteam.alternative-selection/v1",
+  "ruleSha256": "158a6254952ee3c19dba0b2ea045d2d02de510e7f7f7537cf435357facc5e358",
+  "why": "holds an irreversible action"
+ },
+ "alternatives": [
+  {
+   "id": "proposal",
+   "source": "proposal",
+   "candidateSha256": "3c1af5168488bbf9600453e55671edaba68c81dd61686c6b2089c492c00d0198",
+   "actions": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-10-27"
+    }
+   ],
+   "description": "terminate Sam (E04), last day 2026-10-27",
+   "validation": {
+    "ok": true,
+    "results": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-10-27"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Oct 27, 14 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Oct 30.",
+      "effectiveAt": "2026-10-28"
+     }
+    ]
+   },
+   "facts": [
+    {
+     "key": "last_day.E04",
+     "label": "Last day · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-10-27",
+     "source": "preview.terminations[0].lastDay"
+    },
+    {
+     "key": "end_date.E04",
+     "label": "Not employed from · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-10-28",
+     "source": "preview.terminations[0].endDate"
+    },
+    {
+     "key": "notice_days.E04",
+     "label": "Notice · Sam",
+     "class": "A1",
+     "unit": "days",
+     "number": 14,
+     "source": "preview.terminations[0].noticeDays"
+    },
+    {
+     "key": "severance_recognized_now.E04",
+     "label": "Severance recognized now · Sam",
+     "class": "A1",
+     "unit": "cents",
+     "number": 395000,
+     "when": "recognized now, paid 2026-10-30",
+     "source": "preview.terminations[0].severanceCents"
+    },
+    {
+     "key": "severance_payday.E04",
+     "label": "Severance payday · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-10-30",
+     "source": "preview.terminations[0].severancePayday"
+    },
+    {
+     "key": "voided_rosters.E04",
+     "label": "Pending roster versions voided · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.terminations[0].voidedRosters",
+     "derivation": "the number of dates listed"
+    },
+    {
+     "key": "voided_extensions.E04",
+     "label": "Approved extensions voided · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.terminations[0].voidedExtensions",
+     "derivation": "the number of extensions listed"
+    },
+    {
+     "key": "displaced_bookings",
+     "label": "Booked appointments displaced (whole batch)",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.displacements",
+     "derivation": "the number of displacements listed"
+    },
+    {
+     "key": "guaranteed.0",
+     "label": "Severance · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 395000,
+     "when": "recognized now, paid 2026-10-30",
+     "source": "preview.guaranteed[0].cents",
+     "basis": "two contracted weeks (39.5 h) at the base rate with benefits; independent of the roster"
+    },
+    {
+     "key": "guaranteed.1",
+     "label": "Contract pay to the last day · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 435000,
+     "when": "today to 2026-10-27",
+     "source": "preview.guaranteed[1].cents",
+     "basis": "minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it"
+    },
+    {
+     "key": "slots_closed",
+     "label": "Scheduled slots no longer staffed (booked or not)",
+     "class": "A1",
+     "unit": "count",
+     "number": 2481,
+     "when": "2026-10-28 to 2027-02-10 (106 days in the booking horizon)",
+     "source": "slotsClosed.total",
+     "basis": "template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders"
+    },
+    {
+     "key": "slots_closed_booked_now",
+     "label": "Of these, booked now",
+     "class": "A1",
+     "unit": "count",
+     "number": 0,
+     "source": "slotsClosed.bookedNow"
+    },
+    {
+     "key": "slots_closed.XR",
+     "label": "Scheduled slots no longer staffed · XR",
+     "class": "A1",
+     "unit": "count",
+     "number": 1095,
+     "source": "slotsClosed.byModality[0].count"
+    },
+    {
+     "key": "slots_closed.CT",
+     "label": "Scheduled slots no longer staffed · CT",
+     "class": "A1",
+     "unit": "count",
+     "number": 1386,
+     "source": "slotsClosed.byModality[1].count"
+    },
+    {
+     "key": "booked_ahead",
+     "label": "Appointments booked from tomorrow in the booking horizon",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "schedule(+1..+bookingHorizonDays)",
+     "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+    }
+   ],
+   "estimates": [
+    {
+     "key": "forecast.0",
+     "label": "Contract cost no longer owed · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 197500,
+     "when": "per full week from 2026-10-28",
+     "source": "preview.forecast[0].cents",
+     "basis": "estimate: the contract guarantee with benefits; overtime and hold-over not modeled"
+    }
+   ],
+   "obligations": [
+    {
+     "key": "next_payroll",
+     "label": "Payroll accrued, next payday",
+     "class": "A1",
+     "unit": "cents",
+     "number": 213355,
+     "when": "paid 2026-10-16",
+     "source": "observe.finance.nextPayroll"
+    },
+    {
+     "key": "payables",
+     "label": "Accounts payable",
+     "class": "A1",
+     "unit": "cents",
+     "number": 285482,
+     "source": "observe.finance.apCents"
+    }
+   ],
+   "reversibility": {
+    "key": "reversibility",
+    "label": "Reversibility",
+    "class": "A1",
+    "unit": "text",
+    "text": "irreversible",
+    "source": "engine rule",
+    "basis": "already_terminating: notice cannot be moved or withdrawn; no action rehires"
+   },
+   "unavailable": [
+    {
+     "key": "slots_beyond_horizon",
+     "class": "C",
+     "reason": "slots after the booking horizon do not exist yet and are not counted"
+    },
+    {
+     "key": "demand_for_closed_slots",
+     "class": "C",
+     "reason": "whether a closed slot would have been booked depends on future orders, which are not known before deciding"
+    },
+    {
+     "key": "future_orders_and_revenue",
+     "class": "C",
+     "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+    },
+    {
+     "key": "unmodeled",
+     "class": "C",
+     "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+    }
+   ]
+  },
+  {
+   "id": "no_action",
+   "source": "no_action",
+   "candidateSha256": "be2d74b4d4c57609f7a5f0b5a6e1552bb468f657db945453eac7a5f8a04b1076",
+   "actions": [],
+   "description": "No batch: current staffing and every existing commitment continue",
+   "validation": {
+    "ok": true,
+    "results": []
+   },
+   "facts": [
+    {
+     "key": "displaced_bookings",
+     "label": "Booked appointments displaced (whole batch)",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "no batch",
+     "derivation": "no batch is applied, so no booking loses coverage"
+    },
+    {
+     "key": "slots_closed",
+     "label": "Scheduled slots no longer staffed (booked or not)",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "no batch",
+     "derivation": "no batch is applied, so no scheduled slot loses its staffing"
+    },
+    {
+     "key": "severance_recognized_now.E04",
+     "label": "Severance recognized now · Sam",
+     "class": "A2",
+     "unit": "cents",
+     "number": 0,
+     "source": "no batch",
+     "derivation": "no termination is committed, so no severance is recognized"
+    },
+    {
+     "key": "employment.E04",
+     "label": "Employment · Sam",
+     "class": "A1",
+     "unit": "text",
+     "text": "active",
+     "source": "observe.staff[3].employment"
+    },
+    {
+     "key": "contract_minutes.E04",
+     "label": "Contracted weekly minutes · Sam",
+     "class": "A1",
+     "unit": "count",
+     "number": 2370,
+     "source": "observe.staff[3].contractMin"
+    },
+    {
+     "key": "roster_minutes_week_a.E04",
+     "label": "Rostered minutes, week A · Sam",
+     "class": "A1",
+     "unit": "count",
+     "number": 2370,
+     "source": "rosterPlan(E04).versions[0].netMinA"
+    },
+    {
+     "key": "roster_minutes_week_b.E04",
+     "label": "Rostered minutes, week B · Sam",
+     "class": "A1",
+     "unit": "count",
+     "number": 2370,
+     "source": "rosterPlan(E04).versions[0].netMinB"
+    },
+    {
+     "key": "pending_rosters.E04",
+     "label": "Pending roster versions · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "rosterPlan(E04).versions",
+     "derivation": "the number of versions marked pending"
+    },
+    {
+     "key": "approved_extensions.E04",
+     "label": "Approved extensions · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "observe.extensions",
+     "derivation": "the number of extensions listed for the employee"
+    },
+    {
+     "key": "booked_ahead",
+     "label": "Appointments booked from tomorrow in the booking horizon",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "schedule(+1..+bookingHorizonDays)",
+     "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+    }
+   ],
+   "estimates": [],
+   "obligations": [
+    {
+     "key": "severance_if_terminated_later.E04",
+     "label": "Severance if terminated later · Sam",
+     "class": "A1",
+     "unit": "cents",
+     "number": 395000,
+     "when": "owed only on a later termination",
+     "source": "observe.staff[3].severanceCents",
+     "basis": "two contracted weeks with benefits"
+    },
+    {
+     "key": "weekly_guarantee.E04",
+     "label": "Contract guarantee continues · Sam",
+     "class": "A2",
+     "unit": "cents",
+     "number": 197500,
+     "when": "per full week, until a later decision",
+     "source": "preview(proposal).forecast[0].cents",
+     "derivation": "the engine's weekly guarantee with benefits for the employee, read from the proposal's preview; it continues with no action. Cross-checked: observe.staff.severanceCents / 2, within one cent"
+    },
+    {
+     "key": "next_payroll",
+     "label": "Payroll accrued, next payday",
+     "class": "A1",
+     "unit": "cents",
+     "number": 213355,
+     "when": "paid 2026-10-16",
+     "source": "observe.finance.nextPayroll"
+    },
+    {
+     "key": "payables",
+     "label": "Accounts payable",
+     "class": "A1",
+     "unit": "cents",
+     "number": 285482,
+     "source": "observe.finance.apCents"
+    }
+   ],
+   "reversibility": {
+    "key": "reversibility",
+    "label": "Reversibility",
+    "class": "A1",
+    "unit": "text",
+    "text": "nothing to reverse",
+    "source": "engine rule",
+    "basis": "no batch; a termination stays possible later with at least 14 days' notice"
+   },
+   "unavailable": [
+    {
+     "key": "future_orders_and_revenue",
+     "class": "C",
+     "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+    },
+    {
+     "key": "unmodeled",
+     "class": "C",
+     "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+    }
+   ]
+  },
+  {
+   "id": "adjusted",
+   "source": "adjustment",
+   "candidateSha256": "0a2faa9c231320933c99135eb0e954053001939c0ffefb46dfb36d03eee949bd",
+   "actions": [
+    {
+     "type": "terminate",
+     "employee": "E04",
+     "lastDay": "2026-11-10"
+    }
+   ],
+   "description": "terminate Sam (E04), last day 2026-11-10",
+   "validation": {
+    "ok": true,
+    "results": [
+     {
+      "id": "",
+      "batch": 0,
+      "time": "2026-10-13T07:00:00",
+      "action": {
+       "type": "terminate",
+       "employee": "E04",
+       "lastDay": "2026-11-10"
+      },
+      "ok": true,
+      "code": "accepted",
+      "message": "Sam (E04) terminated: last day Tue Nov 10, 28 days' notice with contract pay continuing ($1,975/week guaranteed) · severance $3,950 recognized now, paid Fri Nov 13.",
+      "effectiveAt": "2026-11-11"
+     }
+    ]
+   },
+   "facts": [
+    {
+     "key": "last_day.E04",
+     "label": "Last day · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-11-10",
+     "source": "preview.terminations[0].lastDay"
+    },
+    {
+     "key": "end_date.E04",
+     "label": "Not employed from · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-11-11",
+     "source": "preview.terminations[0].endDate"
+    },
+    {
+     "key": "notice_days.E04",
+     "label": "Notice · Sam",
+     "class": "A1",
+     "unit": "days",
+     "number": 28,
+     "source": "preview.terminations[0].noticeDays"
+    },
+    {
+     "key": "severance_recognized_now.E04",
+     "label": "Severance recognized now · Sam",
+     "class": "A1",
+     "unit": "cents",
+     "number": 395000,
+     "when": "recognized now, paid 2026-11-13",
+     "source": "preview.terminations[0].severanceCents"
+    },
+    {
+     "key": "severance_payday.E04",
+     "label": "Severance payday · Sam",
+     "class": "A1",
+     "unit": "date",
+     "date": "2026-11-13",
+     "source": "preview.terminations[0].severancePayday"
+    },
+    {
+     "key": "voided_rosters.E04",
+     "label": "Pending roster versions voided · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.terminations[0].voidedRosters",
+     "derivation": "the number of dates listed"
+    },
+    {
+     "key": "voided_extensions.E04",
+     "label": "Approved extensions voided · Sam",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.terminations[0].voidedExtensions",
+     "derivation": "the number of extensions listed"
+    },
+    {
+     "key": "displaced_bookings",
+     "label": "Booked appointments displaced (whole batch)",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "preview.displacements",
+     "derivation": "the number of displacements listed"
+    },
+    {
+     "key": "guaranteed.0",
+     "label": "Severance · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 395000,
+     "when": "recognized now, paid 2026-11-13",
+     "source": "preview.guaranteed[0].cents",
+     "basis": "two contracted weeks (39.5 h) at the base rate with benefits; independent of the roster"
+    },
+    {
+     "key": "guaranteed.1",
+     "label": "Contract pay to the last day · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 830000,
+     "when": "today to 2026-11-10",
+     "source": "preview.guaranteed[1].cents",
+     "basis": "minimum: the contract guarantee with benefits on the days still employed; worked pay replaces it"
+    },
+    {
+     "key": "slots_closed",
+     "label": "Scheduled slots no longer staffed (booked or not)",
+     "class": "A1",
+     "unit": "count",
+     "number": 2155,
+     "when": "2026-11-11 to 2027-02-10 (92 days in the booking horizon)",
+     "source": "slotsClosed.total",
+     "basis": "template appointment slots bookable now by staffing that the termination leaves unstaffed; capacity, not orders"
+    },
+    {
+     "key": "slots_closed_booked_now",
+     "label": "Of these, booked now",
+     "class": "A1",
+     "unit": "count",
+     "number": 0,
+     "source": "slotsClosed.bookedNow"
+    },
+    {
+     "key": "slots_closed.XR",
+     "label": "Scheduled slots no longer staffed · XR",
+     "class": "A1",
+     "unit": "count",
+     "number": 951,
+     "source": "slotsClosed.byModality[0].count"
+    },
+    {
+     "key": "slots_closed.CT",
+     "label": "Scheduled slots no longer staffed · CT",
+     "class": "A1",
+     "unit": "count",
+     "number": 1204,
+     "source": "slotsClosed.byModality[1].count"
+    },
+    {
+     "key": "booked_ahead",
+     "label": "Appointments booked from tomorrow in the booking horizon",
+     "class": "A2",
+     "unit": "count",
+     "number": 0,
+     "source": "schedule(+1..+bookingHorizonDays)",
+     "derivation": "booked slots counted day by day, as the run result's bookedAhead"
+    }
+   ],
+   "estimates": [
+    {
+     "key": "forecast.0",
+     "label": "Contract cost no longer owed · Sam (E04)",
+     "class": "A1",
+     "unit": "cents",
+     "number": 197500,
+     "when": "per full week from 2026-11-11",
+     "source": "preview.forecast[0].cents",
+     "basis": "estimate: the contract guarantee with benefits; overtime and hold-over not modeled"
+    }
+   ],
+   "obligations": [
+    {
+     "key": "next_payroll",
+     "label": "Payroll accrued, next payday",
+     "class": "A1",
+     "unit": "cents",
+     "number": 213355,
+     "when": "paid 2026-10-16",
+     "source": "observe.finance.nextPayroll"
+    },
+    {
+     "key": "payables",
+     "label": "Accounts payable",
+     "class": "A1",
+     "unit": "cents",
+     "number": 285482,
+     "source": "observe.finance.apCents"
+    }
+   ],
+   "reversibility": {
+    "key": "reversibility",
+    "label": "Reversibility",
+    "class": "A1",
+    "unit": "text",
+    "text": "irreversible",
+    "source": "engine rule",
+    "basis": "already_terminating: notice cannot be moved or withdrawn; no action rehires"
+   },
+   "unavailable": [
+    {
+     "key": "slots_beyond_horizon",
+     "class": "C",
+     "reason": "slots after the booking horizon do not exist yet and are not counted"
+    },
+    {
+     "key": "demand_for_closed_slots",
+     "class": "C",
+     "reason": "whether a closed slot would have been booked depends on future orders, which are not known before deciding"
+    },
+    {
+     "key": "future_orders_and_revenue",
+     "class": "C",
+     "reason": "orders, exams and revenue after today depend on future demand; not projected for the decision"
+    },
+    {
+     "key": "unmodeled",
+     "class": "C",
+     "reason": "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+    }
+   ]
+  }
+ ],
+ "compared": [
+  {
+   "key": "severance_recognized_now.E04",
+   "unit": "cents",
+   "values": {
+    "adjusted": 395000,
+    "no_action": 0,
+    "proposal": 395000
+   }
+  },
+  {
+   "key": "displaced_bookings",
+   "unit": "count",
+   "values": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   }
+  },
+  {
+   "key": "slots_closed",
+   "unit": "count",
+   "values": {
+    "adjusted": 2155,
+    "no_action": 0,
+    "proposal": 2481
+   }
+  },
+  {
+   "key": "booked_ahead",
+   "unit": "count",
+   "values": {
+    "adjusted": 0,
+    "no_action": 0,
+    "proposal": 0
+   }
+  }
+ ],
+ "provenance": [
+  {
+   "request": "observe",
+   "responseSha256": "914f7f8da2ce4e233e053b2a4b06c1802d6fd8c0086b6855c147bd4a2d2ffad5"
+  },
+  {
+   "request": "validate proposal",
+   "responseSha256": "50c80e901ec96843f365d60bb6daed50f36af4db6ce54a1d6bd2d9e639101164"
+  },
+  {
+   "request": "preview proposal",
+   "responseSha256": "e6f6a6f32c471055513a504d5e7a53bbba2d4f8397f582e9e149468ac99da35e"
+  },
+  {
+   "request": "slotsClosed proposal",
+   "responseSha256": "a120ac4ad96942a37f1f8a68e13d53f3c1a212629446d0ea6a176958ca4b102e"
+  },
+  {
+   "request": "validate no_action",
+   "responseSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  },
+  {
+   "request": "rosterPlan E04",
+   "responseSha256": "c200e70d4f27ef4c6b3af9cf7c553a565002bf0a045fb3ff8349b4e2c219a4dd"
+  },
+  {
+   "request": "validate adjusted",
+   "responseSha256": "622d4267eb12c342cf116f7b0e206b2086a80378770e00f179d0a784e130fe7e"
+  },
+  {
+   "request": "preview adjusted",
+   "responseSha256": "d827c02365aa3719425db872cf00a5352deabfc8163cd762fbc5d1c4d7051e7f"
+  },
+  {
+   "request": "slotsClosed adjusted",
+   "responseSha256": "2eb96114755b6025dabf485ca36c6eb1a78b1976ac83c2cbf72c791aefb0a9fd"
+  }
+ ],
+ "sha256": "fc3bb5e16c9925da32a61b10e519dd34755c03341e7034614e0f864f300339fb"
+}

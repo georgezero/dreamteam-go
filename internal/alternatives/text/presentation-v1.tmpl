@@ -1,0 +1,45 @@
+{{- /* dreamteam.alternatives-presentation/v1: fixed text; every value is a field of the agent comparison */ -}}
+{{define "summary" -}}
+Management alternatives at {{.DecisionPoint.Time}}
+The alternatives below are listed in a fixed order: your proposal first, then no action, then any others the candidate rule lists. The order says nothing about any alternative. No alternative is a default.
+Each alternative's detail has the same sections: action, validation, engine facts, engine estimates, obligations that continue, reversibility, and what is not available before deciding. Engine facts are values the engine reports now. Engine estimates are the engine's own figures, labelled estimate by the engine. Items not available have no value.
+{{range $i, $a := .Alternatives}}
+Alternative {{inc $i}} of {{len $.Alternatives}}: {{$a.ID}}{{if eq $a.ID "proposal"}} (your proposal){{end}}
+  Action: {{json $a.Actions}}
+  Validation: {{template "validation" $a}}
+  Detail: {{len $a.Facts}} engine facts, {{len $a.Estimates}} engine estimates, {{len $a.Obligations}} obligations, {{len $a.Unavailable}} items not available
+{{end}}
+To see an alternative's detail, request inspect:<id>. Then reply with exactly one of: select:<id> (one of the alternatives listed), revise (with a new batch), or abandon (no action). Give a short reason; it is recorded as text.
+{{end}}
+{{- define "validation"}}{{if .Validation.OK}}accepted{{if not .Actions}} (nothing to apply){{end}}{{else}}refused{{range .Validation.Results}}{{if not .OK}} ({{.Code}}: {{.Message}}){{end}}{{end}}{{end}}{{end}}
+{{- define "detail" -}}
+Alternative {{.ID}}{{if eq .ID "proposal"}} (your proposal){{end}}
+  Action: {{json .Actions}}
+  Description: {{.Description}}
+  Validation: {{template "validation" .}}
+  Engine facts:
+{{- range .Facts}}
+    - {{.Label}}: {{val .}}{{if .When}} · {{.When}}{{end}}{{if .Basis}} · {{.Basis}}{{end}}{{if .Derivation}} · derived: {{.Derivation}}{{end}}
+{{- else}}
+    - none
+{{- end}}
+  Engine estimates:
+{{- range .Estimates}}
+    - {{.Label}}: {{val .}}{{if .When}} · {{.When}}{{end}} · {{.Basis}}
+{{- else}}
+    - none
+{{- end}}
+  Obligations that continue:
+{{- range .Obligations}}
+    - {{.Label}}: {{val .}}{{if .When}} · {{.When}}{{end}}{{if .Basis}} · {{.Basis}}{{end}}{{if .Derivation}} · derived: {{.Derivation}}{{end}}
+{{- else}}
+    - none listed
+{{- end}}
+  Reversibility: {{.Reversibility.Text}} · {{.Reversibility.Basis}}
+  Not available before deciding:
+{{- range .Unavailable}}
+    - {{.Key}}: {{.Reason}}
+{{- else}}
+    - none listed
+{{- end}}
+{{end}}

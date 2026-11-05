@@ -24,7 +24,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
 | **V0.12** (released, `v0.12.0`: high-impact action acknowledgment and reproducible decision evidence, V0.12a–V0.12b, by the owner's release decision 2026-11-04) | Decision safeguards: llm-agent 6, engine-backed acknowledgment of high-impact actions, an explicitly selected experimental agent (llm-agent 5's validation-first stays the default); an independent safeguard audit; a prospective live evaluation against llm-agent 5's preview (420 draws): every acknowledgment accurate, none changed a high-impact action (§7f). No decision-quality benefit established; not clinical validation | V0.11 |
-| **V0.13** (in progress: V0.13a done, awaiting review) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
+| **V0.13** (in progress: V0.13a accepted; V0.13b done, awaiting review) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1457,8 +1457,8 @@ reconsider an action. Nothing here is approved or built.
 
 | Milestone | Scope | Status |
 |---|---|---|
-| V0.13a | Alternative-action inventory and design | **done** (0.13.0-dev.1), awaiting owner review |
-| V0.13b | Deterministic alternative-comparison implementation | proposed |
+| V0.13a | Alternative-action inventory and design | **accepted** (0.13.0-dev.1, `1c75c93`) |
+| V0.13b | Deterministic alternative-comparison implementation | **done** (0.13.0-dev.2), awaiting owner review |
 | V0.13c | Controlled decision-level evaluation | proposed |
 | V0.13.0 | Release | pending |
 
@@ -1480,8 +1480,8 @@ reconsider an action. Nothing here is approved or built.
 * Projections use the realized future. They belong to evaluation, not
   to the agent's presentation.
 
-**V0.13a's recommendation for V0.13b (not started; owner decision
-needed):**
+**V0.13a's recommendation for V0.13b (accepted by the owner, with E4
+narrowly approved):**
 * Deterministic work only:
   * the branch builder, branch identities and comparison reader (E1–E3,
     read-only, in `internal/session`);
@@ -1492,6 +1492,22 @@ needed):**
 * No live inference.
 * E4, an opt-in `slotsClosed` for termination-only previews, needs the
   owner's decision.
+
+**V0.13b (done, 0.13.0-dev.2):** deterministic implementation; no live
+inference, no new agent workflow, and no change to simulator mechanics,
+accounting, schemas or scoring.
+* Documents: `docs/v13b/` and the V0.13b section of
+  `docs/V0.13_MANAGEMENT_ALTERNATIVES.md`.
+* **E1, E2:** read-only branches rebuilt from a saved record, with
+  verified identities (`internal/session/branch.go`).
+* **E4:** an opt-in, separate slots-closed report for termination-only
+  batches; the default preview is unchanged (`internal/sim/slotsclosed.go`).
+* **E3, the comparison:** `dreamteam.management-alternatives/v1`, with
+  the agent and evaluation audiences separated in code; the candidate
+  rule; the fixed, pinned template; and the classification of scripted
+  replies (`internal/alternatives/`).
+* **Evidence:** the termination case and scripted decision-sensitivity
+  pairs from real engine states (`docs/benchmark/v13b-dev/`).
 
 ## 8. Testing strategy (all versions)
 
