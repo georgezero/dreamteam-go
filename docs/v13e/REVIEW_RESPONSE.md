@@ -16,8 +16,8 @@ Engineering observations only (not reviewer findings):
   FinalActions. The implementation uses the seven approved final-action
   categories; the frozen descriptive field remains unchanged. The candidate
   outcome definition in OUTCOME_DEFINITIONS.md records the approved scale.
-  Owner disposition of this stale frozen description is required before a
-  future protocol is finalized. No policy or wording correction was made.
+  The owner-approved F7 definition is authoritative. This observation adds
+  no substantive approval dependency; no frozen wording was corrected.
 * docs/v13d/LIMITATIONS.md, Design, says the feet differ. Reproduce by
   comparing both extracted message endings and TestTurnSymmetry: they are
   identical. This frozen note predates the N1 fix. No pinned text changed.

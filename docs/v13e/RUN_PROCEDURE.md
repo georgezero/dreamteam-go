@@ -6,8 +6,7 @@ HUMAN REVIEW PENDING. Live inference NO GO. Nothing in this procedure
 authorizes a model call. No protocol-lock commit exists.
 
 Before any future run: obtain the completed independent human questionnaire,
-owner acceptance, disposition of the frozen descriptive discrepancy in
-REVIEW_RESPONSE.md, all final engineering gates, a separately prepared
+owner acceptance, all final engineering gates, a separately prepared
 protocol with the approved status, and separate explicit live authorization.
 Verify committed file identities with python3 -I analysis/alternatives/lock_check.py.
 Use a new dedicated run directory. Preserve every call and abort record.

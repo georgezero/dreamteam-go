@@ -38,8 +38,9 @@ All named files and every preserved evidence file have SHA-256 entries in
 FINAL_HASH_MANIFEST.txt. Git tree IDs are also in BASELINE_HASHES.txt.
 Frozen draft status is unchanged. Its stale descriptive estimand field is
 recorded in REVIEW_RESPONSE.md; it must not silently override the approved
-final-action scale. Owner disposition remains a prerequisite for a future
-protocol. No new context or arm is introduced.
+final-action scale. The owner-approved F7 definition is authoritative; this
+observation adds no substantive approval dependency. No new context or arm
+is introduced.
 
 Models (exact frozen identifiers):
 * gemma4-26b-a4b: `gemma-4-26B-A4B-it-oQ4e-mtp`
