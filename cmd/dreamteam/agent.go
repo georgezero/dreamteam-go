@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/georgezero/dreamteam-go/internal/agent"
+	"github.com/georgezero/dreamteam-go/internal/alternatives"
 	"github.com/georgezero/dreamteam-go/internal/scenario"
 	"github.com/georgezero/dreamteam-go/internal/session"
 )
@@ -27,6 +28,7 @@ func agentCmd(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	load := fs.String("load", "", "start from a saved session file (replayed and verified)")
 	transcript := fs.String("transcript", "", "(-policy) write every request and response line to this file")
 	save := fs.String("save", "", "(-policy) save the session to this file at the end")
+	alt := fs.Bool("alternatives", false, "(-stdio) also serve the read-only alternatives turn ops (V0.13d; not listed by hello)")
 	pos, err := parseFlags(fs, args)
 	if err != nil || len(pos) > 0 || *stdio == (*policy != "") || *days < 1 || *days > 3650 {
 		fmt.Fprintln(stderr, "usage: dreamteam agent --stdio [-scenario ID|FILE] [-seed N] [-load FILE]\n"+
@@ -52,6 +54,13 @@ func agentCmd(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 	}
 	h := agent.New(s)
 	h.Ref = ref
+	if *alt {
+		if !*stdio {
+			fmt.Fprintln(stderr, "dreamteam: -alternatives needs --stdio")
+			return exitInvalid
+		}
+		h.Extensions = alternatives.Ops()
+	}
 	if *stdio {
 		fmt.Fprintf(stderr, "dreamteam agent: %s · scenario %s · seed %d · ready\n", agent.Protocol, ref, s.Seed())
 		if err := agent.ServeLines(stdin, stdout, h); err != nil {

@@ -1,0 +1,86 @@
+S5 b: teleradiology, weeknights only, from Oct 27
+(record only, never sent: map[C1:new:0 P1:standard-v1])
+
+=== CONTROL (sent)
+FINAL DECISION at 2026-10-13T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
+
+Reply with one JSON object:
+- {"decision": "select", "id": ID, "reason": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal).
+- {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
+- {"decision": "abandon", "reason": TEXT} submits nothing.
+Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.
+
+=== TREATMENT (sent)
+FINAL DECISION at 2026-10-13T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
+
+ALTERNATIVES. The simulator's alternatives to the staffing actions in your reply, in a fixed order: your proposal, no action, then any others the candidate rule lists. The order says nothing about any alternative, and none is a default.
+C1 is the new teleradiology contract action 1 of your reply would start.
+P1 is the teleradiology plan in action 1 of your reply.
+
+proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope all, effective 2026-10-27
+  Validation: accepted
+no_action: no staffing action (no batch)
+  Validation: accepted (nothing to apply)
+adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope urgent, effective 2026-10-27 (scope differs from your reply)
+  Validation: accepted
+
+Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {"inspect": [ID, ...]}. You can do this once.
+
+Reply with one JSON object:
+- {"decision": "select", "id": ID, "reason": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal), no_action, adjusted.
+- {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
+- {"decision": "abandon", "reason": TEXT} submits nothing.
+Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.
+
+=== TREATMENT inspect:proposal (sent on request)
+DETAIL proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope all, effective 2026-10-27
+  Validation: accepted
+  Facts:
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0
+  Estimates:
+    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end
+    - [remote_read_fees.C1] Remote read fees at trailing demand · C1: $0.00 · per 28 days · an upper bound from studies that waited unread in these windows and scope recently
+  Obligations that continue:
+    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - [payables] Accounts payable: $2,854.82
+  Reversibility: irreversible · a contract start binds its minimum term
+  Not known before deciding:
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+=== TREATMENT inspect:no_action (sent on request)
+DETAIL no_action: no staffing action (no batch)
+  Validation: accepted (nothing to apply)
+  Facts:
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0
+  Estimates:
+    - none
+  Obligations that continue:
+    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - [payables] Accounts payable: $2,854.82
+  Reversibility: nothing to reverse · no batch is applied
+  Not known before deciding:
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+
+=== TREATMENT inspect:adjusted (sent on request)
+DETAIL adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope urgent, effective 2026-10-27 (scope differs from your reply)
+  Validation: accepted
+  Facts:
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0
+  Estimates:
+    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end
+    - [remote_read_fees.C1] Remote read fees at trailing demand · C1: $0.00 · per 28 days · an upper bound from studies that waited unread in these windows and scope recently
+  Obligations that continue:
+    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - [payables] Accounts payable: $2,854.82
+  Reversibility: irreversible · a contract start binds its minimum term
+  Not known before deciding:
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
+

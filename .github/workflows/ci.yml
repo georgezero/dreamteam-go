@@ -414,6 +414,30 @@ jobs:
           DREAMTEAM_V13C_REPLAYS="$PWD" go test ./internal/alternatives -run 'TestInventoryV13c$' -count=1 -v 2>&1 | tail -3
           cp docs/benchmark/v13c-dev/points/inventory.json out/v13c-points-inventory.json
           cp docs/benchmark/v13c-dev/points/manifest.json out/v13c-points-manifest.json
+      - name: Management-alternatives workflow and driver (V0.13d)
+        # Without any model: the driver's and the workflow's tests; the
+        # contexts (the V0.13c points from their committed sources, and the
+        # sensitivity members with the agent's own prompt on the real
+        # engine) made again; the draft protocol and schedule made again
+        # from the committed inputs; every context and arm started on the
+        # real engine (the replays above) with the first request the
+        # context's and the turn due as V0.13c declared; and the scripted
+        # fidelity cases, each replayed without a model, with the mock runs.
+        # Equal to the committed files (docs/benchmark/v13d-dev).
+        shell: bash
+        run: |
+          set -euo pipefail
+          P="python3 -I -B"; V=docs/benchmark/v13d-dev; D=analysis/alternatives/v13d.py
+          DREAMTEAM_BINARY=./dt python3 -B -m unittest discover -s analysis/alternatives 2>&1 | tail -1
+          $P $D contexts --binary ./dt --check $V/contexts
+          mkdir -p v13d
+          $P $D protocol --contexts $V/contexts --out v13d/protocol-draft.json
+          cmp v13d/protocol-draft.json $V/protocol-draft.json
+          $P $D schedule --protocol $V/protocol-draft.json --contexts $V/contexts --out v13d/schedule-draft.json
+          cmp v13d/schedule-draft.json $V/schedule-draft.json
+          $P $D check --binary ./dt --protocol $V/protocol-draft.json --contexts $V/contexts --replays .
+          $P analysis/alternatives/v13d_fidelity.py fidelity --binary ./dt --contexts $V/contexts --replays . --out v13d-fidelity
+          for f in fidelity.json fidelity.md; do cmp v13d-fidelity/$f $V/fidelity/$f; cp v13d-fidelity/$f out/v13d-$f; done
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

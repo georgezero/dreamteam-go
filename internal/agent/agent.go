@@ -105,6 +105,13 @@ type Handler struct {
 	// harness (V0.4b): hello withholds the seed and describes the
 	// benchmark's contract instead. Nothing else changes.
 	Benchmark *Benchmark
+	// Extensions, when set, are further operations served by name
+	// (V0.13d: the alternatives turn, dreamteam agent --stdio
+	// -alternatives). Each must leave the session unchanged. They are not
+	// listed by hello, so a session without them answers every listed op
+	// exactly as before; an op that is neither listed nor an extension is
+	// unknown, as before.
+	Extensions map[string]func(*session.Session, json.RawMessage) (any, error)
 }
 
 // Benchmark is what hello tells a policy playing under the benchmark
@@ -235,6 +242,17 @@ func (h *Handler) dispatch(req Request) (any, *Error) {
 			return nil, e
 		}
 		return h.clock(), nil
+	}
+	if f, ok := h.Extensions[req.Op]; ok {
+		before := h.s.Digests()
+		v, err := f(h.s, req.Args)
+		if h.s.Digests() != before {
+			return nil, &Error{Code: "internal_error", Message: "the extension changed the session"}
+		}
+		if err != nil {
+			return nil, &Error{Code: ErrInvalidArgs, Message: err.Error()}
+		}
+		return v, nil
 	}
 	return nil, &Error{Code: ErrUnknownOp, Message: fmt.Sprintf("unknown op %q; the ops are %v", req.Op, Ops), Field: "op"}
 }

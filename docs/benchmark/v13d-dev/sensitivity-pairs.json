@@ -1,0 +1,840 @@
+{
+ "schema": "dreamteam.v13d-sensitivity-pairs/v1",
+ "note": "The V0.13c pairs, unchanged, shown through presentation v2 (the typed view). itemsWithDifferentValues lists every shown item (by alternative/section/key, including each list's order) whose rendered line differs between the members; itemsShownForOneMemberOnly every item one member shows and the other does not; the line lists every rendered line that differs, position by position, in the control text, and in the treatment summary followed by every inspect answer. They are context pairs: none isolates one fact.",
+ "texts": {
+  "dreamteam.alternative-selection/v2": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+  "dreamteam.alternatives-presentation/v2": "8327f254ed2e25865db781f5f1cdcc70db129ea0df72ab6d0ce924ddf79ce496",
+  "dreamteam.alternatives-view/v1": "ce7f0e238c2d8cf71bf87cf720f12b56bd667035971308ae9abae7399d66aba0"
+ },
+ "pairs": [
+  {
+   "id": "S1",
+   "fact": "displaced bookings: zero versus nonzero (decided two weeks apart)",
+   "a": {
+    "label": "terminate Sam (E04), 14 days' notice, decided Oct 13",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E04"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "dc8af236a1925e77e680b73b84a9007a656271e2523041a847aa5ce197b3c48d",
+    "comparisonSha256": "f586142ebe26b4bbf4f10f5ab063df3c3033170a15a1651964b0b580bd1fe496",
+    "viewSha256": "2e5d3c9898328abc30d66f55d3238fa9983f8ace5b6bd4d2bc940037a452f6b8"
+   },
+   "b": {
+    "label": "terminate Sam (E04), 14 days' notice, decided Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-27T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-11-10"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E04"
+    },
+    "controlMessageSha256": "2f22b986f653e4f345db3ab31b34cd068f5b31c867f07b6857df425443c2a58e",
+    "treatmentMessageSha256": "6f2702293ad80614c98cbb07c657cf83ba184682113853a505953b8bfb5d3f31",
+    "comparisonSha256": "c21ed8aaa7d5b2dc28741ca1c8c6b5a73a6d3a3b23ba6927f48904b4d596fef5",
+    "viewSha256": "67750b5f7535483f1181bea9356892b054df1f89206eea63f6fff2850aa7253b"
+   },
+   "itemsWithDifferentValues": [
+    "adjusted/actions: \"action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"action 1: terminate E1, lastDay 2026-11-24 (lastDay differs from your reply)\"",
+    "adjusted/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-25 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "adjusted/facts/booked_ahead: \"Appointments booked from tomorrow within the booking horizon: 0\" vs \"Appointments booked from tomorrow within the booking horizon: 277\"",
+    "adjusted/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $8,300.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $8,300.00 · today to 2026-11-24 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "adjusted/facts/displaced_bookings: \"Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"Booked appointments displaced (whole batch): 13 · appointments already booked that would lose their staffing\"",
+    "adjusted/facts/end_date.E1: \"Not employed from · E1: 2026-11-11\" vs \"Not employed from · E1: 2026-11-25\"",
+    "adjusted/facts/last_day.E1: \"Last day · E1: 2026-11-10\" vs \"Last day · E1: 2026-11-24\"",
+    "adjusted/facts/severance_payday.E1: \"Severance payday · E1: 2026-11-13\" vs \"Severance payday · E1: 2026-11-27\"",
+    "adjusted/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-27 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "adjusted/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-25 to 2027-02-24 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "adjusted/facts/slots_closed_booked_now: \"Of these, booked now: 0\" vs \"Of these, booked now: 13\"",
+    "adjusted/obligations/next_payroll: \"Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "adjusted/obligations/payables: \"Accounts payable: $2,854.82\" vs \"Accounts payable: $50,300.58\"",
+    "adjusted/unavailable/#1: \"Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "adjusted/unavailable/#2: \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "adjusted/unavailable/#3: \"Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "adjusted/unavailable/#4: \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "no_action/facts/booked_ahead: \"Appointments booked from tomorrow within the booking horizon: 0\" vs \"Appointments booked from tomorrow within the booking horizon: 277\"",
+    "no_action/obligations/next_payroll: \"Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "no_action/obligations/payables: \"Accounts payable: $2,854.82\" vs \"Accounts payable: $50,300.58\"",
+    "proposal/actions: \"action 1: terminate E1, lastDay 2026-10-27\" vs \"action 1: terminate E1, lastDay 2026-11-10\"",
+    "proposal/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "proposal/facts/booked_ahead: \"Appointments booked from tomorrow within the booking horizon: 0\" vs \"Appointments booked from tomorrow within the booking horizon: 277\"",
+    "proposal/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $4,350.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $4,350.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "proposal/facts/displaced_bookings: \"Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"Booked appointments displaced (whole batch): 18 · appointments already booked that would lose their staffing\"",
+    "proposal/facts/end_date.E1: \"Not employed from · E1: 2026-10-28\" vs \"Not employed from · E1: 2026-11-11\"",
+    "proposal/facts/last_day.E1: \"Last day · E1: 2026-10-27\" vs \"Last day · E1: 2026-11-10\"",
+    "proposal/facts/severance_payday.E1: \"Severance payday · E1: 2026-10-30\" vs \"Severance payday · E1: 2026-11-13\"",
+    "proposal/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "proposal/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 2,481 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 2,481 · 2026-11-11 to 2027-02-24 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "proposal/facts/slots_closed_booked_now: \"Of these, booked now: 0\" vs \"Of these, booked now: 18\"",
+    "proposal/obligations/next_payroll: \"Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "proposal/obligations/payables: \"Accounts payable: $2,854.82\" vs \"Accounts payable: $50,300.58\"",
+    "proposal/unavailable/#1: \"Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "proposal/unavailable/#2: \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "proposal/unavailable/#3: \"Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "proposal/unavailable/#4: \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "time: \"2026-10-13T07:00:00\" vs \"2026-10-27T07:00:00\""
+   ],
+   "itemsShownForOneMemberOnly": [
+    "adjusted/estimates/#2: \"\" vs \"displaced_replacement\"",
+    "adjusted/estimates/displaced_replacement: \"\" vs \"Displaced bookings with a feasible replacement by capacity: 13 of 13 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "adjusted/unavailable/#5: \"\" vs \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "proposal/estimates/#2: \"\" vs \"displaced_replacement\"",
+    "proposal/estimates/displaced_replacement: \"\" vs \"Displaced bookings with a feasible replacement by capacity: 18 of 18 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "proposal/unavailable/#5: \"\" vs \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\""
+   ],
+   "controlLinesThatDiffer": [
+    "line 1: \"FINAL DECISION at 2026-10-13T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\" vs \"FINAL DECISION at 2026-10-27T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\""
+   ],
+   "treatmentLinesThatDiffer": [
+    "line 1: \"FINAL DECISION at 2026-10-13T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\" vs \"FINAL DECISION at 2026-10-27T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\"",
+    "line 6: \"proposal (your proposal): action 1: terminate E1, lastDay 2026-10-27\" vs \"proposal (your proposal): action 1: terminate E1, lastDay 2026-11-10\"",
+    "line 10: \"adjusted: action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"adjusted: action 1: terminate E1, lastDay 2026-11-24 (lastDay differs from your reply)\"",
+    "line 22: \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2026-10-27\" vs \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2026-11-10\"",
+    "line 25: \"    - [last_day.E1] Last day · E1: 2026-10-27\" vs \"    - [last_day.E1] Last day · E1: 2026-11-10\"",
+    "line 26: \"    - [end_date.E1] Not employed from · E1: 2026-10-28\" vs \"    - [end_date.E1] Not employed from · E1: 2026-11-11\"",
+    "line 28: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 29: \"    - [severance_payday.E1] Severance payday · E1: 2026-10-30\" vs \"    - [severance_payday.E1] Severance payday · E1: 2026-11-13\"",
+    "line 32: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 18 · appointments already booked that would lose their staffing\"",
+    "line 33: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $4,350.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $4,350.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 34: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,481 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,481 · 2026-11-11 to 2027-02-24 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 35: \"    - [slots_closed_booked_now] Of these, booked now: 0\" vs \"    - [slots_closed_booked_now] Of these, booked now: 18\"",
+    "line 38: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 277\"",
+    "line 40: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 41: \"  Obligations that continue:\" vs \"    - [displaced_replacement] Displaced bookings with a feasible replacement by capacity: 18 of 18 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "line 42: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"  Obligations that continue:\"",
+    "line 43: \"    - [payables] Accounts payable: $2,854.82\" vs \"    - [next_payroll] Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "line 44: \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"    - [payables] Accounts payable: $50,300.58\"",
+    "line 45: \"  Not known before deciding:\" vs \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\"",
+    "line 46: \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"  Not known before deciding:\"",
+    "line 47: \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"    - Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "line 48: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "line 49: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "line 50: \"\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 51: \"--- inspect:no_action\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "line 52: \"DETAIL no_action: no staffing action (no batch)\" vs \"\"",
+    "line 53: \"  Validation: accepted (nothing to apply)\" vs \"--- inspect:no_action\"",
+    "line 54: \"  Facts:\" vs \"DETAIL no_action: no staffing action (no batch)\"",
+    "line 55: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"  Validation: accepted (nothing to apply)\"",
+    "line 56: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\" vs \"  Facts:\"",
+    "line 57: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\"",
+    "line 58: \"    - [employment.E1] Employment stage · E1: active\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\"",
+    "line 59: \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,370\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\"",
+    "line 60: \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,370\" vs \"    - [employment.E1] Employment stage · E1: active\"",
+    "line 61: \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,370\" vs \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,370\"",
+    "line 62: \"    - [pending_rosters.E1] Pending roster versions · E1: 0\" vs \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,370\"",
+    "line 63: \"    - [approved_extensions.E1] Approved extensions · E1: 0\" vs \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,370\"",
+    "line 64: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"    - [pending_rosters.E1] Pending roster versions · E1: 0\"",
+    "line 65: \"  Estimates:\" vs \"    - [approved_extensions.E1] Approved extensions · E1: 0\"",
+    "line 66: \"    - none\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 277\"",
+    "line 67: \"  Obligations that continue:\" vs \"  Estimates:\"",
+    "line 68: \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $3,950.00 · owed only on a later termination · two contracted weeks with benefits\" vs \"    - none\"",
+    "line 69: \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $1,975.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\" vs \"  Obligations that continue:\"",
+    "line 70: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $3,950.00 · owed only on a later termination · two contracted weeks with benefits\"",
+    "line 71: \"    - [payables] Accounts payable: $2,854.82\" vs \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $1,975.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\"",
+    "line 72: \"  Reversibility: nothing to reverse · no batch is applied\" vs \"    - [next_payroll] Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "line 73: \"  Not known before deciding:\" vs \"    - [payables] Accounts payable: $50,300.58\"",
+    "line 74: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"  Reversibility: nothing to reverse · no batch is applied\"",
+    "line 75: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"  Not known before deciding:\"",
+    "line 76: \"\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 77: \"--- inspect:adjusted\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "line 78: \"DETAIL adjusted: action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"\"",
+    "line 79: \"  Validation: accepted\" vs \"--- inspect:adjusted\"",
+    "line 80: \"  Facts:\" vs \"DETAIL adjusted: action 1: terminate E1, lastDay 2026-11-24 (lastDay differs from your reply)\"",
+    "line 81: \"    - [last_day.E1] Last day · E1: 2026-11-10\" vs \"  Validation: accepted\"",
+    "line 82: \"    - [end_date.E1] Not employed from · E1: 2026-11-11\" vs \"  Facts:\"",
+    "line 83: \"    - [notice_days.E1] Notice · E1: 28 days\" vs \"    - [last_day.E1] Last day · E1: 2026-11-24\"",
+    "line 84: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [end_date.E1] Not employed from · E1: 2026-11-25\"",
+    "line 85: \"    - [severance_payday.E1] Severance payday · E1: 2026-11-13\" vs \"    - [notice_days.E1] Notice · E1: 28 days\"",
+    "line 86: \"    - [voided_rosters.E1] Pending roster versions voided · E1: 0\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-27 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 87: \"    - [voided_extensions.E1] Approved extensions voided · E1: 0\" vs \"    - [severance_payday.E1] Severance payday · E1: 2026-11-27\"",
+    "line 88: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"    - [voided_rosters.E1] Pending roster versions voided · E1: 0\"",
+    "line 89: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $8,300.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [voided_extensions.E1] Approved extensions voided · E1: 0\"",
+    "line 90: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 13 · appointments already booked that would lose their staffing\"",
+    "line 91: \"    - [slots_closed_booked_now] Of these, booked now: 0\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $8,300.00 · today to 2026-11-24 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 92: \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 951\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-25 to 2027-02-24 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 93: \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 1,204\" vs \"    - [slots_closed_booked_now] Of these, booked now: 13\"",
+    "line 94: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 951\"",
+    "line 95: \"  Estimates:\" vs \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 1,204\"",
+    "line 96: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 277\"",
+    "line 97: \"  Obligations that continue:\" vs \"  Estimates:\"",
+    "line 98: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-25 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 99: \"    - [payables] Accounts payable: $2,854.82\" vs \"    - [displaced_replacement] Displaced bookings with a feasible replacement by capacity: 13 of 13 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "line 100: \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"  Obligations that continue:\"",
+    "line 101: \"  Not known before deciding:\" vs \"    - [next_payroll] Payroll accrued, next payday: $38,675.39 · paid 2026-10-30\"",
+    "line 102: \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"    - [payables] Accounts payable: $50,300.58\"",
+    "line 103: \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\"",
+    "line 104: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"  Not known before deciding:\"",
+    "line 105: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"    - Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "line 106: \"\" vs \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "line 107: \"\" vs \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "line 108: \"\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 109: \"\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\""
+   ]
+  },
+  {
+   "id": "S2",
+   "fact": "displaced bookings: zero versus nonzero (same state)",
+   "a": {
+    "label": "terminate Riley (E03), last day Feb 16",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-20T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2027-02-16"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action"
+    ],
+    "refs": {
+     "E1": "E03"
+    },
+    "controlMessageSha256": "c46ec9c84fc98338e410d85dec97cb200cf2af2d92921e94e8dc17a3d70631d8",
+    "treatmentMessageSha256": "6b13ab84543659de8d2c1869494d9ff1ae4b313579f260ba2fdf396d1bdeb517",
+    "comparisonSha256": "4694d438778271368fffbb476b026067adec88129fa35768b90eecae7cf7316b",
+    "viewSha256": "b899120c5212486265a8f8afa4f34c4c5d91106d7a0f857234923df800f77b34"
+   },
+   "b": {
+    "label": "terminate Riley (E03), last day Feb 9",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-20T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E03",
+      "lastDay": "2027-02-09"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action"
+    ],
+    "refs": {
+     "E1": "E03"
+    },
+    "controlMessageSha256": "c46ec9c84fc98338e410d85dec97cb200cf2af2d92921e94e8dc17a3d70631d8",
+    "treatmentMessageSha256": "00dcc1855ff4219759518eeb87e4ad3022fe85a0325f7ce5e15527ead8b1c53e",
+    "comparisonSha256": "98612e2bdd4bd4b32566a4a20a598b3a75d4a1437c49e9d682844293088a4844",
+    "viewSha256": "7b73727809563a3a3c684125534c7251f5ecedff943a2cc9d4b1312663119cbe"
+   },
+   "itemsWithDifferentValues": [
+    "proposal/actions: \"action 1: terminate E1, lastDay 2027-02-16\" vs \"action 1: terminate E1, lastDay 2027-02-09\"",
+    "proposal/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $1,800.00 · per full week from 2027-02-17 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $1,800.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "proposal/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $30,960.00 · today to 2027-02-16 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $29,160.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "proposal/facts/displaced_bookings: \"Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"Booked appointments displaced (whole batch): 1 · appointments already booked that would lose their staffing\"",
+    "proposal/facts/end_date.E1: \"Not employed from · E1: 2027-02-17\" vs \"Not employed from · E1: 2027-02-10\"",
+    "proposal/facts/last_day.E1: \"Last day · E1: 2027-02-16\" vs \"Last day · E1: 2027-02-09\"",
+    "proposal/facts/notice_days.E1: \"Notice · E1: 119 days\" vs \"Notice · E1: 112 days\"",
+    "proposal/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 45 · 2027-02-17 to 2027-02-17 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 278 · 2027-02-10 to 2027-02-17 (8 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "proposal/facts/slots_closed.CT: \"Scheduled slots no longer staffed · CT: 14\" vs \"Scheduled slots no longer staffed · CT: 92\"",
+    "proposal/facts/slots_closed.XR: \"Scheduled slots no longer staffed · XR: 31\" vs \"Scheduled slots no longer staffed · XR: 186\"",
+    "proposal/facts/slots_closed_booked_now: \"Of these, booked now: 0\" vs \"Of these, booked now: 1\"",
+    "proposal/unavailable/#1: \"Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "proposal/unavailable/#2: \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "proposal/unavailable/#3: \"Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "proposal/unavailable/#4: \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"Future orders and revenue: they depend on future demand and are not projected for the decision\""
+   ],
+   "itemsShownForOneMemberOnly": [
+    "proposal/estimates/#2: \"\" vs \"displaced_replacement\"",
+    "proposal/estimates/displaced_replacement: \"\" vs \"Displaced bookings with a feasible replacement by capacity: 1 of 1 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "proposal/unavailable/#5: \"\" vs \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\""
+   ],
+   "controlLinesThatDiffer": [],
+   "treatmentLinesThatDiffer": [
+    "line 6: \"proposal (your proposal): action 1: terminate E1, lastDay 2027-02-16\" vs \"proposal (your proposal): action 1: terminate E1, lastDay 2027-02-09\"",
+    "line 20: \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-02-16\" vs \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-02-09\"",
+    "line 23: \"    - [last_day.E1] Last day · E1: 2027-02-16\" vs \"    - [last_day.E1] Last day · E1: 2027-02-09\"",
+    "line 24: \"    - [end_date.E1] Not employed from · E1: 2027-02-17\" vs \"    - [end_date.E1] Not employed from · E1: 2027-02-10\"",
+    "line 25: \"    - [notice_days.E1] Notice · E1: 119 days\" vs \"    - [notice_days.E1] Notice · E1: 112 days\"",
+    "line 30: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 1 · appointments already booked that would lose their staffing\"",
+    "line 31: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $30,960.00 · today to 2027-02-16 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $29,160.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 32: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 45 · 2027-02-17 to 2027-02-17 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 278 · 2027-02-10 to 2027-02-17 (8 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 33: \"    - [slots_closed_booked_now] Of these, booked now: 0\" vs \"    - [slots_closed_booked_now] Of these, booked now: 1\"",
+    "line 34: \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 31\" vs \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 186\"",
+    "line 35: \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 14\" vs \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 92\"",
+    "line 38: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,800.00 · per full week from 2027-02-17 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,800.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 39: \"  Obligations that continue:\" vs \"    - [displaced_replacement] Displaced bookings with a feasible replacement by capacity: 1 of 1 · at commit · whether each patient accepts a replacement is decided only at commit\"",
+    "line 40: \"    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\" vs \"  Obligations that continue:\"",
+    "line 41: \"    - [payables] Accounts payable: $26,088.71\" vs \"    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\"",
+    "line 42: \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"    - [payables] Accounts payable: $26,088.71\"",
+    "line 43: \"  Not known before deciding:\" vs \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\"",
+    "line 44: \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"  Not known before deciding:\"",
+    "line 45: \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"    - Replacement acceptance: whether each displaced patient accepts a replacement is decided at commit and is not observable before\"",
+    "line 46: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "line 47: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "line 48: \"\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 49: \"--- inspect:no_action\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "line 50: \"DETAIL no_action: no staffing action (no batch)\" vs \"\"",
+    "line 51: \"  Validation: accepted (nothing to apply)\" vs \"--- inspect:no_action\"",
+    "line 52: \"  Facts:\" vs \"DETAIL no_action: no staffing action (no batch)\"",
+    "line 53: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"  Validation: accepted (nothing to apply)\"",
+    "line 54: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\" vs \"  Facts:\"",
+    "line 55: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\"",
+    "line 56: \"    - [employment.E1] Employment stage · E1: active\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\"",
+    "line 57: \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\"",
+    "line 58: \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400\" vs \"    - [employment.E1] Employment stage · E1: active\"",
+    "line 59: \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\" vs \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\"",
+    "line 60: \"    - [pending_rosters.E1] Pending roster versions · E1: 0\" vs \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400\"",
+    "line 61: \"    - [approved_extensions.E1] Approved extensions · E1: 0\" vs \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\"",
+    "line 62: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 174\" vs \"    - [pending_rosters.E1] Pending roster versions · E1: 0\"",
+    "line 63: \"  Estimates:\" vs \"    - [approved_extensions.E1] Approved extensions · E1: 0\"",
+    "line 64: \"    - none\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 174\"",
+    "line 65: \"  Obligations that continue:\" vs \"  Estimates:\"",
+    "line 66: \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $3,600.00 · owed only on a later termination · two contracted weeks with benefits\" vs \"    - none\"",
+    "line 67: \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $1,800.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\" vs \"  Obligations that continue:\"",
+    "line 68: \"    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\" vs \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $3,600.00 · owed only on a later termination · two contracted weeks with benefits\"",
+    "line 69: \"    - [payables] Accounts payable: $26,088.71\" vs \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $1,800.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\"",
+    "line 70: \"  Reversibility: nothing to reverse · no batch is applied\" vs \"    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\"",
+    "line 71: \"  Not known before deciding:\" vs \"    - [payables] Accounts payable: $26,088.71\"",
+    "line 72: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"  Reversibility: nothing to reverse · no batch is applied\"",
+    "line 73: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"  Not known before deciding:\"",
+    "line 74: \"\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 75: \"\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\""
+   ]
+  },
+  {
+   "id": "S3",
+   "fact": "severance",
+   "a": {
+    "label": "terminate Casey (E05), last day Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E05",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E05"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "dc8af236a1925e77e680b73b84a9007a656271e2523041a847aa5ce197b3c48d",
+    "comparisonSha256": "cfa8bfecbf435538368087ef35ab46f4a5496eafb32ff58c2983978ce5ce6021",
+    "viewSha256": "ab978b18e2835d19a993775a67fb4abe34b1da81a9d155696f42f6b9d09db25b"
+   },
+   "b": {
+    "label": "terminate Morgan (E06), last day Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E06",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E06"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "dc8af236a1925e77e680b73b84a9007a656271e2523041a847aa5ce197b3c48d",
+    "comparisonSha256": "e0090d12894f467636b612d08ac7f55d8d9b7c069af33f93f4c3f17a690ee193",
+    "viewSha256": "1c10785bf14091374a4c1c86059e2b3737c90dfe136df783ac1ff38aedc56f96"
+   },
+   "itemsWithDifferentValues": [
+    "adjusted/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $2,250.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $2,172.50 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "adjusted/facts/#12: \"slots_closed.MR\" vs \"slots_closed.US\"",
+    "adjusted/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $9,450.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $9,124.50 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "adjusted/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $4,500.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $4,345.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "adjusted/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 594 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 756 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "no_action/facts/contract_minutes.E1: \"Contracted weekly minutes · E1: 2,400\" vs \"Contracted weekly minutes · E1: 2,370\"",
+    "no_action/facts/roster_minutes_week_b.E1: \"Rostered minutes, week B · E1: 2,400\" vs \"Rostered minutes, week B · E1: 2,370\"",
+    "no_action/obligations/severance_if_terminated_later.E1: \"Severance if terminated later · E1: $4,500.00 · owed only on a later termination · two contracted weeks with benefits\" vs \"Severance if terminated later · E1: $4,345.00 · owed only on a later termination · two contracted weeks with benefits\"",
+    "no_action/obligations/weekly_guarantee.E1: \"Contract guarantee continues · E1: $2,250.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\" vs \"Contract guarantee continues · E1: $2,172.50 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\"",
+    "proposal/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $2,250.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $2,172.50 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "proposal/facts/#12: \"slots_closed.MR\" vs \"slots_closed.US\"",
+    "proposal/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $4,950.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $4,779.50 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "proposal/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $4,500.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $4,345.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "proposal/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 684 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 872 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\""
+   ],
+   "itemsShownForOneMemberOnly": [
+    "adjusted/facts/slots_closed.MR: \"Scheduled slots no longer staffed · MR: 594\" vs \"\"",
+    "adjusted/facts/slots_closed.US: \"\" vs \"Scheduled slots no longer staffed · US: 756\"",
+    "proposal/facts/slots_closed.MR: \"Scheduled slots no longer staffed · MR: 684\" vs \"\"",
+    "proposal/facts/slots_closed.US: \"\" vs \"Scheduled slots no longer staffed · US: 872\""
+   ],
+   "controlLinesThatDiffer": [],
+   "treatmentLinesThatDiffer": [
+    "line 28: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,500.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,345.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 33: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $4,950.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $4,779.50 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 34: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 684 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 872 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 36: \"    - [slots_closed.MR] Scheduled slots no longer staffed · MR: 684\" vs \"    - [slots_closed.US] Scheduled slots no longer staffed · US: 872\"",
+    "line 39: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,250.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,172.50 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 58: \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\" vs \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,370\"",
+    "line 60: \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\" vs \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,370\"",
+    "line 67: \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $4,500.00 · owed only on a later termination · two contracted weeks with benefits\" vs \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $4,345.00 · owed only on a later termination · two contracted weeks with benefits\"",
+    "line 68: \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $2,250.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\" vs \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $2,172.50 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\"",
+    "line 83: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,500.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,345.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 88: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $9,450.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $9,124.50 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 89: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 594 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 756 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 91: \"    - [slots_closed.MR] Scheduled slots no longer staffed · MR: 594\" vs \"    - [slots_closed.US] Scheduled slots no longer staffed · US: 756\"",
+    "line 94: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,250.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,172.50 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\""
+   ]
+  },
+  {
+   "id": "S4",
+   "fact": "an alternative available versus unavailable (the later-last-day adjustment)",
+   "a": {
+    "label": "terminate Casey (E05), last day Jan 26",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E05",
+      "lastDay": "2027-01-26"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E05"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "e024705133fa1c731912ee98098e4eacfa81cd3744de4662e3859058de10a7c7",
+    "comparisonSha256": "548478bf315c5ac7d4bfe5a331cafa099a620c852467765875b1e3a119fc8d9a",
+    "viewSha256": "bd002c05cc61840f48b83a50846ed968fc880efeb8c7ce29840b32c5df0a5670"
+   },
+   "b": {
+    "label": "terminate Casey (E05), last day Feb 2",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E05",
+      "lastDay": "2027-02-02"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action"
+    ],
+    "refs": {
+     "E1": "E05"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "02ca0c75b4ebdf1e9578e6243259b0d3943378cef9e31319f14ead419be7618d",
+    "comparisonSha256": "cd6e92f867a2fbd78c95dbacfcd8c258b3ea533e1aec66d573058123aff2dcfe",
+    "viewSha256": "00030ad35b899e8f6bcf658958a4fbcffe45280fcf5fe6e2661a62d8670ec7d8"
+   },
+   "itemsWithDifferentValues": [
+    "proposal/actions: \"action 1: terminate E1, lastDay 2027-01-26\" vs \"action 1: terminate E1, lastDay 2027-02-02\"",
+    "proposal/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-02-03 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "proposal/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $34,200.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $36,450.00 · today to 2027-02-02 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "proposal/facts/end_date.E1: \"Not employed from · E1: 2027-01-27\" vs \"Not employed from · E1: 2027-02-03\"",
+    "proposal/facts/last_day.E1: \"Last day · E1: 2027-01-26\" vs \"Last day · E1: 2027-02-02\"",
+    "proposal/facts/notice_days.E1: \"Notice · E1: 105 days\" vs \"Notice · E1: 112 days\"",
+    "proposal/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 99 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 54 · 2027-02-03 to 2027-02-10 (8 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "proposal/facts/slots_closed.MR: \"Scheduled slots no longer staffed · MR: 99\" vs \"Scheduled slots no longer staffed · MR: 54\""
+   ],
+   "itemsShownForOneMemberOnly": [
+    "adjusted/actions: \"action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\" vs \"\"",
+    "adjusted/estimates/#1: \"contract_cost_no_longer_owed.E1\" vs \"\"",
+    "adjusted/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"\"",
+    "adjusted/facts/#1: \"last_day.E1\" vs \"\"",
+    "adjusted/facts/#10: \"slots_closed\" vs \"\"",
+    "adjusted/facts/#11: \"slots_closed_booked_now\" vs \"\"",
+    "adjusted/facts/#12: \"slots_closed.MR\" vs \"\"",
+    "adjusted/facts/#13: \"booked_ahead\" vs \"\"",
+    "adjusted/facts/#2: \"end_date.E1\" vs \"\"",
+    "adjusted/facts/#3: \"notice_days.E1\" vs \"\"",
+    "adjusted/facts/#4: \"severance_recognized_now.E1\" vs \"\"",
+    "adjusted/facts/#5: \"severance_payday.E1\" vs \"\"",
+    "adjusted/facts/#6: \"voided_rosters.E1\" vs \"\"",
+    "adjusted/facts/#7: \"voided_extensions.E1\" vs \"\"",
+    "adjusted/facts/#8: \"displaced_bookings\" vs \"\"",
+    "adjusted/facts/#9: \"contract_pay_to_last_day.E1\" vs \"\"",
+    "adjusted/facts/booked_ahead: \"Appointments booked from tomorrow within the booking horizon: 0\" vs \"\"",
+    "adjusted/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $38,700.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\" vs \"\"",
+    "adjusted/facts/displaced_bookings: \"Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"\"",
+    "adjusted/facts/end_date.E1: \"Not employed from · E1: 2027-02-10\" vs \"\"",
+    "adjusted/facts/last_day.E1: \"Last day · E1: 2027-02-09\" vs \"\"",
+    "adjusted/facts/notice_days.E1: \"Notice · E1: 119 days\" vs \"\"",
+    "adjusted/facts/severance_payday.E1: \"Severance payday · E1: 2027-02-19\" vs \"\"",
+    "adjusted/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $4,500.00 · recognized now, paid 2027-02-19 · two contracted weeks with benefits, owed once the termination is committed\" vs \"\"",
+    "adjusted/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 9 · 2027-02-10 to 2027-02-10 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"\"",
+    "adjusted/facts/slots_closed.MR: \"Scheduled slots no longer staffed · MR: 9\" vs \"\"",
+    "adjusted/facts/slots_closed_booked_now: \"Of these, booked now: 0\" vs \"\"",
+    "adjusted/facts/voided_extensions.E1: \"Approved extensions voided · E1: 0\" vs \"\"",
+    "adjusted/facts/voided_rosters.E1: \"Pending roster versions voided · E1: 0\" vs \"\"",
+    "adjusted/obligations/#1: \"next_payroll\" vs \"\"",
+    "adjusted/obligations/#2: \"payables\" vs \"\"",
+    "adjusted/obligations/next_payroll: \"Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"\"",
+    "adjusted/obligations/payables: \"Accounts payable: $2,854.82\" vs \"\"",
+    "adjusted/reversibility: \"irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"\"",
+    "adjusted/unavailable/#1: \"Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"\"",
+    "adjusted/unavailable/#2: \"Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"\"",
+    "adjusted/unavailable/#3: \"Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"\"",
+    "adjusted/unavailable/#4: \"Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"\"",
+    "adjusted/validation: \"accepted\" vs \"\""
+   ],
+   "controlLinesThatDiffer": [],
+   "treatmentLinesThatDiffer": [
+    "line 6: \"proposal (your proposal): action 1: terminate E1, lastDay 2027-01-26\" vs \"proposal (your proposal): action 1: terminate E1, lastDay 2027-02-02\"",
+    "line 10: \"adjusted: action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\" vs \"\"",
+    "line 11: \"  Validation: accepted\" vs \"Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {\\\"inspect\\\": [ID, ...]}. You can do this once.\"",
+    "line 13: \"Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {\\\"inspect\\\": [ID, ...]}. You can do this once.\" vs \"Reply with one JSON object:\"",
+    "line 14: \"\" vs \"- {\\\"decision\\\": \\\"select\\\", \\\"id\\\": ID, \\\"reason\\\": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal), no_action.\"",
+    "line 15: \"Reply with one JSON object:\" vs \"- {\\\"decision\\\": \\\"revise\\\", \\\"actions\\\": [...], \\\"reason\\\": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.\"",
+    "line 16: \"- {\\\"decision\\\": \\\"select\\\", \\\"id\\\": ID, \\\"reason\\\": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal), no_action, adjusted.\" vs \"- {\\\"decision\\\": \\\"abandon\\\", \\\"reason\\\": TEXT} submits nothing.\"",
+    "line 17: \"- {\\\"decision\\\": \\\"revise\\\", \\\"actions\\\": [...], \\\"reason\\\": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.\" vs \"Optionally add \\\"cite\\\": up to three items from any detail you were shown, each {\\\"item\\\": KEY, \\\"values\\\": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.\"",
+    "line 18: \"- {\\\"decision\\\": \\\"abandon\\\", \\\"reason\\\": TEXT} submits nothing.\" vs \"\"",
+    "line 19: \"Optionally add \\\"cite\\\": up to three items from any detail you were shown, each {\\\"item\\\": KEY, \\\"values\\\": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.\" vs \"--- inspect:proposal\"",
+    "line 20: \"\" vs \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-02-02\"",
+    "line 21: \"--- inspect:proposal\" vs \"  Validation: accepted\"",
+    "line 22: \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-01-26\" vs \"  Facts:\"",
+    "line 23: \"  Validation: accepted\" vs \"    - [last_day.E1] Last day · E1: 2027-02-02\"",
+    "line 24: \"  Facts:\" vs \"    - [end_date.E1] Not employed from · E1: 2027-02-03\"",
+    "line 25: \"    - [last_day.E1] Last day · E1: 2027-01-26\" vs \"    - [notice_days.E1] Notice · E1: 112 days\"",
+    "line 26: \"    - [end_date.E1] Not employed from · E1: 2027-01-27\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,500.00 · recognized now, paid 2027-02-05 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 27: \"    - [notice_days.E1] Notice · E1: 105 days\" vs \"    - [severance_payday.E1] Severance payday · E1: 2027-02-05\"",
+    "line 28: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,500.00 · recognized now, paid 2027-02-05 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [voided_rosters.E1] Pending roster versions voided · E1: 0\"",
+    "line 29: \"    - [severance_payday.E1] Severance payday · E1: 2027-02-05\" vs \"    - [voided_extensions.E1] Approved extensions voided · E1: 0\"",
+    "line 30: \"    - [voided_rosters.E1] Pending roster versions voided · E1: 0\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\"",
+    "line 31: \"    - [voided_extensions.E1] Approved extensions voided · E1: 0\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $36,450.00 · today to 2027-02-02 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 32: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 54 · 2027-02-03 to 2027-02-10 (8 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 33: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $34,200.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [slots_closed_booked_now] Of these, booked now: 0\"",
+    "line 34: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 99 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed.MR] Scheduled slots no longer staffed · MR: 54\"",
+    "line 35: \"    - [slots_closed_booked_now] Of these, booked now: 0\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\"",
+    "line 36: \"    - [slots_closed.MR] Scheduled slots no longer staffed · MR: 99\" vs \"  Estimates:\"",
+    "line 37: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-02-03 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 38: \"  Estimates:\" vs \"  Obligations that continue:\"",
+    "line 39: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\"",
+    "line 40: \"  Obligations that continue:\" vs \"    - [payables] Accounts payable: $2,854.82\"",
+    "line 41: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\"",
+    "line 42: \"    - [payables] Accounts payable: $2,854.82\" vs \"  Not known before deciding:\"",
+    "line 43: \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\"",
+    "line 44: \"  Not known before deciding:\" vs \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\"",
+    "line 45: \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 46: \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "line 47: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"\"",
+    "line 48: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"--- inspect:no_action\"",
+    "line 49: \"\" vs \"DETAIL no_action: no staffing action (no batch)\"",
+    "line 50: \"--- inspect:no_action\" vs \"  Validation: accepted (nothing to apply)\"",
+    "line 51: \"DETAIL no_action: no staffing action (no batch)\" vs \"  Facts:\"",
+    "line 52: \"  Validation: accepted (nothing to apply)\" vs \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\"",
+    "line 53: \"  Facts:\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\"",
+    "line 54: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\"",
+    "line 55: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing\" vs \"    - [employment.E1] Employment stage · E1: active\"",
+    "line 56: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\" vs \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\"",
+    "line 57: \"    - [employment.E1] Employment stage · E1: active\" vs \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400\"",
+    "line 58: \"    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\" vs \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\"",
+    "line 59: \"    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400\" vs \"    - [pending_rosters.E1] Pending roster versions · E1: 0\"",
+    "line 60: \"    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\" vs \"    - [approved_extensions.E1] Approved extensions · E1: 0\"",
+    "line 61: \"    - [pending_rosters.E1] Pending roster versions · E1: 0\" vs \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\"",
+    "line 62: \"    - [approved_extensions.E1] Approved extensions · E1: 0\" vs \"  Estimates:\"",
+    "line 63: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"    - none\"",
+    "line 64: \"  Estimates:\" vs \"  Obligations that continue:\"",
+    "line 65: \"    - none\" vs \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $4,500.00 · owed only on a later termination · two contracted weeks with benefits\"",
+    "line 66: \"  Obligations that continue:\" vs \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $2,250.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\"",
+    "line 67: \"    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $4,500.00 · owed only on a later termination · two contracted weeks with benefits\" vs \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\"",
+    "line 68: \"    - [weekly_guarantee.E1] Contract guarantee continues · E1: $2,250.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked\" vs \"    - [payables] Accounts payable: $2,854.82\"",
+    "line 69: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"  Reversibility: nothing to reverse · no batch is applied\"",
+    "line 70: \"    - [payables] Accounts payable: $2,854.82\" vs \"  Not known before deciding:\"",
+    "line 71: \"  Reversibility: nothing to reverse · no batch is applied\" vs \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\"",
+    "line 72: \"  Not known before deciding:\" vs \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\"",
+    "line 73: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"\"",
+    "line 74: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"\"",
+    "line 76: \"--- inspect:adjusted\" vs \"\"",
+    "line 77: \"DETAIL adjusted: action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\" vs \"\"",
+    "line 78: \"  Validation: accepted\" vs \"\"",
+    "line 79: \"  Facts:\" vs \"\"",
+    "line 80: \"    - [last_day.E1] Last day · E1: 2027-02-09\" vs \"\"",
+    "line 81: \"    - [end_date.E1] Not employed from · E1: 2027-02-10\" vs \"\"",
+    "line 82: \"    - [notice_days.E1] Notice · E1: 119 days\" vs \"\"",
+    "line 83: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $4,500.00 · recognized now, paid 2027-02-19 · two contracted weeks with benefits, owed once the termination is committed\" vs \"\"",
+    "line 84: \"    - [severance_payday.E1] Severance payday · E1: 2027-02-19\" vs \"\"",
+    "line 85: \"    - [voided_rosters.E1] Pending roster versions voided · E1: 0\" vs \"\"",
+    "line 86: \"    - [voided_extensions.E1] Approved extensions voided · E1: 0\" vs \"\"",
+    "line 87: \"    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing\" vs \"\"",
+    "line 88: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $38,700.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\" vs \"\"",
+    "line 89: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 9 · 2027-02-10 to 2027-02-10 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"\"",
+    "line 90: \"    - [slots_closed_booked_now] Of these, booked now: 0\" vs \"\"",
+    "line 91: \"    - [slots_closed.MR] Scheduled slots no longer staffed · MR: 9\" vs \"\"",
+    "line 92: \"    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0\" vs \"\"",
+    "line 93: \"  Estimates:\" vs \"\"",
+    "line 94: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $2,250.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"\"",
+    "line 95: \"  Obligations that continue:\" vs \"\"",
+    "line 96: \"    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16\" vs \"\"",
+    "line 97: \"    - [payables] Accounts payable: $2,854.82\" vs \"\"",
+    "line 98: \"  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee\" vs \"\"",
+    "line 99: \"  Not known before deciding:\" vs \"\"",
+    "line 100: \"    - Slots beyond the booking horizon: they do not exist yet and are not counted\" vs \"\"",
+    "line 101: \"    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\" vs \"\"",
+    "line 102: \"    - Future orders and revenue: they depend on future demand and are not projected for the decision\" vs \"\"",
+    "line 103: \"    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine\" vs \"\""
+   ]
+  },
+  {
+   "id": "S5",
+   "fact": "guaranteed commitment (teleradiology retainer to the earliest end)",
+   "a": {
+    "label": "teleradiology, weeknights, saturday and sunday, from Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "contract_teleradiology",
+      "requestId": "tele-1",
+      "op": "start",
+      "effective": "2026-10-27",
+      "plan": "standard-v1",
+      "windows": [
+       "weeknights",
+       "saturday",
+       "sunday"
+      ],
+      "scope": "all"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "C1": "new:0",
+     "P1": "standard-v1"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "eedf2f54670fb4035dff3ba7c82e1c2a9d664555ca4c40236314d59d8bed2ff4",
+    "comparisonSha256": "c836eb678b1913feca5a55ea15e655cab8dc3fcde6a0c436985a14be565def0e",
+    "viewSha256": "70c29dc6ea6cf561140a54ad22a9bc2993050fdd076d46e531c513b910e898f6"
+   },
+   "b": {
+    "label": "teleradiology, weeknights only, from Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "contract_teleradiology",
+      "requestId": "tele-1",
+      "op": "start",
+      "effective": "2026-10-27",
+      "plan": "standard-v1",
+      "windows": [
+       "weeknights"
+      ],
+      "scope": "all"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "C1": "new:0",
+     "P1": "standard-v1"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "630d66fecb610437c8e99e80aec8210ec1239698f92dea888cce2569d9135ae6",
+    "comparisonSha256": "e96e9f3a9261ec5a750e095b8460cfc78db9a4ae828925dbc2f163700026111c",
+    "viewSha256": "8a8527803959231626ef06145bab682ffb37bb575370a186d34ad6370d7a108a"
+   },
+   "itemsWithDifferentValues": [
+    "adjusted/actions: \"action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope urgent, effective 2026-10-27 (scope differs from your reply)\" vs \"action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope urgent, effective 2026-10-27 (scope differs from your reply)\"",
+    "adjusted/estimates/retainer_run_rate.C1: \"Retainer run rate while open-ended · C1: $3,100.00 · per month after 2026-11-25 · until a cancellation fixes the end\" vs \"Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end\"",
+    "adjusted/facts/retainer_to_earliest_end.C1: \"Teleradiology retainer to the earliest end · C1: $3,083.34 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\" vs \"Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\"",
+    "proposal/actions: \"action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope all, effective 2026-10-27\" vs \"action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope all, effective 2026-10-27\"",
+    "proposal/estimates/retainer_run_rate.C1: \"Retainer run rate while open-ended · C1: $3,100.00 · per month after 2026-11-25 · until a cancellation fixes the end\" vs \"Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end\"",
+    "proposal/facts/retainer_to_earliest_end.C1: \"Teleradiology retainer to the earliest end · C1: $3,083.34 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\" vs \"Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\""
+   ],
+   "itemsShownForOneMemberOnly": [],
+   "controlLinesThatDiffer": [],
+   "treatmentLinesThatDiffer": [
+    "line 7: \"proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope all, effective 2026-10-27\" vs \"proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope all, effective 2026-10-27\"",
+    "line 11: \"adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope urgent, effective 2026-10-27 (scope differs from your reply)\" vs \"adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope urgent, effective 2026-10-27 (scope differs from your reply)\"",
+    "line 23: \"DETAIL proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope all, effective 2026-10-27\" vs \"DETAIL proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope all, effective 2026-10-27\"",
+    "line 27: \"    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $3,083.34 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\" vs \"    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\"",
+    "line 30: \"    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $3,100.00 · per month after 2026-11-25 · until a cancellation fixes the end\" vs \"    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end\"",
+    "line 57: \"DETAIL adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope urgent, effective 2026-10-27 (scope differs from your reply)\" vs \"DETAIL adjusted: action 1: contract_teleradiology C1, op start, plan P1, windows weeknights, scope urgent, effective 2026-10-27 (scope differs from your reply)\"",
+    "line 61: \"    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $3,083.34 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\" vs \"    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $1,491.94 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads\"",
+    "line 64: \"    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $3,100.00 · per month after 2026-11-25 · until a cancellation fixes the end\" vs \"    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $1,500.00 · per month after 2026-11-25 · until a cancellation fixes the end\""
+   ]
+  },
+  {
+   "id": "S6",
+   "fact": "capacity loss (scheduled slots no longer staffed)",
+   "a": {
+    "label": "terminate Sam (E04), last day Oct 27",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2026-10-27"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E04"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "dc8af236a1925e77e680b73b84a9007a656271e2523041a847aa5ce197b3c48d",
+    "comparisonSha256": "f586142ebe26b4bbf4f10f5ab063df3c3033170a15a1651964b0b580bd1fe496",
+    "viewSha256": "2e5d3c9898328abc30d66f55d3238fa9983f8ace5b6bd4d2bc940037a452f6b8"
+   },
+   "b": {
+    "label": "terminate Sam (E04), last day Jan 26",
+    "scenario": "mini",
+    "seed": 52,
+    "at": "2026-10-13T07:00:00",
+    "proposal": [
+     {
+      "type": "terminate",
+      "employee": "E04",
+      "lastDay": "2027-01-26"
+     }
+    ],
+    "due": true,
+    "why": "due",
+    "alternatives": [
+     "proposal",
+     "no_action",
+     "adjusted"
+    ],
+    "refs": {
+     "E1": "E04"
+    },
+    "controlMessageSha256": "7144bd15f016c2417fb4937360f0c76638631c7cd0235cc852cde8d454e57c48",
+    "treatmentMessageSha256": "e024705133fa1c731912ee98098e4eacfa81cd3744de4662e3859058de10a7c7",
+    "comparisonSha256": "ddeae3d94844b14f71b306fc51c95bc7fa2a11ccf8bc1053ab4f620a8b1ab334",
+    "viewSha256": "fbd3bca1b4d39e172b40572154aa16a94a13838914fe0f987a2d8a6394c6f7ea"
+   },
+   "itemsWithDifferentValues": [
+    "adjusted/actions: \"action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\"",
+    "adjusted/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "adjusted/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $8,300.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $33,975.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "adjusted/facts/end_date.E1: \"Not employed from · E1: 2026-11-11\" vs \"Not employed from · E1: 2027-02-10\"",
+    "adjusted/facts/last_day.E1: \"Last day · E1: 2026-11-10\" vs \"Last day · E1: 2027-02-09\"",
+    "adjusted/facts/notice_days.E1: \"Notice · E1: 28 days\" vs \"Notice · E1: 119 days\"",
+    "adjusted/facts/severance_payday.E1: \"Severance payday · E1: 2026-11-13\" vs \"Severance payday · E1: 2027-02-19\"",
+    "adjusted/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2027-02-19 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "adjusted/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 36 · 2027-02-10 to 2027-02-10 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "adjusted/facts/slots_closed.CT: \"Scheduled slots no longer staffed · CT: 1,204\" vs \"Scheduled slots no longer staffed · CT: 21\"",
+    "adjusted/facts/slots_closed.XR: \"Scheduled slots no longer staffed · XR: 951\" vs \"Scheduled slots no longer staffed · XR: 15\"",
+    "proposal/actions: \"action 1: terminate E1, lastDay 2026-10-27\" vs \"action 1: terminate E1, lastDay 2027-01-26\"",
+    "proposal/estimates/contract_cost_no_longer_owed.E1: \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"Contract cost no longer owed · E1: $1,975.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "proposal/facts/contract_pay_to_last_day.E1: \"Contract pay to the last day · E1: $4,350.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"Contract pay to the last day · E1: $30,025.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "proposal/facts/end_date.E1: \"Not employed from · E1: 2026-10-28\" vs \"Not employed from · E1: 2027-01-27\"",
+    "proposal/facts/last_day.E1: \"Last day · E1: 2026-10-27\" vs \"Last day · E1: 2027-01-26\"",
+    "proposal/facts/notice_days.E1: \"Notice · E1: 14 days\" vs \"Notice · E1: 105 days\"",
+    "proposal/facts/severance_payday.E1: \"Severance payday · E1: 2026-10-30\" vs \"Severance payday · E1: 2027-02-05\"",
+    "proposal/facts/severance_recognized_now.E1: \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"Severance recognized now · E1: $3,950.00 · recognized now, paid 2027-02-05 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "proposal/facts/slots_closed: \"Scheduled slots no longer staffed, booked or not: 2,481 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"Scheduled slots no longer staffed, booked or not: 362 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "proposal/facts/slots_closed.CT: \"Scheduled slots no longer staffed · CT: 1,386\" vs \"Scheduled slots no longer staffed · CT: 203\"",
+    "proposal/facts/slots_closed.XR: \"Scheduled slots no longer staffed · XR: 1,095\" vs \"Scheduled slots no longer staffed · XR: 159\""
+   ],
+   "itemsShownForOneMemberOnly": [],
+   "controlLinesThatDiffer": [],
+   "treatmentLinesThatDiffer": [
+    "line 6: \"proposal (your proposal): action 1: terminate E1, lastDay 2026-10-27\" vs \"proposal (your proposal): action 1: terminate E1, lastDay 2027-01-26\"",
+    "line 10: \"adjusted: action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"adjusted: action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\"",
+    "line 22: \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2026-10-27\" vs \"DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-01-26\"",
+    "line 25: \"    - [last_day.E1] Last day · E1: 2026-10-27\" vs \"    - [last_day.E1] Last day · E1: 2027-01-26\"",
+    "line 26: \"    - [end_date.E1] Not employed from · E1: 2026-10-28\" vs \"    - [end_date.E1] Not employed from · E1: 2027-01-27\"",
+    "line 27: \"    - [notice_days.E1] Notice · E1: 14 days\" vs \"    - [notice_days.E1] Notice · E1: 105 days\"",
+    "line 28: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-10-30 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2027-02-05 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 29: \"    - [severance_payday.E1] Severance payday · E1: 2026-10-30\" vs \"    - [severance_payday.E1] Severance payday · E1: 2027-02-05\"",
+    "line 33: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $4,350.00 · today to 2026-10-27 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $30,025.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 34: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,481 · 2026-10-28 to 2027-02-10 (106 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 362 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 36: \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 1,095\" vs \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 159\"",
+    "line 37: \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 1,386\" vs \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 203\"",
+    "line 40: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-10-28 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\"",
+    "line 78: \"DETAIL adjusted: action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your reply)\" vs \"DETAIL adjusted: action 1: terminate E1, lastDay 2027-02-09 (lastDay differs from your reply)\"",
+    "line 81: \"    - [last_day.E1] Last day · E1: 2026-11-10\" vs \"    - [last_day.E1] Last day · E1: 2027-02-09\"",
+    "line 82: \"    - [end_date.E1] Not employed from · E1: 2026-11-11\" vs \"    - [end_date.E1] Not employed from · E1: 2027-02-10\"",
+    "line 83: \"    - [notice_days.E1] Notice · E1: 28 days\" vs \"    - [notice_days.E1] Notice · E1: 119 days\"",
+    "line 84: \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2026-11-13 · two contracted weeks with benefits, owed once the termination is committed\" vs \"    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2027-02-19 · two contracted weeks with benefits, owed once the termination is committed\"",
+    "line 85: \"    - [severance_payday.E1] Severance payday · E1: 2026-11-13\" vs \"    - [severance_payday.E1] Severance payday · E1: 2027-02-19\"",
+    "line 89: \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $8,300.00 · today to 2026-11-10 · minimum: the contract guarantee with benefits on the days still employed\" vs \"    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $33,975.00 · today to 2027-02-09 · minimum: the contract guarantee with benefits on the days still employed\"",
+    "line 90: \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 2,155 · 2026-11-11 to 2027-02-10 (92 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\" vs \"    - [slots_closed] Scheduled slots no longer staffed, booked or not: 36 · 2027-02-10 to 2027-02-10 (1 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue\"",
+    "line 92: \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 951\" vs \"    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 15\"",
+    "line 93: \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 1,204\" vs \"    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 21\"",
+    "line 96: \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2026-11-11 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\" vs \"    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2027-02-10 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\""
+   ]
+  }
+ ]
+}

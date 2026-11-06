@@ -173,6 +173,23 @@ A saved session records the applied batches. Reopening it
 (`-load`, `dreamteam replay`, `dreamteam verify`) replays them and checks
 every digest.
 
+### 3.3 The alternatives extension (V0.13d, opt-in)
+
+`dreamteam agent --stdio -alternatives` also serves two read-only
+operations for the V0.13d experiment workflow
+(`agents/llm/llm_agent_alternatives.py`; `docs/v13d/WORKFLOW.md`). Without
+`-alternatives` they are unknown ops, as before. They are not listed by
+`hello`, so `hello` and every listed op answer exactly as before, with or
+without the flag, and every recorded transcript replays unchanged.
+
+| Op | Arguments | Result |
+|---|---|---|
+| `alternatives.turn` | `arm` (`control` or `treatment`), `actions` (the reply's actions) | `dreamteam.alternatives-turn/v1`: whether the final-decision turn is due and why, its `message` and `inspect` texts (the only texts a workflow may send), the replies it allows, and a `record` that is never sent |
+| `alternatives.decide` | `arm`, `actions` (the same), `inspected` (IDs already answered), `round` (inspect answers already sent), `content` (the model's reply text) | `dreamteam.alternatives-reply/v1`: the reply as read, and either the fixed text to send next (an inspect answer, the once-only notice, the retry text) or the classified outcome (`dreamteam.alternatives-outcome/v1`) |
+
+The handler checks the session's digests unchanged around every extension
+op; a failure is `invalid_args`, with the reason.
+
 ## 4. The action catalog
 
 `actions` returns, for every action type:
