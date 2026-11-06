@@ -1,0 +1,28 @@
+DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-01-26
+  Validation: accepted
+  Facts:
+    - [last_day.E1] Last day · E1: 2027-01-26
+    - [end_date.E1] Not employed from · E1: 2027-01-27
+    - [notice_days.E1] Notice · E1: 105 days
+    - [severance_recognized_now.E1] Severance recognized now · E1: $3,950.00 · recognized now, paid 2027-02-05 · two contracted weeks with benefits, owed once the termination is committed
+    - [severance_payday.E1] Severance payday · E1: 2027-02-05
+    - [voided_rosters.E1] Pending roster versions voided · E1: 0
+    - [voided_extensions.E1] Approved extensions voided · E1: 0
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $30,025.00 · today to 2027-01-26 · minimum: the contract guarantee with benefits on the days still employed
+    - [slots_closed] Scheduled slots no longer staffed, booked or not: 362 · 2027-01-27 to 2027-02-10 (15 days in the booking horizon) · appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue
+    - [slots_closed_booked_now] Of these, booked now: 0
+    - [slots_closed.XR] Scheduled slots no longer staffed · XR: 159
+    - [slots_closed.CT] Scheduled slots no longer staffed · CT: 203
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0
+  Estimates:
+    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,975.00 · per full week from 2027-01-27 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled
+  Obligations that continue:
+    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - [payables] Accounts payable: $2,854.82
+  Reversibility: irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee
+  Not known before deciding:
+    - Slots beyond the booking horizon: they do not exist yet and are not counted
+    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine

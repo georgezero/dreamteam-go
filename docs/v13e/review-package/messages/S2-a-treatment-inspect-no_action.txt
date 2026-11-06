@@ -1,0 +1,24 @@
+DETAIL no_action: no staffing action (no batch)
+  Validation: accepted (nothing to apply)
+  Facts:
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [slots_closed] Scheduled slots no longer staffed, booked or not: 0 · no batch is applied, so no scheduled slot loses its staffing
+    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized
+    - [employment.E1] Employment stage · E1: active
+    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400
+    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400
+    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400
+    - [pending_rosters.E1] Pending roster versions · E1: 0
+    - [approved_extensions.E1] Approved extensions · E1: 0
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 174
+  Estimates:
+    - none
+  Obligations that continue:
+    - [severance_if_terminated_later.E1] Severance if terminated later · E1: $3,600.00 · owed only on a later termination · two contracted weeks with benefits
+    - [weekly_guarantee.E1] Contract guarantee continues · E1: $1,800.00 · per full week, until a later decision · the weekly contract guarantee with benefits, owed whether or not the time is worked
+    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30
+    - [payables] Accounts payable: $26,088.71
+  Reversibility: nothing to reverse · no batch is applied
+  Not known before deciding:
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine

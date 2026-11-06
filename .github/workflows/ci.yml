@@ -438,6 +438,13 @@ jobs:
           $P $D check --binary ./dt --protocol $V/protocol-draft.json --contexts $V/contexts --replays .
           $P analysis/alternatives/v13d_fidelity.py fidelity --binary ./dt --contexts $V/contexts --replays . --out v13d-fidelity
           for f in fidelity.json fidelity.md; do cmp v13d-fidelity/$f $V/fidelity/$f; cp v13d-fidelity/$f out/v13d-$f; done
+      - name: Presentation review package and candidate identities (V0.13e)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -I -B analysis/alternatives/v13e_package.py --check
+          python3 -I -B analysis/alternatives/lock_check.py
+          cp docs/v13e/review-package/SHA256SUMS out/v13e-review-package-SHA256SUMS
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
         # model replies and a scripted engine with the real engine's preview

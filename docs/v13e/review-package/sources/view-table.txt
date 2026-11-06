@@ -1,0 +1,89 @@
+dreamteam.alternatives-view/v1
+
+Items:
+approved_extensions | label "Approved extensions · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+booked_ahead | label "Appointments booked from tomorrow within the booking horizon" | ref "" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+contract_cost_no_longer_owed | label "Contract cost no longer owed · %s" | ref "employee" | unit cents | money "Contract cost no longer owed" forecast true | show "" | drop "" | list false | enum [] | basis "estimate: the contract guarantee with benefits; overtime and hold-over not modeled" | basisNoWhen "" | forms "per full week from {D}" | empty false
+contract_minutes | label "Contracted weekly minutes · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+contract_pay_to_last_day | label "Contract pay to the last day · %s" | ref "employee" | unit cents | money "Contract pay to the last day" forecast false | show "" | drop "" | list false | enum [] | basis "minimum: the contract guarantee with benefits on the days still employed" | basisNoWhen "" | forms "today to {D}" | empty false
+displaced_bookings | label "Booked appointments displaced (whole batch)" | ref "" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "appointments already booked that would lose their staffing" | basisNoWhen "" | forms | empty false
+displaced_replacement | label "Displaced bookings with a feasible replacement by capacity" | ref "" | unit cents | money "Displaced bookings" forecast true | show "count_of" | drop "" | list false | enum [] | basis "whether each patient accepts a replacement is decided only at commit" | basisNoWhen "" | forms "at commit" | empty false
+earliest_exit | label "Earliest lawful exit · %s" | ref "hire" | unit cents | money "Earliest lawful exit" forecast false | show "" | drop "" | list false | enum [] | basis "the contract guarantee from the start to the earliest last day, plus two contracted weeks' severance with benefits" | basisNoWhen "" | forms "last day {D}" | empty false
+employment | label "Employment stage · %s" | ref "employee" | unit text | money "" forecast false | show "" | drop "" | list false | enum [recruiting onboarding active notice terminated] | basis "" | basisNoWhen "" | forms | empty false
+end_date | label "Not employed from · %s" | ref "employee" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+extensions_kept | label "Approved extensions kept · %s" | ref "employee" | unit cents | money "Approved extensions kept" forecast true | show "" | drop "" | list false | enum [] | basis "estimate at the base rate" | basisNoWhen "" | forms "from {D}" "from {D} until {D}" | empty false
+funding.commitment | label "Commitment tested against funding" | ref "" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+funding.funded | label "Funding test passed" | ref "" | unit text | money "" forecast false | show "" | drop "" | list false | enum [true false] | basis "" | basisNoWhen "" | forms | empty false
+funding.headroom | label "Funding headroom" | ref "" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+last_day | label "Last day · %s" | ref "employee" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+next_payroll | label "Payroll accrued, next payday" | ref "" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms "paid {D}" | empty false
+notice_days | label "Notice · %s" | ref "employee" | unit days | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+payables | label "Accounts payable" | ref "" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+pending_rosters | label "Pending roster versions · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+productive_date | label "Independent work from · %s" | ref "hire" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+rate | label "Hourly rate · %s" | ref "hire" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+recruiting_fee | label "Recruiting fee · %s" | ref "hire" | unit cents | money "Recruiting fee" forecast false | show "" | drop "" | list false | enum [] | basis "fixed offer table; not refundable" | basisNoWhen "" | forms "recognized now, paid {D}" | empty false
+remote_read_fees | label "Remote read fees at trailing demand · %s" | ref "new_contract" | unit cents | money "Remote read fees at trailing demand" forecast true | show "" | drop "" | list false | enum [] | basis "an upper bound from studies that waited unread in these windows and scope recently" | basisNoWhen "" | forms "per {N} days" | empty false
+remote_read_fees_existing | label "Remote read fees at trailing demand · %s" | ref "contract" | unit cents | money "Remote read fees at trailing demand" forecast true | show "" | drop "" | list false | enum [] | basis "an upper bound from studies that waited unread in these windows and scope recently" | basisNoWhen "" | forms "per {N} days" | empty false
+retainer_run_rate | label "Retainer run rate while open-ended · %s" | ref "new_contract" | unit cents | money "Retainer run rate while open-ended" forecast true | show "" | drop "" | list false | enum [] | basis "until a cancellation fixes the end" | basisNoWhen "" | forms "per month after {D}" | empty false
+retainer_to_earliest_end | label "Teleradiology retainer to the earliest end · %s" | ref "new_contract" | unit cents | money "Teleradiology retainer to the earliest end" forecast false | show "" | drop "" | list false | enum [] | basis "contract: minimum term and notice, even with no reads" | basisNoWhen "" | forms "accrued daily {D} to {D}, paid on the 1st" | empty false
+retainer_to_end | label "Teleradiology retainer to the end · %s" | ref "contract" | unit cents | money "Teleradiology retainer to the end" forecast false | show "" | drop "" | list false | enum [] | basis "contract: the fixed end" | basisNoWhen "" | forms "accrued daily to {D}, paid on the 1st" | empty false
+roster_effective | label "Roster effective · %s" | ref "employee" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+roster_minutes_week_a | label "Rostered minutes, week A · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+roster_minutes_week_b | label "Rostered minutes, week B · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+salary_allocation_change | label "Salary allocation change · %s" | ref "employee" | unit cents | money "Salary allocation change" forecast false | show "" | drop "" | list false | enum [] | basis "salary share with benefits, accrued daily" | basisNoWhen "" | forms "from {D} until {D}" "from {D} until changed (14 days' notice)" | empty false
+severance_if_terminated_later | label "Severance if terminated later · %s" | ref "employee" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "two contracted weeks with benefits" | basisNoWhen "" | forms "owed only on a later termination" | empty false
+severance_line | label "" | ref "employee" | unit cents | money "Severance" forecast false | show "" | drop "severance_recognized_now" | list false | enum [] | basis "" | basisNoWhen "" | forms "recognized now, paid {D}" | empty false
+severance_payday | label "Severance payday · %s" | ref "employee" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+severance_recognized_now | label "Severance recognized now · %s" | ref "employee" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "two contracted weeks with benefits, owed once the termination is committed" | basisNoWhen "no termination is committed, so none is recognized" | forms "recognized now, paid {D}" | empty true
+site_reading_capacity | label "Site reading blocks a week, change · %s" | ref "employee" | unit cents | money "Site reading capacity" forecast true | show "minutes" | drop "" | list false | enum [] | basis "estimate, in minutes; reports gained depend on the worklist and read times" | basisNoWhen "" | forms "from {D}" | empty false
+slots_closed | label "Scheduled slots no longer staffed, booked or not" | ref "" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue" | basisNoWhen "no batch is applied, so no scheduled slot loses its staffing" | forms "no day in the booking horizon is affected" "{D} to {D} ({N} days in the booking horizon)" | empty true
+slots_closed. | label "Scheduled slots no longer staffed · %s" | ref "modality" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+slots_closed_booked_now | label "Of these, booked now" | ref "" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+start_date | label "Start · %s" | ref "hire" | unit date | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+time_not_rostered | label "Contracted time not rostered · %s" | ref "employee" | unit cents | money "Contracted time not rostered" forecast true | show "" | drop "" | list false | enum [] | basis "estimate: part of the guarantee above, not extra" | basisNoWhen "" | forms "per week from {D}" "per week from {D} until {D}" | empty false
+voided_extensions | label "Approved extensions voided · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list false | enum [] | basis "" | basisNoWhen "" | forms | empty false
+voided_rosters | label "Pending roster versions voided · %s" | ref "employee" | unit count | money "" forecast false | show "" | drop "" | list true | enum [] | basis "" | basisNoWhen "" | forms | empty false
+weekly_guarantee | label "Contract guarantee continues · %s" | ref "employee" | unit cents | money "" forecast false | show "" | drop "" | list false | enum [] | basis "the weekly contract guarantee with benefits, owed whether or not the time is worked" | basisNoWhen "" | forms "per full week, until a later decision" | empty false
+weekly_guarantee_hire | label "Contract guarantee per full week · %s" | ref "hire" | unit cents | money "Contract guarantee per full week" forecast false | show "" | drop "" | list false | enum [] | basis "with benefits; worked pay replaces it" | basisNoWhen "" | forms "from {D}" | empty false
+weekly_guarantee_roster | label "Contract guarantee per full week · %s" | ref "employee" | unit cents | money "Contract guarantee per full week" forecast false | show "" | drop "" | list false | enum [] | basis "with benefits, paid whatever is rostered" | basisNoWhen "" | forms "unchanged by the roster" | empty false
+
+Basis forms:
+"{N} appointments lose coverage; {N} have a feasible replacement by capacity. Whether each patient accepts is decided only at commit; lost exams lose their revenue"
+"estimate: {S} min of site reading blocks a week (mean of rota weeks A and B) inside the same shifts; reports gained depend on the worklist and read times; supervision unchanged"
+
+Not available:
+demand_for_closed_slots | "Demand for the closed slots" | "whether a closed slot would have been booked depends on future orders, which are not known before deciding"
+employment. | "Employment · %s" | "the employee is not in the current observation"
+future_orders_and_revenue | "Future orders and revenue" | "they depend on future demand and are not projected for the decision"
+preview | "Engine preview" | "operations actions have no engine preview; they apply one by one"
+replacement_acceptance | "Replacement acceptance" | "whether each displaced patient accepts a replacement is decided at commit and is not observable before"
+slots_beyond_horizon | "Slots beyond the booking horizon" | "they do not exist yet and are not counted"
+slots_closed | "Scheduled slots no longer staffed" | "the engine does not report it for this batch"
+unmodeled | "Not modeled" | "staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine"
+weekly_guarantee. | "Contract guarantee · %s" | "the engine reports it only in the proposal's preview, which did not give it"
+
+Reversibility:
+applies_now | "applies now · operations changes apply at once; a later change can set them again"
+irreversible_contract | "irreversible · a contract start binds its minimum term"
+irreversible_hire | "irreversible · the recruiting fee is not refundable; ending the contract needs notice and severance"
+irreversible_termination | "irreversible · a committed termination's notice cannot be moved or withdrawn, and no action re-hires the employee"
+none | "nothing to reverse · no batch is applied"
+withdrawable | "withdrawable before its effective date · a pending version can be removed, or a contract cancelled under its terms"
+
+References:
+employee | "the employee in action 1 of your reply"
+hire | "the hire request in action 1 of your reply"
+new_contract | "the new teleradiology contract action 1 of your reply would start"
+contract | "the teleradiology contract in action 1 of your reply"
+plan | "the teleradiology plan in action 1 of your reply"
+
+Vocabularies:
+sources [proposal no_action leave_one_out adjustment]
+modalities [XR US CT MR]
+employment [recruiting onboarding active notice terminated]
+roles [front_desk technologist radiologist ops_manager]
+windows [weeknights saturday sunday]
+scopes [urgent all]
+roster ops [set remove]
+tele ops [start cancel]

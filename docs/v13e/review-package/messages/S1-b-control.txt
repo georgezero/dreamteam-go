@@ -1,0 +1,7 @@
+FINAL DECISION at 2026-10-27T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
+
+Reply with one JSON object:
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
+- {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
+- {"decision": "abandon", "reason": TEXT} submits nothing.
+Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.

@@ -914,3 +914,28 @@ The V0.4b development matrix (`docs/benchmark/v04b-dev/`) also showed:
 * **Development comparisons are not confirmatory performance claims.**
   Five seeds, fixed in advance and now examined, support no claim, and
   the next comparison should use fresh seeds chosen prospectively.
+
+
+## V0.13e: presentation review preparation (0.13.0-dev.2, engine unchanged)
+
+HUMAN REVIEW PENDING. No reviewer, identity or findings exist. No remediation
+or re-review occurs until a human review exists. The rendered, checksum-pinned
+[review package](v13e/review-package/README.md) includes both arms and all
+inspect details, with record-only headers separated. The owner accepted
+V0.13d and approved F7, F3, N1 and the preserved budget. Engineering boundary
+tests supplement the existing implementation without changing it.
+
+LOCK CANDIDATE - NOT LOCKED - awaiting human review
+
+[Candidate identities and verifier](v13e/PROTOCOL_LOCK_CANDIDATE.md) preserve
+262 scheduled draws, 802 max calls, four hours, nine historical contexts,
+six sensitivity pairs and two arms. Actual submitted batches determine the
+primary final action; delivered-detail citations are secondary. Pairs do not
+isolate single facts. A stale descriptive field in frozen evidence is
+[recorded separately](v13e/REVIEW_RESPONSE.md), not silently corrected.
+
+Engine version remains 0.13.0-dev.2; earlier evidence stays byte-identical.
+Live inference NO GO, requiring separate owner authorization. No protocol-lock
+commit, tag or release. See [run procedure](v13e/RUN_PROCEDURE.md),
+[partial-run procedure](v13e/PARTIAL_RUN_PROCEDURE.md), and
+[operational incident report](audits/v0.13e-operational-incident.md).

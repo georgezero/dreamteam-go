@@ -1,0 +1,16 @@
+DETAIL proposal (your proposal): action 1: contract_teleradiology C1, op start, plan P1, windows weeknights+saturday+sunday, scope all, effective 2026-10-27
+  Validation: accepted
+  Facts:
+    - [displaced_bookings] Booked appointments displaced (whole batch): 0 · appointments already booked that would lose their staffing
+    - [retainer_to_earliest_end.C1] Teleradiology retainer to the earliest end · C1: $3,083.34 · accrued daily 2026-10-27 to 2026-11-25, paid on the 1st · contract: minimum term and notice, even with no reads
+    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 0
+  Estimates:
+    - [retainer_run_rate.C1] Retainer run rate while open-ended · C1: $3,100.00 · per month after 2026-11-25 · until a cancellation fixes the end
+    - [remote_read_fees.C1] Remote read fees at trailing demand · C1: $0.00 · per 28 days · an upper bound from studies that waited unread in these windows and scope recently
+  Obligations that continue:
+    - [next_payroll] Payroll accrued, next payday: $2,133.55 · paid 2026-10-16
+    - [payables] Accounts payable: $2,854.82
+  Reversibility: irreversible · a contract start binds its minimum term
+  Not known before deciding:
+    - Future orders and revenue: they depend on future demand and are not projected for the decision
+    - Not modeled: staff morale, workload, resignation, clinical outcomes and reputation are not modeled by the engine
