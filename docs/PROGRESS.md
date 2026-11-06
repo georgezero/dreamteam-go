@@ -7,6 +7,75 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13e — rendered presentation review and candidate preparation (0.13.0-dev.2, engine unchanged)
+
+The owner accepted V0.13d and approved F7, F3, N1, 262 scheduled draws,
+802 max calls and a four-hour limit. Human presentation review remains the
+substantive approval dependency. Live inference NO GO. V0.13.0 unreleased.
+
+**What was built:**
+* Self-contained [rendered review package](v13e/review-package/README.md):
+  twelve members, both arms and every inspect detail, with record-only
+  headers isolated. All text has SHA-256 identities; generation is
+  reproducible and checked byte for byte in CI.
+* Blank twelve-item questionnaire; HUMAN REVIEW PENDING. No reviewer,
+  identity, findings, remediation or re-review exists.
+* F7/F3 boundary tests supplement existing implementation. Submitted
+  batches determine seven mutually exclusive categories; choosing,
+  validation, execution and verified citations stay separate. Citations
+  are secondary process measures; a changed action is not an improvement.
+* Candidate file manifest and committed-tree verifier, run/partial-run
+  procedures, limitations and read-only incident investigation.
+* LOCK CANDIDATE - NOT LOCKED - awaiting human review.
+  No protocol-lock commit. No live model contacted.
+
+**Engineering observations:** the frozen draft's descriptive estimand field
+still names process labels; the implementation and approved scale use actual
+final actions. A stale frozen limitations paragraph also predates the N1
+fix. Both are recorded in v13e/REVIEW_RESPONSE.md; neither was silently
+changed. The six pairs compare contexts, not isolated single facts.
+
+**The engine version string is unchanged at 0.13.0-dev.2.** Bumping it
+would alter the embedded engine identity in V0.13b–V0.13d evidence.
+All earlier evidence is byte-identical, verified against fb8cf3a by Git
+trees, individual hashes and the candidate checker.
+
+**Quality gates** (engineering checks only; local logs under
+~/dt-audit-kept/v013e/):
+
+| Where | Gate | Result / log |
+|---|---|---|
+| Pi | Alternatives, presentation, information boundary, F7/F3, selection | PASS; alternatives.log |
+| Pi | Session branch tests | PASS; session-branch.log |
+| Pi | Python driver tests (isolated mode) | 15 tests, OK, 5 engine tests deferred to CI; python-alternatives.log |
+| Pi | Package byte reproduction | PASS; package.log |
+| Pi | Committed candidate hashes, frozen trees | PASS, 1,964 hashes / 10 trees at first preparation commit; candidate-check.log |
+| horo | Prior gate script reuse | BLOCKED, supplied path absent; horo-gate-blocker.log |
+| horo | Dedicated race (90m timeout), five cross-builds, vet, format | Started with inspected replacement script; logs/race.log, cross-build.log, vet.log, format.log |
+| CI | Full Go suite, golden, historical replay, benchmark verify/reproduce, frozen evidence, V0.12b check/analysis, V0.13d fidelity with historical replays, package check, cross-platform comparison | Required on pushed commit; CI job logs |
+
+V0.13d committed fidelity reference: 65 cases, zero failed checks. Its
+reproduction including historical replays is required in CI; the Pi's
+pure tests alone do not establish that reproduction. The historical nine
+contexts, six sensitivity pairs, two arms, 262 draws, 802 calls and
+14,400-second budget are unchanged and verified by offline protocol/schedule
+tests. The run parser refusal is unit-tested; its live implementation is absent.
+
+**Not run:** live inference, clinical suites, historical live reruns, reserved
+or holdout seeds. No protocol approval or human review was substituted.
+
+**Not changed:** simulator, session, accounting, action schema, scoring,
+validation, preview, pinned templates, view table, earlier workflows,
+recordings, evidence or golden references. No tag or release.
+
+Incident investigation: no matching deletion command in available histories,
+no matching root-log writer/reference within the scoped scan, no matching
+archive entry. The prior run directory is absent; losses remain unknown.
+Dedicated run directories and deletion of only explicitly named temporary
+artifacts are required. See docs/audits/v0.13e-operational-incident.md.
+
+---
+
 ## V0.13d — controlled alternatives workflow and experiment preparation (0.13.0-dev.2, engine unchanged)
 
 On 2026-11-05 the owner accepted V0.13c, with conditions, as a

@@ -20,8 +20,10 @@ Replay checks consistency, not archive authenticity. The wall-clock guard
 acts before requests and does not bound a blocked engine operation.
 
 The supplied prior gate script and prior run directory are absent on horo.
-The specified reused heavy gates, including race, cannot be run through that
-script. CI covers its declared gates; do not infer a race pass from CI.
+The specified script cannot be reused. A new, inspected script runs the race,
+five cross-builds, vet and format directly in the dedicated V0.13e directory.
+CI covers its declared replay and fidelity gates; do not infer a race pass
+from CI.
 Incident investigation is scoped and read-only; absent history matches and
 backup entries do not establish that no files were deleted. See the incident
 report for unknowns and scan limits.
