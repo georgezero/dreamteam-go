@@ -50,8 +50,9 @@ trees, individual hashes and the candidate checker.
 | Pi | Python driver tests (isolated mode) | 15 tests, OK, 5 engine tests deferred to CI; python-alternatives.log |
 | Pi | Package byte reproduction | PASS; package.log |
 | Pi | Committed candidate hashes, frozen trees | PASS, 1,964 hashes / 10 trees at first preparation commit; candidate-check.log |
-| horo | Prior gate script reuse | BLOCKED, supplied path absent; horo-gate-blocker.log |
+| horo / Pi retained copy | Prior gate script | Remote path absent; local retained copy inspected and adapted; horo-gate-blocker.log / replay-gates.sh |
 | horo | Dedicated race (90m timeout), five cross-builds, vet, format | Inspected replacement script launched on the preparation source tree; completion recorded in retained race.status / gates.status and race.log, cross-build.log, vet.log, format.log |
+| horo | Golden, historical replay, benchmark verify/reproduce, frozen evidence, V0.12b check/analysis, V0.13d fidelity with historical replays, Python suites | Adapted retained script after race/build gate; logs/replay-gates.log and replay-gates.status |
 | CI | Full Go suite, golden, historical replay, benchmark verify/reproduce, frozen evidence, V0.12b check/analysis, V0.13d fidelity with historical replays, package check, cross-platform comparison | Run by CI on this commit; CI job logs |
 
 V0.13d committed fidelity reference: 65 cases, zero failed checks. Its
