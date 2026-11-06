@@ -8,8 +8,8 @@ is complete and the owner accepts it.
 
 | Text | File | SHA-256 |
 |---|---|---|
-| The template: both arms' shared head and foot, the treatment's comparison and detail, the inspect and retry answers | `internal/alternatives/text/presentation-v2.tmpl` | `PresentationV2Sha256` (in `turn.go`; see PROTOCOL_DRAFT.md §2) |
-| The closed tables: every item's label, forms and basis; every unavailable item; every reversibility text; every reference description; the vocabularies | `ViewTableText()` in `view.go`, committed as `docs/benchmark/v13d-dev/presentation/view-table.txt` | `ViewTableSha256` |
+| The template: both arms' shared head and foot, the treatment's comparison and detail, the inspect and retry answers | `internal/alternatives/text/presentation-v2.tmpl` | `257b4377c2d7866f19525e9623f0c268ce036bec56bffe74988a240365002877` (`PresentationV2Sha256`) |
+| The closed tables: every item's label, forms and basis; every unavailable item; every reversibility text; every reference description; the vocabularies | `ViewTableText()` in `view.go`, committed as `docs/benchmark/v13d-dev/presentation/view-table.txt` | `ce7f0e238c2d8cf71bf87cf720f12b56bd667035971308ae9abae7399d66aba0` (`ViewTableSha256`) |
 | The arms | `dreamteam.alternatives-arms/v2` | |
 | The view | `dreamteam.alternatives-view/v1` (INFORMATION_BOUNDARY.md) | |
 
@@ -29,17 +29,19 @@ foot        (both arms, the same text apart from the IDs a reply may select)
 actions in your reply passed validation: the simulator would accept them
 now. Nothing has been applied yet."
 
-**Foot:** the reply schema, the same in both arms:
-* `{"decision": "select", "id": ID, "reason": TEXT}`, with the IDs listed;
+**Foot:** the reply schema, the same text in both arms, byte for byte:
+* `{"decision": "select", "id": ID, "reason": TEXT}`: the staffing actions
+  of the listed alternative with that ID, with "Your proposal's ID is
+  "proposal"";
 * `{"decision": "revise", "actions": [...], "reason": TEXT}`;
 * `{"decision": "abandon", "reason": TEXT}`;
 * when the reply has operations actions, one sentence on how each decision
   treats them (D10);
 * an optional `"cite"` of up to three items, with the values as shown.
 
-The IDs line is the only line of the foot that differs between the arms.
-Control lists `proposal (your proposal)`; treatment lists every listed
-alternative. That list is part of the alternatives information.
+The foot lists no other ID (review N1): only the treatment's comparison
+lists the alternatives, and that list is part of the alternatives
+information.
 
 **Comparison** (treatment only): the alternatives in the fixed order, each
 reference defined by the reply's action that names it, each alternative's
@@ -58,8 +60,8 @@ details to inspect"), the once-only notice, and the retry text. All are in
 the template.
 
 `TestTurnSymmetry` checks, at every due member: the heads are equal; the
-treatment is the control with the comparison inserted; and the feet differ
-in the IDs line only.
+treatment is the control with the comparison inserted; and the feet are
+equal byte for byte.
 
 ## 3. Changes from presentation v1, and why
 
@@ -72,7 +74,7 @@ in the IDs line only.
 | A termination's severance is shown once; the repeated money line is checked equal and not shown again | P2 |
 | The displaced-bookings line is shown as "K of N displaced bookings have a feasible replacement by capacity", not as a $0.00 estimate | P3 |
 | Bases no longer name engine internals (`already_terminating:`, `observe.staff.severanceCents / 2`, `bookedAhead`) | P4 |
-| Validation messages are not shown; refusals show the engine's code and the action | they embed names |
+| Validation codes and messages are not shown; a refusal shows the action's place | messages embed names; codes are an open set (review F1) |
 | Counts have thousands separators (2,481) | readability |
 | The no-action reversibility reads "nothing to reverse · no batch is applied" | the v1 sentence mentioned a termination at non-termination points |
 | The reply schema is one JSON object with a `decision` field | the same schema in both arms; replaces v1's `select:<id>` wording |

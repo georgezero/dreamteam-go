@@ -7,7 +7,7 @@ with the V0.8c and V0.9c replays, and required identical in CI.
 needs a model's correction, the reply is V0.12b Stage B's recorded live
 reply at that point (arm A, draw 1), served as a script.
 
-**Result: 59 cases, 0 failed checks.**
+**Result: 65 cases, 0 failed checks.**
 
 ## 1. What every case checks
 
@@ -23,7 +23,7 @@ Every case runs one draw through the driver's own `run_draw`, then:
 * **control and treatment message fidelity:** the turn the workflow sent is
   the one a fresh engine makes for the same reply, its hash is the
   record's, and the other arm's turn has the same head and the same foot
-  apart from the IDs line; control shows no alternatives;
+  byte for byte; control shows no alternatives;
 * **inspect fidelity:** the inspect answer is the turn's details, in the
   order asked;
 * **the result, the model calls, the retries and the batches** are the
@@ -60,7 +60,19 @@ Also: a second inspect request counts as a failure; an inspect in control
 gets the fixed answer; every one of the 21 protocol contexts starts in both
 arms with the same state and turn test, the turn due exactly where V0.13c
 declared; and a complete mock run (S1 and S6 members, both arms, both
-models: 18 draws) is analysed.
+models: 18 draws) is analysed. At the two refused historical points no
+turn exists before a correction, so their probe reads "proposal refused:
+no turn before a correction".
+
+**Added by the technical review** (`docs/audits/v0.13d-review-response.md`):
+
+| Review finding | Case |
+|---|---|
+| F4 | duplicate shift extensions in a revision: refused by the protocol's batch validation (`invalid_alternative`), nothing executed |
+| F6 | an interrupted draw replays with its halt; an edited halt cause, an edited served model and edited usage are each refused |
+| F8 | the partial experiment gives no arm differences and no pair estimates |
+| F9 | five consecutive transport failures stop the run before a sixth call (PARTIAL after 5 calls) |
+| N1 | every due case checks that the two arms' feet are equal byte for byte |
 
 ## 3. Go-level fidelity
 

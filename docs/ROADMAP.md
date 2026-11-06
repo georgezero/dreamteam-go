@@ -24,7 +24,7 @@ Each version is a playable build. Nothing ships as "framework only".
 | **V0.10** (released, `v0.10.0`: inference repeatability and controlled decision experiments, V0.10a–V0.10c, by the owner's release decision 2026-11-01) | A methodology and measurement release: live inference repeatability, a versioned shared-prefix method (v1–v3) with model-free exact replay, two prospective decision experiments (preview against neutral, then neutral, validation and preview), and an inventory of what validate and preview tell an agent (§7d). No demonstrated financial or operational benefit of the preview; not clinical validation | V0.9 |
 | **V0.11** (released, `v0.11.0`: the validation-first agent workflow, V0.11a–V0.11b, by the owner's release decision 2026-11-02) | Agent workflow and evaluation capabilities: llm-agent 5, validation first with exact refusal feedback and bounded retries; `validation-first` the default and the selective preview opt-in (`--workflow`); complete v5 recording and model-free replay; a prospective decision-level evaluation against llm-agent 3 (§7e). No claim of improved financial decision quality; not clinical validation | V0.10 |
 | **V0.12** (released, `v0.12.0`: high-impact action acknowledgment and reproducible decision evidence, V0.12a–V0.12b, by the owner's release decision 2026-11-04) | Decision safeguards: llm-agent 6, engine-backed acknowledgment of high-impact actions, an explicitly selected experimental agent (llm-agent 5's validation-first stays the default); an independent safeguard audit; a prospective live evaluation against llm-agent 5's preview (420 draws): every acknowledgment accurate, none changed a high-impact action (§7f). No decision-quality benefit established; not clinical validation | V0.11 |
-| **V0.13** (in progress: V0.13a and V0.13b accepted; V0.13c preparation done, awaiting review; protocol not locked) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
+| **V0.13** (in progress: V0.13a, V0.13b and V0.13c accepted; V0.13d workflow and experiment preparation done, awaiting review; protocol not locked) | Decision safeguards beyond acknowledgment: the independent human evidence review; explicit comparison of engine-derived consequences of alternatives before irreversible actions; financial decision-quality evaluation; multi-day prospective testing only after the safeguards are reviewed (§7g) | V0.12 |
 | **Future** (deferred) | Growth and expansion (§6, formerly V0.5); financial management (§5, formerly V0.4) | — |
 
 **Owner decision 2026-10-27:** V0.5 is re-slotted from growth to LLM agents,
@@ -1459,8 +1459,9 @@ reconsider an action. Nothing here is approved or built.
 |---|---|---|
 | V0.13a | Alternative-action inventory and design | **accepted** (0.13.0-dev.1, `1c75c93`) |
 | V0.13b | Deterministic alternative-comparison implementation | **accepted** (0.13.0-dev.2, `701d83e`) |
-| V0.13c | Controlled decision-level evaluation: protocol preparation | **done** (0.13.0-dev.2), awaiting owner review; protocol not locked; human presentation review pending |
-| V0.13d | The agent workflow, driver and lock; then, only on authorization, the run | proposed |
+| V0.13c | Controlled decision-level evaluation: protocol preparation | **accepted** as a protocol-design milestone (0.13.0-dev.2, `9a4808d`) |
+| V0.13d | Controlled alternatives workflow and experiment preparation | **done** (0.13.0-dev.2), awaiting owner review; protocol not locked; human presentation review pending |
+| V0.13e | The lock; then, only on the owner's authorization, the run | proposed |
 | V0.13.0 | Release | pending |
 
 **V0.13a (done, 0.13.0-dev.1):** design and inventory only.
@@ -1525,6 +1526,19 @@ inference.
   human presentation review is pending.
 * **The draft protocol:** not locked. It waits on the human review, the
   owner's decisions D1–D10 and V0.13d's workflow and driver.
+
+**V0.13d (done, 0.13.0-dev.2):** the controlled alternatives workflow and
+experiment preparation; no live inference.
+* Documents: `docs/v13d/` and the V0.13d section of
+  `docs/V0.13_MANAGEMENT_ALTERNATIVES.md`.
+* **The owner's decisions:** D7 neutral identifiers and a typed
+  presentation; D8 symmetric wording; D9 the estimand; D10 operations
+  batches preserved.
+* **Built:** the typed view and presentation v2; the turn and the reply as
+  opt-in read-only protocol operations; the workflow; the driver, its
+  scripted fidelity evidence and the revised draft protocol (262 draws).
+* **Pending:** the human presentation review; the owner's approval of the
+  budget; then a lock (V0.13e). A run needs the owner's authorization.
 
 ## 8. Testing strategy (all versions)
 

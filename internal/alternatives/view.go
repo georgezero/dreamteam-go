@@ -92,11 +92,11 @@ type ViewItem struct {
 	List   []string `json:"list,omitempty"` // dates
 }
 
-// ViewRefusal is a refused action: its place in the alternative and the
-// engine's code (the message is never shown).
+// ViewRefusal is a refused action: its place in the reply. Neither the
+// engine's code nor its message is shown: the code is an open set of
+// strings, and a refused alternative cannot be selected anyway.
 type ViewRefusal struct {
-	Action int    `json:"action"`
-	Code   string `json:"code"`
+	Action int `json:"action"`
 }
 
 // ViewAlt is one alternative.
@@ -142,7 +142,6 @@ var (
 	viewRosterOps  = []string{api.RosterOpSet, api.RosterOpRemove}
 	viewTeleOps    = []string{api.TeleOpStart, api.TeleOpCancel}
 	viewSkills     = []string{"registration", "XR", "CT", "US", "MR"}
-	codeForm       = regexp.MustCompile(`^[a-z][a-z0-9_]{0,47}$`)
 	altIDForm      = regexp.MustCompile(`^(proposal|no_action|adjusted|without_[1-9][0-9]?)$`)
 	dateForm       = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}$`)
 	timeForm       = regexp.MustCompile(`^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}$`)
@@ -358,25 +357,28 @@ var viewReversibility = map[string]string{
 	"applies_now":              "applies now · operations changes apply at once; a later change can set them again",
 }
 
-func reversibilityKind(v Value) (string, bool) {
-	switch v.Text {
-	case "nothing to reverse":
-		return "none", true
-	case "irreversible":
-		switch {
-		case strings.HasPrefix(v.Basis, "already_terminating:"):
-			return "irreversible_termination", true
-		case strings.HasPrefix(v.Basis, "the recruiting fee"):
-			return "irreversible_hire", true
-		case strings.HasPrefix(v.Basis, "a contract start"):
-			return "irreversible_contract", true
-		}
-	case "withdrawable before its effective date":
-		return "withdrawable", true
-	case "applies now":
-		return "applies_now", true
+// reversibilityKind is the engine rule's kind for a batch, decided from
+// the batch's action types alone (the rule of reversibility in
+// comparison.go), and the comparison's value must be exactly what that
+// rule gives for the batch: no prefix or partial match.
+func reversibilityKind(v Value, actions []api.Action) (string, bool) {
+	if !jsonEqual(v, reversibility(actions)) {
+		return "", false
 	}
-	return "", false
+	has := func(f func(api.Action) bool) bool { return slices.ContainsFunc(actions, f) }
+	switch {
+	case len(actions) == 0:
+		return "none", true
+	case has(func(x api.Action) bool { return x.Type == api.ActTerminate }):
+		return "irreversible_termination", true
+	case has(func(x api.Action) bool { return x.Type == api.ActHire }):
+		return "irreversible_hire", true
+	case has(irreversible):
+		return "irreversible_contract", true
+	case has(func(x api.Action) bool { return isStaffing(x.Type) }):
+		return "withdrawable", true
+	}
+	return "applies_now", true
 }
 
 // --- building ---------------------------------------------------------------
@@ -592,12 +594,9 @@ func (w *viewer) alternative(alt AgentAlternative) (ViewAlt, error) {
 		if r.OK {
 			continue
 		}
-		if !codeForm.MatchString(r.Code) {
-			return ViewAlt{}, vf("validation code")
-		}
-		va.Refused = append(va.Refused, ViewRefusal{Action: va.Actions[i].Action, Code: r.Code})
+		va.Refused = append(va.Refused, ViewRefusal{Action: va.Actions[i].Action})
 	}
-	kind, ok := reversibilityKind(alt.Reversibility)
+	kind, ok := reversibilityKind(alt.Reversibility, alt.Actions)
 	if !ok || alt.Reversibility.Key != "reversibility" {
 		return ViewAlt{}, vf("reversibility")
 	}
@@ -734,6 +733,13 @@ func (w *viewer) item(alt AgentAlternative, v Value, forecast bool, offers map[s
 	it := ViewItem{Kind: name, Ref: ref, Key: strings.TrimSuffix(name, ".")}
 	if ref != "" {
 		it.Key = strings.TrimSuffix(name, ".") + "." + ref
+	}
+	// A field the unit does not use must be empty: nothing unexpected is
+	// silently ignored. Label, class, source, basis and derivation are the
+	// comparison's own metadata, checked by its contract and never shown.
+	if (v.Unit != UnitDate && v.Date != "") || (v.Unit == UnitDate && (v.Number != nil || v.Text != "")) ||
+		(v.Unit == UnitText && v.Number != nil) {
+		return ViewItem{}, false, vf("a field the unit does not use")
 	}
 	switch v.Unit {
 	case UnitCents, UnitCount, UnitDays:

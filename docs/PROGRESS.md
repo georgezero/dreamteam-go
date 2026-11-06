@@ -7,6 +7,115 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13d — controlled alternatives workflow and experiment preparation (0.13.0-dev.2, engine unchanged)
+
+On 2026-11-05 the owner accepted V0.13c, with conditions, as a
+protocol-design milestone. They gave GO for V0.13d preparation, with
+decisions D7–D10, and did not approve the 964-draw budget. Protocol lock:
+NO GO. Live inference: NO GO. V0.13.0 remains unreleased.
+
+**What was built** (`docs/v13d/IMPLEMENTATION_REPORT.md`):
+* **D7, the typed boundary.** `dreamteam.alternatives-view/v1`
+  (`internal/alternatives/view.go`, table pinned `ce7f0e23…`) is built from
+  the bound comparison:
+  * neutral references (E, H, C, P), by proposal order;
+  * closed tables of labels, forms and bases, parsed exactly and rebuilt;
+  * no source text, no refusal codes;
+  * anything unexpected fails closed (`ErrView`), and both arms then get
+    `not_due`.
+* **D8, presentation v2** (`presentation-v2.tmpl`, `257b4377…`). The head
+  and foot are byte-identical in both arms, "Nothing has been applied yet"
+  included. The treatment adds the comparison, the detail and one inspect
+  round.
+* **The workflow** `llm-agent-alternatives-workflow/v1`. It runs
+  llm-agent 5's validation-first unchanged, then the engine's turn,
+  through the opt-in protocol operations `alternatives.turn` and
+  `alternatives.decide` (`dt agent --stdio -alternatives`). `hello` is
+  unchanged.
+* **D9, the outcome.** One final-action scale for both arms
+  (`original_retained`, `listed_alternative`, `no_staffing_action`,
+  `other_batch`, `abandoned`, `invalid`, `no_decision`), made from the
+  submitted batches only. The arm's own labels are process measures.
+* **D10, the operations batch.**
+  * Select keeps the batch, unchanged; a revision replaces it; abandon
+    submits nothing.
+  * Each batch is validated alone with the protocol's batch validation.
+  * Partial application is recorded.
+* **The driver** `dreamteam-v13d-driver/1` (`analysis/alternatives/v13d.py`).
+  * Both arms start from the same state, request and proposal.
+  * Every draw replays without a model, with call metadata and halts
+    rechecked.
+  * Analysis keeps an execution ledger. A run that is not COMPLETE gives
+    no arm differences.
+  * `run` refuses anything not locked and authorized, and has no live
+    implementation.
+* **Fidelity** (`docs/v13d/FIDELITY.md`): 65 scripted cases,
+  0 failed checks. They cover the 9 historical contexts (recorded V0.12b
+  corrections as scripts), the 12 sensitivity members and the review's
+  cases. No model was contacted.
+* **The sensitivity pairs** are context pairs, with every difference
+  counted (`docs/v13d/SENSITIVITY_CASES.md`).
+* **The draft protocol** `v13d-alt-1` (`docs/v13d/PROTOCOL_DRAFT.md`):
+  * 262 draws, at most 802 model calls, a 4-hour stop;
+  * justified by the V0.10–V0.12 repeatability evidence;
+  * DRAFT, NOT LOCKED, NOT AUTHORIZED.
+
+  Hashes:
+  * `protocol-draft.json`: `13498b55cffdfa35892cb114b2931195f2357cc7e2f8b689b113d64783836752`
+  * `schedule-draft.json`: `81f40c75cec5a05a9e0546a301c8510729012bd0636d1b2982eaccfd334bd54b`
+  * `contexts.jsonl`: `6af6cfd54fb4a9cf3e9eab5447611d7a001b7403627591cbacc6e2d5e2a340e3`
+* **Human presentation review:** PENDING
+  (`docs/v13d/PRESENTATION_REVIEW.md`). No reviewer exists, and none is
+  invented.
+
+**Independent technical review** (`docs/audits/v0.13d-independent-review.md`,
+verbatim, `e40e6c0`): do not lock yet. It found 9 MAJOR, 3 MINOR and
+2 NOTE.
+* **Fixed:** F1–F12 and N1, plus one defect the preparer found (the
+  `inspected` flag on a whole revision).
+* **For the owner to confirm:** F7, the final-action scale; F3,
+  `compared` (only details actually sent count); N1, the identical foot.
+
+The response is in `docs/audits/v0.13d-review-response.md`.
+
+**Mutation checks:** 23 on the fixed tree. 21 are caught; 2 are
+equivalent (another check refuses the input).
+
+**The engine version is not bumped.** A bump would change the engine
+string in V0.13b and V0.13c's evidence, which must stay byte for byte.
+
+**Quality gates:**
+
+| Where | Gate | Result |
+|---|---|---|
+| horo (linux/amd64), reviewed tree `2f89a03` | Race, all packages, 90 min | exit 0; 11 of 11 packages with tests ok |
+| horo, reviewed and fixed trees | Five cross-builds; vet (default, calibration, acceptance); gofmt | 5 of 5 ok; vet ok; gofmt clean |
+| horo, reviewed and fixed trees | Golden references (four, through the migration manifest) | outcomes identical |
+| horo, reviewed and fixed trees | Benchmark verify and reproduce | 86 and 59 checks, 0 failed |
+| horo, reviewed and fixed trees | V0.8c and V0.9c replays | 4 × 104 checks, 0 failed |
+| horo, reviewed and fixed trees | V0.13c inventory; V0.13b–V0.13d evidence, byte for byte | ok |
+| horo, reviewed and fixed trees | V0.12b Stage B check, and the live run analysis replayed without a model | 24 point-arm starts at the recorded state, lock holds; decisions, tables and inference reproduced |
+| horo, reviewed and fixed trees | V0.13d: driver tests, contexts, protocol and schedule made again, check, fidelity | 15 tests OK; contexts 21 identical; protocol and schedule identical; check 21 contexts, 0 failed; fidelity 65 cases, 0 failed (reviewed tree: 59, before the review cases) |
+| horo, reviewed and fixed trees | Python: agents/llm, analysis/evidence, analysis/repeatability, analysis/acknowledgment, analysis/alternatives | OK |
+| horo, fixed tree | Race, all packages, 90 min | exit 0; 11 of 11 packages with tests ok |
+| Pi (linux/arm64), fixed tree | `internal/alternatives`, `internal/agent`, `cmd/dreamteam`; driver tests; constructed fidelity | ok; 15 OK; 47 cases, 0 failed |
+| CI | Full Go suite, golden references, historical replay, benchmark verify and reproduce, frozen evidence, the V0.13c and V0.13d steps, on Linux amd64, Linux arm64 and macOS | run by CI on this commit |
+
+**Not run:** live inference, the clinical suites, historical live reruns,
+and any reserved or holdout seed.
+
+**Not changed:**
+* simulator mechanics, accounting, action schemas, scoring, validation,
+  preview;
+* the session API;
+* every earlier agent, prompt, recording and frozen contract;
+* V0.13b and V0.13c's evidence (`docs/audits/v0.13d-baseline.md`).
+
+The agent protocol gains only the opt-in extension operations
+(`docs/AGENT_PROTOCOL.md` §3.3).
+
+---
+
 ## V0.13c — alternative comparison protocol preparation (0.13.0-dev.2, engine unchanged)
 
 On 2026-11-05 the owner accepted and closed V0.13b, approved the narrow

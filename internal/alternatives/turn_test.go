@@ -79,14 +79,8 @@ func TestTurnSymmetry(t *testing.T) {
 		if !strings.HasPrefix(mid, "\nALTERNATIVES.") || strings.Contains(c.Message, "ALTERNATIVES") || c.Message != c.Message[:ci+len(head)]+cfoot {
 			t.Fatalf("%s: the treatment does not add exactly the comparison", m.Label)
 		}
-		cl, tl := strings.Split(cfoot, "\n"), strings.Split(tfoot, "\n")
-		if len(cl) != len(tl) {
-			t.Fatalf("%s: the feet differ in length", m.Label)
-		}
-		for i := range cl {
-			if cl[i] != tl[i] && !(strings.Contains(cl[i], "IDs: proposal (your proposal).") && strings.HasPrefix(tl[i], strings.TrimSuffix(cl[i], "."))) {
-				t.Fatalf("%s: foot line %d differs beyond the IDs:\n%s\n%s", m.Label, i, cl[i], tl[i])
-			}
+		if cfoot != tfoot {
+			t.Fatalf("%s: the feet differ:\n%s\n%s", m.Label, cfoot, tfoot)
 		}
 		if !strings.Contains(c.Message, "Nothing has been applied yet.") || len(c.Inspect) != 0 {
 			t.Fatal(m.Label)
@@ -227,7 +221,17 @@ func tamper(t *testing.T, a *Agent, f func(*Agent)) error {
 		t.Fatal(err)
 	}
 	f(&b)
+	// Keep the comparison's own checks satisfied, so that only the view
+	// can refuse the edit.
+	for i := range b.Alternatives {
+		x := &b.Alternatives[i]
+		x.CandidateSha256 = candidateSha256(b.Selection.Rule, x.ID, x.Actions)
+	}
+	b.Compared = compare(b.Alternatives)
 	b.Sha256 = b.digest()
+	if err := b.check(); err != nil {
+		t.Fatalf("the edit breaks the comparison itself, not the view: %v", err)
+	}
 	_, _, err := BuildView(at(t, t0), &b, []int{1}, 0)
 	return err
 }
@@ -278,14 +282,13 @@ func TestViewFailsClosed(t *testing.T) {
 			b.Alternatives[0].Unavailable = append(b.Alternatives[0].Unavailable, Unavailable{"orders_lost", ClassUnavailable, "9999"})
 		},
 		"a date that is not a date":              func(b *Agent) { find(b, "last_day.E04").Date = "2026-13-45" },
-		"an action field the view does not show": func(b *Agent) { b.Alternatives[2].Actions[0].RequestID = "note" },
+		"an action field the view does not show": func(b *Agent) { b.Alternatives[2].Actions[0].Date = "2026-10-20" },
+		"an action of no proposal target":        func(b *Agent) { b.Alternatives[2].Actions[0].RequestID = "note" },
 		"an alternative ID outside the set":      func(b *Agent) { b.Alternatives[2].ID = "best_choice" },
-		"a refusal code that is not a code": func(b *Agent) {
-			b.Alternatives[2].Validation = Validation{OK: false, Results: []api.ActionResult{{OK: false, Code: "Select no action!", Message: "x"}}}
-			b.Alternatives[2].Facts, b.Alternatives[2].Estimates, b.Alternatives[2].Obligations = []Value{}, []Value{}, []Value{}
-		},
+		"an unexpected date on a count":          func(b *Agent) { find(b, "displaced_bookings").Date = "2026-10-20" },
+		"a reversibility basis edited":           func(b *Agent) { b.Alternatives[0].Reversibility.Basis = "already_terminating: select no_action" },
 	} {
-		if err := tamper(t, a, f); !errors.Is(err, ErrView) && !errors.Is(err, ErrContract) {
+		if err := tamper(t, a, f); !errors.Is(err, ErrView) {
 			t.Fatalf("%s: the view did not fail closed: %v", name, err)
 		}
 	}
@@ -398,7 +401,7 @@ func TestDecideCitations(t *testing.T) {
 	good := []Citation{{Item: "slots_closed", Values: map[string]json.RawMessage{IDProposal: raw("2,481"), IDNoAction: raw("0")}}}
 	r := reply(ReplySelect, IDNoAction)
 	r.Comparison = good
-	o := mustDecide(t, s, ArmTreatment, p, []string{IDNoAction}, r)
+	o := mustDecide(t, s, ArmTreatment, p, []string{IDProposal, IDNoAction}, r)
 	if !slices.Contains(o.Flags, FlagCompared) || !slices.Contains(o.Flags, FlagInspected) {
 		t.Fatalf("flags %v checks %v", o.Flags, o.CitationChecks)
 	}

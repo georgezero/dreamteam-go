@@ -67,6 +67,37 @@ class Pure(unittest.TestCase):
         self.assertGreater(m["interval"][1], 0.4)
         self.assertIsNone(D.mover(None, b))
 
+    def test_analyze_is_a_command(self):
+        with self.assertRaises(SystemExit) as e:
+            D.main(["analyze", "--help"])
+        self.assertEqual(e.exception.code, 0)
+
+    def test_run_doc_is_checked(self):
+        sched = [{"seq": 1}, {"seq": 2}]
+        rows = [{"seq": 1, "status": "completed"}]
+        doc = {"status": "COMPLETE", "drawsCompleted": 1, "drawsScheduled": 2, "drawInterrupted": None, "stopped": None}
+        with self.assertRaises(D.ExperimentError):
+            D.check_run_doc(doc, rows, sched)
+        D.check_run_doc(dict(doc, status="PARTIAL", stopped={"code": "x"}), rows, sched)
+
+    def test_halt_must_follow_from_its_evidence(self):
+        cfg = {"maxModelCallsPerDraw": 6, "maxModelCalls": 100, "request": {"timeoutSeconds": 300},
+               "stop": {"wallClockSeconds": 14400, "consecutiveTransportFailures": 5}}
+        D.check_halt({"code": "transport", "evidence": {"consecutiveTransportFailures": 5}}, cfg)
+        for bad in ({"code": "wall_clock", "evidence": {"elapsedSeconds": 10}},
+                    {"code": "draw_call_limit", "evidence": {"drawCalls": 2}}, {"code": "invented", "evidence": {}}):
+            with self.assertRaises(D.ExperimentError):
+                D.check_halt(bad, cfg)
+
+    def test_transport_streak_stops_before_the_next_call(self):
+        lim = D.Limits(6, 100, 10 ** 9, 300, max_fails=5, now=lambda: 0.0)
+        for _ in range(5):
+            lim.before_call(0)
+            lim.after_call({"error": "timeout", "status": None})
+        with self.assertRaises(D.Halt) as h:
+            lim.before_call(0)
+        self.assertEqual((h.exception.code, h.exception.evidence["consecutiveTransportFailures"]), ("transport", 5))
+
     def test_run_refuses_a_draft(self):
         with self.assertRaises(SystemExit):
             D.main(["run", "--protocol", os.path.join(V, "protocol-draft.json"), "--authorization", "x"])

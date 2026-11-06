@@ -834,6 +834,26 @@ no score.
 
 The protocol is a draft. It is not locked and no run is authorized.
 
+## 11j. Management alternatives (V0.13d, workflow and experiment preparation)
+
+V0.13d adds no policy, suite, metric or run to the benchmark, and changes
+no score.
+
+**What it prepares** (`docs/v13d/`):
+* `dreamteam agent --stdio -alternatives`: two read-only extension
+  operations that build the final-decision turn of either arm and read the
+  model's reply to it. Without the flag nothing changes, and `hello` is
+  the same with it.
+* An experimental workflow (`llm-agent-alternatives-workflow/v1`) and a
+  driver (`dreamteam-v13d-driver/1`) for a two-arm experiment from fixed
+  decision contexts, with scripted fidelity evidence and model-free replay.
+* A revised draft protocol (`v13d-alt-1`, 262 draws). The primary
+  estimand is the difference in immediate final-action distributions with
+  and without the comparison. It is not a score and not a measure of
+  decision quality.
+
+The protocol is a draft. It is not locked and no run is authorized.
+
 ## 12. Known limitations (V0.6)
 
 * **Trusted participants only.** External policies are trusted

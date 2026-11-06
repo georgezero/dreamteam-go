@@ -1,4 +1,4 @@
-{{- /* dreamteam.alternatives-presentation/v2: fixed text. Both arms get "head" and "foot", the same text; the treatment adds "comparison" between them and answers inspect with "detail". Every value is a typed field of the view (dreamteam.alternatives-view/v1). */ -}}
+{{- /* dreamteam.alternatives-presentation/v2: fixed text. Both arms get "head" and "foot", the same text byte for byte at one decision point; the treatment adds "comparison" between them and answers inspect with "detail". Every value is a typed field of the view (dreamteam.alternatives-view/v1). */ -}}
 {{define "head" -}}
 FINAL DECISION at {{.Time}}. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
 {{end}}
@@ -16,7 +16,7 @@ Each alternative's detail gives the simulator's facts and estimates for it, the 
 {{end}}
 {{- define "foot"}}
 Reply with one JSON object:
-- {"decision": "select", "id": ID, "reason": TEXT} submits that alternative's staffing actions unchanged. IDs: {{ids .}}.
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
 - {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
 - {"decision": "abandon", "reason": TEXT} submits nothing.
 {{- if .Operations}}

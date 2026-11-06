@@ -5,7 +5,7 @@ S1 a: terminate Sam (E04), 14 days' notice, decided Oct 13
 FINAL DECISION at 2026-10-13T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
 
 Reply with one JSON object:
-- {"decision": "select", "id": ID, "reason": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal).
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
 - {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
 - {"decision": "abandon", "reason": TEXT} submits nothing.
 Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.
@@ -26,7 +26,7 @@ adjusted: action 1: terminate E1, lastDay 2026-11-10 (lastDay differs from your 
 Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {"inspect": [ID, ...]}. You can do this once.
 
 Reply with one JSON object:
-- {"decision": "select", "id": ID, "reason": TEXT} submits that alternative's staffing actions unchanged. IDs: proposal (your proposal), no_action, adjusted.
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
 - {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions; they are validated again before anything is submitted.
 - {"decision": "abandon", "reason": TEXT} submits nothing.
 Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.

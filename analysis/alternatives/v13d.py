@@ -221,6 +221,66 @@ def first_request(c, settings):
     return X.body_bytes(A3.ModelClient(settings).payload(msgs))
 
 
+# --- limits and the engine harness ---------------------------------------------
+
+class Limits(SB.Limits):
+    """V0.12b's limits, checked before every model request, with the
+    consecutive transport-failure stop checked there too, call by call
+    (review F9), and the evidence of a halt recorded with it (review F6)."""
+
+    def __init__(self, per_draw, total, wall_seconds, timeout, max_fails=None, now=SB.time.monotonic, t0=None):
+        super().__init__(per_draw, total, wall_seconds, timeout, now=now, t0=t0)
+        self.max_fails, self.fails = max_fails, 0
+
+    def state(self, draw_calls):
+        return {"drawCalls": draw_calls, "runCalls": self.calls, "elapsedSeconds": round(self.elapsed(), 1),
+                "consecutiveTransportFailures": self.fails}
+
+    def before_call(self, draw_calls):
+        try:
+            if self.max_fails is not None and self.fails >= self.max_fails:
+                raise Halt("transport", f"{self.fails} consecutive transport failures")
+            super().before_call(draw_calls)
+        except Halt as x:
+            x.evidence = self.state(draw_calls)
+            raise
+
+    def after_call(self, call):
+        self.fails = self.fails + 1 if call["error"] and call["status"] is None else 0
+
+
+def check_halt(halt, cfg):
+    """A recorded halt must be what the limits give for its own evidence
+    (the replay re-raises it at the same call; this checks the cause)."""
+    e, code = halt.get("evidence") or {}, halt.get("code")
+    ok = {"draw_call_limit": lambda: e.get("drawCalls", -1) >= cfg["maxModelCallsPerDraw"],
+          "call_budget": lambda: e.get("runCalls", -1) >= cfg["maxModelCalls"],
+          "wall_clock": lambda: e.get("elapsedSeconds", -1) + cfg["request"]["timeoutSeconds"] > cfg["stop"]["wallClockSeconds"],
+          "transport": lambda: e.get("consecutiveTransportFailures", -1) >= cfg["stop"]["consecutiveTransportFailures"]}
+    if code not in ok or not ok[code]():
+        raise ExperimentError(f"a halt {code!r} that its own evidence {e} does not give")
+
+
+class Harness(SB.EngineHarness):
+    """V0.12b's harness, with every request logged before its answer is
+    checked, and a failed request logged with its error (review F5)."""
+
+    def request(self, op, args=None):
+        self.n += 1
+        rid = f"r{self.n}"
+        try:
+            a = self.ses.request(rid, op, args)
+        except BaseException as x:
+            self.log.append({"op": op, "args": args, "answer": None, "error": f"{type(x).__name__}: {x}"})
+            raise
+        self.log.append({"op": op, "args": args, "answer": a})
+        if a.get("id") != rid or a.get("protocol") != A3.AGENT_PROTOCOL:
+            raise ExperimentError(f"the engine answered {a.get('id')!r} ({a.get('protocol')!r}) to {rid}")
+        if not a.get("ok"):
+            raise A3.ProtocolError(op, a.get("error") or {})
+        return a["result"]
+
+
 # --- the model ----------------------------------------------------------------
 
 class ContextModel(SB.PointModel):
@@ -238,7 +298,12 @@ class ContextModel(SB.PointModel):
             if json.dumps(payload).encode("utf-8") != self.want:
                 raise ExperimentError(f"{self.e['id']}: the agent's first request is not the context's request")
             return 200, json.dumps({"choices": [{"message": {"content": self.e["proposal"]["content"]}}]}), None
-        return SB.PointModel.call(self, payload)
+        n = len(self.calls)
+        try:
+            return SB.PointModel.call(self, payload)
+        finally:
+            if self.limits is not None and hasattr(self.limits, "after_call") and len(self.calls) > n:
+                self.limits.after_call(self.calls[-1])
 
 
 # --- one draw -------------------------------------------------------------------
@@ -255,28 +320,27 @@ def run_draw(entry, c, settings, opener, mem, transport, limits, utc=SB.RR.utc, 
            "status": None, "halt": None, "initialDigests": None, "record": None, "batches": None, "engine": [],
            "digestsAfter": None, "calls": []}
     ses = opener(c, arm)
-    h = SB.EngineHarness(ses)
+    h = Harness(ses)
     model = ContextModel(c, first_request(c, settings), A3.ModelClient(settings), transport, limits, utc=utc, now=now)
     try:
         d = h.request("digests")["digests"]
         if d != c["digests"]:
             raise ExperimentError(f"draw {entry['seq']}: the engine is not at the context's state")
         out["initialDigests"] = d
-        h.log = []
         try:
             batches, rec = ALT.ask(h, SB.Sink(), model, settings, mem, c.get("point", 1), None, arm=arm)
         except Halt as x:
-            out.update(status="interrupted", halt={"code": x.code, "message": x.message})
+            out.update(status="interrupted", halt={"code": x.code, "message": x.message,
+                                                   "evidence": getattr(x, "evidence", None)})
         else:
             if model.first:
                 raise ExperimentError(f"draw {entry['seq']}: the agent made no request")
             out.update(status="completed", record=rec, batches=batches)
-        out["engine"] = h.log
-        h.log = []
         out["digestsAfter"] = h.request("digests")["digests"]
+        out["engine"] = h.log
     except BaseException as x:
         out["status"] = "aborted"
-        out["engine"] = out["engine"] or h.log
+        out["engine"] = h.log
         x.partialDraw = out
         raise
     finally:
@@ -355,9 +419,24 @@ def scripted(replies):
     return transport
 
 
-def replay_draw(r, c, settings, opener, mem):
+def replay_draw(r, c, settings, opener, mem, cfg=None):
     """A recorded draw again, without a model: everything but the live
-    metadata must be the recorded draw's, and every response used."""
+    metadata must be the recorded draw's, and every response used. The
+    response metadata (usage, finish reason, served model) is made again
+    from each body; an interruption is raised again at the same call, and
+    its cause must be what its recorded evidence gives under cfg's limits
+    (review F6)."""
+    for x in r["calls"]:
+        f = SB.body_fields(x["body"]) if x.get("body") is not None else {"parsedBody": False}
+        want = {k: (f.get(k) if f.get("parsedBody") else None) for k in ("usage", "finishReason", "servedModel")}
+        if {k: x.get(k) for k in want} != want:
+            raise ExperimentError(f"draw {r['seq']}: call {x['n']}'s metadata is not its body's")
+    if r["status"] == "interrupted":
+        if cfg is None:
+            raise ExperimentError(f"draw {r['seq']}: an interrupted draw is replayed only with the protocol's limits")
+        check_halt(r["halt"], cfg)
+        if (r["halt"].get("evidence") or {}).get("drawCalls") != len(r["calls"]):
+            raise ExperimentError(f"draw {r['seq']}: the halt's evidence is not the draw's calls")
     left = list(r["calls"])
 
     def transport(payload):
@@ -372,7 +451,9 @@ def replay_draw(r, c, settings, opener, mem):
         class At(SB.Limits):
             def before_call(self, draw_calls):
                 if draw_calls >= n:
-                    raise Halt(halt["code"], halt["message"])
+                    x = Halt(halt["code"], halt["message"])
+                    x.evidence = halt.get("evidence")
+                    raise x
         limits = At(0, 0, 0, 0)
     entry = {k: r[k] for k in ("seq", "model", "context", "arm", "draw")}
     again = run_draw(entry, c, settings, opener, mem, transport, limits, utc=lambda: None, now=lambda: 0.0)
@@ -425,7 +506,11 @@ def classify(d):
     o = rec.get("outcome") or {}
     result = rec["result"] if rec["result"] in RESULTS else NOT_DUE
     flags = o.get("flags") or []
-    return {"result": result, "why": rec["result"], "due": bool(turn.get("due")),
+    # The final action on the scale both arms share (review F7): from what
+    # is submitted, never from the arm's own labels. A no_decision with no
+    # outcome object (retries spent) is no_decision.
+    final = o.get("final") or ("no_decision" if result == "no_decision" else NOT_DUE)
+    return {"result": result, "final": final, "why": rec["result"], "due": bool(turn.get("due")),
             "comparisonPresented": bool(turn.get("due")) and d["arm"] == "treatment",
             "inspected": "inspected" in flags, "compared": "compared" in flags,
             "noObservableComparison": not ({"inspected", "compared"} & set(flags)),
@@ -454,12 +539,12 @@ def schedule(proto, rows):
 
 
 def call_bound(c):
-    """The most model calls a draw can make after its initial proposal: the
-    validation-first correction and its retry when the proposal is refused
-    (llm_agent5, maxRetries 1), then the turn's reply, one inspect answer and
-    one retry."""
+    """The most model calls a draw can make after its initial proposal: one
+    correction when the proposal is refused (llm_agent5, maxRetries 1: the
+    refusal itself uses the one failure allowed, so a failed correction ends
+    the point), then the turn's reply, one inspect answer and one retry."""
     refused = c.get("category", "").startswith("refused")
-    return (2 if refused else 0) + 1 + ALT.INSPECT_ROUNDS + ALT.TURN_RETRIES
+    return (1 if refused else 0) + 1 + ALT.INSPECT_ROUNDS + ALT.TURN_RETRIES
 
 
 def draft_protocol(rows, contexts_sha):
@@ -534,8 +619,8 @@ def run_schedule(proto, proto_sha, sched, ctxs, opener, transports, out, authori
         raise ExperimentError("no authorization")
     os.makedirs(live)
     stop = proto["stop"]
-    limits = SB.Limits(proto["maxModelCallsPerDraw"], proto["maxModelCalls"], stop["wallClockSeconds"],
-                       proto["request"]["timeoutSeconds"], now=now)
+    limits = Limits(proto["maxModelCallsPerDraw"], proto["maxModelCalls"], stop["wallClockSeconds"],
+                    proto["request"]["timeoutSeconds"], max_fails=stop["consecutiveTransportFailures"], now=now)
     started, completed, stopped, interrupted, aborted, fails, prev = utc(), 0, None, None, None, 0, None
     sig = None
     if state_fn is not None:
@@ -580,11 +665,6 @@ def run_schedule(proto, proto_sha, sched, ctxs, opener, transports, out, authori
                     interrupted, stopped = r["seq"], dict(d["halt"])
                     break
                 completed += 1
-                for x in d["calls"]:
-                    fails = fails + 1 if x["error"] and x["status"] is None else 0
-                if fails >= stop["consecutiveTransportFailures"]:
-                    stopped = {"code": "transport", "message": f"{fails} consecutive transport failures"}
-                    break
     finally:
         opener.close()
         status = "COMPLETE" if completed == len(sched) and stopped is None else "PARTIAL"
@@ -629,26 +709,63 @@ def mover(a, b):
 FINAL = RESULTS + (NOT_DUE,)
 
 
-def analyze(binary, run_dirs, ctxs, proto, sched, rows, run_doc):
+FINALS = ("original_retained", "listed_alternative", "no_staffing_action", "other_batch", "abandoned", "invalid",
+          "no_decision", NOT_DUE)
+
+
+def check_run_doc(run_doc, rows, sched, proto_sha=None):
+    """run.json against the recorded draws (review F8): its counts, its
+    interrupted draw, its protocol and its status. COMPLETE needs every
+    scheduled draw recorded and completed with no stop."""
+    completed = sum(1 for r in rows if r["status"] == "completed")
+    last = rows[-1] if rows else None
+    if run_doc.get("status") not in ("COMPLETE", "PARTIAL") or run_doc.get("drawsCompleted") != completed:
+        raise ExperimentError("run.json does not describe the recorded draws")
+    if run_doc.get("drawsScheduled") != len(sched):
+        raise ExperimentError("run.json's scheduled draws are not the schedule's")
+    if proto_sha is not None and run_doc.get("protocolSha256") != proto_sha:
+        raise ExperimentError("run.json is not this protocol's run")
+    if run_doc.get("drawInterrupted") != (last["seq"] if last and last["status"] == "interrupted" else None):
+        raise ExperimentError("run.json's interrupted draw is not the recorded one")
+    if run_doc["status"] == "COMPLETE" and (run_doc.get("stopped") is not None or completed != len(sched) or
+                                            len(rows) != len(sched) or run_doc.get("drawAborted") is not None):
+        raise ExperimentError("run.json says COMPLETE, but not every scheduled draw was completed without a stop")
+    if run_doc["status"] == "PARTIAL" and run_doc.get("stopped") is None and completed == len(sched):
+        raise ExperimentError("run.json says PARTIAL with every draw completed and no stop")
+
+
+def tv(a, b):
+    """Total variation distance between two count tables."""
+    na, nb = sum(a.values()), sum(b.values())
+    keys = set(a) | set(b)
+    return round(0.5 * sum(abs(a.get(k, 0) / na - b.get(k, 0) / nb) for k in keys), 4)
+
+
+def analyze(binary, run_dirs, ctxs, proto, sched, rows, run_doc, proto_sha=None):
     """Every recorded draw replayed without a model and classified; the
-    batches executed (once per distinct context and batches); the
-    distributions per context, model and arm; the arm differences (D9) and,
-    for each sensitivity pair, the difference of differences in departure.
-    Only what was observed is reported."""
+    batches executed once per distinct context and batches, with a ledger
+    of every execution; the distributions per context, model and arm. For a
+    COMPLETE run only: the arm differences in the final action (D9) and,
+    per sensitivity pair, the difference of differences in departure. A
+    PARTIAL run reports the observed cells only."""
     check_rows(sched, rows)
+    check_run_doc(run_doc, rows, sched, proto_sha)
     opener = ctxs.opener(binary)
-    out, cache = [], {}
+    out, ledger = [], {}
     try:
         for r in rows:
             c = ctxs.by_id[r["context"]]
-            replay_draw(r, c, ctxs.settings[r["model"]], opener, ctxs.memory(c, r["model"]))
+            replay_draw(r, c, ctxs.settings[r["model"]], opener, ctxs.memory(c, r["model"]), proto)
             if r["status"] != "completed":
                 continue
             x = classify(r)
-            k = (c["id"], x["batchesSha256"])
-            if k not in cache:
-                cache[k] = execute(binary, run_dirs, c, r["batches"]) if r["batches"] else None
-            e = cache[k]
+            key = sha256(f"{c['id']}|{x['batchesSha256']}")
+            if key not in ledger:
+                e = execute(binary, run_dirs, c, r["batches"]) if r["batches"] else None
+                ledger[key] = {"context": c["id"], "batches": r["batches"], "batchesSha256": x["batchesSha256"],
+                               "execution": e}
+            e = ledger[key]["execution"]
+            x["execution"] = key
             x["executed"] = None if e is None else e["executed"]
             x["partial"] = None if e is None else e["partial"]
             out.append(dict(x, seq=r["seq"], model=r["model"], context=r["context"], arm=r["arm"], draw=r["draw"]))
@@ -659,43 +776,59 @@ def analyze(binary, run_dirs, ctxs, proto, sched, rows, run_doc):
         cells[(x["context"], x["model"], x["arm"])].append(x)
     table = []
     for (cid, mod, arm), xs in sorted(cells.items()):
-        n = len(xs)
-        cnt = collections.Counter(x["result"] for x in xs)
-        table.append({"context": cid, "model": mod, "arm": arm, "observed": n,
+        cnt, fin = collections.Counter(x["result"] for x in xs), collections.Counter(x["final"] for x in xs)
+        table.append({"context": cid, "model": mod, "arm": arm, "observed": len(xs),
+                      "final": {k: fin.get(k, 0) for k in FINALS},
                       "results": {k: cnt.get(k, 0) for k in FINAL},
+                      "batches": dict(sorted(collections.Counter(x["batchesSha256"] for x in xs).items())),
                       "inspected": sum(x["inspected"] for x in xs), "compared": sum(x["compared"] for x in xs),
                       "presented": sum(x["comparisonPresented"] for x in xs),
                       "finalValid": sum(1 for x in xs if x["finalValid"]),
                       "submitted": sum(x["submitted"] for x in xs),
                       "executed": sum(1 for x in xs if x["executed"]), "partial": sum(1 for x in xs if x["partial"]),
                       "modelCalls": sum(x["modelCalls"] for x in xs), "retries": sum(x["retries"] for x in xs)})
-    diffs = []
     complete = run_doc["status"] == "COMPLETE"
+    diffs, pairs = [], []
     by = {(t["context"], t["model"], t["arm"]): t for t in table}
-    for (cid, mod, arm) in sorted(by):
-        if arm != "treatment" or (cid, mod, "control") not in by:
-            continue
-        tt, tc = by[(cid, mod, "treatment")], by[(cid, mod, "control")]
-        diffs.append({"context": cid, "model": mod,
-                      "byResult": {k: X.newcombe(tt["results"][k], tt["observed"], tc["results"][k], tc["observed"])
-                                   for k in FINAL},
-                      "totalVariation": round(0.5 * sum(abs(tt["results"][k] / tt["observed"] - tc["results"][k] /
-                                                            tc["observed"]) for k in FINAL), 4)})
-    pairs = []
-    for pid in sorted({c["pair"] for c in ctxs.by_id.values() if c["kind"] == "constructed" and c.get("pair")}):
-        for mod in proto["modelOrder"]:
-            d = {}
-            for arm in ARMS:
-                a, b = by.get((f"{pid}-a", mod, arm)), by.get((f"{pid}-b", mod, arm))
-                if a and b:
-                    dep = lambda t: t["observed"] - t["results"]["retained"]
-                    d[arm] = X.newcombe(dep(b), b["observed"], dep(a), a["observed"])
-            if len(d) == 2:
-                pairs.append({"pair": pid, "model": mod, "departure": d,
-                              "sensitivity": mover(d["treatment"], d["control"])})
-    return {"schema": "dreamteam.alternatives-analysis/v1", "runStatus": run_doc["status"],
-            "note": None if complete else "PARTIAL: only what was observed; no pooled summary",
-            "draws": out, "table": table, "armDifferences": diffs, "pairs": pairs if complete else []}
+    if complete:
+        for (cid, mod, arm) in sorted(by):
+            if arm != "treatment" or (cid, mod, "control") not in by:
+                continue
+            tt, tc = by[(cid, mod, "treatment")], by[(cid, mod, "control")]
+            diffs.append({"context": cid, "model": mod,
+                          "byFinal": {k: X.newcombe(tt["final"][k], tt["observed"], tc["final"][k], tc["observed"])
+                                      for k in FINALS},
+                          "totalVariationFinal": tv(tt["final"], tc["final"]),
+                          "totalVariationBatches": tv(tt["batches"], tc["batches"])})
+        for pid in sorted({c["pair"] for c in ctxs.by_id.values() if c["kind"] == "constructed" and c.get("pair")}):
+            for mod in proto["modelOrder"]:
+                d = {}
+                for arm in ARMS:
+                    a, b = by.get((f"{pid}-a", mod, arm)), by.get((f"{pid}-b", mod, arm))
+                    if a and b:
+                        dep = lambda t: t["observed"] - t["final"]["original_retained"]  # noqa: E731
+                        d[arm] = X.newcombe(dep(b), b["observed"], dep(a), a["observed"])
+                if len(d) == 2:
+                    pairs.append({"pair": pid, "model": mod, "departure": d,
+                                  "sensitivity": mover(d["treatment"], d["control"])})
+    return {"schema": "dreamteam.alternatives-analysis/v2", "runStatus": run_doc["status"],
+            "note": None if complete else "PARTIAL: the observed cells only; no arm differences and no pair estimates",
+            "draws": out, "executions": ledger, "table": table, "armDifferences": diffs, "pairs": pairs}
+
+
+def cmd_analyze(a):
+    proto, raw = json.load(open(a.protocol, encoding="utf-8")), open(a.protocol, "rb").read()
+    rows_c, csha = load_contexts(a.contexts)
+    if csha != proto["contextsFileSha256"]:
+        raise SystemExit("the contexts file is not the protocol's")
+    sched = schedule(proto, rows_c)
+    env = {SB.SETTINGS_ENV: SB.REPLAY_URL}
+    ctxs = Contexts(proto, rows_c, a.replays, env)
+    rows = SB.load_jsonl(os.path.join(a.dir, "live", "draws.jsonl"))
+    run_doc = json.load(open(os.path.join(a.dir, "live", "run.json"), encoding="utf-8"))
+    doc = analyze(a.binary, ctxs.run_dirs, ctxs, proto, sched, rows, run_doc, sha256(raw))
+    write_json(os.path.join(a.out, "analysis.json"), doc)
+    print(f"analysis: {len(doc['draws'])} completed draws ({doc['runStatus']}), {len(doc['executions'])} executions")
 
 
 def requests_of(rows, files):
@@ -806,6 +939,13 @@ def main(argv=None):
     p = sub.add_parser("protocol")
     p.add_argument("--contexts", required=True)
     p.add_argument("--out", required=True)
+    p = sub.add_parser("analyze")
+    p.add_argument("--binary", required=True)
+    p.add_argument("--protocol", required=True)
+    p.add_argument("--contexts", required=True)
+    p.add_argument("--replays")
+    p.add_argument("--dir", required=True)
+    p.add_argument("--out", required=True)
     p = sub.add_parser("run")
     p.add_argument("--protocol", required=True)
     p.add_argument("--authorization", default="")
@@ -816,6 +956,8 @@ def main(argv=None):
         cmd_schedule(a)
     elif a.cmd == "check":
         cmd_check(a)
+    elif a.cmd == "analyze":
+        cmd_analyze(a)
     elif a.cmd == "protocol":
         cmd_protocol(a)
     elif a.cmd == "run":

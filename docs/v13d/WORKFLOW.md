@@ -21,7 +21,7 @@ No earlier agent changes. llm-agent 5 is called, unchanged, as a module.
 | 5 | Verify the comparison | the engine: `BuildAgent`, `Encode`, `DecodeAgentAt` (rebuilt from the decision-point session, byte for byte), then `BuildView` |
 | 6 | Present the declared arm | the engine renders the arm's text (presentation v2); the workflow sends it verbatim as the next user message, after the reply it is about |
 | 7 | Accept select, revise or abandon | the engine, `alternatives.decide`: reads the reply (`ParseTurnReply`); answers an inspect request with the details asked for, once; answers an unreadable reply with the retry text |
-| 8 | Validate the final proposal | the engine: each batch to be submitted is validated at the decision point (`Decide`) |
+| 8 | Validate the final proposal | the engine: each batch to be submitted is validated at the decision point by the protocol's own batch validation, the `validate` op's (`DecideWith`; review F4) |
 | 9 | Submit only valid actions | the workflow returns the outcome's batches if all are valid and the digests are unchanged; otherwise nothing |
 | 10 | Record the complete process | the workflow's record (§3) |
 
@@ -52,8 +52,10 @@ or `fallback`), there is no turn, and validation-first's result stands.
   turn can make is 3 (the reply, the reply after inspect, one retry).
 * **Strict reading:** the reply must be exactly one JSON object with only
   the foot's fields (`decision`, `id`, `actions`, `reason`, `cite`) or an
-  inspect request (`inspect`, optionally `reason`). Anything else is
-  unreadable. Nothing is guessed, and nothing is defaulted.
+  inspect request (`inspect`, optionally `reason`), every object's members
+  unique and spelled exactly as the schema spells them, at every depth
+  (review F2). Anything else is unreadable. Nothing is guessed, and nothing
+  is defaulted.
 
 ## 3. The record (`dreamteam.alternatives-decision-record/v1`)
 
@@ -88,7 +90,26 @@ or `fallback`), there is no turn, and validation-first's result stands.
   before it was applied, that is a partial application, and the driver's
   execution check records it.
 
-## 5. Outcome categories
+## 5. Outcomes
+
+**The final action (the primary scale, the same in both arms; review F7).**
+It is made from what is submitted, the reply and the candidate list (a
+function of the decision point alone), never from either arm's labels:
+
+| Final action | Meaning |
+|---|---|
+| `original_retained` | the reply's batches, unchanged |
+| `listed_alternative` | the reply's operations with another candidate's staffing batch (whichever arm, and whatever the reply called it) |
+| `no_staffing_action` | the reply's operations only |
+| `other_batch` | any other submitted batches |
+| `abandoned` | nothing submitted, by choice |
+| `invalid` | nothing submitted: an unlisted or refused alternative, or a batch refused at final validation |
+| `no_decision` | nothing submitted: no usable reply |
+
+Each outcome also records `finalSha256`, the SHA-256 of the submitted
+batches, so the exact action distribution can be compared too.
+
+**The arm's own result (a process measure):**
 
 | Result | Meaning |
 |---|---|
@@ -109,5 +130,7 @@ than the proposal); `compared` (the reply's `cite` names items and values
 exactly as shown, for two or more alternatives, at least one not chosen,
 with a difference, at most three entries, fewer than the items shown, and
 not every row shown for every alternative: copying the table is not a
-comparison); `no_observable_comparison` (neither). The reason text is
-recorded and never read.
+comparison); `no_observable_comparison` (neither). Only details actually
+sent (the alternatives an inspect answer gave) count as shown; a correct
+value that was never sent is not a comparison (review F3). The reason text
+is recorded and never read.

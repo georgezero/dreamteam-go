@@ -38,11 +38,18 @@
   spend one call on inspect, and lists more IDs a reply may select. The
   feet differ in that one line. Calls are counted, never equalized.
 * **Control cannot select another alternative or no action,** because it
-  lists only the proposal. The arms' outcome sets differ by design.
-* **A revision with only the reply's operations actions** is classified as
-  `revised`, not as `selected_no_action`.
-* **`compared` needs the model to cite keys.** The foot describes an
-  optional `cite` field in both arms. Whether models use it is unknown.
+  lists only the proposal; it can reach the same batches by revising. The
+  arms' own labels differ by design, so the primary scale is the final
+  action made from the submitted batches (WORKFLOW.md §5). Whether that
+  reading of D9 is right is for the owner to confirm.
+* **`compared` needs the model to cite keys of details it was sent.** The
+  foot describes an optional `cite` field in both arms. Whether models use
+  it is unknown.
+* **The driver's wall clock is checked before each request**, not watched
+  from outside: a blocked engine read or process shutdown is not bounded
+  by it.
+* **Replay is a consistency check, not an authenticated archive:** a whole
+  internally consistent record made again is not detected by hashes.
 * **The control turn is a confirmation turn** that no earlier experiment
   had (V0.13c D1). Control is not llm-agent 5 unchanged.
 * **Strict reading.** A reply wrapped in a code fence, or with any extra

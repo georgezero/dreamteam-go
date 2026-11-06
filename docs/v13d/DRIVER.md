@@ -59,12 +59,17 @@ draw and never equalized.
 
 * **Per draw:** at most 6 model calls (a guard). The most a draw can
   make after its initial proposal is 3 at a valid proposal (the turn's
-  reply, the reply after inspect, one retry) and 5 at a refused one (one
-  correction and its retry first).
+  reply, the reply after inspect, one retry) and 4 at a refused one (one
+  correction first: the refusal uses validation-first's one allowed
+  failure, so a failed correction ends the point; review F10).
 * **Per run:** the protocol's total, which is the sum of each scheduled
   draw's bound; the wall clock (a request starts only if its whole
-  timeout fits); 5 consecutive transport failures; an unhealthy server or
-  a material server change before a round.
+  timeout fits); 5 consecutive transport failures, counted call by call
+  and checked before every request, so no sixth request is sent (review
+  F9); an unhealthy server or a material server change before a round.
+* **A halt records its evidence:** the draw's and the run's calls, the
+  elapsed time and the failure streak. Replay requires the recorded cause
+  to be what that evidence gives under the protocol's limits (review F6).
 * **A limit reached during a draw** interrupts it (`Halt`, which no agent
   catches). The draw is recorded as interrupted and the run stops.
 * **Any other exception** stops the run. `run.json` is still written, and
@@ -75,15 +80,22 @@ draw and never equalized.
 
 ## 4. Replay and analysis
 
-`analyze` (`v13d.analyze`):
+`v13d.py analyze --binary --protocol --contexts --replays --dir --out`
+writes `analysis.json` (review F12). It:
 * requires the recorded draws to be the schedule's first draws, in order,
-  each once, with only the last unfinished;
+  each once, with only the last unfinished, and `run.json` to describe
+  them: its counts, its interrupted draw, its protocol hash, and COMPLETE
+  only with every scheduled draw recorded and completed with no stop
+  (review F8);
 * replays every draw without a model: the same engine, the agent's own
   code, each recorded response served only to the request with the
   recorded SHA-256 and only if its body still has its SHA-256, every
-  recorded response used, and everything but the live metadata identical;
+  recorded response used, each call's usage, finish reason and served
+  model made again from its body, and everything but the send time and
+  latency identical;
 * classifies each completed draw (WORKFLOW.md §5);
-* **executes** each distinct submitted set of batches once per context:
+* **executes** each distinct submitted set of batches once per context,
+  and keeps every execution in a ledger the draws reference (review F5):
   a fresh engine at the context, the batches applied in order with the
   engine's own `apply`, each answer recorded (applied, or the error),
   partial application recorded, then the end of the day reached with no
@@ -91,9 +103,13 @@ draw and never equalized.
 * tabulates, per context, model and arm: every result, presented,
   inspected, compared, final valid, submitted, executed, partial, model
   calls and retries;
-* computes the arm differences and the pair estimates (PROTOCOL_DRAFT.md
-  §6), only for a COMPLETE run. A PARTIAL run reports what was observed,
-  with no pooled summary.
+* computes the arm differences in the final action and the pair estimates
+  (PROTOCOL_DRAFT.md §6), only for a COMPLETE run. A PARTIAL run reports
+  the observed cells only.
+
+**The engine log** of a draw holds every request and answer, its first and
+last `digests` included, each logged before it is checked; a request that
+fails is logged with its error (review F5).
 
 ## 5. Schedule (`dreamteam-v13d-order/1`)
 

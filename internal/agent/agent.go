@@ -111,7 +111,10 @@ type Handler struct {
 	// listed by hello, so a session without them answers every listed op
 	// exactly as before; an op that is neither listed nor an extension is
 	// unknown, as before.
-	Extensions map[string]func(*session.Session, json.RawMessage) (any, error)
+	// Each is given the session, the protocol's own batch validation (as
+	// the validate op checks a batch: duplicate targets refused, then the
+	// session's validation) and its arguments.
+	Extensions map[string]func(*session.Session, func([]api.Action) ([]api.ActionResult, error), json.RawMessage) (any, error)
 }
 
 // Benchmark is what hello tells a policy playing under the benchmark
@@ -245,7 +248,14 @@ func (h *Handler) dispatch(req Request) (any, *Error) {
 	}
 	if f, ok := h.Extensions[req.Op]; ok {
 		before := h.s.Digests()
-		v, err := f(h.s, req.Args)
+		validate := func(actions []api.Action) ([]api.ActionResult, error) {
+			c, e := h.check(actions)
+			if e != nil {
+				return nil, e
+			}
+			return c.Results, nil
+		}
+		v, err := f(h.s, validate, req.Args)
 		if h.s.Digests() != before {
 			return nil, &Error{Code: "internal_error", Message: "the extension changed the session"}
 		}

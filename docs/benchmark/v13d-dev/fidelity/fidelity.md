@@ -39,6 +39,12 @@ Workflow `llm-agent-alternatives-workflow/v1` (`1e360348d2e6…`). Historical co
 | tampered turn message | S1-a | treatment | refused | 1 | — |
 | tampered response body | S1-a | treatment | refused | 1 | — |
 | stale comparison (another state) | S1-b | treatment | refused | 1 | — |
+| interrupted draw replays with its halt | S1-a | treatment | draw_call_limit | 1 | — |
+| edited halt cause | S1-a | treatment | refused | 1 | — |
+| edited served model | S1-a | treatment | refused | 1 | — |
+| edited usage | S1-a | treatment | refused | 1 | — |
+| five consecutive transport failures stop the run before a sixth call | S1-a | treatment | PARTIAL after 5 calls | 1 | — |
+| duplicate shift extensions in a revision | S1-a | control | invalid_alternative | 13 | — |
 | missing engine field | S1-a | treatment | aborted | 1 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | fl-qwen-s41902-p24 | both | due | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | ss-qwen-s42001-p20 | both | due | 3 | — |
@@ -47,8 +53,8 @@ Workflow `llm-agent-alternatives-workflow/v1` (`1e360348d2e6…`). Historical co
 | initial request, proposal and state equal across arms; turn due as V0.13c | ss-gemma-pv-s42001-p14 | both | due | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | ss-qwen-pv-s42002-p6 | both | not_due:rule | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | fp-qwen-s41901-p25 | both | not_due:rule | 3 | — |
-| initial request, proposal and state equal across arms; turn due as V0.13c | fl-gemma-s41901-p28 | both | None | 3 | — |
-| initial request, proposal and state equal across arms; turn due as V0.13c | fp-qwen-s42001-p7 | both | None | 3 | — |
+| initial request, proposal and state equal across arms; turn due as V0.13c | fl-gemma-s41901-p28 | both | proposal refused: no turn before a correction | 3 | — |
+| initial request, proposal and state equal across arms; turn due as V0.13c | fp-qwen-s42001-p7 | both | proposal refused: no turn before a correction | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | S1-a | both | due | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | S1-b | both | due | 3 | — |
 | initial request, proposal and state equal across arms; turn due as V0.13c | S2-a | both | due | 3 | — |

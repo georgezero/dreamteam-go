@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"slices"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
@@ -48,8 +49,8 @@ type TurnAnswer struct {
 }
 
 // Ops are the extension's operations, for agent.Handler.Extensions.
-func Ops() map[string]func(*session.Session, json.RawMessage) (any, error) {
-	return map[string]func(*session.Session, json.RawMessage) (any, error){
+func Ops() map[string]func(*session.Session, func([]api.Action) ([]api.ActionResult, error), json.RawMessage) (any, error) {
+	return map[string]func(*session.Session, func([]api.Action) ([]api.ActionResult, error), json.RawMessage) (any, error){
 		"alternatives.turn":   opTurn,
 		"alternatives.decide": opDecide,
 	}
@@ -61,14 +62,14 @@ func strict(raw json.RawMessage, v any) error {
 	if err := dec.Decode(v); err != nil {
 		return err
 	}
-	if dec.More() {
+	if err := dec.Decode(&struct{}{}); err != io.EOF {
 		return fmt.Errorf("trailing data")
 	}
 	return nil
 }
 
-func armTurn(s *session.Session, arm string, actions []api.Action) (*Turn, error) {
-	c, t, err := Turns(s, actions)
+func armTurn(s *session.Session, v Validator, arm string, actions []api.Action) (*Turn, error) {
+	c, t, err := TurnsWith(s, v, actions)
 	if err != nil {
 		return nil, err
 	}
@@ -81,7 +82,7 @@ func armTurn(s *session.Session, arm string, actions []api.Action) (*Turn, error
 	return nil, fmt.Errorf("arm %q is not control or treatment", arm)
 }
 
-func opTurn(s *session.Session, raw json.RawMessage) (any, error) {
+func opTurn(s *session.Session, v func([]api.Action) ([]api.ActionResult, error), raw json.RawMessage) (any, error) {
 	var a struct {
 		Arm     string       `json:"arm"`
 		Actions []api.Action `json:"actions"`
@@ -92,7 +93,7 @@ func opTurn(s *session.Session, raw json.RawMessage) (any, error) {
 	if len(a.Actions) == 0 {
 		return nil, fmt.Errorf("actions: the reply's actions are required")
 	}
-	return armTurn(s, a.Arm, a.Actions)
+	return armTurn(s, v, a.Arm, a.Actions)
 }
 
 func renderText(name string, d any) (string, error) {
@@ -106,7 +107,7 @@ func renderText(name string, d any) (string, error) {
 	return b.String(), nil
 }
 
-func opDecide(s *session.Session, raw json.RawMessage) (any, error) {
+func opDecide(s *session.Session, v func([]api.Action) ([]api.ActionResult, error), raw json.RawMessage) (any, error) {
 	var a struct {
 		Arm       string       `json:"arm"`
 		Actions   []api.Action `json:"actions"`
@@ -117,7 +118,7 @@ func opDecide(s *session.Session, raw json.RawMessage) (any, error) {
 	if err := strict(raw, &a); err != nil {
 		return nil, err
 	}
-	t, err := armTurn(s, a.Arm, a.Actions)
+	t, err := armTurn(s, v, a.Arm, a.Actions)
 	if err != nil {
 		return nil, err
 	}
@@ -159,7 +160,7 @@ func opDecide(s *session.Session, raw json.RawMessage) (any, error) {
 		}
 	default:
 		ans.Kind = AnswerDecision
-		ans.Outcome, err = Decide(s, a.Arm, a.Actions, a.Inspected, ans.Parse.Reply)
+		ans.Outcome, err = DecideWith(s, v, a.Arm, a.Actions, a.Inspected, ans.Parse.Reply)
 	}
 	if err != nil {
 		return nil, err

@@ -207,8 +207,8 @@ def run_case(binary, run_dirs, ctxs, pool, case):
         other = fresh_turn(binary, run_dirs, c, "treatment" if arm == "control" else "control",
                            rec["validationFirst"]["attempts"][-1]["actions"])
         head = lambda m: m.split("Nothing has been applied yet.")[0]  # noqa: E731
-        foot = lambda m: m[m.index("\nReply with one JSON object:"):].split("\n", 3)[3]  # noqa: E731
-        ok("both arms' turns share the head and the foot (beyond the IDs line)",
+        foot = lambda m: m[m.index("\nReply with one JSON object:"):]  # noqa: E731
+        ok("both arms' turns share the head and the foot, byte for byte",
            head(t["message"]) == head(other["message"]) and foot(t["message"]) == foot(other["message"]))
         if arm == "control":
             ok("control shows no alternatives", "ALTERNATIVES" not in t["message"] and not t["inspect"])
@@ -267,6 +267,66 @@ def tamper_cases(binary, run_dirs, ctxs, pool, draws):
             refused = True
         out.append({"case": label, "context": at["id"], "arm": d["arm"], "result": "refused" if refused else "accepted",
                     "passed": ["refused"] if refused else [], "failed": [] if refused else ["refused"]})
+    return out
+
+
+LIMIT_CFG = {"maxModelCallsPerDraw": 6, "maxModelCalls": 1000, "request": {"timeoutSeconds": 300},
+             "stop": {"wallClockSeconds": 10 ** 9, "consecutiveTransportFailures": 5}}
+
+
+def review_cases(binary, run_dirs, ctxs, pool, out_dir):
+    """The V0.13d review's witnesses, as fidelity cases: an interrupted
+    draw whose halt cause or response metadata is edited must not replay
+    (F6); five consecutive transport failures stop the run before a sixth
+    call (F9); a revision with two shift extensions for one employee and day
+    is refused at final validation through the protocol (F4)."""
+    out = []
+    c = ctxs.by_id["S1-a"]
+    s = ctxs.settings[D.QWEN]
+    entry = {"seq": 1, "model": D.QWEN, "context": c["id"], "arm": "treatment", "draw": 1}
+    lim = D.Limits(1, 1000, 10 ** 9, 300, max_fails=5, now=lambda: 0.0)
+    d = D.run_draw(entry, c, s, pool, ctxs.memory(c, D.QWEN), D.scripted([INSPECT("adjusted"), SEL("adjusted")]), lim,
+                   utc=lambda: None, now=lambda: 0.0)
+    cfg = dict(LIMIT_CFG, maxModelCallsPerDraw=1)
+    good = d["status"] == "interrupted" and d["halt"]["code"] == "draw_call_limit"
+    try:
+        D.replay_draw(json.loads(json.dumps(d)), c, s, pool, ctxs.memory(c, D.QWEN), cfg)
+    except (D.ExperimentError, SB.ExperimentError):
+        good = False
+    out.append({"case": "interrupted draw replays with its halt", "context": c["id"], "arm": "treatment",
+                "result": d["halt"]["code"], "passed": ["replayed"] if good else [], "failed": [] if good else ["replayed"]})
+    for label, edit in (("edited halt cause", lambda r: r["halt"].update(code="wall_clock", message="invented")),
+                        ("edited served model", lambda r: r["calls"][0].update(servedModel="another-model")),
+                        ("edited usage", lambda r: r["calls"][0].update(usage={"total_tokens": 1}))):
+        r = json.loads(json.dumps(d))
+        edit(r)
+        try:
+            D.replay_draw(r, c, s, pool, ctxs.memory(c, D.QWEN), cfg)
+            refused = False
+        except (D.ExperimentError, SB.ExperimentError):
+            refused = True
+        out.append({"case": label, "context": c["id"], "arm": "treatment", "result": "refused" if refused else "accepted",
+                    "passed": ["refused"] if refused else [], "failed": [] if refused else ["refused"]})
+    # F9: draws 1 and 2 time out twice each, draw 3 once, then would succeed.
+    proto = {"id": "mock-transport", "modelOrder": [D.QWEN], "drawsPerUnit": {D.QWEN: {"unit": 3, "aa": 1}},
+             "contexts": {"S1-a": {"aa": False}}, "maxModelCallsPerDraw": 6, "maxModelCalls": 1000,
+             "request": {"timeoutSeconds": 300}, "stop": {"wallClockSeconds": 10 ** 9, "consecutiveTransportFailures": 5}}
+    sched = [x for x in D.schedule(proto, [c]) if x["arm"] == "treatment"]
+    tr = D.scripted([None, None, None, None, None, SEL("proposal")])
+    tmp = os.path.join(out_dir, "mock-transport")
+    shutil.rmtree(tmp, ignore_errors=True)
+    doc = D.run_schedule(proto, "mock", sched, ctxs, ctxs.opener(binary), {D.QWEN: tr}, tmp, "scripted: no model",
+                         now=lambda: 0.0, utc=lambda: None)
+    good = doc["status"] == "PARTIAL" and (doc["stopped"] or {}).get("code") == "transport" and doc["modelCalls"] == 5
+    out.append({"case": "five consecutive transport failures stop the run before a sixth call", "context": c["id"],
+                "arm": "treatment", "result": f"{doc['status']} after {doc['modelCalls']} calls",
+                "passed": ["stopped"] if good else [], "failed": [] if good else ["stopped"]})
+    ext = {"type": "extend_shift", "employee": "E03", "minutes": 30}
+    r, d = run_case(binary, run_dirs, ctxs, pool, ("duplicate shift extensions in a revision", "S1-a", "control",
+                                                    [REVISE([ext, ext, {"type": "terminate", "employee": "E04",
+                                                                        "lastDay": "2026-10-27"}])],
+                                                    "invalid_alternative", {"batches": 0, "calls": 1}))
+    out.append(r)
     return out
 
 
@@ -331,7 +391,7 @@ def mock_run(binary, run_dirs, ctxs, out, budget=None):
 
 
 def run_all(binary, contexts_dir, replays, out):
-    for m in ("mock-complete", "mock-partial"):  # this command's own scratch runs
+    for m in ("mock-complete", "mock-partial", "mock-transport"):  # this command's own scratch runs
         shutil.rmtree(os.path.join(out, m), ignore_errors=True)
     rows, _ = D.load_contexts(contexts_dir)
     env = {SB.SETTINGS_ENV: SB.REPLAY_URL}
@@ -354,6 +414,7 @@ def run_all(binary, contexts_dir, replays, out):
             results.append(r)
             draws.setdefault(case[0], d)
         results += tamper_cases(binary, ctxs.run_dirs, ctxs, pool, draws)
+        results += review_cases(binary, ctxs.run_dirs, ctxs, pool, out)
         results.append(missing_field_case(binary, ctxs.run_dirs, ctxs, pool))
         # Initial request, proposal and state equality across arms, at every
         # context (historical ones when the replays are given).
@@ -374,7 +435,8 @@ def run_all(binary, contexts_dir, replays, out):
             due_ok = c["expected"].get("stepDue") is None or bool(seen[0][1]) == c["expected"]["stepDue"]
             same = seen[0][:3] == seen[1][:3] and seen[0][0] == c["digests"]
             results.append({"case": "initial request, proposal and state equal across arms; turn due as V0.13c",
-                            "context": c["id"], "arm": "both", "result": "due" if seen[0][1] else str(seen[0][2]),
+                            "context": c["id"], "arm": "both", "result": "due" if seen[0][1] else (str(seen[0][2]) if seen[0][2] is not None
+                                                                                 else "proposal refused: no turn before a correction"),
                             "passed": [x for x, ok in (("first request is the context's in both arms", True), ("state and turn test equal across arms", same),
                                                         ("due as V0.13c", due_ok)) if ok],
                             "failed": [x for x, ok in (("state and turn test equal across arms", same), ("due as V0.13c", due_ok))

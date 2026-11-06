@@ -7,7 +7,7 @@ as well. The 964-draw V0.13c draft (`v13c-alt-1`) was not approved and is
 replaced by this one.
 
 **Files** (`docs/benchmark/v13d-dev/`): `protocol-draft.json`
-(`57aed043…` before the review; see §8 for the hashes at commit),
+(hashes in PROGRESS.md),
 `schedule-draft.json`, `contexts/contexts.jsonl`. Both JSON files are made
 by the driver from the committed inputs alone (`v13d.py protocol`,
 `schedule`), and `test_v13d.py` requires them identical to what the inputs
@@ -31,7 +31,7 @@ Gemma runs first, then Qwen; one model's draws at a time.
 |---|---|
 | Workflow `llm-agent-alternatives-workflow/v1` | `1e360348d2e689952d1911aa0e9d4323e8fbbb6c74edd751a833c2d7bf8a8ccb` |
 | Its base, `llm-agent-validation-first-workflow/v1` | `a0204f628c7631d43ebfbb48e3b6e31071b67252daa76f141e3ad3a43ff5f184` |
-| Presentation v2 template | `8327f254ed2e25865db781f5f1cdcc70db129ea0df72ab6d0ce924ddf79ce496` |
+| Presentation v2 template | `257b4377c2d7866f19525e9623f0c268ce036bec56bffe74988a240365002877` |
 | View table (`dreamteam.alternatives-view/v1`) | `ce7f0e238c2d8cf71bf87cf720f12b56bd667035971308ae9abae7399d66aba0` |
 | Selection rule v2 | `5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9` |
 | Arms | `dreamteam.alternatives-arms/v2` |
@@ -68,8 +68,9 @@ first request must be that one, byte for byte.
 
 * **Model calls.** A draw's bound is 3 calls after its initial proposal at a
   valid proposal (the turn's reply, a reply after inspect, one retry) and
-  5 at a refused one. The run's budget is the sum of every scheduled
-  draw's bound: **818 calls**. That is a ceiling that should never bind; it
+  4 at a refused one (one correction, then the turn). The run's budget is
+  the sum of every scheduled draw's bound: **802 calls** (818 before the
+  review's F10 correction). That is a ceiling that should never bind; it
   is the stop condition.
 * **Expected calls:** about 1 to 2 per due draw (a decision, and one more
   when the model inspects); none at the A/A draws, where the turn is never
@@ -96,7 +97,7 @@ first request must be that one, byte for byte.
   **Qwen 5 draws** allow a little more resolution where Qwen has varied.
   **A/A contexts, 2 draws each:** they check that the arms are identical
   where no turn is shown, and need no precision.
-* The V0.13c draft had 964 draws (4,820 calls). This one has 262 (818 at
+* The V0.13c draft had 964 draws (4,820 calls). This one has 262 (802 at
   most): 27% of the draws and 17% of the call ceiling. More draws per unit
   would narrow per-unit intervals but would not add contexts, so they have
   no clear methodological benefit here.
@@ -118,15 +119,17 @@ protocol and the contexts.
 ## 6. Analysis definitions (fixed before any request)
 
 **Primary estimand (owner decision D9).** For each context and model, the
-difference between the arms' distributions of the immediate final action:
-`retained`, `selected`, `selected_no_action`, `revised`, `abandoned`,
-`invalid_alternative`, `no_decision` (and `not_due` where no turn was
-shown). Reported per category as treatment minus control, with a Newcombe
-hybrid score interval (95%), and as the total variation distance between
-the two distributions. The two arms' outcome sets differ: control cannot
-select another alternative or no action, because it lists only the
-proposal. That is part of the information the treatment adds, and is not
-corrected for.
+difference between the arms' distributions of the immediate final action,
+on one scale for both arms, made from what is submitted (WORKFLOW.md §5;
+review F7): `original_retained`, `listed_alternative`,
+`no_staffing_action`, `other_batch`, `abandoned`, `invalid`, `no_decision`
+(and `not_due` where no turn was shown). Reported per category as treatment
+minus control, with a Newcombe hybrid score interval (95%), and as the
+total variation distance between the two distributions. The total
+variation distance between the exact submitted batches is reported beside
+it. The arms' own results (`retained`, `selected`, `revised`, …) are
+process measures: they depend on what each arm listed, so identical
+batches can carry different labels.
 
 **The three questions the owner asked to keep apart:**
 1. **Information exposure:** was the comparison presented (`presented`:
@@ -140,7 +143,7 @@ corrected for.
 None of these establishes a better financial or operational decision.
 
 **Secondary, per sensitivity pair and model:** the departure rate (anything
-but `retained`) in member b minus member a, per arm, with a Newcombe
+but `original_retained`) in member b minus member a, per arm, with a Newcombe
 interval; treatment minus control, with a MOVER interval. A context pair,
 not one fact (SENSITIVITY_CASES.md).
 
@@ -160,8 +163,8 @@ decisions. The reason text is never read.
   the result is `no_decision` and nothing is submitted. Validation-first
   keeps its own retries.
 * **Partial run:** the interrupted draw is recorded and replayed, not
-  classified. `run.json` says PARTIAL. The analysis reports only what was
-  observed, with no pooled summary and no pair estimates.
+  classified. `run.json` says PARTIAL. The analysis reports only the
+  observed cells, with no arm differences and no pair estimates.
 * **Never resumed:** any continuation needs the owner's separate
   authorization and a documented amendment.
 

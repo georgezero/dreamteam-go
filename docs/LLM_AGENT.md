@@ -1432,3 +1432,26 @@ The agent workflow that does this (llm-agent 7) is V0.13d's work. It
 comes after the owner's decisions and the human presentation review,
 under a locked protocol, and runs only on the owner's explicit
 authorization.
+
+## 25. Management alternatives workflow (V0.13d; experimental, not shown to any model)
+
+`agents/llm/llm_agent_alternatives.py` (`llm-agent-alternatives-workflow/v1`)
+is an experimental workflow for the V0.13d driver, not a new default
+policy. llm-agent 5 (validation-first) remains the default, unchanged, and
+llm-agent 6 remains experimental.
+
+* **Steps:** `llm_agent5.ask(..., workflow="validation-first")`, called
+  unchanged; then, only if it ends with a validated proposal, the engine's
+  final-decision turn for the declared arm (`alternatives.turn`), sent
+  verbatim; the model's replies read by the engine (`alternatives.decide`);
+  one inspect round and one retry; then the engine's outcome batches,
+  submitted only if valid and the state is unchanged.
+* **Texts:** every text after validation-first comes from the engine's
+  pinned presentation v2. The workflow makes none.
+* **Record:** `dreamteam.alternatives-decision-record/v1`, with
+  llm-agent 5's own record inside it.
+* **Specification:** `docs/v13d/WORKFLOW.md`.
+
+No model has been shown these texts. A run needs a locked protocol, the
+human presentation review and the owner's explicit authorization.
+

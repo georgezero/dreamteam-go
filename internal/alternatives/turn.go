@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,10 +20,10 @@ import (
 // arms from one decision point and one reply, rendered from the typed view
 // (view.go) through presentation v2 (text/presentation-v2.tmpl).
 //
-//   - Both arms get the same head and foot, byte for byte apart from the
-//     typed values they print (the time, the IDs a reply may select, the
-//     number of operations actions): "Nothing has been applied yet" is in
-//     both (owner decision D8).
+//   - Both arms get the same head and foot, byte for byte at one decision
+//     point: "Nothing has been applied yet" is in both (owner decision D8).
+//     Only the treatment's comparison lists the IDs a reply may select
+//     besides "proposal" (review N1).
 //   - The treatment adds the comparison between them, and answers inspect
 //     with the details. That is the only content difference.
 //   - The turn is due by one test for both arms: rule v2 applies to the
@@ -36,7 +37,7 @@ const (
 	ArmsV2ID             = "dreamteam.alternatives-arms/v2"
 	TurnSchema           = "dreamteam.alternatives-turn/v1"
 	PresentationV2ID     = "dreamteam.alternatives-presentation/v2"
-	PresentationV2Sha256 = "8327f254ed2e25865db781f5f1cdcc70db129ea0df72ab6d0ce924ddf79ce496"
+	PresentationV2Sha256 = "257b4377c2d7866f19525e9623f0c268ce036bec56bffe74988a240365002877"
 	ViewTableSha256      = "ce7f0e238c2d8cf71bf87cf720f12b56bd667035971308ae9abae7399d66aba0"
 	StepNotDueView       = "not_due:not_representable" // the comparison has no typed view; no turn in either arm
 )
@@ -48,7 +49,6 @@ var presentationV2 = template.Must(template.New("p2").Funcs(template.FuncMap{
 	"refText":       refText,
 	"actions":       viewActions,
 	"validation":    viewValidation,
-	"ids":           func(d turnData) string { return idList(d.IDs) },
 	"line":          viewLine,
 	"reversibility": func(a ViewAlt) string { return viewReversibility[a.Reversibility] },
 	"unavailable":   viewUnavailableText,
@@ -105,20 +105,9 @@ func viewValidation(a ViewAlt) string {
 	}
 	var parts []string
 	for _, r := range a.Refused {
-		parts = append(parts, fmt.Sprintf("action %d %s", r.Action, r.Code))
+		parts = append(parts, fmt.Sprintf("action %d", r.Action))
 	}
 	return "refused: " + strings.Join(parts, "; ")
-}
-
-func idList(ids []string) string {
-	var out []string
-	for _, id := range ids {
-		if id == IDProposal {
-			id += " (your proposal)"
-		}
-		out = append(out, id)
-	}
-	return strings.Join(out, ", ")
 }
 
 func viewValue(it ViewItem, k viewKind) string {
@@ -257,7 +246,47 @@ type built struct {
 	viewErr    string
 }
 
-func build(s *session.Session, reply []api.Action) (*built, error) {
+// Validator is a batch's validation as the agent protocol's validate op
+// makes it: an error when the protocol refuses the batch as a whole (two
+// shift extensions for one employee and day), otherwise the session's
+// result for each action.
+type Validator func([]api.Action) ([]api.ActionResult, error)
+
+// SessionValidator is the protocol's batch validation on a session alone,
+// for callers outside the protocol (tests, evidence): the same duplicate
+// shift-extension rule, then the session's validation.
+func SessionValidator(s *session.Session) Validator {
+	return func(actions []api.Action) ([]api.ActionResult, error) {
+		seen := map[[2]string]bool{}
+		today := s.Calendar().Date(s.Now()).String()
+		for _, a := range actions {
+			if a.Type != api.ActExtendShift {
+				continue
+			}
+			d := a.Date
+			if d == "" {
+				d = today
+			}
+			k := [2]string{a.Employee, d}
+			if seen[k] {
+				return nil, fmt.Errorf("duplicate_target: two shift extensions for one employee and day in one batch")
+			}
+			seen[k] = true
+		}
+		return s.ValidateBatch(actions...), nil
+	}
+}
+
+// accepted: the validator accepts every action of the batch.
+func accepted(v Validator, batch []api.Action) ([]api.ActionResult, bool) {
+	res, err := v(batch)
+	if err != nil {
+		return nil, false
+	}
+	return res, !slices.ContainsFunc(res, func(r api.ActionResult) bool { return !r.OK })
+}
+
+func build(s *session.Session, v Validator, reply []api.Action) (*built, error) {
 	b := &built{}
 	b.ops, b.staff, b.pos = splitPositions(reply)
 	sel, err := SelectV2(s, b.staff)
@@ -267,9 +296,7 @@ func build(s *session.Session, reply []api.Action) (*built, error) {
 	b.sel = sel
 	opsOK := true
 	if len(b.ops) > 0 {
-		for _, r := range s.ValidateBatch(b.ops...) {
-			opsOK = opsOK && r.OK
-		}
+		_, opsOK = accepted(v, b.ops)
 	}
 	switch {
 	case !sel.Applies:
@@ -304,8 +331,14 @@ func build(s *session.Session, reply []api.Action) (*built, error) {
 // Turns builds both arms' turns for a reply at s's current time. s is
 // only read (its digests are checked unchanged).
 func Turns(s *session.Session, reply []api.Action) (control, treatment *Turn, err error) {
+	return TurnsWith(s, SessionValidator(s), reply)
+}
+
+// TurnsWith is Turns with the given batch validation (the protocol's, in
+// the protocol operations).
+func TurnsWith(s *session.Session, v Validator, reply []api.Action) (control, treatment *Turn, err error) {
 	before := s.Digests()
-	b, err := build(s, reply)
+	b, err := build(s, v, reply)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -408,6 +441,95 @@ type TurnReply struct {
 	Error   string   `json:"error,omitempty"`
 }
 
+type replyWire struct {
+	Decision *string       `json:"decision"`
+	ID       *string       `json:"id"`
+	Actions  *[]api.Action `json:"actions"`
+	Reason   *string       `json:"reason"`
+	Cite     *[]Citation   `json:"cite"`
+	Inspect  *[]string     `json:"inspect"`
+}
+
+// exactJSON requires one JSON value whose every object has unique member
+// names, and, where t is a struct, only the names of t's fields exactly
+// as their tags spell them, all the way down.
+func exactJSON(data []byte, t reflect.Type) error {
+	dec := json.NewDecoder(bytes.NewReader(data))
+	dec.UseNumber()
+	var walk func(t reflect.Type, path string) error
+	walk = func(t reflect.Type, path string) error {
+		for t != nil && t.Kind() == reflect.Pointer {
+			t = t.Elem()
+		}
+		tok, err := dec.Token()
+		if err != nil {
+			return err
+		}
+		switch tok {
+		case json.Delim('{'):
+			fields := map[string]reflect.Type{}
+			isStruct := t != nil && t.Kind() == reflect.Struct && t != reflect.TypeOf(json.RawMessage{})
+			if isStruct {
+				for i := 0; i < t.NumField(); i++ {
+					f := t.Field(i)
+					name, _, _ := strings.Cut(f.Tag.Get("json"), ",")
+					if name != "" && name != "-" {
+						fields[name] = f.Type
+					}
+				}
+			}
+			seen := map[string]bool{}
+			for dec.More() {
+				k, err := dec.Token()
+				if err != nil {
+					return err
+				}
+				key := k.(string)
+				if seen[key] {
+					return fmt.Errorf("%s: member %q twice", path, key)
+				}
+				seen[key] = true
+				var next reflect.Type
+				switch {
+				case isStruct:
+					ft, ok := fields[key]
+					if !ok {
+						return fmt.Errorf("%s: unknown member %q", path, key)
+					}
+					next = ft
+				case t != nil && t.Kind() == reflect.Map:
+					next = t.Elem()
+				}
+				if err := walk(next, path+"."+key); err != nil {
+					return err
+				}
+			}
+			_, err = dec.Token()
+			return err
+		case json.Delim('['):
+			var elem reflect.Type
+			if t != nil && (t.Kind() == reflect.Slice || t.Kind() == reflect.Array) && t != reflect.TypeOf(json.RawMessage{}) {
+				elem = t.Elem()
+			}
+			for i := 0; dec.More(); i++ {
+				if err := walk(elem, fmt.Sprintf("%s[%d]", path, i)); err != nil {
+					return err
+				}
+			}
+			_, err = dec.Token()
+			return err
+		}
+		return nil
+	}
+	if err := walk(t, "reply"); err != nil {
+		return err
+	}
+	if _, err := dec.Token(); err != io.EOF {
+		return fmt.Errorf("text after the JSON object")
+	}
+	return nil
+}
+
 // ParseTurnReply reads a model's reply to a turn: exactly one JSON
 // object, nothing before or after it but white space, with only the
 // fields of the foot (decision, id, actions, reason, cite) or of an
@@ -417,14 +539,12 @@ func ParseTurnReply(content string) TurnReply {
 	bad := func(f string, a ...any) TurnReply {
 		return TurnReply{Kind: ReplyUnreadable, Error: fmt.Sprintf(f, a...)}
 	}
-	var raw struct {
-		Decision *string        `json:"decision"`
-		ID       *string        `json:"id"`
-		Actions  *[]api.Action  `json:"actions"`
-		Reason   *string        `json:"reason"`
-		Cite     *[]Citation    `json:"cite"`
-		Inspect  *[]string      `json:"inspect"`
-		Extra    map[string]any `json:"-"`
+	var raw replyWire
+	// Every object's members are unique and spelled exactly as the schema
+	// spells them (the decoder alone would let a later duplicate win, and
+	// match names in any case).
+	if err := exactJSON([]byte(content), reflect.TypeOf(raw)); err != nil {
+		return bad("%v", err)
 	}
 	dec := json.NewDecoder(strings.NewReader(content))
 	dec.DisallowUnknownFields()
@@ -497,6 +617,54 @@ type Outcome struct {
 	Validation       [][]api.ActionResult `json:"validation"`
 	Valid            bool                 `json:"valid"`
 	ComparisonSha256 string               `json:"comparisonSha256,omitempty"`
+	// Final is the final action in a space common to both arms (FinalActions),
+	// from what is submitted, never from the arm's labels; FinalSha256
+	// identifies the submitted batches exactly.
+	Final       string `json:"final"`
+	FinalSha256 string `json:"finalSha256"`
+}
+
+// The final action, the same scale in both arms (owner decision D9): it
+// depends only on the submitted batches, the reply and the candidate
+// list, which the rule makes from the decision point alone, never on what
+// either arm showed.
+const (
+	FinalRetained         = "original_retained"  // the reply's batches, unchanged
+	FinalListed           = "listed_alternative" // the reply's operations with another candidate's staffing batch
+	FinalNoStaffingAction = "no_staffing_action" // the reply's operations only
+	FinalOther            = "other_batch"        // any other submitted batches
+	FinalAbandoned        = "abandoned"          // nothing submitted, by choice
+	FinalInvalid          = "invalid"            // nothing submitted: refused or unlisted
+	FinalNoDecision       = "no_decision"        // nothing submitted: no usable reply
+)
+
+// FinalActions are the final-action categories, in order.
+var FinalActions = []string{FinalRetained, FinalListed, FinalNoStaffingAction, FinalOther, FinalAbandoned, FinalInvalid, FinalNoDecision}
+
+func finalAction(b *built, out *Outcome) string {
+	switch out.Result {
+	case ResultNoDecision:
+		return FinalNoDecision
+	case ResultInvalidAlterative:
+		return FinalInvalid
+	case ResultAbandoned:
+		return FinalAbandoned
+	}
+	if !jsonEqual(canon(out.Operations), canon(b.ops)) {
+		return FinalOther
+	}
+	switch {
+	case jsonEqual(canon(out.Staffing), canon(b.staff)):
+		return FinalRetained
+	case len(out.Staffing) == 0:
+		return FinalNoStaffingAction
+	}
+	for _, c := range b.sel.Candidates[1:] {
+		if c.OK && jsonEqual(canon(c.Actions), canon(out.Staffing)) {
+			return FinalListed
+		}
+	}
+	return FinalOther
 }
 
 // Decide classifies a decision reply to arm's turn at s for the same
@@ -504,8 +672,15 @@ type Outcome struct {
 // the turn (the same function of s and reply), so the decision is bound to
 // what was shown. s is only read.
 func Decide(s *session.Session, arm string, reply []api.Action, inspected []string, r *Reply) (*Outcome, error) {
+	return DecideWith(s, SessionValidator(s), arm, reply, inspected, r)
+}
+
+// DecideWith is Decide with the given batch validation (the protocol's,
+// in the protocol operations): every batch to be submitted is validated by
+// it, as the agents' batches are by the validate op.
+func DecideWith(s *session.Session, v Validator, arm string, reply []api.Action, inspected []string, r *Reply) (*Outcome, error) {
 	before := s.Digests()
-	b, err := build(s, reply)
+	b, err := build(s, v, reply)
 	if err != nil {
 		return nil, err
 	}
@@ -518,7 +693,16 @@ func Decide(s *session.Session, arm string, reply []api.Action, inspected []stri
 	}
 	out := &Outcome{Schema: OutcomeSchema, Arm: arm, Flags: []string{}, CitationChecks: []string{}, Operations: []api.Action{},
 		Staffing: []api.Action{}, Batches: [][]api.Action{}, Validation: [][]api.ActionResult{}}
-	revalidate := func(batch []api.Action) []api.ActionResult { return s.ValidateBatch(batch...) }
+	revalidate := func(batch []api.Action) []api.ActionResult {
+		res, err := v(batch)
+		if err != nil { // refused by the protocol as a batch: every action refused
+			res = make([]api.ActionResult, len(batch))
+			for i := range res {
+				res[i] = api.ActionResult{OK: false, Code: "duplicate_target", Message: err.Error()}
+			}
+		}
+		return res
+	}
 	// A revision replaces the whole reply. When its operations batch is
 	// the reply's, its staffing batch is classified against the listed
 	// alternatives; otherwise it is a revision of the whole proposal.
@@ -555,6 +739,12 @@ func Decide(s *session.Session, arm string, reply []api.Action, inspected []stri
 		if whole {
 			d = Decision{Requests: requests, Reply: r, Flags: []string{}, CitationChecks: []string{}}
 			d.Result, d.Why = ResultRevised, "a new reply: its operations actions differ from the reply's, or it has no staffing action"
+			// The inspected flag, as Classify sets it.
+			if slices.ContainsFunc(inspected, func(id string) bool {
+				return id != IDProposal && slices.ContainsFunc(b.agent.Alternatives, func(x AgentAlternative) bool { return x.ID == id })
+			}) {
+				d.Flags = append(d.Flags, FlagInspected)
+			}
 		} else {
 			d = Classify(b.agent, requests, noCite, revalidate)
 		}
@@ -562,7 +752,7 @@ func Decide(s *session.Session, arm string, reply []api.Action, inspected []stri
 		// Flags: inspected as Classify; compared from the view.
 		d.Flags = slices.DeleteFunc(d.Flags, func(f string) bool { return f == FlagNoComparison || f == FlagCompared })
 		if r != nil && len(r.Comparison) > 0 {
-			if ok, checks := verifyViewCitations(b.view, r.Comparison, d.Alternative); ok {
+			if ok, checks := verifyViewCitations(b.view, inspected, r.Comparison, d.Alternative); ok {
 				d.Flags = append(d.Flags, FlagCompared)
 			} else {
 				d.CitationChecks = checks
@@ -602,7 +792,7 @@ func Decide(s *session.Session, arm string, reply []api.Action, inspected []stri
 		if len(batch) == 0 {
 			continue
 		}
-		res := s.ValidateBatch(batch...)
+		res := revalidate(batch)
 		out.Validation = append(out.Validation, res)
 		out.Batches = append(out.Batches, batch)
 		for _, x := range res {
@@ -617,16 +807,22 @@ func Decide(s *session.Session, arm string, reply []api.Action, inspected []stri
 	if out.Result == ResultNoDecision {
 		out.Valid = false
 	}
+	out.Final, out.FinalSha256 = finalAction(b, out), sha(out.Batches)
 	return out, digestsUnchanged(s, before)
 }
 
 // verifyViewCitations applies V0.13b's five checks to citations of the
 // view's items, by their shown keys and values.
-func verifyViewCitations(v *View, cs []Citation, chosen string) (bool, []string) {
+// Only the details actually sent count as shown: the alternatives an
+// inspect answer gave (the summary holds no item values).
+func verifyViewCitations(v *View, inspected []string, cs []Citation, chosen string) (bool, []string) {
 	var fails []string
 	shown := map[string]bool{}
 	values := map[string]map[string]string{} // alt -> key -> shown value
 	for _, x := range v.Alternatives {
+		if !slices.Contains(inspected, x.ID) {
+			continue
+		}
 		values[x.ID] = map[string]string{}
 		for _, list := range [][]ViewItem{x.Facts, x.Estimates, x.Obligations} {
 			for _, it := range list {
@@ -644,7 +840,7 @@ func verifyViewCitations(v *View, cs []Citation, chosen string) (bool, []string)
 	for k := range shown {
 		all := true
 		for _, x := range v.Alternatives {
-			if !x.Accepted {
+			if !x.Accepted || values[x.ID] == nil {
 				continue
 			}
 			if _, ok := values[x.ID][k]; !ok {

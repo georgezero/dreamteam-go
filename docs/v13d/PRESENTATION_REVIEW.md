@@ -14,7 +14,7 @@
 
 | Text | File | SHA-256 |
 |---|---|---|
-| Presentation v2: the shared head and foot (both arms), the comparison and the detail (treatment), the inspect, once-only and retry answers | `internal/alternatives/text/presentation-v2.tmpl` (also `docs/benchmark/v13d-dev/presentation/presentation-v2.tmpl`) | `8327f254ed2e25865db781f5f1cdcc70db129ea0df72ab6d0ce924ddf79ce496` |
+| Presentation v2: the shared head and foot (both arms), the comparison and the detail (treatment), the inspect, once-only and retry answers | `internal/alternatives/text/presentation-v2.tmpl` (also `docs/benchmark/v13d-dev/presentation/presentation-v2.tmpl`) | `257b4377c2d7866f19525e9623f0c268ce036bec56bffe74988a240365002877` |
 | The closed tables: every item label, form and basis; every "not known before deciding" reason; the reversibility texts; the reference descriptions | `docs/benchmark/v13d-dev/presentation/view-table.txt` | `ce7f0e238c2d8cf71bf87cf720f12b56bd667035971308ae9abae7399d66aba0` |
 | The candidate rule the alternatives come from | `internal/alternatives/text/selection-v2.txt` | `5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9` |
 

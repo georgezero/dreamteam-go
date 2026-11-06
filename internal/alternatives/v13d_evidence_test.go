@@ -104,7 +104,7 @@ func TestEvidenceV13d(t *testing.T) {
 		for k, m := range []member{pr.A, pr.B} {
 			s := at(t, m.At)
 			c, tr := mustTurns(t, s, m.Proposal...)
-			b, err := build(s, m.Proposal)
+			b, err := build(s, SessionValidator(s), m.Proposal)
 			if err != nil || b.view == nil {
 				t.Fatalf("%s: %v", m.Label, err)
 			}
