@@ -1,0 +1,123 @@
+{
+ "control": {
+  "schema": "dreamteam.alternatives-turn/v2",
+  "arms": "dreamteam.alternatives-arms/v3",
+  "arm": "control",
+  "due": true,
+  "why": "due",
+  "message": "PHASE 3 alternative inspection / PHASE 4 final decision at 2026-10-20T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\n\nReply with one JSON object (the shared system schema governs this phase):\n- {\"decision\": \"select\", \"id\": ID, \"reason\": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is \"proposal\".\n- {\"decision\": \"revise\", \"actions\": [...], \"reason\": TEXT} replaces your whole reply with these actions (an empty array is deliberate no action); they are validated again before anything is submitted.\n- {\"decision\": \"abandon\", \"reason\": TEXT} submits nothing.\nOptionally add \"cite\": up to three items from any detail you were shown, each {\"item\": KEY, \"values\": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.\n",
+  "inspect": {},
+  "allowed": [
+   "select:proposal",
+   "revise",
+   "abandon"
+  ],
+  "record": {
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2027-02-16"
+    }
+   ],
+   "operations": [],
+   "replyPositions": [
+    1
+   ],
+   "rule": "dreamteam.alternative-selection/v2",
+   "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+   "presentation": "dreamteam.alternatives-presentation/v3",
+   "presentationSha256": "19caebcbfc53fd2d36fea9c08851a5607cf6bf258cb496c491e6e2de296f7640",
+   "viewSchema": "dreamteam.alternatives-view/v2",
+   "viewTableSha256": "870ed5a8235362bf73fe14b8bcd8966a6066f59a29ee632837a8ec094db8a039",
+   "messageSha256": "aac79b47334731c2696be63bceae897cdb2e234d68b34b46ecf662b1436843ae",
+   "inspectSha256": {}
+  }
+ },
+ "treatment": {
+  "schema": "dreamteam.alternatives-turn/v2",
+  "arms": "dreamteam.alternatives-arms/v3",
+  "arm": "treatment",
+  "due": true,
+  "why": "due",
+  "message": "PHASE 3 alternative inspection / PHASE 4 final decision at 2026-10-20T07:00:00. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.\n\nALTERNATIVES. The simulator's alternatives to the staffing actions in your reply, in a fixed order: your proposal, no action, then any others the candidate rule lists. The order says nothing about any alternative, and none is a default.\nE1 is the employee in action 1 of your reply.\n\nproposal (your proposal): action 1: terminate E1, lastDay 2027-02-16\n  Validation: accepted\nno_action: no staffing action (no batch)\n  Validation: accepted (nothing to apply)\n\nEach alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {\"inspect\": [ID, ...]}. You can do this once.\n\nReply with one JSON object (the shared system schema governs this phase):\n- {\"decision\": \"select\", \"id\": ID, \"reason\": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is \"proposal\".\n- {\"decision\": \"revise\", \"actions\": [...], \"reason\": TEXT} replaces your whole reply with these actions (an empty array is deliberate no action); they are validated again before anything is submitted.\n- {\"decision\": \"abandon\", \"reason\": TEXT} submits nothing.\nOptionally add \"cite\": up to three items from any detail you were shown, each {\"item\": KEY, \"values\": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.\n",
+  "inspect": {
+   "no_action": "DETAIL no_action: no staffing action (no batch)\n  Validation: accepted (nothing to apply)\n  Facts:\n    - [severance_recognized_now.E1] Severance recognized now · E1: $0.00 · no termination is committed, so none is recognized\n    - [employment.E1] Employment stage · E1: active\n    - [contract_minutes.E1] Contracted weekly minutes · E1: 2,400\n    - [roster_minutes_week_a.E1] Rostered minutes, week A · E1: 2,400\n    - [roster_minutes_week_b.E1] Rostered minutes, week B · E1: 2,400\n    - [pending_rosters.E1] Pending roster versions · E1: 0\n    - [approved_extensions.E1] Approved extensions · E1: 0\n    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 174\n  Estimates:\n    - none\n  Obligations that continue:\n    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\n    - [payables] Accounts payable: $26,088.71\n  Continuing employment commitments, relative to no action (each employee once):\n    - S1 is public staff entry 1. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $2,100.00; remaining conditional exposure: $2,100.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S2 is public staff entry 2. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n    - E1 is public staff entry 3. Baseline guarantee: $1,800.00 per full week; continuing guarantee: $1,800.00 per full week; change in weekly rate: $0.00. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $3,600.00; remaining conditional exposure: $3,600.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S4 is public staff entry 4. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $3,950.00; remaining conditional exposure: $3,950.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S5 is public staff entry 5. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $4,500.00; remaining conditional exposure: $4,500.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S6 is public staff entry 6. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $4,345.00; remaining conditional exposure: $4,345.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S7 is public staff entry 7. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n    - S8 is public staff entry 8. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n  Capacity (whole staffing batch):\n    - [slots_closed] Slots closed: 0 slots · 2026-10-21 to 2027-02-17 (current booking horizon). Capacity, not patients, orders or revenue.\n    - [bookings_displaced] Bookings displaced: 0 bookings · 2026-10-21 to 2027-02-17 (current booking horizon)\n    - [replacement_capacity] Displaced bookings with feasible replacements by capacity: 0 bookings · 2026-10-21 to 2027-02-17 (current booking horizon). Acceptance is unavailable before commitment.\n    - [slots_opened] Replacement or additional bookable capacity: 0 slots · 2026-10-21 to 2027-02-17 (current booking horizon)\n    - Future demand: unavailable. Capacity beyond the displayed horizon: unavailable.\n  Withdrawal and reversibility, per action:\n    - No staffing batch is applied; nothing to reverse.\n  Not known before deciding:\n    - Human fatigue, welfare, morale, resignation, clinical outcomes and reputation are unavailable; operational workload and capacity remain modeled.\n    - Future orders and revenue: they depend on future demand and are not projected for the decision\n",
+   "proposal": "DETAIL proposal (your proposal): action 1: terminate E1, lastDay 2027-02-16\n  Validation: accepted\n  Facts:\n    - [last_day.E1] Last day · E1: 2027-02-16\n    - [end_date.E1] Not employed from · E1: 2027-02-17\n    - [notice_days.E1] Notice · E1: 119 days\n    - [severance_recognized_now.E1] Severance recognized now · E1: $3,600.00 · recognized now, paid 2027-02-19 · two contracted weeks with benefits, owed once the termination is committed\n    - [severance_payday.E1] Severance payday · E1: 2027-02-19\n    - [voided_rosters.E1] Pending roster versions voided · E1: 0\n    - [voided_extensions.E1] Approved extensions voided · E1: 0\n    - [contract_pay_to_last_day.E1] Contract pay to the last day · E1: $30,960.00 · today to 2027-02-16 · minimum: the contract guarantee with benefits on the days still employed\n    - [booked_ahead] Appointments booked from tomorrow within the booking horizon: 174\n  Estimates:\n    - [contract_cost_no_longer_owed.E1] Contract cost no longer owed · E1: $1,800.00 · per full week from 2027-02-17 · estimate: the contract guarantee with benefits; overtime and hold-over not modeled\n  Obligations that continue:\n    - [next_payroll] Payroll accrued, next payday: $13,964.15 · paid 2026-10-30\n    - [payables] Accounts payable: $26,088.71\n  Continuing employment commitments, relative to no action (each employee once):\n    - S1 is public staff entry 1. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $2,100.00; remaining conditional exposure: $2,100.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S2 is public staff entry 2. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n    - E1 is public staff entry 3. Baseline guarantee: $1,800.00 per full week; continuing guarantee: $1,800.00 per full week through last day 2027-02-16; change in weekly rate: $0.00. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $3,600.00; remaining conditional exposure: $0.00; change: -$3,600.00. Exposure is payable only on a later termination, never payable now. This termination recognizes severance separately in Facts; do not add that recognized amount again as conditional exposure.\n    - S4 is public staff entry 4. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $3,950.00; remaining conditional exposure: $3,950.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S5 is public staff entry 5. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $4,500.00; remaining conditional exposure: $4,500.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S6 is public staff entry 6. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: $4,345.00; remaining conditional exposure: $4,345.00; change: $0.00. Exposure is payable only on a later termination, never payable now.\n    - S7 is public staff entry 7. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n    - S8 is public staff entry 8. Baseline guarantee: unavailable per full week; continuing guarantee: unavailable per full week; change in weekly rate: unavailable. This is a rate, not a total or future savings.\n      Baseline conditional severance exposure: unavailable; remaining conditional exposure: unavailable; change: unavailable. Exposure is payable only on a later termination, never payable now.\n  Capacity (whole staffing batch):\n    - [slots_closed] Slots closed: 45 slots · 2027-02-17 to 2027-02-17 (current booking horizon). Capacity, not patients, orders or revenue.\n      - XR: 31 slots (same horizon).\n      - CT: 14 slots (same horizon).\n    - [bookings_displaced] Bookings displaced: 0 bookings · 2026-10-21 to 2027-02-17 (current booking horizon)\n    - [replacement_capacity] Displaced bookings with feasible replacements by capacity: 0 bookings · 2026-10-21 to 2027-02-17 (current booking horizon). Acceptance is unavailable before commitment.\n    - [slots_opened] Replacement or additional bookable capacity: 0 slots · 2026-10-21 to 2027-02-17 (current booking horizon)\n    - Future demand: unavailable. Capacity beyond the displayed horizon: unavailable.\n  Withdrawal and reversibility, per action:\n    - Action 1: a committed termination cannot be withdrawn or moved; no action rehires the employee\n  Not known before deciding:\n    - Human fatigue, welfare, morale, resignation, clinical outcomes and reputation are unavailable; operational workload and capacity remain modeled.\n    - Slots beyond the booking horizon: they do not exist yet and are not counted\n    - Demand for the closed slots: whether a closed slot would have been booked depends on future orders, which are not known before deciding\n    - Future orders and revenue: they depend on future demand and are not projected for the decision\n"
+  },
+  "allowed": [
+   "select:proposal",
+   "select:no_action",
+   "revise",
+   "abandon"
+  ],
+  "record": {
+   "proposal": [
+    {
+     "type": "terminate",
+     "employee": "E03",
+     "lastDay": "2027-02-16"
+    }
+   ],
+   "operations": [],
+   "replyPositions": [
+    1
+   ],
+   "rule": "dreamteam.alternative-selection/v2",
+   "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+   "presentation": "dreamteam.alternatives-presentation/v3",
+   "presentationSha256": "19caebcbfc53fd2d36fea9c08851a5607cf6bf258cb496c491e6e2de296f7640",
+   "viewSchema": "dreamteam.alternatives-view/v2",
+   "viewTableSha256": "870ed5a8235362bf73fe14b8bcd8966a6066f59a29ee632837a8ec094db8a039",
+   "comparisonSha256": "4694d438778271368fffbb476b026067adec88129fa35768b90eecae7cf7316b",
+   "viewSha256": "1c9bf2e24336adde707592628f31b00599a572e07a163a2beda73c67457b855f",
+   "messageSha256": "86858b6f86a0773f95c8f9cd2244e8be4d0c7228b92f6c3168a04f453063f06e",
+   "inspectSha256": {
+    "no_action": "dec4bafbea87f350d40ff2a06a2608f24adc337114741ef353f6a977cc9c1c2c",
+    "proposal": "e9ba2199204b494f32c3e2057811320b684885505316400cd96c3eec1c60f9bd"
+   },
+   "map": {
+    "refs": {
+     "E1": "E03"
+    },
+    "items": {
+     "no_action": {
+      "approved_extensions.E1": "approved_extensions.E03",
+      "booked_ahead": "booked_ahead",
+      "contract_minutes.E1": "contract_minutes.E03",
+      "displaced_bookings": "displaced_bookings",
+      "employment.E1": "employment.E03",
+      "next_payroll": "next_payroll",
+      "payables": "payables",
+      "pending_rosters.E1": "pending_rosters.E03",
+      "roster_minutes_week_a.E1": "roster_minutes_week_a.E03",
+      "roster_minutes_week_b.E1": "roster_minutes_week_b.E03",
+      "severance_if_terminated_later.E1": "severance_if_terminated_later.E03",
+      "severance_recognized_now.E1": "severance_recognized_now.E03",
+      "slots_closed": "slots_closed",
+      "weekly_guarantee.E1": "weekly_guarantee.E03"
+     },
+     "proposal": {
+      "booked_ahead": "booked_ahead",
+      "contract_cost_no_longer_owed.E1": "forecast.0",
+      "contract_pay_to_last_day.E1": "guaranteed.1",
+      "displaced_bookings": "displaced_bookings",
+      "end_date.E1": "end_date.E03",
+      "last_day.E1": "last_day.E03",
+      "next_payroll": "next_payroll",
+      "notice_days.E1": "notice_days.E03",
+      "payables": "payables",
+      "severance_payday.E1": "severance_payday.E03",
+      "severance_recognized_now.E1": "severance_recognized_now.E03",
+      "slots_closed": "slots_closed",
+      "slots_closed.CT": "slots_closed.CT",
+      "slots_closed.XR": "slots_closed.XR",
+      "slots_closed_booked_now": "slots_closed_booked_now",
+      "voided_extensions.E1": "voided_extensions.E03",
+      "voided_rosters.E1": "voided_rosters.E03"
+     }
+    }
+   }
+  }
+ }
+}
