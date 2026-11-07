@@ -43,7 +43,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -z "$(gofmt -l .)"
+          test -z "$(git ls-files -z -- '*.go' | xargs -0 gofmt -l)"
           go test ./internal/alternatives ./internal/agent ./cmd/dreamteam -count=1 -timeout 30m
           go build -o .git/dt-v013f/dreamteam ./cmd/dreamteam
       - name: Historical replay prerequisites
