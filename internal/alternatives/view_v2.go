@@ -95,8 +95,12 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 	// is not used as an exact guarantee because benefits round differently.
 	for _, e := range o.Staff {
 		who := e.Name + " (" + e.ID + ")"
+		hiredWho := ""
+		if e.Hired != nil {
+			hiredWho = e.ID + " (" + offerLabelOf(e) + ")"
+		}
 		for _, ln := range append(slices.Clone(pp.Guaranteed), pp.Forecast...) {
-			if ln.Label == "Contract cost no longer owed · "+who || ln.Label == "Contract guarantee per full week · "+who {
+			if ln.Label == "Contract cost no longer owed · "+who || ln.Label == "Contract guarantee per full week · "+who || (hiredWho != "" && (ln.Label == "Contract cost no longer owed · "+hiredWho || ln.Label == "Contract guarantee per full week · "+hiredWho)) {
 				guarantees[e.ID] = ln.Cents
 			}
 		}
@@ -105,11 +109,9 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 		x := ViewAltV2{ViewAlt: base.Alternatives[i], Commitments: []CommitmentV2{}, Reversals: []ReversalV2{}, Proxies: []ProxyV2{}}
 		// Replace the legacy obligation and capacity fragments, so a commitment
 		// is shown once even when several actions touch the same employee.
-		keep := func(it ViewItem) bool {
-			return it.Kind != "weekly_guarantee" && it.Kind != "weekly_guarantee_roster" && it.Kind != "severance_if_terminated_later" &&
-				!strings.HasPrefix(it.Kind, "remote_read_fees") && !strings.HasPrefix(it.Kind, "slots_closed") &&
-				it.Kind != "displaced_bookings" && it.Kind != "displaced_replacement"
-		}
+		from, to := shiftDateV2(o.Date, 1), shiftDateV2(o.Date, o.Practice.BookingHorizonDays)
+		x.Capacity = CapacityV2{Closed: QuantityV2{Unit: "slots", From: from, To: to}, Opened: QuantityV2{Unit: "slots", From: from, To: to}, Displaced: QuantityV2{Unit: "bookings", From: from, To: to}, Replacements: QuantityV2{Unit: "bookings", From: from, To: to}, ClosedByModality: []api.ModalityCount{}}
+		keep := func(it ViewItem) bool { return activeItemV2(it.Kind) }
 		x.Facts = slices.DeleteFunc(slices.Clone(x.Facts), func(it ViewItem) bool { return !keep(it) })
 		x.Estimates = slices.DeleteFunc(slices.Clone(x.Estimates), func(it ViewItem) bool { return !keep(it) })
 		x.Obligations = slices.DeleteFunc(slices.Clone(x.Obligations), func(it ViewItem) bool { return !keep(it) })
@@ -124,7 +126,7 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 				}
 				ref := "S" + fmt.Sprint(j+1)
 				for r, id := range m.Refs {
-					if id == e.ID {
+					if strings.HasPrefix(r, "E") && id == e.ID {
 						ref = r
 						break
 					}
@@ -158,6 +160,11 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 				x.Commitments = append(x.Commitments, c)
 			}
 			x.Capacity = capacityV2(s, o, alt.Actions, p)
+			for _, mc := range x.Capacity.ClosedByModality {
+				if !slices.Contains(viewModalities, mc.Modality) || mc.Count < 0 {
+					return nil, nil, vf("capacity modality or count")
+				}
+			}
 			used := map[int]bool{}
 			for _, act := range alt.Actions {
 				k := -1
@@ -198,7 +205,13 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 				}
 				x.Reversals = append(x.Reversals, r)
 			}
-			for _, tp := range p.Teleradiology {
+			proxyRefs := []string{}
+			for _, it := range base.Alternatives[i].Estimates {
+				if strings.HasPrefix(it.Kind, "remote_read_fees") {
+					proxyRefs = append(proxyRefs, it.Ref)
+				}
+			}
+			for ti, tp := range p.Teleradiology {
 				pr := ProxyV2{Cents: tp.TrailingFeeCents, Studies: tp.TrailingStudies, LookbackDays: tp.TrailingDays, AvailableTo: o.Time,
 					Windows: tp.Windows, Scope: tp.Scope}
 				for _, wn := range pr.Windows {
@@ -223,13 +236,11 @@ func BuildViewV2(s *session.Session, a *Agent, pos []int, ops int) (*ViewV2, *Vi
 					start = cutoff
 				}
 				pr.AvailableFrom = start.Format("2006-01-02T15:04:05")
-				// The mapped fee line identifies the contract without its raw ID.
-				for _, it := range base.Alternatives[i].Estimates {
-					if strings.HasPrefix(it.Kind, "remote_read_fees") {
-						pr.Ref = it.Ref
-						break
-					}
+				// Preview entries and their fee lines have the same engine order.
+				if ti >= len(proxyRefs) {
+					return nil, nil, vf("proxy reference")
 				}
+				pr.Ref = proxyRefs[ti]
 				x.Proxies = append(x.Proxies, pr)
 			}
 		}
@@ -294,6 +305,9 @@ func capacityV2(s *session.Session, o api.Observation, acts []api.Action, p api.
 		}
 		c.Opened.Number = num(n)
 		c.Opened.From = p.Hires[0].ProductiveDate
+		if c.Opened.From > c.Opened.To {
+			c.Opened.From = from
+		}
 	}
 	return c
 }
@@ -314,15 +328,36 @@ func centsTextV2(n *int64) string {
 
 // ViewV2TableText pins the successor's additional fixed vocabulary together
 // with the unchanged grammar it uses for the remaining legacy facts.
+func activeItemV2(kind string) bool {
+	return kind != "weekly_guarantee" && kind != "weekly_guarantee_roster" && kind != "severance_if_terminated_later" &&
+		!strings.HasPrefix(kind, "remote_read_fees") && !strings.HasPrefix(kind, "slots_closed") && kind != "displaced_bookings" && kind != "displaced_replacement"
+}
+
 func ViewV2TableText() string {
-	text := ViewV2Schema + "\n" + ViewTableText() + "\n" + string(presentationV3Text)
+	var b strings.Builder
+	b.WriteString(ViewV2Schema + "\n\nInherited typed grammar: each row is labelled by its rendering status.\n")
+	for _, name := range viewKindNames {
+		k := viewKinds[name]
+		status := "ACTIVE"
+		if !activeItemV2(name) {
+			status = "LEGACY-INACTIVE (internal binding only)"
+		}
+		fmt.Fprintf(&b, "%s | %s | label %q | ref %q | unit %s | basis %q | basisNoWhen %q | forms", status, name, k.label, k.ref, k.unit, k.basis, k.basisNoWhen)
+		for _, f := range k.when {
+			fmt.Fprintf(&b, " %q", f.text)
+		}
+		fmt.Fprintf(&b, " | empty %v\n", k.empty)
+	}
+	b.WriteString("\nACTIVE successor detail, capacity, commitment and proxy templates:\n")
+	b.Write(presentationV3Text)
+	b.WriteString("\nACTIVE action-specific reversibility:\n")
 	keys := make([]string, 0, len(reversalTextsV2))
 	for key := range reversalTextsV2 {
 		keys = append(keys, key)
 	}
 	slices.Sort(keys)
 	for _, key := range keys {
-		text += "\n" + key + " | " + reversalTextsV2[key]
+		fmt.Fprintf(&b, "%s | %q\n", key, reversalTextsV2[key])
 	}
-	return text + "\n"
+	return b.String()
 }

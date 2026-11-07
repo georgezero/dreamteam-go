@@ -18,7 +18,7 @@ const (
 	PresentationV3ID     = "dreamteam.alternatives-presentation/v3"
 	ParserV2ID           = "dreamteam.phase-response-parser/v2"
 	PresentationV3Sha256 = "19caebcbfc53fd2d36fea9c08851a5607cf6bf258cb496c491e6e2de296f7640"
-	ViewV2TableSha256    = "870ed5a8235362bf73fe14b8bcd8966a6066f59a29ee632837a8ec094db8a039"
+	ViewV2TableSha256    = "f96e2c4f9875b1b2593b09340bd6b752aa73ac7d7486886a53548c4c34bd5282"
 )
 
 //go:embed text/presentation-v3.tmpl

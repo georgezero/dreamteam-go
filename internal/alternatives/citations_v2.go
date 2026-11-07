@@ -36,17 +36,28 @@ func citationItemV2(it ViewItem) citationValueV2 {
 var countTextV2 = regexp.MustCompile(`^-?(?:[0-9]+|[1-9][0-9]{0,2}(?:,[0-9]{3})+)$`)
 
 func citationEqualV2(raw json.RawMessage, want citationValueV2) bool {
-	explicitUnit := false
 	var typed struct {
 		Value json.RawMessage `json:"value"`
 		Unit  string          `json:"unit"`
 	}
 	if len(raw) > 0 && raw[0] == '{' {
-		if err := strict(raw, &typed); err != nil || typed.Unit != want.Unit {
+		if err := strict(raw, &typed); err != nil || want.Number == nil {
 			return false
 		}
-		raw = typed.Value
-		explicitUnit = true
+		var n json.Number
+		if json.Unmarshal(typed.Value, &n) != nil {
+			return false
+		}
+		r, ok := new(big.Rat).SetString(string(n))
+		if !ok {
+			return false
+		}
+		if typed.Unit == "dollars" && want.Unit == UnitCents {
+			r.Mul(r, big.NewRat(100, 1))
+		} else if typed.Unit != want.Unit {
+			return false
+		}
+		return r.Cmp(new(big.Rat).SetInt64(*want.Number)) == 0
 	}
 	var s string
 	if json.Unmarshal(raw, &s) == nil {
@@ -58,7 +69,7 @@ func citationEqualV2(raw json.RawMessage, want citationValueV2) bool {
 		}
 		raw = []byte(strings.ReplaceAll(s, ",", ""))
 	}
-	if want.Number == nil || (want.Unit == UnitCents && !explicitUnit) || want.Unit == "dollars" {
+	if want.Number == nil || want.Unit == UnitCents || want.Unit == "dollars" {
 		return false
 	}
 	var n json.Number

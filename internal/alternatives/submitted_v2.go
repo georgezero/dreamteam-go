@@ -3,6 +3,7 @@ package alternatives
 import (
 	"encoding/json"
 	"slices"
+	"strings"
 
 	"github.com/georgezero/dreamteam-go/internal/api"
 )
@@ -11,7 +12,9 @@ const SubmittedSchema = "dreamteam.submitted-action/v1"
 
 // SubmittedAction is the decision of record. Empty submissions have one identity.
 // Action and batch order are retained: application and validation use earlier items.
-// Contract windows are a set in parseTeleWindows and teleCanon.
+// Contract windows are a set in parseTeleWindows and teleCanon. Hire skills
+// and cover windows follow hireCanon; sameCovers defines roster cover equality.
+// Breaks stay ordered because parseRoster validates chronological order.
 type SubmittedAction struct {
 	Schema    string         `json:"schema"`
 	Batches   [][]api.Action `json:"batches"`
@@ -27,6 +30,34 @@ func CanonicalSubmitted(batches [][]api.Action) SubmittedAction {
 		}
 		b := canon(batch)
 		for i := range b {
+			if b[i].Type == api.ActHire {
+				rank := func(s string) int {
+					if n := slices.Index(viewSkills, s); n >= 0 {
+						return n
+					}
+					return len(viewSkills)
+				}
+				slices.SortStableFunc(b[i].Skills, func(a, c string) int {
+					if ra, rc := rank(a), rank(c); ra != rc {
+						return ra - rc
+					}
+					return strings.Compare(a, c)
+				})
+			}
+			if b[i].Roster != nil && (b[i].Type == api.ActHire || b[i].Type == api.ActSetRoster) {
+				for _, week := range []*api.Week{&b[i].Roster.A, &b[i].Roster.B} {
+					for _, day := range week.Days() {
+						if day != nil {
+							slices.SortStableFunc(day.Covers, func(a, c api.Cover) int {
+								if a.Room != c.Room {
+									return strings.Compare(a.Room, c.Room)
+								}
+								return strings.Compare(a.From, c.From)
+							})
+						}
+					}
+				}
+			}
 			if b[i].Type == api.ActContractTeleradiology && b[i].Op == api.TeleOpStart {
 				order := []string{"weeknights", "saturday", "sunday"}
 				slices.SortStableFunc(b[i].Windows, func(a, c string) int { return slices.Index(order, a) - slices.Index(order, c) })

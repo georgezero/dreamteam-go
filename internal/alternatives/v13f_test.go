@@ -39,6 +39,14 @@ func TestV13fCanonicalSubmitted(t *testing.T) {
 		}
 	}
 }
+func TestV13fDifferentCountsAndTargets(t *testing.T) {
+	a := api.Action{Type: api.ActExtendShift, Employee: "E03", Minutes: 30}
+	for _, other := range []api.Action{{Type: api.ActExtendShift, Employee: "E03", Minutes: 31}, {Type: api.ActExtendShift, Employee: "E04", Minutes: 30}} {
+		if CanonicalSubmitted([][]api.Action{{a}}).Sha256 == CanonicalSubmitted([][]api.Action{{other}}).Sha256 {
+			t.Fatal("different count or target collapsed")
+		}
+	}
+}
 func TestV13fEmptyActionCounterexample(t *testing.T) {
 	s := at(t, t0)
 	p := []api.Action{term("E04", "2026-10-27")}
@@ -89,6 +97,7 @@ func TestV13fSystemSchemaPrecedence(t *testing.T) {
 }
 func TestV13fContinuingCommitments(t *testing.T) {
 	for _, acts := range [][]api.Action{
+		{ctHire("E04", "2026-11-10")},
 		{term("E03", "2026-10-27"), term("E04", "2026-10-27")},
 		{term("E03", "2026-10-27"), {Type: api.ActSetRoster, Op: api.RosterOpSet, Employee: "E04", Effective: "2026-11-02", Roster: &api.Roster{}}},
 	} {
@@ -113,6 +122,9 @@ func TestV13fContinuingCommitments(t *testing.T) {
 					t.Fatal("commitment counted twice")
 				}
 				seen[c.Ref] = true
+				if strings.HasPrefix(c.Ref, "H") || strings.HasPrefix(c.Ref, "C") || strings.HasPrefix(c.Ref, "P") {
+					t.Fatal("employee reference crossed a namespace", c.Ref)
+				}
 				if c.Ref == "E1" || c.Ref == "E2" {
 					if c.BaselineGuarantee == nil || c.ContinuingGuarantee == nil {
 						t.Fatal("known guarantee missing", alt.ID, c)
@@ -194,6 +206,16 @@ func TestV13fTypedNumericCitations(t *testing.T) {
 			t.Fatal("wrong units/value accepted", val)
 		}
 	}
+	for _, raw := range []string{`{"value":2481,"unit":"cents"}`, `{"value":24.81,"unit":"dollars"}`} {
+		if !citationEqualV2(json.RawMessage(raw), citationValueV2{Text: "$24.81", Number: num(2481), Unit: "cents"}) {
+			t.Fatal("explicit currency representation rejected", raw)
+		}
+	}
+	for _, raw := range []string{`{"value":2481,"unit":"dollars"}`, `{"value":24.81,"unit":"cents"}`, `{"value":"$24.81","unit":"cents"}`} {
+		if citationEqualV2(json.RawMessage(raw), citationValueV2{Text: "$24.81", Number: num(2481), Unit: "cents"}) {
+			t.Fatal("currency units conflated", raw)
+		}
+	}
 	if citationEqualV2(json.RawMessage(`2481`), citationValueV2{Text: "$24.81", Number: num(2481), Unit: "cents"}) {
 		t.Fatal("cents and bare numbers conflated")
 	}
@@ -265,4 +287,54 @@ func TestV13fBeforeFixWitnesses(t *testing.T) {
 		t.Fatal("historical obligation witness changed")
 	}
 	t.Log("DT13E-03 before fix: leave-one-out omits retained employee guarantee")
+}
+
+func TestV13fCanonicalEngineSets(t *testing.T) {
+	s := at(t, t0)
+	a := ctHire("canonical-hire", "2026-11-10")
+	a.Skills = []string{"CT", "XR"}
+	a.RateCents = 3800
+	for _, week := range []*api.Week{&a.Roster.A, &a.Roster.B} {
+		for _, day := range week.Days() {
+			if day != nil {
+				day.Covers = []api.Cover{{Room: "R1", From: "14:00", Until: "15:00"}, {Room: "R1", From: "12:00", Until: "13:00"}}
+			}
+		}
+	}
+	b := canon([]api.Action{a})[0]
+	slices.Reverse(b.Skills)
+	for _, week := range []*api.Week{&b.Roster.A, &b.Roster.B} {
+		for _, day := range week.Days() {
+			if day != nil {
+				slices.Reverse(day.Covers)
+			}
+		}
+	}
+	for _, act := range []api.Action{a, b} {
+		if res := s.ValidateBatch(act); len(res) != 1 || !res[0].OK {
+			t.Fatal("engine rejects equivalence witness", res)
+		}
+	}
+	if CanonicalSubmitted([][]api.Action{{a}}).Sha256 != CanonicalSubmitted([][]api.Action{{b}}).Sha256 {
+		t.Fatal("engine-equivalent sets have different identities")
+	}
+	if res := s.Apply(a); !res[0].OK {
+		t.Fatal(res)
+	}
+	if res := s.ValidateBatch(b); len(res) != 1 || !res[0].OK || res[0].Code != api.ActionUnchanged {
+		t.Fatal("engine canonical idempotency disagrees", res)
+	}
+}
+
+func TestV13fCapacityHorizonBounds(t *testing.T) {
+	s := at(t, t0)
+	act := ctHire("late-hire", "2027-02-09")
+	p := s.PreviewStaffing(act)
+	if !p.OK || len(p.Hires) != 1 {
+		t.Fatal(p.Results)
+	}
+	q := capacityV2(s, s.Observe(0), []api.Action{act}, p).Opened
+	if q.Number == nil || *q.Number != 0 || q.From > q.To {
+		t.Fatal("capacity horizon is not a valid current-horizon interval", q)
+	}
 }
