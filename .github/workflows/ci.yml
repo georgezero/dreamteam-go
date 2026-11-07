@@ -21,18 +21,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
+      - name: Preserved V0.13f contract checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin cf9a12bf12fc94089e8a99f73dea12edd0cfd019
+          git worktree add --detach .git/v13f-baseline cf9a12bf12fc94089e8a99f73dea12edd0cfd019
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
       - name: Platform
         run: go version && go env GOOS GOARCH
       - name: Vet
+        shell: bash
         run: |
+          set -euo pipefail
           go vet ./...
           go vet -tags calibration ./...
           go vet -tags acceptance ./...
       - name: Format
-        run: test -z "$(gofmt -l .)"
+        run: test -z "$(git ls-files -z -- '*.go' | xargs -0 gofmt -l)"
       - name: Test
         run: go test ./... -count=1 -timeout 30m
       - name: Golden references
@@ -428,7 +436,10 @@ jobs:
         run: |
           set -euo pipefail
           P="python3 -I -B"; V=docs/benchmark/v13d-dev; D=analysis/alternatives/v13d.py
-          DREAMTEAM_BINARY=./dt python3 -B -m unittest discover -s analysis/alternatives 2>&1 | tail -1
+          DREAMTEAM_BINARY="$PWD/dt" python3 -B -m unittest discover -s .git/v13f-baseline/analysis/alternatives 2>&1 | tail -1
+          DREAMTEAM_BINARY=./dt python3 -B -m unittest discover -s analysis/alternatives -p test_v13g.py 2>&1 | tail -1
+          python3 -I -B .git/v13f-baseline/analysis/alternatives/v13f_manifest.py
+          python3 -I -B analysis/alternatives/v13g_identities.py --check
           $P $D contexts --binary ./dt --check $V/contexts
           mkdir -p v13d
           $P $D protocol --contexts $V/contexts --out v13d/protocol-draft.json
@@ -443,7 +454,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 -I -B analysis/alternatives/v13e_package.py --check
-          python3 -I -B analysis/alternatives/lock_check.py
+          git fetch --depth=1 origin e584107c1eacbcca10163aafbf8372f22745e0d8
+          git worktree add --detach .git/v13e-candidate e584107c1eacbcca10163aafbf8372f22745e0d8
+          python3 -I -B .git/v13e-candidate/analysis/alternatives/lock_check.py
+          git worktree remove .git/v13e-candidate
           cp docs/v13e/review-package/SHA256SUMS out/v13e-review-package-SHA256SUMS
       - name: High-impact action acknowledgment
         # V0.12a, without any model: llm-agent 6's scripted cases (scripted
@@ -473,7 +487,7 @@ jobs:
           cmp v11b/schedule.json $V/schedule.json
           cp v11b/schedule.json out/v11b-schedule.json
           $P analysis/repeatability/workflow_experiment.py analyze --binary ./dt --replays . --dir $V --out v11b
-          for f in decisions.json decision-tables.md inference.json; do cmp v11b/$f $V/$f; cp v11b/$f out/v11b-$f; done
+          python3 -I -B analysis/alternatives/ci_compare.py --generated v11b --reference "$V" --out out --prefix v11b- decisions.json decision-tables.md inference.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

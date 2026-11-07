@@ -39,6 +39,7 @@ jobs:
           git worktree add --detach .git/dt-v013f/v13e-candidate e584107c1eacbcca10163aafbf8372f22745e0d8
           python3 -I -B .git/dt-v013f/v13e-candidate/analysis/alternatives/lock_check.py
           git worktree remove .git/dt-v013f/v13e-candidate
+          git worktree add --detach .git/dt-v013f/v13f-baseline cf9a12bf12fc94089e8a99f73dea12edd0cfd019
       - name: Go regressions, format and unchanged evidence
         shell: bash
         run: |
@@ -61,7 +62,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          DREAMTEAM_BINARY="$PWD/.git/dt-v013f/dreamteam" python3 -B -m unittest discover -s analysis/alternatives
+          DREAMTEAM_BINARY="$PWD/.git/dt-v013f/dreamteam" python3 -B -m unittest discover -s .git/dt-v013f/v13f-baseline/analysis/alternatives
+          DREAMTEAM_BINARY="$PWD/.git/dt-v013f/dreamteam" python3 -B -m unittest discover -s analysis/alternatives -p test_v13g.py
           python3 -B -m unittest discover -s agents/llm
       - name: Frozen V0.13d evidence regeneration
         shell: bash
@@ -96,11 +98,34 @@ jobs:
           diff -r .git/dt-v013f/fidelity/interactions "$V/fidelity/interactions"
           python3 -I -B analysis/alternatives/v13f_package.py --source .git/dt-v013f/fidelity --check
           python3 -I -B analysis/alternatives/v13f_identities.py --check
-          python3 -I -B analysis/alternatives/v13f_manifest.py
+          python3 -I -B .git/dt-v013f/v13f-baseline/analysis/alternatives/v13f_manifest.py
           cp "$V/fidelity/fidelity.json" out/v13f-fidelity.json
           cp "$V/protocol-draft.json" out/v13f-protocol.json
           cp "$V/schedule-draft.json" out/v13f-schedule.json
           cp docs/v13f/review-package/SHA256SUMS out/v13f-review-package-SHA256SUMS
+      - name: Final technical remediation contracts and evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=.git/dt-v013f/dreamteam
+          V=docs/benchmark/v13g-dev
+          D=analysis/alternatives/v13g.py
+          python3 -I -B "$D" contexts --binary "$B" --check "$V/contexts"
+          python3 -I -B "$D" protocol --contexts "$V/contexts" --out .git/dt-v013f/v13g-protocol.json
+          cmp .git/dt-v013f/v13g-protocol.json "$V/protocol-draft.json"
+          python3 -I -B "$D" schedule --contexts "$V/contexts" --protocol "$V/protocol-draft.json" --out .git/dt-v013f/v13g-schedule.json
+          cmp .git/dt-v013f/v13g-schedule.json "$V/schedule-draft.json"
+          python3 -I -B "$D" check --binary "$B" --contexts "$V/contexts" --protocol "$V/protocol-draft.json" --replays .
+          python3 -I -B analysis/alternatives/v13g_fidelity.py fidelity --binary "$B" --contexts "$V/contexts" --replays . --out .git/dt-v013f/v13g-fidelity
+          diff -r .git/dt-v013f/v13g-fidelity/interactions "$V/fidelity/interactions"
+          cmp .git/dt-v013f/v13g-fidelity/fidelity.json "$V/fidelity/fidelity.json"
+          cmp .git/dt-v013f/v13g-fidelity/fidelity.md "$V/fidelity/fidelity.md"
+          python3 -I -B analysis/alternatives/v13g_package.py --source .git/dt-v013f/v13g-fidelity --check
+          python3 -I -B analysis/alternatives/v13g_identities.py --check
+          cp "$V/fidelity/fidelity.json" out/v13g-fidelity.json
+          cp "$V/protocol-draft.json" out/v13g-protocol.json
+          cp "$V/schedule-draft.json" out/v13g-schedule.json
+          cp docs/v13g/review-package/SHA256SUMS out/v13g-review-package-SHA256SUMS
       - uses: actions/upload-artifact@v7
         with:
           name: v13f-results-${{ matrix.os }}

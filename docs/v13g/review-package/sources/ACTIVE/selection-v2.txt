@@ -1,0 +1,45 @@
+dreamteam.alternative-selection/v2
+
+Applies to a proposed batch that holds at least one terminate, hire or
+contract_teleradiology op start action, or a staffing batch whose engine
+preview reports displaced bookings. Otherwise no candidate is listed.
+
+Candidates, at most four, in this order:
+1. proposal: the batch as proposed, unchanged. Always listed.
+2. no_action: no batch. Always listed.
+3. without_<k>: for a batch of two or more actions only. The proposal
+   without its k-th action (1-based, batch order), for each terminate,
+   hire or contract_teleradiology op start action in batch order, while
+   fewer than four candidates are listed.
+4. adjusted: for a batch of one action only. One adjustment toward a
+   smaller, later or less binding commitment, listed only when the engine
+   accepts it; otherwise it is omitted and the omission recorded:
+   - terminate: lastDay plus 14 days;
+   - hire: startDate plus 14 days;
+   - contract_teleradiology op start, scope all: the same contract with
+     scope urgent;
+   - contract_teleradiology op start, scope urgent: effective plus 14 days;
+   - set_roster op set: effective plus 7 days;
+   - any other action: none.
+   Every adjusted date must be within the booking horizon (today plus the
+   booking horizon days).
+
+No other action type is ever substituted. No candidate is repaired. Every
+listed candidate is validated by the engine as one batch, and a refused
+proposal or without_<k> candidate stays listed with the engine's codes.
+The order is fixed by this text, never by any value. The list is a pure
+function of the proposal, the engine's validation answers, today's date
+and the booking horizon.
+
+Duplicates (the only change from dreamteam.alternative-selection/v1):
+once the list above is made, a candidate whose actions are identical to
+those of an earlier candidate in the list is removed, and the removal is
+recorded with the earlier candidate's ID. Actions are identical when their
+canonical form is byte-for-byte equal: each action decoded and encoded
+again, the actions in batch order. IDs, labels and sources are never
+compared. The first occurrence in the order above is kept. Nothing is
+listed in place of a removed candidate: the list is never refilled, keeps
+the IDs it was made with, and never holds more than four candidates.
+Removing a duplicate changes no other candidate, no validation and no
+proposal: a refused proposal stays listed, refused, with the engine's
+codes.

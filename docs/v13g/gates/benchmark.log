@@ -1,0 +1,287 @@
+benchmark ci: 8 runs into bench
+mini-s7-noop                             completed          0.2 s
+mini-s7-greedy                           completed          0.2 s
+mini-s7-rules                            completed          0.2 s
+mini-s7-python-ref                       completed          0.2 s
+sustainable-s7-noop                      completed         14.8 s
+sustainable-s7-greedy                    completed         15.2 s
+sustainable-s7-rules                     completed         15.0 s
+sustainable-s7-python-ref                completed         14.5 s
+DreamTeam benchmark ci · engine 0.13.0-dev.2 · dreamteam.agent/v1
+scenarios mini, sustainable · seeds 7 · 3 days · decisions every 1 day(s) at 07:00
+policies noop@1, greedy@1, rules@1, python-ref@1 (external) · paired against noop
+
+Development seeds: a harness check, not a performance claim. Metrics are the
+simulator's own (the replayed session's dreamteam.result/v1) and, where it
+applies, the T90 evaluation of the policy in force. No composite score,
+ranking or significance test. Spreads are the minimum, median (the lower
+middle value) and maximum over completed runs; paired differences are policy
+minus baseline on the same scenario and seed.
+
+1. Runs
+
+run                        status     appl/ref/err  replay  profit    net revenue  lost  exams  TAT p90  breaches  overtime  alerts  T90
+mini-s7-noop               completed  0/0/0         ok      -$12,193  $13,658      1     93     47 min   0         4 min     2       not applicable
+mini-s7-greedy             completed  0/0/0         ok      -$12,193  $13,658      1     93     47 min   0         4 min     2       not applicable
+mini-s7-rules              completed  0/0/0         ok      -$12,193  $13,658      1     93     47 min   0         4 min     2       not applicable
+mini-s7-python-ref         completed  0/0/0         ok      -$12,193  $13,658      1     93     47 min   0         4 min     2       not applicable
+sustainable-s7-noop        completed  0/0/0         ok      $1,463    $32,170      25    214    712 min  4         259 min   10      NO GO (projected from day 3.0416666666666665) · v0.2-eval-4
+sustainable-s7-greedy      completed  0/0/0         ok      $1,463    $32,170      25    214    712 min  4         259 min   10      NO GO (projected from day 3.0416666666666665) · v0.2-eval-4
+sustainable-s7-rules       completed  0/0/0         ok      $1,463    $32,170      25    214    712 min  4         259 min   10      NO GO (projected from day 3.0416666666666665) · v0.2-eval-4
+sustainable-s7-python-ref  completed  0/0/0         ok      $1,463    $32,170      25    214    712 min  4         259 min   10      NO GO (projected from day 3.0416666666666665) · v0.2-eval-4
+
+2. Initial conditions (same scenario and seed)
+
+scenario     seed  runs  start                state digest   identical
+mini         7     4     2026-10-13T06:00:00  1bf77ab22983…  yes
+sustainable  7     4     2026-10-13T06:00:00  efb8635b65ec…  yes
+
+3. Policy summary: min / median / max over completed runs
+
+metric                  noop@1 (2/2)                    greedy@1 (2/2)                  rules@1 (2/2)                   python-ref@1 (2/2)
+netRevenueCents         $13,658 / $13,658 / $32,170     $13,658 / $13,658 / $32,170     $13,658 / $13,658 / $32,170     $13,658 / $13,658 / $32,170
+operatingExpenseCents   $25,851 / $25,851 / $30,707     $25,851 / $25,851 / $30,707     $25,851 / $25,851 / $30,707     $25,851 / $25,851 / $30,707
+operatingProfitCents    -$12,193 / -$12,193 / $1,463    -$12,193 / -$12,193 / $1,463    -$12,193 / -$12,193 / $1,463    -$12,193 / -$12,193 / $1,463
+operatingCashFlowCents  -$30,757 / -$30,757 / -$11,984  -$30,757 / -$30,757 / -$11,984  -$30,757 / -$30,757 / -$11,984  -$30,757 / -$30,757 / -$11,984
+minCashCents            $119,244 / $119,244 / $138,016  $119,244 / $119,244 / $138,016  $119,244 / $119,244 / $138,016  $119,244 / $119,244 / $138,016
+shortfallCents          $0 / $0 / $0                    $0 / $0 / $0                    $0 / $0 / $0                    $0 / $0 / $0
+ordersReceived          197 / 197 / 239                 197 / 197 / 239                 197 / 197 / 239                 197 / 197 / 239
+ordersLost              1 / 1 / 25                      1 / 1 / 25                      1 / 1 / 25                      1 / 1 / 25
+examsCompleted          93 / 93 / 214                   93 / 93 / 214                   93 / 93 / 214                   93 / 93 / 214
+reportsFinal            93 / 93 / 223                   93 / 93 / 223                   93 / 93 / 223                   93 / 93 / 223
+tatP50Sec               18 min / 18 min / 61 min        18 min / 18 min / 61 min        18 min / 18 min / 61 min        18 min / 18 min / 61 min
+tatP90Sec               47 min / 47 min / 712 min       47 min / 47 min / 712 min       47 min / 47 min / 712 min       47 min / 47 min / 712 min
+tatOverTarget           0 / 0 / 4                       0 / 0 / 4                       0 / 0 / 4                       0 / 0 / 4
+tatBreaches             0 / 0 / 4                       0 / 0 / 4                       0 / 0 / 4                       0 / 0 / 4
+backlogEnd              0 / 0 / 8                       0 / 0 / 8                       0 / 0 / 8                       0 / 0 / 8
+waitToExamP50Sec        11 min / 11 min / 22 min        11 min / 11 min / 22 min        11 min / 11 min / 22 min        11 min / 11 min / 22 min
+waitToExamP90Sec        38 min / 38 min / 55 min        38 min / 38 min / 55 min        38 min / 38 min / 55 min        38 min / 38 min / 55 min
+waitsOver30             17 / 17 / 81                    17 / 17 / 81                    17 / 17 / 81                    17 / 17 / 81
+displacedAppointments   –                               –                               –                               –
+overtimeSec             4 min / 4 min / 259 min         4 min / 4 min / 259 min         4 min / 4 min / 259 min         4 min / 4 min / 259 min
+heldOver                0 / 0 / 5                       0 / 0 / 5                       0 / 0 / 5                       0 / 0 / 5
+skippedBreaks           0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+noCoverage              0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+alertsRaisedWarn        12 / 12 / 60                    12 / 12 / 60                    12 / 12 / 60                    12 / 12 / 60
+alertsRaisedAlert       2 / 2 / 10                      2 / 2 / 10                      2 / 2 / 10                      2 / 2 / 10
+alertsActiveAtEnd       0 / 0 / 1                       0 / 0 / 1                       0 / 0 / 1                       0 / 0 / 1
+daysBelowZero           0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+actionsAttempted        0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+actionsAccepted         0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+actionsRejected         0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0                       0 / 0 / 0
+
+4. Paired comparisons: policy − noop, same scenario and seed
+
+scenario     seed  policy      decisions  outcome    Δprofit  Δnet revenue  Δlost  Δexams  ΔTAT p90  Δbreaches  Δovertime  Δalerts
+mini         7     greedy      same       identical  $0       $0            0      0       0 min     0          0 min      0
+sustainable  7     greedy      same       identical  $0       $0            0      0       0 min     0          0 min      0
+mini         7     rules       same       identical  $0       $0            0      0       0 min     0          0 min      0
+sustainable  7     rules       same       identical  $0       $0            0      0       0 min     0          0 min      0
+mini         7     python-ref  same       identical  $0       $0            0      0       0 min     0          0 min      0
+sustainable  7     python-ref  same       identical  $0       $0            0      0       0 min     0          0 min      0
+
+Seeds where the policy's value is higher / lower / equal than noop's:
+
+metric                  greedy     rules      python-ref
+netRevenueCents         0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+operatingExpenseCents   0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+operatingProfitCents    0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+operatingCashFlowCents  0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+minCashCents            0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+shortfallCents          0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+ordersReceived          0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+ordersLost              0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+examsCompleted          0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+reportsFinal            0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+tatP50Sec               0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+tatP90Sec               0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+tatOverTarget           0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+tatBreaches             0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+backlogEnd              0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+waitToExamP50Sec        0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+waitToExamP90Sec        0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+waitsOver30             0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+displacedAppointments   0 / 0 / 0  0 / 0 / 0  0 / 0 / 0
+overtimeSec             0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+heldOver                0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+skippedBreaks           0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+noCoverage              0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+alertsRaisedWarn        0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+alertsRaisedAlert       0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+alertsActiveAtEnd       0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+daysBelowZero           0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+actionsAttempted        0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+actionsAccepted         0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+actionsRejected         0 / 0 / 2  0 / 0 / 2  0 / 0 / 2
+
+5. Failures, refusals and protocol errors
+
+status     runs
+completed  8
+
+policy      decision points  batches  applied  refused  protocol errors  denied requests  request errors
+noop        6                0        0        0        0                0                0
+greedy      6                0        0        0        0                0                0
+rules       6                0        0        0        0                0                0
+python-ref  6                0        0        0        0                0                0
+
+6. Replay verification
+
+8 of 8 saved sessions replayed with every digest verified; 8 of 8 match the applied decisions batch for batch.
+This is an integrity check of these files, not an independent certification.
+ok    hash config.json
+ok    hash report.json
+ok    hash report.txt
+ok    hash runs/mini-s7-noop/run.json
+ok    hash runs/mini-s7-noop/decisions.json
+ok    hash runs/mini-s7-noop/transcript.jsonl
+ok    hash runs/mini-s7-noop/session.json
+ok    hash runs/mini-s7-noop/result.json
+ok    hash runs/mini-s7-greedy/run.json
+ok    hash runs/mini-s7-greedy/decisions.json
+ok    hash runs/mini-s7-greedy/transcript.jsonl
+ok    hash runs/mini-s7-greedy/session.json
+ok    hash runs/mini-s7-greedy/result.json
+ok    hash runs/mini-s7-rules/run.json
+ok    hash runs/mini-s7-rules/decisions.json
+ok    hash runs/mini-s7-rules/transcript.jsonl
+ok    hash runs/mini-s7-rules/session.json
+ok    hash runs/mini-s7-rules/result.json
+ok    hash runs/mini-s7-python-ref/run.json
+ok    hash runs/mini-s7-python-ref/decisions.json
+ok    hash runs/mini-s7-python-ref/transcript.jsonl
+ok    hash runs/mini-s7-python-ref/session.json
+ok    hash runs/mini-s7-python-ref/result.json
+ok    hash runs/sustainable-s7-noop/run.json
+ok    hash runs/sustainable-s7-noop/decisions.json
+ok    hash runs/sustainable-s7-noop/transcript.jsonl
+ok    hash runs/sustainable-s7-noop/session.json
+ok    hash runs/sustainable-s7-noop/result.json
+ok    hash runs/sustainable-s7-noop/t90.json
+ok    hash runs/sustainable-s7-greedy/run.json
+ok    hash runs/sustainable-s7-greedy/decisions.json
+ok    hash runs/sustainable-s7-greedy/transcript.jsonl
+ok    hash runs/sustainable-s7-greedy/session.json
+ok    hash runs/sustainable-s7-greedy/result.json
+ok    hash runs/sustainable-s7-greedy/t90.json
+ok    hash runs/sustainable-s7-rules/run.json
+ok    hash runs/sustainable-s7-rules/decisions.json
+ok    hash runs/sustainable-s7-rules/transcript.jsonl
+ok    hash runs/sustainable-s7-rules/session.json
+ok    hash runs/sustainable-s7-rules/result.json
+ok    hash runs/sustainable-s7-rules/t90.json
+ok    hash runs/sustainable-s7-python-ref/run.json
+ok    hash runs/sustainable-s7-python-ref/decisions.json
+ok    hash runs/sustainable-s7-python-ref/transcript.jsonl
+ok    hash runs/sustainable-s7-python-ref/session.json
+ok    hash runs/sustainable-s7-python-ref/result.json
+ok    hash runs/sustainable-s7-python-ref/t90.json
+ok    no unlisted files
+ok    mini-s7-noop: session replays, every digest verified
+ok    mini-s7-noop: result.json is the replayed session's result
+ok    mini-s7-noop: metrics are the result's values
+ok    mini-s7-noop: session batches are the applied decisions
+ok    mini-s7-greedy: session replays, every digest verified
+ok    mini-s7-greedy: result.json is the replayed session's result
+ok    mini-s7-greedy: metrics are the result's values
+ok    mini-s7-greedy: session batches are the applied decisions
+ok    mini-s7-rules: session replays, every digest verified
+ok    mini-s7-rules: result.json is the replayed session's result
+ok    mini-s7-rules: metrics are the result's values
+ok    mini-s7-rules: session batches are the applied decisions
+ok    mini-s7-python-ref: session replays, every digest verified
+ok    mini-s7-python-ref: result.json is the replayed session's result
+ok    mini-s7-python-ref: metrics are the result's values
+ok    mini-s7-python-ref: session batches are the applied decisions
+ok    sustainable-s7-noop: session replays, every digest verified
+ok    sustainable-s7-noop: result.json is the replayed session's result
+ok    sustainable-s7-noop: metrics are the result's values
+ok    sustainable-s7-noop: session batches are the applied decisions
+ok    sustainable-s7-noop: t90.json recomputed
+ok    sustainable-s7-greedy: session replays, every digest verified
+ok    sustainable-s7-greedy: result.json is the replayed session's result
+ok    sustainable-s7-greedy: metrics are the result's values
+ok    sustainable-s7-greedy: session batches are the applied decisions
+ok    sustainable-s7-greedy: t90.json recomputed
+ok    sustainable-s7-rules: session replays, every digest verified
+ok    sustainable-s7-rules: result.json is the replayed session's result
+ok    sustainable-s7-rules: metrics are the result's values
+ok    sustainable-s7-rules: session batches are the applied decisions
+ok    sustainable-s7-rules: t90.json recomputed
+ok    sustainable-s7-python-ref: session replays, every digest verified
+ok    sustainable-s7-python-ref: result.json is the replayed session's result
+ok    sustainable-s7-python-ref: metrics are the result's values
+ok    sustainable-s7-python-ref: session batches are the applied decisions
+ok    sustainable-s7-python-ref: t90.json recomputed
+ok    report.json rebuilt from the run records
+ok    report.txt rebuilt from the run records
+86 checks, 0 failed (an integrity check of these files, not an independent certification)
+rerunning bench into bench-again
+mini-s7-noop                             completed          0.2 s
+mini-s7-greedy                           completed          0.2 s
+mini-s7-rules                            completed          0.2 s
+mini-s7-python-ref                       completed          0.2 s
+sustainable-s7-noop                      completed         14.4 s
+sustainable-s7-greedy                    completed         14.3 s
+sustainable-s7-rules                     completed         13.6 s
+sustainable-s7-python-ref                completed         14.7 s
+ok    engine, protocol and policy operations
+ok    policies (and external policy files)
+ok    metric definitions
+ok    mini-s7-noop: status completed
+ok    mini-s7-greedy: status completed
+ok    mini-s7-rules: status completed
+ok    mini-s7-python-ref: status completed
+ok    sustainable-s7-noop: status completed
+ok    sustainable-s7-greedy: status completed
+ok    sustainable-s7-rules: status completed
+ok    sustainable-s7-python-ref: status completed
+ok    file config.json
+ok    file runs/mini-s7-noop/run.json
+ok    file runs/mini-s7-noop/decisions.json
+ok    file runs/mini-s7-noop/transcript.jsonl
+ok    file runs/mini-s7-noop/session.json
+ok    file runs/mini-s7-noop/result.json
+ok    file runs/mini-s7-greedy/run.json
+ok    file runs/mini-s7-greedy/decisions.json
+ok    file runs/mini-s7-greedy/transcript.jsonl
+ok    file runs/mini-s7-greedy/session.json
+ok    file runs/mini-s7-greedy/result.json
+ok    file runs/mini-s7-rules/run.json
+ok    file runs/mini-s7-rules/decisions.json
+ok    file runs/mini-s7-rules/transcript.jsonl
+ok    file runs/mini-s7-rules/session.json
+ok    file runs/mini-s7-rules/result.json
+ok    file runs/mini-s7-python-ref/run.json
+ok    file runs/mini-s7-python-ref/decisions.json
+ok    file runs/mini-s7-python-ref/transcript.jsonl
+ok    file runs/mini-s7-python-ref/session.json
+ok    file runs/mini-s7-python-ref/result.json
+ok    file runs/sustainable-s7-noop/run.json
+ok    file runs/sustainable-s7-noop/decisions.json
+ok    file runs/sustainable-s7-noop/transcript.jsonl
+ok    file runs/sustainable-s7-noop/session.json
+ok    file runs/sustainable-s7-noop/result.json
+ok    file runs/sustainable-s7-noop/t90.json
+ok    file runs/sustainable-s7-greedy/run.json
+ok    file runs/sustainable-s7-greedy/decisions.json
+ok    file runs/sustainable-s7-greedy/transcript.jsonl
+ok    file runs/sustainable-s7-greedy/session.json
+ok    file runs/sustainable-s7-greedy/result.json
+ok    file runs/sustainable-s7-greedy/t90.json
+ok    file runs/sustainable-s7-rules/run.json
+ok    file runs/sustainable-s7-rules/decisions.json
+ok    file runs/sustainable-s7-rules/transcript.jsonl
+ok    file runs/sustainable-s7-rules/session.json
+ok    file runs/sustainable-s7-rules/result.json
+ok    file runs/sustainable-s7-rules/t90.json
+ok    file runs/sustainable-s7-python-ref/run.json
+ok    file runs/sustainable-s7-python-ref/decisions.json
+ok    file runs/sustainable-s7-python-ref/transcript.jsonl
+ok    file runs/sustainable-s7-python-ref/session.json
+ok    file runs/sustainable-s7-python-ref/result.json
+ok    file runs/sustainable-s7-python-ref/t90.json
+ok    file report.json
+ok    file report.txt
+ok    manifest.json byte-identical
+59 checks, 0 failed (a rerun compared with the recorded manifest; timing, standard error and policy evidence are not compared)

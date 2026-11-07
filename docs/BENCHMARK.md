@@ -1,5 +1,14 @@
 # DreamTeam agent evaluation harness (V0.4)
 
+V0.13g final technical remediation uses versioned validation, exact execution
+provenance, initialization/stop recording and precision-preserving parsing.
+See [the remediation response](audits/v0.13g-audit-response.md),
+[successor contracts](v13g/PROTOCOL_DRAFT.md) and
+[engineering gates](v13g/gates/README.md). The approved 262-draw / 802-call
+complete-interface design is preserved. Human review and independent technical
+re-review are PENDING. Protocol lock, live inference and V0.13.0 release are NO GO.
+
+
 ## V0.13f preparation status
 
 The [successor outcome contract](v13f/OUTCOME_DEFINITIONS.md) makes exact

@@ -59,7 +59,7 @@ func agentCmd(args []string, stdin io.Reader, stdout, stderr io.Writer) int {
 			fmt.Fprintln(stderr, "dreamteam: -alternatives needs --stdio")
 			return exitInvalid
 		}
-		h.Extensions = alternatives.OpsV2()
+		h.Extensions = alternatives.OpsV3()
 	}
 	if *stdio {
 		fmt.Fprintf(stderr, "dreamteam agent: %s · scenario %s · seed %d · ready\n", agent.Protocol, ref, s.Seed())

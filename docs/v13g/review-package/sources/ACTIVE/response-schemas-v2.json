@@ -1,0 +1,249 @@
+{
+ "id": "dreamteam.phase-response-schemas/v2",
+ "parser": "dreamteam.phase-response-parser/v2",
+ "definitions": {
+  "proposal": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "reason",
+    "actions"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string",
+     "maxLength": 2000
+    },
+    "actions": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "public_details": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "reason",
+    "actions",
+    "details"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string",
+     "maxLength": 2000
+    },
+    "actions": {
+     "const": []
+    },
+    "details": {
+     "type": "array",
+     "minItems": 1,
+     "maxItems": 8,
+     "items": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "select": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "decision",
+    "id"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string"
+    },
+    "id": {
+     "type": "string"
+    },
+    "cite": {
+     "type": "array",
+     "maxItems": 3,
+     "items": {
+      "type": "object",
+      "required": [
+       "item",
+       "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "item": {
+        "type": "string"
+       },
+       "values": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "decision": {
+     "const": "select"
+    }
+   }
+  },
+  "revise": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "decision",
+    "actions"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string"
+    },
+    "actions": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "cite": {
+     "type": "array",
+     "maxItems": 3,
+     "items": {
+      "type": "object",
+      "required": [
+       "item",
+       "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "item": {
+        "type": "string"
+       },
+       "values": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "decision": {
+     "const": "revise"
+    }
+   }
+  },
+  "abandon": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "decision"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string"
+    },
+    "cite": {
+     "type": "array",
+     "maxItems": 3,
+     "items": {
+      "type": "object",
+      "required": [
+       "item",
+       "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "item": {
+        "type": "string"
+       },
+       "values": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "decision": {
+     "const": "abandon"
+    }
+   }
+  },
+  "whole_reply_revision": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "reason",
+    "actions"
+   ],
+   "properties": {
+    "reason": {
+     "type": "string"
+    },
+    "actions": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "cite": {
+     "type": "array",
+     "maxItems": 3,
+     "items": {
+      "type": "object",
+      "required": [
+       "item",
+       "values"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "item": {
+        "type": "string"
+       },
+       "values": {
+        "type": "object"
+       }
+      }
+     }
+    }
+   }
+  },
+  "inspect": {
+   "type": "object",
+   "additionalProperties": false,
+   "required": [
+    "inspect"
+   ],
+   "properties": {
+    "inspect": {
+     "type": "array",
+     "minItems": 1,
+     "maxItems": 4,
+     "items": {
+      "type": "string"
+     }
+    },
+    "reason": {
+     "type": "string"
+    }
+   }
+  }
+ },
+ "phases": {
+  "initial_proposal": [
+   "proposal",
+   "public_details"
+  ],
+  "validation_correction": [
+   "proposal"
+  ],
+  "alternative_inspection": [
+   "inspect",
+   "select",
+   "revise",
+   "abandon",
+   "whole_reply_revision"
+  ],
+  "final_decision": [
+   "select",
+   "revise",
+   "abandon",
+   "whole_reply_revision"
+  ]
+ }
+}

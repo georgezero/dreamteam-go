@@ -7,6 +7,53 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13g — final technical remediation (0.13.0-dev.2, engine unchanged)
+
+The owner accepted DT13F-01 through DT13F-07 from the independent re-review as
+remediation baseline. [Per-finding response](audits/v0.13g-audit-response.md).
+Independent technical re-review: PENDING. Human presentation review: PENDING.
+Protocol lock: NO GO. Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* Versioned final validation reuses the authoritative protocol batch decoder;
+  known operations failures submit neither operations nor staffing.
+* Exact submitted representations have their own execution identities and draw
+  attribution. Canonical submitted actions remain the primary outcome.
+* Initialization failures retain aborted skeletons. Stop reasons and events are
+  checked in both directions, with explicit UNVERIFIED external evidence.
+* Integral numeric spellings parse exactly; successor canonicalization preserves
+  integer precision and normalizes engine-equivalent empty collections.
+* Historical candidate CI runs in its original checkout. All current-tree checks,
+  V0.12a/V0.11b comparisons, artifact upload and platform comparisons remain active.
+* A successor complete human-review package includes corrected failure and numeric
+  paths and real scripted partial-run examples. Human review remains PENDING.
+
+**Preserved design:** nine historical contexts, six pairs, two arms, 262 draws,
+802 maximum calls and the four-hour request-start guard. The intervention is
+the complete interface; no claim of decision-quality improvement is made.
+Predecessor evidence, contracts, historical agents, golden references and both
+committed independent audits retain their bytes. Successor identities and pins
+are under [v13g](v13g/CONTRACT-IDENTITIES.json).
+
+**Baseline:** cf9a12bf12fc94089e8a99f73dea12edd0cfd019 on main.
+The protected untracked swap file and dt are excluded from stages and archives.
+
+**The engine version remains 0.13.0-dev.2.** Simulator mechanics, session,
+accounting, scoring, action schema and preview behavior are unchanged. The
+exported protocol decoder helper delegates to the unchanged original decoder;
+existing callers and historical operations retain their behavior. Versioned
+successor parsing, recording and verification receive separate identities.
+
+**Quality gates:** final results are recorded in [the gate record](v13g/gates/README.md),
+with full logs and before/after witnesses under ~/dt-audit-kept/v013g/.
+
+**Not run or authorized:** independent re-review, human acceptance review,
+live inference, clinical suites, historical live reruns, reserved/holdout
+seeds, protocol lock, tag or release.
+
+---
+
 ## V0.13f — independent audit remediation preparation (0.13.0-dev.2, engine unchanged)
 
 The owner accepted DT13E-01 through DT13E-13 as the deterministic remediation

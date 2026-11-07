@@ -1,0 +1,41 @@
+ok  	github.com/georgezero/dreamteam-go/cmd/dreamteam	1069.918s
+?   	github.com/georgezero/dreamteam-go/docs/evaluation	[no test files]
+ok  	github.com/georgezero/dreamteam-go/internal/agent	840.832s
+ok  	github.com/georgezero/dreamteam-go/internal/alternatives	709.147s
+?   	github.com/georgezero/dreamteam-go/internal/api	[no test files]
+ok  	github.com/georgezero/dreamteam-go/internal/bench	2213.806s
+--- FAIL: TestHoldoutContainment (6.42s)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/eval_test.go:TestHoldoutSealed, which is not reviewed (holdoutReach)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/eval_test.go:synthHoldout, which is not reviewed (holdoutReach)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/eval_test.go:TestAuthorizeSealedFirst, which is not reviewed (holdoutReach)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/holdout.go:, which is not reviewed (holdoutReach)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/holdout.go:GuardRepo, which is not reviewed (holdoutReach)
+    containment_test.go:138: HoldoutPath reached from historical-checkout/internal/eval/protocol.go:, which is not reviewed (holdoutReach)
+    containment_test.go:138: LoadHoldout reached from historical-checkout/internal/eval/eval_test.go:TestHoldoutSealed, which is not reviewed (holdoutReach)
+    containment_test.go:138: LoadHoldout reached from historical-checkout/internal/eval/eval_test.go:synthHoldout, which is not reviewed (holdoutReach)
+    containment_test.go:138: LoadHoldout reached from historical-checkout/internal/eval/holdout.go:GuardRepo, which is not reviewed (holdoutReach)
+    containment_test.go:138: LoadHoldout reached from historical-checkout/internal/eval/protocol.go:Authorize, which is not reviewed (holdoutReach)
+    containment_test.go:138: LoadHoldout reached from historical-checkout/internal/sim/holdout_protocol_test.go:TestHoldoutRecordersGuarded, which is not reviewed (holdoutReach)
+    containment_test.go:138: decodeHoldout reached from historical-checkout/internal/eval/holdout.go:LoadHoldout, which is not reviewed (holdoutReach)
+    containment_test.go:138: decodeHoldout reached from historical-checkout/internal/eval/holdout.go:GuardManifest, which is not reviewed (holdoutReach)
+    containment_test.go:138: GuardManifest reached from historical-checkout/internal/bench/config.go:Validate, which is not reviewed (holdoutReach)
+    containment_test.go:138: GuardManifest reached from historical-checkout/internal/session/branch.go:branchSource, which is not reviewed (holdoutReach)
+    containment_test.go:138: GuardManifest reached from historical-checkout/internal/session/t90.go:T90Job, which is not reviewed (holdoutReach)
+    containment_test.go:138: Authorize:RepoPaths reached from historical-checkout/internal/eval/eval_test.go:TestAuthorizeSealedFirst, which is not reviewed (holdoutReach)
+    containment_test.go:138: Authorize:RepoPaths reached from historical-checkout/internal/eval/eval_test.go:TestRepositoryProtocol, which is not reviewed (holdoutReach)
+    containment_test.go:138: Authorize:RepoPaths reached from historical-checkout/internal/sim/holdout_protocol_test.go:authorizeAs, which is not reviewed (holdoutReach)
+    containment_test.go:138: Authorize:RepoPaths reached from historical-checkout/internal/sim/holdout_runner_test.go:TestHoldoutRun, which is not reviewed (holdoutReach)
+    containment_test.go:148: HoldoutSeeds with a label that is not synthetic ("dreamteam/test/"...) in historical-checkout/internal/eval/eval_test.go:synthHoldout
+    containment_test.go:148: HoldoutSeeds with a label that is not synthetic ("dreamteam/test/"...) in historical-checkout/internal/eval/eval_test.go:TestGuardSeeds
+    containment_test.go:148: HoldoutSeeds with a label that is not synthetic ("dreamteam/test/"...) in historical-checkout/internal/eval/holdout.go:decodeHoldout
+FAIL
+FAIL	github.com/georgezero/dreamteam-go/internal/eval	4236.970s
+ok  	github.com/georgezero/dreamteam-go/internal/rng	1.118s
+ok  	github.com/georgezero/dreamteam-go/internal/scenario	5.669s
+ok  	github.com/georgezero/dreamteam-go/internal/session	1951.367s
+ok  	github.com/georgezero/dreamteam-go/internal/sim	1797.067s
+ok  	github.com/georgezero/dreamteam-go/internal/simtime	4.444s
+ok  	github.com/georgezero/dreamteam-go/internal/tui	227.459s
+?   	github.com/georgezero/dreamteam-go/internal/version	[no test files]
+?   	github.com/georgezero/dreamteam-go/scenarios	[no test files]
+FAIL
