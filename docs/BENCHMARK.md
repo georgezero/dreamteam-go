@@ -1,5 +1,22 @@
 # DreamTeam agent evaluation harness (V0.4)
 
+## V0.13f preparation status
+
+The [successor outcome contract](v13f/OUTCOME_DEFINITIONS.md) makes exact
+canonical submitted batches the primary action estimand within the exposed
+denominator. Original response routes, eligibility, correction failure and
+execution remain separate. The estimand concerns assignment to the complete
+alternatives interface, including menu, shortcuts, inspection, extra calls
+and order. It does not establish improvement or an information-only effect.
+
+The [phase-aware workflow](v13f/WORKFLOW.md), [protocol draft](v13f/PROTOCOL_DRAFT.md)
+and [complete interaction review package](v13f/review-package/README.md) are
+successors; historical evidence and contracts retain their bytes. Nine historical
+contexts, six pairs including duplicate S1-a/S6-a inputs, two arms, 262 draws
+and at most 802 calls remain fixed. Independent re-review: PENDING. Human
+review: PENDING. Protocol lock: NO GO. Live inference: NO GO. V0.13.0 is
+unreleased. Engineering gate status is in [V0.13f gates](v13f/gates/README.md).
+
 The harness runs agent policies, built in or as separate processes, on
 identical scenarios and seeds through the released agent protocol (`dreamteam.agent/v1`,
 [AGENT_PROTOCOL.md](AGENT_PROTOCOL.md)). It records what each policy

@@ -1,5 +1,20 @@
 # DreamTeam — Roadmap
 
+## V0.13f — independent audit remediation preparation
+
+Deterministic remediation of DT13E-01 through DT13E-13 is tracked in the
+[audit response](audits/v0.13f-audit-response.md). The successor uses canonical
+submitted actions, a shared phase-aware system schema, complete continuing
+obligations and native-unit capacity disclosures, action-specific withdrawal
+conditions, separate eligibility/exposure accounting and verified partial runs.
+The human package follows the complete delivered scripted interaction.
+
+Independent re-review: PENDING. Independent human review and owner acceptance
+remain required. Protocol lock: NO GO. Live inference: NO GO. The design remains
+nine historical contexts, six pairs, two arms, 262 draws and at most 802 calls.
+S1-a and S6-a duplicate inputs and are retained. V0.13.0 remains unreleased;
+the engine identity stays 0.13.0-dev.2 because no mechanics change.
+
 Status: **draft for review**.
 Companion documents: [PLAN.md](PLAN.md), [SIMULATION_DESIGN.md](SIMULATION_DESIGN.md),
 [TUI_DESIGN.md](TUI_DESIGN.md).

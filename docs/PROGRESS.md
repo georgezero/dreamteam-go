@@ -7,6 +7,73 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13f — independent audit remediation preparation (0.13.0-dev.2, engine unchanged)
+
+The owner accepted DT13E-01 through DT13E-13 as the deterministic remediation
+baseline. [Per-finding response](audits/v0.13f-audit-response.md).
+Independent re-review: PENDING. Human presentation review: PENDING.
+Protocol lock: NO GO. Live inference: NO GO. V0.13.0 remains unreleased.
+
+**What was built:**
+
+* Canonical submitted action identities are PRIMARY. Intended, validated,
+  submitted and executed actions have separate fields. Five abandonments
+  versus five no_action selections produce primary TV exactly zero; original
+  response routes and seven F7 labels remain secondary.
+* Side-by-side successors: shared phase-aware system instruction, workflow v2,
+  driver v2, presentation v3 and view v2. The system schema takes precedence;
+  compliant reason/actions final revisions, including empty ones, are accepted.
+* Continuing employment obligations use a common no-action baseline and
+  incremental differences, once per employee. Conditional severance is not
+  payable-now severance. Exact unavailable guarantees remain unavailable.
+* Closed slots, displaced bookings and replacement capacity retain units and
+  horizons. The 2,481-slots/zero-bookings witness and 2,354-slot roster witness
+  are reproduced. Withdrawal follows the engine notice rule; historical fee
+  proxies retain study counts, history limits and lane context.
+* Eligibility, exposure, correction failure, deliberate inaction, process
+  failures, calls and retries are separate. Partial runs verify aborted draw
+  identity, schedule/count conservation, call bounds, responses and stops.
+  Reconstructible aborts replay; unsupported reconstruction is UNVERIFIED.
+* Numeric citations use typed values and explicit unit separation. The
+  estimand covers the complete interface bundle. Duplicate S1-a/S6-a inputs
+  remain; small samples cannot establish stability. The four-hour mechanism
+  is accurately a request-start guard.
+* Complete scripted interactions are packaged for subsequent human review,
+  with ACTIVE and LEGACY-INACTIVE sources and evaluation-only records kept
+  outside model-visible messages. Reviewer fields remain PENDING.
+
+**Preserved design:** nine historical contexts, six sensitivity pairs (all
+12 members), two arms, 262 draws and 802 maximum model calls. The budget does
+not change. No alternative is added or reordered. Historical evidence,
+contracts, templates, workflows and agents remain byte-identical; the old
+operations retain their behavior. The opt-in command registers additional
+read-only successor operations.
+
+**Baseline:** main e584107c1eacbcca10163aafbf8372f22745e0d8; v0.12.0 still
+peels to 8bbeca29550da67c70d69efd313baadca6438244. The 1,173 scoped file hashes
+are in v13f/BASELINE-HASHES.sha256. The protected untracked swap file and dt
+are excluded from every stage and archive.
+
+**The engine version remains 0.13.0-dev.2.** No simulator mechanics, session,
+accounting, scoring, action schema, validation or preview behavior changes.
+As in V0.13c–V0.13e, a version bump would alter embedded historical evidence.
+The extension and presentation successors receive their own identities.
+
+**Quality gates:** focused Go regressions and historical V0.13d evidence
+reproduction pass locally; successor workflow/driver and baseline-byte checks
+pass. Full Go, race, vet, format, five cross-builds, golden references,
+benchmark verify/reproduce, historical replays, V0.12b analysis and both
+fidelity paths are recorded in [the gate record](v13f/gates/README.md),
+with retained logs under ~/dt-audit-kept/v013f/. The historical V0.13e CI
+verifier's exact-HEAD-tree requirement conflicts with successor additions;
+a narrow invocation exception is requested and not assumed.
+
+**Not run or authorized:** independent re-review, human acceptance review,
+live inference, clinical suites, historical live reruns, reserved/holdout
+seeds, protocol lock, tag or release.
+
+---
+
 ## V0.13e — rendered presentation review and candidate preparation (0.13.0-dev.2, engine unchanged)
 
 The owner accepted V0.13d and approved F7, F3, N1, 262 scheduled draws,
