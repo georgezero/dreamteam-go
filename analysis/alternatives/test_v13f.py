@@ -38,6 +38,10 @@ class Pure(unittest.TestCase):
         pins=json.loads((ROOT/'docs/v13f/CONTRACT-PINS.json').read_text())
         for path,want in pins['files'].items():
             self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),want,path)
+        index=json.loads((ROOT/'docs/v13f/CONTRACT-IDENTITIES.json').read_text())
+        for files in index['identities'].values():
+            for path,want in files.items():
+                self.assertEqual(hashlib.sha256((ROOT/path).read_bytes()).hexdigest(),want,path)
         self.assertEqual(pins['parserVersionSha256'],D.sha256(D.ALT.PARSER_VERSION))
         import re
         go_version=re.search(r'ParserV2ID\s*=\s*"([^"]+)"',(ROOT/'internal/alternatives/turn_v2.go').read_text())[1]

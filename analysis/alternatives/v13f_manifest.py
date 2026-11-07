@@ -19,6 +19,17 @@ def main():
             raise SystemExit('successor contract mismatch: '+path)
     if hashlib.sha256(pins['parserVersion'].encode()).hexdigest()!=pins['parserVersionSha256']:
         raise SystemExit('parser identity mismatch')
+    index=json.loads((ROOT/'docs/v13f/CONTRACT-IDENTITIES.json').read_text())
+    for files in index['identities'].values():
+        for path,want in files.items():
+            if hashlib.sha256((ROOT/path).read_bytes()).hexdigest()!=want:
+                raise SystemExit('contract source mismatch: '+path)
+    if index['parserVersionSha256']!=pins['parserVersionSha256']:
+        raise SystemExit('parser index mismatch')
+    proto=json.loads((ROOT/'docs/benchmark/v13f-dev/protocol-draft.json').read_text())
+    if index['workflowSpecificationSha256']!=proto['workflow']['sha256']:
+        raise SystemExit('workflow index mismatch')
+    print(f'Contract/source identities: {len(index["identities"])}; PASS')
     print(f'Historical bytes: {count} files; successor contracts: {len(pins["files"])} files; PASS')
     print('Independent re-review: PENDING; protocol lock: NO GO; live inference: NO GO')
 

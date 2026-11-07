@@ -7,6 +7,7 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 DEST=ROOT/'docs/v13f/review-package'
 DEFAULT=ROOT/'docs/benchmark/v13f-dev/fidelity'
+PACKAGE_SCHEMA='dreamteam.review-package/v1'
 
 
 def artifacts(source):
@@ -48,7 +49,7 @@ def artifacts(source):
             out[target]=(ROOT/f).read_bytes()
             sources.append({'status':status,'source':f,'packagePath':target,
                             'legacyInactiveSections':['rows labelled LEGACY-INACTIVE (internal binding only)'] if f.endswith('view-table.txt') else []})
-    out['RECORD_ONLY_INDEX.json']=(json.dumps({'notice':'RECORD ONLY: never appended to model-visible messages',
+    out['RECORD_ONLY_INDEX.json']=(json.dumps({'schema':PACKAGE_SCHEMA,'notice':'RECORD ONLY: never appended to model-visible messages',
         'interactions':index,'sources':sources},indent=1,sort_keys=True)+'\n').encode()
     items=['neutrality','readability','financial terminology','target identification','continuing obligations and no action',
            'bookings displaced','slots closed and replacement capacity','missing information','withdrawal and reversibility',
