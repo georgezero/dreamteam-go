@@ -64,7 +64,9 @@ reproduction pass locally; successor workflow/driver and baseline-byte checks
 pass. Full Go, race, vet, format, five cross-builds, golden references,
 benchmark verify/reproduce, historical replays, V0.12b analysis and both
 fidelity paths are recorded in [the gate record](v13f/gates/README.md),
-with retained logs under ~/dt-audit-kept/v013f/. The historical V0.13e CI
+with retained logs under ~/dt-audit-kept/v013f/. All remote component gates
+pass. The format walk was scoped to committed Go files after scratch caches
+were found by the broad walk; no source formatting changed. The historical V0.13e CI
 verifier's exact-HEAD-tree requirement conflicts with successor additions;
 a narrow invocation exception is requested and not assumed.
 
