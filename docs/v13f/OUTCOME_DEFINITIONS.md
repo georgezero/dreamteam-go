@@ -30,7 +30,8 @@ submit nothing; execution records never silently substitute another action.
 
 `dreamteam.submitted-action/v1` decodes operations and staffing through the
 engine action type, omits empty batches, and hashes deterministic JSON.
-Whitespace and object-key order do not matter. Numeric spellings accepted by
+Whitespace and object-key order do not matter. An omitted extend_shift date
+resolves to the decision-point date, exactly as the engine does. Numeric spellings accepted by
 the engine, such as integer -0, normalize through the typed action fields.
 Contract windows normalize in catalog order because parseTeleWindows and
 teleCanon treat them as a set. Hire skills follow canonicalSkills table order;

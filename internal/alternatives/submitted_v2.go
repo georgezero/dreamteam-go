@@ -15,6 +15,8 @@ const SubmittedSchema = "dreamteam.submitted-action/v1"
 // Contract windows are a set in parseTeleWindows and teleCanon. Hire skills
 // and cover windows follow hireCanon; sameCovers defines roster cover equality.
 // Breaks stay ordered because parseRoster validates chronological order.
+// Production callers supply the decision date to resolve extend_shift
+// defaults exactly as the protocol and engine do.
 type SubmittedAction struct {
 	Schema    string         `json:"schema"`
 	Batches   [][]api.Action `json:"batches"`
@@ -22,7 +24,7 @@ type SubmittedAction struct {
 	Sha256    string         `json:"sha256"`
 }
 
-func CanonicalSubmitted(batches [][]api.Action) SubmittedAction {
+func CanonicalSubmitted(batches [][]api.Action, decisionDates ...string) SubmittedAction {
 	out := SubmittedAction{Schema: SubmittedSchema, Batches: [][]api.Action{}}
 	for _, batch := range batches {
 		if len(batch) == 0 {
@@ -30,6 +32,9 @@ func CanonicalSubmitted(batches [][]api.Action) SubmittedAction {
 		}
 		b := canon(batch)
 		for i := range b {
+			if b[i].Type == api.ActExtendShift && b[i].Date == "" && len(decisionDates) > 0 {
+				b[i].Date = decisionDates[0]
+			}
 			if b[i].Type == api.ActHire {
 				rank := func(s string) int {
 					if n := slices.Index(viewSkills, s); n >= 0 {

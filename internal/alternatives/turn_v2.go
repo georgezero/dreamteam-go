@@ -240,7 +240,7 @@ func DecideV2With(s *session.Session, v Validator, arm string, proposal []api.Ac
 			o.Flags = append(o.Flags, FlagNoComparison)
 		}
 	}
-	sub := CanonicalSubmitted(o.Batches)
+	sub := CanonicalSubmitted(o.Batches, s.Calendar().Date(s.Now()).String())
 	o.Schema = "dreamteam.alternatives-outcome/v2"
 	// Keep the seven-way legacy field as a process measure. The new primary
 	// identity is submittedAction.sha256 and never depends on response route.

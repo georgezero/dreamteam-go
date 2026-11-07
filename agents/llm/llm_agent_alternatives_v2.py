@@ -60,11 +60,9 @@ def parse_initial(content,types,details_allowed):
     return A3.parse_decision(json.dumps(obj),types,details_allowed)
 
 def ask_proposal(h, ev, client, settings, memory, point, prev=None, *, workflow="validation-first"):
-    """One live decision point, with the named workflow (WORKFLOWS). Every
-    attempt is recorded as it is made (attempts.jsonl) and in the record.
-    A caller that names no workflow gets V0.11a's (with the preview), as
-    before the selector; the agent's command line defaults to
-    validation-first (DEFAULT_WORKFLOW) and always names it."""
+    """One supplied-transport proposal under the versioned shared contract.
+    Every attempt is recorded in attempts.jsonl and the decision record.
+    The alternatives workflow requests validation-first explicitly."""
     if workflow not in WORKFLOWS:
         raise SettingsError(f"unknown workflow {workflow!r}")
     preview_on = WORKFLOWS[workflow]["preview"]

@@ -31,7 +31,7 @@ func OpsV2() map[string]func(*session.Session, func([]api.Action) ([]api.ActionR
 		if err := strict(raw, &a); err != nil {
 			return nil, err
 		}
-		return CanonicalSubmitted(a.Batches), nil
+		return CanonicalSubmitted(a.Batches, s.Calendar().Date(s.Now()).String()), nil
 	}
 	return ops
 }

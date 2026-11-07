@@ -338,3 +338,23 @@ func TestV13fCapacityHorizonBounds(t *testing.T) {
 		t.Fatal("capacity horizon is not a valid current-horizon interval", q)
 	}
 }
+
+func TestV13fCanonicalEngineDefaults(t *testing.T) {
+	s := at(t, t0)
+	today := s.Observe(0).Date
+	a := api.Action{Type: api.ActExtendShift, Employee: "E03", Minutes: 30}
+	b := a
+	b.Date = today
+	for _, act := range []api.Action{a, b} {
+		if r := s.ValidateBatch(act); len(r) != 1 || !r[0].OK {
+			t.Fatal(r)
+		}
+	}
+	if CanonicalSubmitted([][]api.Action{{a}}, today).Sha256 != CanonicalSubmitted([][]api.Action{{b}}, today).Sha256 {
+		t.Fatal("omitted date differs from the engine's current-day default")
+	}
+	b.Date = shiftDateV2(today, 1)
+	if CanonicalSubmitted([][]api.Action{{a}}, today).Sha256 == CanonicalSubmitted([][]api.Action{{b}}, today).Sha256 {
+		t.Fatal("different target dates collapsed")
+	}
+}

@@ -10,9 +10,9 @@ Each draw starts from a context:
 * constructed: a sensitivity-pair member (V0.13c), a fresh engine at the
   member's state (mini, seed 52, reached with no action), the agent's own
   prompt at that state with a fresh memory, and the scripted proposal.
-Then it runs llm_agent_alternatives.ask under the draw's arm. The driver
-reimplements no step: validation-first is llm_agent5's, the turn and the
-outcome are the engine's (alternatives.turn, alternatives.decide).
+Then it runs llm_agent_alternatives_v2.ask under the draw's arm, using the
+successor validation-first workflow and read-only alternatives.v2.turn,
+alternatives.v2.decide and alternatives.v2.canonical engine extensions.
 
     python3 -I -B analysis/alternatives/v13f.py contexts --binary ./dt --check DIR
     python3 -I -B analysis/alternatives/v13f.py protocol --out FILE
@@ -575,7 +575,7 @@ def classify(d):
 def schedule(proto, rows):
     """Per model in modelOrder, its draws as rounds; each round has every
     unit (context, arm) of the model once, in the order of
-    SHA-256('dreamteam-v13f-order/1|<model>|<round>|<context>|<arm>')."""
+    SHA-256('dreamteam-v13d-order/1|<model>|<round>|<context>|<arm>')."""
     out = []
     for mod in proto["modelOrder"]:
         units = [c["id"] for c in rows if c["kind"] == "constructed" or c["model"] == mod]
@@ -631,12 +631,12 @@ def draft_protocol(rows, contexts_sha):
              "analysis": {"estimand": "per context and model: the difference between the arms' distributions of the "
                                       "canonical submitted action batches within comparison-exposed draws; per-identity "
                                       "treatment minus control differences and total variation; route labels secondary",
-                          "pairs": "secondary, per sensitivity pair and model: departure (anything but retained) "
-                                   "in member b minus member a, per arm (Newcombe), and treatment minus control "
-                                   "(MOVER); a context pair, not one fact",
-                          "observable": "comparison presented, inspected, compared (verified citations), no "
-                                        "observable comparison, final valid, submitted, executed, partial, calls, "
-                                        "retries",
+                          "pairs": "secondary, per sensitivity pair and model: departure of canonical submitted identity "
+                                   "from the validated proposal identity, in exposed member b minus exposed member a, "
+                                   "per arm (Newcombe), and treatment minus control (MOVER); a context pair, not one fact",
+                          "observable": "eligibility, exposure, validation-first correction, correction failure, deliberate "
+                                        "no action, process failure, original response route, seven secondary process labels, "
+                                        "intended/validated/submitted/executed action, inspection, citations, calls and retries",
                           "notClaimed": "a changed decision is not an improvement; the reason is never read"}}
     sched = schedule(proto, rows)
     proto["duplicateInputs"] = [["S1-a", "S6-a"]]
