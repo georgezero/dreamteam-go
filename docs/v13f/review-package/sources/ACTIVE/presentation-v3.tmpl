@@ -1,0 +1,90 @@
+{{- /* dreamteam.alternatives-presentation/v3: fixed text. Both arms get "head" and "foot", the same text byte for byte at one decision point; the treatment adds "comparison" between them and answers inspect with "detail". Every value is a typed field of the view (dreamteam.alternatives-view/v2). */ -}}
+{{define "head" -}}
+PHASE 3 alternative inspection / PHASE 4 final decision at {{.Time}}. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
+{{end}}
+{{- define "comparison"}}
+ALTERNATIVES. The simulator's alternatives to the staffing actions in your reply, in a fixed order: your proposal, no action, then any others the candidate rule lists. The order says nothing about any alternative, and none is a default.
+{{- range .Refs}}
+{{.ID}} is {{refText .}}.
+{{- end}}
+{{range .Alternatives}}
+{{.ID}}{{if eq .ID "proposal"}} (your proposal){{end}}: {{actions .}}
+  Validation: {{validation .}}
+{{- end}}
+
+Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {"inspect": [ID, ...]}. You can do this once.
+{{end}}
+{{- define "foot"}}
+Reply with one JSON object (the shared system schema governs this phase):
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
+- {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions (an empty array is deliberate no action); they are validated again before anything is submitted.
+- {"decision": "abandon", "reason": TEXT} submits nothing.
+{{- if .Operations}}
+Your reply's operations actions ({{.Operations}}) are submitted unchanged with "select"; "revise" replaces them too, and "abandon" submits none of them.
+{{- end}}
+Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.
+{{end}}
+{{- define "detail" -}}
+DETAIL {{.ID}}{{if eq .ID "proposal"}} (your proposal){{end}}: {{actions .}}
+  Validation: {{validation .}}
+  Facts:
+{{- range .Facts}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none
+{{- end}}
+  Estimates:
+{{- range .Estimates}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none
+{{- end}}
+  Obligations that continue:
+{{- range .Obligations}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none listed
+{{- end}}
+  Continuing employment commitments, relative to no action (each employee once):
+{{- range .Commitments}}
+    - {{.Ref}} is public staff entry {{.PublicPosition}}. Baseline guarantee: {{cents .BaselineGuarantee}} per full week; continuing guarantee: {{cents .ContinuingGuarantee}} per full week{{if .Through}} through last day {{.Through}}{{end}}; change in weekly rate: {{cents .GuaranteeDelta}}. This is a rate, not a total or future savings.
+      Baseline conditional severance exposure: {{cents .BaselineExposure}}; remaining conditional exposure: {{cents .ConditionalExposure}}; change: {{cents .ExposureDelta}}. Exposure is payable only on a later termination, never payable now.{{if .Terminating}} This termination recognizes severance separately in Facts; do not add that recognized amount again as conditional exposure.{{end}}
+{{- end}}
+  Capacity (whole staffing batch):
+    - [slots_closed] Slots closed: {{quantity .Capacity.Closed}}. Capacity, not patients, orders or revenue.
+{{- range .Capacity.ClosedByModality}}
+      - {{.Modality}}: {{.Count}} slots (same horizon).
+{{- end}}
+    - [bookings_displaced] Bookings displaced: {{quantity .Capacity.Displaced}}
+    - [replacement_capacity] Displaced bookings with feasible replacements by capacity: {{quantity .Capacity.Replacements}}. Acceptance is unavailable before commitment.
+    - [slots_opened] Replacement or additional bookable capacity: {{quantity .Capacity.Opened}}
+    - Future demand: unavailable. Capacity beyond the displayed horizon: unavailable.
+  Withdrawal and reversibility, per action:
+{{- range .Reversals}}
+    - Action {{.Action}}: {{reversal .}}
+{{- else}}
+    - No staffing batch is applied; nothing to reverse.
+{{- end}}
+{{- range .Proxies}}
+  Historical remote fee proxy for {{.Ref}}: {{proxyMoney .Cents}} from {{.Studies}} relevant studies; requested trailing lookback {{.LookbackDays}} days. Available run observation period: {{.AvailableFrom}} to {{.AvailableTo}}. Incomplete lookback: {{.Incomplete}}.
+    Windows: {{windows .Windows}}; scope: {{.Scope}}. The engine prices studies that waited unread during matching windows and scope at the first qualifying instant, including its night surcharge. Two lanes are shared by all contracts; employed readers claim first. This is not a guaranteed future fee and not a utilisation bound. History before the available run period is unavailable.
+{{- end}}
+  Not known before deciding:
+    - Human fatigue, welfare, morale, resignation, clinical outcomes and reputation are unavailable; operational workload and capacity remain modeled.
+{{- range .Unavailable}}
+    - {{unavailable .}}
+{{- else}}
+    - none listed
+{{- end}}
+{{end}}
+{{- define "inspect_answer"}}{{range .}}{{.}}
+{{end}}PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_unlisted"}}No alternative with that ID is listed. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_control"}}There are no details to inspect. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_again"}}Details can be requested only once. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "retry"}}Your reply could not be read as one JSON object of the form described above. Reply again with one JSON object.
+{{end}}

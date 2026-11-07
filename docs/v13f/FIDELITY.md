@@ -36,3 +36,11 @@ Reference outputs belong only under docs/benchmark/v13f-dev/fidelity/.
 The historical V0.13d fidelity and evidence remain byte-identical and are
 regenerated separately. Engineering checks do not constitute human review
 or an independent technical re-review.
+
+The historical-inclusive reference run passed 114 cases with zero failed
+checks and retained 81 complete delivered interactions. The derived human
+package contains 97 files and covers all 42 required context/arm cells,
+plus explicitly constructed regression paths. The exact audit witness has
+five exposed draws per arm and primary TV = 0; its empty identity is
+4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945.
+These engineering results do not supply reviewer findings or acceptance.

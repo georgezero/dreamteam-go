@@ -12,3 +12,9 @@ review-package/ after remediation and engineering checks are complete.
 A different reviewer must perform the independent technical re-review on
 the final identified snapshot. This preparation does not conduct that review.
 Protocol lock: NO GO. Live inference: NO GO. V0.13.0 remains unreleased.
+
+The rebuilt package has 97 files derived from 81 actual delivered scripted
+interactions, including both arms at every one of the 21 required contexts.
+Its generator and exact-byte check pass. The historical-inclusive successor
+fidelity run passes 114 cases with zero failed checks. This is engineering
+validation only; every human review field remains PENDING.

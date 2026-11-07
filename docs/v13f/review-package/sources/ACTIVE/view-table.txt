@@ -1,0 +1,150 @@
+dreamteam.alternatives-view/v2
+
+Inherited typed grammar: each row is labelled by its rendering status.
+ACTIVE | approved_extensions | label "Approved extensions · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | booked_ahead | label "Appointments booked from tomorrow within the booking horizon" | ref "" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | contract_cost_no_longer_owed | label "Contract cost no longer owed · %s" | ref "employee" | unit cents | basis "estimate: the contract guarantee with benefits; overtime and hold-over not modeled" | basisNoWhen "" | forms "per full week from {D}" | empty false
+ACTIVE | contract_minutes | label "Contracted weekly minutes · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | contract_pay_to_last_day | label "Contract pay to the last day · %s" | ref "employee" | unit cents | basis "minimum: the contract guarantee with benefits on the days still employed" | basisNoWhen "" | forms "today to {D}" | empty false
+LEGACY-INACTIVE (internal binding only) | displaced_bookings | label "Booked appointments displaced (whole batch)" | ref "" | unit count | basis "appointments already booked that would lose their staffing" | basisNoWhen "" | forms | empty false
+LEGACY-INACTIVE (internal binding only) | displaced_replacement | label "Displaced bookings with a feasible replacement by capacity" | ref "" | unit cents | basis "whether each patient accepts a replacement is decided only at commit" | basisNoWhen "" | forms "at commit" | empty false
+ACTIVE | earliest_exit | label "Earliest lawful exit · %s" | ref "hire" | unit cents | basis "the contract guarantee from the start to the earliest last day, plus two contracted weeks' severance with benefits" | basisNoWhen "" | forms "last day {D}" | empty false
+ACTIVE | employment | label "Employment stage · %s" | ref "employee" | unit text | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | end_date | label "Not employed from · %s" | ref "employee" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | extensions_kept | label "Approved extensions kept · %s" | ref "employee" | unit cents | basis "estimate at the base rate" | basisNoWhen "" | forms "from {D}" "from {D} until {D}" | empty false
+ACTIVE | funding.commitment | label "Commitment tested against funding" | ref "" | unit cents | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | funding.funded | label "Funding test passed" | ref "" | unit text | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | funding.headroom | label "Funding headroom" | ref "" | unit cents | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | last_day | label "Last day · %s" | ref "employee" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | next_payroll | label "Payroll accrued, next payday" | ref "" | unit cents | basis "" | basisNoWhen "" | forms "paid {D}" | empty false
+ACTIVE | notice_days | label "Notice · %s" | ref "employee" | unit days | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | payables | label "Accounts payable" | ref "" | unit cents | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | pending_rosters | label "Pending roster versions · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | productive_date | label "Independent work from · %s" | ref "hire" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | rate | label "Hourly rate · %s" | ref "hire" | unit cents | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | recruiting_fee | label "Recruiting fee · %s" | ref "hire" | unit cents | basis "fixed offer table; not refundable" | basisNoWhen "" | forms "recognized now, paid {D}" | empty false
+LEGACY-INACTIVE (internal binding only) | remote_read_fees | label "Remote read fees at trailing demand · %s" | ref "new_contract" | unit cents | basis "an upper bound from studies that waited unread in these windows and scope recently" | basisNoWhen "" | forms "per {N} days" | empty false
+LEGACY-INACTIVE (internal binding only) | remote_read_fees_existing | label "Remote read fees at trailing demand · %s" | ref "contract" | unit cents | basis "an upper bound from studies that waited unread in these windows and scope recently" | basisNoWhen "" | forms "per {N} days" | empty false
+ACTIVE | retainer_run_rate | label "Retainer run rate while open-ended · %s" | ref "new_contract" | unit cents | basis "until a cancellation fixes the end" | basisNoWhen "" | forms "per month after {D}" | empty false
+ACTIVE | retainer_to_earliest_end | label "Teleradiology retainer to the earliest end · %s" | ref "new_contract" | unit cents | basis "contract: minimum term and notice, even with no reads" | basisNoWhen "" | forms "accrued daily {D} to {D}, paid on the 1st" | empty false
+ACTIVE | retainer_to_end | label "Teleradiology retainer to the end · %s" | ref "contract" | unit cents | basis "contract: the fixed end" | basisNoWhen "" | forms "accrued daily to {D}, paid on the 1st" | empty false
+ACTIVE | roster_effective | label "Roster effective · %s" | ref "employee" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | roster_minutes_week_a | label "Rostered minutes, week A · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | roster_minutes_week_b | label "Rostered minutes, week B · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | salary_allocation_change | label "Salary allocation change · %s" | ref "employee" | unit cents | basis "salary share with benefits, accrued daily" | basisNoWhen "" | forms "from {D} until {D}" "from {D} until changed (14 days' notice)" | empty false
+LEGACY-INACTIVE (internal binding only) | severance_if_terminated_later | label "Severance if terminated later · %s" | ref "employee" | unit cents | basis "two contracted weeks with benefits" | basisNoWhen "" | forms "owed only on a later termination" | empty false
+ACTIVE | severance_line | label "" | ref "employee" | unit cents | basis "" | basisNoWhen "" | forms "recognized now, paid {D}" | empty false
+ACTIVE | severance_payday | label "Severance payday · %s" | ref "employee" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | severance_recognized_now | label "Severance recognized now · %s" | ref "employee" | unit cents | basis "two contracted weeks with benefits, owed once the termination is committed" | basisNoWhen "no termination is committed, so none is recognized" | forms "recognized now, paid {D}" | empty true
+ACTIVE | site_reading_capacity | label "Site reading blocks a week, change · %s" | ref "employee" | unit cents | basis "estimate, in minutes; reports gained depend on the worklist and read times" | basisNoWhen "" | forms "from {D}" | empty false
+LEGACY-INACTIVE (internal binding only) | slots_closed | label "Scheduled slots no longer staffed, booked or not" | ref "" | unit count | basis "appointment slots in the current booking horizon that would have no staff; this counts capacity, not patients, orders or revenue" | basisNoWhen "no batch is applied, so no scheduled slot loses its staffing" | forms "no day in the booking horizon is affected" "{D} to {D} ({N} days in the booking horizon)" | empty true
+LEGACY-INACTIVE (internal binding only) | slots_closed. | label "Scheduled slots no longer staffed · %s" | ref "modality" | unit count | basis "" | basisNoWhen "" | forms | empty false
+LEGACY-INACTIVE (internal binding only) | slots_closed_booked_now | label "Of these, booked now" | ref "" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | start_date | label "Start · %s" | ref "hire" | unit date | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | time_not_rostered | label "Contracted time not rostered · %s" | ref "employee" | unit cents | basis "estimate: part of the guarantee above, not extra" | basisNoWhen "" | forms "per week from {D}" "per week from {D} until {D}" | empty false
+ACTIVE | voided_extensions | label "Approved extensions voided · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+ACTIVE | voided_rosters | label "Pending roster versions voided · %s" | ref "employee" | unit count | basis "" | basisNoWhen "" | forms | empty false
+LEGACY-INACTIVE (internal binding only) | weekly_guarantee | label "Contract guarantee continues · %s" | ref "employee" | unit cents | basis "the weekly contract guarantee with benefits, owed whether or not the time is worked" | basisNoWhen "" | forms "per full week, until a later decision" | empty false
+ACTIVE | weekly_guarantee_hire | label "Contract guarantee per full week · %s" | ref "hire" | unit cents | basis "with benefits; worked pay replaces it" | basisNoWhen "" | forms "from {D}" | empty false
+LEGACY-INACTIVE (internal binding only) | weekly_guarantee_roster | label "Contract guarantee per full week · %s" | ref "employee" | unit cents | basis "with benefits, paid whatever is rostered" | basisNoWhen "" | forms "unchanged by the roster" | empty false
+
+ACTIVE successor detail, capacity, commitment and proxy templates:
+{{- /* dreamteam.alternatives-presentation/v3: fixed text. Both arms get "head" and "foot", the same text byte for byte at one decision point; the treatment adds "comparison" between them and answers inspect with "detail". Every value is a typed field of the view (dreamteam.alternatives-view/v2). */ -}}
+{{define "head" -}}
+PHASE 3 alternative inspection / PHASE 4 final decision at {{.Time}}. The staffing actions in your reply passed validation: the simulator would accept them now. Nothing has been applied yet.
+{{end}}
+{{- define "comparison"}}
+ALTERNATIVES. The simulator's alternatives to the staffing actions in your reply, in a fixed order: your proposal, no action, then any others the candidate rule lists. The order says nothing about any alternative, and none is a default.
+{{- range .Refs}}
+{{.ID}} is {{refText .}}.
+{{- end}}
+{{range .Alternatives}}
+{{.ID}}{{if eq .ID "proposal"}} (your proposal){{end}}: {{actions .}}
+  Validation: {{validation .}}
+{{- end}}
+
+Each alternative's detail gives the simulator's facts and estimates for it, the obligations that continue, its reversibility, and what is not known before deciding. To see details before deciding, reply {"inspect": [ID, ...]}. You can do this once.
+{{end}}
+{{- define "foot"}}
+Reply with one JSON object (the shared system schema governs this phase):
+- {"decision": "select", "id": ID, "reason": TEXT} submits the staffing actions of the listed alternative with that ID, unchanged. Your proposal's ID is "proposal".
+- {"decision": "revise", "actions": [...], "reason": TEXT} replaces your whole reply with these actions (an empty array is deliberate no action); they are validated again before anything is submitted.
+- {"decision": "abandon", "reason": TEXT} submits nothing.
+{{- if .Operations}}
+Your reply's operations actions ({{.Operations}}) are submitted unchanged with "select"; "revise" replaces them too, and "abandon" submits none of them.
+{{- end}}
+Optionally add "cite": up to three items from any detail you were shown, each {"item": KEY, "values": {ID: VALUE, ...}}, with the values as shown. The reason is recorded as text.
+{{end}}
+{{- define "detail" -}}
+DETAIL {{.ID}}{{if eq .ID "proposal"}} (your proposal){{end}}: {{actions .}}
+  Validation: {{validation .}}
+  Facts:
+{{- range .Facts}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none
+{{- end}}
+  Estimates:
+{{- range .Estimates}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none
+{{- end}}
+  Obligations that continue:
+{{- range .Obligations}}
+    - [{{.Key}}] {{line .}}
+{{- else}}
+    - none listed
+{{- end}}
+  Continuing employment commitments, relative to no action (each employee once):
+{{- range .Commitments}}
+    - {{.Ref}} is public staff entry {{.PublicPosition}}. Baseline guarantee: {{cents .BaselineGuarantee}} per full week; continuing guarantee: {{cents .ContinuingGuarantee}} per full week{{if .Through}} through last day {{.Through}}{{end}}; change in weekly rate: {{cents .GuaranteeDelta}}. This is a rate, not a total or future savings.
+      Baseline conditional severance exposure: {{cents .BaselineExposure}}; remaining conditional exposure: {{cents .ConditionalExposure}}; change: {{cents .ExposureDelta}}. Exposure is payable only on a later termination, never payable now.{{if .Terminating}} This termination recognizes severance separately in Facts; do not add that recognized amount again as conditional exposure.{{end}}
+{{- end}}
+  Capacity (whole staffing batch):
+    - [slots_closed] Slots closed: {{quantity .Capacity.Closed}}. Capacity, not patients, orders or revenue.
+{{- range .Capacity.ClosedByModality}}
+      - {{.Modality}}: {{.Count}} slots (same horizon).
+{{- end}}
+    - [bookings_displaced] Bookings displaced: {{quantity .Capacity.Displaced}}
+    - [replacement_capacity] Displaced bookings with feasible replacements by capacity: {{quantity .Capacity.Replacements}}. Acceptance is unavailable before commitment.
+    - [slots_opened] Replacement or additional bookable capacity: {{quantity .Capacity.Opened}}
+    - Future demand: unavailable. Capacity beyond the displayed horizon: unavailable.
+  Withdrawal and reversibility, per action:
+{{- range .Reversals}}
+    - Action {{.Action}}: {{reversal .}}
+{{- else}}
+    - No staffing batch is applied; nothing to reverse.
+{{- end}}
+{{- range .Proxies}}
+  Historical remote fee proxy for {{.Ref}}: {{proxyMoney .Cents}} from {{.Studies}} relevant studies; requested trailing lookback {{.LookbackDays}} days. Available run observation period: {{.AvailableFrom}} to {{.AvailableTo}}. Incomplete lookback: {{.Incomplete}}.
+    Windows: {{windows .Windows}}; scope: {{.Scope}}. The engine prices studies that waited unread during matching windows and scope at the first qualifying instant, including its night surcharge. Two lanes are shared by all contracts; employed readers claim first. This is not a guaranteed future fee and not a utilisation bound. History before the available run period is unavailable.
+{{- end}}
+  Not known before deciding:
+    - Human fatigue, welfare, morale, resignation, clinical outcomes and reputation are unavailable; operational workload and capacity remain modeled.
+{{- range .Unavailable}}
+    - {{unavailable .}}
+{{- else}}
+    - none listed
+{{- end}}
+{{end}}
+{{- define "inspect_answer"}}{{range .}}{{.}}
+{{end}}PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_unlisted"}}No alternative with that ID is listed. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_control"}}There are no details to inspect. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "inspect_again"}}Details can be requested only once. PHASE 4 final decision. Reply with one JSON object under the shared system schema.
+{{end}}
+{{- define "retry"}}Your reply could not be read as one JSON object of the form described above. Reply again with one JSON object.
+{{end}}
+
+ACTIVE action-specific reversibility:
+allocation | "a pending allocation may be withdrawn only within the engine notice rule"
+hire | "the recruiting fee is non-refundable; ending employment requires lawful notice and severance"
+roster | "removal or replacement of a pending roster also requires 14 days notice; the version must still be pending and the employee employed"
+roster_remove | "a removal is not undone by another removal; restoring a version needs a new set under the same 14-day notice and validation rules"
+tele_cancel | "the fixed exclusive contract end cannot be moved or withdrawn; claims in flight complete at locked fees"
+tele_start | "activation binds the minimum term; cancellation requires an end at least 30 days after activation and at least 30 days after the cancellation decision"
+termination | "a committed termination cannot be withdrawn or moved; no action rehires the employee"

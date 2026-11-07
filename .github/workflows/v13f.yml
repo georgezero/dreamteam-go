@@ -1,0 +1,125 @@
+name: v13f-offline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  remediation:
+    name: remediation (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      TMPDIR: ${{ github.workspace }}/.git/dt-v013f/go-tmp
+      GOTMPDIR: ${{ github.workspace }}/.git/dt-v013f/go-tmp
+      GOCACHE: ${{ github.workspace }}/.git/dt-v013f/go-cache
+      GOMODCACHE: ${{ github.workspace }}/.git/dt-v013f/go-mod
+      GOPATH: ${{ github.workspace }}/.git/dt-v013f/go-path
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Dedicated scratch
+        run: mkdir -p "$GOTMPDIR" "$GOCACHE" "$GOMODCACHE" "$GOPATH" out
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: Historical candidate in its original checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach .git/dt-v013f/v13e-candidate e584107c1eacbcca10163aafbf8372f22745e0d8
+          python3 -I -B .git/dt-v013f/v13e-candidate/analysis/alternatives/lock_check.py
+          git worktree remove .git/dt-v013f/v13e-candidate
+      - name: Go regressions, format and unchanged evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(gofmt -l .)"
+          go test ./internal/alternatives ./internal/agent ./cmd/dreamteam -count=1 -timeout 30m
+          go build -o .git/dt-v013f/dreamteam ./cmd/dreamteam
+      - name: Historical replay prerequisites
+        shell: bash
+        run: |
+          set -euo pipefail
+          for v in v08c v09c; do
+            for f in docs/benchmark/$v-dev/eval-replay-*.json; do
+              name=$(basename "$f" .json)
+              .git/dt-v013f/dreamteam benchmark suite run "$f" -out "$v-$name" > /dev/null
+              .git/dt-v013f/dreamteam benchmark verify "$v-$name" | tail -1
+            done
+          done
+      - name: Workflow and driver tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          DREAMTEAM_BINARY="$PWD/.git/dt-v013f/dreamteam" python3 -B -m unittest discover -s analysis/alternatives
+          python3 -B -m unittest discover -s agents/llm
+      - name: Frozen V0.13d evidence regeneration
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=.git/dt-v013f/dreamteam
+          V=docs/benchmark/v13d-dev
+          python3 -I -B analysis/alternatives/v13d.py contexts --binary "$B" --check "$V/contexts"
+          python3 -I -B analysis/alternatives/v13d.py protocol --contexts "$V/contexts" --out .git/dt-v013f/legacy-protocol.json
+          cmp .git/dt-v013f/legacy-protocol.json "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13d.py schedule --contexts "$V/contexts" --protocol "$V/protocol-draft.json" --out .git/dt-v013f/legacy-schedule.json
+          cmp .git/dt-v013f/legacy-schedule.json "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13d_fidelity.py fidelity --binary "$B" --contexts "$V/contexts" --replays . --out .git/dt-v013f/legacy-fidelity
+          cmp .git/dt-v013f/legacy-fidelity/fidelity.json "$V/fidelity/fidelity.json"
+          cmp .git/dt-v013f/legacy-fidelity/fidelity.md "$V/fidelity/fidelity.md"
+      - name: Successor protocol, fidelity and complete review package
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=.git/dt-v013f/dreamteam
+          V=docs/benchmark/v13f-dev
+          D=analysis/alternatives/v13f.py
+          python3 -I -B "$D" contexts --binary "$B" --check "$V/contexts"
+          python3 -I -B "$D" protocol --contexts "$V/contexts" --out .git/dt-v013f/protocol.json
+          cmp .git/dt-v013f/protocol.json "$V/protocol-draft.json"
+          python3 -I -B "$D" schedule --contexts "$V/contexts" --protocol "$V/protocol-draft.json" --out .git/dt-v013f/schedule.json
+          cmp .git/dt-v013f/schedule.json "$V/schedule-draft.json"
+          python3 -I -B "$D" check --binary "$B" --contexts "$V/contexts" --protocol "$V/protocol-draft.json" --replays .
+          python3 -I -B analysis/alternatives/v13f_fidelity.py fidelity --binary "$B" --contexts "$V/contexts" --replays . --out .git/dt-v013f/fidelity
+          cmp .git/dt-v013f/fidelity/fidelity.json "$V/fidelity/fidelity.json"
+          cmp .git/dt-v013f/fidelity/fidelity.md "$V/fidelity/fidelity.md"
+          diff -r .git/dt-v013f/fidelity/interactions "$V/fidelity/interactions"
+          python3 -I -B analysis/alternatives/v13f_package.py --source .git/dt-v013f/fidelity --check
+          python3 -I -B analysis/alternatives/v13f_identities.py --check
+          python3 -I -B analysis/alternatives/v13f_manifest.py
+          cp "$V/fidelity/fidelity.json" out/v13f-fidelity.json
+          cp "$V/protocol-draft.json" out/v13f-protocol.json
+          cp "$V/schedule-draft.json" out/v13f-schedule.json
+          cp docs/v13f/review-package/SHA256SUMS out/v13f-review-package-SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: v13f-results-${{ matrix.os }}
+          path: out/
+  compare:
+    needs: remediation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: results
+          pattern: v13f-results-*
+      - name: Compare final artifacts across platforms
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in results/v13f-results-ubuntu-latest/*; do
+            name=$(basename "$file")
+            for platform in ubuntu-24.04-arm macos-latest; do
+              cmp "$file" "results/v13f-results-$platform/$name"
+            done
+          done

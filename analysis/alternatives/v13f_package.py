@@ -1,5 +1,6 @@
 """Build the acceptance-review material from complete delivered scripted interactions."""
 import argparse
+import ast
 import hashlib
 import json
 from pathlib import Path
@@ -41,7 +42,8 @@ def artifacts(source):
             'agents/llm/text/correction-v2.txt','agents/llm/text/response-schemas-v2.json',
             'internal/alternatives/text/presentation-v3.tmpl','docs/benchmark/v13f-dev/presentation/view-table.txt',
             'internal/alternatives/text/selection-v2.txt']
-    legacy=['internal/alternatives/text/control-v1.tmpl','internal/alternatives/text/presentation-v2.tmpl']
+    legacy=['internal/alternatives/text/control-v1.tmpl','internal/alternatives/text/presentation-v1.tmpl',
+            'internal/alternatives/text/presentation-v2.tmpl','internal/alternatives/text/selection-v1.txt']
     sources=[]
     for status,files in [('ACTIVE',active),('LEGACY-INACTIVE',legacy)]:
         for f in files:
@@ -49,6 +51,13 @@ def artifacts(source):
             out[target]=(ROOT/f).read_bytes()
             sources.append({'status':status,'source':f,'packagePath':target,
                             'legacyInactiveSections':['rows labelled LEGACY-INACTIVE (internal binding only)'] if f.endswith('view-table.txt') else []})
+    legacy_agent=ROOT/'agents/llm/llm_agent3.py'
+    assignment=next(node for node in ast.parse(legacy_agent.read_text()).body
+                    if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='SYSTEM_PROMPT' for t in node.targets))
+    target='sources/LEGACY-INACTIVE/system-prompt-v3.txt'
+    out[target]=ast.literal_eval(assignment.value).encode()
+    sources.append({'status':'LEGACY-INACTIVE','source':'agents/llm/llm_agent3.py#SYSTEM_PROMPT',
+                    'packagePath':target})
     out['RECORD_ONLY_INDEX.json']=(json.dumps({'schema':PACKAGE_SCHEMA,'notice':'RECORD ONLY: never appended to model-visible messages',
         'interactions':index,'sources':sources},indent=1,sort_keys=True)+'\n').encode()
     items=['neutrality','readability','financial terminology','target identification','continuing obligations and no action',
@@ -85,8 +94,8 @@ shown against the same no-action baseline for each employee. Exposure is not
 payable-now severance. Capacity is not demand. Then read the multi-employee,
 roster, mixed staffing and limited-history teleradiology interactions.
 
-Sources are labelled ACTIVE or LEGACY-INACTIVE. The legacy source files are
-reference material, not additional messages delivered by this workflow.
+Sources are labelled ACTIVE or LEGACY-INACTIVE. The legacy source files, including the original built-in system instruction,
+are reference material, not additional messages delivered by this workflow.
 Selection v2 remains ACTIVE with its unchanged historical contract identity. The successor view inherits
 unchanged item grammar where used; runtime replaces legacy reversibility,
 capacity, retained guarantees and fee-proxy fragments with the typed sections.
