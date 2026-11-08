@@ -1,0 +1,158 @@
+{
+ "authorization": "scripted lifecycle fixture",
+ "cleanup": {
+  "failure": null,
+  "status": "SUCCEEDED",
+  "timestamp": "2026-01-01T00:00:00.000006Z"
+ },
+ "counters": {
+  "drawAborted": null,
+  "drawInterrupted": null,
+  "drawsCompleted": 0,
+  "drawsNotRun": 2,
+  "drawsScheduled": 2,
+  "healthChecks": 1,
+  "modelCalls": 0
+ },
+ "driver": "dreamteam-v13i-driver/5",
+ "ended": "2026-01-01T00:00:00.000007Z",
+ "failureEvent": {
+  "drawsCompleted": 0,
+  "modelCalls": 0,
+  "nextDraw": {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 1,
+   "model": "qwen36-35b-a3b",
+   "seq": 1
+  },
+  "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+  "runId": "00000000-0000-4000-8000-0000000013a1",
+  "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+  "schema": "dreamteam.run-failure/v2",
+  "state": "PREFLIGHT",
+  "stop": {
+   "beforeSignature": null,
+   "code": "health",
+   "evidence": null,
+   "failure": null,
+   "healthCheck": 0,
+   "message": "the server did not answer healthy",
+   "request": {
+    "method": "GET",
+    "path": "/health"
+   },
+   "state": "PREFLIGHT"
+  },
+  "timestamp": "2026-01-01T00:00:00.000005Z",
+  "verificationStatus": "UNVERIFIED"
+ },
+ "finalization": {
+  "artifacts": {
+   "aborted-draw.json": null,
+   "draws.json": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+   "failure-event.json": "e50a0baf91938051009fccfc18b8010baad382f1fa659d212da367df1d7b3fb5",
+   "server-before.json": "d6610470516b8954e36c4bb567077d953ce3ead912204908a7f409ea37c4da1c"
+  },
+  "timestamp": "2026-01-01T00:00:00.000007Z"
+ },
+ "healthChecks": [
+  {
+   "beforeDraw": null,
+   "index": 0,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5IiwiZXJyb3IiOiJVUkxFcnJvciJ9",
+      "bytes": 39,
+      "sha256": "97b0fe3eca9e75d66eff0640896401aa5a04c37335106e83c84f8a9ba1dfcce8"
+     },
+     "category": "contradictory_body",
+     "ended": "2026-01-01T00:00:00.000004Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "MALFORMED",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v1",
+     "started": "2026-01-01T00:00:00.000003Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "PREFLIGHT"
+  }
+ ],
+ "journal": [
+  {
+   "event": "create",
+   "from": null,
+   "n": 1,
+   "timestamp": "2026-01-01T00:00:00.000001Z",
+   "to": "CREATED"
+  },
+  {
+   "event": "begin_preflight",
+   "from": "CREATED",
+   "n": 2,
+   "timestamp": "2026-01-01T00:00:00.000002Z",
+   "to": "PREFLIGHT"
+  },
+  {
+   "code": "health",
+   "event": "stop",
+   "from": "PREFLIGHT",
+   "n": 3,
+   "timestamp": "2026-01-01T00:00:00.000005Z",
+   "to": "CLEANUP"
+  },
+  {
+   "event": "cleanup_succeeded",
+   "from": "CLEANUP",
+   "n": 4,
+   "timestamp": "2026-01-01T00:00:00.000006Z",
+   "to": "FINALIZING"
+  },
+  {
+   "event": "finalize_partial",
+   "from": "FINALIZING",
+   "n": 5,
+   "timestamp": "2026-01-01T00:00:00.000007Z",
+   "to": "PARTIAL"
+  }
+ ],
+ "lifecycle": {
+  "id": "dreamteam.run-lifecycle/v1",
+  "sha256": "36f8e99add5b45fd69a7c27742835192929d4aae5e676fadddf5787761026ae6"
+ },
+ "protocol": "record-only-lifecycle-fixture",
+ "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+ "provenance": {
+  "runId": "SYNTHETIC_FIXTURE",
+  "timestamps": "SYNTHETIC_FIXTURE"
+ },
+ "resume": "never",
+ "runId": "00000000-0000-4000-8000-0000000013a1",
+ "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+ "schema": "dreamteam.alternatives-run/v5",
+ "serverObserved": true,
+ "started": "2026-01-01T00:00:00.000001Z",
+ "state": "PARTIAL",
+ "status": "PARTIAL",
+ "stop": {
+  "beforeSignature": null,
+  "code": "health",
+  "evidence": null,
+  "failure": null,
+  "healthCheck": 0,
+  "message": "the server did not answer healthy",
+  "request": {
+   "method": "GET",
+   "path": "/health"
+  },
+  "state": "PREFLIGHT"
+ },
+ "verificationStatus": "UNVERIFIED"
+}

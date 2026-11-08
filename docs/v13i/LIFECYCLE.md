@@ -117,7 +117,8 @@ the exception's class or from the body bytes, never from message text.
 * The verifier re-classifies every observation from its stored body or
   exception type; any disagreement is INVALID evidence (L07).
 
-Health checks follow `healthSchedule`: one in PREFLIGHT, then one in
+Ordinary runs observe the server; only an explicitly checked record-only
+fixture may run unobserved. Health checks follow `healthSchedule`: one in PREFLIGHT, then one in
 HEALTH_CHECK before `schedule[i]` whenever i = 0 or the (model, round)
 changes. `server-before.json` equals the initial state.
 
@@ -132,7 +133,9 @@ are compared, never trusted.
 ## Interrupts, reconciliation and fail-closed behaviour
 
 * SIGINT is deferred everywhere except inside the interruptible regions: the
-  health read, draw execution and session release. A deferred interrupt is
+  health read, draw execution and session release (and even there when it is
+  handled in the recorder's own frame, before the external call starts or
+  after it returned). A deferred interrupt is
   raised at the next transition boundary while the run is still running; once
   the run has stopped it cannot interrupt cleanup bookkeeping or finalization.
 * An exception or interrupt outside persistence and outside the

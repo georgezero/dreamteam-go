@@ -1,0 +1,228 @@
+{
+ "authorization": "scripted lifecycle fixture",
+ "cleanup": {
+  "failure": null,
+  "status": "SUCCEEDED",
+  "timestamp": "2026-01-01T00:00:00.000014Z"
+ },
+ "counters": {
+  "drawAborted": null,
+  "drawInterrupted": null,
+  "drawsCompleted": 1,
+  "drawsNotRun": 1,
+  "drawsScheduled": 2,
+  "healthChecks": 2,
+  "modelCalls": 1
+ },
+ "driver": "dreamteam-v13i-driver/5",
+ "ended": "2026-01-01T00:00:00.000015Z",
+ "failureEvent": {
+  "drawsCompleted": 1,
+  "modelCalls": 1,
+  "nextDraw": {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 2,
+   "model": "qwen36-35b-a3b",
+   "seq": 2
+  },
+  "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+  "runId": "00000000-0000-4000-8000-0000000013a1",
+  "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+  "schema": "dreamteam.run-failure/v2",
+  "state": "DRAW_RECORDED",
+  "stop": {
+   "beforeSignature": null,
+   "code": "operator",
+   "evidence": null,
+   "failure": {
+    "message": "witness interrupt at persist:ledger.after#1",
+    "type": "KeyboardInterrupt"
+   },
+   "healthCheck": null,
+   "message": "KeyboardInterrupt: witness interrupt at persist:ledger.after#1",
+   "request": null,
+   "state": "DRAW_RECORDED"
+  },
+  "timestamp": "2026-01-01T00:00:00.000013Z",
+  "verificationStatus": "UNVERIFIED"
+ },
+ "finalization": {
+  "artifacts": {
+   "aborted-draw.json": null,
+   "draws.json": "a90f0c759f387b168df88f307984181b85d214cc667e520c5848f261edae7a17",
+   "failure-event.json": "c63d021b58719d965172962db8a1a152e2a7323a4d8703e7b76577275507f773",
+   "server-before.json": "76293cee88aaa271bfccde5b3d6026f20b72d5260d7ad4e9679662806d15d2d0"
+  },
+  "timestamp": "2026-01-01T00:00:00.000015Z"
+ },
+ "healthChecks": [
+  {
+   "beforeDraw": null,
+   "index": 0,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000004Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v1",
+     "started": "2026-01-01T00:00:00.000003Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "PREFLIGHT"
+  },
+  {
+   "beforeDraw": 1,
+   "index": 1,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000008Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v1",
+     "started": "2026-01-01T00:00:00.000007Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "HEALTH_CHECK"
+  }
+ ],
+ "journal": [
+  {
+   "event": "create",
+   "from": null,
+   "n": 1,
+   "timestamp": "2026-01-01T00:00:00.000001Z",
+   "to": "CREATED"
+  },
+  {
+   "event": "begin_preflight",
+   "from": "CREATED",
+   "n": 2,
+   "timestamp": "2026-01-01T00:00:00.000002Z",
+   "to": "PREFLIGHT"
+  },
+  {
+   "event": "preflight_passed",
+   "from": "PREFLIGHT",
+   "n": 3,
+   "timestamp": "2026-01-01T00:00:00.000005Z",
+   "to": "READY"
+  },
+  {
+   "event": "begin_health_check",
+   "from": "READY",
+   "healthCheck": 1,
+   "n": 4,
+   "timestamp": "2026-01-01T00:00:00.000006Z",
+   "to": "HEALTH_CHECK"
+  },
+  {
+   "event": "health_passed",
+   "from": "HEALTH_CHECK",
+   "healthCheck": 1,
+   "n": 5,
+   "timestamp": "2026-01-01T00:00:00.000009Z",
+   "to": "READY"
+  },
+  {
+   "draw": 1,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 6,
+   "timestamp": "2026-01-01T00:00:00.000010Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 1,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 7,
+   "reconciled": true,
+   "rowSha256": "f35ba40a7ef059b5f461c75f029c511849a36afb63b4f5b1784ab278298fe195",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000012Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "code": "operator",
+   "event": "stop",
+   "from": "DRAW_RECORDED",
+   "n": 8,
+   "timestamp": "2026-01-01T00:00:00.000013Z",
+   "to": "CLEANUP"
+  },
+  {
+   "event": "cleanup_succeeded",
+   "from": "CLEANUP",
+   "n": 9,
+   "timestamp": "2026-01-01T00:00:00.000014Z",
+   "to": "FINALIZING"
+  },
+  {
+   "event": "finalize_partial",
+   "from": "FINALIZING",
+   "n": 10,
+   "timestamp": "2026-01-01T00:00:00.000015Z",
+   "to": "PARTIAL"
+  }
+ ],
+ "lifecycle": {
+  "id": "dreamteam.run-lifecycle/v1",
+  "sha256": "36f8e99add5b45fd69a7c27742835192929d4aae5e676fadddf5787761026ae6"
+ },
+ "protocol": "record-only-lifecycle-fixture",
+ "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+ "provenance": {
+  "runId": "SYNTHETIC_FIXTURE",
+  "timestamps": "SYNTHETIC_FIXTURE"
+ },
+ "resume": "never",
+ "runId": "00000000-0000-4000-8000-0000000013a1",
+ "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+ "schema": "dreamteam.alternatives-run/v5",
+ "serverObserved": true,
+ "started": "2026-01-01T00:00:00.000001Z",
+ "state": "PARTIAL",
+ "status": "PARTIAL",
+ "stop": {
+  "beforeSignature": null,
+  "code": "operator",
+  "evidence": null,
+  "failure": {
+   "message": "witness interrupt at persist:ledger.after#1",
+   "type": "KeyboardInterrupt"
+  },
+  "healthCheck": null,
+  "message": "KeyboardInterrupt: witness interrupt at persist:ledger.after#1",
+  "request": null,
+  "state": "DRAW_RECORDED"
+ },
+ "verificationStatus": "UNVERIFIED"
+}

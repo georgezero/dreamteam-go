@@ -1,0 +1,376 @@
+{
+ "cases": [
+  {
+   "agree": true,
+   "expected": {
+    "category": null,
+    "completed": 2,
+    "recorderState": "COMPLETE",
+    "stopCode": null
+   },
+   "mismatch": [],
+   "name": "healthy",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 2,
+     "failureVerification": null,
+     "runStatus": "COMPLETE"
+    },
+    "category": null,
+    "completed": 2,
+    "healthReads": 3,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "COMPLETE",
+    "stopCode": null,
+    "stopState": null,
+    "verifierState": "COMPLETE",
+    "violations": []
+   },
+   "serverMode": "healthy"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "unhealthy_status",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "explicit_unhealthy",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "unhealthy_status",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "unhealthy"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "connection_refused",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "connection_refused",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "connection_refused",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "refused"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "remote_disconnected",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "connection_closed_early",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "remote_disconnected",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "closed_early"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "incomplete_read",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "incomplete_http_response",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "incomplete_read",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "incomplete"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": null,
+    "completed": 2,
+    "recorderState": "COMPLETE",
+    "stopCode": null
+   },
+   "mismatch": [],
+   "name": "delayed_response_within_timeout",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 2,
+     "failureVerification": null,
+     "runStatus": "COMPLETE"
+    },
+    "category": null,
+    "completed": 2,
+    "healthReads": 3,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "COMPLETE",
+    "stopCode": null,
+    "stopState": null,
+    "verifierState": "COMPLETE",
+    "violations": []
+   },
+   "serverMode": "delayed"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "timeout",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "timeout",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "timeout",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "timeout"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "invalid_json",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "malformed_json",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "invalid_json",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "malformed"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "http_status",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "http_error_status",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "http_status",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "http_503"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "contradictory_body",
+    "completed": 0,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "healthy_with_error_field",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 0,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "contradictory_body",
+    "completed": 0,
+    "healthReads": 1,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "PREFLIGHT",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "contradictory"
+  },
+  {
+   "agree": true,
+   "expected": {
+    "category": "connection_refused",
+    "completed": 1,
+    "recorderState": "PARTIAL",
+    "stopCode": "health"
+   },
+   "mismatch": [],
+   "name": "server_disappears_between_checks",
+   "observed": {
+    "analysis": {
+     "comparisonsSuppressed": true,
+     "completedVerified": 1,
+     "failureVerification": "UNVERIFIED",
+     "runStatus": "PARTIAL"
+    },
+    "category": "connection_refused",
+    "completed": 1,
+    "healthReads": 3,
+    "provenance": {
+     "runId": "UUID4",
+     "timestamps": "SYSTEM_UTC"
+    },
+    "recorder": "returned",
+    "recorderState": "PARTIAL",
+    "stopCode": "health",
+    "stopState": "HEALTH_CHECK",
+    "verifierState": "PARTIAL",
+    "violations": []
+   },
+   "serverMode": "healthy"
+  }
+ ],
+ "host": "linux/x86_64",
+ "notice": "Loopback only; no model endpoint; scripted model replies; actual timestamps and UUIDs.",
+ "python": "3.13.5",
+ "schema": "dreamteam.v13i-loopback/v1",
+ "server": "http.server on localhost, ephemeral port",
+ "summary": {
+  "agree": 11,
+  "cases": 11
+ }
+}

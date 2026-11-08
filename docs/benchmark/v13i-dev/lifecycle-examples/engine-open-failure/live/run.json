@@ -1,0 +1,172 @@
+{
+ "authorization": "scripted lifecycle fixture",
+ "cleanup": {
+  "failure": null,
+  "status": "SUCCEEDED",
+  "timestamp": "2026-01-01T00:00:00.000010Z"
+ },
+ "counters": {
+  "drawAborted": 2,
+  "drawInterrupted": null,
+  "drawsCompleted": 1,
+  "drawsNotRun": 0,
+  "drawsScheduled": 2,
+  "healthChecks": 0,
+  "modelCalls": 1
+ },
+ "driver": "dreamteam-v13i-driver/5",
+ "ended": "2026-01-01T00:00:00.000011Z",
+ "failureEvent": {
+  "drawsCompleted": 1,
+  "modelCalls": 1,
+  "nextDraw": {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 2,
+   "model": "qwen36-35b-a3b",
+   "seq": 2
+  },
+  "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+  "runId": "00000000-0000-4000-8000-0000000013a1",
+  "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+  "schema": "dreamteam.run-failure/v2",
+  "state": "DRAW_ACTIVE",
+  "stop": {
+   "beforeSignature": null,
+   "code": "driver",
+   "evidence": null,
+   "failure": {
+    "message": "scripted engine opening failure",
+    "type": "RuntimeError"
+   },
+   "healthCheck": null,
+   "message": "RuntimeError: scripted engine opening failure",
+   "request": null,
+   "state": "DRAW_ACTIVE"
+  },
+  "timestamp": "2026-01-01T00:00:00.000009Z",
+  "verificationStatus": "UNVERIFIED"
+ },
+ "finalization": {
+  "artifacts": {
+   "aborted-draw.json": "bc9ca2faeac1cb671c7294be1412cb8e3b0302480fc1a9e5f1599a7e9076239c",
+   "draws.json": "5df250811a59f510ee5d7268824473e5bc3f0375759e7f0c9c6872d1fac8d3e3",
+   "failure-event.json": "e826c184293bebe2c83a4d0aebe02d7faf736075cb3e6603c5674993a86f927e",
+   "server-before.json": null
+  },
+  "timestamp": "2026-01-01T00:00:00.000011Z"
+ },
+ "healthChecks": [],
+ "journal": [
+  {
+   "event": "create",
+   "from": null,
+   "n": 1,
+   "timestamp": "2026-01-01T00:00:00.000001Z",
+   "to": "CREATED"
+  },
+  {
+   "event": "begin_preflight",
+   "from": "CREATED",
+   "n": 2,
+   "timestamp": "2026-01-01T00:00:00.000002Z",
+   "to": "PREFLIGHT"
+  },
+  {
+   "event": "preflight_passed",
+   "from": "PREFLIGHT",
+   "n": 3,
+   "timestamp": "2026-01-01T00:00:00.000003Z",
+   "to": "READY"
+  },
+  {
+   "draw": 1,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 4,
+   "timestamp": "2026-01-01T00:00:00.000004Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 1,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 5,
+   "reconciled": false,
+   "rowSha256": "13942d3cec89b3bf4bdb4fd095bd3b5a7b3ffee7a61d062ca98a0f39dafdb13a",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000006Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 6,
+   "timestamp": "2026-01-01T00:00:00.000007Z",
+   "to": "READY"
+  },
+  {
+   "draw": 2,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 7,
+   "timestamp": "2026-01-01T00:00:00.000008Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "code": "driver",
+   "event": "stop",
+   "from": "DRAW_ACTIVE",
+   "n": 8,
+   "timestamp": "2026-01-01T00:00:00.000009Z",
+   "to": "CLEANUP"
+  },
+  {
+   "event": "cleanup_succeeded",
+   "from": "CLEANUP",
+   "n": 9,
+   "timestamp": "2026-01-01T00:00:00.000010Z",
+   "to": "FINALIZING"
+  },
+  {
+   "event": "finalize_partial",
+   "from": "FINALIZING",
+   "n": 10,
+   "timestamp": "2026-01-01T00:00:00.000011Z",
+   "to": "PARTIAL"
+  }
+ ],
+ "lifecycle": {
+  "id": "dreamteam.run-lifecycle/v1",
+  "sha256": "36f8e99add5b45fd69a7c27742835192929d4aae5e676fadddf5787761026ae6"
+ },
+ "protocol": "record-only-lifecycle-fixture",
+ "protocolSha256": "291fc7bc2e3cd9d3c95e1d2857ea8645665ee2ed5fe0d3bda44840f235dbd218",
+ "provenance": {
+  "runId": "SYNTHETIC_FIXTURE",
+  "timestamps": "SYNTHETIC_FIXTURE"
+ },
+ "resume": "never",
+ "runId": "00000000-0000-4000-8000-0000000013a1",
+ "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+ "schema": "dreamteam.alternatives-run/v5",
+ "serverObserved": false,
+ "started": "2026-01-01T00:00:00.000001Z",
+ "state": "PARTIAL",
+ "status": "PARTIAL",
+ "stop": {
+  "beforeSignature": null,
+  "code": "driver",
+  "evidence": null,
+  "failure": {
+   "message": "scripted engine opening failure",
+   "type": "RuntimeError"
+  },
+  "healthCheck": null,
+  "message": "RuntimeError: scripted engine opening failure",
+  "request": null,
+  "state": "DRAW_ACTIVE"
+ },
+ "verificationStatus": "UNVERIFIED"
+}

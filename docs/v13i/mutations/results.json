@@ -1,0 +1,967 @@
+{
+ "bases": {
+  "aborted_workflow": "PARTIAL",
+  "cleanup_failed": "PARTIAL",
+  "complete": "COMPLETE",
+  "halt_row": "PARTIAL",
+  "health_stop": "PARTIAL"
+ },
+ "mutants": [
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L02"
+   ],
+   "name": "completed_row_with_cleanup_failure",
+   "violations": [
+    "L02",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "complete_with_unhealthy_initial_observation",
+   "violations": [
+    "L07",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "complete_with_unhealthy_server_before_file_only",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_failure_with_workflow_evidence",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_failure_marked_ready_without_calls",
+   "violations": [
+    "L03",
+    "L06",
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "draw_setup_failure_with_engine_log",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L03"
+   ],
+   "name": "impossible_run_model_calls",
+   "violations": [
+    "L03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "impossible_per_draw_calls",
+   "violations": [
+    "L04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "failure_event_call_count",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01"
+   ],
+   "name": "duplicate_completed_draws",
+   "violations": [
+    "L01",
+    "L12",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01"
+   ],
+   "name": "missing_schedule_entry",
+   "violations": [
+    "L01",
+    "L12",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L10",
+    "L17"
+   ],
+   "name": "truncated_ledger_claiming_complete",
+   "violations": [
+    "L12",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01"
+   ],
+   "name": "aborted_status_row_in_ledger",
+   "violations": [
+    "L01",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L05",
+    "L16"
+   ],
+   "name": "aborted_artifact_beside_complete",
+   "violations": [
+    "L03",
+    "L05",
+    "L09",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "stop_code_differs_in_failure_event_file",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "stop_code_differs_from_journal",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "stop_state_differs_from_journal",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L14",
+    "L19"
+   ],
+   "name": "second_stop_transition",
+   "violations": [
+    "L12",
+    "L13",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "halt_row",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "halt_row_with_operator_stop",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "illegal_transition",
+   "violations": [
+    "L07",
+    "L12",
+    "L14",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "unknown_event",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "unknown_state",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "transitions_reordered",
+   "violations": [
+    "L07",
+    "L12",
+    "L13",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "journal_without_finalization",
+   "violations": [
+    "L12",
+    "L13",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "unsupported_terminal_status",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "terminal_state_invalid",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L09",
+    "L10",
+    "L14"
+   ],
+   "name": "partial_claimed_complete",
+   "violations": [
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L08"
+   ],
+   "name": "complete_with_cleanup_failure",
+   "violations": [
+    "L08",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L08",
+    "L19"
+   ],
+   "name": "cleanup_failure_replaces_primary",
+   "violations": [
+    "L08",
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "cleanup_failed",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "cleanup_created_stop_mislabelled",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "server_before_byte_changed_unsealed",
+   "violations": [
+    "L07",
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16",
+    "L17"
+   ],
+   "name": "ledger_changed_unsealed",
+   "violations": [
+    "L12",
+    "L16",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "finalization_hash_forged",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L17"
+   ],
+   "name": "commit_row_hash_stale",
+   "violations": [
+    "L12",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L03"
+   ],
+   "name": "counters_not_conserved",
+   "violations": [
+    "L03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L17"
+   ],
+   "name": "reconciled_commit_without_stop",
+   "violations": [
+    "L12",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L18"
+   ],
+   "name": "resume_permitted",
+   "violations": [
+    "L18"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "run_identity_not_uuid",
+   "violations": [
+    "L15"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "lifecycle_contract_differs",
+   "violations": [
+    "L15"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "recording_claims_verification",
+   "violations": [
+    "L15"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_label_on_contradictory_body",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_with_exception",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "health_field_missing",
+   "violations": [
+    "L07",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "unknown_read_failure_category",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "read_failure_class_mismatch",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L14"
+   ],
+   "name": "health_stop_on_healthy_observation",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L14"
+   ],
+   "name": "missing_round_health_check",
+   "violations": [
+    "L07",
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "null_journal_timestamp",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "unparseable_journal_timestamp",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "impossible_calendar_timestamp",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "journal_time_reversed",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "run_started_after_ended",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "run_started_missing",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "run_ended_null",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "failure_event_timestamp_null",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "observation_end_before_start",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "call_sent_missing",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "call_sent_outside_draw",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "marker_present",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "stray_temporary_file",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "legacy_stop_event_file",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_manifest",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "truncated_manifest",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_ledger",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "truncated_ledger",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_failure_event",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "mismatched_failure_event",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L05",
+    "L16"
+   ],
+   "name": "missing_aborted_artifact",
+   "violations": [
+    "L03",
+    "L05",
+    "L06",
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L16"
+   ],
+   "name": "missing_server_before",
+   "violations": [
+    "L07",
+    "L16"
+   ]
+  }
+ ],
+ "notice": "Scripted archives only; no inference.",
+ "schema": "dreamteam.v13i-mutations/v1",
+ "summary": {
+  "agree": 69,
+  "mutants": 69
+ }
+}

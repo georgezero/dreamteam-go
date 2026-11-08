@@ -7,6 +7,71 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13i — run lifecycle state machine and systematic fault verification (0.13.0-dev.2, engine unchanged)
+
+The owner accepted V0.13h as a remediation milestone (not technical
+clearance) and directed a lifecycle redesign for DT13H-01 to DT13H-04 and
+timestamp validation for DT13H-05. [Per-finding response](audits/v0.13i-audit-response.md).
+Independent technical re-review (Extra High): PENDING. Human presentation
+review: PENDING, limited to the 93 unchanged model-visible transcripts.
+Protocol lock: NO GO. Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* A versioned lifecycle contract, [dreamteam.run-lifecycle/v1](v13i/LIFECYCLE.md)
+  (machine-readable `analysis/alternatives/lifecycle_v1.json`), committed before
+  any recorder change: 10 recorder states plus verifier-only INVALID, 19 legal
+  transitions, stop codes per state, an aborted-draw stage table, structured
+  health categories, required artifacts, counters, timestamp rules, interrupt
+  and fail-closed semantics, finalization steps, 19 invariants and the declared
+  fault-injection operations, phases, kinds and expected-outcome rule.
+* A recorder (driver/5, run/5) that changes state only through that table,
+  with a structured health probe, ledger reconciliation on interrupts, SIGINT
+  deferred outside interruptible regions, and FINALIZING-marker finalization
+  that fails closed.
+* An independent classifier and analyzer (partial-run/5, analysis/6) that loads
+  the same contract, does not import the recorder, and derives the state from
+  the persisted artifacts; PARTIAL runs never produce complete-run comparisons.
+* A fault matrix generated from the contract (601 cases at 240 points, all
+  agreeing), 19 real-process signal tests, 11 real loopback tests on horo, 71
+  regression witnesses from the V0.13g/V0.13h reviews and 69 re-sealed
+  contradictory-evidence mutants. See [fault verification](v13i/FAULT_MATRIX.md).
+* A frozen, limited human presentation review package (commit ee987a1):
+  [human-review](v13i/human-review/README.md).
+
+**Contract amendments during implementation** (all inside the contract file,
+recorded here rather than rewritten into the earlier specification commit
+44efcb1): the marker-removal operation has no reachable `after` phase; the
+os_error read-failure category admits any other OSError subclass (by class);
+ordinary runs must observe the server, only checked fixtures may not; a SIGINT
+handled in the recorder's own frame inside a region is deferred.
+
+**Preserved design:** nine historical contexts, six context pairs, 21 contexts,
+two arms, 262 scheduled draws, 802 maximum calls, four-hour request-start
+guard, canonical submitted-action primary outcome, unchanged decision workflow,
+parser, presentation, selection and draw contract (draw/v4, V0.13h `run_draw`).
+All 2,884 starting files other than PROGRESS and the two workflows retain their
+bytes ([baseline](v13i/BASELINE.json)); the 93 transcripts and 7 active static
+assets are byte-identical to the frozen human-review manifest.
+
+**Baseline:** a4d7204c14f36977fee044b3d1a17518d58cc02c on main.
+The protected swap file and dt are excluded from stages and source archives.
+
+**The engine version remains 0.13.0-dev.2.** Simulator, session, API,
+mechanics, accounting, scoring and decision operations are unchanged; only run
+recording and verification receive [successor identities](v13i/CONTRACT-IDENTITIES.json).
+
+**Quality gates:** see [the gate record](v13i/gates/README.md); retained logs
+and before-fix witnesses are under /home/george/dt-audit-kept/v013i/. Heavy
+checks and loopback tests run on horo; the Pi runs memory-limited focused checks.
+
+**Not run or authorized:** independent technical re-review, human review,
+clinical suites, historical live reruns, reserved/holdout seeds, protocol
+lock, live inference, tag or release. No post-hoc recovery of hard-killed
+archives exists (they are INVALID); whether one is wanted is an owner decision.
+
+---
+
 ## V0.13h — run-level failure recording and verification closure (0.13.0-dev.2, engine unchanged)
 
 The owner accepted V0.13g with conditions and limited remediation to DT13G-01,

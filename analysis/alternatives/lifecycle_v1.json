@@ -102,13 +102,13 @@
    "timeout": {"exceptionTypes": ["TimeoutError", "timeout"], "urlErrorReasonTypes": ["TimeoutError", "timeout"]},
    "http_protocol": {"exceptionTypes": ["BadStatusLine", "LineTooLong", "UnknownProtocol", "HTTPException"], "urlErrorReasonTypes": []},
    "url_error": {"exceptionTypes": ["URLError"], "urlErrorReasonTypes": ["*"]},
-   "os_error": {"exceptionTypes": ["OSError", "gaierror", "herror", "SSLError"], "urlErrorReasonTypes": []}
+   "os_error": {"exceptionTypes": ["*"], "urlErrorReasonTypes": [], "note": "any other OSError subclass, by class; READ_FAILED either way"}
   },
   "readFailureRule": "categories are assigned by exception class (isinstance), never by message text; a URLError is categorised by its reason's class when that class is listed, otherwise url_error; every read failure has outcome READ_FAILED, an exception {type, reasonType}, no parsed body, and cause UNVERIFIED",
   "contradiction": "an observation whose recorded category, outcome, exception and body disagree (for example HEALTHY with an exception, or a body that re-classifies differently) is INVALID evidence (L07); it is never HEALTHY",
   "noInvention": "an interrupted read records no observation, only the attempted request; no response is ever substituted"
  },
- "healthSchedule": "when the server is observed: one read in PREFLIGHT, then one read in HEALTH_CHECK before schedule[i] whenever i == 0 or (model, draw round) differs from schedule[i-1]; none otherwise",
+ "healthSchedule": "ordinary runs observe the server (serverObserved true); only an explicitly checked record-only fixture may leave it unobserved. When the server is observed: one read in PREFLIGHT, then one read in HEALTH_CHECK before schedule[i] whenever i == 0 or (model, draw round) differs from schedule[i-1]; none otherwise",
  "artifacts": {
   "run.json": "manifest: identities, claimed state, journal, counters, health checks, stop, failure event, cleanup, finalization",
   "draws.json": "authoritative ledger: the committed rows (completed or interrupted), schedule prefix, atomic",
@@ -147,7 +147,7 @@
   "replay": "timestamps are metadata; deterministic draw replay identities exclude them; a missing timestamp is never inferred"
  },
  "interrupts": {
-  "operatorSignal": "SIGINT is deferred everywhere except inside interruptible regions (health read, draw execution, session release); a deferred interrupt is raised at the next transition boundary before the run stops, and ignored for control once the run has stopped (it cannot undo or corrupt finalization)",
+  "operatorSignal": "SIGINT is deferred everywhere except inside interruptible regions (health read, draw execution, session release), and even there when it is handled in the recorder's own frame before the external call starts or after it returned; a deferred interrupt is raised at the next transition boundary before the run stops, and ignored for control once the run has stopped (it cannot undo or corrupt finalization)",
   "interruptibleRegions": ["health_read", "draw_execute", "session_cleanup"],
   "handled": "an exception or interrupt outside persistence and outside the stop/cleanup/finalization sequence records stop driver/operator at the current state after reconciling the committed ledger",
   "reconciliation": "before recording a stop from DRAW_ACTIVE the recorder commits a draw that had already returned, and records commit_draw (reconciled) for a row already durable in draws.json; it never invents an aborted artifact for a completed draw, nor a row that was not returned",
@@ -168,7 +168,7 @@
   },
   "operations": {
    "persist": {"phases": {"before": ["exception", "keyboard"], "write": ["exception", "keyboard", "persistence"], "file_fsync": ["exception", "keyboard", "persistence"], "replace": ["exception", "keyboard", "persistence"], "replaced": ["exception", "keyboard"], "dir_fsync": ["exception", "keyboard", "persistence"], "after": ["exception", "keyboard"]}},
-   "unlink": {"phases": {"before": ["exception", "keyboard"], "unlink": ["exception", "keyboard", "persistence"], "unlinked": ["exception", "keyboard"], "dir_fsync": ["exception", "keyboard", "persistence"], "after": ["exception", "keyboard"]}},
+   "unlink": {"phases": {"before": ["exception", "keyboard"], "unlink": ["exception", "keyboard", "persistence"], "unlinked": ["exception", "keyboard"], "dir_fsync": ["exception", "keyboard", "persistence"]}},
    "health_read": {"phases": {"before": ["exception", "keyboard"], "during": ["exception", "keyboard", "transport"], "after": ["exception", "keyboard"]}},
    "draw_guard": {"phases": {"before": ["exception", "keyboard"], "during": ["guard_halt"], "after": ["exception", "keyboard"]}},
    "draw_execute": {"phases": {"before": ["exception", "keyboard"], "engine_open": ["exception", "keyboard"], "model_call": ["exception", "keyboard", "transport"], "after": ["exception", "keyboard"]}},
