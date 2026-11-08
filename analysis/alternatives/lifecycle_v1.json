@@ -1,0 +1,233 @@
+{
+ "schema": "dreamteam.lifecycle-spec/v1",
+ "id": "dreamteam.run-lifecycle/v1",
+ "status": "DRAFT, NOT LOCKED",
+ "notice": "The single authoritative run-lifecycle contract. The recorder drives transitions only through this table; the verifier loads the same file and reconstructs the archive state independently from persisted evidence. Prose: docs/v13i/LIFECYCLE.md.",
+ "states": {
+  "CREATED": {"terminal": false, "meaning": "archive directory, empty ledger and initial manifest persisted; nothing fallible has run"},
+  "PREFLIGHT": {"terminal": false, "meaning": "limits configured; the initial health read, when the server is observed, is in progress"},
+  "READY": {"terminal": false, "meaning": "between draws: the next scheduled draw may start once its round health check and draw guard pass"},
+  "HEALTH_CHECK": {"terminal": false, "meaning": "the round-boundary health read before the next draw is in progress"},
+  "DRAW_ACTIVE": {"terminal": false, "meaning": "the draw guard passed for the next scheduled draw; it is executing, or has returned and is not yet committed"},
+  "DRAW_RECORDED": {"terminal": false, "meaning": "the draw's row is committed to the authoritative ledger"},
+  "CLEANUP": {"terminal": false, "meaning": "no further draw will start; pooled engine sessions are being released"},
+  "FINALIZING": {"terminal": false, "meaning": "the FINALIZING marker is durable; final artifacts and the final manifest are being written"},
+  "COMPLETE": {"terminal": true, "meaning": "every scheduled draw completed, no stop, cleanup succeeded, finalization durable"},
+  "PARTIAL": {"terminal": true, "meaning": "finalized after a recorded stop or cleanup failure; only observed evidence is analysed"},
+  "INVALID": {"terminal": true, "classifierOnly": true, "meaning": "assigned by the verifier to any archive that violates an invariant, is unfinalized, or cannot be read; never written by the recorder"}
+ },
+ "events": {
+  "create": "initial manifest persisted",
+  "begin_preflight": "limits configured next; the initial health read follows when the server is observed",
+  "preflight_passed": "initial health observation HEALTHY (or the server is not observed)",
+  "begin_health_check": "round-boundary health read starts",
+  "health_passed": "round-boundary observation HEALTHY and the server signature unchanged",
+  "begin_draw": "draw guard passed for schedule[committed]",
+  "commit_draw": "the row for the active draw is durable in draws.json",
+  "continue": "the committed row completed and draws remain",
+  "schedule_done": "the committed row completed and it was the last scheduled draw",
+  "stop": "a stop is recorded (health, server_change, a guard halt, or a driver/operator exception)",
+  "cleanup_succeeded": "pooled session release returned normally",
+  "cleanup_failed": "pooled session release raised; recorded separately from any primary stop",
+  "finalize_complete": "final manifest written as COMPLETE under the FINALIZING marker",
+  "finalize_partial": "final manifest written as PARTIAL under the FINALIZING marker"
+ },
+ "transitions": [
+  {"from": null, "event": "create", "to": "CREATED"},
+  {"from": "CREATED", "event": "begin_preflight", "to": "PREFLIGHT"},
+  {"from": "CREATED", "event": "stop", "to": "CLEANUP"},
+  {"from": "PREFLIGHT", "event": "preflight_passed", "to": "READY"},
+  {"from": "PREFLIGHT", "event": "stop", "to": "CLEANUP"},
+  {"from": "READY", "event": "begin_health_check", "to": "HEALTH_CHECK"},
+  {"from": "READY", "event": "begin_draw", "to": "DRAW_ACTIVE"},
+  {"from": "READY", "event": "stop", "to": "CLEANUP"},
+  {"from": "HEALTH_CHECK", "event": "health_passed", "to": "READY"},
+  {"from": "HEALTH_CHECK", "event": "stop", "to": "CLEANUP"},
+  {"from": "DRAW_ACTIVE", "event": "commit_draw", "to": "DRAW_RECORDED"},
+  {"from": "DRAW_ACTIVE", "event": "stop", "to": "CLEANUP"},
+  {"from": "DRAW_RECORDED", "event": "continue", "to": "READY"},
+  {"from": "DRAW_RECORDED", "event": "schedule_done", "to": "CLEANUP"},
+  {"from": "DRAW_RECORDED", "event": "stop", "to": "CLEANUP"},
+  {"from": "CLEANUP", "event": "cleanup_succeeded", "to": "FINALIZING"},
+  {"from": "CLEANUP", "event": "cleanup_failed", "to": "FINALIZING"},
+  {"from": "FINALIZING", "event": "finalize_complete", "to": "COMPLETE"},
+  {"from": "FINALIZING", "event": "finalize_partial", "to": "PARTIAL"}
+ ],
+ "illegalTransitions": "every (from, event) pair not listed above, every transition out of COMPLETE or PARTIAL, any transition into INVALID, and any unknown state or event name: the recorder refuses it and the verifier classifies the archive INVALID (L14)",
+ "stopCodes": {
+  "health": {"states": ["PREFLIGHT", "HEALTH_CHECK"], "requires": "the state's health check has a non-HEALTHY observation; failure null; request GET /health"},
+  "server_change": {"states": ["HEALTH_CHECK"], "requires": "HEALTHY round observation whose server signature differs from the initial signature"},
+  "wall_clock": {"states": ["READY", "DRAW_RECORDED"], "requires": "READY: draw-guard halt evidence (stage draw_start); DRAW_RECORDED: the committed row is interrupted with this halt"},
+  "draw_call_limit": {"states": ["DRAW_RECORDED"], "requires": "the committed row is interrupted with this halt (stage request_start)"},
+  "call_budget": {"states": ["DRAW_RECORDED"], "requires": "the committed row is interrupted with this halt (stage request_start)"},
+  "transport": {"states": ["DRAW_RECORDED"], "requires": "the committed row is interrupted with this halt (stage request_start)"},
+  "driver": {"states": ["CREATED", "PREFLIGHT", "READY", "HEALTH_CHECK", "DRAW_ACTIVE", "DRAW_RECORDED", "CLEANUP"], "requires": "failure {type,message} with type other than KeyboardInterrupt; DRAW_ACTIVE requires the aborted artifact for the active draw; DRAW_RECORDED requires the committed row to be completed; CLEANUP only through cleanup_failed with no earlier stop"},
+  "operator": {"states": ["CREATED", "PREFLIGHT", "READY", "HEALTH_CHECK", "DRAW_ACTIVE", "DRAW_RECORDED", "CLEANUP"], "requires": "as driver, with failure type KeyboardInterrupt"}
+ },
+ "abortedDraw": {
+  "note": "An aborted draw is the next scheduled draw, never a ledger row. failureStage determines the admissible initialization status and evidence; cleanupFailure is admissible only beside a different primary failure.",
+  "stages": {
+   "draw_setup": {"engineInitialization": ["NOT_STARTED"], "calls": "none", "engine": "none", "initialDigests": "null", "reconstruction": "UNVERIFIED"},
+   "draw_unrecorded": {"engineInitialization": ["UNKNOWN"], "calls": "none", "engine": "none", "initialDigests": "null", "reconstruction": "UNVERIFIED", "meaning": "the draw had been entered but raised without its own aborted evidence; nothing is reconstructed or invented"},
+   "engine_open": {"engineInitialization": ["FAILED"], "calls": "none", "engine": "none", "initialDigests": "null", "reconstruction": "UNVERIFIED"},
+   "model_setup": {"engineInitialization": ["OPENED"], "calls": "none", "engine": "none", "initialDigests": "null", "reconstruction": "UNVERIFIED"},
+   "initial_digests": {"engineInitialization": ["OPENED", "READY"], "calls": "none", "engine": "at most one digests request", "initialDigests": "null or the context digests", "reconstruction": "UNVERIFIED"},
+   "workflow": {"engineInitialization": ["READY"], "calls": "recorded", "engine": "recorded", "initialDigests": "the context digests", "reconstruction": "transport replay when the last recorded call failed without a body; otherwise UNVERIFIED"},
+   "final_digests": {"engineInitialization": ["READY"], "calls": "recorded", "engine": "recorded", "initialDigests": "the context digests", "reconstruction": "UNVERIFIED"},
+   "engine_close": {"engineInitialization": ["READY"], "calls": "recorded", "engine": "recorded", "initialDigests": "the context digests", "reconstruction": "UNVERIFIED", "cleanupFailure": "forbidden (the close failure is the primary failure)"}
+  }
+ },
+ "health": {
+  "observationSchema": "dreamteam.health-observation/v1",
+  "request": {"method": "GET", "path": "/health"},
+  "maxBodyBytes": 65536,
+  "outcomes": ["HEALTHY", "UNHEALTHY", "MALFORMED", "READ_FAILED"],
+  "bodyCategories": {
+   "healthy": "HEALTHY",
+   "unhealthy_status": "UNHEALTHY",
+   "oversized_body": "MALFORMED",
+   "non_utf8_body": "MALFORMED",
+   "invalid_json": "MALFORMED",
+   "not_an_object": "MALFORMED",
+   "missing_status": "MALFORMED",
+   "contradictory_body": "MALFORMED"
+  },
+  "bodyRule": "bytes over maxBodyBytes: oversized_body; not strict UTF-8: non_utf8_body; not JSON: invalid_json; not an object: not_an_object; an object with a key named error and status \"healthy\": contradictory_body; status not a non-empty string: missing_status; status \"healthy\": healthy; any other status: unhealthy_status",
+  "readFailureCategories": {
+   "http_status": {"exceptionTypes": ["HTTPError"], "httpStatus": "required, not 2xx", "body": "retained when read"},
+   "connection_refused": {"exceptionTypes": ["ConnectionRefusedError"], "urlErrorReasonTypes": ["ConnectionRefusedError"]},
+   "connection_reset": {"exceptionTypes": ["ConnectionResetError", "ConnectionAbortedError", "BrokenPipeError"], "urlErrorReasonTypes": ["ConnectionResetError", "ConnectionAbortedError", "BrokenPipeError"]},
+   "remote_disconnected": {"exceptionTypes": ["RemoteDisconnected"], "urlErrorReasonTypes": ["RemoteDisconnected"]},
+   "incomplete_read": {"exceptionTypes": ["IncompleteRead"], "urlErrorReasonTypes": []},
+   "timeout": {"exceptionTypes": ["TimeoutError", "timeout"], "urlErrorReasonTypes": ["TimeoutError", "timeout"]},
+   "http_protocol": {"exceptionTypes": ["BadStatusLine", "LineTooLong", "UnknownProtocol", "HTTPException"], "urlErrorReasonTypes": []},
+   "url_error": {"exceptionTypes": ["URLError"], "urlErrorReasonTypes": ["*"]},
+   "os_error": {"exceptionTypes": ["OSError", "gaierror", "herror", "SSLError"], "urlErrorReasonTypes": []}
+  },
+  "readFailureRule": "categories are assigned by exception class (isinstance), never by message text; a URLError is categorised by its reason's class when that class is listed, otherwise url_error; every read failure has outcome READ_FAILED, an exception {type, reasonType}, no parsed body, and cause UNVERIFIED",
+  "contradiction": "an observation whose recorded category, outcome, exception and body disagree (for example HEALTHY with an exception, or a body that re-classifies differently) is INVALID evidence (L07); it is never HEALTHY",
+  "noInvention": "an interrupted read records no observation, only the attempted request; no response is ever substituted"
+ },
+ "healthSchedule": "when the server is observed: one read in PREFLIGHT, then one read in HEALTH_CHECK before schedule[i] whenever i == 0 or (model, draw round) differs from schedule[i-1]; none otherwise",
+ "artifacts": {
+  "run.json": "manifest: identities, claimed state, journal, counters, health checks, stop, failure event, cleanup, finalization",
+  "draws.json": "authoritative ledger: the committed rows (completed or interrupted), schedule prefix, atomic",
+  "server-before.json": "the full initial server state; required iff the server is observed and the initial read returned",
+  "aborted-draw.json": "required iff the stop is from DRAW_ACTIVE",
+  "failure-event.json": "required iff a stop exists; equal to run.failureEvent",
+  "FINALIZING": "marker present from the start of finalization until every final write and directory sync succeeded; its presence makes the archive INVALID"
+ },
+ "requiredArtifactsByState": {
+  "CREATED": ["run.json", "draws.json"],
+  "PREFLIGHT": ["run.json", "draws.json"],
+  "READY": ["run.json", "draws.json", "server-before.json if observed"],
+  "HEALTH_CHECK": ["run.json", "draws.json", "server-before.json if observed"],
+  "DRAW_ACTIVE": ["run.json", "draws.json", "server-before.json if observed"],
+  "DRAW_RECORDED": ["run.json", "draws.json", "server-before.json if observed"],
+  "CLEANUP": ["run.json", "draws.json", "server-before.json if observed and read", "aborted-draw.json if stopped from DRAW_ACTIVE"],
+  "FINALIZING": ["FINALIZING", "run.json", "draws.json"],
+  "COMPLETE": ["run.json", "draws.json", "server-before.json if observed"],
+  "PARTIAL": ["run.json", "draws.json", "failure-event.json", "server-before.json if observed and read", "aborted-draw.json if stopped from DRAW_ACTIVE"]
+ },
+ "allowedArchiveFiles": ["run.json", "draws.json", "server-before.json", "aborted-draw.json", "failure-event.json"],
+ "counters": {
+  "drawsScheduled": "len(schedule)",
+  "drawsCompleted": "ledger rows with status completed",
+  "drawInterrupted": "seq of the interrupted ledger row, or null",
+  "drawAborted": "seq of the aborted artifact, or null",
+  "drawsNotRun": "drawsScheduled - drawsCompleted - [drawInterrupted] - [drawAborted]",
+  "modelCalls": "recorded model exchanges in ledger rows plus the aborted artifact, failed attempts included",
+  "healthChecks": "recorded health checks, interrupted reads included"
+ },
+ "timestamps": {
+  "format": "UTC RFC 3339: YYYY-MM-DDTHH:MM:SS[.ffffff]Z, a valid calendar time",
+  "required": ["run.started", "run.ended (terminal)", "journal[*].timestamp", "healthChecks[*].observation.started/ended", "cleanup.timestamp (after cleanup)", "finalization.timestamp", "failureEvent.timestamp", "calls[*].sent"],
+  "order": "run.started <= journal timestamps (non-decreasing) <= run.ended; run.ended equals the finalize transition; each observation started <= ended, inside its health-check interval; failureEvent.timestamp equals the stop transition; each draw's call times non-decreasing inside its begin_draw..commit/stop interval",
+  "provenance": "run.provenance.timestamps is SYSTEM_UTC for ordinary runs or SYNTHETIC_FIXTURE for reproducible record-only fixtures; the verifier refuses SYNTHETIC_FIXTURE unless explicitly asked to check a fixture",
+  "replay": "timestamps are metadata; deterministic draw replay identities exclude them; a missing timestamp is never inferred"
+ },
+ "interrupts": {
+  "operatorSignal": "SIGINT is deferred everywhere except inside interruptible regions (health read, draw execution, session release); a deferred interrupt is raised at the next transition boundary before the run stops, and ignored for control once the run has stopped (it cannot undo or corrupt finalization)",
+  "interruptibleRegions": ["health_read", "draw_execute", "session_cleanup"],
+  "handled": "an exception or interrupt outside persistence and outside the stop/cleanup/finalization sequence records stop driver/operator at the current state after reconciling the committed ledger",
+  "reconciliation": "before recording a stop from DRAW_ACTIVE the recorder commits a draw that had already returned, and records commit_draw (reconciled) for a row already durable in draws.json; it never invents an aborted artifact for a completed draw, nor a row that was not returned",
+  "failClosed": "a failure of any persistence operation, and any exception inside the stop/cleanup/finalization sequence other than the session release itself, propagates as a recording failure; the archive stays unfinalized (or keeps its FINALIZING marker) and is INVALID"
+ },
+ "finalization": {
+  "steps": ["write FINALIZING marker (file and directory sync)", "write failure-event.json when a stop exists", "write run.json in its terminal state with SHA-256 of every archive file", "remove the marker", "sync the directory"],
+  "rule": "COMPLETE or PARTIAL is reported only after every step succeeded; if the final directory sync fails after the marker is removed the recorder restores the marker before failing",
+  "limits": "atomic same-directory replacement per file and fsync where supported; no multi-file transaction, power-loss or filesystem-ordering guarantee is claimed"
+ },
+ "faultInjection": {
+  "kinds": {
+   "exception": "RuntimeError raised at the point",
+   "keyboard": "KeyboardInterrupt raised at the point (an interrupt that is not deferred)",
+   "transport": "a genuine transport failure: health read -> connection refused classified by the probe; model call -> failed exchange without a response",
+   "persistence": "OSError(EIO) from the filesystem call",
+   "guard_halt": "the run clock passes the wall-clock stop at the draw guard"
+  },
+  "operations": {
+   "persist": {"phases": {"before": ["exception", "keyboard"], "write": ["exception", "keyboard", "persistence"], "file_fsync": ["exception", "keyboard", "persistence"], "replace": ["exception", "keyboard", "persistence"], "replaced": ["exception", "keyboard"], "dir_fsync": ["exception", "keyboard", "persistence"], "after": ["exception", "keyboard"]}},
+   "unlink": {"phases": {"before": ["exception", "keyboard"], "unlink": ["exception", "keyboard", "persistence"], "unlinked": ["exception", "keyboard"], "dir_fsync": ["exception", "keyboard", "persistence"], "after": ["exception", "keyboard"]}},
+   "health_read": {"phases": {"before": ["exception", "keyboard"], "during": ["exception", "keyboard", "transport"], "after": ["exception", "keyboard"]}},
+   "draw_guard": {"phases": {"before": ["exception", "keyboard"], "during": ["guard_halt"], "after": ["exception", "keyboard"]}},
+   "draw_execute": {"phases": {"before": ["exception", "keyboard"], "engine_open": ["exception", "keyboard"], "model_call": ["exception", "keyboard", "transport"], "after": ["exception", "keyboard"]}},
+   "session_cleanup": {"phases": {"before": ["exception", "keyboard"], "during": ["exception", "keyboard"], "after": ["exception", "keyboard"]}}
+  },
+  "boundaries": {
+   "persist:ledger_init": {"operation": "persist", "artifact": "draws.json", "context": "before the manifest exists"},
+   "persist:manifest": {"operation": "persist", "artifact": "run.json", "context": "every transition checkpoint, identified by its event"},
+   "persist:server_before": {"operation": "persist", "artifact": "server-before.json", "context": "after the initial health read"},
+   "persist:ledger": {"operation": "persist", "artifact": "draws.json", "context": "draw commit"},
+   "persist:aborted": {"operation": "persist", "artifact": "aborted-draw.json", "context": "stop handling from DRAW_ACTIVE"},
+   "persist:marker": {"operation": "persist", "artifact": "FINALIZING", "context": "finalization"},
+   "persist:failure_event": {"operation": "persist", "artifact": "failure-event.json", "context": "finalization"},
+   "persist:final_manifest": {"operation": "persist", "artifact": "run.json", "context": "finalization"},
+   "unlink:marker": {"operation": "unlink", "artifact": "FINALIZING", "context": "finalization"},
+   "health_read": {"operation": "health_read", "context": "PREFLIGHT or HEALTH_CHECK"},
+   "draw_guard": {"operation": "draw_guard", "context": "READY"},
+   "draw_execute": {"operation": "draw_execute", "context": "DRAW_ACTIVE"},
+   "session_cleanup": {"operation": "session_cleanup", "context": "CLEANUP"}
+  },
+  "expected": {
+   "NO_ARCHIVE": "fault before the initial manifest is durable: the recorder raises a recording failure; no run.json exists; the verifier classifies INVALID",
+   "FAIL_CLOSED": "persistence fault, or any fault inside the stop/cleanup/finalization sequence other than the session release: the recorder raises a recording failure; the archive is unfinalized or keeps its marker; the verifier classifies INVALID",
+   "HANDLED": "exception -> stop driver, keyboard -> stop operator, recorded at the state current at the fault; PARTIAL; completed draws = rows durable in draws.json plus a returned uncommitted draw",
+   "HEALTH_STOP": "transport fault during a health read: stop health with a READ_FAILED observation; PARTIAL",
+   "GUARD_STOP": "guard_halt: stop wall_clock at READY; PARTIAL",
+   "CLEANUP_FAILED": "fault during the session release: cleanup FAILED; any earlier stop is kept as primary, otherwise stop driver/operator at CLEANUP; PARTIAL",
+   "WORKFLOW_EVIDENCE": "model transport failure: a recorded failed exchange inside the draw; the lifecycle outcome is the base scenario's unless a guard halt follows from the recorded evidence"
+  },
+  "expectedRule": [
+   {"when": "manifest not yet durable", "expect": "NO_ARCHIVE"},
+   {"when": "fault kind persistence, or phase in a persist/unlink operation other than before/after", "expect": "FAIL_CLOSED"},
+   {"when": "fault inside the stop/cleanup/finalization sequence (stop recorded or state CLEANUP/FINALIZING) and not session_cleanup.during", "expect": "FAIL_CLOSED"},
+   {"when": "session_cleanup.during", "expect": "CLEANUP_FAILED"},
+   {"when": "health_read.during transport", "expect": "HEALTH_STOP"},
+   {"when": "draw_guard.during guard_halt", "expect": "GUARD_STOP"},
+   {"when": "draw_execute.model_call transport", "expect": "WORKFLOW_EVIDENCE"},
+   {"when": "otherwise", "expect": "HANDLED"}
+  ]
+ },
+ "invariants": {
+  "L01": {"name": "schedule prefix", "rule": "ledger rows are schedule[0:n] in order with exact identities, each once; only the last may be interrupted; an aborted draw is schedule[n]"},
+  "L02": {"name": "completed evidence", "rule": "every completed row has the complete draw/v4 evidence: record, batches, exact submitted representation and hash, initial and final digests, engine log, calls, READY initialization, no failure or cleanupFailure"},
+  "L03": {"name": "draw conservation", "rule": "drawsScheduled = drawsCompleted + [drawInterrupted] + [drawAborted] + drawsNotRun, each counter equal to the value derived from the artifacts"},
+  "L04": {"name": "model-call reconciliation", "rule": "run and failure-event call counts equal recorded exchanges; per-call order, request and response hashes and metadata hold; per-draw and run totals within the protocol bounds; halt evidence equals the recorded counts and failure streak"},
+  "L05": {"name": "aborted is not completed", "rule": "an aborted draw is never a ledger row, only the next scheduled draw, only after a stop from DRAW_ACTIVE, and has status aborted"},
+  "L06": {"name": "failure stage", "rule": "the stop's code is admissible in the state it was recorded from; the failure event's state equals the journal's stop source; an aborted failureStage admits only its initialization status and evidence"},
+  "L07": {"name": "health evidence", "rule": "health checks occur exactly as healthSchedule requires; every observation is internally consistent and re-classifies from its body or exception; passing transitions require HEALTHY; a health stop requires a non-HEALTHY observation; server-before.json equals the initial state"},
+  "L08": {"name": "cleanup distinguishable", "rule": "cleanup has SUCCEEDED or FAILED plus a separate failure; a cleanup failure never replaces an earlier primary stop; a cleanup-created stop equals the cleanup failure"},
+  "L09": {"name": "no unresolved failure in COMPLETE", "rule": "COMPLETE has no stop, failure event, aborted artifact, interrupted row, failed cleanup or non-HEALTHY observation"},
+  "L10": {"name": "COMPLETE coverage and finalization", "rule": "COMPLETE requires every scheduled draw completed and the journal tail schedule_done, cleanup_succeeded, finalize_complete"},
+  "L11": {"name": "PARTIAL suppression", "rule": "a PARTIAL analysis has no complete-run arm differences or pair summaries"},
+  "L12": {"name": "INVALID never passes", "rule": "any violation classifies the archive INVALID and analysis refuses it"},
+  "L13": {"name": "timestamps", "rule": "every required timestamp is present, valid and ordered as timestamps.order requires; synthetic provenance only for explicit fixtures"},
+  "L14": {"name": "unknown transitions fail closed", "rule": "the journal starts with create, chains from/to exactly, uses only listed transitions and names, and ends in the claimed terminal state"},
+  "L15": {"name": "identity binding", "rule": "run schema, driver, lifecycle identity and SHA-256, UUID run identity, protocol identity and hash, and schedule hash agree"},
+  "L16": {"name": "artifact set and hashes", "rule": "the archive has exactly the artifacts its derived state requires, no FINALIZING marker or stray file, failure-event.json equal to run.failureEvent, and every finalization hash equal to the file bytes"},
+  "L17": {"name": "journal-ledger binding", "rule": "begin_draw and commit_draw name the scheduled draws in order; each commit_draw carries the row's canonical SHA-256, status and call count"},
+  "L18": {"name": "no resume", "rule": "resume is never; an existing run directory is never reused"},
+  "L19": {"name": "single consistent stop", "rule": "at most one stop transition; run.stop, failureEvent.stop and the journal agree on code and state"}
+ }
+}
