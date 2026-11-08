@@ -7,6 +7,50 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13h — run-level failure recording and verification closure (0.13.0-dev.2, engine unchanged)
+
+The owner accepted V0.13g with conditions and limited remediation to DT13G-01,
+DT13G-02 and DT13G-03 disclosure. [Per-finding response](audits/v0.13h-audit-response.md).
+Independent technical re-review: PENDING. Human presentation review: PENDING.
+Protocol lock: NO GO. Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* Successor health evidence accepts supported failed reads without inventing
+  responses, retaining scheduled boundary, attempted request, timestamp and
+  model-call accounting. External causes remain UNVERIFIED.
+* A guarded run lifecycle creates a PARTIAL manifest before fallible work,
+  checkpoints progress and preserves primary failures alongside cleanup errors.
+* Critical JSON uses same-directory atomic replacement and supported fsyncs.
+  Unfinished or inconsistent checkpoints never pass as COMPLETE.
+* Partial verification checks event identities, stages, counts, artifacts and
+  cleanup; incomplete runs have no complete-run arm or pair comparisons.
+* A successor human-review package preserves all previous delivered messages
+  and adds the disclosed initial invalid-number feedback interaction and
+  record-only lifecycle examples. Human review of the exact package is pending.
+
+**Preserved design:** nine historical contexts, six context pairs, two arms,
+262 scheduled draws, 802 maximum calls, four-hour request-start guard, canonical
+submitted-action primary outcome and unchanged decision workflow/presentation.
+All pinned predecessor evidence and three independent audits retain their bytes.
+
+**Baseline:** 24df940db349657bcf088ae56f480526d015a945 on main.
+The protected swap file and dt are excluded from stages and source archives.
+
+**The engine version remains 0.13.0-dev.2.** Simulator, session, API, mechanics,
+accounting, scoring and decision operations are unchanged. Only recording and
+verification receive [successor identities](v13h/CONTRACT-IDENTITIES.json).
+
+**Quality gates:** see [the gate record](v13h/gates/README.md); full retained
+logs and before/after witnesses are under /home/george/dt-audit-kept/v013h/.
+Heavy checks run on horo; the Pi runs memory-limited focused checks only.
+
+**Not run or authorized:** focused independent re-review, human acceptance,
+clinical suites, historical live reruns, reserved/holdout seeds, protocol lock,
+live inference, tag or release.
+
+---
+
 ## V0.13g — final technical remediation (0.13.0-dev.2, engine unchanged)
 
 The owner accepted DT13F-01 through DT13F-07 from the independent re-review as

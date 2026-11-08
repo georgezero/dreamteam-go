@@ -1,0 +1,343 @@
+{
+ "arm": "treatment",
+ "calls": [],
+ "case": "complete context transcript",
+ "context": "fp-qwen-s41901-p25",
+ "record": {
+  "arm": "treatment",
+  "batches": [
+   [
+    {
+     "effective": "2026-11-21",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 5000,
+     "type": "set_reading_allocation"
+    }
+   ]
+  ],
+  "contractPins": {
+   "alternatives-system-v2.txt": "d7dc7e0f765264b5e58d27bdbcb68a97de4467ab4177204dee80a2c714c10d3c",
+   "correction-v2.txt": "33d27405354f2eb87900b0647e0acdb0c9599940fe8cb0526b5dacb689c0c063",
+   "initial-v2.txt": "742518137f672c373832e80fdf6664ca1203f3cc743e31184b1ef19625732473",
+   "parserVersion": "17e819e7e723f4d5766818db7e5fd737fa74c882712d120b1d5290177a12cb36",
+   "response-schemas-v2.json": "74bae0dd0a0121ee425e5d6052f330d5d7262a33e7e16372f075438ce17bad7d"
+  },
+  "correctionFailure": false,
+  "deliberateNoAction": false,
+  "deliveries": [
+   {
+    "body": "{\"choices\": [{\"message\": {\"content\": \"{\\\"reason\\\": \\\"The practice is facing a critical reading backlog (79 unread) and significant financial losses (-$17k MTD) due to insufficient radiologist coverage for reading. Dr. Blake (E08) is currently allocated only 30% site time, limiting his reading capacity. Increasing his allocation to 50% (from 30%) will increase his reading hours and help clear the backlog, which is the primary bottleneck causing overdue reports and lost demand. This change is effective from the earliest possible date (2026-11-21) to start impacting capacity as soon as the lead time allows. No immediate operational changes (like extend_shift) are effective today as the practice is closed and radiologist coverage is the constraint.\\\", \\\"actions\\\": [{\\\"type\\\": \\\"set_reading_allocation\\\", \\\"employee\\\": \\\"E08\\\", \\\"op\\\": \\\"set\\\", \\\"effective\\\": \\\"2026-11-21\\\", \\\"siteAllocationBP\\\": 5000}]}\"}}]}",
+    "content": "{\"reason\": \"The practice is facing a critical reading backlog (79 unread) and significant financial losses (-$17k MTD) due to insufficient radiologist coverage for reading. Dr. Blake (E08) is currently allocated only 30% site time, limiting his reading capacity. Increasing his allocation to 50% (from 30%) will increase his reading hours and help clear the backlog, which is the primary bottleneck causing overdue reports and lost demand. This change is effective from the earliest possible date (2026-11-21) to start impacting capacity as soon as the lead time allows. No immediate operational changes (like extend_shift) are effective today as the practice is closed and radiologist coverage is the constraint.\", \"actions\": [{\"type\": \"set_reading_allocation\", \"employee\": \"E08\", \"op\": \"set\", \"effective\": \"2026-11-21\", \"siteAllocationBP\": 5000}]}",
+    "error": null,
+    "messages": [
+     {
+      "content": "llm-agent-alternatives-system/v2\n\nYou manage a synthetic outpatient imaging practice. Make operational decisions only, never clinical decisions. Consider financial sustainability, timely exams and reports, cash and commitments. Doing nothing is a valid decision. Use only public state and the listed action types, fields, targets and allowed values. Dates are practice-local YYYY-MM-DD and times HH:MM.\n\nThis shared system instruction governs both arms. Its response schema for the current phase takes precedence over any conflicting lower-priority template or schema. Return exactly one JSON object, with unique, exactly spelled keys, without wrappers. Action objects must obey the engine catalog. A reason is optional in phases 3 and 4 and is recorded without scoring. In phases 1 and 2 it is a string of at most 2000 characters; in phases 3 and 4 at most 4000 bytes.\n\nPhase 1: initial proposal. Allowed kinds: proposal or public-details request.\nProposal: {\"reason\": TEXT, \"actions\": [ACTION, ...]}.\nPublic details, once when allowed: {\"reason\": TEXT, \"actions\": [], \"details\": [NAME, ...]}, one to eight names from the listed omitted paths or action types. After public details, use the proposal schema only. At most 64 operations and 64 staffing actions.\n\nPhase 2: validation correction. Allowed kind: corrected proposal.\n{\"reason\": TEXT, \"actions\": [ACTION, ...]}.\nThe engine feedback describes the refused proposal. Supply a whole replacement, including an empty array for deliberate no action. No details request is permitted during a validation correction. One failed proposal uses the single failure allowance; a failed correction ends this decision point.\n\nPhase 3: alternative inspection. Allowed kinds: inspect, select, revise, abandon, or whole-reply revision.\nInspect: {\"inspect\": [ID, ...], \"reason\": TEXT}, one to four IDs; reason optional. Inspection may be used once. Select, revise, abandon and whole-reply revision use the phase 4 schemas. After an inspection answer, phase 4 applies.\n\nPhase 4: final decision. Allowed kinds: select, revise, abandon, or whole-reply revision.\nSelect: {\"decision\": \"select\", \"id\": ID, \"reason\": TEXT}.\nRevise: {\"decision\": \"revise\", \"actions\": [ACTION, ...], \"reason\": TEXT}.\nAbandon: {\"decision\": \"abandon\", \"reason\": TEXT}.\nWhole-reply revision: {\"reason\": TEXT, \"actions\": [ACTION, ...]}. This is accepted as revise even if a lower-priority template shows only decision/select/revise/abandon.\nAn empty revision is a deliberate no-action decision. Select uses a listed ID; control lists only proposal. Revise replaces the entire reply. Select preserves the original operations batch and uses the selected staffing batch; abandon submits neither. Each batch must validate before submission; operations apply before staffing and are not one atomic unit with staffing.\n\nOptional final citation field: \"cite\": [{\"item\": KEY, \"values\": {ID: VALUE, ...}}, ...], at most three entries, only for details actually delivered. Cite a differing value for two alternatives, including one not chosen; copying all rows does not count. Numeric counts may use JSON numbers or correctly grouped integer text. A typed citation {\"value\": NUMBER, \"unit\": UNIT} must retain the displayed unit. Dollars, cents, minutes, slots and bookings are distinct. Non-numeric values match exactly. Selection, validation, submission and execution are separate events.\n",
+      "role": "system"
+     },
+     {
+      "content": "PHASE 1 initial proposal. Use the shared system response schema.\n\nDecision point 25: Sat 2026-11-07 07:00 (day 26). Practice phase: closed; hours 10:00–18:00; scheduled close today 18:00.\nDecide what to change now, if anything.\n\nACTIVE PROBLEMS\n- [alert] 2 urgent reports overdue (target 1h) · oldest 17h 02m — no radiologist in a site-reading block now · next block 10:00\n- [warn] Reporting backlog: 79 studies unread or being read — no radiologist in a site-reading block now · next block 10:00\n- [warn] 10 soon reports overdue (target 4h) · oldest 1d 15h — no radiologist in a site-reading block now · next block 10:00\n- [warn] 12 routine reports overdue (target 1d) · oldest 1d 15h — no radiologist in a site-reading block now · next block 10:00\n- Reading backlog: 79 unread, 0 being read, 2 urgent, 24 overdue, oldest 2360 min; today 2 breaches, TAT p90 0 min.\n- Lost demand: 1 today, 174 since the start.\n- Booking pressure (first open slot over 3 days ahead): MR next open 2026-11-26.\n- Operating profit month to date -$17,297 (margin -5719 BP).\n\nMEMORY (llm-agent-memory/v1: your own decisions in this run and what the public observation showed afterwards; bounded)\nEarlier, points 0–18: 19 decisions (16 no action, 2 with actions, 1 fallbacks); 5 actions submitted, 5 accepted, 0 refused when applied; 5 proposals refused by validate.\nRecent decisions:\n- point 19 (11-01 07:00): no_action — \"The practice is closed today (Sunday) and Dr. Avery starts at 07:30 to clear the reading backlog; extending shifts is ineffective without radiologist coverage for imaging. No immediate operational ch…\"\n- point 20 (11-02 07:00): no_action — \"The practice has a significant reading backlog (16 unread, 16 overdue) and is operating at a loss. Dr. Avery starts at 07:30 and will begin reading immediately, clearing the backlog without needing o…\"\n- point 21 (11-03 07:00): no_action — \"The practice is operating at a significant loss (-$9,712 MTD) with a large backlog of 5 unread studies. Dr. Avery starts at 07:30 and will clear the backlog, but extending Sam's shift to cover the la…\"\n- point 22 (11-04 07:00): no_action — \"The practice is operating at a significant loss with a growing reading backlog and overdue reports. Dr. Avery starts at 07:30 and will clear the backlog, but extending Sam's shift to cover the late a…\"\n- point 23 (11-05 07:00): no_action — \"Extending shifts after close is invalid. The backlog is primarily due to lack of radiologist coverage for reading, which Dr. Avery will handle. No operational changes can fix the reading bottleneck o…\"\n  refused by validate first: extend_shift after_close: Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).\n  refused by validate first: extend_shift after_close: Alex's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).\n- point 24 (11-06 07:00): no_action — \"Extending Sam's shift was refused because he already works until the scheduled close. The primary issue is the reading backlog (65 unread). Dr. Avery starts at 07:30 and will begin reading, but the b…\"\n  refused by validate first: extend_shift after_close: Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).\nValidation refusals met in this run (most recent last):\n- extend_shift no_coverage (point 4): Dr. Avery would cover no room, desk or contrast supervision in the extra time today (a remote radiologist's reading blocks are not extended): nothing to gain.\n- hire lead_too_short (point 11): At the premium tier recruiting takes 21 days: the earliest start is 2026-11-14.\n- extend_shift after_close (point 24): Sam's shift today already runs to the scheduled close: an extension after close adds no capacity (staff stay automatically while admitted patients need them).\nPending changes now (from the observation and catalog):\n- staff E05: {\"id\":\"E05\",\"name\":\"Casey\",\"role\":\"technologist\",\"skills\":[\"MR\"],\"employment\":\"terminated\"}\nMetrics at recent decision points (cash; operating profit month to date; unread studies; overdue; lost demand, exams done, overtime minutes, no-coverage events since the start):\npoint | time | cash | profitMTD | unread | overdue | lost | exams | overtimeMin | noCoverage\n20 | 11-02 07:00 | $39,957 | -$8,523 | 16 | 16 | 107 | 956 | 2836 | 0\n21 | 11-03 07:00 | $64,038 | -$9,712 | 5 | 0 | 114 | 986 | 2873 | 0\n22 | 11-04 07:00 | $68,506 | -$10,815 | 26 | 6 | 125 | 1062 | 2981 | 0\n23 | 11-05 07:00 | $77,667 | -$13,208 | 39 | 4 | 139 | 1127 | 3266 | 0\n24 | 11-06 07:00 | $85,704 | -$15,319 | 65 | 12 | 155 | 1190 | 3377 | 0\n25 | 11-07 07:00 | $92,357 | -$17,297 | 79 | 24 | 174 | 1252 | 3550 | 0\n\nSTATE (the public observation, dreamteam.observation/v1, summarized: see LEFT OUT)\n{\"schema\":\"dreamteam.observation/v1\",\"time\":\"2026-11-07T07:00:00\",\"day\":26,\"weekday\":\"Sat\",\"date\":\"2026-11-07\",\"clock\":\"07:00\",\"practice\":{\"name\":\"DreamTeam Imaging Center (benchmark: financial pressure, radiologist overtime paid, $50,000 credit line at 10%)\",\"open\":false,\"scenario\":\"bench-financial-pressure-ot-credit\",\"hours\":\"10:00–18:00\",\"bookingHorizonDays\":120,\"startOffset\":-25,\"phase\":\"closed\",\"scheduledClose\":\"18:00\",\"onSite\":0,\"overtimeMin\":0,\"overtimeCostCents\":0},\"rooms\":[{\"id\":\"R1\",\"name\":\"X-ray 1\",\"modality\":\"XR\",\"state\":\"closed\",\"staffedBy\":null,\"shared\":false},{\"id\":\"R2\",\"name\":\"Ultrasound 1\",\"modality\":\"US\",\"state\":\"closed\",\"staffedBy\":null,\"shared\":false},{\"id\":\"R3\",\"name\":\"CT 1\",\"modality\":\"CT\",\"state\":\"closed\",\"staffedBy\":null,\"shared\":false},{\"id\":\"R4\",\"name\":\"MRI 1\",\"modality\":\"MR\",\"state\":\"closed\",\"staffedBy\":null,\"shared\":false}],\"staff\":[{\"id\":\"E01\",\"name\":\"Jordan\",\"role\":\"front_desk\",\"skills\":[\"registration\"],\"status\":\"off\",\"shift\":\"\",\"hourlyCents\":2100,\"weekPaidMin\":2408,\"employment\":\"active\",\"contractMin\":2400},{\"id\":\"E02\",\"name\":\"Taylor\",\"role\":\"ops_manager\",\"skills\":[\"registration\"],\"status\":\"off\",\"shift\":\"\",\"weekPaidMin\":2700,\"employment\":\"active\"},{\"id\":\"E03\",\"name\":\"Riley\",\"role\":\"technologist\",\"skills\":[\"XR\",\"CT\"],\"status\":\"off\",\"shift\":\"\",\"hourlyCents\":3600,\"weekPaidMin\":2511,\"employment\":\"active\",\"contractMin\":2400},{\"id\":\"E04\",\"name\":\"Sam\",\"role\":\"technologist\",\"skills\":[\"CT\",\"XR\"],\"status\":\"off\",\"shift\":\"10:00–18:00\",\"rosterEnd\":\"18:00\",\"capAt\":\"22:00\",\"hourlyCents\":4000,\"weekPaidMin\":2244,\"employment\":\"active\",\"contractMin\":2370},{\"id\":\"E05\",\"name\":\"Casey\",\"role\":\"technologist\",\"skills\":[\"MR\"],\"status\":\"off\",\"shift\":\"\",\"hourlyCents\":4500,\"weekPaidMin\":0,\"employment\":\"terminated\",\"contractMin\":2400,\"leaving\":{\"lastDay\":\"2026-10-31\",\"severanceCents\":450000,\"severancePayday\":\"2026-11-13\",\"severancePaid\":false}},{\"id\":\"E06\",\"name\":\"Morgan\",\"role\":\"technologist\",\"skills\":[\"US\"],\"status\":\"off\",\"shift\":\"10:00–18:00\",\"rosterEnd\":\"18:00\",\"capAt\":\"22:00\",\"hourlyCents\":4400,\"weekPaidMin\":1981,\"employment\":\"active\",\"contractMin\":2370},{\"id\":\"E07\",\"name\":\"Dr. Avery\",\"role\":\"radiologist\",\"skills\":[],\"status\":\"off\",\"shift\":\"\",\"siteBP\":3000,\"weekPaidMin\":2552,\"employment\":\"active\"},{\"id\":\"E08\",\"name\":\"Dr. Blake\",\"role\":\"radiologist\",\"skills\":[],\"status\":\"off\",\"shift\":\"10:00–14:00\",\"remote\":true,\"siteBP\":3000,\"rosterEnd\":\"14:00\",\"capAt\":\"22:00\",\"weekPaidMin\":2741,\"employment\":\"active\"},{\"id\":\"E11\",\"name\":\"Alex\",\"role\":\"technologist\",\"skills\":[\"MR\"],\"status\":\"off\",\"shift\":\"\",\"hourlyCents\":4500,\"weekPaidMin\":2413,\"employment\":\"active\",\"contractMin\":2400}],\"desk\":{\"coverage\":\"closed\"},\"demand\":{\"modalities\":[{\"modality\":\"XR\",\"today\":{\"received\":0,\"booked\":0,\"recall\":0,\"lost\":0,\"cancelled\":0},\"sinceStart\":{\"received\":529,\"booked\":539,\"recall\":17,\"lost\":11,\"cancelled\":43},\"apptsToday\":11,\"openToday\":1,\"nextOpen\":\"2026-11-07\",\"nextOpenDays\":0},{\"modality\":\"US\",\"today\":{\"received\":0,\"booked\":0,\"recall\":0,\"lost\":1,\"cancelled\":0},\"sinceStart\":{\"received\":313,\"booked\":235,\"recall\":18,\"lost\":91,\"cancelled\":19},\"apptsToday\":7,\"openToday\":1,\"nextOpen\":\"2026-11-07\",\"nextOpenDays\":0},{\"modality\":\"CT\",\"today\":{\"received\":0,\"booked\":0,\"recall\":0,\"lost\":0,\"cancelled\":0},\"sinceStart\":{\"received\":393,\"booked\":398,\"recall\":9,\"lost\":26,\"cancelled\":36},\"apptsToday\":7,\"openToday\":0,\"nextOpen\":\"2026-11-10\",\"nextOpenDays\":3},{\"modality\":\"MR\",\"today\":{\"received\":0,\"booked\":0,\"recall\":0,\"lost\":0,\"cancelled\":0},\"sinceStart\":{\"received\":250,\"booked\":223,\"recall\":8,\"lost\":46,\"cancelled\":16},\"apptsToday\":0,\"openToday\":0,\"nextOpen\":\"2026-11-26\",\"nextOpenDays\":19}],\"recallList\":53},\"flow\":{\"today\":{\"arrived\":0,\"early\":0,\"late\":0,\"afterGrace\":0,\"walkIns\":0,\"walkInsAdmitted\":0,\"walkInsOffered\":0,\"walkInsDeclined\":0,\"walkInsOfferBooked\":0,\"walkInsOfferFailed\":0,\"missed\":0,\"noShows\":0,\"rescheduled\":0,\"left\":0,\"registered\":0,\"selfRegistered\":0,\"examsStarted\":0,\"examsDone\":0,\"afterHours\":0,\"noCoverage\":0,\"heldOver\":0,\"skippedBreaks\":0,\"overtimeMin\":0,\"overtimeCostCents\":0,\"approvedOvertimeMin\":0,\"approvedOvertimeCostCents\":0},\"sinceStart\":{\"arrived\":1165,\"early\":706,\"late\":145,\"afterGrace\":72,\"walkIns\":198,\"walkInsAdmitted\":190,\"walkInsOffered\":8,\"walkInsDeclined\":0,\"walkInsOfferBooked\":5,\"walkInsOfferFailed\":3,\"missed\":144,\"noShows\":71,\"rescheduled\":1,\"left\":103,\"registered\":1353,\"selfRegistered\":251,\"examsStarted\":1252,\"examsDone\":1252,\"afterHours\":52,\"noCoverage\":0,\"heldOver\":42,\"skippedBreaks\":0,\"overtimeMin\":3550,\"overtimeCostCents\":602017,\"approvedOvertimeMin\":180,\"approvedOvertimeCostCents\":49753},\"missedNow\":0,\"noShowsLastClose\":1,\"waiting\":null},\"worklist\":{\"policy\":\"urgent_then_fifo\",\"unread\":79,\"reading\":0,\"urgent\":2,\"items\":[{\"study\":\"S08976\",\"modality\":\"MR\",\"priority\":\"routine\",\"state\":\"unread\",\"ageMin\":2360,\"overdue\":true},{\"study\":\"S08978\",\"modality\":\"CT\",\"priority\":\"soon\",\"state\":\"unread\",\"ageMin\":2352,\"overdue\":true},{\"study\":\"S08980\",\"modality\":\"US\",\"priority\":\"routine\",\"state\":\"unread\",\"ageMin\":2323,\"overdue\":true},{\"study\":\"S08981\",\"modality\":\"XR\",\"priority\":\"routine\",\"state\":\"unread\",\"ageMin\":2317,\"overdue\":true},{\"study\":\"S08982\",\"modality\":\"CT\",\"priority\":\"routine\",\"state\":\"unread\",\"ageMin\":2310,\"overdue\":true}],\"oldestMin\":2360,\"byModality\":[{\"key\":\"XR\",\"unread\":29,\"reading\":0},{\"key\":\"US\",\"unread\":14,\"reading\":0},{\"key\":\"CT\",\"unread\":25,\"reading\":0},{\"key\":\"MR\",\"unread\":11,\"reading\":0}],\"byPriority\":[{\"key\":\"routine\",\"unread\":67,\"reading\":0},{\"key\":\"soon\",\"unread\":10,\"reading\":0},{\"key\":\"urgent\",\"unread\":2,\"reading\":0}],\"finalToday\":0,\"finalTotal\":1176,\"breachToday\":2,\"acquiredToday\":0,\"tatMedianMin\":0,\"tatP90Min\":0,\"waitMedianMin\":0,\"readMedianMin\":0,\"tatByPriority\":[{\"priority\":\"routine\",\"count\":0,\"minutes\":0},{\"priority\":\"soon\",\"count\":0,\"minutes\":0},{\"priority\":\"urgent\",\"count\":0,\"minutes\":0}],\"targetMin\":[{\"priority\":\"routine\",\"count\":0,\"minutes\":1440},{\"priority\":\"soon\",\"count\":0,\"minutes\":240},{\"priority\":\"urgent\",\"count\":0,\"minutes\":60}]},\"finance\":{\"cashCents\":9235787,\"cashChangeTodayCents\":0,\"arCents\":31552073,\"apCents\":2848906,\"accruedPayrollCents\":2575043,\"today\":{\"label\":\"Today\",\"from\":\"2026-11-07\",\"to\":\"2026-11-07\",\"days\":1,\"netRevenueCents\":0,\"laborCents\":131164,\"fixedCents\":294998,\"variableCents\":0,\"operatingExpenseCents\":426162,\"operatingProfitCents\":-426162,\"marginBP\":0,\"collectionsCents\":0,\"disbursementsCents\":0,\"netCashFlowCents\":0,\"reportsFinal\":0,\"denialRateBP\":0},\"monthToDate\":{\"label\":\"Month to date\",\"from\":\"2026-11-01\",\"to\":\"2026-11-07\",\"days\":7,\"netRevenueCents\":3024360,\"laborCents\":1905158,\"fixedCents\":2064998,\"variableCents\":783908,\"operatingExpenseCents\":4754064,\"operatingProfitCents\":-1729704,\"marginBP\":-5719,\"collectionsCents\":5240078,\"disbursementsCents\":12723560,\"netCashFlowCents\":-7483482,\"reportsFinal\":233,\"denialRateBP\":706},\"trailing30\":{\"label\":\"Trailing 30 days\",\"from\":\"2026-10-09\",\"to\":\"2026-11-07\",\"days\":30,\"netRevenueCents\":20204338,\"laborCents\":11656728,\"fixedCents\":8631132,\"variableCents\":3612669,\"operatingExpenseCents\":23900529,\"operatingProfitCents\":-3696191,\"marginBP\":-1829,\"collectionsCents\":21648995,\"disbursementsCents\":24078380,\"netCashFlowCents\":-2429385,\"reportsFinal\":1319,\"denialRateBP\":689},\"sinceStart\":{\"label\":\"Since day 1\",\"from\":\"2026-10-13\",\"to\":\"2026-11-07\",\"days\":26,\"netRevenueCents\":17913812,\"laborCents\":10276133,\"fixedCents\":7489196,\"variableCents\":3207623,\"operatingExpenseCents\":20972952,\"operatingProfitCents\":-3059140,\"marginBP\":-1707,\"collectionsCents\":18314167,\"disbursementsCents\":24078380,\"netCashFlowCents\":-5764213,\"reportsFinal\":1176,\"denialRateBP\":661},\"claims\":{\"total\":8978,\"open\":2130,\"pending\":91,\"submitted\":1908,\"denied\":131,\"paid\":6093,\"shortPaid\":357,\"writtenOff\":398,\"daysInAR\":46},\"nextPayroll\":{\"date\":\"2026-11-13\",\"cents\":2575043},\"nextPayables\":{\"date\":\"2026-12-01\",\"cents\":2848906},\"severanceDue\":[{\"date\":\"2026-11-13\",\"cents\":450000}],\"balanceSheet\":{\"cashCents\":9235787,\"receivablesCents\":31552073,\"assetsCents\":40787860,\"payablesCents\":2848906,\"accruedPayrollCents\":2575043,\"severancePayableCents\":450000,\"liabilitiesCents\":5873949,\"openingCapitalCents\":54311236,\"historyEarningsCents\":-16338185,\"earningsSinceStartCents\":-3059140,\"equityCents\":34913911},\"financing\":{\"shortfallCents\":0,\"minCashCents\":3995709,\"minCashTime\":\"2026-11-01T00:00:00\",\"daysBelowZero\":0,\"creditLineModeled\":true,\"solvency\":{\"creditLimitCents\":5000000,\"creditRateBP\":1000,\"creditDrawnCents\":0,\"creditAvailableCents\":5000000,\"currentLiabilitiesCents\":5873949,\"reservedCents\":0,\"fundingHeadroomCents\":8361838,\"interestChargedCents\":0}},\"journalTotal\":33144},\"today\":{\"from\":\"2026-11-07T00:00:00\",\"to\":\"2026-11-07T07:00:00\",\"complete\":false,\"demand\":{\"received\":0,\"booked\":0,\"recall\":0,\"lost\":1,\"cancelled\":0,\"lostRate\":{\"num\":1,\"den\":0},\"walkInOrigin\":{\"booked\":0,\"lost\":0,\"cancelled\":0}},\"appointments\":{\"scheduled\":0,\"cancelled\":0,\"arrived\":0,\"noShows\":0,\"missed\":0,\"rescheduled\":0,\"noShowRate\":{\"num\":0,\"den\":0},\"cancelRate\":{\"num\":0,\"den\":0},\"bookableSec\":0,\"bookedSec\":0,\"fill\":{\"num\":0,\"den\":0}},\"walkIns\":{\"arrived\":0,\"admitted\":0,\"offered\":0,\"declined\":0,\"unservable\":0,\"offerBooked\":0,\"offerFailed\":0,\"left\":0,\"sameVisitExams\":0,\"returnExams\":0,\"cohort\":{\"arrived\":0,\"imagedSameVisit\":0,\"converted\":0,\"convertedImaged\":0,\"left\":0,\"lost\":0,\"onSite\":0},\"acceptance\":{\"num\":0,\"den\":0},\"abandonment\":{\"num\":0,\"den\":0}},\"waits\":{\"registration\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"toExam\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"pastAppointment\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"over30\":0},\"exams\":0,\"afterHoursExams\":0,\"reporting\":{\"acquired\":0,\"tat\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"unfinished\":0,\"overTarget\":0,\"final\":0,\"finalTAT\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"inherited\":0,\"breaches\":2,\"byPriority\":[{\"priority\":\"routine\",\"acquired\":0,\"tat\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"overTarget\":0,\"targetSec\":86400},{\"priority\":\"soon\",\"acquired\":0,\"tat\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"overTarget\":0,\"targetSec\":14400},{\"priority\":\"urgent\",\"acquired\":0,\"tat\":{\"count\":0,\"p50Sec\":0,\"p90Sec\":0,\"maxSec\":0},\"overTarget\":0,\"targetSec\":3600}],\"backlogStart\":79,\"backlogEnd\":79},\"workforce\":{\"overtimeSec\":0,\"overtimeCostCents\":0,\"approvedOvertimeSec\":0,\"approvedOvertimeCostCents\":0,\"heldOver\":0,\"skippedBreaks\":0,\"noCoverage\":0,\"deskSelfPatientSec\":0},\"alerts\":{\"warn\":0,\"alert\":0,\"top\":null},\"actions\":{\"attempted\":0,\"accepted\":0,\"rejected\":0}},\"alerts\":{\"active\":[{\"key\":\"tat.2\",\"severity\":\"alert\",\"since\":\"2026-11-06T14:57:39\",\"text\":\"2 urgent reports overdue (target 1h) · oldest 17h 02m\",\"why\":\"no radiologist in a site-reading block now · next block 10:00\",\"screen\":\"w\"},{\"key\":\"backlog\",\"severity\":\"warn\",\"since\":\"2026-11-05T09:07:40\",\"text\":\"Reporting backlog: 79 studies unread or being read\",\"why\":\"no radiologist in a site-reading block now · next block 10:00\",\"screen\":\"w\"},{\"key\":\"tat.1\",\"severity\":\"warn\",\"since\":\"2026-11-05T19:30:47\",\"text\":\"10 soon reports overdue (target 4h) · oldest 1d 15h\",\"why\":\"no radiologist in a site-reading block now · next block 10:00\",\"screen\":\"w\"},{\"key\":\"tat.0\",\"severity\":\"warn\",\"since\":\"2026-11-05T20:19:45\",\"text\":\"12 routine reports overdue (target 1d) · oldest 1d 15h\",\"why\":\"no radiologist in a site-reading block now · next block 10:00\",\"screen\":\"w\"}],\"raisedToday\":0},\"policies\":{\"walkIn\":\"accept_if_gap\",\"worklist\":\"urgent_then_fifo\"},\"actions\":{\"attempted\":5,\"accepted\":5,\"rejected\":0,\"recent\":[{\"id\":\"X00005\",\"batch\":2,\"time\":\"2026-10-17T07:00:00\",\"action\":{\"type\":\"set_reading_allocation\",\"employee\":\"E08\",\"op\":\"set\",\"effective\":\"2026-10-31\",\"siteAllocationBP\":3000},\"ok\":true,\"code\":\"accepted\",\"message\":\"Allocation change: Dr. Blake (E08) from Sat Oct 31: site share 30% (was 50%) · site reading 13 h 20 min (week A), 14 h 50 min (week B) (was 21 h 40 min (week A), 24 h (week B)) · salary with benefits $14,795 per 30 days (−$9,863) · shifts and contrast supervision unchanged.\",\"effectiveAt\":\"2026-10-31\"},{\"id\":\"X00004\",\"batch\":2,\"time\":\"2026-10-17T07:00:00\",\"action\":{\"type\":\"set_reading_allocation\",\"employee\":\"E07\",\"op\":\"set\",\"effective\":\"2026-10-31\",\"siteAllocationBP\":3000},\"ok\":true,\"code\":\"accepted\",\"message\":\"Allocation change: Dr. Avery (E07) from Sat Oct 31: site share 30% (was 60%) · site reading 14 h 50 min (week A), 13 h 20 min (week B) (was 28.5 h (week A), 25 h 50 min (week B)) · salary with benefits $14,795 per 30 days (−$14,795) · shifts and contrast supervision unchanged.\",\"effectiveAt\":\"2026-10-31\"},{\"id\":\"X00003\",\"batch\":2,\"time\":\"2026-10-17T07:00:00\",\"action\":{\"type\":\"terminate\",\"employee\":\"E05\",\"lastDay\":\"2026-10-31\"},\"ok\":true,\"code\":\"accepted\",\"message\":\"Casey (E05) terminated: last day Sat Oct 31, 14 days' notice with contract pay continuing ($2,250/week guaranteed) · severance $4,500 recognized now, paid Fri Nov 13.\",\"effectiveAt\":\"2026-11-01\"},{\"id\":\"X00002\",\"batch\":1,\"time\":\"2026-10-13T07:00:00\",\"action\":{\"type\":\"extend_shift\",\"employee\":\"E03\",\"minutes\":60,\"date\":\"2026-10-13\"},\"ok\":true,\"code\":\"accepted\",\"message\":\"Shift extended: Riley today until 17:15 (+1h approved overtime · ≈$36) · staffs XR 16:15–17:15 · no slot newly bookable (already staffed, or no template slots then).\"},{\"id\":\"X00001\",\"batch\":1,\"time\":\"2026-10-13T07:00:00\",\"action\":{\"type\":\"extend_shift\",\"employee\":\"E07\",\"minutes\":120,\"date\":\"2026-10-13\"},\"ok\":true,\"code\":\"accepted\",\"message\":\"Shift extended: Dr. Avery today until 18:00 (+2h approved overtime · ≈$462 at the salary's hourly rate, if worked) · on site for contrast supervision (reading blocks unchanged) 16:00–18:00.\"}]},\"extensions\":null,\"logTotal\":76200,\"recentLog\":[]}\n\nACTIONS (every action type in the catalog)\nBatch rules (catalog): A batch is 1–64 actions applied at the current time. apply applies a batch only if every action in it is valid; otherwise nothing changes and each action's result says why. V0.2 staffing actions (hire, terminate, set_roster, set_reading_allocation, contract_teleradiology) cannot share a batch with V0.1 actions (mixed_batch). Two extend_shift actions for the same employee and day go in separate batches.\nThis agent submits operations actions (extend_shift, set_walkin_policy, set_worklist_policy) and staffing actions (hire, terminate, set_roster, set_reading_allocation, contract_teleradiology) as two batches at this decision point, operations first; both must validate or neither is submitted. They are not one atomic unit.\nOperating hours 10:00–18:00; scheduled close today 18:00; booking horizon 120 days. Today is 2026-11-07 (Sat), now 07:00.\n\n## extend_shift (operations batch): Approve overtime: extend a technologist's or desk employee's shift today or on a later day.\nFields: {date?: string (a practice-local date YYYY-MM-DD; today when omitted, at most the booking horizon ahead), employee: string (an employee ID from targets), minutes: integer 1–240 (extension minutes), type: \"extend_shift\"}\nRule: Within the employee's shift cap; ahead of time, the new slots open for booking at once.\nRule: The date is today or a later day within the booking horizon (2027-03-07).\nTiming: the catalog's targets state no dates or lead times for this type; the fields and rules above say what is known, and validate decides.\nTargets (extend_shift): [{\"employee\":\"E01\",\"name\":\"Jordan\",\"role\":\"front_desk\"},{\"employee\":\"E03\",\"name\":\"Riley\",\"role\":\"technologist\"},{\"employee\":\"E04\",\"name\":\"Sam\",\"role\":\"technologist\",\"shiftToday\":\"10:00–18:00\",\"capAt\":\"22:00\"},{\"employee\":\"E06\",\"name\":\"Morgan\",\"role\":\"technologist\",\"shiftToday\":\"10:00–18:00\",\"capAt\":\"22:00\"},{\"employee\":\"E11\",\"name\":\"Alex\",\"role\":\"technologist\"}]\n\n## set_walkin_policy (operations batch): Set the walk-in policy.\nFields: {cutoff?: string (a practice-local time HH:MM; required for accept_until only), policy: \"accept_always\"|\"accept_if_gap\"|\"accept_until\"|\"schedule_later\", type: \"set_walkin_policy\"}\nRule: cutoff is given with accept_until and only then.\nTiming: the catalog's targets state no dates or lead times for this type; the fields and rules above say what is known, and validate decides.\nTargets (set_walkin_policy): {\"walkIn\":\"accept_if_gap\",\"worklist\":\"urgent_then_fifo\"}\n\n## set_worklist_policy (operations batch): Set the order radiologists read non-urgent studies in (urgent studies always come first).\nFields: {policy: \"urgent_then_fifo\"|\"fifo\"|\"oldest_first\"|\"shortest_first\", type: \"set_worklist_policy\"}\nTiming: the catalog's targets state no dates or lead times for this type; the fields and rules above say what is known, and validate decides.\nTargets (set_worklist_policy): {\"walkIn\":\"accept_if_gap\",\"worklist\":\"urgent_then_fifo\"}\n\n## hire (staffing batch): Recruit a technologist or front desk employee from the offer table.\nFields: {contractedWeeklyMinutes: integer 1–2400 (guaranteed weekly minutes; the roster may not exceed them), rateCents: integer (the offer's standard or premium hourly rate), requestId: string (1–128 characters, unique to this hire; resending the same hire is a no-op), role: \"technologist\"|\"front_desk\", roster: {A|B: {Fri|Mon|Sat|Sun|Thu|Tue|Wed: null or {assignment: string (a room ID, or \"desk\" for the front desk), breaks: [[string (a practice-local time HH:MM), …] (min 2, max 2), …], covers: [{from|until: string (a practice-local time HH:MM), room: string (a room ID)}, …], end|start: string (a practice-local time HH:MM)}}}, skills: [string (a skill), …], startDate: string (a practice-local date YYYY-MM-DD, after today and within the booking horizon; at least the offer's lead ahead), type: \"hire\"}\nRule: The recruiting fee is charged at once; paid onboarding and training come before patient capacity.\nRule: Roster: qualified rooms only, at most 6 working days a week, a 30-minute break in a shift over 6 hours, 10 hours' rest from the shift cap to the next start.\nRule: Headcount caps count recruiting, onboarding, active and notice staff.\nTiming (from targets): standardLeadDays 14–28; premiumLeadDays 7–21; earliestStartDate 2026-11-08 (in 1 days); latestStartDate 2027-03-07 (in 120 days)\nTargets (hire): {\"offers\":[{\"role\":\"front_desk\",\"skills\":[\"registration\"],\"standardRateCents\":2100,\"standardLeadDays\":14,\"premiumRateCents\":2400,\"premiumLeadDays\":7,\"recruitingFeeCents\":100000},{\"role\":\"technologist\",\"skills\":[\"XR\"],\"standardRateCents\":3600,\"standardLeadDays\":28,\"premiumRateCents\":4000,\"premiumLeadDays\":21,\"recruitingFeeCents\":300000},{\"role\":\"technologist\",\"skills\":[\"CT\"],\"standardRateCents\":4000,\"standardLeadDays\":28,\"premiumRateCents\":4400,\"premiumLeadDays\":21,\"recruitingFeeCents\":300000},{\"role\":\"technologist\",\"skills\":[\"XR\",\"CT\"],\"standardRateCents\":3800,\"standardLeadDays\":28,\"premiumRateCents\":4200,\"premiumLeadDays\":21,\"recruitingFeeCents\":300000},{\"role\":\"technologist\",\"skills\":[\"US\"],\"standardRateCents\":4400,\"standardLeadDays\":28,\"premiumRateCents\":4800,\"premiumLeadDays\":21,\"recruitingFeeCents\":300000},{\"role\":\"technologist\",\"skills\":[\"MR\"],\"standardRateCents\":4500,\"standardLeadDays\":28,\"premiumRateCents\":4900,\"premiumLeadDays\":21,\"recruitingFeeCents\":300000}],\"earliestStartDate\":\"2026-11-08\",\"latestStartDate\":\"2027-03-07\",\"rooms\":[{\"id\":\"R1\",\"modality\":\"XR\"},{\"id\":\"R2\",\"modality\":\"US\"},{\"id\":\"R3\",\"modality\":\"CT\"},{\"id\":\"R4\",\"modality\":\"MR\"}],\"technologists\":4,\"maxTechnologists\":8,\"desk\":1,\"maxDesk\":4}\n\n## terminate (staffing batch): Give notice to an hourly technologist or front desk employee.\nFields: {employee: string (an employee ID from targets), lastDay: string (a practice-local date YYYY-MM-DD, inclusive, at least the earliest last day), type: \"terminate\"}\nRule: Contract pay continues to the last day; two contracted weeks' severance is recognized at once.\nRule: Booked patients who lose their technologist are rebooked or lost; preview names them.\nTiming (from targets): earliestLastDay 2026-11-21 (in 14 days)\nTargets (terminate): [{\"employee\":\"E01\",\"name\":\"Jordan\",\"role\":\"front_desk\",\"employment\":\"active\",\"earliestLastDay\":\"2026-11-21\",\"severanceCents\":210000},{\"employee\":\"E03\",\"name\":\"Riley\",\"role\":\"technologist\",\"employment\":\"active\",\"earliestLastDay\":\"2026-11-21\",\"severanceCents\":360000},{\"employee\":\"E04\",\"name\":\"Sam\",\"role\":\"technologist\",\"employment\":\"active\",\"earliestLastDay\":\"2026-11-21\",\"severanceCents\":395000},{\"employee\":\"E06\",\"name\":\"Morgan\",\"role\":\"technologist\",\"employment\":\"active\",\"earliestLastDay\":\"2026-11-21\",\"severanceCents\":434500},{\"employee\":\"E11\",\"name\":\"Alex\",\"role\":\"technologist\",\"employment\":\"active\",\"earliestLastDay\":\"2026-11-21\",\"severanceCents\":450000}]\n\n## set_roster (staffing batch): Set or remove a dated roster version of an hourly employee.\nFields: {effective: string (a practice-local date YYYY-MM-DD: a Monday at least the earliest effective date), employee: string (an employee ID from targets), op: \"set\"|\"remove\", roster?: {A|B: {Fri|Mon|Sat|Sun|Thu|Tue|Wed: null or {assignment: string (a room ID, or \"desk\" for the front desk), breaks: [[string (a practice-local time HH:MM), …] (min 2, max 2), …], covers: [{from|until: string (a practice-local time HH:MM), room: string (a room ID)}, …], end|start: string (a practice-local time HH:MM)}}}, type: \"set_roster\"}\nRule: roster is given with op set and only then.\nRule: The contract does not change: a roster may not exceed it.\nTiming (from targets): earliestEffective 2026-11-23 (in 16 days)\n(Rosters shown as text: \"Mon–Fri 07:45–16:15 @desk break 12:00–12:30\" is, for each of those days, {\"start\":\"07:45\",\"end\":\"16:15\",\"breaks\":[[\"12:00\",\"12:30\"]],\"assignment\":\"desk\",\"covers\":[]}; \"off\" is null.)\nTargets (set_roster): [{\"employee\":\"E01\",\"name\":\"Jordan\",\"role\":\"front_desk\",\"skills\":[\"registration\"],\"contractMin\":2400,\"editable\":true,\"earliestEffective\":\"2026-11-23\",\"assignments\":[\"desk\"],\"versions\":[{\"roster\":\"A: Mon–Fri 07:45–16:15 @desk break 12:00–12:30; Sat,Sun off | B: same as A\",\"netMinA\":2400,\"netMinB\":2400,\"inEffect\":true,\"pending\":false}]},{\"employee\":\"E03\",\"name\":\"Riley\",\"role\":\"technologist\",\"skills\":[\"XR\",\"CT\"],\"contractMin\":2400,\"editable\":true,\"earliestEffective\":\"2026-11-23\",\"assignments\":[\"R1\",\"R3\"],\"versions\":[{\"roster\":\"A: Mon 07:45–16:15 @R1 break 11:30–12:00 covers R3 07:45–16:15; Tue–Fri 07:45–16:15 @R1 break 11:30–12:00 covers R3 07:45–11:30; Sat,Sun off | B: same as A\",\"netMinA\":2400,\"netMinB\":2400,\"inEffect\":true,\"pending\":false}]},{\"employee\":\"E04\",\"name\":\"Sam\",\"role\":\"technologist\",\"skills\":[\"CT\",\"XR\"],\"contractMin\":2370,\"editable\":true,\"earliestEffective\":\"2026-11-23\",\"assignments\":[\"R1\",\"R3\"],\"versions\":[{\"roster\":\"A: Mon off; Tue–Fri 11:30–20:00 @R3 break 15:30–16:00 covers R1 16:15–20:00; Sat 10:00–18:00 @R3 break 13:30–14:00 covers R1 10:00–18:00; Sun off | B: same as A\",\"netMinA\":2370,\"netMinB\":2370,\"inEffect\":true,\"pending\":false}]},{\"employee\":\"E06\",\"name\":\"Morgan\",\"role\":\"technologist\",\"skills\":[\"US\"],\"contractMin\":2370,\"editable\":true,\"earliestEffective\":\"2026-11-23\",\"assignments\":[\"R2\"],\"versions\":[{\"roster\":\"A: Mon–Fri 09:30–18:00 @R2 break 13:30–14:00; Sat,Sun off | B: Mon off; Tue–Fri 09:30–18:00 @R2 break 13:30–14:00; Sat 10:00–18:00 @R2 break 13:30–14:00; Sun off\",\"netMinA\":2400,\"netMinB\":2370,\"inEffect\":true,\"pending\":false}]},{\"employee\":\"E11\",\"name\":\"Alex\",\"role\":\"technologist\",\"skills\":[\"MR\"],\"contractMin\":2400,\"editable\":true,\"earliestEffective\":\"2026-11-23\",\"assignments\":[\"R4\"],\"versions\":[{\"roster\":\"A: Mon–Fri 11:30–20:00 @R4 break 15:30–16:00; Sat,Sun off | B: same as A\",\"netMinA\":2400,\"netMinB\":2400,\"inEffect\":true,\"pending\":false}]}]\n\n## set_reading_allocation (staffing batch): Set or remove a dated site reading allocation of a salaried radiologist.\nFields: {effective: string (a practice-local date YYYY-MM-DD, at least the earliest effective date), employee: string (an employee ID from targets), op: \"set\"|\"remove\", siteAllocationBP?: integer 3000–10000 (the site share of paid time in basis points; with op set only), type: \"set_reading_allocation\"}\nRule: It changes the radiologist's site reading blocks and the salary charged to the practice.\nTiming (from targets): earliestEffective 2026-11-21 (in 14 days)\nTargets (set_reading_allocation): [{\"employee\":\"E07\",\"name\":\"Dr. Avery\",\"annualSalaryCents\":48000000,\"inEffectBP\":3000,\"editable\":true,\"earliestEffective\":\"2026-11-21\",\"minBP\":3000,\"maxBP\":10000,\"versions\":[{\"siteBP\":6000,\"siteMinA\":1710,\"siteMinB\":1550,\"salary30Cents\":2958904,\"inEffect\":false,\"pending\":false},{\"effective\":\"2026-10-31\",\"siteBP\":3000,\"siteMinA\":890,\"siteMinB\":800,\"salary30Cents\":1479451,\"inEffect\":true,\"pending\":false,\"action\":\"X00004\"}]},{\"employee\":\"E08\",\"name\":\"Dr. Blake\",\"annualSalaryCents\":48000000,\"inEffectBP\":3000,\"editable\":true,\"earliestEffective\":\"2026-11-21\",\"minBP\":3000,\"maxBP\":10000,\"versions\":[{\"siteBP\":5000,\"siteMinA\":1300,\"siteMinB\":1440,\"salary30Cents\":2465753,\"inEffect\":false,\"pending\":false},{\"effective\":\"2026-10-31\",\"siteBP\":3000,\"siteMinA\":800,\"siteMinB\":890,\"salary30Cents\":1479451,\"inEffect\":true,\"pending\":false,\"action\":\"X00005\"}]}]\n\n## contract_teleradiology (staffing batch): Start a teleradiology contract from the plan catalog, or fix an open-ended contract's end.\nFields: {contract?: string (op cancel: a contract ID from targets), effective?: string (op start: a practice-local date YYYY-MM-DD, the activation, at least 14 days ahead), endDate?: string (op cancel: a practice-local date YYYY-MM-DD, exclusive, at least the contract's earliest end date), op: \"start\"|\"cancel\", plan?: string (op start: a plan ID from targets), requestId?: string (op start: 1–128 characters, unique to this contract), scope?: \"urgent\"|\"all\", type: \"contract_teleradiology\", windows?: [\"weeknights\"|\"saturday\"|\"sunday\", …] (min 1, max 3)}\nRule: Contracts never overlap; they share the practice's two remote lanes.\nRule: A cancellation ends at least 30 days ahead and at least 30 days after activation.\nTiming (from targets): noticeDays 14; minTermDays 30; cancelNoticeDays 30; earliestEffective 2026-11-21 (in 14 days)\nTargets (contract_teleradiology): {\"plans\":[{\"id\":\"standard-v1\",\"retainers\":[{\"window\":\"weeknights\",\"hours\":\"Mon–Fri 18:00 to 08:00 next day\",\"monthlyCents\":150000},{\"window\":\"saturday\",\"hours\":\"Sat 14:00–24:00\",\"monthlyCents\":80000},{\"window\":\"sunday\",\"hours\":\"Sun 00:00–24:00\",\"monthlyCents\":80000}],\"readFees\":[{\"modality\":\"XR\",\"cents\":1200},{\"modality\":\"US\",\"cents\":3000},{\"modality\":\"CT\",\"cents\":4500},{\"modality\":\"MR\",\"cents\":6000}],\"nightSurchargeBP\":2000,\"nightFrom\":\"22:00\",\"nightUntil\":\"08:00\",\"noticeDays\":14,\"minTermDays\":30,\"cancelNoticeDays\":30,\"lanes\":2,\"handoffMin\":10,\"scopes\":[\"urgent\",\"all\"]}],\"earliestEffective\":\"2026-11-21\",\"cancellableContracts\":null}\n\nLEFT OUT (ask with \"details\" (once per decision point)):\n- alerts.resolved: 20 entries (history; left out by the protocol's compact observation)\n- finance.claims.openClaims: 200 entries (history; left out by the protocol's compact observation)\n- finance.journal: 60 entries (history; left out by the protocol's compact observation)\n- worklist.recent: 50 entries (history; left out by the protocol's compact observation)\n- worklist.items: 79 entries; the first 5 shown\n- finance.today: fields adjudicated, benefitsCents, billingCents, collectionVarianceCents, denied, equipmentCents, facilityCents, grossRevenueCents, itCents, marginDefined, suppliesCents, wagesCents\n- finance.monthToDate: fields adjudicated, benefitsCents, billingCents, collectionVarianceCents, denied, equipmentCents, facilityCents, grossRevenueCents, itCents, marginDefined, suppliesCents, wagesCents\n- finance.trailing30: fields adjudicated, benefitsCents, billingCents, collectionVarianceCents, denied, equipmentCents, facilityCents, grossRevenueCents, itCents, marginDefined, severanceCents, suppliesCents, wagesCents\n- finance.sinceStart: fields adjudicated, benefitsCents, billingCents, collectionVarianceCents, denied, equipmentCents, facilityCents, grossRevenueCents, itCents, marginDefined, severanceCents, suppliesCents, wagesCents\n- worklist.items: fields acquired, examName, patient\n- staff: fields contractInferred, severanceCents, startsAt\n- action JSON Schemas and raw targets: summarized above as Fields and Targets; ask by action type\n- left out entirely: finance.cashHistory, finance.accounts, finance.opening, finance.claims.aging, finance.today.byModality, finance.today.fixedByItem, finance.monthToDate.byModality, finance.monthToDate.fixedByItem, finance.trailing30.byModality, finance.trailing30.fixedByItem, finance.sinceStart.byModality, finance.sinceStart.fixedByItem, today.rooms, today.staff, today.demand.byModality\n\nReply with the JSON decision object only.\n",
+      "role": "user"
+     }
+    ],
+    "status": 200
+   }
+  ],
+  "eligibility": {
+   "eligible": false,
+   "reason": "not_due:rule"
+  },
+  "errors": [],
+  "exchanges": [],
+  "executedAction": {
+   "status": "NOT_EXECUTED"
+  },
+  "exposure": false,
+  "inspected": [],
+  "intendedAction": [
+   [
+    {
+     "effective": "2026-11-21",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 5000,
+     "type": "set_reading_allocation"
+    }
+   ]
+  ],
+  "outcome": null,
+  "processFailure": false,
+  "proposalSubmittedAction": {
+   "batches": [
+    [
+     {
+      "effective": "2026-11-21",
+      "employee": "E08",
+      "op": "set",
+      "siteAllocationBP": 5000,
+      "type": "set_reading_allocation"
+     }
+    ]
+   ],
+   "canonical": "[[{\"effective\":\"2026-11-21\",\"employee\":\"E08\",\"op\":\"set\",\"siteAllocationBP\":5000,\"type\":\"set_reading_allocation\"}]]",
+   "schema": "dreamteam.submitted-action/v2",
+   "sha256": "8008b73d99b18a4221aa18f80afea8fb8eba911858c3ec27e1931f7a3858e146"
+  },
+  "result": "not_due:rule",
+  "retryRequests": 0,
+  "schema": "dreamteam.alternatives-decision-record/v3",
+  "submittedAction": {
+   "batches": [
+    [
+     {
+      "effective": "2026-11-21",
+      "employee": "E08",
+      "op": "set",
+      "siteAllocationBP": 5000,
+      "type": "set_reading_allocation"
+     }
+    ]
+   ],
+   "canonical": "[[{\"effective\":\"2026-11-21\",\"employee\":\"E08\",\"op\":\"set\",\"siteAllocationBP\":5000,\"type\":\"set_reading_allocation\"}]]",
+   "schema": "dreamteam.submitted-action/v2",
+   "sha256": "8008b73d99b18a4221aa18f80afea8fb8eba911858c3ec27e1931f7a3858e146"
+  },
+  "turn": {
+   "allowed": [],
+   "arm": "treatment",
+   "arms": "dreamteam.alternatives-arms/v3",
+   "due": false,
+   "inspect": {},
+   "message": "",
+   "record": {
+    "inspectSha256": {},
+    "messageSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "operations": [],
+    "presentation": "dreamteam.alternatives-presentation/v3",
+    "presentationSha256": "19caebcbfc53fd2d36fea9c08851a5607cf6bf258cb496c491e6e2de296f7640",
+    "proposal": [
+     {
+      "effective": "2026-11-21",
+      "employee": "E08",
+      "op": "set",
+      "siteAllocationBP": 5000,
+      "type": "set_reading_allocation"
+     }
+    ],
+    "replyPositions": [
+     1
+    ],
+    "rule": "dreamteam.alternative-selection/v2",
+    "ruleSha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9",
+    "viewSchema": "dreamteam.alternatives-view/v2",
+    "viewTableSha256": "f96e2c4f9875b1b2593b09340bd6b752aa73ac7d7486886a53548c4c34bd5282"
+   },
+   "schema": "dreamteam.alternatives-turn/v2",
+   "why": "not_due:rule"
+  },
+  "validatedAction": [
+   [
+    {
+     "effective": "2026-11-21",
+     "employee": "E08",
+     "op": "set",
+     "siteAllocationBP": 5000,
+     "type": "set_reading_allocation"
+    }
+   ]
+  ],
+  "validationFirst": {
+   "agentVersion": "alternatives-v3",
+   "attempts": [
+    {
+     "actions": [
+      {
+       "effective": "2026-11-21",
+       "employee": "E08",
+       "op": "set",
+       "siteAllocationBP": 5000,
+       "type": "set_reading_allocation"
+      }
+     ],
+     "attempt": 1,
+     "detailsRequested": null,
+     "error": null,
+     "id": "25.1",
+     "input": {
+      "chars": 33404,
+      "kind": "prompt",
+      "sha256": "833fb4f4971621fca0892953c18593b31561e44092485faa9a2b49f70f6bc2f8"
+     },
+     "output": {
+      "chars": 849,
+      "sha256": "5f270860dba860698be098d1e238e26efdec1cefb4fdf17e997b28e49435845f",
+      "text": "{\"reason\": \"The practice is facing a critical reading backlog (79 unread) and significant financial losses (-$17k MTD) due to insufficient radiologist coverage for reading. Dr. Blake (E08) is currently allocated only 30% site time, limiting his reading capacity. Increasing his allocation to 50% (from 30%) will increase his reading hours and help clear the backlog, which is the primary bottleneck causing overdue reports and lost demand. This change is effective from the earliest possible date (2026-11-21) to start impacting capacity as soon as the lead time allows. No immediate operational changes (like extend_shift) are effective today as the practice is closed and radiologist coverage is the constraint.\", \"actions\": [{\"type\": \"set_reading_allocation\", \"employee\": \"E08\", \"op\": \"set\", \"effective\": \"2026-11-21\", \"siteAllocationBP\": 5000}]}"
+     },
+     "parse": {
+      "ok": true
+     },
+     "point": 25,
+     "preview": null,
+     "protocolError": null,
+     "reason": "The practice is facing a critical reading backlog (79 unread) and significant financial losses (-$17k MTD) due to insufficient radiologist coverage for reading. Dr. Blake (E08) is currently allocated only 30% site time, limiting his reading capacity. Increasing his allocation to 50% (from 30%) will increase his reading hours and help clear the backlog, which is the primary bottleneck causing overdue reports and lost demand. This change is effective from the earliest possible date (2026-11-21) to start impacting capacity as soon as the lead time allows. No immediate operational changes (like extend_shift) are effective today as the practice is closed and radiologist coverage is the constraint.",
+     "refusals": [],
+     "transport": "ok",
+     "turn": "first",
+     "used": true,
+     "validation": [
+      {
+       "actions": [
+        {
+         "effective": "2026-11-21",
+         "employee": "E08",
+         "op": "set",
+         "siteAllocationBP": 5000,
+         "type": "set_reading_allocation"
+        }
+       ],
+       "answer": {
+        "results": [
+         {
+          "action": {
+           "effective": "2026-11-21",
+           "employee": "E08",
+           "op": "set",
+           "siteAllocationBP": 5000,
+           "type": "set_reading_allocation"
+          },
+          "batch": 0,
+          "code": "accepted",
+          "effectiveAt": "2026-11-21",
+          "id": "",
+          "message": "Allocation change: Dr. Blake (E08) from Sat Nov 21: site share 50% (was 30%) · site reading 21 h 40 min (week A), 24 h (week B) (was 13 h 20 min (week A), 14 h 50 min (week B)) · salary with benefits $24,658 per 30 days (+$9,863) · shifts and contrast supervision unchanged.",
+          "ok": true,
+          "time": "2026-11-07T07:00:00"
+         }
+        ],
+        "valid": true
+       },
+       "indices": [
+        0
+       ]
+      }
+     ]
+    }
+   ],
+   "baseAgentVersion": "5",
+   "batches": [
+    [
+     {
+      "effective": "2026-11-21",
+      "employee": "E08",
+      "op": "set",
+      "siteAllocationBP": 5000,
+      "type": "set_reading_allocation"
+     }
+    ]
+   ],
+   "completeness": {
+    "actionsRecorded": 1,
+    "attempts": 1,
+    "attemptsRecorded": true,
+    "inputsVerifiable": true,
+    "outputsRecorded": 1,
+    "previewsRecorded": 0,
+    "previewsRequested": 0,
+    "reasonsRecorded": 1,
+    "stopped": null,
+    "truncated": [],
+    "validationsRecorded": 1
+   },
+   "day": 26,
+   "digests": {
+    "actions": "0e1d524aba1101af22a2e25e0558d99dd15e7243cc1e10efd9dcb3d3d1f24288",
+    "ledger": "984d10f4f90a2ad5b441cf488c5ecf58e3d9380a9e78ed663a32d2d518584b75",
+    "log": "489f102fb7661c16ff39e63d4228b7c1b7d191c30f3f60c26623e14f90332087",
+    "run": "d0da3421d7a688620146e6d7630adbf2fb63c8e68f2a285556feee1b3a12d3ab",
+    "state": "cf86d5692e8202f94f3e5453f27879c2fe78b680f26b0ecb577e66ef33ceb6c5"
+   },
+   "digestsBeforeSubmit": {
+    "unchanged": true
+   },
+   "errors": [],
+   "final": {
+    "attempt": 1,
+    "outcome": "actions"
+   },
+   "leftOut": [
+    "alerts.resolved",
+    "finance.claims.openClaims",
+    "finance.journal",
+    "worklist.recent",
+    "finance.cashHistory",
+    "finance.accounts",
+    "finance.opening",
+    "finance.claims.aging",
+    "finance.today.byModality",
+    "finance.today.fixedByItem",
+    "finance.monthToDate.byModality",
+    "finance.monthToDate.fixedByItem",
+    "finance.trailing30.byModality",
+    "finance.trailing30.fixedByItem",
+    "finance.sinceStart.byModality",
+    "finance.sinceStart.fixedByItem",
+    "today.rooms",
+    "today.staff",
+    "today.demand.byModality",
+    "worklist.items",
+    "finance.today",
+    "finance.monthToDate",
+    "finance.trailing30",
+    "finance.sinceStart",
+    "worklist.items",
+    "staff",
+    "action JSON Schemas and raw targets"
+   ],
+   "memoryChars": 3817,
+   "memoryFormat": "llm-agent-memory/v1",
+   "memorySha256": "9fd66bde61bf62dff5474b2d196a98c5fc3514bbb5fdd5ec8d1f7fdcbda4410a",
+   "mode": "supplied-transport",
+   "outcome": "actions",
+   "point": 25,
+   "previousExecution": null,
+   "promptChars": 33404,
+   "promptSettings": {
+    "allowDetails": true,
+    "catalog": "guided",
+    "maxPromptChars": 200000,
+    "memoryDecisions": 6,
+    "memoryMaxChars": 6000,
+    "memoryMetricPoints": 6,
+    "observation": "summary"
+   },
+   "promptSha256": "833fb4f4971621fca0892953c18593b31561e44092485faa9a2b49f70f6bc2f8",
+   "promptVersion": "llm-agent-prompt/v3",
+   "reason": "The practice is facing a critical reading backlog (79 unread) and significant financial losses (-$17k MTD) due to insufficient radiologist coverage for reading. Dr. Blake (E08) is currently allocated only 30% site time, limiting his reading capacity. Increasing his allocation to 50% (from 30%) will increase his reading hours and help clear the backlog, which is the primary bottleneck causing overdue reports and lost demand. This change is effective from the earliest possible date (2026-11-21) to start impacting capacity as soon as the lead time allows. No immediate operational changes (like extend_shift) are effective today as the practice is closed and radiologist coverage is the constraint.",
+   "refusals": [],
+   "schema": "dreamteam.phase-proposal-record/v3",
+   "stages": {
+    "previewed": null,
+    "proposed": [
+     "25.1"
+    ],
+    "refused": [],
+    "submitted": {
+     "actions": 1,
+     "batches": 1,
+     "outcome": "actions"
+    },
+    "validated": [
+     "25.1"
+    ]
+   },
+   "systemPromptSha256": "d7dc7e0f765264b5e58d27bdbcb68a97de4467ab4177204dee80a2c714c10d3c",
+   "systemPromptVersion": "llm-agent-alternatives-system/v2",
+   "time": "2026-11-07T07:00:00",
+   "workflowSha256": "9ac657fe9f666c95d1d67527531123512cb1115a0b3ca827e28e3e757a1bf764",
+   "workflowVersion": "llm-agent-phase-validation-first/v3"
+  },
+  "validationFirstCorrection": false,
+  "workflowSha256": "9ac657fe9f666c95d1d67527531123512cb1115a0b3ca827e28e3e757a1bf764",
+  "workflowVersion": "llm-agent-alternatives-workflow/v3"
+ }
+}

@@ -1,0 +1,137 @@
+{
+ "abortedVerification": null,
+ "armDifferences": [],
+ "completedVerification": "VERIFIED",
+ "draws": [
+  {
+   "arm": "control",
+   "batchesSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+   "compared": false,
+   "comparisonPresented": false,
+   "context": "S1-a",
+   "correctionFailure": false,
+   "deliberateNoAction": true,
+   "draw": 1,
+   "eligibility": {
+    "eligible": true,
+    "reason": "due"
+   },
+   "executedAction": {
+    "batches": [],
+    "executed": false,
+    "partial": false,
+    "status": "EMPTY_SUBMISSION"
+   },
+   "executionRecord": "367e87390d91bf980a5ab97a75114ba0e5d9fa4eb9e7511f06fc8c63dd4f3b52",
+   "exposure": true,
+   "finalValid": true,
+   "inspected": false,
+   "intendedAction": [],
+   "model": "qwen36-35b-a3b",
+   "modelCalls": 1,
+   "processFailure": false,
+   "proposalSubmittedSha256": "300268d55206bc3fa086dd369b03296ae3481a959b2fbd6c1da38c51b5139c81",
+   "responseRoute": "abandon",
+   "result": "abandoned",
+   "retries": 0,
+   "secondaryRoute": "abandoned",
+   "seq": 1,
+   "submitted": false,
+   "submittedAction": {
+    "batches": [],
+    "canonical": "[]",
+    "schema": "dreamteam.submitted-action/v2",
+    "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+   },
+   "submittedRepresentationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+   "validatedAction": [],
+   "validationFirstCorrection": false
+  }
+ ],
+ "executions": {
+  "367e87390d91bf980a5ab97a75114ba0e5d9fa4eb9e7511f06fc8c63dd4f3b52": {
+   "batches": [],
+   "context": "S1-a",
+   "draws": [
+    {
+     "arm": "control",
+     "context": "S1-a",
+     "draw": 1,
+     "model": "qwen36-35b-a3b",
+     "seq": 1
+    }
+   ],
+   "execution": {
+    "batches": [],
+    "executed": false,
+    "partial": false,
+    "status": "EMPTY_SUBMISSION"
+   },
+   "submittedRepresentation": "[]",
+   "submittedRepresentationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+  }
+ },
+ "failureVerification": {
+  "event": {
+   "completed": 1,
+   "failure": null,
+   "modelCalls": 1,
+   "nextDraw": {
+    "arm": "control",
+    "context": "S1-a",
+    "draw": 2,
+    "model": "qwen36-35b-a3b",
+    "seq": 2
+   },
+   "protocolSha256": "914a7a5afa4f7697c6f4649b88d3febf573a235e89b343f8e39d2705ab3e118a",
+   "request": {
+    "method": "GET",
+    "path": "/health"
+   },
+   "runId": "cfee1205-2651-59e7-a101-a7882244e3a4",
+   "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+   "schema": "dreamteam.run-failure/v1",
+   "stage": "between_health",
+   "stop": {
+    "code": "health",
+    "message": "the server did not answer healthy",
+    "state": {
+     "health": {
+      "error": "URLError"
+     }
+    }
+   },
+   "timestamp": "2026-01-01T00:00:00Z",
+   "verificationStatus": "UNVERIFIED"
+  },
+  "status": "UNVERIFIED"
+ },
+ "note": "Exposed-only canonical submitted actions. Partial coverage yields no complete-run comparisons. Pair estimates remain descriptive context comparisons; duplicate S1-a/S6-a retained.",
+ "pairs": [],
+ "runStatus": "PARTIAL",
+ "schema": "dreamteam.alternatives-analysis/v5",
+ "table": [
+  {
+   "arm": "control",
+   "context": "S1-a",
+   "correctionFailure": 0,
+   "deliberateNoAction": 1,
+   "exposed": 1,
+   "model": "qwen36-35b-a3b",
+   "modelCalls": 1,
+   "observed": 1,
+   "primarySubmitted": {
+    "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945": 1
+   },
+   "processFailure": 0,
+   "results": {
+    "abandoned": 1
+   },
+   "retries": 0,
+   "secondaryRoutes": {
+    "abandoned": 1
+   },
+   "validationFirstCorrection": 0
+  }
+ ]
+}

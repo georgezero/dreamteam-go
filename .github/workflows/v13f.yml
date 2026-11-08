@@ -126,6 +126,30 @@ jobs:
           cp "$V/protocol-draft.json" out/v13g-protocol.json
           cp "$V/schedule-draft.json" out/v13g-schedule.json
           cp docs/v13g/review-package/SHA256SUMS out/v13g-review-package-SHA256SUMS
+      - name: Run-level failure recording and verification (V0.13h)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B=.git/dt-v013f/dreamteam
+          S=.git/dt-v013f/v13h
+          V=docs/benchmark/v13h-dev
+          C=docs/benchmark/v13g-dev/contexts
+          mkdir -p "$S"
+          DREAMTEAM_BINARY="$PWD/$B" python3 -B -m unittest discover -s analysis/alternatives -p test_v13h.py
+          python3 -I -B analysis/alternatives/v13h.py protocol --contexts "$C" --out "$S/protocol.json"
+          cmp "$S/protocol.json" "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13h.py schedule --contexts "$C" --protocol "$V/protocol-draft.json" --out "$S/schedule.json"
+          cmp "$S/schedule.json" "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13h.py check --binary "$B" --contexts "$C" --protocol "$V/protocol-draft.json" --replays .
+          python3 -I -B analysis/alternatives/v13h_fidelity.py fidelity --binary "$B" --contexts "$C" --replays . --out "$S/fidelity"
+          for f in fidelity.json fidelity.md; do cmp "$S/fidelity/$f" "$V/fidelity/$f"; cp "$S/fidelity/$f" "out/v13h-$f"; done
+          diff -r "$S/fidelity/interactions" "$V/fidelity/interactions"
+          diff -r "$S/fidelity/lifecycle-examples" "$V/fidelity/lifecycle-examples"
+          python3 -I -B analysis/alternatives/v13h_package.py --source "$S/fidelity" --check
+          python3 -I -B analysis/alternatives/v13h_identities.py --check
+          cp "$V/protocol-draft.json" out/v13h-protocol.json
+          cp "$V/schedule-draft.json" out/v13h-schedule.json
+          cp docs/v13h/review-package/SHA256SUMS out/v13h-review-package-SHA256SUMS
       - uses: actions/upload-artifact@v7
         with:
           name: v13f-results-${{ matrix.os }}
