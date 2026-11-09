@@ -1,0 +1,3526 @@
+{
+ "bindingsSha256": "fa3cb0a2ddab09f0f1ccfe7f13d80c2d73262b960a3d4c84d03587f54ed44b33",
+ "cases": [
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L15 run manifest fields",
+   "target": "run.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L15 run schema or driver",
+   "target": "run.driver"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 claimed state disagrees with the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L15 protocol identity; S02 seal run identity",
+   "target": "run.protocol"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.modelCalls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.protocolSha256 has invalid type or null; L15 protocol identity; S02 seal run identity",
+   "target": "run.protocolSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.schema has invalid type or null; L15 run schema or driver",
+   "target": "run.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L15 run manifest fields",
+   "target": "run.runId"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L18 the manifest permits resumption",
+   "target": "run.resume"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.runId"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 claimed state disagrees with the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L15 run identity is not a UUID; S02 seal run identity",
+   "target": "run.runId"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.modelCalls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.scheduleSha256 has invalid type or null; L15 schedule identity; S02 seal run identity",
+   "target": "run.scheduleSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-MANIFEST-002 run.runId has invalid type or null; L15 run identity is not a UUID; S02 seal run identity",
+   "target": "run.runId"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L15 run manifest fields",
+   "target": "run.counters"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.drawsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.counters"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 claimed state disagrees with the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L15 lifecycle identity",
+   "target": "run.lifecycle.id"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.drawsNotRun"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.lifecycle.sha256 has invalid type or null; L15 lifecycle identity",
+   "target": "run.lifecycle.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-MANIFEST-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-MANIFEST-003 run.counters has invalid type or null; L03 counters disagree with the artifacts",
+   "target": "run.counters"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: B-JOURNAL-002 journal.draw has invalid type or null; L17 commit_draw does not follow its own begin_draw; L02 row 1 fields; L12 malformed evidence in calls: KeyError: 'seq'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in timestamps: KeyError: 'seq'",
+   "target": "rows.0.seq"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.context"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.seq"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 continue after a row that did not complete; L01 an unfinished row before the last; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.model"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-BATCH-001 draw.submittedRepresentationSha256 has invalid type or null; L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.submittedRepresentationSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L17 commit_draw does not follow its own begin_draw; L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 draw 2 call times outside the draw or out of order (dispatch <= sent <= outcome)",
+   "target": "rows"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-LEDGER-001 draw.seq has invalid type or null; L17 commit_draw does not follow its own begin_draw; L01 row 1 is not the schedule's draw 1; L04 draw 1 dispatched 1 call(s) that no draw evidence keeps; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.seq"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L02 row 1 fields; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.engineInitialization"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L02 row 1 initialization or verification status; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.verificationStatus"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.engineInitialization"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L02 row 1 initialization or verification status; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 row call count; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-BATCH-001 draw.submittedRepresentationSha256 has invalid type or null; L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.submittedRepresentationSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.engine"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-LEDGER-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-LEDGER-002 draw.engineInitialization has invalid type or null; L02 row 1 initialization or verification status; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.engineInitialization"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L14 unknown or seal-only event None in the journal; L12 malformed evidence in ledger: KeyError: 'event'; L12 malformed evidence in calls: KeyError: 'event'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: KeyError: 'event'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in timestamps: KeyError: 'event'",
+   "target": "run.journal.0.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L14 illegal transition PREFLIGHT --preflight_passed--> READY-contradiction; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.journal.2.to"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.journal.0.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 journal does not chain at entry 1; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.journal.0.from"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L14 unknown or seal-only event 'create-contradiction' in the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.journal.0.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.journal.1.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.lifecycle.sha256 has invalid type or null; L15 lifecycle identity",
+   "target": "run.lifecycle.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-JOURNAL-001 journal.event has invalid type or null; L14 unknown or seal-only event None in the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.journal.0.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L14 journal entry 7 fields; L12 malformed evidence in ledger: KeyError: 'draw'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L17 commit 1 does not bind its ledger row; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "commit.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L17 a reconciled commit not followed by its stop",
+   "target": "commit.reconciled"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L17 commit_draw does not follow its own begin_draw; L17 commit 1 does not bind its ledger row; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L17 commit 1 does not bind its ledger row; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.modelCalls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-JOURNAL-002 journal.rowSha256 has invalid type or null; L17 commit 1 does not bind its ledger row; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.rowSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-JOURNAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-JOURNAL-002 journal.draw has invalid type or null; L17 commit_draw does not follow its own begin_draw; L17 commit 1 does not bind its ledger row; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "commit.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.record"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L04 dispatch 1 names draw 18, which was never begun; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "calls.0.record"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.record"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 dispatch 1 numbering; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.k"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-CALL-002 callJournal.requestSha256 has invalid type or null; L04 request hash; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.record"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L04 the outcome of dispatch 1 does not bind it; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L04 returned outcome 1 evidence; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.body"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L04 dispatch 1 has no outcome before the next dispatch; L03 counters disagree with the artifacts; L09 the evidence supports neither COMPLETE nor PARTIAL; S03 seal call-journal hash",
+   "target": "calls.1.record"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L04 the outcome of dispatch 1 does not bind it; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 the outcome of dispatch 1 does not bind it; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-CALL-002 callJournal.responseSha256 has invalid type or null; B-CALL-002 response hash grammar; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.responseSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-CALL-002 callJournal.requestSha256 has invalid type or null; L04 request hash; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.timestamp"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: B-CALL-003 calls.sent has invalid type or null; L13 invalid or missing timestamp: draw 1 call 1 sent",
+   "target": "rows.0.calls.0.sent"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "calls.0.timestamp"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L13 draw 1 call times outside the draw or out of order (dispatch <= sent <= outcome)",
+   "target": "calls.0.timestamp"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L04 dispatch 1 names draw 18, which was never begun; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 dispatch 1 is not call 1 of draw 1; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-CALL-002 callJournal.requestSha256 has invalid type or null; L04 request hash; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CALL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-CALL-003 callJournal.timestamp has invalid type or null; L13 invalid or missing timestamp: draw 1 dispatch 1",
+   "target": "calls.0.timestamp"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.modelCalls"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.record"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L04 dispatch 1 names draw 18, which was never begun; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 dispatch 1 is not call 1 of draw 1; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.n"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-CALL-002 callJournal.requestSha256 has invalid type or null; L04 request hash; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.1.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L04 call-journal record 1 is not a dispatch intent; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls"
+  },
+  {
+   "agree": true,
+   "base": "unrecorded",
+   "binding": "B-CALL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-CALL-001 callJournal.draw has invalid type or null; L04 dispatch 1 names draw None, which was never begun; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash",
+   "target": "calls.0.draw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: B-TRANSPORT-001 call field set",
+   "target": "rows.0.calls.0.request"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L04 recorded request hash",
+   "target": "rows.0.calls.0.request"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.calls.0.request"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L13 draw 1 call times outside the draw or out of order (dispatch <= sent <= outcome)",
+   "target": "rows.0.calls.0.sent"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L04 response metadata",
+   "target": "rows.0.calls.0.servedModel"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 draw 1 call 1: request disagrees with the call journal; L04 call order",
+   "target": "rows.0.calls.0.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-TRANSPORT-001 calls.requestSha256 has invalid type or null; L04 draw 1 call 1: request disagrees with the call journal; L04 recorded request hash",
+   "target": "rows.0.calls.0.requestSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.engine"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-TRANSPORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L04 recorded request hash",
+   "target": "rows.0.calls.0.request"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.record.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.record.result"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.record.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 continue after a row that did not complete; L01 an unfinished row before the last; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.record.workflowVersion"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.record.retryRequests"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-DECISION-001 record.workflowSha256 has invalid type or null",
+   "target": "rows.0.record.workflowSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.engine"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.record.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L02 completed row 1 process evidence disagrees with its record; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.process.exposure"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L02 completed row 1 process evidence disagrees with its record; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.process.processFailure"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.process.exposure"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 continue after a row that did not complete; L01 an unfinished row before the last; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.arm"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 row call count; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-BATCH-001 draw.submittedRepresentationSha256 has invalid type or null; L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.submittedRepresentationSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.engine"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-DECISION-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-DECISION-002 process.exposure has invalid type or null; L02 completed row 1 process evidence disagrees with its record; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.process.exposure"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L02 row 1 fields; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.batches"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.batches"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.batches"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 continue after a row that did not complete; L01 an unfinished row before the last; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L01 row 1 is not the schedule's draw 1; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.arm"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 row call count; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-BATCH-001 draw.submittedRepresentationSha256 has invalid type or null; L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.submittedRepresentationSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "draw 1: the replay differs from the record",
+   "target": "rows.0.engine"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-BATCH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L02 completed row 1 evidence; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.batches"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L06 a READY draw without its initial digests request",
+   "target": "aborted.engine.0.answer"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "aborted engine response contradicts reconstruction",
+   "target": "aborted.engine.0.answer"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "aborted.engine.0.answer"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L06 failure stage engine_open contradicts initialization READY",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L06 a READY draw without its initial digests request",
+   "target": "aborted.engine.0.op"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L06 engine_close: modelCallsCompleted must be len(calls)",
+   "target": "aborted.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: L06 engine_close: initialDigests must be context",
+   "target": "aborted.initialDigests.state"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "aborted engine response contradicts reconstruction",
+   "target": "aborted.engine"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L06 a READY draw without its initial digests request",
+   "target": "aborted.engine.0.answer"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L05 aborted artifact fields",
+   "target": "aborted.digestsAfter"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: B-ENGINE-002 final digest differs from completed engine response",
+   "target": "aborted.digestsAfter.state"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "aborted.digestsAfter"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L06 failure stage engine_open contradicts initialization READY",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L05 aborted draw is not the next scheduled draw; L19 failure event disagrees with the derived stop",
+   "target": "aborted.context"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L06 engine_close: modelCallsCompleted must be len(calls)",
+   "target": "aborted.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: L06 engine_close: initialDigests must be context",
+   "target": "aborted.initialDigests.state"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "aborted engine response contradicts reconstruction",
+   "target": "aborted.engine"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ENGINE-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L06 engine_close: digestsAfter must be object",
+   "target": "aborted.digestsAfter"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks.0.index"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks.0.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.healthChecks.0.index"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks.0.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L07 health check names the wrong draw",
+   "target": "run.healthChecks.1.beforeDraw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L07 health check 1 fields",
+   "target": "run.healthChecks.1.index"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-HEALTH-003 health.body.sha256 has invalid type or null; L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-HEALTH-001 healthChecks.index has invalid type or null; L07 health check 0 fields",
+   "target": "run.healthChecks.0.index"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L07 health check 0: not a health observation; L12 malformed evidence in terminal: KeyError: 'outcome'",
+   "target": "run.healthChecks.0.serverState.health.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L07 health check 0: unknown health category",
+   "target": "run.healthChecks.0.serverState.health.category"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.healthChecks.0.serverState.health.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks.0.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L07 health check 0: not a health observation",
+   "target": "run.healthChecks.0.serverState.health.request.path"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L07 health check 0: a response category without a valid 2xx response",
+   "target": "run.healthChecks.0.serverState.health.httpStatus"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-HEALTH-003 health.body.sha256 has invalid type or null; L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-HEALTH-002 health.outcome has invalid type or null; L07 health check 0: outcome disagrees with category; L09 the evidence supports neither COMPLETE nor PARTIAL",
+   "target": "run.healthChecks.0.serverState.health.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.base64"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.base64"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.healthChecks.0.serverState.health.body.base64"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L07 health check 0: outcome disagrees with category; L09 the evidence supports neither COMPLETE nor PARTIAL",
+   "target": "run.healthChecks.0.serverState.health.outcome"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L07 health check 0: not a health observation",
+   "target": "run.healthChecks.0.serverState.health.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.bytes"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-HEALTH-003 health.body.sha256 has invalid type or null; L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L07 health check 0: body evidence",
+   "target": "run.healthChecks.0.serverState.health.body.base64"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L07 health check 0: read failure without exception evidence; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.exception.type"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L07 health check 0: a wrapped exception outside the family its category names; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.exception.reasonKind"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.healthChecks.0.serverState.health.exception.type"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L07 health check 0: read failure without exception evidence; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.outcome"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L07 health check 0: an exception type outside the family its category names; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.exception.type"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L07 health check 0: a read failure with response evidence; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.httpStatus"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.protocolSha256 has invalid type or null; L15 protocol identity; L19 failure event disagrees with the derived stop; S02 seal run identity",
+   "target": "run.protocolSha256"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-HEALTH-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-HEALTH-004 health.exception.type has invalid type or null; L07 health check 0: an exception type outside the family its category names; L07 health stop without a failed observation",
+   "target": "run.healthChecks.0.serverState.health.exception.type"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L07 server-before.json disagrees with the initial health check",
+   "target": "before.health"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L07 server-before.json disagrees with the initial health check",
+   "target": "before.health.category"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "before.health"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks.0.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L07 server-before.json disagrees with the initial health check",
+   "target": "before.health.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L03 counters disagree with the artifacts",
+   "target": "run.counters.healthChecks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: L07 server-before.json disagrees with the initial health check",
+   "target": "before.health.body.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L07 health check 0 fields",
+   "target": "run.healthChecks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HEALTH-005",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L07 server-before.json disagrees with the initial health check",
+   "target": "before.health"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L19 stop fields",
+   "target": "run.stop.code"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: B-STOP-001 stop.failure has invalid type or null; L06 health stop evidence",
+   "target": "run.stop.failure"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.stop.code"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L19 stop disagrees with the journal",
+   "target": "run.stop.state"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L06 unknown stop code 'health-contradiction'",
+   "target": "run.stop.code"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L06 health stop evidence",
+   "target": "run.stop.healthCheck"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-FAILURE-001 failureEvent.protocolSha256 has invalid type or null; L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.protocolSha256"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-STOP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-STOP-001 stop.code has invalid type or null; L06 unknown stop code None",
+   "target": "run.stop.code"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L02 interrupted row 1 evidence; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.halt.code"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L06 halt differs from the interrupted row",
+   "target": "rows.0.halt.evidence.stage"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "rows.0.halt.code"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L06 halt differs from the interrupted row",
+   "target": "rows.0.halt.evidence.stage"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L02 interrupted row 1 evidence; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.halt.code"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L06 halt differs from the interrupted row",
+   "target": "rows.0.halt.evidence.runCalls"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.protocolSha256 has invalid type or null; L15 protocol identity; L19 failure event disagrees with the derived stop; S02 seal run identity",
+   "target": "run.protocolSha256"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 begin_health_check names the wrong check; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "halt_row",
+   "binding": "B-STOP-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-STOP-002 halt.code has invalid type or null; L02 interrupted row 1 evidence; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'interrupted'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "rows.0.halt.code"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L20 interrupt event 1 fields",
+   "target": "run.interrupts.events.0.safePoint"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L20 unknown interrupt disposition 'AFTER_SCHEDULE-contradiction'",
+   "target": "run.interrupts.events.0.disposition"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.interrupts.events.0.safePoint"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L20 interrupt event 1 at an undeclared point",
+   "target": "run.interrupts.events.0.state"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L20 interrupt record",
+   "target": "run.interrupts.signal"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L20 interrupt event 1 fields",
+   "target": "run.interrupts.events.0.n"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.scheduleSha256 has invalid type or null; L15 schedule identity; S02 seal run identity",
+   "target": "run.scheduleSha256"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup visits missing, duplicated or out of order; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'cleanup_visits'",
+   "target": "run.cleanup.events"
+  },
+  {
+   "agree": true,
+   "base": "after_schedule",
+   "binding": "B-INTERRUPT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-INTERRUPT-001 interrupts.events.safePoint has invalid type or null; L20 interrupt event 1 at an undeclared point",
+   "target": "run.interrupts.events.0.safePoint"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L08 cleanup evidence missing",
+   "target": "run.cleanup.started"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L08 cleanup evidence missing; L09 the evidence supports neither COMPLETE nor PARTIAL",
+   "target": "run.cleanup.status"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.cleanup.started"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup visit fields or stage",
+   "target": "run.cleanup.events.0.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup visits missing, duplicated or out of order",
+   "target": "run.cleanup.events.0.safePoint"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup visit fields or stage",
+   "target": "run.cleanup.events.1.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-MANIFEST-001 run.lifecycle.sha256 has invalid type or null; L15 lifecycle identity",
+   "target": "run.lifecycle.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup visits missing, duplicated or out of order",
+   "target": "run.cleanup.events"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-CLEANUP-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-CLEANUP-001 cleanup.started has invalid type or null; L13 invalid or missing timestamp: cleanup start",
+   "target": "run.cleanup.started"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L06 unknown aborted failure stage None",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L06 failure stage engine_close contradicts initialization READY-contradiction",
+   "target": "aborted.engineInitialization"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L06 failure stage engine_open contradicts initialization READY",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L05 aborted draw is not the next scheduled draw; L19 failure event disagrees with the derived stop",
+   "target": "aborted.context"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L04 draw 1 dispatched 1 call(s) that no draw evidence keeps; L05 aborted draw is not the next scheduled draw; L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts",
+   "target": "aborted.seq"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-ABORT-002 aborted.submittedRepresentationSha256 has invalid type or null; L06 engine_close: submittedRepresentationSha256 must be sha256 iff record",
+   "target": "aborted.submittedRepresentationSha256"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "aborted engine response contradicts reconstruction",
+   "target": "aborted.engine"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L06 unknown aborted failure stage None",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L05 aborted artifact fields",
+   "target": "aborted.record"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L06 engine_close: process must be recordProcess iff record, else derivedProcess",
+   "target": "aborted.process.exposure"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "aborted.record"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L06 failure stage engine_open contradicts initialization READY",
+   "target": "aborted.failureStage"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L05 aborted draw is not the next scheduled draw; L19 failure event disagrees with the derived stop",
+   "target": "aborted.arm"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L06 engine_close: modelCallsCompleted must be len(calls)",
+   "target": "aborted.modelCallsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-ENGINE-002 final digest differs from completed engine response",
+   "target": "aborted.digestsAfter.state"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "aborted engine response contradicts reconstruction",
+   "target": "aborted.engine"
+  },
+  {
+   "agree": true,
+   "base": "engine_close",
+   "binding": "B-ABORT-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L06 engine_close: batches must be list iff record",
+   "target": "aborted.record"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.nextDraw"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.state"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "run.failureEvent.nextDraw"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.state"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.runId"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.modelCalls"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-FAILURE-001 failureEvent.scheduleSha256 has invalid type or null; L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.scheduleSha256"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "health_stop",
+   "binding": "B-FAILURE-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L19 failure event disagrees with the derived stop",
+   "target": "run.failureEvent.nextDraw"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-HANDOFF-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L16 unexpected archive files: pending-draw.json",
+   "target": "pending-draw.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: S02 seal fields",
+   "target": "seal.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: S02 seal contract identities",
+   "target": "seal.driver"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "seal.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: S02 seal contract identities",
+   "target": "seal.runSchema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: S02 seal run identity",
+   "target": "seal.runId"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.transition.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-SEAL-001 SEAL.lifecycle.sha256 has invalid type or null; S02 seal contract identities",
+   "target": "seal.lifecycle.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: S03 seal ledger hashes",
+   "target": "seal.ledger.rowSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-SEAL-001 SEAL.schema has invalid type or null; S02 seal schema or finalization contract",
+   "target": "seal.schema"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.transition.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.terminalState"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "seal.transition.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.transition.from"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.transition.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: S04 seal transition",
+   "target": "seal.transition.n"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-SEAL-001 SEAL.lifecycle.sha256 has invalid type or null; S02 seal contract identities",
+   "target": "seal.lifecycle.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L14 journal order; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L04 dispatch 2 returns to an earlier draw; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L07 health visit without an admissible exit; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'; L13 run.started is not the create transition",
+   "target": "run.journal"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-002",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-SEAL-002 SEAL.transition.event has invalid type or null; S04 seal transition",
+   "target": "seal.transition.event"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: S03 seal ledger hashes",
+   "target": "seal.ledger.rows"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: S03 seal ledger hashes",
+   "target": "seal.ledger.completed"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "seal.ledger.rows"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 claimed state disagrees with the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: S03 seal ledger hashes",
+   "target": "seal.ledger.file"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: S03 seal call-journal hash",
+   "target": "seal.calls.dispatched"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-SEAL-003 SEAL.calls.sha256 has invalid type or null; S03 seal call-journal hash",
+   "target": "seal.calls.sha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: S03 seal ledger hashes",
+   "target": "seal.ledger.rowSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-003",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-SEAL-003 SEAL.ledger.rows has invalid type or null; S03 seal ledger hashes",
+   "target": "seal.ledger.rows"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: S03 seal health hashes",
+   "target": "seal.health.checks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: S03 seal counters",
+   "target": "seal.counters.drawsCompleted"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unreadable archive file: duplicate key",
+   "target": "seal.health.checks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L14 claimed state disagrees with the journal; L12 malformed evidence in ledger: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in aborted: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in health: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in stop: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in cleanup: AttributeError: 'Classifier' object has no attribute 'events'; L12 malformed evidence in interrupts: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in counters: AttributeError: 'Classifier' object has no attribute 'completed'; L12 malformed evidence in terminal: AttributeError: 'Classifier' object has no attribute 'stop_at'; L12 malformed evidence in seal: AttributeError: 'Classifier' object has no attribute 'completed'",
+   "target": "run.state"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: S02 seal contract identities",
+   "target": "seal.lifecycle.id"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: S03 seal health hashes",
+   "target": "seal.health.checks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: B-SEAL-004 SEAL.health.serverBefore has invalid type or null; S03 seal health hashes",
+   "target": "seal.health.serverBefore"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: S03 seal health hashes",
+   "target": "seal.health.checkSha256"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-SEAL-004",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: B-SEAL-004 SEAL.health.checks has invalid type or null; S03 seal health hashes",
+   "target": "seal.health.checks"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": true,
+   "fullAnalysisAccepted": true,
+   "mutation": "valid_matching_evidence",
+   "refusal": null,
+   "target": "all bound evidence"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "missing_required_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "contradictory_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "duplicated_evidence",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_stage",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_identity",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_count",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_hash",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "wrong_ordering",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  },
+  {
+   "agree": true,
+   "base": "complete",
+   "binding": "B-EXECUTION-001",
+   "expectedAccepted": false,
+   "fullAnalysisAccepted": false,
+   "mutation": "invalid_null",
+   "refusal": "INVALID archive: L16 unexpected archive files: analysis.json",
+   "target": "analysis.json (forbidden in sealed archive)"
+  }
+ ],
+ "mutationKinds": [
+  "valid_matching_evidence",
+  "missing_required_evidence",
+  "contradictory_evidence",
+  "duplicated_evidence",
+  "wrong_stage",
+  "wrong_identity",
+  "wrong_count",
+  "wrong_hash",
+  "wrong_ordering",
+  "invalid_null"
+ ],
+ "relationships": 35,
+ "schema": "dreamteam.binding-matrix/v1",
+ "summary": {
+  "agree": 350,
+  "cases": 350,
+  "contradictionsRejected": 315,
+  "survivingContradictions": [],
+  "validAccepted": 35
+ }
+}

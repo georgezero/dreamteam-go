@@ -1,0 +1,1990 @@
+{
+ "authorization": "scripted fidelity",
+ "cleanup": {
+  "events": [
+   {
+    "n": 1,
+    "safePoint": "before_cleanup",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000399Z"
+   },
+   {
+    "n": 2,
+    "safePoint": "after_cleanup",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000401Z"
+   },
+   {
+    "n": 3,
+    "safePoint": "before_finalization",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000402Z"
+   }
+  ],
+  "failure": null,
+  "started": "2026-01-01T00:00:00.000398Z",
+  "status": "SUCCEEDED",
+  "timestamp": "2026-01-01T00:00:00.000400Z"
+ },
+ "counters": {
+  "drawAborted": null,
+  "drawInterrupted": null,
+  "drawsCompleted": 66,
+  "drawsNotRun": 0,
+  "drawsScheduled": 66,
+  "healthChecks": 3,
+  "modelCalls": 62
+ },
+ "driver": "dreamteam-v13k-driver/7",
+ "failureEvent": null,
+ "healthChecks": [
+  {
+   "beforeDraw": null,
+   "index": 0,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000004Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v2",
+     "started": "2026-01-01T00:00:00.000003Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "PREFLIGHT"
+  },
+  {
+   "beforeDraw": 1,
+   "index": 1,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000008Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v2",
+     "started": "2026-01-01T00:00:00.000007Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "HEALTH_CHECK"
+  },
+  {
+   "beforeDraw": 29,
+   "index": 2,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000180Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v2",
+     "started": "2026-01-01T00:00:00.000179Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "HEALTH_CHECK"
+  }
+ ],
+ "interrupts": {
+  "events": [],
+  "signal": "SIGINT"
+ },
+ "journal": [
+  {
+   "event": "create",
+   "from": null,
+   "n": 1,
+   "timestamp": "2026-01-01T00:00:00.000001Z",
+   "to": "CREATED"
+  },
+  {
+   "event": "begin_preflight",
+   "from": "CREATED",
+   "n": 2,
+   "timestamp": "2026-01-01T00:00:00.000002Z",
+   "to": "PREFLIGHT"
+  },
+  {
+   "event": "preflight_passed",
+   "from": "PREFLIGHT",
+   "n": 3,
+   "timestamp": "2026-01-01T00:00:00.000005Z",
+   "to": "READY"
+  },
+  {
+   "event": "begin_health_check",
+   "from": "READY",
+   "healthCheck": 1,
+   "n": 4,
+   "timestamp": "2026-01-01T00:00:00.000006Z",
+   "to": "HEALTH_CHECK"
+  },
+  {
+   "event": "health_passed",
+   "from": "HEALTH_CHECK",
+   "healthCheck": 1,
+   "n": 5,
+   "timestamp": "2026-01-01T00:00:00.000009Z",
+   "to": "READY"
+  },
+  {
+   "draw": 1,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 6,
+   "timestamp": "2026-01-01T00:00:00.000010Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 1,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 7,
+   "reconciled": false,
+   "rowSha256": "20cee79b57e3ed39bdaba7346784b2f1a19117f6d13c3db19b7cf4d3692f987c",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000014Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 8,
+   "timestamp": "2026-01-01T00:00:00.000015Z",
+   "to": "READY"
+  },
+  {
+   "draw": 2,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 9,
+   "timestamp": "2026-01-01T00:00:00.000016Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 2,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 10,
+   "reconciled": false,
+   "rowSha256": "456187ff80aeb2391258c67455f2d631a399d58df1a4b2acbfda38e9b61670fa",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000020Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 11,
+   "timestamp": "2026-01-01T00:00:00.000021Z",
+   "to": "READY"
+  },
+  {
+   "draw": 3,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 12,
+   "timestamp": "2026-01-01T00:00:00.000022Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 3,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 13,
+   "reconciled": false,
+   "rowSha256": "efe92e283990082ae0aae2b0b5b17a3f60d65076383ee6d4ec4bde11d1641671",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000026Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 14,
+   "timestamp": "2026-01-01T00:00:00.000027Z",
+   "to": "READY"
+  },
+  {
+   "draw": 4,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 15,
+   "timestamp": "2026-01-01T00:00:00.000028Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 4,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 16,
+   "reconciled": false,
+   "rowSha256": "f9b2dec67c05467526ca9a447fd170b719eec949f78ccc3a77b56a39bd6db7a0",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000032Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 17,
+   "timestamp": "2026-01-01T00:00:00.000033Z",
+   "to": "READY"
+  },
+  {
+   "draw": 5,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 18,
+   "timestamp": "2026-01-01T00:00:00.000034Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 5,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 19,
+   "reconciled": false,
+   "rowSha256": "63aeb49a230a8d4f72f325cabf6b2167655e3d14776da0630bbd7ee0cea2f6a4",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000038Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 20,
+   "timestamp": "2026-01-01T00:00:00.000039Z",
+   "to": "READY"
+  },
+  {
+   "draw": 6,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 21,
+   "timestamp": "2026-01-01T00:00:00.000040Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 6,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 22,
+   "reconciled": false,
+   "rowSha256": "3fa3104070f14f48e165713085900959ea9e9971ba72e605bcef7166458d7024",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000044Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 23,
+   "timestamp": "2026-01-01T00:00:00.000045Z",
+   "to": "READY"
+  },
+  {
+   "draw": 7,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 24,
+   "timestamp": "2026-01-01T00:00:00.000046Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 7,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 25,
+   "reconciled": false,
+   "rowSha256": "a735e1c31bca3d970e2845b7f4b7587e82f4027ccde4bc5cf07b69900c842c90",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000050Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 26,
+   "timestamp": "2026-01-01T00:00:00.000051Z",
+   "to": "READY"
+  },
+  {
+   "draw": 8,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 27,
+   "timestamp": "2026-01-01T00:00:00.000052Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 8,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 28,
+   "reconciled": false,
+   "rowSha256": "9424cbaeed5e45e3378bd9cd1c260debd3ff237ae37a4b2b37860926329f85b6",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000056Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 29,
+   "timestamp": "2026-01-01T00:00:00.000057Z",
+   "to": "READY"
+  },
+  {
+   "draw": 9,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 30,
+   "timestamp": "2026-01-01T00:00:00.000058Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 9,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 31,
+   "reconciled": false,
+   "rowSha256": "40991981f1179fcc4e3cc07afa6c1d86bc63d99e7e2c5b311b97bccac80d4885",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000062Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 32,
+   "timestamp": "2026-01-01T00:00:00.000063Z",
+   "to": "READY"
+  },
+  {
+   "draw": 10,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 33,
+   "timestamp": "2026-01-01T00:00:00.000064Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 10,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 34,
+   "reconciled": false,
+   "rowSha256": "a1b1c83a69e8696c7b99ff19b6ed6c12512ff96646d7a5e5d491bb896d0ae597",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000068Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 35,
+   "timestamp": "2026-01-01T00:00:00.000069Z",
+   "to": "READY"
+  },
+  {
+   "draw": 11,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 36,
+   "timestamp": "2026-01-01T00:00:00.000070Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 11,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 37,
+   "reconciled": false,
+   "rowSha256": "df5e77fe039040cab4613336a178114aa9dcc939a8be057a8d425bc3afa5a0c5",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000074Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 38,
+   "timestamp": "2026-01-01T00:00:00.000075Z",
+   "to": "READY"
+  },
+  {
+   "draw": 12,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 39,
+   "timestamp": "2026-01-01T00:00:00.000076Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 12,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 40,
+   "reconciled": false,
+   "rowSha256": "7933706c4e3509824545f5f2747f80d23667c06526e3d8745d61740e0dfa1cb9",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000080Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 41,
+   "timestamp": "2026-01-01T00:00:00.000081Z",
+   "to": "READY"
+  },
+  {
+   "draw": 13,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 42,
+   "timestamp": "2026-01-01T00:00:00.000082Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 13,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 43,
+   "reconciled": false,
+   "rowSha256": "4526aacb5ff59311a0ea092f281522e49f3c550eb8818c38b11c6dae8568a818",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000086Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 44,
+   "timestamp": "2026-01-01T00:00:00.000087Z",
+   "to": "READY"
+  },
+  {
+   "draw": 14,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 45,
+   "timestamp": "2026-01-01T00:00:00.000088Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 14,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 46,
+   "reconciled": false,
+   "rowSha256": "b6f4eddf7783b6acac0fc48b6c6c89969608c2090e3c2c6baede54d7a80fc355",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000092Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 47,
+   "timestamp": "2026-01-01T00:00:00.000093Z",
+   "to": "READY"
+  },
+  {
+   "draw": 15,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 48,
+   "timestamp": "2026-01-01T00:00:00.000094Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 15,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 49,
+   "reconciled": false,
+   "rowSha256": "d44f49eb67830a05c46064f001080f201bc45dfd86ff6788e430c69995cf4a15",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000098Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 50,
+   "timestamp": "2026-01-01T00:00:00.000099Z",
+   "to": "READY"
+  },
+  {
+   "draw": 16,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 51,
+   "timestamp": "2026-01-01T00:00:00.000100Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 16,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 52,
+   "reconciled": false,
+   "rowSha256": "06b6ed9f06691c49188d087f1dc2d1ccf6c3f3716cad2ef8d24708e02307b2de",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000104Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 53,
+   "timestamp": "2026-01-01T00:00:00.000105Z",
+   "to": "READY"
+  },
+  {
+   "draw": 17,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 54,
+   "timestamp": "2026-01-01T00:00:00.000106Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 17,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 55,
+   "reconciled": false,
+   "rowSha256": "d33a82296a4fa2dfd46eb5326b2f33f20e0c5f7facb297fcf55dbe317a163912",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000110Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 56,
+   "timestamp": "2026-01-01T00:00:00.000111Z",
+   "to": "READY"
+  },
+  {
+   "draw": 18,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 57,
+   "timestamp": "2026-01-01T00:00:00.000112Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 18,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 58,
+   "reconciled": false,
+   "rowSha256": "0627e53940090a5cfcb1288969189f03ba359b4837e7be458d59b96c26d44134",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000116Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 59,
+   "timestamp": "2026-01-01T00:00:00.000117Z",
+   "to": "READY"
+  },
+  {
+   "draw": 19,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 60,
+   "timestamp": "2026-01-01T00:00:00.000118Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 19,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 61,
+   "reconciled": false,
+   "rowSha256": "037f701c7ffaeda1b16d952fbcaa1004dbd7da33548767cac839bd87ff37287c",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000122Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 62,
+   "timestamp": "2026-01-01T00:00:00.000123Z",
+   "to": "READY"
+  },
+  {
+   "draw": 20,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 63,
+   "timestamp": "2026-01-01T00:00:00.000124Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 20,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 64,
+   "reconciled": false,
+   "rowSha256": "a62ef25a6be8da65ba41b05546a40ea30befa585a4ce09f88767ded127507dea",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000128Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 65,
+   "timestamp": "2026-01-01T00:00:00.000129Z",
+   "to": "READY"
+  },
+  {
+   "draw": 21,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 66,
+   "timestamp": "2026-01-01T00:00:00.000130Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 21,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 67,
+   "reconciled": false,
+   "rowSha256": "456ca5f5de75d7cacddd55ce014530e766577e78c3fa4a0b1a85f8e183780871",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000134Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 68,
+   "timestamp": "2026-01-01T00:00:00.000135Z",
+   "to": "READY"
+  },
+  {
+   "draw": 22,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 69,
+   "timestamp": "2026-01-01T00:00:00.000136Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 22,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 70,
+   "reconciled": false,
+   "rowSha256": "a61afb489adacffe2182343690ff8ace7c35c029eda55fece8baaca04e518c9f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000140Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 71,
+   "timestamp": "2026-01-01T00:00:00.000141Z",
+   "to": "READY"
+  },
+  {
+   "draw": 23,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 72,
+   "timestamp": "2026-01-01T00:00:00.000142Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 23,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 73,
+   "reconciled": false,
+   "rowSha256": "1c313a2c986f2ce192cb549b256a4d6da8471d364a236c10ebf52128cab6490d",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000146Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 74,
+   "timestamp": "2026-01-01T00:00:00.000147Z",
+   "to": "READY"
+  },
+  {
+   "draw": 24,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 75,
+   "timestamp": "2026-01-01T00:00:00.000148Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 24,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 76,
+   "reconciled": false,
+   "rowSha256": "78c8f7c651f7f35b8a34a30860df9e7c94c3161144e8a48cbb4304b7899939a2",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000152Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 77,
+   "timestamp": "2026-01-01T00:00:00.000153Z",
+   "to": "READY"
+  },
+  {
+   "draw": 25,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 78,
+   "timestamp": "2026-01-01T00:00:00.000154Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 25,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 79,
+   "reconciled": false,
+   "rowSha256": "b9c5698d400b82e36861ed29004f66669e9a86506182a0f6df56f934ef387a63",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000158Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 80,
+   "timestamp": "2026-01-01T00:00:00.000159Z",
+   "to": "READY"
+  },
+  {
+   "draw": 26,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 81,
+   "timestamp": "2026-01-01T00:00:00.000160Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 26,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 82,
+   "reconciled": false,
+   "rowSha256": "4d353250df129d89ae053084e7587f17af746708c0a55b932c82c767fe12883d",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000164Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 83,
+   "timestamp": "2026-01-01T00:00:00.000165Z",
+   "to": "READY"
+  },
+  {
+   "draw": 27,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 84,
+   "timestamp": "2026-01-01T00:00:00.000166Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 27,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 85,
+   "reconciled": false,
+   "rowSha256": "6a558b0ee5837cafda022ddcc36a3704d18eb8b434d1f01a2fbb820e51127a2c",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000170Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 86,
+   "timestamp": "2026-01-01T00:00:00.000171Z",
+   "to": "READY"
+  },
+  {
+   "draw": 28,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 87,
+   "timestamp": "2026-01-01T00:00:00.000172Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 28,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 88,
+   "reconciled": false,
+   "rowSha256": "baf763f5e81024d7ddf05a93494e707b2a7ebaab6d11ffb0879defe8a8630a03",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000176Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 89,
+   "timestamp": "2026-01-01T00:00:00.000177Z",
+   "to": "READY"
+  },
+  {
+   "event": "begin_health_check",
+   "from": "READY",
+   "healthCheck": 2,
+   "n": 90,
+   "timestamp": "2026-01-01T00:00:00.000178Z",
+   "to": "HEALTH_CHECK"
+  },
+  {
+   "event": "health_passed",
+   "from": "HEALTH_CHECK",
+   "healthCheck": 2,
+   "n": 91,
+   "timestamp": "2026-01-01T00:00:00.000181Z",
+   "to": "READY"
+  },
+  {
+   "draw": 29,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 92,
+   "timestamp": "2026-01-01T00:00:00.000182Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 29,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 93,
+   "reconciled": false,
+   "rowSha256": "b388abb24bd9ee9938dfa42b7beb8cd0f50100dc26c1b00056997edbccc61787",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000186Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 94,
+   "timestamp": "2026-01-01T00:00:00.000187Z",
+   "to": "READY"
+  },
+  {
+   "draw": 30,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 95,
+   "timestamp": "2026-01-01T00:00:00.000188Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 30,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 96,
+   "reconciled": false,
+   "rowSha256": "794d447cb811a39318587e0090bc646bbac3acee586d88bfccac898b4e80e57f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000192Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 97,
+   "timestamp": "2026-01-01T00:00:00.000193Z",
+   "to": "READY"
+  },
+  {
+   "draw": 31,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 98,
+   "timestamp": "2026-01-01T00:00:00.000194Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 31,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 99,
+   "reconciled": false,
+   "rowSha256": "a63fd425cb487806e2d24c0f7f814464787895c22bd5facea42126a30de1bb2f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000198Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 100,
+   "timestamp": "2026-01-01T00:00:00.000199Z",
+   "to": "READY"
+  },
+  {
+   "draw": 32,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 101,
+   "timestamp": "2026-01-01T00:00:00.000200Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 32,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 102,
+   "reconciled": false,
+   "rowSha256": "cca6c1bc8063aa0c6eca8e487f3f7ab5e39ace625f814d982e99a815e66e55b0",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000204Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 103,
+   "timestamp": "2026-01-01T00:00:00.000205Z",
+   "to": "READY"
+  },
+  {
+   "draw": 33,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 104,
+   "timestamp": "2026-01-01T00:00:00.000206Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 33,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 105,
+   "reconciled": false,
+   "rowSha256": "fbb0d51b537b562f26f299ce9d19e44167566fd31cf1b979fa3337dd98252e8d",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000210Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 106,
+   "timestamp": "2026-01-01T00:00:00.000211Z",
+   "to": "READY"
+  },
+  {
+   "draw": 34,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 107,
+   "timestamp": "2026-01-01T00:00:00.000212Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 34,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 108,
+   "reconciled": false,
+   "rowSha256": "b2960c20d9d5c5b35a88e266445e51772f98458f7b098fde5e319490502913c5",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000216Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 109,
+   "timestamp": "2026-01-01T00:00:00.000217Z",
+   "to": "READY"
+  },
+  {
+   "draw": 35,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 110,
+   "timestamp": "2026-01-01T00:00:00.000218Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 35,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 111,
+   "reconciled": false,
+   "rowSha256": "3c2acdfd378bdfc396a44e6abc86acbd9ab23db39d30d0a476ca41b37e67fa25",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000222Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 112,
+   "timestamp": "2026-01-01T00:00:00.000223Z",
+   "to": "READY"
+  },
+  {
+   "draw": 36,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 113,
+   "timestamp": "2026-01-01T00:00:00.000224Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 36,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 114,
+   "reconciled": false,
+   "rowSha256": "30161e0dcab1afb4bb4401287647674a6a5faf376f5386fea2896d47f3a99ca6",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000228Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 115,
+   "timestamp": "2026-01-01T00:00:00.000229Z",
+   "to": "READY"
+  },
+  {
+   "draw": 37,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 116,
+   "timestamp": "2026-01-01T00:00:00.000230Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 37,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 117,
+   "reconciled": false,
+   "rowSha256": "42acad1e3435ec37ca2f6a3ba649aa520ae60fafa8e17193df74268793c73337",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000234Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 118,
+   "timestamp": "2026-01-01T00:00:00.000235Z",
+   "to": "READY"
+  },
+  {
+   "draw": 38,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 119,
+   "timestamp": "2026-01-01T00:00:00.000236Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 38,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 120,
+   "reconciled": false,
+   "rowSha256": "63ca8d822feab9c53c998ed74902bb7d10de17c7440aa0ebc04aecb7c74eb19e",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000240Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 121,
+   "timestamp": "2026-01-01T00:00:00.000241Z",
+   "to": "READY"
+  },
+  {
+   "draw": 39,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 122,
+   "timestamp": "2026-01-01T00:00:00.000242Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 39,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 123,
+   "reconciled": false,
+   "rowSha256": "22604cd77261755a66a18b2c7192612403162ff3988635ccbf0935698f4a8b97",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000246Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 124,
+   "timestamp": "2026-01-01T00:00:00.000247Z",
+   "to": "READY"
+  },
+  {
+   "draw": 40,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 125,
+   "timestamp": "2026-01-01T00:00:00.000248Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 40,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 126,
+   "reconciled": false,
+   "rowSha256": "ca71c17153fad36454d8bb715eff929776e7e815837d6c91dea0d2632c92441b",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000252Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 127,
+   "timestamp": "2026-01-01T00:00:00.000253Z",
+   "to": "READY"
+  },
+  {
+   "draw": 41,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 128,
+   "timestamp": "2026-01-01T00:00:00.000254Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 41,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 129,
+   "reconciled": false,
+   "rowSha256": "7ea8c908eb633dda0523583e91c60b3d01be436c2e483e9b92b2af016a5b68be",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000258Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 130,
+   "timestamp": "2026-01-01T00:00:00.000259Z",
+   "to": "READY"
+  },
+  {
+   "draw": 42,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 131,
+   "timestamp": "2026-01-01T00:00:00.000260Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 42,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 132,
+   "reconciled": false,
+   "rowSha256": "8e58d4296f824950ae8e4e7098f5c27487eb0d11b742c78eb70c98d667e0cc4b",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000264Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 133,
+   "timestamp": "2026-01-01T00:00:00.000265Z",
+   "to": "READY"
+  },
+  {
+   "draw": 43,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 134,
+   "timestamp": "2026-01-01T00:00:00.000266Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 43,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 135,
+   "reconciled": false,
+   "rowSha256": "10ea5b51eaca0ca315edca79e027c52f2b2e8416db4f30297dc6bf93f7eea17f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000270Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 136,
+   "timestamp": "2026-01-01T00:00:00.000271Z",
+   "to": "READY"
+  },
+  {
+   "draw": 44,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 137,
+   "timestamp": "2026-01-01T00:00:00.000272Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 44,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 138,
+   "reconciled": false,
+   "rowSha256": "4aba40752ffdc1d05eaeceb6c5894494574d8b8155ef50f0a3cf4cf2dcc7da7b",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000276Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 139,
+   "timestamp": "2026-01-01T00:00:00.000277Z",
+   "to": "READY"
+  },
+  {
+   "draw": 45,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 140,
+   "timestamp": "2026-01-01T00:00:00.000278Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 45,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 141,
+   "reconciled": false,
+   "rowSha256": "7bd0d65514483429b00716da63b1b1934a6a636d7584d49de26ecdf5cd8eb66e",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000282Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 142,
+   "timestamp": "2026-01-01T00:00:00.000283Z",
+   "to": "READY"
+  },
+  {
+   "draw": 46,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 143,
+   "timestamp": "2026-01-01T00:00:00.000284Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 46,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 144,
+   "reconciled": false,
+   "rowSha256": "31b61688e2a14516a53844f93fb40a5f1b9f0198669a23054e070dcea5ed2f73",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000288Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 145,
+   "timestamp": "2026-01-01T00:00:00.000289Z",
+   "to": "READY"
+  },
+  {
+   "draw": 47,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 146,
+   "timestamp": "2026-01-01T00:00:00.000290Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 47,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 147,
+   "reconciled": false,
+   "rowSha256": "538985ac1dede7fc9dd2a3871bfed3b24048d5eb12ab0230ad7630a7f3520b1f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000294Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 148,
+   "timestamp": "2026-01-01T00:00:00.000295Z",
+   "to": "READY"
+  },
+  {
+   "draw": 48,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 149,
+   "timestamp": "2026-01-01T00:00:00.000296Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 48,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 150,
+   "reconciled": false,
+   "rowSha256": "5b6a2e0ed5ce6751ecc7490bfa3a5c6c62927225fa87175f373f46b76df0d0e5",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000300Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 151,
+   "timestamp": "2026-01-01T00:00:00.000301Z",
+   "to": "READY"
+  },
+  {
+   "draw": 49,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 152,
+   "timestamp": "2026-01-01T00:00:00.000302Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 49,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 153,
+   "reconciled": false,
+   "rowSha256": "dd3a4b0a34a8cd6d0d8c639c7cd78cf945bc4f5debbf7dfb9248b4c2ba761b05",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000306Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 154,
+   "timestamp": "2026-01-01T00:00:00.000307Z",
+   "to": "READY"
+  },
+  {
+   "draw": 50,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 155,
+   "timestamp": "2026-01-01T00:00:00.000308Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 50,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 156,
+   "reconciled": false,
+   "rowSha256": "1b291303a219a18c57e427e14a81c5dd593255f2221a581f31a3b1fe227f47b9",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000312Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 157,
+   "timestamp": "2026-01-01T00:00:00.000313Z",
+   "to": "READY"
+  },
+  {
+   "draw": 51,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 158,
+   "timestamp": "2026-01-01T00:00:00.000314Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 51,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 159,
+   "reconciled": false,
+   "rowSha256": "aee7cb58d74535880bad98a06476fd121607abce912cd1fa722618569394a450",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000318Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 160,
+   "timestamp": "2026-01-01T00:00:00.000319Z",
+   "to": "READY"
+  },
+  {
+   "draw": 52,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 161,
+   "timestamp": "2026-01-01T00:00:00.000320Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 52,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 0,
+   "n": 162,
+   "reconciled": false,
+   "rowSha256": "5b60316bb52b5d27e54d985eb57b592c9e97a8b96b87b61c76b2f056783a0662",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000321Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 163,
+   "timestamp": "2026-01-01T00:00:00.000322Z",
+   "to": "READY"
+  },
+  {
+   "draw": 53,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 164,
+   "timestamp": "2026-01-01T00:00:00.000323Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 53,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 165,
+   "reconciled": false,
+   "rowSha256": "e80fa14e6568ee0e4dbf7754e2840306f694c844af657cf8dd8f75c6a2a605a9",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000327Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 166,
+   "timestamp": "2026-01-01T00:00:00.000328Z",
+   "to": "READY"
+  },
+  {
+   "draw": 54,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 167,
+   "timestamp": "2026-01-01T00:00:00.000329Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 54,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 168,
+   "reconciled": false,
+   "rowSha256": "8b050017ee780165f97c832b3ffd92a84fc5a14b18bcd67695c6d52dc36d88e5",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000333Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 169,
+   "timestamp": "2026-01-01T00:00:00.000334Z",
+   "to": "READY"
+  },
+  {
+   "draw": 55,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 170,
+   "timestamp": "2026-01-01T00:00:00.000335Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 55,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 171,
+   "reconciled": false,
+   "rowSha256": "70a500e486521523d512f62e9b6507deeeec5093d62ef491eca79579a6969e68",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000339Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 172,
+   "timestamp": "2026-01-01T00:00:00.000340Z",
+   "to": "READY"
+  },
+  {
+   "draw": 56,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 173,
+   "timestamp": "2026-01-01T00:00:00.000341Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 56,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 174,
+   "reconciled": false,
+   "rowSha256": "464dc130a77aaf489bcb660276aa03257136af3d5f3bade14fef36ec80afa6cb",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000345Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 175,
+   "timestamp": "2026-01-01T00:00:00.000346Z",
+   "to": "READY"
+  },
+  {
+   "draw": 57,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 176,
+   "timestamp": "2026-01-01T00:00:00.000347Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 57,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 177,
+   "reconciled": false,
+   "rowSha256": "4e000d0d14b85585f237f6b71f858b177f9b4966bfee0a0c0e79c6792a37d592",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000351Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 178,
+   "timestamp": "2026-01-01T00:00:00.000352Z",
+   "to": "READY"
+  },
+  {
+   "draw": 58,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 179,
+   "timestamp": "2026-01-01T00:00:00.000353Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 58,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 0,
+   "n": 180,
+   "reconciled": false,
+   "rowSha256": "cfb65cf60053ae345b12505cd8cdfaca55b5ee31d129a174d976708d6a45e27f",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000354Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 181,
+   "timestamp": "2026-01-01T00:00:00.000355Z",
+   "to": "READY"
+  },
+  {
+   "draw": 59,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 182,
+   "timestamp": "2026-01-01T00:00:00.000356Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 59,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 183,
+   "reconciled": false,
+   "rowSha256": "6cba0dcb45178100719fe51e377ba67fc44267b717b941daf9c3b2c1e92040b1",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000360Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 184,
+   "timestamp": "2026-01-01T00:00:00.000361Z",
+   "to": "READY"
+  },
+  {
+   "draw": 60,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 185,
+   "timestamp": "2026-01-01T00:00:00.000362Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 60,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 186,
+   "reconciled": false,
+   "rowSha256": "5bd61d025540e94c5b08651b4e42526315eee9575e70120bc7a3eac735ad4396",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000366Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 187,
+   "timestamp": "2026-01-01T00:00:00.000367Z",
+   "to": "READY"
+  },
+  {
+   "draw": 61,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 188,
+   "timestamp": "2026-01-01T00:00:00.000368Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 61,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 0,
+   "n": 189,
+   "reconciled": false,
+   "rowSha256": "db422326c238e5338316f3bc2fd411f9a3699a1beca7e35bbe670cac4e37a40b",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000369Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 190,
+   "timestamp": "2026-01-01T00:00:00.000370Z",
+   "to": "READY"
+  },
+  {
+   "draw": 62,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 191,
+   "timestamp": "2026-01-01T00:00:00.000371Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 62,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 192,
+   "reconciled": false,
+   "rowSha256": "b5c3cffe1041cd40df18bd794ff1802f9f5e781a069ea171ceb2b953440eca01",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000375Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 193,
+   "timestamp": "2026-01-01T00:00:00.000376Z",
+   "to": "READY"
+  },
+  {
+   "draw": 63,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 194,
+   "timestamp": "2026-01-01T00:00:00.000377Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 63,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 195,
+   "reconciled": false,
+   "rowSha256": "e42410fd5fe55c1ec6da236bbaeb03972094407734a15d149a1e31f473d9fa3a",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000381Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 196,
+   "timestamp": "2026-01-01T00:00:00.000382Z",
+   "to": "READY"
+  },
+  {
+   "draw": 64,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 197,
+   "timestamp": "2026-01-01T00:00:00.000383Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 64,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 198,
+   "reconciled": false,
+   "rowSha256": "b6c29717973b20d9b76953b1c7cf088ac6154a953c9ac21d405cc2d251e370e2",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000387Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 199,
+   "timestamp": "2026-01-01T00:00:00.000388Z",
+   "to": "READY"
+  },
+  {
+   "draw": 65,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 200,
+   "timestamp": "2026-01-01T00:00:00.000389Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 65,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 0,
+   "n": 201,
+   "reconciled": false,
+   "rowSha256": "832fb31e6fb0b31b2eb14d204674a383d48cffd2074e3b982583733ee0131f5a",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000390Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "continue",
+   "from": "DRAW_RECORDED",
+   "n": 202,
+   "timestamp": "2026-01-01T00:00:00.000391Z",
+   "to": "READY"
+  },
+  {
+   "draw": 66,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 203,
+   "timestamp": "2026-01-01T00:00:00.000392Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "draw": 66,
+   "event": "commit_draw",
+   "from": "DRAW_ACTIVE",
+   "modelCalls": 1,
+   "n": 204,
+   "reconciled": false,
+   "rowSha256": "ef1cb71c69ea3508a5efec4d573782a90cb699470f684f174aa229ac45edf588",
+   "status": "completed",
+   "timestamp": "2026-01-01T00:00:00.000396Z",
+   "to": "DRAW_RECORDED"
+  },
+  {
+   "event": "schedule_done",
+   "from": "DRAW_RECORDED",
+   "n": 205,
+   "timestamp": "2026-01-01T00:00:00.000397Z",
+   "to": "CLEANUP"
+  },
+  {
+   "event": "cleanup_succeeded",
+   "from": "CLEANUP",
+   "n": 206,
+   "timestamp": "2026-01-01T00:00:00.000400Z",
+   "to": "FINALIZING"
+  }
+ ],
+ "lifecycle": {
+  "id": "dreamteam.run-lifecycle/v3",
+  "sha256": "fa3cb0a2ddab09f0f1ccfe7f13d80c2d73262b960a3d4c84d03587f54ed44b33"
+ },
+ "protocol": "record-only-v13k-fidelity-v1",
+ "protocolSha256": "ff2b75c22e2ec0cf0c1871f0f35e9bf0d803b2ea5c3bff290e952b7d131c880d",
+ "provenance": {
+  "runId": "SYNTHETIC_FIXTURE",
+  "timestamps": "SYNTHETIC_FIXTURE"
+ },
+ "resume": "never",
+ "runId": "00000000-0000-4000-8000-0000000013b1",
+ "scheduleSha256": "99730cb1609bb8a98d8a8037a82a165195fb9b1d8767178d6dbce652c798572c",
+ "schema": "dreamteam.alternatives-run/v7",
+ "serverObserved": true,
+ "started": "2026-01-01T00:00:00.000001Z",
+ "state": "FINALIZING",
+ "stop": null,
+ "verificationStatus": "UNVERIFIED"
+}

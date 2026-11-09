@@ -1,0 +1,1870 @@
+{
+ "bases": {
+  "aborted_workflow": "PARTIAL",
+  "after_schedule": "COMPLETE",
+  "cleanup_failed": "PARTIAL",
+  "complete": "COMPLETE",
+  "engine_open": "PARTIAL",
+  "halt_row": "PARTIAL",
+  "health_stop": "PARTIAL",
+  "operator_between": "PARTIAL",
+  "operator_dispatch": "PARTIAL",
+  "unrecorded": "PARTIAL"
+ },
+ "mutants": [
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "engine_open",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_with_finished_record",
+   "source": "DT13I-04 forgeries engine_open_with_finished_record",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "engine_open",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_with_transport_halt",
+   "source": "DT13I-04 forgeries engine_open_with_transport_halt",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "cleanup_failed",
+   "classification": "INVALID",
+   "expected": [
+    "L03",
+    "L14"
+   ],
+   "name": "premature_schedule_done_cleanup_failure",
+   "source": "DT13I-04 forgeries premature_schedule_done_cleanup_failure",
+   "violations": [
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L14"
+   ],
+   "name": "duplicate_round_health",
+   "source": "DT13I-04 extra-forgeries duplicate_round_health",
+   "violations": [
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "null_failure_event_file",
+   "source": "DT13I-04 forgeries null_failure-event.json",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "null_aborted_draw_file",
+   "source": "DT13I-04 forgeries null_aborted-draw.json",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "null_server_before_file",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "os_error_named_KeyboardInterrupt",
+   "source": "DT13I-03 forgeries os_error_KeyboardInterrupt",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "os_error_named_ValueError",
+   "source": "DT13I-03 forgeries os_error_ValueError",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "os_error_named_invented",
+   "source": "DT13I-03 forgeries os_error_MadeUpNonOSError",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "unqualified_type_name",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "wrapped_reason_in_wrong_family",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "url_error_with_exception_reason",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "wrapped_keyboard_interrupt",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "http_status_without_status",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L13",
+    "L20"
+   ],
+   "name": "all_times_trailing_newline",
+   "source": "DT13I-06 extra-forgeries all_times_trailing_newline",
+   "violations": [
+    "B-MANIFEST-003",
+    "L07",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L13",
+    "L20"
+   ],
+   "name": "all_times_arabic_indic_digits",
+   "source": "DT13I-06 extra-forgeries all_times_unicode_digits",
+   "violations": [
+    "B-MANIFEST-003",
+    "L07",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L13",
+    "L20"
+   ],
+   "name": "all_times_fullwidth_digits",
+   "source": "V0.13k",
+   "violations": [
+    "B-MANIFEST-003",
+    "L07",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "timestamp_non_utc_offset",
+   "source": "DT13I-06 forgeries timestamp_non_utc",
+   "violations": [
+    "B-MANIFEST-003",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "timestamp_trailing_newline_single",
+   "source": "DT13I-06 forgeries timestamp_trailing_newline",
+   "violations": [
+    "B-JOURNAL-001",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "timestamp_null",
+   "source": "DT13I-06 forgeries timestamp_null",
+   "violations": [
+    "B-MANIFEST-003",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "impossible_calendar_timestamp",
+   "source": "V0.13k",
+   "violations": [
+    "B-JOURNAL-001",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "journal_time_reversed",
+   "source": "V0.13k",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S04"
+   ],
+   "name": "seal_time_before_journal",
+   "source": "V0.13k",
+   "violations": [
+    "B-CLEANUP-001",
+    "S04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "observation_end_before_start",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "call_sent_before_dispatch",
+   "source": "V0.13k",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "call_sent_outside_draw",
+   "source": "V0.13k",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "call_sent_missing",
+   "source": "V0.13k",
+   "violations": [
+    "B-CALL-003",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L13"
+   ],
+   "name": "dispatch_time_outside_draw",
+   "source": "V0.13k",
+   "violations": [
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "after_schedule",
+   "classification": "INVALID",
+   "expected": [
+    "L13",
+    "L20"
+   ],
+   "name": "interrupt_event_time_garbled",
+   "source": "V0.13k",
+   "violations": [
+    "B-INTERRUPT-001",
+    "L13"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": false,
+   "base": "complete",
+   "classification": "COMPLETE",
+   "expected": "accepted",
+   "name": "valid_call_metadata_shift",
+   "source": "DT13I-06 extra-forgeries valid_call_metadata_shift (positive control)",
+   "violations": []
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "journal_dispatch_dropped",
+   "source": "DT13I-01 known call missing from the journal",
+   "violations": [
+    "L03",
+    "L04",
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "journal_outcome_dropped",
+   "source": "V0.13k",
+   "violations": [
+    "L04",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L03",
+    "L04"
+   ],
+   "name": "journal_extra_dispatch",
+   "source": "V0.13k",
+   "violations": [
+    "L03",
+    "L04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "journal_response_altered",
+   "source": "V0.13k",
+   "violations": [
+    "L04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "journal_record_reordered",
+   "source": "V0.13k",
+   "violations": [
+    "L03",
+    "L04",
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "journal_raised_recorded_as_returned",
+   "source": "V0.13k",
+   "violations": [
+    "L04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "COMPLETE",
+   "expected": "refused by replay",
+   "name": "call_dropped_from_row_and_journal",
+   "source": "DT13I-01 a completed call erased everywhere, counts recomputed",
+   "violations": []
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "unrecorded",
+   "classification": "INVALID",
+   "expected": [
+    "L04",
+    "L06"
+   ],
+   "name": "unrecorded_draw_reported_as_zero_calls",
+   "source": "DT13I-01 unknown calls reported as known zero",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "unrecorded",
+   "classification": "INVALID",
+   "expected": [
+    "L03",
+    "L19"
+   ],
+   "name": "unrecorded_draw_journal_erased",
+   "source": "DT13I-01 dispatched calls erased from the journal",
+   "violations": [
+    "L03",
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L03"
+   ],
+   "name": "counter_modelcalls_from_rows_only",
+   "source": "V0.13k",
+   "violations": [
+    "L03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04",
+    "L16"
+   ],
+   "name": "torn_call_journal",
+   "source": "V0.13k",
+   "violations": [
+    "L04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "S04"
+   ],
+   "name": "seal_claims_complete_on_partial",
+   "source": "V0.13k",
+   "violations": [
+    "S04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S04"
+   ],
+   "name": "seal_claims_partial_on_complete",
+   "source": "V0.13k",
+   "violations": [
+    "S04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S04"
+   ],
+   "name": "seal_transition_n_wrong",
+   "source": "V0.13k",
+   "violations": [
+    "S04"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S02"
+   ],
+   "name": "seal_run_identity_differs",
+   "source": "V0.13k",
+   "violations": [
+    "S02"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S02"
+   ],
+   "name": "seal_extra_field",
+   "source": "V0.13k",
+   "violations": [
+    "S02"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S02"
+   ],
+   "name": "seal_lifecycle_v1",
+   "source": "V0.13k",
+   "violations": [
+    "S02"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S02"
+   ],
+   "name": "seal_finalization_contract_differs",
+   "source": "V0.13k",
+   "violations": [
+    "S02"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S03"
+   ],
+   "name": "seal_null_hash_for_present_file",
+   "source": "V0.13k",
+   "violations": [
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S03"
+   ],
+   "name": "seal_manifest_hash_stale",
+   "source": "V0.13k",
+   "violations": [
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S03"
+   ],
+   "name": "seal_row_hash_stale",
+   "source": "V0.13k",
+   "violations": [
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S03"
+   ],
+   "name": "seal_counters_differ",
+   "source": "V0.13k",
+   "violations": [
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "manifest_claims_terminal_state",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L08",
+    "L14"
+   ],
+   "name": "manifest_journal_unfinished",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "operator_between",
+   "classification": "INVALID",
+   "expected": [
+    "L20"
+   ],
+   "name": "operator_stop_without_event",
+   "source": "V0.13k",
+   "violations": [
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "operator_between",
+   "classification": "INVALID",
+   "expected": [
+    "L20"
+   ],
+   "name": "operator_stop_event_other_point",
+   "source": "V0.13k",
+   "violations": [
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "operator_between",
+   "classification": "INVALID",
+   "expected": [
+    "L06",
+    "L20"
+   ],
+   "name": "operator_stop_at_note_point",
+   "source": "V0.13k",
+   "violations": [
+    "L06",
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "after_schedule",
+   "classification": "INVALID",
+   "expected": [
+    "L09",
+    "L20"
+   ],
+   "name": "after_stop_event_in_complete",
+   "source": "V0.13k",
+   "violations": [
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "after_schedule",
+   "classification": "INVALID",
+   "expected": [
+    "L09",
+    "L20"
+   ],
+   "name": "stop_event_in_complete",
+   "source": "V0.13k",
+   "violations": [
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "cleanup_failed",
+   "classification": "INVALID",
+   "expected": [
+    "L06",
+    "L08",
+    "L19",
+    "L20"
+   ],
+   "name": "driver_relabelled_operator",
+   "source": "V0.13k",
+   "violations": [
+    "L08",
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "operator_between",
+   "classification": "INVALID",
+   "expected": [
+    "L06",
+    "L20"
+   ],
+   "name": "operator_relabelled_driver_keyboard",
+   "source": "V0.13k",
+   "violations": [
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "operator_dispatch",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "operator_before_dispatch_without_operatorstop",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L06",
+    "L07",
+    "L20"
+   ],
+   "name": "health_stop_relabelled_operator",
+   "source": "V0.13k",
+   "violations": [
+    "L06",
+    "L20"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "workflow_with_final_digests",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "workflow_with_record",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "workflow_process_exposure_flipped",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "engine_open",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_with_cleanup_failure",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "engine_open",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_marked_ready",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "engine_open",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "engine_open_with_engine_log",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L04",
+    "L06"
+   ],
+   "name": "draw_setup_with_calls",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "aborted_stage_unknown",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L02"
+   ],
+   "name": "completed_row_with_cleanup_failure",
+   "source": "V0.13k",
+   "violations": [
+    "L02",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L02"
+   ],
+   "name": "completed_row_process_differs",
+   "source": "V0.13k",
+   "violations": [
+    "L02",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "schedule_done_after_first_draw",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "continue_after_last_draw",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "L14"
+   ],
+   "name": "begin_draw_without_health_visit",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "illegal_transition",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "unknown_event",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "unknown_state",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L14"
+   ],
+   "name": "transitions_reordered",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L12",
+    "L13",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01"
+   ],
+   "name": "duplicate_completed_draws",
+   "source": "V0.13k",
+   "violations": [
+    "L01",
+    "L04",
+    "L12",
+    "L13",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01"
+   ],
+   "name": "missing_schedule_entry",
+   "source": "V0.13k",
+   "violations": [
+    "L01",
+    "L04",
+    "L12",
+    "L13",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04",
+    "L10",
+    "L17"
+   ],
+   "name": "truncated_ledger_claiming_complete",
+   "source": "V0.13k",
+   "violations": [
+    "L04",
+    "L12",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L01",
+    "L02"
+   ],
+   "name": "aborted_status_row_in_ledger",
+   "source": "V0.13k",
+   "violations": [
+    "L01",
+    "L12",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L05",
+    "L16"
+   ],
+   "name": "aborted_artifact_beside_complete",
+   "source": "V0.13k",
+   "violations": [
+    "L03",
+    "L05",
+    "L09",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "stop_code_differs_in_failure_event_file",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "stop_code_differs_from_journal",
+   "source": "V0.13k",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L14",
+    "L19"
+   ],
+   "name": "second_stop_transition",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L13",
+    "L14"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "halt_row",
+   "classification": "INVALID",
+   "expected": [
+    "L06"
+   ],
+   "name": "halt_row_with_driver_stop",
+   "source": "V0.13k",
+   "violations": [
+    "L06"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L19"
+   ],
+   "name": "failure_event_call_count",
+   "source": "V0.13k",
+   "violations": [
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L03"
+   ],
+   "name": "counters_not_conserved",
+   "source": "V0.13k",
+   "violations": [
+    "L03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L08"
+   ],
+   "name": "complete_with_cleanup_failure",
+   "source": "V0.13k",
+   "violations": [
+    "L08",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L08",
+    "L19"
+   ],
+   "name": "cleanup_failure_replaces_primary",
+   "source": "V0.13k",
+   "violations": [
+    "L08",
+    "L19"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L08"
+   ],
+   "name": "cleanup_timestamp_differs",
+   "source": "V0.13k",
+   "violations": [
+    "L08"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L17"
+   ],
+   "name": "reconciled_commit_without_stop",
+   "source": "V0.13k",
+   "violations": [
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L17"
+   ],
+   "name": "commit_row_hash_stale",
+   "source": "V0.13k",
+   "violations": [
+    "L12",
+    "L17"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L18"
+   ],
+   "name": "resume_permitted",
+   "source": "V0.13k",
+   "violations": [
+    "L18"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "run_identity_not_uuid",
+   "source": "V0.13k",
+   "violations": [
+    "L15",
+    "S02"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "lifecycle_contract_differs",
+   "source": "V0.13k",
+   "violations": [
+    "L15"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L15"
+   ],
+   "name": "recording_claims_verification",
+   "source": "V0.13k",
+   "violations": [
+    "L15"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "complete_with_unhealthy_initial_observation",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_label_on_contradictory_body",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_with_exception",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_with_http_503",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "healthy_body_hash_wrong",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "health_field_missing",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L12"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "unknown_read_failure_category",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "rejected_valid_observation",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "L09"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07"
+   ],
+   "name": "server_before_differs",
+   "source": "V0.13k",
+   "violations": [
+    "L07"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "S01"
+   ],
+   "name": "seal_missing",
+   "source": "DT13I-02 completion without a seal",
+   "violations": [
+    "S01"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "S01"
+   ],
+   "name": "seal_missing_partial",
+   "source": "V0.13k",
+   "violations": [
+    "S01"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "seal_truncated",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16",
+    "S02"
+   ],
+   "name": "seal_is_null",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "stray_seal_temporary_file",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "finalizing_marker_beside_seal",
+   "source": "V0.13i marker",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "stray_temporary_file",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_manifest",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_ledger",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "missing_call_journal",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "health_stop",
+   "classification": "INVALID",
+   "expected": [
+    "L16",
+    "S03"
+   ],
+   "name": "missing_failure_event",
+   "source": "V0.13k",
+   "violations": [
+    "L16",
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "aborted_workflow",
+   "classification": "INVALID",
+   "expected": [
+    "L04",
+    "L05",
+    "S03"
+   ],
+   "name": "missing_aborted_artifact",
+   "source": "V0.13k",
+   "violations": [
+    "L03",
+    "L04",
+    "L05",
+    "L06",
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L07",
+    "S03"
+   ],
+   "name": "missing_server_before",
+   "source": "V0.13k",
+   "violations": [
+    "L07",
+    "S03"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L16"
+   ],
+   "name": "subdirectory_in_archive",
+   "source": "V0.13k",
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "agree": true,
+   "analysisRefused": true,
+   "base": "complete",
+   "classification": "INVALID",
+   "expected": [
+    "L04"
+   ],
+   "name": "call_journal_noncanonical",
+   "source": "V0.13k",
+   "violations": [
+    "L04"
+   ]
+  }
+ ],
+ "notice": "Scripted archives only; every dependent hash, count and seal binding recomputed; no inference.",
+ "schema": "dreamteam.v13k-mutations/v1",
+ "summary": {
+  "agree": 125,
+  "mutants": 125,
+  "positiveControls": 1
+ }
+}
