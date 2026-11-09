@@ -27,6 +27,12 @@ jobs:
           set -euo pipefail
           git fetch --depth=1 origin cf9a12bf12fc94089e8a99f73dea12edd0cfd019
           git worktree add --detach .git/v13f-baseline cf9a12bf12fc94089e8a99f73dea12edd0cfd019
+      - name: Preserved pre-remediation contract checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --depth=1 origin cb5ac6832e7b43ef68212355ff395cf5958fff11
+          git worktree add --detach .git/v13k-preserved cb5ac6832e7b43ef68212355ff395cf5958fff11
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
@@ -479,7 +485,7 @@ jobs:
           diff -r "$S/fidelity/interactions" "$V/fidelity/interactions"
           diff -r "$S/fidelity/lifecycle-examples" "$V/fidelity/lifecycle-examples"
           python3 -I -B analysis/alternatives/v13h_package.py --source "$S/fidelity" --check
-          python3 -I -B analysis/alternatives/v13h_identities.py --check
+          python3 -I -B .git/v13k-preserved/analysis/alternatives/v13h_identities.py --check
           cp "$V/protocol-draft.json" out/v13h-protocol.json
           cp "$V/schedule-draft.json" out/v13h-schedule.json
           cp docs/v13h/review-package/SHA256SUMS out/v13h-review-package-SHA256SUMS
@@ -500,7 +506,7 @@ jobs:
           cmp "$S/schedule.json" "$V/schedule-draft.json"
           python3 -I -B analysis/alternatives/v13i.py check --binary "$B" --contexts "$C" --protocol "$V/protocol-draft.json" --replays .
           python3 -I -B analysis/alternatives/v13i_examples.py --binary "$B" --out "$S/examples" --check "$V/lifecycle-examples"
-          python3 -I -B analysis/alternatives/v13i_identities.py --check
+          python3 -I -B .git/v13k-preserved/analysis/alternatives/v13i_identities.py --check
           cp "$V/protocol-draft.json" out/v13i-protocol.json
           cp "$V/schedule-draft.json" out/v13i-schedule.json
           (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13i-lifecycle-examples.sha256
@@ -528,7 +534,7 @@ jobs:
           cmp "$S/schedule.json" "$V/schedule-draft.json"
           python3 -I -B analysis/alternatives/v13j.py check --binary "$B" --contexts "$C" --protocol "$V/protocol-draft.json" --replays .
           python3 -I -B analysis/alternatives/v13j_examples.py --binary "$B" --out "$S/examples" --check "$V/lifecycle-examples"
-          python3 -I -B analysis/alternatives/v13j_identities.py --check
+          python3 -I -B .git/v13k-preserved/analysis/alternatives/v13j_identities.py --check
           cp "$V/protocol-draft.json" out/v13j-protocol.json
           cp "$V/schedule-draft.json" out/v13j-schedule.json
           (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13j-lifecycle-examples.sha256
@@ -561,6 +567,35 @@ jobs:
           cp v11b/schedule.json out/v11b-schedule.json
           $P analysis/repeatability/workflow_experiment.py analyze --binary ./dt --replays . --dir $V --out v11b
           python3 -I -B analysis/alternatives/ci_compare.py --generated v11b --reference "$V" --out out --prefix v11b- decisions.json decision-tables.md inference.json
+      - name: Evidence binding and verification closure (V0.13k)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="$PWD/dt"
+          S="$PWD/.git/v13k-ci"
+          V="$PWD/docs/benchmark/v13k-dev"
+          C="$PWD/docs/benchmark/v13g-dev/contexts"
+          mkdir -p "$S"
+          export TMPDIR="$S"
+          python3 -B -m unittest discover -s analysis/alternatives -p test_lifecycle_v3_spec.py
+          DREAMTEAM_BINARY="$B" python3 -B -m unittest discover -s analysis/alternatives -p test_v13k.py
+          python3 -I -B analysis/alternatives/v13k.py protocol --contexts "$C" --out "$S/protocol.json"
+          cmp "$S/protocol.json" "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13k.py schedule --contexts "$C" --protocol "$V/protocol-draft.json" --out "$S/schedule.json"
+          cmp "$S/schedule.json" "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13k.py check --binary "$B" --contexts "$C" --protocol "$V/protocol-draft.json" --replays "$PWD"
+          python3 -I -B analysis/alternatives/v13k_examples.py --binary "$B" --out "$S/examples" --check "$V/lifecycle-examples"
+          python3 -I -B analysis/alternatives/v13k_binding_matrix.py --binary "$B" --scratch "$S/binding-matrix" --out "$S/binding-matrix.json"
+          cmp "$S/binding-matrix.json" docs/v13k/binding-matrix/results.json
+          python3 -I -B analysis/alternatives/v13k_fidelity.py --binary "$B" --contexts "$C" --replays "$PWD" --scratch "$S/fidelity-archive" --out "$S/fidelity.json"
+          cmp "$S/fidelity.json" "$V/fidelity/results.json"
+          python3 -I -B analysis/alternatives/v13k_preserved.py
+          python3 -I -B analysis/alternatives/v13k_identities.py --check
+          cp "$S/protocol.json" out/v13k-protocol.json
+          cp "$S/schedule.json" out/v13k-schedule.json
+          cp "$S/binding-matrix.json" out/v13k-binding-matrix.json
+          cp "$S/fidelity.json" out/v13k-fidelity.json
+          (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13k-lifecycle-examples.sha256
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

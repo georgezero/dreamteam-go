@@ -7,6 +7,103 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13k — evidence binding and verification closure (0.13.0-dev.2, engine unchanged)
+
+The owner directed V0.13k after the V0.13j independent review (NO GO;
+DT13J-01..05). All five dispositions are FIX; exception identity is fixed
+narrowly. [Per-finding remediation](v13k/DT13J_REMEDIATION.md). Separate
+independent review: PENDING. Human presentation review: PENDING (separate,
+`docs/v13i/human-review` at `ee987a1`, unchanged). Protocol lock: NO GO.
+Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* One explicit [evidence inventory](v13k/EVIDENCE_BINDINGS.md), schema
+  `dreamteam.evidence-bindings/1`, with 35 bindings, 293 named fixed fields
+  and recursively compared domain descendants. The baseline and inventory
+  were committed first (214c35a), before recording or verifier changes.
+  Types, requiredness, lifecycle stages, related evidence, invalidity,
+  replay, absence and permitted external-only UNVERIFIED scope are explicit.
+* Successor recording (driver/7, run/7), lifecycle /3, independent partial-run
+  verification /7 and full analysis /8. The verifier shares only binding
+  JSON data with the recorder; it has its own timestamp and health-body
+  validation and reconstructs engine/workflow events through frozen code.
+  External failures never waive retained decisions, submissions, responses,
+  counts, call bounds, exchanges or state-digest checks. Unknown call arrays
+  still require request reconstruction from the retained journal prefix.
+* Exactly ordered cleanup/finalization visits, interval and interrupt
+  reconciliation, context bounds derived from scheduled contexts independently
+  of nullable draw calls, lowercase hexadecimal hash grammar and the absolute
+  802-call ceiling. The existing completion seal, finalization contract and
+  process-crash rename commit point are preserved.
+* A durable completed-result handoff, retained failed ledger/handoff
+  candidates, pending-aware error reconciliation and exact failure evidence.
+  Six real filesystem/return/error-handling cases retain and replay the
+  completed result. Invalid archives are retained for audit, never silently
+  repaired into accepted runs. Actual trusted health exception class objects
+  are matched by identity; same-text impostors are refused. Duplicate keys
+  and nonfinite health JSON use the existing invalid_json category.
+* Generated engineering evidence: 350 full-analysis binding cases (35 matching
+  cases accepted, 315 contradictory cases rejected, no surviving contradiction);
+  5,288 lifecycle fault cases at 1,619 points, all agreeing,
+  zero false COMPLETE and full declared transition/stop coverage;
+  353 real-process signal/termination cases; 12 real loopback cases;
+  16 focused regressions; 76 inherited witnesses; 125 re-sealed mutations
+  including one positive control; six completed-result preservation cases;
+  16 deterministic lifecycle examples; and 66 successor fidelity
+  draws across all scheduled context/model/arm units, including nine historical
+  contexts, all recorded and independently replayed.
+
+**Inventory amendments during implementation:** fixed descendant types and
+conditional nullability are explicit; the latency field spelling is corrected;
+canonical JSON comparison preserves boolean/numeric type identity. Retained
+journal outcomes without status require transport-error evidence and no body.
+The final inventory drives field validation, stage shapes, cleanup order,
+hash grammar and call bounds. The additional journal-prefix regression closes
+an accepted valid-hex false request in the unknown-call-array path.
+
+**Preserved design:** simulator mechanics, accounting, session, API, scoring,
+decision workflow, parser, presentation, view, alternative selection, system
+instruction, canonicalization and primary canonical submitted-action estimand.
+Nine historical contexts, six sensitivity pairs, 21 contexts, 262 scheduled
+draws, the 802-call ceiling, 93 transcripts and seven static assets retain
+their hashes. All 3,172 protected starting files are byte-identical; earlier
+source, recordings and independent reports remain unchanged. See
+[baseline](v13k/BASELINE.md) and [preservation](v13k/PRESERVATION.md).
+
+**Baseline:** `cb5ac6832e7b43ef68212355ff395cf5958fff11` on main, verified
+ancestor (V0.13j plus its verbatim independent review). The protected swap
+file and dt are excluded from stages and source archives.
+
+**The engine version remains 0.13.0-dev.2.** Engine behavior and model-visible
+material do not change. Recording, verification, analysis, lifecycle, binding
+and evidence contracts receive [successor identities](v13k/CONTRACT-IDENTITIES.json).
+
+**Quality gates:** [gate record](v13k/gates/README.md) and
+[test map](v13k/gates/TEST_MAP.md). Heavy Go/Python, historical replay,
+fidelity, real signals and loopback run on horo. Focused Pi checks use the
+memory-limited scope. Both cross-platform workflows cover the successor.
+Exact final-push workflow results are recorded in the owner handoff.
+
+**Known limitations:** no recovery or resumption of INVALID archives; no
+claim to recover arbitrary power loss or in-memory evidence lost to forced
+termination before its first durable handoff. If storage rejects every
+subsequent write, existing candidates are retained and the caller receives
+the pending result and error evidence. Only external causes may remain
+UNVERIFIED. The self-hash seal is not an authenticity anchor. These bounded
+availability limitations do not permit false COMPLETE or contradictory
+PARTIAL. [Details](v13k/KNOWN_LIMITATIONS.md).
+
+**Review preparation only:** PENDING repository stubs, an external brief and
+a read-only archive of the final commit prepare the separate independent
+review. It must reproduce all five original findings, generate additional
+cross-field contradictions, recompute hashes/seals and use FULL analysis.
+No independent review, human acceptance, clinical suite, historical live
+rerun, reserved/holdout seed, protocol lock, live inference, tag or release
+was run or authorized.
+
+---
+
 ## V0.13j — safe-point interrupts and sealed run completion (0.13.0-dev.2, engine unchanged)
 
 The owner directed V0.13j after the V0.13i independent review (NO GO;

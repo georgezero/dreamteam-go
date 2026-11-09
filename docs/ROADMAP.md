@@ -1,5 +1,7 @@
 # DreamTeam — Roadmap
 
+V0.13k evidence binding and verification closure addresses DT13J-01 through DT13J-05 through an explicit [evidence inventory](v13k/EVIDENCE_BINDINGS.md), successor recording and full-analysis verification. The [remediation map](v13k/DT13J_REMEDIATION.md) and [engineering gates](v13k/gates/README.md) describe the evidence. Engine identity remains `0.13.0-dev.2`; the decision workflow, presentation, 262-draw / 802-call design and frozen historical evidence are unchanged. Independent review and human presentation review are PENDING. Protocol lock and live inference remain NO GO. No release is authorized.
+
 V0.13g final technical remediation uses versioned validation, exact execution
 provenance, initialization/stop recording and precision-preserving parsing.
 See [the remediation response](audits/v0.13g-audit-response.md),
