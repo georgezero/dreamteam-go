@@ -1,0 +1,1171 @@
+#!/usr/bin/env python3
+"""V0.13j independent archive verifier and analyzer
+(dreamteam.alternatives-analysis/v7, partial-run procedure /6).
+
+It loads the safety contract (lifecycle_v2.json) and reconstructs the
+archive's state from the persisted files alone. The completion seal is the
+only evidence that a run reached a terminal state, and it is never
+sufficient: the verifier walks the journal through the contract's
+transition table and predicates, binds the ledger, the call journal, the
+aborted artifact, health evidence, stop, cleanup and interrupts to each other
+field by field, recomputes every counter and hash, derives the terminal state
+the evidence supports, and requires the seal to agree. It never takes a
+claimed status as truth and does not import the recorder (v13j.py).
+Completed and interrupted rows are then replayed without a model through the
+unchanged V0.13h draw machinery.
+
+    python3 -I -B analysis/alternatives/v13j_verify.py classify --protocol FILE --contexts DIR --dir RUN
+    python3 -I -B analysis/alternatives/v13j_verify.py analyze --binary ./dt --protocol FILE --contexts DIR \\
+        --replays DIR --dir RUN --out DIR
+"""
+import argparse
+import base64
+import collections
+import hashlib
+import json
+import os
+import sys
+import uuid
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import lifecycle_v2_spec as LS  # noqa: E402
+import v13h as H  # noqa: E402  (draw replay, classification and execution; not the run recorder)
+
+SB, X = H.SB, H.X
+sha256, canon = H.sha256, H.canon
+ExperimentError = H.ExperimentError
+
+RUN_SCHEMA = "dreamteam.alternatives-run/v6"
+DRIVER = "dreamteam-v13j-driver/6"
+FAILURE_SCHEMA = "dreamteam.run-failure/v3"
+HEALTH_SCHEMA = "dreamteam.health-observation/v2"
+CALLS_SCHEMA = "dreamteam.call-journal/v1"
+SEAL_SCHEMA = "dreamteam.completion-seal/v1"
+FINALIZATION = "dreamteam.run-finalization/v1"
+ANALYSIS_SCHEMA = "dreamteam.alternatives-analysis/v7"
+SEAL, CALLS = "SEAL.json", "calls.jsonl"
+SIDE = ("server-before.json", "aborted-draw.json", "failure-event.json")
+HALTS = {"draw_call_limit", "call_budget", "wall_clock", "transport"}
+RUN_KEYS = {"schema", "driver", "lifecycle", "protocol", "protocolSha256", "scheduleSha256", "runId", "authorization",
+            "provenance", "serverObserved", "started", "state", "journal", "counters", "healthChecks", "stop",
+            "failureEvent", "cleanup", "interrupts", "verificationStatus", "resume"}
+STOP_KEYS = {"code", "state", "message", "failure", "evidence", "request", "healthCheck", "beforeSignature", "safePoint"}
+DETAIL = {"create": set(), "begin_preflight": set(), "preflight_passed": set(), "begin_health_check": {"healthCheck"},
+          "health_passed": {"healthCheck"}, "begin_draw": {"draw"},
+          "commit_draw": {"draw", "status", "rowSha256", "modelCalls", "reconciled"}, "continue": set(),
+          "schedule_done": set(), "stop": {"code"}, "cleanup_succeeded": set(), "cleanup_failed": set()}
+DRAW_KEYS = {"schema", "seq", "model", "context", "arm", "draw", "status", "halt", "initialDigests", "record", "batches",
+             "engine", "digestsAfter", "calls", "submittedRepresentation", "submittedRepresentationSha256",
+             "engineInitialization", "failureStage", "verificationStatus", "modelCallsCompleted", "process"}
+PROCESS_KEYS = ("eligibility", "exposure", "validationFirstCorrection", "correctionFailure", "deliberateNoAction",
+                "processFailure", "submittedAction", "executedAction")
+IDENTITY = ("seq", "model", "context", "arm", "draw")
+RECORD_FIELDS = {"dispatch": {"schema", "record", "k", "draw", "n", "timestamp"},
+                 "returned": {"schema", "record", "k", "draw", "n", "requestSha256", "status", "error", "responseSha256",
+                              "body", "timestamp"},
+                 "raised": {"schema", "record", "k", "draw", "n", "requestSha256", "exception", "timestamp"}}
+
+
+class Invalid(Exception):
+    def __init__(self, invariant, message):
+        super().__init__(f"{invariant}: {message}")
+        self.invariant, self.message = invariant, message
+
+
+def _need(ok, invariant, message):
+    if not ok:
+        raise Invalid(invariant, message)
+
+
+def _nat(x):
+    return isinstance(x, int) and not isinstance(x, bool) and x >= 0
+
+
+def _failure_shape(f):
+    return isinstance(f, dict) and set(f) == {"type", "message"} and isinstance(f["type"], str) and bool(f["type"]) \
+        and isinstance(f["message"], str)
+
+
+def _ts(value, what):
+    t = LS.parse_timestamp(value)
+    _need(t is not None, "L13", f"invalid or missing timestamp: {what}")
+    return t
+
+
+def _strict_json(data):
+    """JSON with no duplicate keys and no NaN/Infinity."""
+    def pairs(items):
+        keys = [k for k, _ in items]
+        if len(keys) != len(set(keys)):
+            raise ValueError("duplicate key")
+        return dict(items)
+
+    def constant(name):
+        raise ValueError("non-finite number " + name)
+    return json.loads(data.decode("utf-8"), object_pairs_hook=pairs, parse_constant=constant)
+
+
+class Archive:
+    """The persisted files of one run directory, read once."""
+
+    def __init__(self, directory):
+        self.live = os.path.join(directory, "live")
+        self.files = sorted(os.listdir(self.live)) if os.path.isdir(self.live) else None
+        self.raw, self.dirs = {}, []
+        for name in self.files or []:
+            p = os.path.join(self.live, name)
+            if os.path.isfile(p) and not os.path.islink(p):
+                with open(p, "rb") as f:
+                    self.raw[name] = f.read()
+            else:
+                self.dirs.append(name)
+
+    def json(self, name):
+        return _strict_json(self.raw[name])
+
+
+class Classifier:
+    """The authoritative classifier: S01-S04 and L01-L20 (L11 in analysis)."""
+
+    def __init__(self, archive, proto, proto_sha, sched, contexts=None, allow_synthetic=False):
+        self.a, self.proto, self.proto_sha, self.sched = archive, proto, proto_sha, sched
+        self.contexts, self.allow_synthetic = contexts or {}, allow_synthetic
+        self.spec = LS.load()
+        self.table = LS.transition_table(self.spec)
+        self.violations = []
+        self.facts = {}
+        self.derived = None
+        self.doc = None
+        self.by_draw, self.unresolved, self.dispatched = {}, [], None
+
+    # -- entry --------------------------------------------------------------------
+
+    def run(self):
+        try:
+            self._load()
+        except Invalid as x:
+            return self._result(x)
+        for group in (self._identity, self._journal, self._ledger, self._calls, self._aborted, self._health,
+                      self._stop, self._cleanup, self._interrupts, self._counters, self._terminal, self._seal,
+                      self._timestamps):
+            try:
+                group()
+            except Invalid as x:
+                self.violations.append({"invariant": x.invariant, "message": x.message})
+            except ExperimentError as x:
+                self.violations.append({"invariant": "L06", "message": f"{group.__name__[1:]}: {x}"})
+            except (KeyError, TypeError, ValueError, AttributeError, IndexError) as x:
+                self.violations.append({"invariant": "L12", "message": f"malformed evidence in {group.__name__[1:]}: "
+                                                                       f"{type(x).__name__}: {x}"})
+        return self._result()
+
+    def _result(self, fatal=None):
+        if fatal is not None:
+            self.violations.append({"invariant": fatal.invariant, "message": fatal.message})
+        doc = self.doc
+        seal = getattr(self, "seal", None)
+        return {"state": "INVALID" if self.violations or self.derived is None else self.derived,
+                "sealed": isinstance(seal, dict),
+                "sealClaims": seal.get("terminalState") if isinstance(seal, dict) else None,
+                "manifestState": doc.get("state") if isinstance(doc, dict) else None,
+                "violations": self.violations, "derived": self.facts, "preserved": self._preserved()}
+
+    def _preserved(self):
+        """What durable evidence the archive keeps, whatever its classification
+        (completed rows and dispatched calls are never silently lost)."""
+        rows = getattr(self, "rows", None)
+        recs = getattr(self, "records", None)
+        out = {"ledgerRows": len(rows) if isinstance(rows, list) else None,
+               "completedRows": sum(isinstance(r, dict) and r.get("status") == "completed" for r in rows)
+               if isinstance(rows, list) else None}
+        if isinstance(recs, list):
+            d = sum(isinstance(r, dict) and r.get("record") == "dispatch" for r in recs)
+            o = sum(isinstance(r, dict) and r.get("record") in ("returned", "raised") for r in recs)
+            out.update(dispatchedCalls=d, unresolvedCalls=d - o)
+        return out
+
+    # -- files (L16, S01) -----------------------------------------------------------------
+
+    def _load(self):
+        a = self.a
+        _need(a.files is not None, "L16", "no archive directory")
+        _need(not a.dirs, "L16", "unexpected entries that are not regular files: " + ", ".join(a.dirs))
+        stray = set(a.files) - set(self.spec["allowedArchiveFiles"])
+        _need("run.json" in a.raw, "L16", "no run manifest")
+        _need("draws.json" in a.raw, "L16", "no authoritative ledger")
+        _need(CALLS in a.raw, "L16", "no call journal")
+        try:
+            self.doc = a.json("run.json")
+            self.rows = a.json("draws.json")
+            self.records = self._journal_records(a.raw[CALLS])
+            side = {n: a.json(n) for n in SIDE if n in a.raw}
+            self.seal = a.json(SEAL) if SEAL in a.raw else None
+        except (ValueError, UnicodeDecodeError) as x:
+            raise Invalid("L16", f"unreadable archive file: {x}")
+        for n, v in side.items():
+            _need(v is not None, "L16", f"{n} is present but JSON null; absence is required to be absence")
+            _need(isinstance(v, dict), "L16", f"{n} is not a JSON object")
+        self.aborted = side.get("aborted-draw.json")
+        self.event_file = side.get("failure-event.json")
+        self.before = side.get("server-before.json")
+        _need(not stray, "L16", "unexpected archive files: " + ", ".join(sorted(stray)))
+        _need(isinstance(self.doc, dict) and set(self.doc) == RUN_KEYS, "L15", "run manifest fields")
+        _need(isinstance(self.rows, list) and all(isinstance(r, dict) for r in self.rows), "L01", "ledger is not a list of rows")
+        self.journal = self.doc["journal"]
+        _need(isinstance(self.journal, list) and self.journal and all(isinstance(e, dict) for e in self.journal),
+              "L14", "journal missing")
+        if SEAL not in a.raw:
+            self.violations.append({"invariant": "S01", "message": "no completion seal: the run did not reach its "
+                                                                   "commit point; it is not COMPLETE or PARTIAL"})
+        else:
+            _need(isinstance(self.seal, dict), "L16", "SEAL.json is present but not a JSON object (JSON null is not absence)")
+
+    def _journal_records(self, raw):
+        _need(raw == b"" or raw.endswith(b"\n"), "L04", "the call journal ends in a torn record")
+        recs = []
+        for line in raw.split(b"\n")[:-1] if raw else []:
+            r = _strict_json(line)
+            _need(isinstance(r, dict), "L04", "a call-journal record is not an object")
+            again = (json.dumps(r, sort_keys=True, separators=(",", ":"), ensure_ascii=True)).encode("ascii")
+            _need(again == line, "L04", "a call-journal record is not in canonical form")
+            recs.append(r)
+        return recs
+
+    # -- identity (L15, L18) ------------------------------------------------------------
+
+    def _identity(self):
+        d = self.doc
+        _need(d["schema"] == RUN_SCHEMA and d["driver"] == DRIVER, "L15", "run schema or driver")
+        _need(d["lifecycle"] == {"id": LS.LIFECYCLE_ID, "sha256": LS.spec_sha256()}, "L15", "lifecycle identity")
+        _need(d["protocol"] == self.proto["id"] and d["protocolSha256"] == self.proto_sha, "L15", "protocol identity")
+        _need(d["scheduleSha256"] == sha256(canon(self.sched)), "L15", "schedule identity")
+        prov = d["provenance"]
+        _need(isinstance(prov, dict) and set(prov) == {"timestamps", "runId"}
+              and prov["timestamps"] in ("SYSTEM_UTC", "SYNTHETIC_FIXTURE") and prov["runId"] in ("UUID4", "SYNTHETIC_FIXTURE"),
+              "L15", "provenance")
+        _need("SYNTHETIC_FIXTURE" not in prov.values() or self.allow_synthetic, "L13",
+              "synthetic provenance outside an explicit fixture check")
+        try:
+            u = uuid.UUID(d["runId"])
+        except (ValueError, TypeError, AttributeError):
+            raise Invalid("L15", "run identity is not a UUID")
+        _need(str(u) == d["runId"] and (prov["runId"] != "UUID4" or u.version == 4), "L15", "run identity form")
+        _need(isinstance(d["authorization"], str) and d["authorization"].strip(), "L15", "authorization")
+        _need(isinstance(d["serverObserved"], bool), "L15", "serverObserved")
+        _need(d["resume"] == "never", "L18", "the manifest permits resumption")
+        _need(d["verificationStatus"] == "UNVERIFIED", "L15", "the recording claims verification")
+
+    # -- journal and transition predicates (L14, L17, L19) --------------------------------
+
+    def _needs_check(self, i):
+        if not self.doc["serverObserved"]:
+            return False
+        s = self.sched
+        return i == 0 or (s[i]["model"], s[i]["draw"]) != (s[i - 1]["model"], s[i - 1]["draw"])
+
+    def _journal(self):
+        states, events = self.spec["states"], self.spec["events"]
+        sealed_only = set(self.spec["sealOnlyEvents"])
+        prev = None
+        for k, e in enumerate(self.journal):
+            ev = e.get("event")
+            _need(ev in events and ev not in sealed_only, "L14", f"unknown or seal-only event {ev!r} in the journal")
+            _need(set(e) == {"n", "event", "from", "to", "timestamp"} | DETAIL[ev], "L14", f"journal entry {k + 1} fields")
+            _need(e["n"] == k + 1, "L14", "journal order")
+            _need(e["from"] is None or e["from"] in states, "L14", f"unknown state {e['from']!r}")
+            _need(e["from"] == prev, "L14", f"journal does not chain at entry {k + 1}")
+            _need((e["from"], ev) in self.table and self.table[(e["from"], ev)] == e["to"], "L14",
+                  f"illegal transition {e['from']} --{ev}--> {e['to']}")
+            prev = e["to"]
+        _need(self.journal[0]["event"] == "create", "L14", "the journal does not start with create")
+        _need(prev == "FINALIZING", "L14", f"the manifest journal ends in {prev}, not FINALIZING (unfinalized run)")
+        _need(self.doc["state"] == prev, "L14", "claimed state disagrees with the journal")
+        self.events = [e["event"] for e in self.journal]
+        stops = [k for k, ev in enumerate(self.events) if ev == "stop"]
+        _need(len(stops) <= 1, "L19", "more than one stop")
+        self.stop_at = stops[0] if stops else None
+        # Transition predicates (contract transitionPredicates), recomputed from the journal and ledger.
+        committed, served, rows = 0, set(), self.rows
+        observed = self.doc["serverObserved"]
+        for k, e in enumerate(self.journal):
+            ev, before = e["event"], (self.journal[k - 1]["event"] if k else None)
+            if ev == "begin_health_check":
+                _need(observed and committed < len(self.sched) and self._needs_check(committed)
+                      and committed not in served, "L14",
+                      "a round health check where the schedule requires none, or a second visit for the same draw")
+                served.add(committed)
+            elif ev == "begin_draw":
+                _need(committed < len(self.sched) and e["draw"] == self.sched[committed]["seq"], "L17",
+                      f"begin_draw {e['draw']!r} is not the next scheduled draw")
+                want = "health_passed" if self._needs_check(committed) else ("preflight_passed" if committed == 0 else "continue")
+                _need(before == want, "L14", f"draw {e['draw']} started after {before}, the schedule requires {want}")
+                _need(not self._needs_check(committed) or committed in served, "L14", "draw started without its health visit")
+            elif ev == "commit_draw":
+                _need(before == "begin_draw" and self.journal[k - 1]["draw"] == e["draw"], "L17",
+                      "commit_draw does not follow its own begin_draw")
+                committed += 1
+                _need(committed <= len(rows), "L17", "journal commits beyond the ledger")
+                nxt = self.journal[k + 1]["event"] if k + 1 < len(self.journal) else None
+                _need(e["reconciled"] is False or nxt == "stop", "L17", "a reconciled commit not followed by its stop")
+            elif ev in ("continue", "schedule_done"):
+                _need(before == "commit_draw" and committed >= 1 and rows[committed - 1]["status"] == "completed", "L14",
+                      f"{ev} after a row that did not complete")
+                _need((committed == len(self.sched)) == (ev == "schedule_done"), "L14",
+                      "schedule_done before the last scheduled draw" if ev == "schedule_done" else
+                      "continue after the last scheduled draw")
+            elif ev == "preflight_passed":
+                _need(before == "begin_preflight", "L14", "preflight_passed without its preflight")
+        self.committed_in_journal = committed
+        _need(committed == len(rows), "L17", "journal commits disagree with the ledger")
+
+    # -- ledger (L01, L02, L17) ----------------------------------------------------------
+
+    def _ledger(self):
+        rows, sched = self.rows, self.sched
+        _need(len(rows) <= len(sched), "L01", "more rows than scheduled")
+        seen = set()
+        for k, r in enumerate(rows):
+            _need(isinstance(r, dict) and set(r) == DRAW_KEYS, "L02", f"row {k + 1} fields")
+            _need(r["schema"] == H.DRAW_SCHEMA and {f: r[f] for f in IDENTITY} == sched[k], "L01",
+                  f"row {k + 1} is not the schedule's draw {sched[k]['seq']}")
+            _need(r["seq"] not in seen, "L01", "duplicate row")
+            seen.add(r["seq"])
+            _need(r["status"] in ("completed", "interrupted"), "L01", f"row status {r['status']!r}")
+            _need(r["status"] == "completed" or k == len(rows) - 1, "L01", "an unfinished row before the last")
+            _need(r["engineInitialization"] == "READY" and r["failureStage"] is None and r["verificationStatus"] == "RECORDED",
+                  "L02", f"row {r['seq']} initialization or verification status")
+            _need(isinstance(r["calls"], list) and r["modelCallsCompleted"] == len(r["calls"]), "L04", "row call count")
+            _need(isinstance(r["initialDigests"], dict) and isinstance(r["digestsAfter"], dict)
+                  and isinstance(r["engine"], list) and r["engine"], "L02", f"row {r['seq']} engine evidence")
+            c = self.contexts.get(r["context"])
+            if c is not None:
+                _need(r["initialDigests"] == c["digests"], "L02", f"row {r['seq']} initial digests")
+            if r["status"] == "completed":
+                rep = r["submittedRepresentation"]
+                _need(r["halt"] is None and isinstance(r["record"], dict) and isinstance(r["batches"], list)
+                      and isinstance(rep, str) and sha256(rep) == r["submittedRepresentationSha256"]
+                      and json.loads(rep) == r["batches"], "L02", f"completed row {r['seq']} evidence")
+                _need(r["process"] == {f: r["record"][f] for f in PROCESS_KEYS}, "L02",
+                      f"completed row {r['seq']} process evidence disagrees with its record")
+            else:
+                h = r["halt"]
+                _need(isinstance(h, dict) and set(h) == {"code", "message", "evidence"} and h["code"] in HALTS
+                      and r["batches"] is None and r["record"] is None and r["submittedRepresentation"] is None
+                      and r["submittedRepresentationSha256"] is None, "L02", f"interrupted row {r['seq']} evidence")
+                _need(r["process"] == self._derived_process(r, r["process"]), "L02",
+                      f"interrupted row {r['seq']} process evidence")
+        commits = [e for e in self.journal if e["event"] == "commit_draw"]
+        for k, e in enumerate(commits[:len(rows)]):
+            r = rows[k]
+            _need(e["draw"] == r["seq"] and e["status"] == r["status"] and e["rowSha256"] == sha256(canon(r))
+                  and e["modelCalls"] == len(r["calls"]) and isinstance(e["reconciled"], bool), "L17",
+                  f"commit {k + 1} does not bind its ledger row")
+        begins = [e for e in self.journal if e["event"] == "begin_draw"]
+        from_active = self.stop_at is not None and self.journal[self.stop_at]["from"] == "DRAW_ACTIVE"
+        _need(len(begins) == len(rows) + int(from_active), "L17", "begun draws disagree with committed rows")
+        self.completed = sum(r["status"] == "completed" for r in rows)
+        self.interrupted = rows[-1]["seq"] if rows and rows[-1]["status"] == "interrupted" else None
+
+    def _derived_process(self, r, recorded):
+        """run_draw's process evidence for a draw without a record, recomputed
+        from the artifact's own engine log and calls (pendingMessage, the last
+        request the model made, is checked for type only)."""
+        engine, calls = r["engine"] or [], r["calls"] or []
+        turns = [e["answer"].get("result") for e in engine if isinstance(e, dict) and e.get("op") == "alternatives.v3.turn"
+                 and isinstance(e.get("answer"), dict) and e["answer"].get("ok")]
+        turn = turns[-1] if turns else None
+        correction = any("PHASE 2 validation correction" in (call.get("request", {}).get("messages", [{}])[-1].get("content") or "")
+                         for call in calls)
+        want = {"eligibility": {"eligible": turn.get("due") if turn else None,
+                                "reason": turn.get("why") if turn else "UNVERIFIED before comparison"},
+                "exposure": bool(turn and turn.get("message") and any(turn["message"] == m.get("content") for call in calls
+                                                                      for m in call.get("request", {}).get("messages", []))),
+                "validationFirstCorrection": correction, "correctionFailure": None if correction else False,
+                "deliberateNoAction": False, "processFailure": True, "intendedAction": None, "validatedAction": None,
+                "submittedAction": None, "executedAction": {"status": "NOT_EXECUTED"}}
+        pending = recorded.get("pendingMessage") if isinstance(recorded, dict) else None
+        _need(pending is None or isinstance(pending, str), "L06", "pending message evidence")
+        return dict(want, pendingMessage=pending)
+
+    # -- call journal (L04) ------------------------------------------------------------
+
+    def _calls(self):
+        recs = self.records
+        self.dispatches, self.by_draw, self.unresolved = [], collections.defaultdict(list), []
+        begun = [e["draw"] for e in self.journal if e["event"] == "begin_draw"]
+        k, i, last_draw_index = 0, 0, -1
+        while i < len(recs):
+            d = recs[i]
+            _need(d.get("record") == "dispatch" and set(d) == RECORD_FIELDS["dispatch"] and d["schema"] == CALLS_SCHEMA,
+                  "L04", f"call-journal record {i + 1} is not a dispatch intent")
+            k += 1
+            _need(d["k"] == k and _nat(d["n"]) and d["n"] >= 1, "L04", f"dispatch {k} numbering")
+            _need(d["draw"] in begun, "L04", f"dispatch {k} names draw {d['draw']!r}, which was never begun")
+            di = begun.index(d["draw"])
+            _need(di >= last_draw_index, "L04", f"dispatch {k} returns to an earlier draw")
+            prior = self.by_draw[d["draw"]]
+            _need(d["n"] == len(prior) + 1, "L04", f"dispatch {k} is not call {len(prior) + 1} of draw {d['draw']}")
+            last_draw_index = di
+            o = recs[i + 1] if i + 1 < len(recs) else None
+            if o is None or o.get("record") == "dispatch":
+                self.unresolved.append(d)
+                _need(o is None, "L04", f"dispatch {k} has no outcome before the next dispatch")
+                prior.append({"dispatch": d, "outcome": None})
+                i += 1
+                continue
+            kind = o.get("record")
+            _need(kind in ("returned", "raised") and set(o) == RECORD_FIELDS[kind] and o["schema"] == CALLS_SCHEMA
+                  and o["k"] == k and o["draw"] == d["draw"] and o["n"] == d["n"], "L04",
+                  f"the outcome of dispatch {k} does not bind it")
+            _need(isinstance(o["requestSha256"], str) and len(o["requestSha256"]) == 64, "L04", "request hash")
+            if kind == "returned":
+                _need((o["body"] is None or isinstance(o["body"], str)) and o["responseSha256"] == sha256(o["body"] or "")
+                      and (o["status"] is None or _nat(o["status"])) and (o["error"] is None or isinstance(o["error"], str)),
+                      "L04", f"returned outcome {k} evidence")
+            else:
+                _need(_failure_shape(o["exception"]), "L04", f"raised outcome {k} evidence")
+            prior.append({"dispatch": d, "outcome": o})
+            self.dispatches.append(d)
+            i += 2
+        self.dispatched = k
+        if self.seal is not None:
+            _need(not self.unresolved, "L04", f"{len(self.unresolved)} dispatched call(s) without an outcome in a sealed archive")
+        # Each draw's resolved entries equal its recorded calls one to one.
+        observed = {r["seq"]: r for r in self.rows}
+        if self.aborted is not None:
+            observed[self.aborted.get("seq")] = self.aborted
+        for draw, entries in self.by_draw.items():
+            r = observed.get(draw)
+            _need(r is not None, "L04", f"draw {draw} dispatched {len(entries)} call(s) that no draw evidence keeps")
+            if r is self.aborted and self.aborted.get("failureStage") == "draw_unrecorded":
+                continue  # the journal is the only call evidence; checked in _aborted
+            calls = r.get("calls")
+            _need(isinstance(calls, list) and len(calls) == len(entries), "L04",
+                  f"draw {draw}: {len(entries)} dispatched call(s) but {len(calls) if isinstance(calls, list) else calls!r} recorded")
+            for e, call in zip(entries, calls):
+                o = e["outcome"]
+                _need(o is not None, "L04", f"draw {draw}: a recorded call whose dispatch is unresolved")
+                _need(call.get("n") == o["n"] and call.get("requestSha256") == o["requestSha256"], "L04",
+                      f"draw {draw} call {o['n']}: request disagrees with the call journal")
+                if o["record"] == "returned":
+                    _need(call.get("status") == o["status"] and call.get("error") == o["error"]
+                          and call.get("body") == o["body"] and call.get("responseSha256") == o["responseSha256"], "L04",
+                          f"draw {draw} call {o['n']}: response disagrees with the call journal")
+                else:
+                    x = o["exception"]
+                    _need(call.get("status") is None and call.get("body") is None
+                          and call.get("error") == f"client: {x['type']}: {x['message']}"
+                          and call.get("responseSha256") == sha256(""), "L04",
+                          f"draw {draw} call {o['n']}: a raised dispatch recorded differently")
+        for seq, r in observed.items():
+            calls = r.get("calls")
+            if isinstance(calls, list) and calls:
+                _need(seq in self.by_draw, "L04", f"draw {seq} records calls the call journal never dispatched")
+
+    # -- aborted draw (L05, L06) -------------------------------------------------------------
+
+    def _aborted(self):
+        from_active = self.stop_at is not None and self.journal[self.stop_at]["from"] == "DRAW_ACTIVE"
+        ab = self.aborted
+        _need((ab is not None) == from_active, "L05", "aborted artifact present iff the stop is from DRAW_ACTIVE")
+        if ab is None:
+            return
+        stages = self.spec["abortedDraw"]["stages"]
+        stage = stages.get(ab.get("failureStage"))
+        _need(stage is not None, "L06", f"unknown aborted failure stage {ab.get('failureStage')!r}")
+        keys = DRAW_KEYS | {"failure", "stopReason"}
+        _need(set(ab) - {"cleanupFailure"} == keys, "L05", "aborted artifact fields")
+        _need(ab["schema"] == H.DRAW_SCHEMA and ab["status"] == "aborted" and ab["verificationStatus"] == "UNVERIFIED",
+              "L05", "aborted artifact status")
+        _need(len(self.rows) < len(self.sched) and {f: ab[f] for f in IDENTITY} == self.sched[len(self.rows)], "L05",
+              "aborted draw is not the next scheduled draw")
+        _need(ab["engineInitialization"] in stage["engineInitialization"], "L06",
+              f"failure stage {ab['failureStage']} contradicts initialization {ab['engineInitialization']}")
+        _need(_failure_shape(ab["failure"]), "L06", "aborted failure evidence")
+        stop = self.doc["stop"] if isinstance(self.doc["stop"], dict) else {}
+        _need(ab["stopReason"] == stop.get("code"), "L06", "aborted stopReason disagrees with the stop")
+        operator = ab["failure"]["type"] == "OperatorStop"
+        _need(operator == (stop.get("code") == "operator"), "L06", "OperatorStop failure iff an operator stop")
+        _need(not operator or ab["failureStage"] == "workflow", "L06", "an operator stop outside the workflow stage")
+        digests = (self.contexts.get(ab["context"]) or {}).get("digests")
+        for field, rule in stage["fields"].items():
+            self._field(ab, field, rule, digests)
+        if stage["journalCalls"] == "none":
+            _need(not self.by_draw.get(ab["seq"]), "L04", f"{ab['failureStage']} failure with dispatched calls")
+        if ab["failureStage"] in ("workflow", "final_digests", "engine_close"):
+            e0 = ab["engine"][0]
+            _need(isinstance(e0, dict) and e0.get("op") == "digests" and isinstance(e0.get("answer"), dict)
+                  and e0["answer"].get("ok") is True, "L06", "a READY draw without its initial digests request")
+        if ab["failureStage"] == "final_digests":
+            _need(isinstance(ab["engine"][-1], dict) and ab["engine"][-1].get("op") == "digests", "L06",
+                  "a final-digests failure whose last engine request is not the digests request")
+
+    def _field(self, ab, field, rule, digests):
+        present = field in ab
+        v = ab.get(field)
+        record = ab.get("record")
+        msg = f"{ab['failureStage']}: {field} must be {rule}"
+        if rule == "forbidden":
+            _need(not present, "L06", msg)
+            return
+        if rule == "optionalFailure":
+            _need(not present or _failure_shape(v), "L08", msg)
+            return
+        _need(present, "L06", msg)
+        if rule == "null":
+            ok = v is None
+        elif rule == 0:
+            ok = v == 0 and not isinstance(v, bool)
+        elif rule == "empty":
+            ok = v == []
+        elif rule == "nonEmpty":
+            ok = isinstance(v, list) and len(v) > 0
+        elif rule == "object":
+            ok = isinstance(v, dict)
+        elif rule == "context":
+            ok = isinstance(v, dict) and (digests is None or v == digests)
+        elif rule == "recordedCalls":
+            ok = isinstance(v, list)
+        elif rule == "len(calls)":
+            ok = isinstance(ab.get("calls"), list) and v == len(ab["calls"])
+        elif rule == "one digests request":
+            ok = isinstance(v, list) and len(v) == 1 and isinstance(v[0], dict) and v[0].get("op") == "digests"
+        elif rule == "noModelProcess":
+            ok = v == self.spec["abortedDraw"]["noModelProcess"]
+        elif rule == "derivedProcess":
+            ok = v == self._derived_process(ab, v)
+        elif rule == "null, or a halt (then record null)":
+            ok = v is None or (isinstance(v, dict) and set(v) == {"code", "message", "evidence"} and v["code"] in HALTS
+                               and record is None)
+        elif rule == "null, or an object (then halt null)":
+            ok = v is None or (isinstance(v, dict) and ab.get("halt") is None)
+        elif rule == "string iff record":
+            ok = isinstance(v, str) if record is not None else v is None
+        elif rule == "sha256 iff record":
+            ok = (isinstance(ab.get("submittedRepresentation"), str) and v == sha256(ab["submittedRepresentation"])) \
+                if record is not None else v is None
+        elif rule == "list iff record":
+            ok = (isinstance(v, list) and json.loads(ab["submittedRepresentation"]) == v) if record is not None else v is None
+        elif rule == "recordProcess iff record, else derivedProcess":
+            ok = v == {f: record[f] for f in PROCESS_KEYS} if isinstance(record, dict) else v == self._derived_process(ab, v)
+        else:
+            raise Invalid("L06", f"the verifier does not support the contract rule {rule!r} for {field}")
+        _need(ok, "L06", msg)
+
+    # -- health (L07) --------------------------------------------------------------------
+
+    def observation_problem(self, obs):
+        """The verifier's independent check of a kept observation."""
+        h = self.spec["health"]
+        keys = {"schema", "request", "started", "ended", "outcome", "category", "httpStatus", "exception", "body",
+                "verificationStatus"}
+        if not isinstance(obs, dict) or set(obs) != keys or obs["schema"] != HEALTH_SCHEMA or obs["request"] != h["request"]:
+            return "not a health observation"
+        if obs["verificationStatus"] != "UNVERIFIED":
+            return "health observation claims verification"
+        t0, t1 = LS.parse_timestamp(obs["started"]), LS.parse_timestamp(obs["ended"])
+        if t0 is None or t1 is None or t1 < t0:
+            return "health observation timestamps"
+        cat, body, exc, status = obs["category"], obs["body"], obs["exception"], obs["httpStatus"]
+        raw = None
+        if body is not None:
+            if not (isinstance(body, dict) and set(body) == {"bytes", "sha256", "base64"} and isinstance(body["base64"], str)):
+                return "body evidence"
+            try:
+                raw = base64.b64decode(body["base64"], validate=True)
+            except (ValueError, TypeError):
+                return "body evidence"
+            if len(raw) != body["bytes"] or hashlib.sha256(raw).hexdigest() != body["sha256"]:
+                return "body evidence"
+        if cat in h["bodyCategories"]:
+            if exc is not None or raw is None or not (_nat(status) and 200 <= status < 300):
+                return "a response category without a valid 2xx response"
+            if LS.health_body_category(raw, h["maxBodyBytes"]) != cat:
+                return "the recorded body does not classify as recorded"
+            if obs["outcome"] != h["bodyCategories"][cat]:
+                return "outcome disagrees with category"
+            return None
+        families = h["readFailureFamilies"]
+        if cat not in families:
+            return "unknown health category"
+        if obs["outcome"] != "READ_FAILED" or not (isinstance(exc, dict) and set(exc) == {"type", "reasonType", "reasonKind"}):
+            return "read failure without exception evidence"
+        t, rt, rk = exc["type"], exc["reasonType"], exc["reasonKind"]
+        if cat == "http_status":
+            if (t, rt, rk) != ("urllib.error.HTTPError", None, None) or not _nat(status) or 200 <= status < 300:
+                return "http_status without a non-2xx HTTPError"
+            return None
+        if status is not None or body is not None:
+            return "a read failure with response evidence"
+        if cat == "url_error":
+            return None if (t, rt, rk) == ("urllib.error.URLError", None, "text") else "url_error evidence"
+        fam = families[cat]
+        if t == "urllib.error.URLError":
+            if rk != "exception" or not fam["wrappable"] or rt not in fam["types"]:
+                return "a wrapped exception outside the family its category names"
+            return None
+        if rk is not None or rt is not None or t not in fam["types"]:
+            return "an exception type outside the family its category names"
+        return None
+
+    def _health(self):
+        doc, checks = self.doc, self.doc["healthChecks"]
+        _need(isinstance(checks, list), "L07", "health checks")
+        observed = doc["serverObserved"]
+        self.signature, self.visits = None, []
+        _need(observed or self.allow_synthetic, "L07", "an ordinary run must observe the server's health")
+        if not observed:
+            _need(not checks and "begin_health_check" not in self.events and self.before is None, "L07",
+                  "health evidence in a run that does not observe the server")
+            return
+        for k, c in enumerate(checks):
+            _need(isinstance(c, dict) and set(c) == {"index", "state", "beforeDraw", "serverState", "rejected"}
+                  and c["index"] == k and c["state"] in ("PREFLIGHT", "HEALTH_CHECK"), "L07", f"health check {k} fields")
+            _need(c["serverState"] is None or c["rejected"] is None, "L07", "a health check both kept and rejected")
+            if c["serverState"] is not None:
+                _need(isinstance(c["serverState"], dict), "L07", "server state")
+                problem = self.observation_problem(c["serverState"].get("health"))
+                _need(problem is None, "L07", f"health check {k}: {problem}")
+            if c["rejected"] is not None:
+                _need(isinstance(c["rejected"], dict) and set(c["rejected"]) == {"returned"}, "L07", "rejected evidence")
+                ret = c["rejected"]["returned"]
+                obs = ret.get("health") if isinstance(ret, dict) else None
+                _need(self.observation_problem(obs) is not None, "L07", "a valid observation was rejected")
+        stop = doc["stop"] if isinstance(doc["stop"], dict) else None
+        committed, used = 0, 0
+        for k, e in enumerate(self.journal):
+            ev = e["event"]
+            if ev == "commit_draw":
+                committed += 1
+            if ev not in ("begin_preflight", "begin_health_check"):
+                continue
+            nxt = self.journal[k + 1] if k + 1 < len(self.journal) else None
+            _need(nxt is not None and nxt["event"] in ("preflight_passed", "health_passed", "stop"), "L07",
+                  "health visit without an admissible exit")
+            state = "PREFLIGHT" if ev == "begin_preflight" else "HEALTH_CHECK"
+            if state == "HEALTH_CHECK":
+                _need(e["healthCheck"] == used, "L07", "begin_health_check names the wrong check")
+            if nxt["event"] in ("preflight_passed", "health_passed"):
+                consumes = True
+            else:  # a stop from this visit consumes a check iff it names one
+                consumes = stop is not None and stop.get("healthCheck") is not None
+            check = None
+            if consumes:
+                _need(used < len(checks) and checks[used]["state"] == state, "L07",
+                      "a health visit without the check it requires")
+                check = checks[used]
+                _need(check["beforeDraw"] == (None if state == "PREFLIGHT" else self.sched[committed]["seq"]), "L07",
+                      "health check names the wrong draw")
+                used += 1
+            self.visits.append({"state": state, "check": check, "enter": k, "exit": k + 1, "draw": committed})
+            if nxt["event"] in ("preflight_passed", "health_passed"):
+                _need(check["serverState"] is not None and check["serverState"]["health"]["outcome"] == "HEALTHY", "L07",
+                      "a passing health transition without a HEALTHY observation")
+                if nxt["event"] == "health_passed":
+                    _need(nxt["healthCheck"] == check["index"], "L07", "health_passed names another check")
+                    _need(X.server_signature(check["serverState"]) == self.signature, "L07",
+                          "health passed although the server signature changed")
+            if state == "PREFLIGHT" and check is not None and check["serverState"] is not None:
+                self.signature = X.server_signature(check["serverState"])
+        _need(used == len(checks), "L07", "health checks outside any health visit")
+        if observed and "preflight_passed" in self.events:
+            _need(self.visits and self.visits[0]["check"] is not None, "L07", "preflight passed without its health check")
+        first = checks[0] if checks and checks[0]["state"] == "PREFLIGHT" else None
+        if first is not None and first["serverState"] is not None:
+            _need(self.before == first["serverState"], "L07", "server-before.json disagrees with the initial health check")
+        else:
+            _need(self.before is None, "L07", "server-before.json without an initial kept observation")
+
+    # -- stop and failure event (L06, L08, L19) -----------------------------------------------
+
+    def _calls_list(self):
+        out = []
+        for r in self.rows + ([self.aborted] if self.aborted else []):
+            if isinstance(r.get("calls"), list):
+                out.extend(r["calls"])
+        return out
+
+    def _streak(self, calls):
+        n = 0
+        for c in calls:
+            n = n + 1 if c.get("status") is None and c.get("error") else 0
+        return n
+
+    def _stop(self):
+        doc, stop = self.doc, self.doc["stop"]
+        cleanup_created = self.stop_at is None and "cleanup_failed" in self.events and stop is not None
+        self.cleanup_created = cleanup_created
+        if self.stop_at is None and not cleanup_created:
+            _need(stop is None and doc["failureEvent"] is None and self.event_file is None, "L19",
+                  "stop evidence without a stop transition")
+            return
+        _need(isinstance(stop, dict) and set(stop) == STOP_KEYS and isinstance(stop["message"], str), "L19", "stop fields")
+        code = stop["code"]
+        rule = self.spec["stopCodes"].get(code)
+        _need(rule is not None, "L06", f"unknown stop code {code!r}")
+        if cleanup_created:
+            entry_ts = self.journal[self.events.index("cleanup_failed")]["timestamp"]
+            _need(stop["state"] == "CLEANUP" and code == "driver", "L08", "cleanup-created stop outside CLEANUP or not driver")
+        else:
+            e = self.journal[self.stop_at]
+            entry_ts = e["timestamp"]
+            _need(stop["code"] == e["code"] and stop["state"] == e["from"], "L19", "stop disagrees with the journal")
+            _need(stop["state"] != "CLEANUP", "L06", "a stop transition from CLEANUP")
+        _need(stop["state"] in rule["states"], "L06", f"stop {code} cannot come from {stop['state']}")
+        visit = next((v for v in reversed(getattr(self, "visits", [])) if v["exit"] == self.stop_at), None)
+        check = visit["check"] if visit else None
+        req = self.spec["health"]["request"]
+        calls = self._calls_list()
+        nulls = lambda *fields: all(stop[f] is None for f in fields)  # noqa: E731
+        if code == "health":
+            _need(check is not None and check["serverState"] is not None
+                  and check["serverState"]["health"]["outcome"] != "HEALTHY", "L07", "health stop without a failed observation")
+            _need(nulls("failure", "evidence", "beforeSignature", "safePoint") and stop["request"] == req
+                  and stop["healthCheck"] == check["index"], "L06", "health stop evidence")
+        elif code == "server_change":
+            _need(check is not None and check["serverState"] is not None
+                  and check["serverState"]["health"]["outcome"] == "HEALTHY"
+                  and X.server_signature(check["serverState"]) != self.signature
+                  and stop["beforeSignature"] == self.signature, "L07", "server-change stop evidence")
+            _need(nulls("failure", "evidence", "request", "safePoint") and stop["healthCheck"] == check["index"], "L06",
+                  "server-change stop fields")
+        elif code in HALTS:
+            _need(nulls("failure", "request", "healthCheck", "beforeSignature", "safePoint"), "L06", "halt stop fields")
+            H.check_halt({"code": code, "evidence": stop["evidence"]}, self.proto)
+            ev = stop["evidence"]
+            if stop["state"] == "DRAW_RECORDED":
+                _need(self.interrupted is not None and {k: stop[k] for k in ("code", "message", "evidence")}
+                      == self.rows[-1]["halt"], "L06", "halt differs from the interrupted row")
+                _need(ev["drawCalls"] == len(self.rows[-1]["calls"]), "L04", "halt draw call evidence")
+            else:
+                _need(ev["stage"] == "draw_start" and ev["drawCalls"] == 0, "L06", "draw-guard halt evidence")
+            _need(ev["runCalls"] == self.dispatched and ev["runCalls"] == len(calls)
+                  and ev["consecutiveTransportFailures"] == self._streak(calls), "L04",
+                  "halt call evidence disagrees with the call journal")
+        elif code == "operator":
+            sp = stop["safePoint"]
+            point = self.spec["safePoints"]["points"].get(sp)
+            _need(point is not None and point["kind"] == "STOP" and stop["state"] in point["states"], "L06",
+                  f"operator stop at {sp!r} is not a STOP safe point of {stop['state']}")
+            _need(nulls("failure", "evidence", "request", "beforeSignature"), "L06", "operator stop fields")
+            if sp == "after_health_check":
+                _need(check is not None and check["serverState"] is not None
+                      and check["serverState"]["health"]["outcome"] == "HEALTHY"
+                      and stop["healthCheck"] == check["index"], "L07",
+                      "an operator stop after a health check needs that check, kept and HEALTHY")
+                if stop["state"] == "HEALTH_CHECK":
+                    _need(X.server_signature(check["serverState"]) == self.signature, "L07",
+                          "an operator stop after a changed server signature (server_change is primary)")
+            else:
+                _need(stop["healthCheck"] is None and check is None, "L06",
+                      f"an operator stop at {sp} with a health check of the visit")
+            if sp == "before_health_check" and stop["state"] == "READY":
+                _need(self._needs_check(len(self.rows)), "L06",
+                      "an operator stop before a round health check the schedule does not require")
+            if sp == "before_dispatch":
+                _need(self.aborted is not None and self.aborted["failure"]["type"] == "OperatorStop"
+                      and self.aborted["failureStage"] == "workflow", "L06",
+                      "an operator stop before dispatch needs the aborted workflow artifact")
+            if sp == "after_draw_persisted":
+                _need(self.rows and self.rows[-1]["status"] == "completed", "L06",
+                      "an operator stop after a draw that did not complete")
+        else:
+            f = stop["failure"]
+            _need(_failure_shape(f) and f["type"] != "OperatorStop", "L06", "driver stop failure evidence")
+            _need(nulls("evidence", "beforeSignature", "safePoint"), "L06", "driver stop fields")
+            attempted = check is not None and check["serverState"] is None and check["rejected"] is None
+            _need(stop["request"] == (req if attempted else None), "L07", "attempted health request disagrees")
+            _need(stop["healthCheck"] == (check["index"] if check is not None else None), "L07",
+                  "stop names the wrong health check")
+            if stop["state"] == "DRAW_ACTIVE":
+                _need(self.aborted is not None and f == self.aborted["failure"], "L06",
+                      "primary draw failure disagrees with the aborted artifact")
+            if stop["state"] == "DRAW_RECORDED":
+                _need(self.rows and self.rows[-1]["status"] == "completed", "L06",
+                      "an exception stop after an interrupted row (the halt is the stop)")
+            if cleanup_created:
+                _need(f == doc["cleanup"]["failure"] and stop["message"] == f"{f['type']}: {f['message']}"
+                      and stop["request"] is None and stop["healthCheck"] is None, "L08",
+                      "cleanup-created stop disagrees with the cleanup failure")
+        if check is not None and check["rejected"] is not None:
+            _need(code == "driver", "L07", "a rejected observation must stop the run as a driver failure")
+        if self.interrupted is not None:
+            _need(code in HALTS and stop["state"] == "DRAW_RECORDED", "L06", "an interrupted row needs its halt as the stop")
+        nxt = ({k: self.aborted[k] for k in IDENTITY} if self.aborted else
+               {k: self.rows[-1][k] for k in IDENTITY} if self.interrupted is not None else
+               self.sched[len(self.rows)] if len(self.rows) < len(self.sched) else None)
+        want = {"schema": FAILURE_SCHEMA, "runId": doc["runId"], "protocolSha256": doc["protocolSha256"],
+                "scheduleSha256": doc["scheduleSha256"], "state": stop["state"], "stop": stop, "nextDraw": nxt,
+                "drawsCompleted": self.completed, "modelCalls": self.dispatched, "timestamp": entry_ts,
+                "verificationStatus": "UNVERIFIED"}
+        _need(doc["failureEvent"] == want, "L19", "failure event disagrees with the derived stop")
+        _need(self.event_file == doc["failureEvent"], "L16", "failure-event.json missing or disagrees")
+
+    # -- cleanup (L08) -----------------------------------------------------------------
+
+    def _cleanup(self):
+        c = self.doc["cleanup"]
+        _need(isinstance(c, dict) and set(c) == {"status", "failure", "timestamp"} and c["status"] in ("SUCCEEDED", "FAILED"),
+              "L08", "cleanup evidence missing")
+        _need((c["status"] == "FAILED") == ("cleanup_failed" in self.events)
+              and (c["status"] == "SUCCEEDED") == ("cleanup_succeeded" in self.events), "L08", "cleanup disagrees with the journal")
+        _need((c["failure"] is None) == (c["status"] == "SUCCEEDED") and (c["failure"] is None or _failure_shape(c["failure"])),
+              "L08", "contradictory cleanup failure")
+        ev = "cleanup_failed" if c["status"] == "FAILED" else "cleanup_succeeded"
+        _need(self.events[-1] == ev and c["timestamp"] == self.journal[-1]["timestamp"], "L08",
+              "cleanup is not the journal's last transition with its timestamp")
+        if c["status"] == "FAILED" and self.stop_at is None:
+            _need(isinstance(self.doc["stop"], dict) and self.doc["stop"].get("state") == "CLEANUP", "L08",
+                  "cleanup failure without a stop")
+
+    # -- interrupts (L20) ------------------------------------------------------------------
+
+    def _interrupts(self):
+        it = self.doc["interrupts"]
+        _need(isinstance(it, dict) and set(it) == {"signal", "events"} and it["signal"] == "SIGINT"
+              and isinstance(it["events"], list), "L20", "interrupt record")
+        points = self.spec["safePoints"]["points"]
+        stop = self.doc["stop"] if isinstance(self.doc["stop"], dict) else None
+        operator = stop is not None and stop.get("code") == "operator"
+        stop_ts = self.journal[self.stop_at]["timestamp"] if self.stop_at is not None else None
+        done = "schedule_done" in self.events
+        done_ts = self.journal[self.events.index("schedule_done")]["timestamp"] if done else None
+        cleanup_created = getattr(self, "cleanup_created", False)
+        stops, prev = 0, None
+        for k, e in enumerate(it["events"]):
+            _need(isinstance(e, dict) and set(e) == {"n", "safePoint", "state", "signals", "disposition", "timestamp"}
+                  and e["n"] == k + 1 and _nat(e["signals"]) and e["signals"] >= 1, "L20", f"interrupt event {k + 1} fields")
+            t = _ts(e["timestamp"], f"interrupt event {k + 1}")
+            _need(prev is None or prev <= t, "L20", "interrupt events out of order")
+            prev = t
+            p = points.get(e["safePoint"])
+            _need(p is not None and e["state"] in p["states"], "L20", f"interrupt event {k + 1} at an undeclared point")
+            if e["disposition"] == "STOP":
+                stops += 1
+                _need(operator and p["kind"] == "STOP" and e["safePoint"] == stop["safePoint"]
+                      and e["state"] == stop["state"] and e["timestamp"] == stop_ts and k == 0, "L20",
+                      "a STOP interrupt event that is not the operator stop")
+            elif e["disposition"] == "AFTER_STOP":
+                _need(stop is not None and p["kind"] == "RECORD" and e["state"] == "CLEANUP", "L20",
+                      "an AFTER_STOP event without a prior stop, or outside CLEANUP")
+                if cleanup_created:
+                    _need(e["safePoint"] in ("after_cleanup", "before_finalization"), "L20",
+                          "an AFTER_STOP event before the cleanup failure that created the stop")
+                else:
+                    _need(t >= LS.parse_timestamp(stop_ts), "L20", "an AFTER_STOP event before its stop")
+            elif e["disposition"] == "AFTER_SCHEDULE":
+                _need(done and self.stop_at is None and p["kind"] == "RECORD" and e["state"] == "CLEANUP"
+                      and t >= LS.parse_timestamp(done_ts), "L20", "an AFTER_SCHEDULE event before schedule_done or after a stop")
+                if cleanup_created:
+                    _need(e["safePoint"] == "before_cleanup", "L20", "an AFTER_SCHEDULE event after the cleanup failure")
+            else:
+                raise Invalid("L20", f"unknown interrupt disposition {e['disposition']!r}")
+        _need(stops == (1 if operator else 0), "L20", "an operator stop needs exactly one STOP interrupt event")
+        self.interrupt_events = it["events"]
+
+    # -- counters (L03, L04) ---------------------------------------------------------------
+
+    def _counters(self):
+        observed = list(self.rows) + ([self.aborted] if self.aborted else [])
+        derived = {"drawsScheduled": len(self.sched), "drawsCompleted": self.completed, "drawInterrupted": self.interrupted,
+                   "drawAborted": self.aborted["seq"] if self.aborted else None,
+                   "drawsNotRun": len(self.sched) - self.completed - int(self.interrupted is not None) - int(self.aborted is not None),
+                   "modelCalls": self.dispatched, "healthChecks": len(self.doc["healthChecks"])}
+        self.facts["counters"] = derived
+        self.facts["unresolvedCalls"] = len(self.unresolved)
+        _need(self.doc["counters"] == derived, "L03", "counters disagree with the artifacts")
+        _need(derived["drawsNotRun"] >= 0, "L03", "draw counts are not conserved")
+        for r in observed:
+            calls = r.get("calls")
+            if not isinstance(calls, list):
+                continue
+            for n, call in enumerate(calls, 1):
+                _need(call.get("n") == n, "L04", "call order")
+                _need(call.get("responseSha256") == sha256(call.get("body") or ""), "L04", "response hash")
+                f = SB.body_fields(call.get("body"))
+                for field in ("usage", "servedModel", "finishReason"):
+                    _need(call.get(field) == (f.get(field) if f.get("parsedBody") else None), "L04", "response metadata")
+                req, body = call.get("request"), call.get("requestBody")
+                _need(isinstance(req, dict) and isinstance(body, str) and json.loads(body) == req
+                      and call.get("requestSha256") == sha256(body), "L04", "recorded request hash")
+            bound = self.proto.get("contexts", {}).get(r["context"], {}).get("callBound", self.proto["maxModelCallsPerDraw"])
+            _need(len(calls) <= min(bound, self.proto["maxModelCallsPerDraw"]), "L04", "impossible per-draw call total")
+        for draw, entries in self.by_draw.items():
+            _need(len(entries) <= self.proto["maxModelCallsPerDraw"], "L04", f"draw {draw}: impossible dispatch total")
+        _need(self.dispatched <= self.proto["maxModelCalls"], "L04", "impossible run call total")
+
+    # -- terminal state (L09, L10) ------------------------------------------------------------
+
+    def _terminal(self):
+        checks = self.doc["healthChecks"]
+        all_healthy = all(c["serverState"] is not None and c["rejected"] is None
+                          and c["serverState"]["health"]["outcome"] == "HEALTHY" for c in checks)
+        only_after_schedule = all(e["disposition"] == "AFTER_SCHEDULE" for e in getattr(self, "interrupt_events", []))
+        complete = (self.doc["stop"] is None and self.stop_at is None and self.aborted is None and self.interrupted is None
+                    and self.doc["failureEvent"] is None and self.event_file is None
+                    and self.doc["cleanup"]["status"] == "SUCCEEDED" and len(self.rows) == len(self.sched)
+                    and self.completed == len(self.sched) and all_healthy and not self.unresolved
+                    and only_after_schedule and self.events[-2:] == ["schedule_done", "cleanup_succeeded"])
+        partial = self.doc["stop"] is not None and self.events[-1] in ("cleanup_succeeded", "cleanup_failed")
+        derived = "COMPLETE" if complete else "PARTIAL" if partial else None
+        self.facts["state"] = derived
+        _need(derived is not None, "L09", "the evidence supports neither COMPLETE nor PARTIAL")
+        if self.seal is not None:
+            self.derived = derived
+
+    # -- completion seal (S02-S04) ------------------------------------------------------------
+
+    def _seal(self):
+        s = self.seal
+        if s is None:
+            return
+        spec_fields = set(self.spec["finalization"]["seal"]["fields"])
+        _need(set(s) == spec_fields, "S02", "seal fields")
+        d = self.doc
+        _need(s["schema"] == SEAL_SCHEMA and s["finalization"] == FINALIZATION
+              and s["finalization"] == self.spec["finalization"]["contract"], "S02", "seal schema or finalization contract")
+        _need(s["lifecycle"] == {"id": LS.LIFECYCLE_ID, "sha256": LS.spec_sha256()} and s["runSchema"] == RUN_SCHEMA
+              and s["driver"] == DRIVER, "S02", "seal contract identities")
+        _need(s["runId"] == d["runId"] and s["protocol"] == {"id": self.proto["id"], "sha256": self.proto_sha}
+              and s["protocol"] == {"id": d["protocol"], "sha256": d["protocolSha256"]}
+              and s["scheduleSha256"] == sha256(canon(self.sched)) == d["scheduleSha256"], "S02", "seal run identity")
+        t = s["transition"]
+        _need(isinstance(t, dict) and set(t) == {"n", "event", "from", "to", "timestamp"} and t["from"] == "FINALIZING"
+              and self.table.get(("FINALIZING", t["event"])) == t["to"] and t["to"] == s["terminalState"]
+              and t["event"] in self.spec["sealOnlyEvents"] and t["n"] == len(self.journal) + 1, "S04",
+              "seal transition")
+        end = _ts(t["timestamp"], "seal transition")
+        _need(end >= _ts(self.journal[-1]["timestamp"], "last journal entry"), "S04", "the seal precedes the journal")
+        raw = self.a.raw
+        h = lambda n: hashlib.sha256(raw[n]).hexdigest() if n in raw else None  # noqa: E731
+        _need(s["manifest"] == {"file": "run.json", "sha256": h("run.json"), "journalEntries": len(self.journal)},
+              "S03", "seal manifest hash")
+        _need(s["ledger"] == {"file": "draws.json", "sha256": h("draws.json"), "rows": len(self.rows),
+                              "completed": self.completed, "rowSha256": [sha256(canon(r)) for r in self.rows]},
+              "S03", "seal ledger hashes")
+        _need(s["calls"] == {"file": CALLS, "sha256": h(CALLS), "records": len(self.records), "dispatched": self.dispatched},
+              "S03", "seal call-journal hash")
+        _need(s["health"] == {"checks": len(d["healthChecks"]), "checkSha256": [sha256(canon(c)) for c in d["healthChecks"]],
+                              "serverBefore": h("server-before.json")}, "S03", "seal health hashes")
+        _need(isinstance(s["sideArtifacts"], dict) and set(s["sideArtifacts"]) == set(SIDE), "S03", "seal side artifacts")
+        for n in SIDE:
+            _need(s["sideArtifacts"][n] == h(n), "S03", f"seal hash for {n} (null requires absence)")
+        _need(s["counters"] == d["counters"], "S03", "seal counters")
+        _need(self.derived is None or s["terminalState"] == self.derived, "S04",
+              f"the seal claims {s['terminalState']} but the evidence supports {self.facts.get('state')}")
+        if self.derived is not None and s["terminalState"] != self.derived:
+            self.derived = None
+
+    # -- timestamps (L13) ---------------------------------------------------------------------
+
+    def _timestamps(self):
+        d = self.doc
+        start = _ts(d["started"], "run.started")
+        _need(d["started"] == self.journal[0]["timestamp"], "L13", "run.started is not the create transition")
+        times = [_ts(e["timestamp"], f"journal entry {e['n']}") for e in self.journal]
+        _need(all(a <= b for a, b in zip(times, times[1:])), "L13", "journal timestamps out of order")
+        end = times[-1]
+        if isinstance(self.seal, dict) and isinstance(self.seal.get("transition"), dict):
+            end = max(end, _ts(self.seal["transition"]["timestamp"], "seal transition"))
+        _need(start <= end, "L13", "run interval reversed")
+        for v in getattr(self, "visits", []):
+            c = v["check"]
+            if c is not None and c["serverState"] is not None:
+                obs = c["serverState"]["health"]
+                _need(times[v["enter"]] <= _ts(obs["started"], "observation start") <= _ts(obs["ended"], "observation end")
+                      <= times[v["exit"]], "L13", f"health check {c['index']} outside its visit")
+        if isinstance(d["failureEvent"], dict):
+            _ts(d["failureEvent"].get("timestamp"), "failure event")
+        if isinstance(d["cleanup"], dict) and d["cleanup"].get("timestamp") is not None:
+            _ts(d["cleanup"]["timestamp"], "cleanup")
+        for e in getattr(self, "interrupt_events", []):
+            _need(start <= _ts(e["timestamp"], "interrupt event") <= end, "L13", "interrupt event outside the run")
+        begins = [k for k, e in enumerate(self.journal) if e["event"] == "begin_draw"]
+        observed = list(self.rows) + ([self.aborted] if self.aborted else [])
+        for k, r in enumerate(observed):
+            lo, hi = times[begins[k]], times[begins[k] + 1]
+            entries = self.by_draw.get(r["seq"], [])
+            calls = r.get("calls") if isinstance(r.get("calls"), list) else [None] * len(entries)
+            prev = lo
+            for e, call in zip(entries, calls):
+                t0 = _ts(e["dispatch"]["timestamp"], f"draw {r['seq']} dispatch {e['dispatch']['n']}")
+                seq = [t0]
+                if call is not None:
+                    seq.append(_ts(call.get("sent"), f"draw {r['seq']} call {call.get('n')} sent"))
+                if e["outcome"] is not None:
+                    seq.append(_ts(e["outcome"]["timestamp"], f"draw {r['seq']} call outcome {e['outcome']['n']}"))
+                _need(all(a <= b for a, b in zip([prev] + seq, seq + [hi])), "L13",
+                      f"draw {r['seq']} call times outside the draw or out of order (dispatch <= sent <= outcome)")
+                prev = seq[-1]
+            if isinstance(r.get("calls"), list) and len(r["calls"]) > len(entries):
+                for call in r["calls"][len(entries):]:
+                    _ts(call.get("sent"), f"draw {r['seq']} call {call.get('n')} sent")
+
+
+def classify(directory, proto, proto_sha, sched, contexts=None, allow_synthetic=False):
+    """The archive's state as the evidence supports it, with every violated invariant."""
+    return Classifier(Archive(directory), proto, proto_sha, sched, contexts, allow_synthetic).run()
+
+
+# --- analysis -------------------------------------------------------------------------
+
+def verify_aborted(r, ctxs, pool, spec, stop):
+    """Model-free reconstruction of an aborted draw where its evidence allows:
+    a transport failure that raised at the last recorded call, or an operator
+    stop at before_dispatch (the workflow, given the recorded responses, asks
+    for exactly one more call there). The external cause stays UNVERIFIED."""
+    base = {"seq": r["seq"], "failureStage": r["failureStage"], "causeStatus": "UNVERIFIED"}
+    stage = spec["abortedDraw"]["stages"][r["failureStage"]]
+    calls = r["calls"] if isinstance(r["calls"], list) else None
+    boundary = stop.get("code") == "operator" and stop.get("safePoint") == "before_dispatch"
+    raised = calls and calls[-1].get("body") is None
+    if r["failureStage"] != "workflow" or calls is None or not (raised or boundary):
+        return dict(base, status="UNVERIFIED", reason=f"{r['failureStage']}: {stage['reconstruction']}; no response invented")
+
+    class Boundary(Exception):
+        pass
+    queue = list(calls)
+
+    def transport(payload):
+        if not queue:
+            raise Boundary("the workflow asked for a call beyond the recorded calls")
+        call = queue.pop(0)
+        if sha256(json.dumps(payload).encode()) != call["requestSha256"]:
+            raise ExperimentError("aborted request disagrees")
+        if call.get("body") is None:
+            raise Boundary(call.get("error"))
+        return call["status"], call["body"], call["error"]
+    c = ctxs.by_id[r["context"]]
+    try:
+        H.run_draw(r, c, ctxs.settings[r["model"]], pool, ctxs.memory(c, r["model"]), transport, None,
+                   utc=lambda: None, now=lambda: 0.0)
+    except Boundary as x:
+        engine = x.partialDraw["engine"]
+        if queue or engine != r["engine"]:
+            raise ExperimentError("aborted engine exchanges disagree")
+        what = "operator stop at the next dispatch boundary" if boundary and not raised else "recorded transport failure"
+        return dict(base, status="VERIFIED", reason=what + " reproduced; external cause unverified")
+    raise ExperimentError("aborted draw completed during reconstruction")
+
+
+def analyze(binary, run_dirs, ctxs, proto, sched, directory, proto_sha, allow_synthetic=False):
+    verdict = classify(directory, proto, proto_sha, sched, ctxs.by_id, allow_synthetic)
+    if verdict["state"] == "INVALID":
+        raise ExperimentError("INVALID archive: " + "; ".join(f"{v['invariant']} {v['message']}" for v in verdict["violations"]))
+    a = Archive(directory)
+    run_doc, rows = a.json("run.json"), a.json("draws.json")
+    aborted = a.json("aborted-draw.json") if "aborted-draw.json" in a.raw else None
+    spec = LS.load()
+    pool = ctxs.opener(binary)
+    out, ledger, aborted_verification = [], {}, None
+    try:
+        for r in rows:
+            c = ctxs.by_id[r["context"]]
+            H.replay_draw(r, c, ctxs.settings[r["model"]], pool, ctxs.memory(c, r["model"]), proto)
+            if r["status"] != "completed":
+                continue
+            x = H.classify(r)
+            ses = pool(c, r["arm"])
+            actual = H.Harness(ses).request("alternatives.v3.canonical", {"batches": r["batches"]})
+            if actual != x["submittedAction"]:
+                raise ExperimentError("submitted identity disagrees")
+            rep = r["submittedRepresentation"]
+            rep_sha = sha256(rep)
+            if rep_sha != r["submittedRepresentationSha256"] or json.loads(rep) != r["batches"]:
+                raise ExperimentError("exact submitted representation disagrees")
+            key = sha256(c["id"] + "|" + rep_sha)
+            x["submittedRepresentationSha256"], x["executionRecord"] = rep_sha, key
+            if key not in ledger:
+                e = H.execute(binary, run_dirs, c, json.loads(rep)) if r["batches"] else \
+                    {"status": "EMPTY_SUBMISSION", "batches": [], "executed": False, "partial": False}
+                ledger[key] = {"context": c["id"], "batches": r["batches"], "submittedRepresentation": rep,
+                               "submittedRepresentationSha256": rep_sha, "draws": [], "execution": e}
+            ledger[key]["draws"].append({k: r[k] for k in ("seq", "context", "model", "arm", "draw")})
+            x["executedAction"] = ledger[key]["execution"]
+            x.update(seq=r["seq"], context=r["context"], model=r["model"], arm=r["arm"], draw=r["draw"])
+            out.append(x)
+        if aborted is not None:
+            aborted_verification = verify_aborted(aborted, ctxs, pool, spec, run_doc["stop"])
+    finally:
+        pool.close()
+    cells = collections.defaultdict(list)
+    for x in out:
+        cells[(x["context"], x["model"], x["arm"])].append(x)
+    table = []
+    for (cid, mod, arm), xs in sorted(cells.items()):
+        exposed = [x for x in xs if x["exposure"]]
+        table.append({"context": cid, "model": mod, "arm": arm, "observed": len(xs), "exposed": len(exposed),
+                      "primarySubmitted": dict(sorted(collections.Counter(x["batchesSha256"] for x in exposed).items())),
+                      "secondaryRoutes": dict(sorted(collections.Counter(x["secondaryRoute"] for x in exposed).items(),
+                                                     key=lambda p: str(p[0]))),
+                      "results": dict(sorted(collections.Counter(x["result"] for x in xs).items())),
+                      **{k: sum(bool(x[k]) for x in xs) for k in ("validationFirstCorrection", "correctionFailure",
+                                                                  "deliberateNoAction", "processFailure")},
+                      "modelCalls": sum(x["modelCalls"] for x in xs), "retries": sum(x["retries"] for x in xs)})
+    complete = verdict["state"] == "COMPLETE"
+    differences, pairs = [], []
+    if complete:
+        for cid, mod, arm in sorted(cells):
+            if arm != "treatment":
+                continue
+            comp = H.primary_comparison(cells.get((cid, mod, "control"), []), cells[(cid, mod, arm)])
+            if comp is not None:
+                differences.append(dict(comp, context=cid, model=mod))
+        for pid in sorted({c["pair"] for c in ctxs.by_id.values() if c.get("pair")}):
+            for mod in proto["modelOrder"]:
+                dep = {}
+                for arm in H.ARMS:
+                    members = [[x for x in cells.get((pid + "-" + side, mod, arm), []) if x["exposure"]] for side in ("a", "b")]
+                    if all(members):
+                        ma, mb = members
+                        count = lambda xs: sum(x["batchesSha256"] != x["proposalSubmittedSha256"] for x in xs)  # noqa: E731
+                        dep[arm] = X.newcombe(count(mb), len(mb), count(ma), len(ma))
+                if len(dep) == 2:
+                    pairs.append({"pair": pid, "model": mod, "departure": dep, "sensitivity": H.mover(dep["treatment"], dep["control"])})
+    stop = run_doc["stop"]
+    return {"schema": ANALYSIS_SCHEMA, "runStatus": verdict["state"], "lifecycle": {
+                "id": LS.LIFECYCLE_ID, "sha256": LS.spec_sha256(), "state": verdict["state"],
+                "counters": verdict["derived"]["counters"], "violations": []},
+            "draws": out, "executions": ledger, "table": table, "armDifferences": differences, "pairs": pairs,
+            "abortedVerification": aborted_verification,
+            "failureVerification": {"status": "UNVERIFIED", "stop": stop} if stop is not None else None,
+            "completedVerification": "VERIFIED",
+            "note": "Exposed-only canonical submitted actions. Partial coverage yields no complete-run comparisons. "
+                    "Pair estimates remain descriptive context comparisons; duplicate S1-a/S6-a retained."}
+
+
+def _inputs(a):
+    proto, raw = json.load(open(a.protocol, encoding="utf-8")), open(a.protocol, "rb").read()
+    rows, csha = H.load_contexts(a.contexts)
+    if csha != proto["contextsFileSha256"]:
+        raise SystemExit("the contexts file is not the protocol's")
+    return proto, sha256(raw), H.schedule(proto, rows), rows
+
+
+def main(argv=None):
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    for name in ("classify", "analyze"):
+        p = sub.add_parser(name)
+        p.add_argument("--protocol", required=True)
+        p.add_argument("--contexts", required=True)
+        p.add_argument("--dir", required=True)
+        if name == "analyze":
+            p.add_argument("--binary", required=True)
+            p.add_argument("--replays")
+            p.add_argument("--out", required=True)
+    a = ap.parse_args(argv)
+    proto, proto_sha, sched, rows = _inputs(a)
+    if a.cmd == "classify":
+        verdict = classify(a.dir, proto, proto_sha, sched, {c["id"]: c for c in rows})
+        print(json.dumps(verdict, indent=1, sort_keys=True))
+        raise SystemExit(0 if verdict["state"] != "INVALID" else 1)
+    ctxs = H.Contexts(proto, rows, a.replays, {SB.SETTINGS_ENV: SB.REPLAY_URL})
+    doc = analyze(a.binary, ctxs.run_dirs, ctxs, proto, sched, a.dir, proto_sha)
+    H.write_json(os.path.join(a.out, "analysis.json"), doc)
+    print(f"analysis: {len(doc['draws'])} completed draws ({doc['runStatus']}), {len(doc['executions'])} executions")
+
+
+if __name__ == "__main__":
+    main()

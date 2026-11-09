@@ -57,6 +57,15 @@ a structural contradiction.
 **INVALID**: any archive that is unsealed, malformed, incomplete,
 contradictory, unsupported, or unverifiable beyond the PARTIAL contract.
 
+**Threat model.** The seal binds the archive's bytes so that partial
+failure, accidental change and any contradiction, including one whose
+dependent hashes were recomputed, are detected. It is a self-hash, not a
+signature: a writer able to rewrite every file consistently can remove
+evidence that leaves no other trace. Model-free replay exposes an erased
+exchange that the draw's engine log or decision record still reflects.
+Detecting a fully consistent rewrite would need an external anchor of the
+seal (an owner decision; not provided).
+
 ## 3. Safe-point interrupts
 
 The SIGINT handler only counts the signal; it never raises. A pending

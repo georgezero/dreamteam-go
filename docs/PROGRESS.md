@@ -7,6 +7,93 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13j — safe-point interrupts and sealed run completion (0.13.0-dev.2, engine unchanged)
+
+The owner directed V0.13j after the V0.13i independent review (NO GO;
+DT13I-01..06): the final seal must be the only evidence that a run completed;
+never falsely COMPLETE; contradictory PARTIAL evidence must be rejected;
+known calls and completed draws must not be lost; a genuine failure safely
+classified INVALID is an acceptable, documented availability limitation.
+[Per-finding response](audits/v0.13j-audit-response.md). Independent technical
+re-review (Extra High): PENDING. Human presentation review: PENDING
+(separate; docs/v13i/human-review at ee987a1, unchanged). Protocol lock: NO
+GO. Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* A safety contract, [dreamteam.run-lifecycle/v2](v13j/SAFETY_CONTRACT.md)
+  (machine-readable `analysis/alternatives/lifecycle_v2.json`), committed before
+  any recorder change (8b37738): COMPLETE/PARTIAL/INVALID acceptance rules, the
+  owner's severity hierarchy, ten declared safe points, the durable call
+  journal, the completion seal and finalization protocol with an explicit
+  durability boundary, per-stage evidence fields, transition predicates,
+  closed health exception families, the strict timestamp grammar, invariants
+  S01–S04 and L01–L20, and the declared fault-injection operations.
+* A recorder (driver/6, run/6) whose SIGINT handler only counts; interrupts
+  act only at safe points; every model call is journalled durably before
+  dispatch and on return; the completion seal, renamed into place after every
+  bound file is durable, is the commit point; engine sessions run in their
+  own process group. The public result reports every interrupt.
+* An independent verifier and analyzer (partial-run/6, analysis/7) that
+  requires a valid seal, never treats it as sufficient, and recomputes every
+  binding from the persisted files; it does not import the recorder.
+* Generated evidence: a fault matrix generated from the contract (4,916 cases at 1,511 points over nine bases, all agreeing, no false COMPLETE, every transition and every admissible stop observed); 326 real-process signal and termination tests (external and process-group SIGINT, SIGINT on the DT13I-01 source lines, SIGKILL at every reached point, SIGTERM); 12 real loopback tests on horo; 76 regression witnesses, including every DT13I counterexample;
+  125 re-sealed contradictory-archive checks. See [fault verification](v13j/FAULT_MATRIX.md).
+
+**Contract amendments during implementation** (inside the contract file,
+recorded here rather than rewritten into 8b37738; compare
+`git diff 8b37738 -- analysis/alternatives/lifecycle_v2.json`): the per-call
+order is dispatch <= sent <= outcome (the intent precedes the draw's own send
+time; the specification commit had the first two reversed); a fault before an
+outcome record poisons the archive and a deferred recorder fault still
+unresolved when the run stops fails closed (`safePoints.windows`, with the
+expected-outcome rule refined to match); an explicit threat model (the seal
+is a self-hash, not a signature).
+
+**Durability boundary:** process-crash consistency is claimed and tested
+with real SIGKILL at every reached operation boundary; power-loss durability
+is not claimed (design intent only: fsync ordering before the seal rename;
+an uncertain case can only revert to INVALID).
+
+**Preserved design:** nine historical contexts, six context pairs, 21
+contexts, two arms, 262 scheduled draws, 802 maximum calls, four-hour
+request-start guard, canonical submitted-action primary outcome, unchanged
+decision workflow, parser, presentation, view, selection, system
+instruction, canonicalization, simulator, session, API, scoring and draw
+contract (draw/v4; `v13h.py` and `stage_b.py` byte-identical). All 2,984
+starting files other than PROGRESS and the two workflows retain their bytes
+([baseline](v13j/BASELINE.json)); the 93 transcripts and 7 active static
+assets are byte-identical to the frozen human-review manifest.
+
+**Baseline:** 72dc35aa7e73bccf6ca64a3857bc3d58dfabfd43 on main (V0.13i plus
+the verbatim independent review). The protected swap file and dt are
+excluded from stages and source archives.
+
+**The engine version remains 0.13.0-dev.2.** Simulator, session, API,
+mechanics, accounting, scoring and decision operations are unchanged; only
+run recording and verification receive [successor identities](v13j/CONTRACT-IDENTITIES.json).
+
+**Quality gates:** see [the gate record](v13j/gates/README.md) and the
+[test map](v13j/gates/TEST_MAP.md); retained logs and the review's witnesses
+are under /home/george/dt-audit-kept/v013j/. Heavy checks, real signals and
+loopback tests run on horo; the Pi runs memory-limited focused checks.
+
+**Known limitations (availability, documented):** a recorder fault inside
+the stop, cleanup or finalization sequence (other than the session release),
+a fault before an outcome record, any persistence failure and a hard kill
+before the seal each leave an unsealed INVALID archive with its durable rows
+and call journal intact; there is no recovery or resumption. A SIGINT during
+a model call or health read takes effect when that call returns (at most the
+request timeout). A writer able to rewrite every archive file consistently
+can remove evidence that leaves no other trace; an external anchor of the
+seal would be an owner decision.
+
+**Not run or authorized:** independent technical re-review, human review,
+clinical suites, historical live reruns, reserved/holdout seeds, protocol
+lock, live inference, tag or release.
+
+---
+
 ## V0.13i — run lifecycle state machine and systematic fault verification (0.13.0-dev.2, engine unchanged)
 
 The owner accepted V0.13h as a remediation milestone (not technical

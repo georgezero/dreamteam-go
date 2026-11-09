@@ -28,6 +28,7 @@
    "no complete-run arm comparison or pair summary is produced"
   ],
   "INVALID": "any archive that is unsealed, malformed, incomplete, contradictory, unsupported or unverifiable beyond the PARTIAL contract; INVALID is assigned only by the verifier and analysis refuses it",
+  "threatModel": "the seal binds the archive's bytes so that partial failure, accidental change and any contradiction, including one whose dependent hashes were recomputed, are detected; it is a self-hash, not a signature. A writer able to rewrite every file consistently can remove evidence that leaves no other trace (model-free replay exposes erased exchanges that the draw's engine log or decision record still reflects); detecting such a rewrite needs an external anchor of the seal, which this contract does not provide",
   "severity": [
    {"rank": 1, "class": "false COMPLETE", "meaning": "an incomplete, contradictory or insufficiently durable archive classified COMPLETE", "disposition": "release blocker"},
    {"rank": 2, "class": "false acceptance of PARTIAL", "meaning": "a contradictory archive accepted because its status is PARTIAL or its cause is UNVERIFIED", "disposition": "release blocker"},
@@ -123,7 +124,7 @@
    "AFTER_SCHEDULE": "observed after schedule_done with no stop; a post-completion operator event, admissible in COMPLETE"
   },
   "unarchived": "an interrupt received after before_finalization is reported only through the public run result (interrupts.unarchived); it cannot alter an archive whose content is already fixed",
-  "windows": "between a durable dispatch intent and the transport call, and between the transport's return and the draw's own evidence append, no recorder exception propagates: a recorder fault there is deferred to the next STOP point as a driver stop, and a persistence fault poisons the archive (it is never sealed)",
+  "windows": "between a durable dispatch intent and the transport call, and between the transport's return and the draw's own evidence append, no recorder exception propagates: a recorder fault there is deferred to the next STOP point as a driver stop; a persistence fault, or a fault before an outcome record is written, poisons the archive (it is never sealed); a deferred fault still unresolved when the run stops for another reason makes the recorder fail closed",
   "engineIsolation": "engine subprocesses run in their own session (process group) so that a terminal SIGINT reaches only the recorder; the engine and its requests are unchanged"
  },
  "stopCodes": {
@@ -252,7 +253,7 @@
  "timestamps": {
   "grammar": "UTC RFC 3339 profile, matched against the whole string: [0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]{1,6})?Z with ASCII digits only, no surrounding or trailing characters (a trailing newline is rejected), and a valid calendar date and time",
   "required": ["run.started", "journal[*].timestamp", "healthChecks[*].serverState.health.started/ended (kept observations)", "cleanup.timestamp", "failureEvent.timestamp", "interrupts.events[*].timestamp", "calls[*].sent", "call journal timestamps", "seal.transition.timestamp"],
-  "order": "run.started equals the create entry; journal timestamps non-decreasing; the seal transition timestamp >= the last journal entry; each kept observation started <= ended inside its visit; failureEvent.timestamp equals the stop transition (or the cleanup_failed entry for a cleanup-created stop); cleanup.timestamp equals its transition; each draw's call sent times and call-journal times non-decreasing inside its begin_draw..commit/stop interval, with sent <= dispatch <= outcome for each call; interrupt events inside the run",
+  "order": "run.started equals the create entry; journal timestamps non-decreasing; the seal transition timestamp >= the last journal entry; each kept observation started <= ended inside its visit; failureEvent.timestamp equals the stop transition (or the cleanup_failed entry for a cleanup-created stop); cleanup.timestamp equals its transition; each draw's call sent times and call-journal times non-decreasing inside its begin_draw..commit/stop interval, with dispatch <= sent <= outcome for each call (the dispatch intent precedes the draw's own send time); interrupt events inside the run",
   "provenance": "run.provenance.timestamps SYSTEM_UTC for ordinary runs; SYNTHETIC_FIXTURE only for reproducible record-only fixtures, refused unless the verifier is explicitly asked to check a fixture",
   "replay": "timestamps are metadata; deterministic draw replay identities exclude them; a missing timestamp is never inferred"
  },
@@ -336,8 +337,8 @@
    {"when": "point at or after seal.renamed", "expect": "COMMITTED"},
    {"when": "kind signal", "expect": "INTERRUPT"},
    {"when": "manifest not yet durable", "expect": "NO_ARCHIVE"},
-   {"when": "kind persistence or persistent, a persist/append/seal phase other than before/after, or seal.before", "expect": "FAIL_CLOSED"},
-   {"when": "append:calls after phase of a dispatch intent, before/after phase of an outcome record, or a NOTE safe point (inside a transport window)", "expect": "HANDLED (deferred to the next STOP point)"},
+   {"when": "kind persistence or persistent, a persist/append/seal phase other than before/after, seal.before, or append:calls.before of an outcome record (the outcome would be missing)", "expect": "FAIL_CLOSED"},
+   {"when": "append:calls.after (dispatch or outcome) or a NOTE safe point (inside a transport window)", "expect": "HANDLED (deferred to the next STOP point)"},
    {"when": "inside the stop/cleanup/finalization sequence and not session_cleanup.during", "expect": "FAIL_CLOSED"},
    {"when": "session_cleanup.during", "expect": "CLEANUP_FAILED"},
    {"when": "health_read.during transport", "expect": "HEALTH_STOP"},
