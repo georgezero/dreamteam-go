@@ -2,6 +2,50 @@
  "bindings": [
   {
    "constraints": "exact successor identities and input hashes",
+   "fieldDetails": {
+    "run.driver": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.lifecycle.id": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.lifecycle.sha256": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "run.protocol": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.protocolSha256": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "run.scheduleSha256": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "run.schema": {
+     "binding": "B-MANIFEST-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "run.schema",
     "run.driver",
@@ -31,12 +75,56 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "canonical UUID; nonempty authorization; resume never; ordinary runs observe server; fixtures explicitly admitted",
+   "fieldDetails": {
+    "run.authorization": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.provenance.runId": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.provenance.timestamps": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.resume": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.runId": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.serverObserved": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "run.verificationStatus": {
+     "binding": "B-MANIFEST-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "run.runId",
     "run.authorization",
@@ -65,12 +153,110 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "closed field set and field types; derive terminal state independently",
+   "fieldDetails": {
+    "run.cleanup": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "run.counters": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "run.counters.drawAborted": {
+     "binding": "B-MANIFEST-003",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.drawInterrupted": {
+     "binding": "B-MANIFEST-003",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.drawsCompleted": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.drawsNotRun": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.drawsScheduled": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.healthChecks": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.modelCalls": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.failureEvent": {
+     "binding": "B-MANIFEST-003",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "run.healthChecks": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "run.interrupts": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "run.journal": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "run.started": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "run.state": {
+     "binding": "B-MANIFEST-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "run.stop": {
+     "binding": "B-MANIFEST-003",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    }
+   },
    "fields": [
     "run.state",
     "run.started",
@@ -80,7 +266,14 @@
     "run.stop",
     "run.failureEvent",
     "run.cleanup",
-    "run.interrupts"
+    "run.interrupts",
+    "run.counters.drawsScheduled",
+    "run.counters.drawsCompleted",
+    "run.counters.drawInterrupted",
+    "run.counters.drawAborted",
+    "run.counters.drawsNotRun",
+    "run.counters.modelCalls",
+    "run.counters.healthChecks"
    ],
    "group": "run manifest",
    "id": "B-MANIFEST-003",
@@ -101,12 +294,56 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact scheduled identities; at most last row interrupted; no aborted ledger row",
+   "fieldDetails": {
+    "draw.arm": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.context": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.draw": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "draw.model": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.schema": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.seq": {
+     "binding": "B-LEDGER-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "draw.status": {
+     "binding": "B-LEDGER-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "draw.schema",
     "draw.seq",
@@ -136,12 +373,38 @@
    ],
    "source": "draw runner; recorder commits",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "READY, null failure stage, RECORDED, exact call count; no failure or cleanupFailure",
+   "fieldDetails": {
+    "draw.engineInitialization": {
+     "binding": "B-LEDGER-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.failureStage": {
+     "binding": "B-LEDGER-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.modelCallsCompleted": {
+     "binding": "B-LEDGER-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "draw.verificationStatus": {
+     "binding": "B-LEDGER-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "draw.engineInitialization",
     "draw.failureStage",
@@ -167,12 +430,44 @@
    ],
    "source": "draw runner",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "closed event-specific field sets; legal table and predicates; FINALIZING tail; terminal transition only in seal",
+   "fieldDetails": {
+    "journal.event": {
+     "binding": "B-JOURNAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "journal.from": {
+     "binding": "B-JOURNAL-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "journal.n": {
+     "binding": "B-JOURNAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "journal.timestamp": {
+     "binding": "B-JOURNAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "journal.to": {
+     "binding": "B-JOURNAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "journal.n",
     "journal.event",
@@ -199,12 +494,44 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "begin names next scheduled draw; commit row hash/status/calls; reconciled commit followed by stop",
+   "fieldDetails": {
+    "journal.draw": {
+     "binding": "B-JOURNAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "journal.modelCalls": {
+     "binding": "B-JOURNAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "journal.reconciled": {
+     "binding": "B-JOURNAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "journal.rowSha256": {
+     "binding": "B-JOURNAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "journal.status": {
+     "binding": "B-JOURNAL-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "journal.draw",
     "journal.status",
@@ -232,12 +559,44 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "closed record variants; contiguous positive integers; alternating dispatch/outcome; no unresolved call sealed; no return to prior draw",
+   "fieldDetails": {
+    "callJournal.draw": {
+     "binding": "B-CALL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "callJournal.k": {
+     "binding": "B-CALL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "callJournal.n": {
+     "binding": "B-CALL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "callJournal.record": {
+     "binding": "B-CALL-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "callJournal.schema": {
+     "binding": "B-CALL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "callJournal.schema",
     "callJournal.record",
@@ -264,12 +623,56 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
-   "constraints": "lowercase hexadecimal SHA-256; body and response hash match; raised exception has no returned fields; retained request hashes recomputed",
+   "constraints": "lowercase hexadecimal SHA-256; body and response hash match; raised exception has no returned fields; retained request hashes recomputed; absent HTTP status requires a transport error and no response body",
+   "fieldDetails": {
+    "callJournal.body": {
+     "binding": "B-CALL-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "callJournal.error": {
+     "binding": "B-CALL-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "callJournal.exception.message": {
+     "binding": "B-CALL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "callJournal.exception.type": {
+     "binding": "B-CALL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "callJournal.requestSha256": {
+     "binding": "B-CALL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "callJournal.responseSha256": {
+     "binding": "B-CALL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "callJournal.status": {
+     "binding": "B-CALL-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    }
+   },
    "fields": [
     "callJournal.requestSha256",
     "callJournal.responseSha256",
@@ -293,18 +696,39 @@
    "required": true,
    "rules": [
     {
+     "noStatus": {
+      "body": [
+       null,
+       ""
+      ],
+      "error": "nonempty string"
+     },
      "op": "hashGrammar",
      "pattern": "[0-9a-f]{64}"
     }
    ],
    "source": "transport wrapper",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "strict timestamps; monotonic per draw and globally; dispatch <= sent <= outcome",
+   "fieldDetails": {
+    "callJournal.timestamp": {
+     "binding": "B-CALL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "calls.sent": {
+     "binding": "B-CALL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    }
+   },
    "fields": [
     "callJournal.timestamp",
     "calls.sent"
@@ -329,12 +753,44 @@
    ],
    "source": "recorder; transport",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "derive bound from schedule context identity; no fallback for missing context; limit independently of nullable draw.calls; global ceiling 802",
+   "fieldDetails": {
+    "callJournal.draw": {
+     "binding": "B-CALL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "callJournal.n": {
+     "binding": "B-CALL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "failureEvent.modelCalls": {
+     "binding": "B-CALL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "halt.evidence.runCalls": {
+     "binding": "B-CALL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "run.counters.modelCalls": {
+     "binding": "B-CALL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    }
+   },
    "fields": [
     "callJournal.draw",
     "callJournal.n",
@@ -365,16 +821,96 @@
    ],
    "source": "recorder; scheduled context",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact call fields; n order; nonnegative finite latency; JSON request equals bytes; hashes and body-derived metadata exact",
+   "fieldDetails": {
+    "calls.body": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "calls.error": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "calls.finishReason": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "calls.latencyMs": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "finite nonnegative number"
+    },
+    "calls.n": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "calls.request": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "calls.requestBody": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "calls.requestSha256": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "calls.responseSha256": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "calls.sent": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "calls.servedModel": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "calls.status": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "calls.usage": {
+     "binding": "B-TRANSPORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    }
+   },
    "fields": [
     "calls.n",
     "calls.sent",
-    "calls.latencySeconds",
+    "calls.latencyMs",
     "calls.request",
     "calls.requestBody",
     "calls.requestSha256",
@@ -405,12 +941,182 @@
    ],
    "source": "point transport",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "all fields recursively equal workflow replay, including proposal, final response, halt exclusivity, submissions and pins; conditional fields absent only on workflow branches that omit them",
+   "fieldDetails": {
+    "record.arm": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "record.batches": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.contractPins": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.correctionFailure": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "record.deliberateNoAction": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "record.deliveries": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.digestsBeforeSubmit": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.eligibility": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.errors": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.exchanges": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.executedAction": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.exposure": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "record.inspected": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.intendedAction": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.outcome": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.processFailure": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "record.proposalSubmittedAction": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.responseRoute": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "record.result": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "record.retryRequests": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "record.schema": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "record.submittedAction": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.turn": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.validatedAction": {
+     "binding": "B-DECISION-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "record.validationFirst": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "record.validationFirstCorrection": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "record.workflowSha256": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "record.workflowVersion": {
+     "binding": "B-DECISION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "record.schema",
     "record.workflowVersion",
@@ -467,10 +1173,78 @@
     "final_digests",
     "engine_close"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "record-derived fields exact; otherwise derive from engine/calls; pending message must equal reconstructed workflow request",
+   "fieldDetails": {
+    "process.correctionFailure": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "process.deliberateNoAction": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "process.eligibility": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "process.executedAction": {
+     "binding": "B-DECISION-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "process.exposure": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "process.intendedAction": {
+     "binding": "B-DECISION-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "process.pendingMessage": {
+     "binding": "B-DECISION-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "domain JSON"
+    },
+    "process.processFailure": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    },
+    "process.submittedAction": {
+     "binding": "B-DECISION-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "process.validatedAction": {
+     "binding": "B-DECISION-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "process.validationFirstCorrection": {
+     "binding": "B-DECISION-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "boolean"
+    }
+   },
    "fields": [
     "process.eligibility",
     "process.exposure",
@@ -503,12 +1277,32 @@
    ],
    "source": "draw runner",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact representation parses to batches; hash exact; no abandoned proposal substituted; null iff no returned record at aborted stage",
+   "fieldDetails": {
+    "draw.batches": {
+     "binding": "B-BATCH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "draw.submittedRepresentation": {
+     "binding": "B-BATCH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "draw.submittedRepresentationSha256": {
+     "binding": "B-BATCH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    }
+   },
    "fields": [
     "draw.batches",
     "draw.submittedRepresentation",
@@ -534,12 +1328,38 @@
    ],
    "source": "draw runner",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "ordered exact request/argument/answer sequence; only failed external request may have null answer and an error; no invented entries",
+   "fieldDetails": {
+    "draw.engine.answer": {
+     "binding": "B-ENGINE-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "draw.engine.args": {
+     "binding": "B-ENGINE-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "domain JSON"
+    },
+    "draw.engine.error": {
+     "binding": "B-ENGINE-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "draw.engine.op": {
+     "binding": "B-ENGINE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "draw.engine.op",
     "draw.engine.args",
@@ -566,12 +1386,26 @@
    ],
    "source": "engine harness",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "initial equals context and initial response; final equals final response; stage fixes presence",
+   "fieldDetails": {
+    "draw.digestsAfter": {
+     "binding": "B-ENGINE-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "draw.initialDigests": {
+     "binding": "B-ENGINE-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    }
+   },
    "fields": [
     "draw.initialDigests",
     "draw.digestsAfter"
@@ -595,12 +1429,44 @@
    ],
    "source": "engine harness",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "one initial visit then one per required round; visit identity and order exact; no extra, duplicate or unowned check; kept/rejected exclusive",
+   "fieldDetails": {
+    "healthChecks.beforeDraw": {
+     "binding": "B-HEALTH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "healthChecks.index": {
+     "binding": "B-HEALTH-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "healthChecks.rejected": {
+     "binding": "B-HEALTH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "domain JSON"
+    },
+    "healthChecks.serverState": {
+     "binding": "B-HEALTH-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "healthChecks.state": {
+     "binding": "B-HEALTH-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "healthChecks.index",
     "healthChecks.state",
@@ -627,12 +1493,80 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "closed fields; body category requires 2xx and no exception; read family requires exact allowed serialized identity; rejection must be invalid; only external read cause unverified",
+   "fieldDetails": {
+    "health.body": {
+     "binding": "B-HEALTH-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "health.category": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.ended": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "health.exception": {
+     "binding": "B-HEALTH-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "health.httpStatus": {
+     "binding": "B-HEALTH-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "health.outcome": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.request.method": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.request.path": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.schema": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.started": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "health.verificationStatus": {
+     "binding": "B-HEALTH-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "health.schema",
     "health.request.method",
@@ -665,12 +1599,32 @@
    ],
    "source": "health probe",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
-   "constraints": "strict base64; exact byte count; lowercase SHA-256; UTF-8 and strict JSON classification; no duplicate keys or nonfinite values",
+   "constraints": "strict base64; exact byte count; lowercase SHA-256; UTF-8 and strict JSON classification; no duplicate keys or nonfinite values; health JSON rejects duplicate keys and nonfinite values using the existing invalid_json category",
+   "fieldDetails": {
+    "health.body.base64": {
+     "binding": "B-HEALTH-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "domain JSON"
+    },
+    "health.body.bytes": {
+     "binding": "B-HEALTH-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "health.body.sha256": {
+     "binding": "B-HEALTH-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    }
+   },
    "fields": [
     "health.body.bytes",
     "health.body.sha256",
@@ -694,12 +1648,32 @@
    ],
    "source": "health probe",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "recorder uses actual imported class identity; wrapped exceptions only wrappable; impostor same text refused",
+   "fieldDetails": {
+    "health.exception.reasonKind": {
+     "binding": "B-HEALTH-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.exception.reasonType": {
+     "binding": "B-HEALTH-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "health.exception.type": {
+     "binding": "B-HEALTH-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "health.exception.type",
     "health.exception.reasonType",
@@ -805,12 +1779,50 @@
    ],
    "source": "health probe",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "initial file equals initial kept state; passing rounds have unchanged signature; health times within visit; metadata externally observed",
+   "fieldDetails": {
+    "server-before.json": {
+     "binding": "B-HEALTH-005",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "serverState.models": {
+     "binding": "B-HEALTH-005",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "domain JSON"
+    },
+    "serverState.openapiSha256": {
+     "binding": "B-HEALTH-005",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "serverState.serverTitle": {
+     "binding": "B-HEALTH-005",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "serverState.serverVersion": {
+     "binding": "B-HEALTH-005",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "serverState.time": {
+     "binding": "B-HEALTH-005",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "server-before.json",
     "serverState.time",
@@ -838,12 +1850,68 @@
    ],
    "source": "health probe",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "field presence/null per stop code and state; stop matches journal; earlier stop stays primary",
+   "fieldDetails": {
+    "stop.beforeSignature": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "stop.code": {
+     "binding": "B-STOP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "stop.evidence": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "stop.failure": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "stop.healthCheck": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "stop.message": {
+     "binding": "B-STOP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "stop.request": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "stop.safePoint": {
+     "binding": "B-STOP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "stop.state": {
+     "binding": "B-STOP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "stop.code",
     "stop.state",
@@ -876,12 +1944,56 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact guard priority; counts and streak derived from calls; stage and elapsed bound consistent; aborted record xor halt",
+   "fieldDetails": {
+    "halt.code": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "halt.evidence.consecutiveTransportFailures": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "halt.evidence.drawCalls": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "halt.evidence.elapsedSeconds": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "finite nonnegative number"
+    },
+    "halt.evidence.runCalls": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "halt.evidence.stage": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "halt.message": {
+     "binding": "B-STOP-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "halt.code",
     "halt.message",
@@ -911,12 +2023,56 @@
    ],
    "source": "guard",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "SIGINT; positive counts; one STOP iff operator; RECORD events ordered nonduplicated subsequence; exact visit timestamps; state and disposition agree",
+   "fieldDetails": {
+    "interrupts.events.disposition": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "interrupts.events.n": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "interrupts.events.safePoint": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "interrupts.events.signals": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "interrupts.events.state": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "interrupts.events.timestamp": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "interrupts.signal": {
+     "binding": "B-INTERRUPT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "interrupts.signal",
     "interrupts.events.n",
@@ -951,12 +2107,62 @@
    ],
    "source": "signal latch and recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "required exact three visits; order/multiplicity/stage; start <= before <= completion <= after <= finalization <= seal; result and cleanup transition agree",
+   "fieldDetails": {
+    "cleanup.events.n": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "cleanup.events.safePoint": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "cleanup.events.state": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "cleanup.events.timestamp": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "cleanup.failure": {
+     "binding": "B-CLEANUP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "cleanup.started": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "cleanup.status": {
+     "binding": "B-CLEANUP-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "cleanup.timestamp": {
+     "binding": "B-CLEANUP-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    }
+   },
    "fields": [
     "cleanup.status",
     "cleanup.failure",
@@ -1022,12 +2228,92 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "closed fields; exact per-stage shape; record xor halt after workflow; no completed pending draw reclassified unrecorded",
+   "fieldDetails": {
+    "aborted.arm": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.cleanupFailure": {
+     "binding": "B-ABORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.context": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.draw": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "aborted.engineInitialization": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.failure": {
+     "binding": "B-ABORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.failureStage": {
+     "binding": "B-ABORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.model": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.schema": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.seq": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "aborted.status": {
+     "binding": "B-ABORT-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.stopReason": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.verificationStatus": {
+     "binding": "B-ABORT-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "aborted.schema",
     "aborted.seq",
@@ -1244,12 +2530,80 @@
    ],
    "source": "draw runner or recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "every completed engine/workflow event and final proposal replayed; no missing call with retained exchange; no wrong digest or stage; UNVERIFIED only external cause",
+   "fieldDetails": {
+    "aborted.batches": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "aborted.calls": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "aborted.digestsAfter": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.engine": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "aborted.halt": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.initialDigests": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.modelCallsCompleted": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "aborted.process": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.record": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "aborted.submittedRepresentation": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "aborted.submittedRepresentationSha256": {
+     "binding": "B-ABORT-002",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    }
+   },
    "fields": [
     "aborted.record",
     "aborted.batches",
@@ -1286,12 +2640,110 @@
    ],
    "source": "draw runner",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact field set and equality; external cause may stay unverified; all reconstructed fields verified",
+   "fieldDetails": {
+    "failureEvent.drawsCompleted": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "failureEvent.modelCalls": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "failureEvent.nextDraw": {
+     "binding": "B-FAILURE-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "failureEvent.nextDraw.arm": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.nextDraw.context": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.nextDraw.draw": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "failureEvent.nextDraw.model": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.nextDraw.seq": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "failureEvent.protocolSha256": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "failureEvent.runId": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.scheduleSha256": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "failureEvent.schema": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.state": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failureEvent.stop": {
+     "binding": "B-FAILURE-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "failureEvent.timestamp": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "failureEvent.verificationStatus": {
+     "binding": "B-FAILURE-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "failureEvent.schema",
     "failureEvent.runId",
@@ -1303,7 +2755,12 @@
     "failureEvent.drawsCompleted",
     "failureEvent.modelCalls",
     "failureEvent.timestamp",
-    "failureEvent.verificationStatus"
+    "failureEvent.verificationStatus",
+    "failureEvent.nextDraw.seq",
+    "failureEvent.nextDraw.model",
+    "failureEvent.nextDraw.context",
+    "failureEvent.nextDraw.arm",
+    "failureEvent.nextDraw.draw"
    ],
    "group": "failure events",
    "id": "B-FAILURE-001",
@@ -1326,12 +2783,68 @@
    ],
    "source": "recorder",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "durable pending handoff before ledger mutation; never delete failed candidate containing completed draw; pending cleared only after durable commit; retained failure evidence unsealed INVALID",
+   "fieldDetails": {
+    "failed.candidates": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "failed.error": {
+     "binding": "B-HANDOFF-001",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "failed.error.message": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failed.error.type": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "failed.pending": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "failed.stage": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "pending.draw": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "pending.rowSha256": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "pending.schema": {
+     "binding": "B-HANDOFF-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "pending.schema",
     "pending.draw",
@@ -1339,7 +2852,9 @@
     "failed.stage",
     "failed.error",
     "failed.pending",
-    "failed.candidates"
+    "failed.candidates",
+    "failed.error.type",
+    "failed.error.message"
    ],
    "group": "draw ledger",
    "id": "B-HANDOFF-001",
@@ -1376,10 +2891,84 @@
     "ledger_commit",
     "error_handling"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact existing completion-seal/v1 schema and finalization/v1 semantics; successor lifecycle/driver identities",
+   "fieldDetails": {
+    "SEAL.driver": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.finalization": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.lifecycle": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "SEAL.lifecycle.id": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.lifecycle.sha256": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.protocol": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "SEAL.protocol.id": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.protocol.sha256": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.runId": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.runSchema": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.scheduleSha256": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.schema": {
+     "binding": "B-SEAL-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "SEAL.schema",
     "SEAL.finalization",
@@ -1388,7 +2977,11 @@
     "SEAL.driver",
     "SEAL.runId",
     "SEAL.protocol",
-    "SEAL.scheduleSha256"
+    "SEAL.scheduleSha256",
+    "SEAL.lifecycle.id",
+    "SEAL.lifecycle.sha256",
+    "SEAL.protocol.id",
+    "SEAL.protocol.sha256"
    ],
    "group": "completion seal",
    "id": "B-SEAL-001",
@@ -1409,12 +3002,50 @@
    ],
    "source": "recorder finalization",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "terminal transition only here; n=len(journal)+1; FINALIZING to derived state; timestamp after all safe points",
+   "fieldDetails": {
+    "SEAL.terminalState": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.transition.event": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.transition.from": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.transition.n": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.transition.timestamp": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "UTC timestamp"
+    },
+    "SEAL.transition.to": {
+     "binding": "B-SEAL-002",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    }
+   },
    "fields": [
     "SEAL.terminalState",
     "SEAL.transition.n",
@@ -1443,12 +3074,86 @@
    ],
    "source": "recorder finalization",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact file identities; all raw and canonical hashes and counts recomputed",
+   "fieldDetails": {
+    "SEAL.calls.dispatched": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.calls.file": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.calls.records": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.calls.sha256": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.ledger.completed": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.ledger.file": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.ledger.rowSha256": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256 array"
+    },
+    "SEAL.ledger.rows": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.ledger.sha256": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.manifest.file": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "SEAL.manifest.journalEntries": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.manifest.sha256": {
+     "binding": "B-SEAL-003",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    }
+   },
    "fields": [
     "SEAL.manifest.file",
     "SEAL.manifest.sha256",
@@ -1482,18 +3187,120 @@
    ],
    "source": "recorder finalization",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "exact required side artifact set; null requires absence; hashes counts exact; no stray accepted archive files",
+   "fieldDetails": {
+    "SEAL.counters": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "SEAL.counters.drawAborted": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.drawInterrupted": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.drawsCompleted": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.drawsNotRun": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.drawsScheduled": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.healthChecks": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.counters.modelCalls": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.health.checkSha256": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256 array"
+    },
+    "SEAL.health.checks": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "integer"
+    },
+    "SEAL.health.serverBefore": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.sideArtifacts": {
+     "binding": "B-SEAL-004",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "SEAL.sideArtifacts.aborted-draw.json": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.sideArtifacts.failure-event.json": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    },
+    "SEAL.sideArtifacts.server-before.json": {
+     "binding": "B-SEAL-004",
+     "nullable": true,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "sha256"
+    }
+   },
    "fields": [
     "SEAL.health.checks",
     "SEAL.health.checkSha256",
     "SEAL.health.serverBefore",
     "SEAL.sideArtifacts",
-    "SEAL.counters"
+    "SEAL.counters",
+    "SEAL.counters.drawsScheduled",
+    "SEAL.counters.drawsCompleted",
+    "SEAL.counters.drawInterrupted",
+    "SEAL.counters.drawAborted",
+    "SEAL.counters.drawsNotRun",
+    "SEAL.counters.modelCalls",
+    "SEAL.counters.healthChecks",
+    "SEAL.sideArtifacts.server-before.json",
+    "SEAL.sideArtifacts.aborted-draw.json",
+    "SEAL.sideArtifacts.failure-event.json"
    ],
    "group": "completion seal",
    "id": "B-SEAL-004",
@@ -1516,12 +3323,68 @@
    ],
    "source": "recorder finalization",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   },
   {
    "constraints": "execute canonical submitted batches; deduplicate by context and exact representation hash; PARTIAL suppresses comparisons; reject contradictory archive; failure status only external cause",
+   "fieldDetails": {
+    "analysis.abortedVerification": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "analysis.armDifferences": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "analysis.completedVerification": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "string"
+    },
+    "analysis.draws": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "analysis.executions": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "analysis.failureVerification": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "analysis.lifecycle": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "object"
+    },
+    "analysis.pairs": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    },
+    "analysis.table": {
+     "binding": "B-EXECUTION-001",
+     "nullable": false,
+     "required": "within applicable parent; stage shape governs parent absence",
+     "type": "array"
+    }
+   },
    "fields": [
     "analysis.executions",
     "analysis.draws",
@@ -1554,9 +3417,9 @@
    ],
    "source": "independent analyzer",
    "stages": [
-    "all"
+    "all stages where the containing artifact exists"
    ],
-   "type": "field-specific types in fieldTypes; entire structured subtrees are bound recursively"
+   "type": "per-field fieldDetails; domain JSON descendants recursively bound by exact typed reconstruction"
   }
  ],
  "externalCauseRule": "UNVERIFIED applies only to external cause that cannot be reconstructed. Validate all retained evidence, requests, responses, counts, submissions, digests and workflow events in FULL analysis.",
@@ -2453,6 +4316,10 @@
    "bodyRule": "bytes over maxBodyBytes: oversized_body; not strict UTF-8: non_utf8_body; not JSON: invalid_json; not an object: not_an_object; an object with a key named error and status \"healthy\": contradictory_body; status not a non-empty string: missing_status; status \"healthy\": healthy; any other status: unhealthy_status. A body category requires a 2xx HTTP status, no exception and a valid stored body.",
    "contradiction": "an observation whose category, outcome, HTTP status, exception, body, hash or timestamps disagree is invalid evidence; the recorder refuses it before it can justify continuing (driver stop, the value kept as rejected) and the verifier re-checks independently; it is never HEALTHY",
    "exceptionEvidence": "{type, reasonType, reasonKind}: type is the exception's exact class as module.qualname; for urllib.error.URLError reasonKind is exception (reasonType the reason's exact class) or text (reasonType null); otherwise reasonType and reasonKind are null",
+   "jsonProfile": {
+    "duplicateKeys": "reject",
+    "nonfinite": "reject"
+   },
    "maxBodyBytes": 65536,
    "noInvention": "a read that raised an unclassified exception records the attempted request and no observation; no response is substituted",
    "observationSchema": "dreamteam.health-observation/v2",
@@ -3081,5 +4948,6 @@
  ],
  "recursiveFieldRule": "A listed structured field includes every descendant, including arbitrary protocol/domain keys; equality and replay are recursive, not a projection. Conditional descendants are permitted absent exactly when the frozen workflow branch omits them. No field may be ignored because its containing artifact says UNVERIFIED.",
  "schema": "dreamteam.evidence-bindings/1",
- "status": "DRAFT, NOT LOCKED"
+ "status": "DRAFT, NOT LOCKED",
+ "typedEquality": "Reconstructed JSON compares canonical encodings, preserving boolean versus numeric type identity. Domain JSON has exact recursive keys, values, types and array ordering."
 }
