@@ -125,7 +125,7 @@ Every relationship is planned under the seven kinds `valid_agreement`, `missing_
   * `contradiction`: `complete`: `set` `rows.0.calls.0.servedModel` = `"another-model"`; rejected.
   * `duplicate_evidence`: `complete`: `duplicate_key` `rows.0.calls.0.finishReason`; rejected.
   * `incorrect_identity`: `complete`: `custom` `response_hash_of_other_body`; rejected.
-  * `incorrect_type`: `complete`: `custom` `usage_number_as_string`; rejected.
+  * `incorrect_type`: `complete`: `custom` `served_model_as_list`; rejected.
   * `persistence_interruption`: recorder fault `persistence` at `persist:handoff.file_fsync` (occurrence 1); expect INVALID; preserve dispatches, completedRows.
 
 ### R-DISPATCH-001 — dispatch intent versus call journal versus draw calls
@@ -154,7 +154,7 @@ Every relationship is planned under the seven kinds `valid_agreement`, `missing_
 * Planned variations:
   * `valid_agreement`: unmodified `complete` archive, accepted.
   * `missing_evidence`: `complete`: `delete` `calls.1.body`; rejected.
-  * `contradiction`: `complete`: `custom` `response_status_changed_both`; rejected.
+  * `contradiction`: `complete`: `custom` `journal_status_differs`; rejected.
   * `duplicate_evidence`: `complete`: `duplicate_key` `calls.1.status`; rejected.
   * `incorrect_identity`: `complete`: `set` `calls.1.draw` = `2`; rejected.
   * `incorrect_type`: `complete`: `custom` `status_float_in_journal`; rejected.
@@ -302,7 +302,7 @@ Every relationship is planned under the seven kinds `valid_agreement`, `missing_
   * `duplicate_evidence`: `complete`: `custom` `ledger_row_twice`; rejected.
   * `incorrect_identity`: `complete`: `custom` `commit_names_other_draw`; rejected.
   * `incorrect_type`: `complete`: `custom` `commit_reconciled_as_int`; rejected.
-  * `persistence_interruption`: recorder fault `persistence` at `handoff_clear.before` (occurrence 1); expect INVALID; preserve dispatches, completedRows.
+  * `persistence_interruption`: recorder fault `persistence` at `persist:ledger.dir_fsync` (occurrence 1); expect INVALID; preserve dispatches, completedRows.
 
 ### R-SEAL-001 — ledger, journal and call journal versus completion seal
 

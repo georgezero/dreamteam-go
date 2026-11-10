@@ -5179,7 +5179,7 @@
     },
     "incorrect_type": {
      "base": "complete",
-     "name": "usage_number_as_string",
+     "name": "served_model_as_list",
      "op": "custom"
     },
     "missing_evidence": {
@@ -5292,7 +5292,7 @@
    "matrix": {
     "contradiction": {
      "base": "complete",
-     "name": "response_status_changed_both",
+     "name": "journal_status_differs",
      "op": "custom"
     },
     "duplicate_evidence": {
@@ -5872,12 +5872,12 @@
      "op": "custom"
     },
     "persistence_interruption": {
-     "boundary": "handoff_clear",
+     "boundary": "persist:ledger",
      "expect": "INVALID",
      "kind": "persistence",
      "occurrence": 1,
      "op": "fault",
-     "phase": "before",
+     "phase": "dir_fsync",
      "preserve": [
       "dispatches",
       "completedRows"
