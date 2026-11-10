@@ -1,0 +1,51 @@
+{
+ "contexts": {
+  "S1-a": {
+   "aa": false,
+   "callBound": 3,
+   "kind": "constructed",
+   "model": null
+  }
+ },
+ "driver": "dreamteam-v13l-driver/8",
+ "id": "record-only-lifecycle-fixture-v2",
+ "lifecycle": {
+  "file": "analysis/alternatives/bindings_v2.json",
+  "id": "dreamteam.run-lifecycle/v4",
+  "sha256": "e93b3a5b7f955bfb09b9a5cecb553f7e11aa22de29b6b3a2c6959b472d5c8d1f"
+ },
+ "maxModelCalls": 802,
+ "maxModelCallsPerDraw": 0,
+ "modelOrder": [
+  "qwen36-35b-a3b"
+ ],
+ "notice": "SCRIPTED RECORD ONLY: not the experimental schedule",
+ "request": {
+  "timeoutSeconds": 300
+ },
+ "schedule": [
+  {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 1,
+   "model": "qwen36-35b-a3b",
+   "seq": 1
+  },
+  {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 2,
+   "model": "qwen36-35b-a3b",
+   "seq": 2
+  }
+ ],
+ "stop": {
+  "consecutiveTransportFailures": 5,
+  "health": "an unhealthy /health before a round stops the run",
+  "partial": "a run that stops early is PARTIAL; the analysis reports only what was observed",
+  "resume": "never",
+  "serverChange": "a material change before a round stops the run",
+  "timeGuarantee": "request-start guard; blocked operations are not bounded",
+  "wallClockSeconds": 14400
+ }
+}
