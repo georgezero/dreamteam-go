@@ -1,0 +1,225 @@
+{
+ "authorization": "scripted lifecycle fixture",
+ "cleanup": {
+  "events": [
+   {
+    "n": 1,
+    "safePoint": "before_cleanup",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000016Z"
+   },
+   {
+    "n": 2,
+    "safePoint": "after_cleanup",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000018Z"
+   },
+   {
+    "n": 3,
+    "safePoint": "before_finalization",
+    "state": "CLEANUP",
+    "timestamp": "2026-01-01T00:00:00.000019Z"
+   }
+  ],
+  "failure": null,
+  "started": "2026-01-01T00:00:00.000015Z",
+  "status": "SUCCEEDED",
+  "timestamp": "2026-01-01T00:00:00.000017Z"
+ },
+ "counters": {
+  "drawAborted": 1,
+  "drawInterrupted": null,
+  "drawsCompleted": 0,
+  "drawsNotRun": 1,
+  "drawsScheduled": 2,
+  "healthChecks": 2,
+  "modelCalls": 1
+ },
+ "driver": "dreamteam-v13m-driver/9",
+ "failureEvent": {
+  "drawsCompleted": 0,
+  "modelCalls": 1,
+  "nextDraw": {
+   "arm": "control",
+   "context": "S1-a",
+   "draw": 1,
+   "model": "qwen36-35b-a3b",
+   "seq": 1
+  },
+  "protocolSha256": "913f07c834ccadcd728c79cb7420f1bf5e728c5a77023bd5093a26551d297ddd",
+  "runId": "00000000-0000-4000-8000-0000000013b1",
+  "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+  "schema": "dreamteam.run-failure/v3",
+  "state": "DRAW_ACTIVE",
+  "stop": {
+   "beforeSignature": null,
+   "code": "driver",
+   "evidence": null,
+   "failure": {
+    "message": "the draw raised without evidence after one dispatched call",
+    "type": "RuntimeError"
+   },
+   "healthCheck": null,
+   "message": "RuntimeError: the draw raised without evidence after one dispatched call",
+   "request": null,
+   "safePoint": null,
+   "state": "DRAW_ACTIVE"
+  },
+  "timestamp": "2026-01-01T00:00:00.000014Z",
+  "verificationStatus": "UNVERIFIED"
+ },
+ "healthChecks": [
+  {
+   "beforeDraw": null,
+   "index": 0,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000004Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v2",
+     "started": "2026-01-01T00:00:00.000003Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "PREFLIGHT"
+  },
+  {
+   "beforeDraw": 1,
+   "index": 1,
+   "rejected": null,
+   "serverState": {
+    "health": {
+     "body": {
+      "base64": "eyJzdGF0dXMiOiJoZWFsdGh5In0=",
+      "bytes": 20,
+      "sha256": "b808daea0f225957b3cddad9d5e33cb8dd4da1dbfc1d764e291f8d2e9fa4f857"
+     },
+     "category": "healthy",
+     "ended": "2026-01-01T00:00:00.000008Z",
+     "exception": null,
+     "httpStatus": 200,
+     "outcome": "HEALTHY",
+     "request": {
+      "method": "GET",
+      "path": "/health"
+     },
+     "schema": "dreamteam.health-observation/v2",
+     "started": "2026-01-01T00:00:00.000007Z",
+     "verificationStatus": "UNVERIFIED"
+    }
+   },
+   "state": "HEALTH_CHECK"
+  }
+ ],
+ "interrupts": {
+  "events": [],
+  "signal": "SIGINT"
+ },
+ "journal": [
+  {
+   "event": "create",
+   "from": null,
+   "n": 1,
+   "timestamp": "2026-01-01T00:00:00.000001Z",
+   "to": "CREATED"
+  },
+  {
+   "event": "begin_preflight",
+   "from": "CREATED",
+   "n": 2,
+   "timestamp": "2026-01-01T00:00:00.000002Z",
+   "to": "PREFLIGHT"
+  },
+  {
+   "event": "preflight_passed",
+   "from": "PREFLIGHT",
+   "n": 3,
+   "timestamp": "2026-01-01T00:00:00.000005Z",
+   "to": "READY"
+  },
+  {
+   "event": "begin_health_check",
+   "from": "READY",
+   "healthCheck": 1,
+   "n": 4,
+   "timestamp": "2026-01-01T00:00:00.000006Z",
+   "to": "HEALTH_CHECK"
+  },
+  {
+   "event": "health_passed",
+   "from": "HEALTH_CHECK",
+   "healthCheck": 1,
+   "n": 5,
+   "timestamp": "2026-01-01T00:00:00.000009Z",
+   "to": "READY"
+  },
+  {
+   "draw": 1,
+   "event": "begin_draw",
+   "from": "READY",
+   "n": 6,
+   "timestamp": "2026-01-01T00:00:00.000010Z",
+   "to": "DRAW_ACTIVE"
+  },
+  {
+   "code": "driver",
+   "event": "stop",
+   "from": "DRAW_ACTIVE",
+   "n": 7,
+   "timestamp": "2026-01-01T00:00:00.000014Z",
+   "to": "CLEANUP"
+  },
+  {
+   "event": "cleanup_succeeded",
+   "from": "CLEANUP",
+   "n": 8,
+   "timestamp": "2026-01-01T00:00:00.000017Z",
+   "to": "FINALIZING"
+  }
+ ],
+ "lifecycle": {
+  "id": "dreamteam.run-lifecycle/v4",
+  "sha256": "e93b3a5b7f955bfb09b9a5cecb553f7e11aa22de29b6b3a2c6959b472d5c8d1f"
+ },
+ "protocol": "record-only-lifecycle-fixture-v2",
+ "protocolSha256": "913f07c834ccadcd728c79cb7420f1bf5e728c5a77023bd5093a26551d297ddd",
+ "provenance": {
+  "runId": "SYNTHETIC_FIXTURE",
+  "timestamps": "SYNTHETIC_FIXTURE"
+ },
+ "resume": "never",
+ "runId": "00000000-0000-4000-8000-0000000013b1",
+ "scheduleSha256": "411adec4556c74898a9342280ee0145cf47da8475a8d89106de709cbdb7030e7",
+ "schema": "dreamteam.alternatives-run/v9",
+ "serverObserved": true,
+ "started": "2026-01-01T00:00:00.000001Z",
+ "state": "FINALIZING",
+ "stop": {
+  "beforeSignature": null,
+  "code": "driver",
+  "evidence": null,
+  "failure": {
+   "message": "the draw raised without evidence after one dispatched call",
+   "type": "RuntimeError"
+  },
+  "healthCheck": null,
+  "message": "RuntimeError: the draw raised without evidence after one dispatched call",
+  "request": null,
+  "safePoint": null,
+  "state": "DRAW_ACTIVE"
+ },
+ "verificationStatus": "UNVERIFIED"
+}

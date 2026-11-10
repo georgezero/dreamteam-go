@@ -1,0 +1,464 @@
+{
+ "implementation": "v13m",
+ "notice": "Implementer-performed bounded technical acceptance review probes; not an independent or human review.",
+ "probes": [
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: draw 1: the replay differs from the record"
+   },
+   "case": "ambiguous body only in the delivery copy",
+   "classification": "COMPLETE",
+   "expected": "rejected",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 2,
+    "dispatchedCalls": 2,
+    "ledgerRows": 2,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": []
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: R-JSON-004 call-journal outcome 1: ambiguous model response: the workflow parser reads it but strict JSON refuses it (ValueError: duplicate key); L03 counters disagree with the artifacts; S03 seal call-journal hash"
+   },
+   "case": "ambiguous body only in the journal copy",
+   "classification": "INVALID",
+   "expected": "rejected",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 2,
+    "dispatchedCalls": 2,
+    "ledgerRows": 2,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": [
+    "L03",
+    "R-JSON-004",
+    "S03"
+   ]
+  },
+  {
+   "analysis": {
+    "abortedVerification": {
+     "boundary": "transport_failure",
+     "causeStatus": "UNVERIFIED",
+     "engineEvents": 10,
+     "failureStage": "workflow",
+     "halt": null,
+     "modelCalls": 2,
+     "reason": "all retained engine/workflow evidence reconstructed; external cause unverified",
+     "seq": 1,
+     "status": "VERIFIED",
+     "workflow": "REPLAYED"
+    },
+    "accepted": true,
+    "armDifferences": [],
+    "completedVerified": 0,
+    "runStatus": "PARTIAL"
+   },
+   "case": "aborted-workflow positive control",
+   "classification": "PARTIAL",
+   "expected": "accepted",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 2,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": []
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: R-JSON-004 call-journal outcome 1: ambiguous model response: the workflow parser reads it but strict JSON refuses it (ValueError: duplicate key); L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash"
+   },
+   "case": "ambiguous body in an aborted draw",
+   "classification": "INVALID",
+   "expected": "rejected",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 2,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": [
+    "L03",
+    "L19",
+    "R-JSON-004",
+    "S03"
+   ]
+  },
+  {
+   "analysis": {
+    "abortedVerification": null,
+    "accepted": true,
+    "armDifferences": [],
+    "completedVerified": 0,
+    "runStatus": "PARTIAL"
+   },
+   "case": "interrupted-row positive control",
+   "classification": "PARTIAL",
+   "expected": "accepted",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 1,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": []
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: R-JSON-004 call-journal outcome 1: ambiguous model response: the workflow parser reads it but strict JSON refuses it (ValueError: duplicate key); R-COUNT-001 halt call evidence disagrees with the call journal; L03 counters disagree with the artifacts; S03 seal call-journal hash"
+   },
+   "case": "ambiguous body in an interrupted (halted) row",
+   "classification": "INVALID",
+   "expected": "rejected",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 1,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": [
+    "L03",
+    "R-COUNT-001",
+    "R-JSON-004",
+    "S03"
+   ]
+  },
+  {
+   "analysis": {
+    "abortedVerification": {
+     "causeStatus": "UNVERIFIED",
+     "engineEvents": 0,
+     "failureStage": "draw_unrecorded",
+     "modelCalls": 1,
+     "reason": "retained journal requests reconstructed; missing draw result not invented",
+     "seq": 1,
+     "status": "VERIFIED",
+     "workflow": "JOURNAL_PREFIX_REPLAYED"
+    },
+    "accepted": true,
+    "armDifferences": [],
+    "completedVerified": 0,
+    "runStatus": "PARTIAL"
+   },
+   "case": "draw_unrecorded positive control (retained call cannot complete the workflow)",
+   "classification": "PARTIAL",
+   "expected": "accepted",
+   "item": "fail-closed persistence",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": []
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: R-JSON-004 call-journal outcome 1: ambiguous model response: the workflow parser reads it but strict JSON refuses it (ValueError: duplicate key); L19 failure event disagrees with the derived stop; L03 counters disagree with the artifacts; S03 seal call-journal hash"
+   },
+   "case": "ambiguous body in a draw_unrecorded journal outcome",
+   "classification": "INVALID",
+   "expected": "rejected",
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "violations": [
+    "L03",
+    "L19",
+    "R-JSON-004",
+    "S03"
+   ]
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: L04 draw 1: 1 dispatched call(s) but 0 recorded"
+   },
+   "case": "response nested beyond the parser limit",
+   "classification": "INVALID",
+   "expected": "not COMPLETE with that response read",
+   "firstCallMetadata": null,
+   "item": "strict response JSON",
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "recorder": "PARTIAL",
+   "violations": [
+    "L04"
+   ]
+  },
+  {
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "ordinary CLI draw-call-limit halt, genuine control",
+   "classification": "PARTIAL",
+   "expected": "accepted",
+   "item": "wall-clock halt causality",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13h.ExperimentError: INVALID archive: R-HALT-003 halt elapsedSeconds 10800.301778819412 disagrees with the structured timestamps (between -59.960 and 60.404 s, tolerance 60 s)",
+    "stdout": ""
+   },
+   "case": "ordinary CLI non-wall halt with elapsed inflated by 3 h",
+   "classification": "INVALID",
+   "expected": "rejected",
+   "item": "wall-clock halt causality",
+   "meetsExpectation": true,
+   "violations": [
+    "R-HALT-003"
+   ]
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: L16 unexpected archive files: persistence-failure.json"
+   },
+   "case": "third fault while disclosing the loss",
+   "classification": "INVALID",
+   "drawsBegun": [
+    1
+   ],
+   "evidenceLoss": null,
+   "expected": "fail closed",
+   "faults": [
+    "first",
+    "second",
+    "third"
+   ],
+   "item": "fail-closed persistence",
+   "journalDispatched": 1,
+   "ledgerCompleted": 0,
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "recorder": "RecordingError",
+   "sealed": false,
+   "transportInvocations": 1,
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: L16 unexpected archive files: persistence-failure.json"
+   },
+   "case": "BaseException (KeyboardInterrupt) as the secondary fault",
+   "classification": "INVALID",
+   "drawsBegun": [
+    1
+   ],
+   "evidenceLoss": {
+    "detail": "the draw ended with an exception and recovering its result failed; a completed result may have been lost",
+    "dispatched": 1,
+    "draw": 1,
+    "kind": "completed-draw recovery failed",
+    "originalError": {
+     "message": "first fault",
+     "type": "RuntimeError"
+    },
+    "possible": true,
+    "secondaryError": {
+     "message": "",
+     "type": "KeyboardInterrupt"
+    }
+   },
+   "expected": "fail closed",
+   "faults": [
+    "first",
+    "second"
+   ],
+   "item": "fail-closed persistence",
+   "journalDispatched": 1,
+   "ledgerCompleted": 0,
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 0,
+    "dispatchedCalls": 1,
+    "ledgerRows": 0,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [
+     {
+      "detail": "the draw ended with an exception and recovering its result failed; a completed result may have been lost",
+      "dispatched": 1,
+      "draw": 1,
+      "kind": "completed-draw recovery failed",
+      "originalError": {
+       "message": "first fault",
+       "type": "RuntimeError"
+      },
+      "possible": true,
+      "secondaryError": {
+       "message": "",
+       "type": "KeyboardInterrupt"
+      }
+     }
+    ],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "recorder": "RecordingError",
+   "sealed": false,
+   "transportInvocations": 1,
+   "violations": [
+    "L16"
+   ]
+  },
+  {
+   "analysis": {
+    "accepted": false,
+    "refusal": "ExperimentError: INVALID archive: L16 unexpected archive files: persistence-failure.json"
+   },
+   "case": "nested failure in draw 2 after draw 1 committed",
+   "classification": "INVALID",
+   "drawsBegun": [
+    1,
+    2
+   ],
+   "evidenceLoss": {
+    "detail": "the draw ended with an exception and recovering its result failed; a completed result may have been lost",
+    "dispatched": 2,
+    "draw": 2,
+    "kind": "completed-draw recovery failed",
+    "originalError": {
+     "message": "first fault",
+     "type": "RuntimeError"
+    },
+    "possible": true,
+    "secondaryError": {
+     "message": "second fault",
+     "type": "MemoryError"
+    }
+   },
+   "expected": "fail closed, draw 1 retained",
+   "faults": [
+    "first",
+    "second"
+   ],
+   "item": "fail-closed persistence",
+   "journalDispatched": 2,
+   "ledgerCompleted": 1,
+   "meetsExpectation": true,
+   "preserved": {
+    "completedRows": 1,
+    "dispatchedCalls": 2,
+    "ledgerRows": 1,
+    "partialDraws": 0,
+    "pendingCompleted": 0,
+    "possibleEvidenceLoss": [
+     {
+      "detail": "the draw ended with an exception and recovering its result failed; a completed result may have been lost",
+      "dispatched": 2,
+      "draw": 2,
+      "kind": "completed-draw recovery failed",
+      "originalError": {
+       "message": "first fault",
+       "type": "RuntimeError"
+      },
+      "possible": true,
+      "secondaryError": {
+       "message": "second fault",
+       "type": "MemoryError"
+      }
+     }
+    ],
+    "receivedResponses": 0,
+    "unresolvedCalls": 0
+   },
+   "recorder": "RecordingError",
+   "sealed": false,
+   "transportInvocations": 2,
+   "violations": [
+    "L16"
+   ]
+  }
+ ],
+ "schema": "dreamteam.v13m-review-probes/v1",
+ "summary": {
+  "meetExpectation": 14,
+  "probes": 14
+ }
+}

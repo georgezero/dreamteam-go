@@ -629,6 +629,37 @@ jobs:
           cp "$S/dt13k.json" out/v13l-dt13k.json
           cp "$S/fidelity.json" out/v13l-fidelity.json
           (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13l-lifecycle-examples.sha256
+      - name: Experimental readiness closure (V0.13m-lite)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="$PWD/dt"
+          S="$PWD/.git/v13m-ci"
+          V="$PWD/docs/benchmark/v13m-dev"
+          C="$PWD/docs/benchmark/v13g-dev/contexts"
+          mkdir -p "$S"
+          export TMPDIR="$S"
+          DREAMTEAM_BINARY="$B" python3 -B -m unittest discover -s analysis/alternatives -p test_v13m.py
+          python3 -I -B analysis/alternatives/v13m.py protocol --contexts "$C" --out "$S/protocol.json"
+          cmp "$S/protocol.json" "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13m.py schedule --contexts "$C" --protocol "$V/protocol-draft.json" --out "$S/schedule.json"
+          cmp "$S/schedule.json" "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13m.py check --binary "$B" --contexts "$C" --protocol "$V/protocol-draft.json" --replays "$PWD"
+          python3 -I -B analysis/alternatives/v13m_examples.py --binary "$B" --out "$S/examples" --check "$V/lifecycle-examples"
+          python3 -I -B analysis/alternatives/v13m_binding_matrix.py --binary "$B" --scratch "$S/binding-matrix" --out "$S/binding-matrix.json"
+          cmp "$S/binding-matrix.json" docs/v13m/binding-matrix/results.json
+          python3 -I -B analysis/alternatives/v13m_dt13l.py --binary "$B" --implementation v13m --scratch "$S/dt13l" --out "$S/dt13l.json"
+          python3 -I -B analysis/alternatives/v13m_fidelity.py --binary "$B" --contexts "$C" --replays "$PWD" --scratch "$S/fidelity-archive" --out "$S/fidelity.json"
+          cmp "$S/fidelity.json" "$V/fidelity/results.json"
+          python3 -I -B analysis/alternatives/v13m_preserved.py
+          python3 -I -B analysis/alternatives/v13m_identities.py --check
+          git fetch --depth=1 origin ee987a100896f1ea942e0e873ae833ef3c70edff 2>/dev/null || git fetch origin
+          git diff --exit-code ee987a100896f1ea942e0e873ae833ef3c70edff -- docs/v13i/human-review
+          cp "$S/protocol.json" out/v13m-protocol.json
+          cp "$S/schedule.json" out/v13m-schedule.json
+          cp "$S/binding-matrix.json" out/v13m-binding-matrix.json
+          cp "$S/fidelity.json" out/v13m-fidelity.json
+          (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13m-lifecycle-examples.sha256
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
