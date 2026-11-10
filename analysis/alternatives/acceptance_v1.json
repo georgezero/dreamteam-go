@@ -1,0 +1,70 @@
+{
+ "schema": "dreamteam.acceptance-standard/v1",
+ "status": "DRAFT, NOT LOCKED. Owner-approved acceptance-standard change (V0.13m-lite). Protocol lock and live inference NO GO.",
+ "supersedes": "the V0.13j-V0.13l acceptance standard (lifecycle /4 acceptance), for the fail-closed persistence clauses only",
+ "ownerDecision": "V0.13m-lite: Experimental Readiness Closure. DT13L-01 and DT13L-02 are fixed. For DT13L-03 and DT13L-04 the owner adopts a conservative fail-closed persistence policy instead of further double-fault recovery machinery. This is an explicit change to the previous acceptance standard; it does not relabel DT13L-03/04 as resolved.",
+ "blocking": [
+  "False COMPLETE",
+  "Contradictory PARTIAL accepted",
+  "Invalid evidence included in scientific analysis",
+  "Automatic retries or replacement draws that alter the protocol"
+ ],
+ "nonblockingIfDisclosed": [
+  "A genuine failed run classified INVALID",
+  "Loss of evidence during unrecoverable double failure, provided the run is rejected",
+  "Lack of automatic crash recovery",
+  "Lack of power-loss guarantees"
+ ],
+ "failClosedPersistence": {
+  "trigger": "persistence or recovery fails and evidence cannot be reliably retained (including a failure while recovering a draw's result, or while building the failure report)",
+  "required": [
+   "stop the run at once",
+   "never seal it: the archive is INVALID (unusable)",
+   "never accept it as COMPLETE",
+   "never accept contradictory or insufficient evidence as a valid PARTIAL",
+   "exclude it from primary analysis",
+   "no automatic retry",
+   "no automatic resumption",
+   "no replacement of scheduled draws",
+   "report possible evidence loss (persistence-failure.json evidenceLoss and RecordingError.retainedEvidence)",
+   "preserve evidence where possible; never hide the inability to preserve it"
+  ],
+  "notBuilt": "no additional nested recovery system for multiple simultaneous persistence failures",
+  "retention": "dreamteam.failed-persistence-retention/v3"
+ },
+ "retentionSchema": {
+  "id": "dreamteam.failed-persistence-retention/v3",
+  "fields": ["schema", "stage", "error", "pending", "partialDraw", "receivedResponses", "dispatched", "candidates", "evidenceLoss"],
+  "evidenceLoss": "null, or {possible: boolean, kind: string, detail: string, ...}: the disclosure that evidence may be incomplete or lost; unsealed failure evidence only, never part of a sealed archive"
+ },
+ "relationships": [
+  {
+   "id": "R-JSON-004",
+   "guarantee": "canonical",
+   "finding": "DT13L-01",
+   "relation": "retained model-response body versus the workflow parser's reading and the structured response metadata",
+   "rule": "every retained response body (draw calls and call-journal returned outcomes) is independently reparsed under dreamteam.strict-json/v1. A body the permissive workflow parser (json.loads) reads must also be read by the strict parser (no duplicate key at any depth, including escaped-equivalent keys; no NaN/Infinity; no number overflowing to infinity; no trailing content; nesting within the parser's limit) and both readings must be identical under strict typed equality; the structured metadata (usage, servedModel, finishReason) must be the strict reading's fields. A body that neither parser reads (malformed, trailing content, empty) is an unparsed reply to the frozen workflow: it carries no structured metadata and contributes only as the workflow's own unparsed-reply handling. Exact response bytes are preserved; nothing model-visible changes.",
+   "onViolation": "INVALID: the archive is excluded from analysis (an ambiguous response never contributes to COMPLETE or PARTIAL analysis)"
+  },
+  {
+   "id": "R-HALT-003",
+   "guarantee": "causal",
+   "finding": "DT13L-02",
+   "relation": "wall-clock halt versus the request-start guard, its message and the structured timestamps",
+   "rule": "for a wall_clock halt, the guard fired at a monotonic reading e1 with e1 + request.timeoutSeconds > stop.wallClockSeconds; the message shows round(e2) for a later reading e2 >= e1; the evidence elapsedSeconds is a still later reading e3 >= e2. The verifier requires e3 + timeoutSeconds > wallClockSeconds and threshold - 0.5 < message seconds <= e3 + 0.5, where threshold = wallClockSeconds - timeoutSeconds. For every halt in an archive with SYSTEM_UTC timestamps, elapsedSeconds must agree with the structured journal timestamps within the tolerance: elapsedSeconds <= (stop transition - begin_preflight) + tolerance and elapsedSeconds >= (last event or call record preceding the halt - first event after begin_preflight) - tolerance.",
+   "toleranceSeconds": 60,
+   "toleranceReason": "monotonic and UTC clocks are read separately; NTP slewing is bounded (500 ppm is 7.2 s over four hours); a larger clock step makes a genuine archive INVALID (availability limitation, disclosed)",
+   "syntheticTimestamps": "archives with SYNTHETIC_FIXTURE timestamps are admissible only to an explicit fixture check (never to ordinary analysis); the timestamp agreement is not applied to them, the guard and message rules are",
+   "guard": "the existing four-hour request-start guard (a request starts only if its whole timeout fits before the stop); no hard deadline is claimed",
+   "onViolation": "INVALID"
+  },
+  {
+   "id": "R-HANDOFF-003",
+   "guarantee": "ownership",
+   "finding": "DT13L-03",
+   "relation": "draw_unrecorded aborted draw versus the workflow reconstructed from its retained call journal",
+   "rule": "a draw_unrecorded draw is accepted in a PARTIAL only if replaying the frozen workflow over its retained journal outcomes stops at a dispatch or external boundary. If the retained outcomes complete the workflow, the draw may have completed and its result may have been lost (an unrecoverable double failure, or a forged archive): the archive is rejected, never accepted as PARTIAL.",
+   "onViolation": "INVALID (analysis refused; possible evidence loss reported)"
+  }
+ ]
+}
