@@ -7,6 +7,94 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13m-lite — experimental readiness closure (0.13.0-dev.2, engine unchanged)
+
+The owner ended the open-ended recorder-hardening cycle after the V0.13l
+independent review (NO GO; DT13L-01..02 BLOCKER, DT13L-03..04 MAJOR) and
+directed a bounded remediation: fix the two scientific-integrity blockers and
+adopt a conservative fail-closed persistence policy for the double-fault
+findings — an explicit, owner-approved change to the acceptance standard.
+[Remediation and dispositions](v13m/DT13L_REMEDIATION.md). Bounded technical
+acceptance review: performed by the implementer (not an independent review,
+not a human review) — [record](v13m/ACCEPTANCE_REVIEW.md). Human
+presentation review: PENDING (frozen package `docs/v13i/human-review` at
+`ee987a1`, unchanged; [questionnaire and instructions](v13m/human-review/README.md)).
+Protocol lock: NO GO. Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* [Revised acceptance contract](v13m/ACCEPTANCE_CONTRACT.md)
+  (`dreamteam.acceptance-standard/v1`, machine form
+  `analysis/alternatives/acceptance_v1.json`): BLOCKING — false COMPLETE,
+  contradictory PARTIAL accepted, invalid evidence in analysis, automatic
+  retries or replacement draws; NON-BLOCKING IF DISCLOSED — a genuine failed
+  run classified INVALID, evidence loss in an unrecoverable double failure
+  provided the run is rejected, no automatic crash recovery, no power-loss
+  guarantee. DT13L-03/04 are recorded as a policy disposition, not as
+  resolved.
+* DT13L-01 fixed (R-JSON-004): the verifier reparses every retained model
+  response body (draw calls and call-journal outcomes) under strict JSON;
+  duplicate keys at any depth (including escaped-equivalent), NaN/Infinity,
+  overflow and any disagreement with the workflow parser's reading make the
+  archive INVALID; metadata comes from the strict reading. Bytes, workflow
+  and parser unchanged.
+* DT13L-02 fixed (R-HALT-003): a wall-clock halt's displayed duration must be
+  able to have triggered the four-hour request-start guard
+  (`threshold − 0.5 < shown ≤ elapsed + 0.5`) and, with system timestamps,
+  every halt's elapsed time must agree with the structured journal timestamps
+  (60 s tolerance). No hard deadline is claimed.
+* Fail-closed persistence (DT13L-03/04): a failure while recovering a draw's
+  result poisons the archive and stops the run unsealed (INVALID), disclosing
+  `evidenceLoss`; the failure-report fallback keeps the response held at
+  receipt and discloses the secondary failure
+  (`failed-persistence-retention/v3`); the verifier refuses a
+  `draw_unrecorded` PARTIAL whose retained calls complete the workflow
+  (R-HANDOFF-003). No retry, resumption, replacement draw or new recovery
+  machinery.
+* Successor identities: driver /9, run /9, analysis /10, partial-run /9,
+  experiment /9 (`v13m-alt-1`, schedule entries identical to V0.13l).
+  Lifecycle /4, evidence bindings /2, the completion seal and its
+  process-crash commit point are unchanged.
+
+**Engineering evidence** ([gate record](v13m/gates/README.md), [test map](v13m/gates/TEST_MAP.md)):
+DT13L witnesses before/after on genuine archives (V0.13l and the pre-fix
+successor: 24/56 cases meet the remediation expectation; V0.13m-lite: 57/57,
+including one verifier-defense case), including ordinary-CLI
+reproductions; 14 additional review probes (V0.13l 7/14, V0.13m-lite 14/14);
+the reviewer's original V0.13l CLI archives accepted by V0.13l and rejected
+by V0.13m-lite on the semantic relation. Successor regeneration: 350 + 119
+binding-matrix cases (zero survivors), 5,288 fault cases at 1,619 points
+(zero false COMPLETE), 353 real signals, 12 real loopback, 6 + 9 + 258 + 62
+ownership cases, 16 regressions, 76 witnesses, 125 mutations, 17 lifecycle
+examples, 66-unit fidelity (COMPLETE/VERIFIED); DT13K witnesses on V0.13m
+(35/35). Full Go, race, vet, gofmt, five cross-builds, golden
+references, benchmark verify/reproduce, historical replays, frozen evidence,
+V0.12b/V0.12a/V0.11b and every earlier V0.13 stage (including V0.13l's
+unchanged modules) pass on horo; 742 Python tests pass (689 preserved, 53
+successor). Both cross-platform workflows cover the successor; final-push
+results are in the owner handoff.
+
+**Preserved design:** simulator, accounting, session, API, scoring, decision
+workflow, parser, presentation, alternative selection, primary estimand,
+nine historical contexts, six sensitivity pairs, 262 scheduled draws,
+802-call ceiling, 93 transcripts and seven static assets. All 3,606
+protected starting files (every V0.13l and earlier file) are byte-identical
+([baseline](v13m/BASELINE.md)); only CI workflows and bookkeeping documents
+changed in place.
+
+**Baseline:** `133e21d2181c10f910da00c0339fce77257d51f9` (V0.13l `7b21d93`
+plus its verbatim independent review). The protected swap file and dt are
+excluded from stages and archives.
+
+**Known limitations:** [details](v13m/KNOWN_LIMITATIONS.md) — evidence can
+still be lost in an unrecoverable double failure (the run is then rejected
+and the loss disclosed); fail-closed verification rejects some genuine runs
+(availability); inherited V0.13l limitations. No clinical suite, historical
+live rerun, reserved/holdout seed, model endpoint, protocol lock, live
+inference, tag or release.
+
+---
+
 ## V0.13l — canonical evidence and durable handoff closure (0.13.0-dev.2, engine unchanged)
 
 The owner directed V0.13l after the V0.13k independent review (NO GO;
