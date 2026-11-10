@@ -7,6 +7,107 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13l — canonical evidence and durable handoff closure (0.13.0-dev.2, engine unchanged)
+
+The owner directed V0.13l after the V0.13k independent review (NO GO;
+DT13K-01..03 BLOCKER, DT13K-04..05 MAJOR, DT13K-06 MINOR, DT13K-07 NOTE),
+with a change of approach: contract-driven rather than witness-driven.
+[Per-finding remediation](v13l/DT13K_REMEDIATION.md). Separate independent
+review: PENDING. Human presentation review: PENDING (separate,
+`docs/v13i/human-review` at `ee987a1`, unchanged). Protocol lock: NO GO.
+Live inference: NO GO. V0.13.0 release: NO GO.
+
+**What was built:**
+
+* A generalized, executable [evidence inventory](v13l/EVIDENCE_BINDINGS.md)
+  (`dreamteam.evidence-bindings/2`, committed first in `b13dc42`): three
+  guarantees (canonical, causal, ownership), strict JSON semantics
+  (`dreamteam.strict-json/v1`) and 17 cross-field relationships — raw versus
+  structured JSON, dispatch versus journal, response versus transport record,
+  halt versus reconstructed workflow, failure versus lifecycle event,
+  completed draw versus pending record, pending record versus ledger, ledger
+  versus seal, call counts versus limits — each planned under seven kinds
+  (valid agreement, missing evidence, contradiction, duplicate evidence,
+  incorrect identity, incorrect type, persistence interruption).
+* Canonical consistency (DT13K-01): the verifier compares every retained JSON
+  representation with strict typed equality (boolean, integer, float, string,
+  null and absence distinct; exact integers; bitwise floats; duplicate keys
+  and non-finite numbers refused); request bytes are reparsed independently
+  and compared with the structured request; replay compares request bytes and
+  objects. A self-consistent seal never overrides a mismatch.
+* Causal consistency (DT13K-02, DT13K-03): closed failed-engine entries only
+  as the last engine event and equal to the draw failure; raised transport
+  outcomes terminal and equal to the draw failure; stop messages derived from
+  code and fields; reconstructed replay failures compared; halts
+  reconstructed from retained calls, limits and workflow phase (stage, draw
+  and run counts, transport-failure streak, guard order and message), with
+  only the wall-clock measurement external.
+* Durable ownership (DT13K-04, DT13K-05): the completed draw is owned in the
+  statement that receives it, its handoff is inside the recovery scope, and
+  run_draw bookkeeping after the final digests is recovered and replayed; a
+  received model response is owned at receipt and consumed only after its
+  outcome record is durable (`dreamteam.response-handoff/v1`), otherwise the
+  draw ends with `ResponseNotRecorded`, no replacement call is made and the
+  response is retained (`dreamteam.failed-persistence-retention/v2`, also in
+  the structured recording error). The journal close is injectable.
+* DT13K-06 stays a conservative INVALID, documented as an availability
+  limitation. DT13K-07: generated fault contexts keep `pendingRetained`,
+  `receivedUnrecorded` and every preservation key; the oracle fails a context
+  that drops one.
+* Successor recording (driver/8, run/8), lifecycle /4, partial-run /8 and
+  analysis /9. The verifier shares only binding data with the recorder.
+
+**Engineering evidence** ([gate record](v13l/gates/README.md), [test map](v13l/gates/TEST_MAP.md)):
+the original witnesses reproduced before and after remediation on genuine
+archives (V0.13k: 9/27 witness cases meet the remediation expectation; the
+pre-fix successor: the same 9/27; V0.13l: 27/27 with 8/8 positive controls
+accepted); 350 inherited and 119 relationship full-analysis matrix cases
+(zero surviving contradictions; 17 real persistence interruptions INVALID
+with evidence preserved); 6 + 9 ownership fault cases and exhaustive
+line-boundary enumeration (258 completed-draw and 62 received-response
+sites, all retaining their evidence, no replacement call); 5,288 lifecycle
+fault cases at 1,619 points (zero false COMPLETE); 353 real-process signal
+and 12 real loopback cases; 16 DT13J regressions, 76 witnesses, 125 re-sealed
+mutations; 16 lifecycle examples and the 66-unit fidelity fixture. Full Go,
+race, vet, gofmt, five cross-builds, golden references, benchmark
+verify/reproduce, historical replays, frozen evidence, V0.12b/V0.12a/V0.11b
+and every earlier V0.13 stage pass on horo; 689 Python tests pass. Both
+cross-platform workflows cover the successor; final-push results are in the
+owner handoff.
+
+**Preserved design:** simulator mechanics, accounting, session, API,
+scoring, decision workflow, parser, presentation, view, alternative
+selection, system instruction, canonicalization and primary canonical
+submitted-action estimand. Nine historical contexts, six sensitivity pairs,
+21 contexts, 262 scheduled draws, the 802-call ceiling, 93 transcripts and
+seven static assets retain their hashes. All 3,387 protected starting files
+(including every V0.13k module and evidence file) are byte-identical; the
+completion seal format and process-crash commit point are unchanged. See
+[baseline](v13l/BASELINE.md) and [preservation](v13l/PRESERVATION.md).
+
+**Baseline:** `ea7bf4bc4718397b2d73568e7a5279104fc795b4` on main (V0.13k
+`105fba3` plus its verbatim independent review). The protected swap file and
+dt are excluded from stages and source archives.
+
+**The engine version remains 0.13.0-dev.2.** Recording, verification,
+analysis, lifecycle, binding and evidence contracts receive
+[successor identities](v13l/CONTRACT-IDENTITIES.json).
+
+**Known limitations:** DT13K-06 conservative INVALID; recorder-internal
+faults between receipt and durable record are INVALID with the response
+retained; no recovery or resumption of INVALID archives; no power-loss or
+SIGKILL recovery; storage that refuses every later write leaves the evidence
+in the structured error only; the seal is a self-hash, not an authenticity
+anchor. [Details](v13l/KNOWN_LIMITATIONS.md).
+
+**Review preparation only:** PENDING repository stubs, an external brief and
+a read-only archive of the final commit prepare the separate independent
+review (Astra, Extra High). No independent review, human acceptance,
+clinical suite, historical live rerun, reserved/holdout seed, protocol lock,
+live inference, tag or release was run or authorized.
+
+---
+
 ## V0.13k — evidence binding and verification closure (0.13.0-dev.2, engine unchanged)
 
 The owner directed V0.13k after the V0.13j independent review (NO GO;
