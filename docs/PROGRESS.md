@@ -7,6 +7,37 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13n — human review and protocol-lock preparation (0.13.0-dev.2, engine unchanged)
+
+The owner accepted V0.13m-lite as an engineering milestone: DT13L-01 and
+DT13L-02 accepted as fixed, DT13L-03/04 accepted as documented fail-closed
+limitations, the revised acceptance contract approved, the 60-second clock
+tolerance approved provisionally, and recorder development stopped. The
+V0.13m-lite technical acceptance review was implementer-performed, not
+independent.
+
+**What was done (preparation only, no code or evidence changed):**
+
+* Baseline at `9d4626b` recorded with exact hashes in
+  [v13n/README.md](v13n/README.md): the frozen human-review package
+  (`MANIFEST.json` `31bec875…`, 93 transcripts, 7 static assets, all checks
+  pass), simulator source, protocol and schedule drafts (262 draws, 802-call
+  ceiling, 14,400-second request-start guard), acceptance standard (60-second
+  tolerance pinned), recorder, verifier and contract identities.
+* Human reviewer packet defined in
+  [v13n/human-review/REVIEWER_PACKET.md](v13n/human-review/REVIEWER_PACKET.md):
+  frozen model-visible material, the 12-item questionnaire and instructions
+  only; no technical audit conclusions. Required record contents: identity,
+  expertise, independence declaration, 12 responses, specific findings,
+  overall recommendation.
+
+**Status:** human presentation review PENDING (no reviewer assigned; none
+invented). Bounded independent technical check PENDING (deferred by the
+owner). Lock candidate and lock gate not started. Protocol lock: NO GO. Live
+inference: NO GO. V0.13.0 release: NO GO.
+
+---
+
 ## V0.13m-lite — experimental readiness closure (0.13.0-dev.2, engine unchanged)
 
 The owner ended the open-ended recorder-hardening cycle after the V0.13l
