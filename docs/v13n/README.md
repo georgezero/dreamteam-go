@@ -1,8 +1,8 @@
 # V0.13n — Human review and protocol-lock preparation
 
 **Status: PREPARATION ONLY.** Human presentation review: **PENDING** (no
-reviewer assigned). Bounded independent technical check: **PENDING**
-(deferred by the owner). Protocol lock: **NO GO**. Live inference: **NO GO**.
+reviewer assigned). Bounded independent technical check: **NOT ACCEPT**
+(DT13M-01 MAJOR; fixed in V0.13o, recheck PENDING). Protocol lock: **NO GO**. Live inference: **NO GO**.
 V0.13.0 release: **NO GO**.
 
 ## Owner decisions carried into V0.13n
@@ -67,7 +67,12 @@ No human findings yet.
 
 ## Phase 4 — bounded technical check
 
-**PENDING.** The owner deferred it. Scope when run: strict response JSON;
+**Completed 4567e3c: NOT ACCEPT / Technical NO GO** on one MAJOR finding,
+DT13M-01 (protocol did not pin the acceptance standard and 60-second policy);
+no BLOCKER. Report: [../audits/v0.13n-bounded-technical-check.md](../audits/v0.13n-bounded-technical-check.md).
+Fix: V0.13o ([../v13o/README.md](../v13o/README.md)); narrow recheck PENDING.
+
+Original scope (launched at high effort after the owner lifted the deferral): Scope when run: strict response JSON;
 wall-clock halt causality; fail-closed persistence; no false COMPLETE; no
 contradictory PARTIAL; no invalid evidence in primary analysis; no automatic
 retry or resume; historical preservation; reproduction of the original
@@ -82,5 +87,5 @@ check to be accepted. No lock is made automatically.
 ## Remaining blockers for protocol lock
 
 1. Independent human presentation review (PENDING).
-2. Bounded independent technical check (PENDING, deferred).
+2. Narrow independent recheck of DT13M-01 after the V0.13o fix (PENDING).
 3. Lock candidate preparation and owner approval (not started).

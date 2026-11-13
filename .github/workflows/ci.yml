@@ -660,6 +660,28 @@ jobs:
           cp "$S/binding-matrix.json" out/v13m-binding-matrix.json
           cp "$S/fidelity.json" out/v13m-fidelity.json
           (cd "$S/examples" && find . -type f | LC_ALL=C sort | xargs shasum -a 256) > out/v13m-lifecycle-examples.sha256
+      - name: Acceptance standard pinned in the protocol (V0.13o, DT13M-01)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="$PWD/dt"
+          S="$PWD/.git/v13o-ci"
+          V="$PWD/docs/benchmark/v13o-dev"
+          C="$PWD/docs/benchmark/v13g-dev/contexts"
+          mkdir -p "$S"
+          export TMPDIR="$S"
+          python3 -B -m unittest discover -s analysis/alternatives -p test_v13o.py
+          python3 -I -B analysis/alternatives/v13o.py protocol --contexts "$C" --out "$S/protocol.json"
+          cmp "$S/protocol.json" "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13o.py schedule --contexts "$C" --protocol "$V/protocol-draft.json" --out "$S/schedule.json"
+          cmp "$S/schedule.json" "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13o_pin.py --binary "$B" --scratch "$S/pin" --out "$S/pin.json"
+          cmp "$S/pin.json" docs/v13o/pin/results.json
+          python3 -I -B -c 'import hashlib,json,sys; d=json.load(open("docs/v13o/IDENTITIES.json")); bad=[f for f,h in d["sha256"].items() if hashlib.sha256(open(f,"rb").read()).hexdigest()!=h]; sys.exit("identity mismatch: %s" % bad if bad else 0)'
+          python3 -I -B analysis/alternatives/v13m_identities.py --check
+          cp "$S/protocol.json" out/v13o-protocol.json
+          cp "$S/schedule.json" out/v13o-schedule.json
+          cp "$S/pin.json" out/v13o-pin.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

@@ -7,6 +7,54 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13o — DT13M-01: acceptance standard pinned in the protocol (0.13.0-dev.2, engine unchanged)
+
+The V0.13n bounded independent technical check (
+[audits/v0.13n-bounded-technical-check.md](audits/v0.13n-bounded-technical-check.md),
+`4567e3c`) found no BLOCKER. It confirmed:
+
+* DT13L-01 and DT13L-02 are closed;
+* DT13L-03/04 meet the fail-closed policy;
+* preservation holds.
+
+It returned NOT ACCEPT / Technical NO GO on one MAJOR finding, DT13M-01: the
+protocol did not pin the acceptance standard or the 60-second clock policy,
+and the verifier read whatever acceptance file was on disk. The owner
+authorized a narrow fix.
+
+**What was built (successors; V0.13m-lite unchanged):**
+
+* `v13o.py`: protocol `v13o-alt-1` (`dreamteam.alternatives-experiment/v10`),
+  which is V0.13m-lite's protocol plus an `acceptance` field. That field holds
+  the acceptance-standard identity, file and SHA-256 (`c6af89ed…`), the
+  60-second tolerance, its timestamp-only scope, rejection on excess with no
+  retry, and the explicit operational-assumption statement. The recorder
+  refuses a protocol without a matching binding.
+* `v13o_verify.py`: rule R-PIN-001, placed in front of the unchanged V0.13m-lite
+  verifier. An archive whose protocol does not pin the exact acceptance bytes
+  and policy applied is INVALID and analysis is refused.
+* Drafts in `docs/benchmark/v13o-dev/`: 262 schedule entries identical to
+  V0.13m-lite, 802-call ceiling, 14,400 s.
+
+**Tests:**
+
+* [v13o/pin/results.json](v13o/pin/results.json): 13 deterministic witnesses,
+  all meeting expectation. The reviewer's ambient-120 s diagnostic is accepted
+  by V0.13m-lite and refused by V0.13o (R-PIN-001). The ±60 s boundary is
+  unchanged: 59.9 s is accepted and 60.1 s is rejected. Five tampered
+  protocols are each refused by both the recorder and the verifier.
+* `test_v13o.py`: 10 tests, including 16 protocol alterations and altered
+  acceptance files.
+* The V0.13m-lite preservation (3,606 files) and identity checks pass.
+* A new CI step was added. Model-visible content is unchanged. Details are in
+  [v13o/README.md](v13o/README.md).
+
+**Status:** the narrow independent recheck of DT13M-01 is PENDING. The human
+presentation review is PENDING. Protocol lock: NO GO. Live inference: NO GO.
+V0.13.0 release: NO GO.
+
+---
+
 ## V0.13n — human review and protocol-lock preparation (0.13.0-dev.2, engine unchanged)
 
 The owner accepted V0.13m-lite as an engineering milestone: DT13L-01 and

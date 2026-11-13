@@ -1,0 +1,251 @@
+{
+ "acceptanceSha256": "c6af89ede52284a023f1413ea7b3d46b38a7da516ccd87da92841efe1195a721",
+ "allMeetExpectation": true,
+ "cases": [
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "genuine-linked-halt",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "control",
+   "implementation": "v13m",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "elapsed-beyond-timestamps-by-59.9-s",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "tolerance",
+   "implementation": "v13m",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13h.ExperimentError: INVALID archive: R-HALT-003 halt elapsedSeconds 17760.800008000002 disagrees with the structured timestamps (between -60.000 and 17760.700 s, tolerance 60 s)",
+    "stdout": ""
+   },
+   "case": "elapsed-beyond-timestamps-by-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "tolerance",
+   "implementation": "v13m",
+   "meetsExpectation": true,
+   "violations": [
+    "R-HALT-003"
+   ]
+  },
+  {
+   "ambientTolerance": 120,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "ambient-acceptance-120-s-excess-60.1-s",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted (gap)",
+   "finding": "DT13M-01",
+   "implementation": "v13m",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "genuine-linked-halt",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "control",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "elapsed-beyond-timestamps-by-59.9-s",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "tolerance",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "violations": []
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13h.ExperimentError: INVALID archive: R-HALT-003 halt elapsedSeconds 17760.800008000002 disagrees with the structured timestamps (between -60.000 and 17760.700 s, tolerance 60 s)",
+    "stdout": ""
+   },
+   "case": "elapsed-beyond-timestamps-by-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "tolerance",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "violations": [
+    "R-HALT-003"
+   ]
+  },
+  {
+   "ambientTolerance": 120,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the acceptance file is not the one the protocol pins (SHA-256 differs)",
+    "stdout": ""
+   },
+   "case": "ambient-acceptance-120-s-excess-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the protocol does not bind an acceptance standard",
+    "stdout": ""
+   },
+   "case": "protocol-binding-absent",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "v13oRecorderRefusesProtocol": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the acceptance file is not the one the protocol pins (SHA-256 differs)",
+    "stdout": ""
+   },
+   "case": "protocol-acceptance-sha-altered",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "v13oRecorderRefusesProtocol": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the protocol's clock tolerance is not the applied standard's",
+    "stdout": ""
+   },
+   "case": "protocol-tolerance-120",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "v13oRecorderRefusesProtocol": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the protocol's clock-reconciliation statement differs (scope, excess rule or operational assumption)",
+    "stdout": ""
+   },
+   "case": "protocol-operational-assumption-weakened",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "v13oRecorderRefusesProtocol": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientTolerance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the protocol's clock-reconciliation statement differs (scope, excess rule or operational assumption)",
+    "stdout": ""
+   },
+   "case": "protocol-scope-widened-to-guard",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "implementation": "v13o",
+   "meetsExpectation": true,
+   "v13oRecorderRefusesProtocol": true,
+   "violations": [
+    "R-PIN-001"
+   ]
+  }
+ ],
+ "finding": "DT13M-01",
+ "schema": "dreamteam.v13o-pin-witnesses/v1",
+ "verifierCopiesByteIdentical": true
+}
