@@ -7,6 +7,40 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13q — Human presentation review and lock candidate (0.13.0-dev.2, engine unchanged; preparation only)
+
+Starting commit `70184c5` (clean main; the owner accepted V0.13p).
+
+* **Baseline verified.** The human-review freeze `ee987a1` is unchanged:
+  * 93 transcripts (`14c414d1…`) and 7 static assets (`a2dd64b8…`);
+  * the engine source tree is unchanged (`1964bd9f…`);
+  * all identity checks and `v13m_preserved.py` (3,606 files) pass;
+  * the design is unchanged: 262 draws, 802 calls, a 14,400 s request-start
+    guard, a 60 s tolerance and the same primary outcome.
+* **Human review: PENDING.** No reviewer has been named, and none is
+  invented. `docs/v13q/human-review/STATUS.json` records:
+  * the exact package identity;
+  * the three classes for future findings (documentation, presentation,
+    protocol).
+* **Lock candidate** (`docs/v13q/LOCK-CANDIDATE.json`, NOT LOCKED). It pins
+  the 12 LOCK-REQUIREMENTS items. `v13q_candidate.py --check`, run in CI,
+  re-derives every item from the repository.
+* **DT13O-02 is not yet enforced in code.** Analysis checks an archive
+  against the protocol file it is given, not against a locked hash. The
+  enforcement plan is in `docs/v13q/README.md`, and it must be implemented
+  before the lock is accepted. It needs owner authorization.
+
+**Blockers:**
+
+* LC-01: human review.
+* LC-02: protocol-hash enforcement.
+* LC-03: the engine binary hash, recorded at lock time.
+* LC-04: owner lock-gate approval.
+
+**Status:** Protocol lock, live inference and V0.13.0 release: NO GO.
+
+---
+
 ## V0.13p — Protocol parsing and lock hygiene (0.13.0-dev.2, engine unchanged)
 
 Starting commit `4373fd2`. The independent DT13M-01 recheck found DT13M-01

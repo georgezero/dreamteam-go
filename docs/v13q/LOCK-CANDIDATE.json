@@ -1,0 +1,222 @@
+{
+ "blockers": [
+  {
+   "blocker": "human presentation review PENDING: no independent reviewer has been named; the frozen record docs/v13i/human-review/REVIEW_RECORD.md is blank",
+   "id": "LC-01",
+   "item": 6
+  },
+  {
+   "blocker": "DT13O-02 enforcement not implemented: analysis checks the archive against the protocol file it is given (L15), not against the locked protocol SHA-256 in an approved lock manifest; see docs/v13q/README.md, protocol-hash enforcement plan",
+   "id": "LC-02",
+   "item": 1
+  },
+  {
+   "blocker": "the engine binary for the run is to be built from the locked commit and its SHA-256 recorded at lock time (this candidate pins the engine source tree only)",
+   "id": "LC-03",
+   "item": 3
+  },
+  {
+   "blocker": "owner lock-gate approval (never automatic) and a separate owner run authorization",
+   "id": "LC-04",
+   "item": null
+  }
+ ],
+ "items": {
+  "01-protocol": {
+   "file": "docs/benchmark/v13o-dev/protocol-draft.json",
+   "id": "v13o-alt-1",
+   "schema": "dreamteam.alternatives-experiment/v10",
+   "sha256": "202548ad613d2c95b639b345e4fdff262386879d0a17a723fabf50d11e1b7b34",
+   "statusInFile": "DRAFT — NOT LOCKED — NOT AUTHORIZED"
+  },
+  "02-acceptance": {
+   "equalsProtocolPin": true,
+   "file": "analysis/alternatives/acceptance_v1.json",
+   "id": "dreamteam.acceptance-standard/v1",
+   "sha256": "c6af89ede52284a023f1413ea7b3d46b38a7da516ccd87da92841efe1195a721"
+  },
+  "03-recorder": {
+   "contractIdentities": {
+    "check": "v13m_identities.py --check",
+    "file": "docs/v13m/CONTRACT-IDENTITIES.json",
+    "sha256": "87e9e77fecfdbf17e322b707ad06fb4d471c7b2c37c2e42c7be9e7c433bc09c2"
+   },
+   "driver": "dreamteam-v13m-driver/9",
+   "engine": {
+    "binary": "built from the locked commit; SHA-256 recorded at lock (LC-03)",
+    "sourceTree": "sha256 of `git ls-tree -r HEAD internal cmd`",
+    "sourceTreeSha256": "1964bd9fbd367b3d6c49c209761db2512bba21edb2ae81b1a6763fe1d8a0dfa1",
+    "version": "0.13.0-dev.2"
+   },
+   "entryPoint": "analysis/alternatives/v13p.py",
+   "lifecycle": {
+    "file": "analysis/alternatives/bindings_v2.json",
+    "id": "dreamteam.run-lifecycle/v4",
+    "sha256": "e93b3a5b7f955bfb09b9a5cecb553f7e11aa22de29b6b3a2c6959b472d5c8d1f"
+   },
+   "modules": {
+    "analysis/alternatives/lifecycle_v4_spec.py": "b3476341c306b7d085707806a335997effd92bbb45d48c441644a2e4e173663d",
+    "analysis/alternatives/v13h.py": "d67aa12940e80d705d83d86ab64d8ce362f9bac9208d0e3c6672b1d88fd5b5bf",
+    "analysis/alternatives/v13m.py": "c83bb296367f72ca59b18cdef1c9fa96a81bf34d1893c9dcc5302b399ea509da",
+    "analysis/alternatives/v13o.py": "a9690fcfc2da6f0772904a16918ace9f6a51af7d59667aa0ef3d36cdd20538af",
+    "analysis/alternatives/v13p.py": "2d1927fa2b553da9ee0acc38a321c6e735078b47c443384cca8e3874f35abe06"
+   },
+   "runSchedule": "v13p.run_schedule(protocol bytes)"
+  },
+  "04-verifier": {
+   "data": {
+    "analysis/alternatives/acceptance_v1.json": "c6af89ede52284a023f1413ea7b3d46b38a7da516ccd87da92841efe1195a721",
+    "analysis/alternatives/bindings_v2.json": "e93b3a5b7f955bfb09b9a5cecb553f7e11aa22de29b6b3a2c6959b472d5c8d1f"
+   },
+   "entryPoint": "analysis/alternatives/v13p_verify.py",
+   "modules": {
+    "analysis/alternatives/v13h.py": "d67aa12940e80d705d83d86ab64d8ce362f9bac9208d0e3c6672b1d88fd5b5bf",
+    "analysis/alternatives/v13m_verify.py": "327ec2fbf5c3431cd164d48cea2751ca535323bfe8714c5dc2eef8e849648455",
+    "analysis/alternatives/v13o_verify.py": "df041968bdb2eb968140553cc1838ae45e699cd3cd7da6bcaa5b470337fb36ca",
+    "analysis/alternatives/v13p_verify.py": "54f9d8fe1e8e7ce22546e15470f78ded680a5a4905728da7b6c96f97a1d45692"
+   },
+   "rules": [
+    "R-PROTO-001",
+    "R-POLICY-001",
+    "R-PIN-001"
+   ]
+  },
+  "05-schedule": {
+   "entries": 262,
+   "file": "docs/benchmark/v13o-dev/schedule-draft.json",
+   "orderRule": "dreamteam-v13d-order/1",
+   "protocolSha256": "202548ad613d2c95b639b345e4fdff262386879d0a17a723fabf50d11e1b7b34",
+   "sha256": "2be938b639baa1531e3a577c96317b7103530ae13c736cc795e6cf8ed7c7701a"
+  },
+  "06-presentation": {
+   "humanReview": "PENDING (LC-01)",
+   "humanReviewFreeze": {
+    "commit": "ee987a100896f1ea942e0e873ae833ef3c70edff",
+    "manifest": {
+     "file": "docs/v13i/human-review/MANIFEST.json",
+     "sha256": "31bec875723d2d59643efb47979538eb8cd77ed07583228e9f78ce400b9b8faf"
+    },
+    "manifestSums": {
+     "file": "docs/v13i/human-review/MANIFEST.sha256",
+     "sha256": "9f2efba95693451f514bb9e6dd06795a990332649493d85a5e2148ece8bee0a5"
+    },
+    "staticAssets": 7,
+    "staticAssetsConcatSha256": "a2dd64b82cb6803f366458eea1a9daec8db87d3440d3d04d5fa33160e2d47032",
+    "transcripts": 93,
+    "transcriptsConcatSha256": "14c414d144efa76f211d6dd14af2e15ea6f5fa8c5f2a25fb476198a78f209655"
+   },
+   "systemPromptSha256": "d7dc7e0f765264b5e58d27bdbcb68a97de4467ab4177204dee80a2c714c10d3c",
+   "texts": {
+    "arms": "dreamteam.alternatives-arms/v3",
+    "presentation": {
+     "file": "internal/alternatives/text/presentation-v3.tmpl",
+     "id": "dreamteam.alternatives-presentation/v3",
+     "sha256": "19caebcbfc53fd2d36fea9c08851a5607cf6bf258cb496c491e6e2de296f7640"
+    },
+    "selectionRule": {
+     "file": "internal/alternatives/text/selection-v2.txt",
+     "id": "dreamteam.alternative-selection/v2",
+     "sha256": "5f32b2c84a0b8383f1a213ce52745e56f5d5aa8292bc714096d1beec70debcf9"
+    },
+    "viewTable": {
+     "file": "docs/benchmark/v13g-dev/presentation/view-table.txt",
+     "id": "dreamteam.alternatives-view/v2",
+     "sha256": "f96e2c4f9875b1b2593b09340bd6b752aa73ac7d7486886a53548c4c34bd5282"
+    }
+   },
+   "workflow": {
+    "contracts": {
+     "alternatives-system-v2.txt": "d7dc7e0f765264b5e58d27bdbcb68a97de4467ab4177204dee80a2c714c10d3c",
+     "correction-v2.txt": "33d27405354f2eb87900b0647e0acdb0c9599940fe8cb0526b5dacb689c0c063",
+     "initial-v2.txt": "742518137f672c373832e80fdf6664ca1203f3cc743e31184b1ef19625732473",
+     "parserVersion": "17e819e7e723f4d5766818db7e5fd737fa74c882712d120b1d5290177a12cb36",
+     "response-schemas-v2.json": "74bae0dd0a0121ee425e5d6052f330d5d7262a33e7e16372f075438ce17bad7d"
+    },
+    "sha256": "9ac657fe9f666c95d1d67527531123512cb1115a0b3ca827e28e3e757a1bf764",
+    "version": "llm-agent-alternatives-workflow/v3"
+   }
+  },
+  "07-primaryOutcome": {
+   "analysis": {
+    "estimand": "per context and model: the difference between the arms' distributions of the canonical submitted action batches within comparison-exposed draws; per-identity treatment minus control differences and total variation; route labels secondary",
+    "notClaimed": "a changed decision is not an improvement; the reason is never read",
+    "observable": "eligibility, exposure, validation-first correction, correction failure, deliberate no action, process failure, original response route, seven secondary process labels, intended/validated/submitted/executed action, inspection, citations, calls and retries",
+    "pairs": "secondary, per sensitivity pair and model: departure of canonical submitted identity from the validated proposal identity, in exposed member b minus exposed member a, per arm (Newcombe), and treatment minus control (MOVER); a context pair, not one fact"
+   }
+  },
+  "08-modelSettings": {
+   "maxModelCallsPerDraw": 6,
+   "modelOrder": [
+    "gemma4-26b-a4b",
+    "qwen36-35b-a3b"
+   ],
+   "models": {
+    "gemma4-26b-a4b": "gemma-4-26B-A4B-it-oQ4e-mtp",
+    "qwen36-35b-a3b": "Qwen3.6-35B-A3B-oQ4e-mtp"
+   },
+   "request": {
+    "timeoutSeconds": 300
+   },
+   "settings": {
+    "allowDetails": true,
+    "files": {
+     "gemma4-26b-a4b": {
+      "file": "docs/benchmark/v05c-dev/llm-gemma4-26b-a4b.json",
+      "sha256": "1a1edae5a492b67a72086bec51faecc8ed0930800bdb6e548412b65fa444aa6a"
+     },
+     "qwen36-35b-a3b": {
+      "file": "docs/benchmark/v05c-dev/llm-qwen36-35b-a3b.json",
+      "sha256": "e19a47dce948a8acbd3262ef5053b89f1e23c32603860e03628d38b184acbf5d"
+     }
+    },
+    "maxRetries": 1
+   }
+  },
+  "09-allocation": {
+   "contexts": 21,
+   "contextsFileSha256": "b26c81ab07143fc70f4df3d28f0cc4aa77971c61e2b50c1341de103b212eda1d",
+   "draws": 262,
+   "drawsPerUnit": {
+    "gemma4-26b-a4b": {
+     "aa": 2,
+     "unit": 3
+    },
+    "qwen36-35b-a3b": {
+     "aa": 2,
+     "unit": 5
+    }
+   },
+   "duplicateInputs": [
+    [
+     "S1-a",
+     "S6-a"
+    ]
+   ]
+  },
+  "10-callCeiling": {
+   "maxModelCalls": 802,
+   "maxModelCallsPerDraw": 6
+  },
+  "11-requestStartGuard": {
+   "request.timeoutSeconds": 300,
+   "stop.wallClockSeconds": 14400,
+   "timeGuarantee": "request-start guard; blocked operations are not bounded",
+   "tolerance": "none"
+  },
+  "12-clockTolerance": {
+   "appliedByVerifier": 60,
+   "basis": "operational assumption that the monotonic and UTC clocks of the recording host agree within toleranceSeconds over the run; it is not a measured clock-accuracy guarantee",
+   "onExcess": "INVALID: a discrepancy above toleranceSeconds rejects the archive, with no retry, resumption or replacement draw",
+   "rule": "R-HALT-003",
+   "scope": "reconciles each halt's evidence elapsedSeconds with the recorded wall-clock (SYSTEM_UTC) journal and call-journal timestamps only; it does not change the four-hour request-start guard (stop.wallClockSeconds, request.timeoutSeconds), which is applied without tolerance",
+   "toleranceSeconds": 60
+  }
+ },
+ "notice": "Not a lock manifest. A lock requires the blockers below to clear and the owner's lock-gate approval; it never happens automatically. Protocol lock, live inference and V0.13.0 release: NO GO.",
+ "requirements": {
+  "file": "docs/v13p/LOCK-REQUIREMENTS.md",
+  "sha256": "c63a0333473ea31b5756ff29c1fe8c51da167c7d7576aa215eb74341f2c5765e"
+ },
+ "schema": "dreamteam.lock-candidate/v1",
+ "status": "CANDIDATE — NOT LOCKED — NOT AUTHORIZED"
+}

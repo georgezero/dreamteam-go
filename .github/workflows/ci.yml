@@ -701,6 +701,14 @@ jobs:
           cmp "$S/pin.json" docs/v13p/pin/results.json
           python3 -I -B -c 'import hashlib,json,sys; d=json.load(open("docs/v13p/IDENTITIES.json")); bad=[f for f,h in d["sha256"].items() if hashlib.sha256(open(f,"rb").read()).hexdigest()!=h]; sys.exit("identity mismatch: %s" % bad if bad else 0)'
           cp "$S/pin.json" out/v13p-pin.json
+      - name: Protocol lock candidate re-derived (V0.13q, NOT LOCKED)
+        shell: bash
+        run: |
+          set -euo pipefail
+          export TMPDIR="$PWD/.git/v13q-ci"
+          mkdir -p "$TMPDIR"
+          python3 -I -B analysis/alternatives/v13q_candidate.py --check docs/v13q/LOCK-CANDIDATE.json
+          python3 -I -B analysis/alternatives/v13i_human_review.py --check
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
