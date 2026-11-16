@@ -1,0 +1,221 @@
+{
+ "acceptanceSha256": "c6af89ede52284a023f1413ea7b3d46b38a7da516ccd87da92841efe1195a721",
+ "allMeetExpectation": true,
+ "cases": [
+  {
+   "ambientAcceptance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "genuine-linked-halt",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "control",
+   "meetsExpectation": true,
+   "verifier": "v13p",
+   "violations": []
+  },
+  {
+   "ambientAcceptance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "elapsed-beyond-timestamps-by-59.9-s",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted",
+   "finding": "tolerance",
+   "meetsExpectation": true,
+   "verifier": "v13p",
+   "violations": []
+  },
+  {
+   "ambientAcceptance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13h.ExperimentError: INVALID archive: R-HALT-003 halt elapsedSeconds 17760.800008000002 disagrees with the structured timestamps (between -60.000 and 17760.700 s, tolerance 60 s)",
+    "stdout": ""
+   },
+   "case": "elapsed-beyond-timestamps-by-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "tolerance",
+   "meetsExpectation": true,
+   "verifier": "v13p",
+   "violations": [
+    "R-HALT-003"
+   ]
+  },
+  {
+   "ambientAcceptance": "tolerance-120",
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the acceptance file is not the one the protocol pins (SHA-256 differs)",
+    "stdout": ""
+   },
+   "case": "ambient-acceptance-120-s-excess-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "meetsExpectation": true,
+   "verifier": "v13o",
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientAcceptance": "tolerance-120",
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the acceptance file is not the one the protocol pins (SHA-256 differs)",
+    "stdout": ""
+   },
+   "case": "ambient-acceptance-120-s-excess-60.1-s",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13M-01",
+   "meetsExpectation": true,
+   "verifier": "v13p",
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientAcceptance": "duplicate-rule-60-then-120",
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "repinned-duplicate-rule-60-then-120",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted (gap)",
+   "finding": "DT13O-01",
+   "meetsExpectation": true,
+   "recorderAcceptsBinding": false,
+   "verifier": "v13o",
+   "violations": []
+  },
+  {
+   "ambientAcceptance": "duplicate-rule-60-then-120",
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-POLICY-001: duplicate relationship id R-HALT-003",
+    "stdout": ""
+   },
+   "case": "repinned-duplicate-rule-60-then-120",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13O-01",
+   "meetsExpectation": true,
+   "recorderAcceptsBinding": false,
+   "verifier": "v13p",
+   "violations": [
+    "R-POLICY-001"
+   ]
+  },
+  {
+   "ambientAcceptance": "duplicate-top-level-key",
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-PIN-001: the acceptance file is not strict JSON: duplicate key",
+    "stdout": ""
+   },
+   "case": "repinned-duplicate-top-level-key",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13O-01",
+   "meetsExpectation": true,
+   "recorderAcceptsBinding": true,
+   "verifier": "v13o",
+   "violations": [
+    "R-PIN-001"
+   ]
+  },
+  {
+   "ambientAcceptance": "duplicate-top-level-key",
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "v13m_verify.Invalid: R-POLICY-001: the acceptance file is not strict JSON: duplicate key",
+    "stdout": ""
+   },
+   "case": "repinned-duplicate-top-level-key",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13O-01",
+   "meetsExpectation": true,
+   "recorderAcceptsBinding": false,
+   "verifier": "v13p",
+   "violations": [
+    "R-POLICY-001"
+   ]
+  },
+  {
+   "ambientAcceptance": null,
+   "analysis": {
+    "accepted": true,
+    "exit": 0,
+    "refusal": "",
+    "stdout": "analysis: 0 completed draws (PARTIAL), 0 executions"
+   },
+   "case": "protocol-text-tolerance-120-then-60",
+   "classification": "PARTIAL",
+   "classifyExit": 0,
+   "expected": "accepted (gap)",
+   "finding": "DT13O-04",
+   "meetsExpectation": true,
+   "recorderAcceptsProtocol": true,
+   "verifier": "v13o",
+   "violations": []
+  },
+  {
+   "ambientAcceptance": null,
+   "analysis": {
+    "accepted": false,
+    "exit": 1,
+    "refusal": "INVALID protocol: R-PROTO-001: the protocol file is not strict JSON: duplicate key",
+    "stdout": ""
+   },
+   "case": "protocol-text-tolerance-120-then-60",
+   "classification": "INVALID",
+   "classifyExit": 1,
+   "expected": "rejected",
+   "finding": "DT13O-04",
+   "meetsExpectation": true,
+   "recorderAcceptsProtocol": false,
+   "verifier": "v13p",
+   "violations": [
+    "R-PROTO-001"
+   ]
+  }
+ ],
+ "findings": [
+  "DT13O-01",
+  "DT13O-04",
+  "DT13M-01"
+ ],
+ "protocolSha256": "202548ad613d2c95b639b345e4fdff262386879d0a17a723fabf50d11e1b7b34",
+ "schema": "dreamteam.v13p-parsing-witnesses/v1",
+ "verifierCopiesByteIdentical": true
+}

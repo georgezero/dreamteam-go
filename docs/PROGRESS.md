@@ -7,6 +7,71 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13p — Protocol parsing and lock hygiene (0.13.0-dev.2, engine unchanged)
+
+Starting commit `4373fd2`. The independent DT13M-01 recheck found DT13M-01
+RESOLVED and returned Technical GO, with one MINOR finding (DT13O-01) and
+four NOTEs. The owner authorized only these pre-lock corrections:
+
+* fix DT13O-01 and DT13O-04;
+* record DT13O-02 as a lock-manifest requirement;
+* make DT13O-05 a mandatory runner requirement;
+* accept DT13O-03 as a documented limitation.
+
+**What was built (successors; V0.13o and earlier unchanged):**
+
+* `v13p.py` (recorder entry point) and `v13p_verify.py` (verifier entry
+  point) parse the acceptance file and the protocol file with
+  `dreamteam.strict-json/v1`: no duplicate key at any depth, no non-finite
+  number, strict UTF-8, no trailing content. Each component has its own
+  parser, so the verifier imports no recorder; a 66-input differential test
+  shows they accept identical syntax.
+* **R-POLICY-001.** The acceptance file must be a well-formed policy: unique
+  relationship ids and a single positive-integer R-HALT-003 tolerance. This
+  closes DT13O-01; both counterexamples are now refused by both components.
+* **R-PROTO-001.** The protocol file must be a strict JSON object. This
+  closes DT13O-04: last-key-wins duplicate text is now refused.
+* `v13p.run_schedule` takes the protocol's exact bytes. It is the mandatory
+  entry point for any future live runner. No runner is implemented.
+* `docs/v13p/LOCK-REQUIREMENTS.md` lists the 12 identities the eventual lock
+  manifest must pin, and requires analysis of a locked run to check the
+  locked protocol SHA-256 (DT13O-02). It also states the runner requirement
+  and the accepted DT13O-03 limitation.
+
+**Protocol identity: unchanged.** The protocol is `v13o-alt-1`
+(`202548ad…`), the schedule `2be938b6…` and the acceptance file
+`c6af89ed…`. The strict and permissive readings of these files are
+identical, and both regenerate byte for byte. No protocol version change is
+needed: strictness belongs to the entry points, which the lock pins.
+
+**How it was tested:**
+
+* `test_v13p.py`, 14 tests:
+  * 30 acceptance-file variants refused by both components, and 4 accepted by
+    both;
+  * 10 protocol variants refused by both;
+  * the 16 R-PIN-001 alterations;
+  * command-line refusals;
+  * the runner entry point.
+* `v13p_pin.py` witnesses, run through the ordinary command line. The output
+  is deterministic and stored as `docs/v13p/pin/results.json`:
+  * the DT13O-01 disagreements are reproduced on V0.13o and closed on V0.13p;
+  * the DT13O-04 text is accepted by V0.13o and refused by V0.13p;
+  * the original DT13M-01 witness is refused;
+  * the 59.9 s and 60.1 s boundaries are unchanged.
+* Preservation checks pass: `v13m_preserved.py` (3,606 files),
+  `v13m_identities.py --check`, `docs/v13o/IDENTITIES.json` and
+  `test_v13o.py`, and the V0.13o witnesses are byte-identical.
+
+**Status:**
+
+* Human presentation review: PENDING.
+* Protocol lock: NO GO.
+* Live inference: NO GO.
+* V0.13.0 release: NO GO.
+
+---
+
 ## V0.13o — DT13M-01: acceptance standard pinned in the protocol (0.13.0-dev.2, engine unchanged)
 
 The V0.13n bounded independent technical check (

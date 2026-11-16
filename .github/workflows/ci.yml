@@ -682,6 +682,25 @@ jobs:
           cp "$S/protocol.json" out/v13o-protocol.json
           cp "$S/schedule.json" out/v13o-schedule.json
           cp "$S/pin.json" out/v13o-pin.json
+      - name: Strict policy and protocol parsing (V0.13p, DT13O-01, DT13O-04)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="$PWD/dt"
+          S="$PWD/.git/v13p-ci"
+          V="$PWD/docs/benchmark/v13o-dev"
+          C="$PWD/docs/benchmark/v13g-dev/contexts"
+          mkdir -p "$S"
+          export TMPDIR="$S"
+          python3 -B -m unittest discover -s analysis/alternatives -p test_v13p.py
+          python3 -I -B analysis/alternatives/v13p.py protocol --contexts "$C" --out "$S/protocol.json"
+          cmp "$S/protocol.json" "$V/protocol-draft.json"
+          python3 -I -B analysis/alternatives/v13p.py schedule --contexts "$C" --protocol "$V/protocol-draft.json" --out "$S/schedule.json"
+          cmp "$S/schedule.json" "$V/schedule-draft.json"
+          python3 -I -B analysis/alternatives/v13p_pin.py --binary "$B" --scratch "$S/pin" --out "$S/pin.json"
+          cmp "$S/pin.json" docs/v13p/pin/results.json
+          python3 -I -B -c 'import hashlib,json,sys; d=json.load(open("docs/v13p/IDENTITIES.json")); bad=[f for f,h in d["sha256"].items() if hashlib.sha256(open(f,"rb").read()).hexdigest()!=h]; sys.exit("identity mismatch: %s" % bad if bad else 0)'
+          cp "$S/pin.json" out/v13p-pin.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}

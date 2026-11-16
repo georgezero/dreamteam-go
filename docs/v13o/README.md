@@ -1,6 +1,8 @@
 # V0.13o — DT13M-01: acceptance standard pinned in the protocol
 
-**Status: FIX IMPLEMENTED; NARROW INDEPENDENT RECHECK PENDING.** Human
+**Status: FIX IMPLEMENTED; NARROW INDEPENDENT RECHECK: DT13M-01 RESOLVED,
+TECHNICAL GO ([`4373fd2`](../audits/v0.13o-dt13m-01-recheck.md)). Pre-lock
+parsing corrections DT13O-01/04: [V0.13p](../v13p/README.md).** Human
 presentation review: **PENDING**. Protocol lock: **NO GO**. Live inference:
 **NO GO**. V0.13.0 release: **NO GO**.
 
