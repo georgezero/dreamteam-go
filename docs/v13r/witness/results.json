@@ -1,0 +1,568 @@
+{
+ "allMeetExpectation": true,
+ "lockedAnalysis": [
+  {
+   "analyze": {
+    "analysisWritten": true,
+    "exit": 0,
+    "refusal": null
+   },
+   "case": "valid-test-only-lock",
+   "classify": {
+    "reachedVerifier": true,
+    "refusal": null,
+    "state": "COMPLETE"
+   },
+   "expected": "reaches verifier",
+   "meetsExpectation": true,
+   "outputMarker": "TEST ONLY \u2014 NOT A PRIMARY RESULT",
+   "sameAsUnlockedV13pAnalysis": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 2,
+    "refusal": "usage"
+   },
+   "case": "missing-lock",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "usage",
+    "state": null
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 2,
+    "refusal": "usage"
+   },
+   "case": "missing-lock-commit",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "usage",
+    "state": null
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-PURPOSE"
+   },
+   "case": "test-lock-without-test-only-flag",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-PURPOSE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-SCHEMA"
+   },
+   "case": "candidate-instead-of-lock",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-SCHEMA",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-STATUS"
+   },
+   "case": "status-not-locked",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-STATUS",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-SCHEMA"
+   },
+   "case": "missing-approval",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-SCHEMA",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-SCHEMA"
+   },
+   "case": "missing-engine-field",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-SCHEMA",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-PARSE"
+   },
+   "case": "duplicate-manifest-key",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-PARSE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-PARSE"
+   },
+   "case": "nested-duplicate-manifest-key",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-PARSE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-APPROVAL"
+   },
+   "case": "test-lock-claiming-owner-approval",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-APPROVAL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-COMMIT"
+   },
+   "case": "lock-commit-not-in-history",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-COMMIT",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-COMMIT"
+   },
+   "case": "unknown-lock-commit",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-COMMIT",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-COMMIT"
+   },
+   "case": "abbreviated-lock-commit",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-COMMIT",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-COMMIT"
+   },
+   "case": "manifest-differs-from-lock-commit",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-COMMIT",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-COMMIT"
+   },
+   "case": "lock-commit-changes-other-files",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-COMMIT",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-APPROVAL"
+   },
+   "case": "lock-commit-not-by-approval-owner",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-APPROVAL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-APPROVAL"
+   },
+   "case": "altered-approval-record",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-APPROVAL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-APPROVAL"
+   },
+   "case": "approval-record-without-decision",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-APPROVAL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-PROTOCOL"
+   },
+   "case": "re-pinned-protocol-same-id",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-PROTOCOL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-ARCHIVE"
+   },
+   "case": "archive-under-re-pinned-protocol",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-ARCHIVE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-ARCHIVE"
+   },
+   "case": "draft-protocol-archive",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-ARCHIVE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-ARCHIVE"
+   },
+   "case": "relabelled-archive-recomputed-hashes-and-seal",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-ARCHIVE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": true,
+    "exit": 0,
+    "refusal": null
+   },
+   "case": "fully-forged-archive-binding-hashes-and-seal",
+   "classify": {
+    "reachedVerifier": true,
+    "refusal": null,
+    "state": "COMPLETE"
+   },
+   "expected": "reaches verifier (limitation)",
+   "meetsExpectation": true,
+   "note": "unsigned archives: rewriting every field including the lock binding and recomputing every hash and the seal is not detectable by content checks; archive custody is required (docs/v13r/README.md)"
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-ACCEPTANCE"
+   },
+   "case": "changed-acceptance-file",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-ACCEPTANCE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-SCHEDULE"
+   },
+   "case": "changed-schedule",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-SCHEDULE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-MODULE"
+   },
+   "case": "changed-verifier-module",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-MODULE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-MODULE"
+   },
+   "case": "changed-analysis-module",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-MODULE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": true,
+    "exit": 0,
+    "refusal": null
+   },
+   "case": "byte-identical-module-copies",
+   "classify": {
+    "reachedVerifier": true,
+    "refusal": null,
+    "state": "COMPLETE"
+   },
+   "expected": "reaches verifier",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-ENGINE"
+   },
+   "case": "wrong-engine-binary",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-ENGINE",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-MODEL"
+   },
+   "case": "changed-model-settings",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-MODEL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-MODEL"
+   },
+   "case": "changed-model-request-settings",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-MODEL",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  },
+  {
+   "analyze": {
+    "analysisWritten": false,
+    "exit": 1,
+    "refusal": "LK-OUTCOME"
+   },
+   "case": "changed-outcome-definition",
+   "classify": {
+    "reachedVerifier": false,
+    "refusal": "LK-OUTCOME",
+    "state": "INVALID"
+   },
+   "expected": "refused",
+   "meetsExpectation": true
+  }
+ ],
+ "notice": "TEST ONLY. Synthetic fixtures; no protocol lock is created, no model is contacted.",
+ "recordUnderRunLock": {
+  "meetsExpectation": true,
+  "refusal": "LK-RUNNER"
+ },
+ "runnerPreflight": [
+  {
+   "case": "valid",
+   "code": null,
+   "expected": "PASSED",
+   "meetsExpectation": true,
+   "preflight": "PASSED"
+  },
+  {
+   "case": "candidate-instead-of-lock",
+   "code": "LK-SCHEMA",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "re-pinned-protocol-same-id",
+   "code": "LK-PROTOCOL",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "draft-protocol",
+   "code": "LK-PROTOCOL",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "changed-schedule",
+   "code": "LK-SCHEDULE",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "wrong-engine-binary",
+   "code": "LK-ENGINE",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "changed-recorder-module",
+   "code": "LK-MODULE",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  },
+  {
+   "case": "changed-acceptance-file",
+   "code": "LK-ACCEPTANCE",
+   "expected": "REFUSED",
+   "meetsExpectation": true,
+   "preflight": "REFUSED"
+  }
+ ],
+ "schema": "dreamteam.v13r-lock-witnesses/v1",
+ "unlockedV13pAnalysisExit": 0
+}

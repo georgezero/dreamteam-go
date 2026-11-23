@@ -7,6 +7,84 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
+## V0.13r — Locked-protocol enforcement, LC-02 (0.13.0-dev.2, engine unchanged; TEST ONLY fixtures)
+
+Starting commit `aabda48`; the owner authorized LC-02. The baseline matches
+V0.13q:
+* freeze `ee987a1` intact (93 transcripts, 7 assets);
+* 262 draws, 802 calls, the 14,400 s guard and the 60 s tolerance;
+* primary estimand unchanged;
+* lock candidate `e55b0812…` re-derived;
+* 3,606 protected files.
+
+**What was built (new files only; no Go, recorder, verifier or presentation
+changes):**
+
+* `v13r_lock.py`, the `dreamteam.protocol-lock/v1` contract. A strict JSON
+  manifest with an exact key set pins:
+  * the protocol, acceptance standard, schedule and outcome definition;
+  * the recorder, verifier and analysis module sets (every repository
+    module each process loads);
+  * the engine source tree and binary;
+  * the model settings, presentation and design values;
+  * the approval record and the creation identity.
+
+  Authority comes from the owner's **lock commit**:
+  * a full commit id in HEAD's history, whose single parent is the base;
+  * it adds the manifest, touches only lock files and is authored by
+    `approval.owner`;
+  * it holds the exact manifest bytes and the pinned approval and review
+    records.
+
+  A self-declared `LOCKED` field confers nothing, and a candidate is never a
+  lock.
+* `v13r_analyze.py`, the locked analysis. `--lock` and `--lock-commit` are
+  required, with no fallback. It checks lock structure, Git identity,
+  modules, protocol, acceptance, schedule, engine, models, presentation,
+  outcome, design, and finally the archive's protocol hash and lock binding,
+  all before `v13p_verify` runs unchanged.
+* `v13r_preflight.py`, the runner preflight. The same checks are run with the
+  recorder modules. `record_after_preflight` is the only path to
+  `v13p.run_schedule` under a lock and records the lock binding. It refuses
+  RUN locks, because no live runner is built.
+
+**How it was tested:**
+
+* `test_v13r.py` (13 tests): schema, purpose rules, strict parsing,
+  three-way parser agreement, refusals never reaching the verifier, no
+  fallback, import independence.
+* `v13r_witness.py`, deterministic, `docs/v13r/witness/results.json`. It uses
+  a scratch Git repository with a TEST ONLY lock commit and scripted
+  recordings.
+  * **Locked analysis:**
+    * The valid fixture reaches the verifier, COMPLETE, and its analysis
+      equals the unlocked V0.13p analysis.
+    * 30 adversarial cases are refused before the verifier, including:
+      missing `--lock`; a candidate; missing or altered approval; a
+      re-pinned protocol with the same id; a draft archive; a relabelled
+      and resealed archive; changed acceptance, schedule, verifier or
+      analysis module, binary, settings or outcome; duplicate keys; and a
+      commit outside history or by another author.
+  * **Runner preflight:** 1 pass and 7 refusals.
+
+**Open limitation (owner decision):** archives are hash-sealed, not signed.
+A fully forged archive, with the binding rewritten and every hash and the
+seal recomputed, cannot be told apart by content. The proposed mitigation is
+a post-run custody commit of the seal hash (`docs/v13r/README.md`). It is
+not implemented.
+
+**Engine binary:** the local `./dt` was a stale build. It was rebuilt from
+HEAD the way CI builds it. CI builds its own.
+
+**Status:**
+
+* Human review: PENDING (LC-01).
+* Protocol lock: NO GO.
+* Live inference: NO GO.
+* V0.13.0 release: NO GO.
+
+---
+
 ## V0.13q — Human presentation review and lock candidate (0.13.0-dev.2, engine unchanged; preparation only)
 
 Starting commit `70184c5` (clean main; the owner accepted V0.13p).

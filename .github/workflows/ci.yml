@@ -709,6 +709,20 @@ jobs:
           mkdir -p "$TMPDIR"
           python3 -I -B analysis/alternatives/v13q_candidate.py --check docs/v13q/LOCK-CANDIDATE.json
           python3 -I -B analysis/alternatives/v13i_human_review.py --check
+      - name: Locked-protocol enforcement (V0.13r, LC-02, TEST ONLY fixtures)
+        shell: bash
+        run: |
+          set -euo pipefail
+          B="$PWD/dt"
+          S="$PWD/.git/v13r-ci"
+          mkdir -p "$S"
+          export TMPDIR="$S"
+          python3 -B -m unittest discover -s analysis/alternatives -p test_v13r.py
+          python3 -I -B analysis/alternatives/v13r_witness.py --binary "$B" --scratch "$S/w" --out "$S/witness.json"
+          cmp "$S/witness.json" docs/v13r/witness/results.json
+          python3 -I -B -c 'import hashlib,json,sys; d=json.load(open("docs/v13r/IDENTITIES.json")); bad=[f for f,h in d["sha256"].items() if hashlib.sha256(open(f,"rb").read()).hexdigest()!=h]; sys.exit("identity mismatch: %s" % bad if bad else 0)'
+          python3 -I -B analysis/alternatives/v13q_candidate.py --check docs/v13q/LOCK-CANDIDATE.json
+          cp "$S/witness.json" out/v13r-witness.json
       - uses: actions/upload-artifact@v7
         with:
           name: results-${{ matrix.os }}
