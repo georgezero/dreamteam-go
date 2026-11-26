@@ -1,9 +1,10 @@
 # V0.13r — Locked-protocol enforcement (LC-02)
 
-**Status: IMPLEMENTED, TEST ONLY fixtures.** No protocol is locked: there is
-no LOCKED manifest in this repository and no lock commit. Human
-presentation review: **PENDING**. Protocol lock: **NO GO**. Live inference:
-**NO GO**. V0.13.0 release: **NO GO**.
+**Status: ACCEPTED by the owner (995914c). LC-02 CLOSED. TEST ONLY
+fixtures.** No protocol is locked: there is no LOCKED manifest in this
+repository and no lock commit. Human presentation review: **PENDING**.
+Protocol lock: **NO GO**. Live inference: **NO GO**. V0.13.0 release:
+**NO GO**. Recorder and verifier development: **stopped**.
 
 Starting commit: `aabda48c2e95563e5fef294d4b13d0d255511061` (clean main,
 equal to `origin/main`; V0.13q accepted; owner GO for LC-02).
@@ -191,7 +192,7 @@ commit. Each case runs through the ordinary command line.
 | Wrong engine binary | LK-ENGINE |
 | Changed model settings file pin; changed request settings | LK-MODEL |
 | Changed outcome definition | LK-OUTCOME |
-| **Fully forged archive**: draft archive relabelled, lock binding written into its authorization, all hashes and the seal recomputed | **reaches the verifier: limitation, below** |
+| **Fully forged archive**: draft archive relabelled, lock binding written into its authorization, all hashes and the seal recomputed | **reaches the verifier: accepted trust-model limitation, below** |
 
 All 30 refusal cases are refused before the verifier, and none writes an
 analysis.
@@ -220,7 +221,7 @@ Unit tests (`test_v13r.py`, 13 tests):
 - `v13r_analyze` imports no recorder, and `v13r_preflight` imports no
   verifier.
 
-## Limitation: archive authenticity (owner decision needed)
+## Trust model and archive authenticity (owner decision, V0.13r closure)
 
 Archives are sealed with hashes, not signatures. Anyone who can rewrite an
 archive can:
@@ -232,12 +233,53 @@ Content checks cannot tell this from a genuine locked run. The witness
 demonstrates it. Every weaker forgery is refused, including the relabelled
 and resealed archive that lacks the binding.
 
-The proposed mitigation is a procedure, with no new cryptography. Immediately
-after a locked run, the owner commits a custody record holding the archive's
-`SEAL.json` SHA-256 and the run id. The locked analysis would then also
-require that custody commit (`--custody-commit`), checked the same way as the
-lock commit. This is not implemented in V0.13r; it is listed as a remaining
-lock requirement.
+**Owner decision:** the fully forged archive case is **accepted as a
+documented trust-model limitation**. A mandatory post-run custody check is
+**not authorized**. No digital signatures, external attestation or other
+authentication infrastructure will be added. The custody proposal earlier in
+this milestone (`--custody-commit`) is withdrawn and is not a lock
+requirement. The witness note in `witness/results.json` ("archive custody is
+required") predates this decision. It is kept unchanged as recorded evidence,
+and this section supersedes it.
+
+The decisions recorded:
+
+1. **Integrity, not origin.** The completion seal establishes content
+   integrity: the evidence has not changed relative to its recorded hashes.
+   It does not establish origin authenticity.
+2. **The lock commit binds the protocol.** The approved lock commit binds
+   the exact experimental protocol, under a trusted-repository operating
+   assumption.
+3. **Git author metadata is not authentication.** Git author metadata alone
+   is not cryptographic authentication.
+4. **Forged archives can pass content checks.** A fully consistent
+   fabricated archive cannot necessarily be distinguished from a genuine
+   recording by content checks.
+5. **Custody detects later changes only.** A post-run custody commit would
+   detect modifications made after that commit. It would not independently
+   authenticate the original run.
+6. **Manual preservation after a run.** After an authorized live run, the
+   items below are manually preserved and recorded in Git. This is a
+   research-record preservation procedure, not an additional verifier
+   requirement:
+   - the exact run archive;
+   - the archive SHA-256;
+   - the completion-seal (`SEAL.json`) SHA-256;
+   - the lock commit identity;
+   - the run-host identity;
+   - the engine binary identity;
+   - the model identifiers;
+   - the run start and end times.
+7. **Trusted operation.** The experiment assumes a trusted operator,
+   repository, run host and recording process.
+8. **No third-party submissions.** The experiment is not intended to
+   authenticate submissions from untrusted third parties.
+
+| Assurance | What it establishes | Status |
+|---|---|---|
+| Content integrity | Evidence has not changed relative to its recorded hashes | Implemented (completion seal) |
+| Protocol binding | Evidence is evaluated against the exact approved protocol | Implemented (V0.13r, lock commit) |
+| Authenticity | Evidence originated from the claimed live model interaction | Not independently established. Assumed under the trust model (item 7) |
 
 ## Lock creation procedure (for the owner; not performed)
 
@@ -274,8 +316,15 @@ Go file changed.
 
 | Id | Requirement |
 |---|---|
-| LC-01 | Independent human presentation review (PENDING; the owner nominates and contacts the reviewer; the packet is ready). |
-| LC-02 | **Implemented here.** Archive custody (above) is an open owner decision. |
-| LC-03 | Engine binary SHA-256 recorded from the run host at lock time. |
-| LC-04 | Owner lock-gate approval in a lock commit, and a separate run authorization. |
-| — | The live runner itself (not built; separate authorization). |
+| LC-01 | Independent human presentation review: **PENDING**. The owner nominates and contacts a genuine independent reviewer; none is invented. The reviewer packet is unchanged. |
+| LC-02 | **CLOSED** (V0.13r accepted). The forged-archive case is an accepted trust-model limitation (above). |
+| LC-03 | Engine binary identity: SHA-256 recorded from the run host at lock time. |
+| LC-04 | Explicit owner lock approval in a lock commit. |
+| — | Live-runner implementation (not built). |
+| — | Separate live-run authorization. |
+
+After an authorized run, the manual research-record preservation (decision 6
+above) applies. It is not a lock requirement or a verifier check.
+
+Protocol lock: **NO GO**. Live inference: **NO GO**. V0.13.0 release:
+**NO GO**.

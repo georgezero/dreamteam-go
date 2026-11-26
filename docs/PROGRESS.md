@@ -7,7 +7,7 @@ and by `dreamteam version` names the latest step a build contains.
 
 ---
 
-## V0.13r — Locked-protocol enforcement, LC-02 (0.13.0-dev.2, engine unchanged; TEST ONLY fixtures)
+## V0.13r — Locked-protocol enforcement, LC-02 (0.13.0-dev.2, engine unchanged; TEST ONLY fixtures; accepted, LC-02 closed)
 
 Starting commit `aabda48`; the owner authorized LC-02. The baseline matches
 V0.13q:
@@ -67,14 +67,48 @@ changes):**
       commit outside history or by another author.
   * **Runner preflight:** 1 pass and 7 refusals.
 
-**Open limitation (owner decision):** archives are hash-sealed, not signed.
-A fully forged archive, with the binding rewritten and every hash and the
-seal recomputed, cannot be told apart by content. The proposed mitigation is
-a post-run custody commit of the seal hash (`docs/v13r/README.md`). It is
-not implemented.
+**Trust-model limitation (accepted by the owner):** archives are
+hash-sealed, not signed. A fully forged archive, with the binding rewritten
+and every hash and the seal recomputed, cannot be told apart by content. The
+owner accepted this as a documented trust-model limitation.
+* No mandatory post-run custody check, signatures or attestation will be
+  added. The custody proposal is withdrawn.
+* The seal establishes content integrity, not origin.
+* The lock commit binds the protocol under a trusted-repository assumption.
+* Git author metadata is not cryptographic authentication.
+* The experiment assumes a trusted operator, repository, run host and
+  recording process, and does not authenticate third-party submissions.
+
+After an authorized live run, the following are manually preserved in Git as
+a research-record procedure (not a verifier requirement):
+* the archive and its SHA-256;
+* the seal SHA-256;
+* the lock commit;
+* the run host;
+* the engine binary;
+* the model identifiers;
+* the start and end times.
+
+See `docs/v13r/README.md`, "Trust model and archive authenticity".
 
 **Engine binary:** the local `./dt` was a stale build. It was rebuilt from
 HEAD the way CI builds it. CI builds its own.
+
+**Closure (documentation only):**
+
+* V0.13r accepted (`995914c`) and LC-02 closed.
+* Lock manifest schema v1 and the owner-approved Git lock identity are
+  approved.
+* Recorder and verifier development is stopped.
+
+**Remaining:**
+
+* LC-01: the human presentation review (PENDING; no reviewer is invented,
+  and the packet is unchanged).
+* LC-03: the engine binary identity, recorded at lock time.
+* LC-04: explicit owner lock approval.
+* The live runner, which is not built.
+* A separate live-run authorization.
 
 **Status:**
 
